@@ -1,0 +1,137 @@
+name: Compact score restoration screen c563d487
+
+on:
+  push:
+    branches: [perf/compact-score-screen-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_SHA: 1aa5ac5fed41f761244fe80af0cf011d93dfe4a7
+
+jobs:
+  validate:
+    name: Frozen candidate correctness gates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - name: Check out the exact product candidate
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify the frozen candidate commit
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+      - name: Set up the pinned runtime and dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install the compiler required by native unit tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          clang-21 --version
+
+      - name: Run scoped lint, strict types, full unit suites, and dry build
+        run: |
+          mkdir -p builds/compact-score-validation
+          npx eslint ext/js/dictionary/term-record-opfs-store.js 2>&1 | tee builds/compact-score-validation/lint.log
+          npm run test:ts:main 2>&1 | tee builds/compact-score-validation/types-main.log
+          npm run test:ts:test 2>&1 | tee builds/compact-score-validation/types-test.log
+          npm run test:unit -- --maxWorkers=2 2>&1 | tee builds/compact-score-validation/unit.log
+          npm run test:unit:options -- --maxWorkers=2 2>&1 | tee builds/compact-score-validation/options.log
+          npm run test:build 2>&1 | tee builds/compact-score-validation/build.log
+
+      - name: Preserve every validation log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compact-score-validation-${{ github.run_attempt }}
+          path: builds/compact-score-validation
+          if-no-files-found: warn
+          retention-days: 14
+
+  screen:
+    name: ${{ matrix.dictionary }} replicate ${{ matrix.replicate }}
+    needs: validate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        replicate: [0, 1]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      REPLICATE: ${{ matrix.replicate }}
+      BASE_ROOT: ${{ github.workspace }}/../score-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../score-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/compact-score-screen
+    steps:
+      - name: Check out the frozen experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the pinned runtime and dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Prepare isolated clean source worktrees and identical libraries
+        run: |
+          git fetch --no-tags origin "$BASE_SHA" "$CANDIDATE_SHA"
+          git worktree add --detach "$BASE_ROOT" "$BASE_SHA"
+          git worktree add --detach "$CANDIDATE_ROOT" "$CANDIDATE_SHA"
+          test "$(git -C "$BASE_ROOT" rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git -C "$CANDIDATE_ROOT" rev-parse HEAD)" = "$CANDIDATE_SHA"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$BASE_ROOT/node_modules"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$CANDIDATE_ROOT/node_modules"
+          npm --prefix "$BASE_ROOT" run build:libs
+          npm --prefix "$CANDIDATE_ROOT" run build:libs
+          mkdir -p "$OUTPUT_ROOT"
+          git -C "$CANDIDATE_ROOT" diff "$BASE_SHA" HEAD > "$OUTPUT_ROOT/candidate.diff"
+          node --check dev/perf/compact-score-c563d487/common.mjs
+          node --check dev/perf/compact-score-c563d487/prepare.mjs
+          node --check dev/perf/compact-score-c563d487/measure.mjs
+          python3 -m py_compile dev/perf/compact-score-c563d487/run.py
+
+      - name: Fetch and integrity-check the current locked dictionary
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY]);"
+
+      - name: Capture every real record run and require exact sidecar parity
+        run: |
+          node --max-old-space-size=512 dev/perf/compact-score-c563d487/prepare.mjs "$BASE_ROOT" "$CANDIDATE_ROOT" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT" "$DICTIONARY" 2>&1 | tee "$OUTPUT_ROOT/prepare.log"
+
+      - name: Run all four alternating pairs and four adjacent identical-code pairs per boundary
+        run: |
+          python3 dev/perf/compact-score-c563d487/run.py "$DICTIONARY" "$BASE_ROOT" "$CANDIDATE_ROOT" "$OUTPUT_ROOT" "$REPLICATE" 2>&1 | tee "$OUTPUT_ROOT/acquisition.log"
+
+      - name: Preserve all raw observations, failures, fixture manifests, and source provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compact-score-${{ matrix.dictionary }}-${{ matrix.replicate }}-${{ github.run_attempt }}
+          path: |
+            builds/compact-score-screen/*.json
+            builds/compact-score-screen/*.diff
+            builds/compact-score-screen/*.log
+            builds/compact-score-screen/observations
+          if-no-files-found: warn
+          retention-days: 14
