@@ -1,0 +1,52 @@
+name: Wide keyword full parser parity 9bb32
+on:
+  push:
+    branches: [diagnostic/import-wide-keyword-parity-20261128-9bb32]
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out diagnostic helper
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Freeze exact helper and immutable baseline evidence
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/wide-keyword-parity-inputs-9bb32"
+          cp dev/perf/import-wide-keyword-parity-9bb32.py "$RUNNER_TEMP/wide-keyword-parity-inputs-9bb32/run-parity.py"
+          git fetch --no-tags --depth=1 origin 35069bdeb7a904fb9a39c919717b61021af9e78b
+          git show 35069bdeb7a904fb9a39c919717b61021af9e78b:dev/perf/import-optimization-9bb32/phase1/checkpoint-phase1.tar.gz > "$RUNNER_TEMP/wide-keyword-parity-inputs-9bb32/checkpoint-phase1.tar.gz"
+      - name: Check out frozen product candidate
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ebf4278afc59d83f191692bd587f0e1f7e8682b3
+          persist-credentials: false
+      - name: Install exact component Node and dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: "24.20.0"
+      - name: Prepare all locked full dictionaries
+        shell: bash
+        run: |
+          node dev/perf/prepare-dictionaries.js jmdict
+          node dev/perf/prepare-dictionaries.js jitendex
+          node dev/perf/prepare-dictionaries.js vndb
+      - name: Verify each complete parser output once
+        shell: bash
+        run: |
+          python3 "$RUNNER_TEMP/wide-keyword-parity-inputs-9bb32/run-parity.py" --source "$GITHUB_WORKSPACE" --checkpoint "$RUNNER_TEMP/wide-keyword-parity-inputs-9bb32/checkpoint-phase1.tar.gz" --output "$RUNNER_TEMP/wide-keyword-parity-9bb32" --workflow-sha "$GITHUB_SHA"
+      - name: Retain raw parity reports and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: wide-keyword-full-parser-parity-9bb32
+          path: |
+            ${{ runner.temp }}/wide-keyword-parity-9bb32
+            ${{ runner.temp }}/wide-keyword-parity-inputs-9bb32/run-parity.py
+          if-no-files-found: warn
+          retention-days: 14
