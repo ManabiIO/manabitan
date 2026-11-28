@@ -1,0 +1,106 @@
+name: Import source registration screen d2d13264
+
+on:
+  push:
+    branches:
+      - perf/import-screen-registration-20261127-d2d13264
+    paths:
+      - .github/workflows/import-screen-d2d13264.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-screen-d2d13264-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: ecb077918e4e641187c561105205b53a6c135441
+
+jobs:
+  validation:
+    name: Frozen candidate validation
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_CANDIDATE }}
+          persist-credentials: false
+      - name: Install pinned native test compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Lint changed source and tests
+        run: node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js test/dictionary-in-flight-source-validation.test.js
+      - name: Type-check product and tests
+        run: npm run test:ts:main && npm run test:ts:test
+      - name: Run complete unit suite
+        run: npm run test:unit
+      - name: Verify all build targets
+        run: npm run test:build
+
+  screen:
+    needs: validation
+    name: ${{ matrix.dictionary }} (six AB pairs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check qualification receipt tests
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Screen frozen source with unchanged qualification tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_root=builds/perf/import-screen-d2d13264
+          mkdir -p "$evidence_root"
+          git rev-parse HEAD HEAD^{tree} > "$evidence_root/workflow-source.txt"
+          sha256sum .github/workflows/import-screen-d2d13264.yml > "$evidence_root/workflow-sha256.txt"
+          policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            policy+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order AB \
+            --pairs 6 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            "${policy[@]}" \
+            --evidence "$evidence_root/cohort" \
+            2>&1 | tee "$evidence_root/acquisition.log"
+      - name: Preserve all observations, packages and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: import-registration-d2d13264-${{ matrix.dictionary }}-${{ github.run_id }}
+          path: builds/perf/import-screen-d2d13264
+          if-no-files-found: error
+          retention-days: 90
