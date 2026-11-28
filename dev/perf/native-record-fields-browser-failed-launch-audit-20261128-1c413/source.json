@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "records-only-original-six-cell-zero-acquisition-failure-audit",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "files": {
+    "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/audit.py": {
+      "gitBlob": "00dcd51992ee4962b5a8ebdd7b2ca4039ee4250b",
+      "bytes": 17329,
+      "sha256": "f6b155a170ccdfc4f9b33e234f6c14be1676a3720691e7ba46c14b294c38d706"
+    },
+    "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/test-audit.py": {
+      "gitBlob": "65c40bf0b1002d1110c7524c23055a3e9e3c4dfe",
+      "bytes": 13823,
+      "sha256": "c7a10eb824db96eefd566c1e4a9c74faf2d9775f0f9811efb377402846162944"
+    },
+    "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/manifest.json": {
+      "gitBlob": "dbc9817df8aa648b49b50b22c9bcbfc933310103",
+      "bytes": 6411,
+      "sha256": "d6650a9bae01c0c32fabd6a0d39d96a008bde3367d0d9c6327afc2f0af7e4231"
+    },
+    "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/README.md": {
+      "gitBlob": "abb43b272fd493e368c016022dc2f801dc594e46",
+      "bytes": 4600,
+      "sha256": "96574731e4a7aea02f226e1ae5a3ebbc58e1d313d8da6ee660831d08d692c808"
+    },
+    "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/transport.py": {
+      "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+      "bytes": 9875,
+      "sha256": "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
+    },
+    ".github/workflows/native-fields-browser-failed-launch-audit-1c413.yml": {
+      "gitBlob": "7f53b1510aa25b0f30efee54816b2043d343fae1",
+      "bytes": 6207,
+      "sha256": "a9cf8be2fb51e84e1ff47e62229c849aaf3f00b06148f4512a3d5916ae03f3b3"
+    }
+  },
+  "sourceManifestExcludedFromOwnHashes": true,
+  "productExecuted": false,
+  "originalsChanged": false,
+  "qualificationPassed": false
+}

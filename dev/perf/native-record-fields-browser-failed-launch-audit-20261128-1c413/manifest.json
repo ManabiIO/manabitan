@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "enabled": true,
+  "publication": {
+    "runId": 46136060186,
+    "headSha": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+    "headTree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+    "headBranch": "perf/native-record-fields-browser-20261128-1c413",
+    "runAttempt": 1,
+    "event": "push",
+    "workflowPath": ".github/workflows/import-native-record-fields-1c413.yml"
+  },
+  "expectedRunConclusion": "failure",
+  "archiveSources": {
+    ".github/workflows/import-native-record-fields-1c413.yml": {
+      "gitBlob": "b136fbae0ec44c2f4c083bfe5ffcc6e242b17ec0",
+      "bytes": 7545,
+      "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md": {
+      "gitBlob": "4122882fef32487dfa32651c6d9ef0250e9c6ce3",
+      "bytes": 8815,
+      "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/README.md": {
+      "gitBlob": "089e2ea317712094235955cefca8a39f6a7aa02b",
+      "bytes": 17495,
+      "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py": {
+      "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+      "bytes": 25222,
+      "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/source.json": {
+      "gitBlob": "71108341a50c71f340252153eb18080c9753b55c",
+      "bytes": 5950,
+      "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/study.json": {
+      "gitBlob": "292b25e1d99f3e0f857254f0bd8a64c3e1913e5b",
+      "bytes": 56480,
+      "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py": {
+      "gitBlob": "ac9583fe30aeca15364b7e0d1fc89f188dac7668",
+      "bytes": 19793,
+      "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+    },
+    "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py": {
+      "gitBlob": "0ad65fbea6db6d7050604ba9253062d998e2de2c",
+      "bytes": 23311,
+      "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+    }
+  },
+  "artifacts": [
+    {
+      "kind": "jitendex-AB",
+      "id": 15260155296,
+      "name": "native-record-fields-browser-jitendex-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51742,
+      "sha256": "484c8c389794b6bbfac768ef96e16e1b5ca68c3e5369986ef74e3e9b19602092",
+      "jobId": 140951508501,
+      "jobName": "Complete import (jitendex, AB)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "6a3f544e15755045b7224222c4c2d3e52e5a058d",
+        "bytes": 292554,
+        "sha256": "8178ca124e922a0f1d6fbf383b33d2ec55be898618950865642105be8151dc34"
+      }
+    },
+    {
+      "kind": "jitendex-BA",
+      "id": 15260230004,
+      "name": "native-record-fields-browser-jitendex-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51742,
+      "sha256": "4373503f8ae23908cfad24909016e775bff8325917c6c6709b8f0a72ac1c0cc2",
+      "jobId": 140951508493,
+      "jobName": "Complete import (jitendex, BA)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "475e997f727989742621229e341bf1c510257f91",
+        "bytes": 292556,
+        "sha256": "8e436a5500ebc3a29af256a92648ebc831089094f99e4ef10c405e9a3a9a3bba"
+      }
+    },
+    {
+      "kind": "jmdict-AB",
+      "id": 15259713287,
+      "name": "native-record-fields-browser-jmdict-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51739,
+      "sha256": "15b5d3164f01cb98cef5efeef097d551afac0d828317dfa3ab3c4e4b78e9b821",
+      "jobId": 140951508519,
+      "jobName": "Complete import (jmdict, AB)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "b405b2fb0e14a1514807181d129f1e10a8b0a2ea",
+        "bytes": 292534,
+        "sha256": "ef65040bc51cf56e8efa3ba5c14c9707572ccfb90f46690a6dac910c18eb1f30"
+      }
+    },
+    {
+      "kind": "jmdict-BA",
+      "id": 15259179765,
+      "name": "native-record-fields-browser-jmdict-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51739,
+      "sha256": "80bbd2183699ec8ef7f050f6263528a6debef8fa6a4656eb6f06acf22f5c7907",
+      "jobId": 140951508568,
+      "jobName": "Complete import (jmdict, BA)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "6f8450f0529c36a13db62ab9f5bee4a046e59c39",
+        "bytes": 292534,
+        "sha256": "6b7acfd3ef2214b5e61dcc73dd9f106c5b688c60f33ef33c9ba7ed8df9afe564"
+      }
+    },
+    {
+      "kind": "vndb-AB",
+      "id": 15260185274,
+      "name": "native-record-fields-browser-vndb-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51739,
+      "sha256": "aebb424159cb28948686a226378e5addd581566d420324d4b7ac803d9733fc5b",
+      "jobId": 140951508552,
+      "jobName": "Complete import (vndb, AB)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "5281665e5832578d3bf24aa21a6d7dc06768fd62",
+        "bytes": 292516,
+        "sha256": "f476090c1d6292edb5807b53d6e65bc1ef2f626f67e3446780fb78d8caf88382"
+      }
+    },
+    {
+      "kind": "vndb-BA",
+      "id": 15260140331,
+      "name": "native-record-fields-browser-vndb-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "sizeBytes": 51739,
+      "sha256": "59160a78aae561ce7921a3ecdaaa7b36300011ea9d2f191043f2db8c7262d757",
+      "jobId": 140951508293,
+      "jobName": "Complete import (vndb, BA)",
+      "expectedConclusion": "failure",
+      "originalJobLog": {
+        "gitBlob": "f0f30da80593bcd97b9048789cf708cc806ed0a7",
+        "bytes": 292514,
+        "sha256": "abaabd8be72d9b73302ef8a2675e4f91e873c6edf9cfd2657e622d47ad422704"
+      }
+    }
+  ],
+  "originalFailureEvidence": "e77d71829fb743df78edbd48984699b08460675c",
+  "scope": {
+    "readOnly": true,
+    "allSixOriginals": true,
+    "expectedRegularFilesPerArchive": 13,
+    "expectedOriginalReportCount": 0,
+    "originalStudyPassed": false,
+    "qualificationPassed": false,
+    "replacementAcquisition": false
+  }
+}

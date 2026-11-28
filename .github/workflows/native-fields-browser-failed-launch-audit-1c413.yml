@@ -1,0 +1,120 @@
+name: Audit six original native fields zero-acquisition launch failures 20261128
+
+on:
+  push:
+    branches: [audit/native-fields-browser-failed-launch-20261128-1c413]
+    paths:
+      - '.github/workflows/native-fields-browser-failed-launch-audit-1c413.yml'
+      - 'dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/**'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: native-fields-browser-failed-launch-audit-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  audit:
+    name: Verify all six original failed launch archives
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind and preserve the exact records-only source before setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-fields-browser-failed-launch-audit
+          python3 - <<'PY'
+          import hashlib, json, os, shutil, subprocess, sys
+          from pathlib import Path
+          if sys.flags.optimize:
+              raise RuntimeError('Optimized assertions are not permitted')
+          prefix = 'dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413'
+          output = Path('builds/perf/native-fields-browser-failed-launch-audit')
+          source_path = prefix + '/source.json'
+          source = json.loads(Path(source_path).read_text())
+          head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          base = 'f28c2801fcfd9416f220b46b9cbafeee901c1cb2'
+          if head != os.environ['GITHUB_SHA'] or os.environ['GITHUB_RUN_ATTEMPT'] != '1':
+              raise RuntimeError('Unexpected original reader identity')
+          parents = subprocess.check_output(['git', 'rev-list', '--parents', '-n', '1', head], text=True).split()
+          if parents != [head, base]:
+              raise RuntimeError('Unexpected reader parent')
+          changed = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', '--no-renames', base, head], text=True).splitlines())
+          if changed != set(source['files']) | {source_path}:
+              raise RuntimeError('Unexpected complete records-only source boundary')
+          verified = {}
+          for name, expected in source['files'].items():
+              path = Path(name)
+              if path.is_symlink() or not path.is_file():
+                  raise RuntimeError('Missing regular audit source')
+              data = path.read_bytes()
+              identity = {'gitBlob': hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest(),
+                          'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+              if identity != expected or data != subprocess.check_output(['git', 'show', head + ':' + name]):
+                  raise RuntimeError('Audit source identity mismatch: ' + name)
+              verified[name] = identity
+          for name in sorted(set(source['files']) | {source_path}):
+              target = output / 'source-snapshot' / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(name, target)
+          receipt = {'passed': True, 'headSha': head, 'parent': base, 'files': verified,
+                     'sourceManifestSha256': hashlib.sha256(Path(source_path).read_bytes()).hexdigest(),
+                     'performanceMeasurements': False, 'productExecuted': False}
+          (output / 'source-proof.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          (output / 'setup-request.json').write_text(json.dumps({
+              'requestedPython': '3.12.10', 'requestedArchitecture': 'arm64',
+              'runnerOs': os.environ.get('RUNNER_OS'), 'runnerArch': os.environ.get('RUNNER_ARCH'),
+              'performanceMeasurements': False}, indent=2) + '\n')
+          print(json.dumps(receipt, sort_keys=True))
+          PY
+      - name: Set up the supported records-only Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12.10'
+          architecture: arm64
+      - name: Verify the pure failure and archive reader
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, platform, sys
+          from pathlib import Path
+          if sys.version_info[:3] != (3, 12, 10) or sys.flags.optimize or platform.machine() != 'arm64':
+              raise RuntimeError('Unexpected records-only Python or architecture')
+          Path('builds/perf/native-fields-browser-failed-launch-audit/python.json').write_text(
+              json.dumps({'version': sys.version, 'machine': platform.machine(),
+                          'performanceMeasurements': False}, indent=2) + '\n')
+          PY
+          python dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/test-audit.py \
+            2>&1 | tee builds/perf/native-fields-browser-failed-launch-audit/pure-tests.log
+      - name: Read only the six exact failed original artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/audit.py \
+            --manifest dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/manifest.json \
+            --output builds/perf/native-fields-browser-failed-launch-audit/originals \
+            2>&1 | tee builds/perf/native-fields-browser-failed-launch-audit/full-result.log
+      - name: Preserve every original archive, log and reader outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-fields-browser-failed-launch-audit-${{ github.sha }}
+          path: builds/perf/native-fields-browser-failed-launch-audit
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
