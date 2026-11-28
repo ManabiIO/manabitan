@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "status": "HOLD: no worthwhile whole-import JMdict gain established",
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "runId": 46114139837,
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+      "analyzerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+      "completeTimingScheduleVerified": true,
+      "unrecordedAttempts": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.0483403338920283,
+          0.46750924837957175
+        ],
+        "equalWorkChangePercent": -0.06196597980310248,
+        "fasterPairs": 5,
+        "medianPairedChangePercent": 0.03146706355421358,
+        "ratios": [
+          0.988842398884215,
+          0.9901907944379444,
+          1.0003161888702008,
+          1.0447068747364858,
+          1.0010497585555322,
+          1.022966906775176,
+          1.0065297525013288,
+          0.9609113924050868,
+          0.9817832203218304,
+          0.993789473684186,
+          1.0003131524008837,
+          1.0028204324662626
+        ],
+        "worstPairChangePercent": 4.470687473648582
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -6.525555989077503,
+          0.5554962076713466
+        ],
+        "equalWorkChangePercent": -1.4960080613882099,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 0.20003046168652894,
+        "ratios": [
+          1.0055549620767135,
+          0.934744440109225,
+          1.0038963774220848,
+          1.000104231811646
+        ],
+        "worstPairChangePercent": 0.5554962076713466
+      },
+      "allCorrectnessMemoryGatesPassed": true,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -0.3876598335701198,
+            "medianPairedChangePercent": -1.5489652574702306
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -0.023366091677545775,
+            "medianPairedChangePercent": -1.1280065040892184
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 292,
+        "schemaVersion": 1
+      },
+      "issues": [],
+      "timingClaim": false,
+      "hostPooling": false,
+      "controlSubtraction": false
+    },
+    {
+      "cell": "jmdict-BA",
+      "runId": 46114139837,
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+      "analyzerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+      "completeTimingScheduleVerified": true,
+      "unrecordedAttempts": [],
+      "candidateVsBaseline": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.8215943338862117,
+          0.9233740416888958
+        ],
+        "equalWorkChangePercent": -0.6976178478961148,
+        "fasterPairs": 7,
+        "medianPairedChangePercent": -1.059638142702246,
+        "ratios": [
+          0.9795599123996481,
+          1.0193319729352384,
+          0.9656701030927956,
+          1.0076279266871613,
+          0.9843652930213533,
+          0.9840082009226276,
+          0.9880829015544041,
+          0.9678528103517509,
+          1.0108395541466166,
+          1.0035132545511871,
+          1.01754949170682,
+          0.9907243355915509
+        ],
+        "worstPairChangePercent": 1.9331972935238362
+      },
+      "identicalCodeControl": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -0.5367856015192851,
+          0.5383722157563664
+        ],
+        "equalWorkChangePercent": 0.17526878907152543,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 0.34811013716109507,
+        "ratios": [
+          0.9946321439848071,
+          1.0037550850109886,
+          1.0053837221575637,
+          1.0032071177322335
+        ],
+        "worstPairChangePercent": 0.5383722157563664
+      },
+      "allCorrectnessMemoryGatesPassed": false,
+      "memoryAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 259,
+        "schemaVersion": 1
+      },
+      "issues": [
+        {
+          "message": "Frozen prospective memory gate failed",
+          "stage": "separateMemory",
+          "type": "ValueError"
+        }
+      ],
+      "timingClaim": false,
+      "hostPooling": false,
+      "controlSubtraction": false
+    },
+    {
+      "cell": "jitendex-AB",
+      "runId": 46114139837,
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+      "analyzerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+      "completeTimingScheduleVerified": true,
+      "unrecordedAttempts": [],
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.6202984632263773,
+          4.9466372509126
+        ],
+        "equalWorkChangePercent": 1.3377032414026324,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 0.5311801143386585,
+        "ratios": [
+          1.0760978210168466,
+          0.9970387083127401,
+          1.0008322929671325,
+          1.0228349240014056,
+          0.9705553224227325,
+          1.0097913093196405
+        ],
+        "worstPairChangePercent": 7.609782101684659
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -7.188551078282712,
+          -4.712332569923117
+        ],
+        "equalWorkChangePercent": -5.982010009469185,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": -5.9504418241029144,
+        "ratios": [
+          0.9528766743007688,
+          0.9281144892171729
+        ],
+        "worstPairChangePercent": -4.712332569923117
+      },
+      "allCorrectnessMemoryGatesPassed": false,
+      "memoryAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 295,
+        "schemaVersion": 1
+      },
+      "issues": [
+        {
+          "message": "Frozen prospective memory gate failed",
+          "stage": "separateMemory",
+          "type": "ValueError"
+        }
+      ],
+      "timingClaim": false,
+      "hostPooling": false,
+      "controlSubtraction": false
+    },
+    {
+      "cell": "vndb-AB",
+      "runId": 46114139837,
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+      "analyzerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+      "completeTimingScheduleVerified": true,
+      "unrecordedAttempts": [],
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -0.8066612310689392,
+          6.1889179628975555
+        ],
+        "equalWorkChangePercent": 2.748637278985977,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 3.0604429354264884,
+        "ratios": [
+          1.0502778910323787,
+          1.0109309676761509,
+          1.003646634767393,
+          1.0652098433227724,
+          1.0585685159351788,
+          0.9802201406112284
+        ],
+        "worstPairChangePercent": 6.520984332277235
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -0.06804891015441683,
+          3.0189230351966856
+        ],
+        "equalWorkChangePercent": 1.4901638653692206,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 1.4754370625211344,
+        "ratios": [
+          0.9993195108984558,
+          1.0301892303519669
+        ],
+        "worstPairChangePercent": 3.0189230351966856
+      },
+      "allCorrectnessMemoryGatesPassed": true,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 1.9775599988831827,
+            "medianPairedChangePercent": 1.8891132105194886
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.5314973001397947,
+            "medianPairedChangePercent": 1.5179364122322014
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 430,
+        "schemaVersion": 1
+      },
+      "issues": [],
+      "timingClaim": false,
+      "hostPooling": false,
+      "controlSubtraction": false
+    }
+  ]
+}

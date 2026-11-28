@@ -1,7 +1,7 @@
 {
   "study": "Manabitan import investigation, continuation 2026-11-28",
-  "checkpoint": "second-pass-1",
-  "publishedAtUtc": "2026-11-28T08:58:00Z",
+  "checkpoint": "second-pass-2",
+  "publishedAtUtc": "2026-11-28 09:15:32 UTC",
   "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
   "currentDevelopProfile": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
   "sharedCodecSource": "1d6803caf249fa02ea5eea652731e5b9953ce7d9",
@@ -23,6 +23,30 @@
       "bytes": 2239133,
       "sha256": "0ee495fecbb4d3b51b2a0f41d2773155dd32c93251335333e65d3ef62cb0fb35",
       "gitBlob": "9a3bec4ac9951edd0375ecc2afdd7555a10f16e3"
+    },
+    {
+      "path": "inflight-830-jmdict-BA.tar.gz",
+      "bytes": 2225584,
+      "sha256": "2329d2089e8e3849f93a1ddddf362acfd56946e2a775cad8e7f0fd1715165277",
+      "gitBlob": "8cbcd4f7bae6f8b8cb4c498d32b7fdc5cb6697db"
+    },
+    {
+      "path": "inflight-830-jitendex-AB.tar.gz",
+      "bytes": 1695254,
+      "sha256": "2188231e4e64535444042699c959e221c35006f03818bd044b03ce86eb1b559b",
+      "gitBlob": "a31197e2076fabdd77944ce4528443538a9daebd"
+    },
+    {
+      "path": "inflight-830-vndb-AB.tar.gz",
+      "bytes": 1814342,
+      "sha256": "f3e83c4d1d33a7770f65d904841c3ac361f22d32efec86ca3ef288378d152f4c",
+      "gitBlob": "c34729465b91a1c10a270ba033b88b539d5c84de"
+    },
+    {
+      "path": "native-tail-admission.tar.gz",
+      "bytes": 254568,
+      "sha256": "70b9bdc3437d51572df941f8fe58c8c3b3e2d5993457078bb58e685cf9ebd72a",
+      "gitBlob": "935b0533ba120b1c3ebd55e09e8483597d59d57d"
     }
   ],
   "constraints": {
@@ -34,5 +58,15 @@
     "Archive contents retain earlier failed environment/preparation attempts.",
     "The native profile is diagnostic, not an import speed comparison.",
     "The #830 AB result is one independent JMdict host and is not pooled with the other host."
-  ]
+  ],
+  "browser830Status": "HOLD: no worthwhile whole-import JMdict gain established; all four original cell archives retained",
+  "columnarPreparation": {
+    "product": "66ae01d41e3abdb546873f62f8db9ff35bd4ebbb",
+    "tooling": "8498c92ba6a5626317486c11b2a85f84b057fce0",
+    "hold": "29ae2936452c1dc38ebf01cd82d250dff921e3c7",
+    "cancelledRun": 46128570908,
+    "cancelledJob": 140928524543,
+    "steps": [],
+    "observationsAcquired": 0
+  }
 }
