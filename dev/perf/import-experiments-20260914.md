@@ -814,3 +814,116 @@ The separately registered hosted full-import cohort remains frozen at
 [run 46102823858](https://github.com/ManabiIO/manabitan/actions/runs/46102823858).
 It was still queued when this component evidence was recorded. This evidence-only
 follow-up changes no runtime bytes and does not reacquire that cohort.
+
+### Completed hosted JMdict screen: stop without a runtime PR
+
+[Run 46102823858](https://github.com/ManabiIO/manabitan/actions/runs/46102823858)
+completed both originally registered six-pair JMdict cohorts at frozen candidate
+`ab116fa90777cd64b067d4858318923f0f4e3ee7`. The baseline remains
+`9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`; the sole release-package difference is
+`js/dictionary/term-record-opfs-store.js`. The opposite-order hosts disagree in
+sign and both descriptive intervals cross zero. This does not establish a
+review-worthy gain. **STOP: no runtime PR, no Jitendex/VNDB expansion, and no
+unchanged-candidate retry.** The earlier negative component screen remains part
+of the result.
+
+| Independent cohort | Median paired B/A change | Equal-work change | Faster pairs | Descriptive paired-bootstrap 95% interval | Worst retained B/A pair | Same-code C/A median |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Initial AB | -0.7822% | -2.5118% | 4/6 | [-7.4232%, +1.5619%] | +2.6125% | +0.5558% |
+| Initial BA | +1.4049% | +1.3871% | 2/6 | [-1.8773%, +4.7481%] | +5.4998% | +0.5077% |
+
+Negative changes mean faster. The AB first pair, -11.6369%, and all other tails
+remain included. Each host has two same-code control pairs; their equal-work
+changes are +0.5600% and +0.5079%, respectively. Hosts are not pooled, controls
+are not subtracted, and no observations were trimmed or replaced. These are
+the unchanged qualifier's whole-import measurements from file-input change
+through post-UI completion, with a fresh profile for each observation.
+
+All **52 prescribed semantic receipts** passed the original source, fixture,
+default-option, content, storage, readback, restart, lookup, and media checks.
+Per host, the schedule is four excluded warmups, twelve timed imports, four
+same-code control imports, two separate exhaustive-media imports, and four
+separate memory imports. The eight memory observations retain **578 raw scans**
+(314 on AB and 264 on BA); every observation qualifies and both prospective
+memory screens pass. Sampled memory acceptance supplies no peak-memory or
+memory-reduction claim.
+
+Both cohorts used the locked Chrome for Testing 153.0.8010.12 binary, SHA-256
+`8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e`,
+Node 22.22.0, the frozen fixture/harness/qualifier, and default flags `{}`.
+The corrected source gate passed scoped ESLint, main and test TypeScript,
+669 unit-test files (15,137 tests, 47 skipped), all dry-build targets, and the
+32 unchanged qualification-observer tests. The original missing-`@throws`
+lint failure in run 46102040540 remains separate; it started no browser imports.
+
+### Recovered evidence and verification
+
+The completed hosted evidence is preserved in
+[the recovery manifest](../../builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery/manifest.json)
+and its adjacent `evidence.tar.xz`,
+`verify-recovered-evidence.py`, and `verified-originals.json`.
+This is a newly prepared preservation archive, not a new acquisition. It retains
+all 402 non-product-ZIP members from the two original timing artifacts, all
+corrected-validation artifact bytes, the original audit source, frozen checker
+sources, exact changed package modules and package inventories, and all
+21 already-published local component files. The outer archive contains 458
+members, 39,523,896 uncompressed bytes, and is 844,260 bytes with SHA-256
+`50b07636d78adda206c1c65c1deffedf33bc2ee2435821409813ebd8da11b2f0`.
+
+| Original artifact | Artifact ID | Bytes | SHA-256 |
+| --- | ---: | ---: | --- |
+| JMdict AB | 15247854574 | 35,001,825 | `3c253d47260b91bb5d8b1bad06446cb80aad65fb4973278089417f6f3ab0775c` |
+| JMdict BA | 15248767297 | 34,942,141 | `67159673a6cb6cc3b579e9d01ee82334094c40a3e6932876fffd812df5f68d66` |
+| Corrected validation | 15247200027 | 47,132 | `0115dae32253c88b5a8ca8ef2496971e2e1f2379df6de4be40e53f2048bab8d9` |
+
+An executor reset removed the first prepared evidence pack and its packaging
+review before they were published. Their previously recorded sizes, SHA-256
+and Git-blob identities are retained in `recovery/lost-prepared-index.json`;
+the missing files are explicitly not represented as recovered originals.
+The new pack was built from fresh downloads of the exact original CI ZIPs
+above, the original 7,360-byte auditor recovered from the session, and the
+exact Git blobs already published at
+`3f137c22eefa2b347cd7e0ed7e307f3528f62ac9`. No import, memory observation,
+or component measurement was rerun. Only packaging and verification were
+recomputed.
+
+Running the recovered original auditor against the original ZIPs reproduced
+the pre-reset audit outputs byte for byte: AB SHA-256
+`5d1244116a999f9eef544c5a58a6190c5cd3f9fd4324335d345691d10e40bad2`
+and BA
+`20413b00c230974f8776074f7230da4b8e5be5a5ccdd4074426cf296d5c883e4`.
+The new portable verifier keeps that original semantic, memory, and statistical
+checking body unchanged, adapting only its repository/input location and its
+initial product-ZIP extraction for this compact archive. It requires identical
+reproduced audit bytes and checks all retained members and source bindings.
+Its first packaging-only verification rejected component-wise path ordering
+where lexical member-name ordering was required. That failure and the first
+manifest are retained separately; the corrected pack changes ordering and
+preservation metadata, not any original observation.
+
+The four product ZIPs were fully verified before their bytes were omitted from
+the compact pack. Each package has 554 members, and the full package comparison
+permits only the declared record-store module difference. Original artifact and
+package hashes, complete member inventories, exact changed modules, and original
+audit results remain. The omitted ZIP bytes cannot be reconstructed or
+independently rehashed from this compact pack alone.
+
+The failed initial source-job log was retrieved again from its original job
+140846425703. Its earlier individual SHA-256 was not retained, so this new
+retrieval is labelled by job identity and does not claim pre-reset byte equality.
+The original failed local component logs and successful focused validation
+already published at 3f137c22 are recovered by exact Git-blob identity.
+
+Verify the compact evidence without performing any imports:
+
+```sh
+python3 builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery/verify-recovered-evidence.py \
+  --evidence builds/perf/record-field-lengths-20261127-5a86/completed-hosted-recovery
+```
+
+For full original-artifact verification, additionally pass
+`--original-artifacts /path/to/originals`, where that directory contains
+`hosted-AB/artifact.zip`, `hosted-BA/artifact.zip`, and
+`validation/artifact.zip` with the identities above. The verifier reconstructs
+the same 52 semantic receipts and 578 raw scans and recomputes the paired
+statistics using the frozen checkers; it never launches the importer.

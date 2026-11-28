@@ -1,0 +1,48 @@
+{
+  "archiveBytes": 844260,
+  "archiveSha256": "50b07636d78adda206c1c65c1deffedf33bc2ee2435821409813ebd8da11b2f0",
+  "checks": [
+    {
+      "diagnostic": "",
+      "label": "compact",
+      "returnCode": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "c7c9e30927dfe231a28c358cbf4c62f737a19f8dc02c54f495aae0f5a654fa3d"
+    },
+    {
+      "diagnostic": "FAIL: Do not use optimized Python (-O)",
+      "label": "optimized-python",
+      "returnCode": 1,
+      "stderrSha256": "8cd0dad9450dd11a82e9b34ead68c09a7fcc0fc980ffcc6abf4f00880201dadd",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "diagnostic": "FAIL: Archive identity mismatch",
+      "label": "corrupt-archive",
+      "returnCode": 1,
+      "stderrSha256": "73f88680c42989d204209a5e58a532793e506fbd238c1cde594832219f88d794",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "coverage": {
+    "archiveMembers": 458,
+    "archiveUncompressedBytes": 39523896,
+    "publishedComponentFiles": 21,
+    "rawMemoryScans": 578,
+    "semanticReceipts": 52
+  },
+  "disposition": "No demonstrated JMdict gain; no PR or Jitendex/VNDB expansion. No observation replaced or rerun.",
+  "fullOriginalVerifierStdoutSha256": "73a8521c2915b2621e17ff0d618ec7f073925549c82aacf5ec7e3a426447a869",
+  "handoffReview": "Accurate STOP/no-PR conclusion, opposite signs and intervals, all tails/controls, correct52/578 coverage, exact artifact identities, reset loss ledger, retained initial packing-order failure, and explicit omitted-product-ZIP limitation.",
+  "manifestSha256": "c70b3f510f39e19bd653489a9d8cd6a3cedbb1765e596df808db290bee738ff3",
+  "originalAudits": {
+    "AB": "5d1244116a999f9eef544c5a58a6190c5cd3f9fd4324335d345691d10e40bad2",
+    "BA": "20413b00c230974f8776074f7230da4b8e5be5a5ccdd4074426cf296d5c883e4"
+  },
+  "packageReview": "Original AB and BA ZIPs rehashed against original metadata; all554 package members checked for each arm/host. Exact changed record-store module bytes independently compared against Git9e10 and ab116 in both hosts; no other package entry differs.",
+  "reviewer": "root",
+  "schema": 1,
+  "scope": "Independent read-only preservation review; no import, timing, memory or component acquisition",
+  "status": "PASS",
+  "verifierSha256": "0b99891cacec0f5f2cd2b16d77b67a492364989e3f094c9cc73256d67777e5e4"
+}

@@ -1,0 +1,1899 @@
+{
+  "schemaVersion": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "ab116fa90777cd64b067d4858318923f0f4e3ee7",
+  "runId": 46102823858,
+  "disposition": "STOP: no demonstrated JMdict gain; no PR, expansion or unchanged-candidate retry",
+  "noNewAcquisition": true,
+  "originalArtifacts": {
+    "AB": {
+      "id": 15247854574,
+      "bytes": 35001825,
+      "sha256": "3c253d47260b91bb5d8b1bad06446cb80aad65fb4973278089417f6f3ab0775c"
+    },
+    "BA": {
+      "id": 15248767297,
+      "bytes": 34942141,
+      "sha256": "67159673a6cb6cc3b579e9d01ee82334094c40a3e6932876fffd812df5f68d66"
+    },
+    "validation": {
+      "id": 15247200027,
+      "bytes": 47132,
+      "sha256": "0115dae32253c88b5a8ca8ef2496971e2e1f2379df6de4be40e53f2048bab8d9"
+    }
+  },
+  "reproducedOriginalAudits": {
+    "AB": "5d1244116a999f9eef544c5a58a6190c5cd3f9fd4324335d345691d10e40bad2",
+    "BA": "20413b00c230974f8776074f7230da4b8e5be5a5ccdd4074426cf296d5c883e4"
+  },
+  "archive": {
+    "file": "evidence.tar.xz",
+    "bytes": 844260,
+    "sha256": "50b07636d78adda206c1c65c1deffedf33bc2ee2435821409813ebd8da11b2f0",
+    "memberCount": 458,
+    "uncompressedBytes": 39523896
+  },
+  "members": {
+    "frozen-repository/dev/perf/import-memory-20261125-a7f7/audit_memory.py": {
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    "frozen-repository/dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    "frozen-repository/dev/perf/import-memory-20261125-a7f7/protocol.py": {
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    "frozen-repository/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": {
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    "frozen-repository/dev/perf/import-qualification-20261125-a7f7.py": {
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    "frozen-repository/test/chromium/extension-two-dictionary-import.e2e.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "frozen-repository/test/perf/dictionaries.lock.json": {
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "hosted-AB/package-and-artifact-proof.json": {
+      "bytes": 169238,
+      "sha256": "53d9cbf01a5803037f2cf1f4eee63735b2f4a6a3fdd7d669b3e8ef241e9e2d2b"
+    },
+    "hosted-AB/record-field-lengths-jmdict-console-summary.json": {
+      "bytes": 7309,
+      "sha256": "c87e7e9c39fc5b9e87a12dbf5ce9db66d9daccff3614fd9aca8a2c051599a680"
+    },
+    "hosted-AB/record-field-lengths-jmdict-runner.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hosted-AB/record-field-lengths-jmdict/analysis.json": {
+      "bytes": 1316,
+      "sha256": "b07c8cb18039bdc4cad7bdb3b654dad286ad41adaeb261179d1cd9dc00eff0be"
+    },
+    "hosted-AB/record-field-lengths-jmdict/browser-identity.json": {
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/build-A.log": {
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    "hosted-AB/record-field-lengths-jmdict/build-B.log": {
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "f8761ef89757f84dede297f5fe194d9b3e966b03301bc23da28c8a4905c922a1"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "117ac1d96520e822dc7e27cdcfb93b566d144cd76548a526b1dad5291ea0ba1c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/run-1.html": {
+      "bytes": 82646,
+      "sha256": "cdaff27e841769204488073e6bdf077e7fbc4198781617a877534c60428299ab"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/run-1.json": {
+      "bytes": 150205,
+      "sha256": "0260fca6aae33eacac1520b9365f3704de10e6b1557ab8c0189f8dfe98a0d03c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/run.log": {
+      "bytes": 1613,
+      "sha256": "c2e3f29ee5baa8d28a4eee96664c3ebe00a3f3c88e6c69632add406c6a7b7867"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-A/summary.json": {
+      "bytes": 58604,
+      "sha256": "3b1c798321f79ca7376b4b01775cdd9d37c837b88fc93533c7d99a61aa05e4f9"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/host-after.json": {
+      "bytes": 497,
+      "sha256": "78804aec9625b857426682dc4366c0449f85def8acbd0e161c5ed5d03571a73e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/host-before.json": {
+      "bytes": 497,
+      "sha256": "7c40c53b4df8f400bab7f6488486363c60eb1e3682fac8f0bbdc837ed2b2817d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/run-1.html": {
+      "bytes": 83680,
+      "sha256": "d18fa93b9f32141375b0afd708a7b70b656957f6db660e3aa8c59b9345ba616e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/run-1.json": {
+      "bytes": 151328,
+      "sha256": "9d1a2f96d74c3ec099f9723ae5edf7d30fe96e84ae72c57ad52a0ed90cbaa622"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/run.log": {
+      "bytes": 1720,
+      "sha256": "1f09773a909e7705bfa7862318c59541e17908bb1cfa4c535d810f2238528e25"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-01-C/summary.json": {
+      "bytes": 58946,
+      "sha256": "1861b8584253ed9f24697667260ffae5c3f8dd2db7c59123ed9b091a3633b7d4"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "5d2d1b0fe2888a5870438fbdfb18880b5fab564ed37e75969e91ed98380804c4"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "7ca579b85c83759b7b9e34b53ae4f797aa4c3b6cf36f06516c9803703c5cc158"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/run-1.html": {
+      "bytes": 82843,
+      "sha256": "b4141f84c108a4ba5fc252e7b57c0114d91c57836f8dbe0ad214e1532206b1e9"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/run-1.json": {
+      "bytes": 150733,
+      "sha256": "086ff065c46b92a58b9fae8ec68f414a012fe53efa3cbbdc2e439181f267cc93"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/run.log": {
+      "bytes": 1614,
+      "sha256": "ff12882cb95b741b190ed292641b1551b7ff981c041d0e2ac257a2bcbc9ed1d2"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-A/summary.json": {
+      "bytes": 58952,
+      "sha256": "65a3145edd22da1978bbfe4f9f5f5473b53a7721d5c931dda12c9b251a50ebf1"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/host-after.json": {
+      "bytes": 497,
+      "sha256": "6d03b6fb95acea593ada24c3a7828bdf623d2be3d4d71c53cf6a60ada48de3c2"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/host-before.json": {
+      "bytes": 497,
+      "sha256": "49f285be12c3a77b92d5e570f1a06b957d0184376a61e770ea89de90c2695324"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/run-1.html": {
+      "bytes": 84014,
+      "sha256": "018d32fb42259666e438de98930ac1faaf0c5117f13b7317a97e6c9e85297429"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/run-1.json": {
+      "bytes": 151004,
+      "sha256": "3fe3701e0cd3ac0e83661cece2d8d67d983e1e615e5860d0fc35c96775161058"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/run.log": {
+      "bytes": 1810,
+      "sha256": "ff40d2e68cb07bec6695dbfbc7f7c83df8bfcababce0688140f3cbd5a6b86129"
+    },
+    "hosted-AB/record-field-lengths-jmdict/control-02-C/summary.json": {
+      "bytes": 58795,
+      "sha256": "ef50909f9656a9bdf7e29c810a5f1b7cc81ccdef56a1c37ea8959a7b1528238f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-A/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-A/run-1.html": {
+      "bytes": 82490,
+      "sha256": "ff2280c864e5e5f90542b9365c122d08927514f5b2a273943379e15851585112"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-A/run-1.json": {
+      "bytes": 150220,
+      "sha256": "6cb0324c7e2c4d609982e71baa8f5469685efa68a23192f5b44ff3c6efd94899"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-A/run.log": {
+      "bytes": 1631,
+      "sha256": "2e01fafb5cb454b5d1c96c4be47e23b0cf1921d74fa25ad90ccacad355f44371"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-A/summary.json": {
+      "bytes": 58863,
+      "sha256": "90b35bc25f696d26d94987984e5bf6ddad772a1bc6b91bd6b59ba14f5bdc2c7e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-B/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-B/run-1.html": {
+      "bytes": 82653,
+      "sha256": "86d64b8b0035b4d07d9bab0b5f6c54519c1d3ca5a046a518ff7b926af9cdc363"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-B/run-1.json": {
+      "bytes": 150343,
+      "sha256": "db454b6e718ec803eaea2b25093ce0b0218ea31e9eb1b58c4ac7b0c7fbabeb35"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-B/run.log": {
+      "bytes": 1631,
+      "sha256": "b2fe497434094351da234b11cd0586e48e023cf53b90c7bc2c326ffa9eb998a3"
+    },
+    "hosted-AB/record-field-lengths-jmdict/exhaustive-media-B/summary.json": {
+      "bytes": 58760,
+      "sha256": "8a9a68d68a0a677daa2c891ad39a42995fff28c42ce9f321eb5b6ba4b7ce474e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/fixtures.log": {
+      "bytes": 157,
+      "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+    },
+    "hosted-AB/record-field-lengths-jmdict/libs-A.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/libs-B.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/license-A.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/license-B.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "885e2b05f1f477dfde7a1c76a27ff98c7400a91f2a86875abdfa44e7e484aa04"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/memory.json": {
+      "bytes": 2570134,
+      "sha256": "88f90afd4072f57ee6f1af08b18e7a5223b466c37afb8aa344dff81863ee005a"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/run-1.html": {
+      "bytes": 83365,
+      "sha256": "487c441e0e5b5d44c50a75818e246e098234584bc25eaa9587b42f9302bd1f3e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/run-1.json": {
+      "bytes": 150682,
+      "sha256": "f3f035094f897ef9cb69120aa6eee8bc7ba9a54ca27ad63c8d73cf0dd3fa4be0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/run.log": {
+      "bytes": 1711,
+      "sha256": "3b0056a534a8c571e2a05c202ce15010e8078a45032591dc6e4b16f0366e5ef9"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A1/summary.json": {
+      "bytes": 58708,
+      "sha256": "a0e3fde89815c9bb5b02c3d155acd44086598af85f235cfa2f1a447fabbb58eb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "6378206577cc59572aeac6495edd8474f42e0cfa60e237a77acec4855c9f5fcc"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/memory.json": {
+      "bytes": 2435056,
+      "sha256": "d5cd6de73ab7269994bc250763bf9cfb56c18fb51ac0c5dc77714502adcc6c18"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/run-1.html": {
+      "bytes": 83688,
+      "sha256": "2c0150a62caf11158d4144599c736b771f70ccac0c2b355abebd31b90478a7c6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/run-1.json": {
+      "bytes": 151198,
+      "sha256": "4c3ab6333dcf99469de653387ca39a65232bded113d190280911b79e5d0224c0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/run.log": {
+      "bytes": 1712,
+      "sha256": "db691cb9d09a5d68035073b0c566c96c77cc41fae79c30cf35b4ec7c4e1dfcc3"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/A2/summary.json": {
+      "bytes": 58789,
+      "sha256": "760b8d83656df17197c5a659ac3cf070445a9c09d4f43538c3c3eb714bae89a3"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "32ada70922ee62717e6c0f691d075ec8b42692ab320ec565cd4b3e41c5a45b11"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/memory.json": {
+      "bytes": 2445270,
+      "sha256": "8a51ddca70e91fab70ded57b089b04413d8adaed4e93a043d97eb6880273bb13"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/run-1.html": {
+      "bytes": 83836,
+      "sha256": "5ee44d4011b848c658b04a3dee818b0aa4fe33bc9f4efde5730d8adb71d0cc70"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/run-1.json": {
+      "bytes": 150523,
+      "sha256": "67e6330f93277498a4cd44b4c055d04b4d41b2eb135ee111b0e9e82b0afb34d4"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/run.log": {
+      "bytes": 1801,
+      "sha256": "d6d1e80e8129a2750539a55d5fd7963c827c4db7f451a3f3d7de15a2447cb382"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B1/summary.json": {
+      "bytes": 58546,
+      "sha256": "2546d1222da6248abbf137357cf87730fb438cbc1f33dde4ef16a124a79bb20c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "67cf0f3d6b34a384bfc3565a6f675ca72c81e49079abaf3ce33ae32723feaa7d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/memory.json": {
+      "bytes": 2403851,
+      "sha256": "e90a1e9ef275b7e4b865c9c21f15a78855045b00be38330644775d137724ec81"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/run-1.html": {
+      "bytes": 83642,
+      "sha256": "ae4a928d1a035211b4e859c082a2804c10b36839897c5493c339ef53ac2165e1"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/run-1.json": {
+      "bytes": 151078,
+      "sha256": "889a74bc822984e3bd912e48fa2a648ee4061b9fdb9cbd8245e6496fb3e04bf1"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/run.log": {
+      "bytes": 1712,
+      "sha256": "6c98b769967d22b620a13d07195774fb75ee98a3f7894fbeb3d0e10742588b6b"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/B2/summary.json": {
+      "bytes": 58820,
+      "sha256": "4a526badd95f81cda3cf137d7bf8bb42c46997bfd0379961bee28868ddeb36b6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/harness-instrumented.js": {
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/harness-original.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/memory-audit.json": {
+      "bytes": 459,
+      "sha256": "ec14d186d60386fce7af9bfa0a68f5330d3a772470f754292079872f36cfed03"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/memory-comparison.json": {
+      "bytes": 10135,
+      "sha256": "d6d02cc1e5d1d2c24c7343d7d9417914b3b635b2a320dbe63a33b4a61a0ff0f0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/observations.json": {
+      "bytes": 8505,
+      "sha256": "952721512afdac33249ae5894e028cf1e92e4a2b2cab4190d1ee82461278d9ca"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/plan.json": {
+      "bytes": 129296,
+      "sha256": "fb810a5c1883ef24efa9b96d6b29f0ca7733dd690a6efe43fcc7ad9d3951a62f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/memory/semantic-failures.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "hosted-AB/record-field-lengths-jmdict/observations.json": {
+      "bytes": 2463,
+      "sha256": "7aac7b2f5aa62aa4bf19ff9dd9fdbfb0526a0f2814e2233388546b08d7fed356"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "d3666b9ac9238d23d96d9267bd0141f34c6983bbc16aa8e9a98d680aa9adc179"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "767c1e58d7f956ed78206ca9ea4ae1be1c0c586fc8020450c946874a3594d6eb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/run-1.html": {
+      "bytes": 82784,
+      "sha256": "db13a6f8776962d0e4a99daa5958868b2249e4c218844950f2c33eb2b0e2ef7d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/run-1.json": {
+      "bytes": 150673,
+      "sha256": "c29393e1851208eadb9e89c558b1ec764e4cb7e0d39855d8e4a398409c721e75"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/run.log": {
+      "bytes": 1605,
+      "sha256": "1ddfcce59b2e06b363401a1d2045a9a57b39a03c705570557cc227ffd02147f7"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-A/summary.json": {
+      "bytes": 58966,
+      "sha256": "fb559366fea181d194be9d816ae4d424828e213e3a9c2f731b6b24d05a50d0a7"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/host-after.json": {
+      "bytes": 496,
+      "sha256": "a75a058bcecf5f47be56bab4d58741665ef7fddf45103380d590ecda73d1be6d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/host-before.json": {
+      "bytes": 496,
+      "sha256": "a6df5f83b79fd45005de2529d5aa09398fb35a1432b22a402395ac008c83bcb4"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/run-1.html": {
+      "bytes": 84181,
+      "sha256": "324da6b4eac5f32a32be7dfb698b6023fad61d35776bf740317b408fb7aa63a6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/run-1.json": {
+      "bytes": 151331,
+      "sha256": "9ce6b46d43d0ea532395275c4bddea95ffa19887916f90f52dd87121bf422a72"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/run.log": {
+      "bytes": 1800,
+      "sha256": "200ea6bf41ee50ce882a8e4ed97b065c2628558634fd54f42734917a6703223a"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-01-B/summary.json": {
+      "bytes": 58841,
+      "sha256": "ac9db20daa4fa2b4f597bd53aa2a804bc15893e7e67ea110025ff6f8ff23aaf6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "c9da6a5b55020d9e9cf5b8861ff01e76e3823f8d192c56efbb9608031256b327"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "3d62577e0a3571596b168e29fa2cadd71c07c749086db6b36946c044f64c3c72"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/run-1.html": {
+      "bytes": 83561,
+      "sha256": "d765472c558cf6490b3aa0d5405a83a10144a397a8495945f24af98904010639"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/run-1.json": {
+      "bytes": 151152,
+      "sha256": "c3841149e1dd44a338e4c7499953d587f2cb2c391f4f2ac14902606e738d8f6c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/run.log": {
+      "bytes": 1711,
+      "sha256": "a3eb1d4f74c46a4789a32d7b603be37c4e642836784dcb11aa8c7ebf4e38b387"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-A/summary.json": {
+      "bytes": 58950,
+      "sha256": "a9fdcd31989f67ce61420b3ef4e536ba536d04028fcbd8e3c84634a50e91a3be"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "5b2d789e973c6b722bf68e3483b0f30b32de45d6b41995bbcc6a1b179320c109"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/host-before.json": {
+      "bytes": 496,
+      "sha256": "2aa494d8d6ae2eaee967214f8cd33d37de0588a9466271b73df87a378698327f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/run-1.html": {
+      "bytes": 83473,
+      "sha256": "de8ce33fcf57fe83430f221f55edcb5a0cac7df95c5e5c08fd13d0cdd0f3b5d7"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/run-1.json": {
+      "bytes": 150900,
+      "sha256": "ec27d71788d387be689283850386a18269d067d9d6b74ab7062b7f3d5f584c78"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/run.log": {
+      "bytes": 1711,
+      "sha256": "267fd73d44ad8d380cf243bbf7e306a9e55ba8dbc4b408d135ad6c67308749e9"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-02-B/summary.json": {
+      "bytes": 58875,
+      "sha256": "e2a7caf64232189ab68651738654fbffe8a5e33e37a826ebe4b7ac142479b210"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "0695d11104cb232d82a8f9f0078edbf3582ea61d97f85b79a76289fa85005a3f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "bee475afc34b69739c75d04c94a0a78abc9a41f5a2bef3b7b72447fe8f0d89c3"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/run-1.html": {
+      "bytes": 84175,
+      "sha256": "a3654c5c7e060acef60b45cdceb3aabc3870a0ec28d97b31de90f6f04fbf4238"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/run-1.json": {
+      "bytes": 151217,
+      "sha256": "75e5642fd01965edc663ccf954a615a8f7e02332fcf6a4e46a0f16493db22249"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/run.log": {
+      "bytes": 1800,
+      "sha256": "1b5d1ef8e07c915fbe52d42cf733c633ca268f06bc4fd0963b613c25b8e2758b"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-A/summary.json": {
+      "bytes": 58783,
+      "sha256": "d4bd3f570262db02d93e7ddd79d8a4e7c081cea33f87f08c44a5747bc5bc5a08"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "611ee853c71fe28cf93c2a2cab536d68fce8e817fe7f847a85dedf53f835a69a"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/host-before.json": {
+      "bytes": 496,
+      "sha256": "5e8e237fec7549523cc292ce9d33a998acc8345426b5fb87982d7de7895b514a"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/run-1.html": {
+      "bytes": 83260,
+      "sha256": "9ce9e8d4591cb4a2381bd3abe2fef6bb3160ed0f0de2be425e07843ae69cbb2f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/run-1.json": {
+      "bytes": 150578,
+      "sha256": "fb2b1acd34821b4204dd7e74dbce8661f61940603a0797dffa9df75684801ba0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/run.log": {
+      "bytes": 1693,
+      "sha256": "a5c14c4f20039f0d4b824c0d7b3f1713e2e11957e57ac14f1263e0b571a5afd8"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-03-B/summary.json": {
+      "bytes": 58731,
+      "sha256": "e4c92517da9e8779fa42e3faa141b4e1b776a492e4f7a9afb151b7e05f5e9633"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "2ee64e4b931d244bf1429c80c14e2fd1054348474ddc7ee5d0a820361e841a74"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/host-before.json": {
+      "bytes": 496,
+      "sha256": "f440236f84df85e10481e9df8b54dce31730781fde8cc3a9b6a0aea6b9a71ba6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/run-1.html": {
+      "bytes": 82729,
+      "sha256": "2fcaa2f8d86388a9035cb55ef5786eb4f49892b0f07c77c33d6a232bb7e7d79d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/run-1.json": {
+      "bytes": 150531,
+      "sha256": "9fab30d455878c9158089febca86bf4a05dfeb587188d7eb5d5403cee167b5bb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/run.log": {
+      "bytes": 1604,
+      "sha256": "c8f63f572eb1a2363e3eeca59a14232c03aaca596ca72b50aacdac1bb0941541"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-A/summary.json": {
+      "bytes": 58833,
+      "sha256": "f592de512bf7e8ebf000a8f82faade75a55adb2ba56c90bef805df12113d16ca"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/host-after.json": {
+      "bytes": 496,
+      "sha256": "c2c9b5d6af25345b276abca2adda1d5e8fcbef555cc9e92689f682f9a471eb2f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "b5d0563c6ff8ceecfe0d8c3646dd21021f82c4471b173d83011cb9b67fc6ccf6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/run-1.html": {
+      "bytes": 83423,
+      "sha256": "e652e2d94c2b29bd6cdc29c68a074bc8e74a0f30e5df7c86bfc825fc44e84f51"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/run-1.json": {
+      "bytes": 150703,
+      "sha256": "e2c3e4e9d2bdb8ad38bd08b0451d8350926d7679c4d51a049165b2290665573b"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/run.log": {
+      "bytes": 1712,
+      "sha256": "96abd1e6f9633f80e0f4e906e51107a891b4bb0be5e8d51c5163d6dbba5dd64f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-04-B/summary.json": {
+      "bytes": 58715,
+      "sha256": "35eab40188038cddbe27c22403010d714810ec35db341b3324b759b8cd3b2673"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "9f4728396925f83fb788ac91e162528482f6b9e2de8f8507df1db950e21f3731"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/host-before.json": {
+      "bytes": 496,
+      "sha256": "357a836933b3f82270e63d5b451c1fe5e58820b0be8f30ccb62e9abe79cb1356"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/run-1.html": {
+      "bytes": 82712,
+      "sha256": "6209f8a08c9c2460aac42119824f9f761c5473427990e918e83075bd5ad86ac0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/run-1.json": {
+      "bytes": 150595,
+      "sha256": "8dc791a730f59c94f7796a797da0bb5d64bf8dee4afd38235797fa4b23a1e678"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/run.log": {
+      "bytes": 1605,
+      "sha256": "839c8c4da48bc2daf05d289f74f7189d6871aabe14fdd9315a663513954ea5f5"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-A/summary.json": {
+      "bytes": 58904,
+      "sha256": "b1398badbd2b0e13238b65fe145093df2cd8c58fd5b41107bc9f9a6fe860db79"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "e84a2911c5536855459a8db8faf4b910913739be959e38014f4af7b5ca8b1434"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "1a15463402c541247c97f91bf0f59772f2fd23c064477856b8a40758296a0f96"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/run-1.html": {
+      "bytes": 82747,
+      "sha256": "a2edd5b681ca571c6f8222a99d652ae3cabae9af93e2ee0b4c7adaffade52b65"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/run-1.json": {
+      "bytes": 150417,
+      "sha256": "85d122a764df8b19ab3f2203f006f6e885cf1970d790feb3dfb0ef03901de7bb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/run.log": {
+      "bytes": 1605,
+      "sha256": "5dd9a4f216bffd8b0204ee68b835089ef9a8e46763a0702aeb3b4ddad01e7aa6"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-05-B/summary.json": {
+      "bytes": 58769,
+      "sha256": "b59944f74d874dce31726abadcc0cd3dcc7091124f114b098fcc447afee83999"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "1583c54e16b2822700714d5d4a2475001731913b48b94849aaad51c36bc4774b"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "5cd4de7aed8355ad083a70fee82dbb22b47d6e37ff3742d2fabb11625e015f1e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/run-1.html": {
+      "bytes": 83158,
+      "sha256": "83fa5281f226e313e7ef36eed134fe633f69a8a871d285d0be97267833322774"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/run-1.json": {
+      "bytes": 150179,
+      "sha256": "e31139d615dc91031e95964e55dc991232fb4b2e6acdb3db8ec46fd268c5d8da"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/run.log": {
+      "bytes": 1711,
+      "sha256": "f60cf01e117d5fd3ccc0c72b254fdff5d12bc6c780d36cc1676edde059e0558f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-A/summary.json": {
+      "bytes": 58490,
+      "sha256": "8f5770878aad4942cc982e8efa273b3322e9bf629c37f8c658638e26a8860a7e"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "3e79261eae710627ad34816ab6c469092091d985e62dc1a5f3c459bf085fe85f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "9fcc9e84d857852e5f35e4c4aa57abf564eae642aec455eb210ece3a989a0a05"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/run-1.html": {
+      "bytes": 83614,
+      "sha256": "45e69ee3ec9091224bf04b405e5ab06fbdd0f0643649ea9ddc9dc28094883201"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/run-1.json": {
+      "bytes": 151098,
+      "sha256": "ea9709cbdedcfa0ae68a4d2b9e3bc89df4acee124a7037992b276a3a272d2501"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/run.log": {
+      "bytes": 1711,
+      "sha256": "501b3af5b093aa780cade6fcf985cd08d7a9745ebab017d7d254af4a28f66ac5"
+    },
+    "hosted-AB/record-field-lengths-jmdict/pair-06-B/summary.json": {
+      "bytes": 58798,
+      "sha256": "bee503fdaef6bc6d515868fd7da15760c6e03fb276dfd3d6cdbc3cc56dad4ae3"
+    },
+    "hosted-AB/record-field-lengths-jmdict/registered-plan.json": {
+      "bytes": 3315,
+      "sha256": "4a785d9516e394ff30bc7fe2a918961ed97578e0a89967b80b1a6340f35137dc"
+    },
+    "hosted-AB/record-field-lengths-jmdict/source-identities.json": {
+      "bytes": 128938,
+      "sha256": "281bbe9a6248b74fd7242f51ba2b89b6cb4cf1c97ae97963eaf291dc8c4d4e7d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "d7d63c01a2c0a084ab9e41e537666beb9c075c92202eddaac447375c4570cf58"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "4b72bf41291b7698e99d511668949149c7841c12e28848fe5c519d9784697945"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/run-1.html": {
+      "bytes": 83559,
+      "sha256": "41cddc7ca429c0c8578d4ca9417611c0465251caa89a6a11792be4e2cdf82833"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/run-1.json": {
+      "bytes": 151331,
+      "sha256": "51a712990004ff7de3b244eaa4e62896e88a64dc3350a6846b03ed2c0ab1b226"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/run.log": {
+      "bytes": 1715,
+      "sha256": "9f02c7379f256ad241ba930b2a6b255275b5238f2ec9fe62d25b49cb57b19092"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-A/summary.json": {
+      "bytes": 59178,
+      "sha256": "95ccab451fa35bf66d51bf926dc72a273fc476d7903faf4e43f7c31539abacfe"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "50ea17cf706224c80699be80063a8a1b868603e3054aeb3432bbc3958dee602d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "312e788d7fc487f01771d5ccab6c70eabd98bf4accde3a48228d666d4ce1a04d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/run-1.html": {
+      "bytes": 82582,
+      "sha256": "874bf9140b443a53be3750cc042d0ddf2bb74774b40f3932cc6baa613f4df1eb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/run-1.json": {
+      "bytes": 150176,
+      "sha256": "09152fc48ccca27ad240e5bae789925ca72411a0fd0f7cf5ea128d42e83465d8"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/run.log": {
+      "bytes": 1608,
+      "sha256": "af9c0e2cf8adca59bf281dde4ce2afd94f85ee6493d3e4d2e6475bf6f61efc7f"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-1-B/summary.json": {
+      "bytes": 58759,
+      "sha256": "d8e5a8b2cfe8b2173624258d969ad3d6370cb3db1fb27f08fd3f73101c30ba3b"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "928c91ae6cb72f3d7cfa37b9f16631c0da4ba522d862651105e6c3016072d547"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "da6ee867204e0c682cfdb5d15165e492f986659ce643ade58b7f5d883a1da5f8"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/run-1.html": {
+      "bytes": 84154,
+      "sha256": "dacdef9f0f62d3e58ec42fd6acadffa266ba88b809a67daa846aabc4b80fd838"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/run-1.json": {
+      "bytes": 151360,
+      "sha256": "fb22d91ef017faf76968a1f8f50510453154c7c29e7e208cbfbe1920e3835802"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/run.log": {
+      "bytes": 1803,
+      "sha256": "be95be2f61945a541ea4285ecd1535fc067c7ebc65f7e453682395c38fb7b7ec"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-A/summary.json": {
+      "bytes": 58975,
+      "sha256": "024bd2e76a68bb84bb7a7364db8424ffccf4349ff812463e6db1f1dcc283c327"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "7439f492dbbbfe3de59a7667b7afd3370ee13e57d3a7bb842bcc14eaf6900adb"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "b81b287e38cc4ee35bc5ce8cf30dad6be290e6dcf58002c73aff0f4a315c95e5"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/run-1.html": {
+      "bytes": 82629,
+      "sha256": "3521da213db9b9a1cc403124a0cccdcafe7c6e4c7696557cf2467013017c812c"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/run-1.json": {
+      "bytes": 150268,
+      "sha256": "3f128c50603b887ffb667b71e6cc40c0d2ebfcebc7726551bcd19c7a7b0949b0"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/run.log": {
+      "bytes": 1608,
+      "sha256": "b9b9618eae56d4f408022ca3ec24dc1dfb77c13a4182ce8a601b82c7ffdcb969"
+    },
+    "hosted-AB/record-field-lengths-jmdict/warmup-2-B/summary.json": {
+      "bytes": 58695,
+      "sha256": "cb72eece22a2cf8e61614a01fb4c3583ee1fb9464a4e2205ecd93d3622ee089d"
+    },
+    "hosted-AB/record-field-lengths-jmdict/worktree-A.log": {
+      "bytes": 158,
+      "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    "hosted-AB/record-field-lengths-jmdict/worktree-B.log": {
+      "bytes": 118,
+      "sha256": "721f34ab2bde85bb4418dc0c7799902b5c8552d201f2ac317b2f9d73f87185b3"
+    },
+    "hosted-AB/reproduced-original-audit.json": {
+      "bytes": 17931,
+      "sha256": "5d1244116a999f9eef544c5a58a6190c5cd3f9fd4324335d345691d10e40bad2"
+    },
+    "hosted-AB/verified-module-A.js": {
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+    },
+    "hosted-AB/verified-module-B.js": {
+      "bytes": 365990,
+      "sha256": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca"
+    },
+    "hosted-BA/package-and-artifact-proof.json": {
+      "bytes": 169238,
+      "sha256": "46d5d1a99d49dd0feb94e42165845456b12068db2cc6dfeecc135d803434af16"
+    },
+    "hosted-BA/record-field-lengths-jmdict-console-summary.json": {
+      "bytes": 7312,
+      "sha256": "ff7625c65f019aabc5b206119b4c69d39e49ac62a9a2cac35cf041448d063c22"
+    },
+    "hosted-BA/record-field-lengths-jmdict-runner.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hosted-BA/record-field-lengths-jmdict/analysis.json": {
+      "bytes": 1313,
+      "sha256": "2533e0e1b5b99bc832c5eb208bca1cba1e1aec77ed63946116cb5daeafe5025a"
+    },
+    "hosted-BA/record-field-lengths-jmdict/browser-identity.json": {
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/build-A.log": {
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    "hosted-BA/record-field-lengths-jmdict/build-B.log": {
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "c04a488dc575281038e74fc94c7bf2ddfe011efe41a1fa134f96edcaf08d5a8e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "389c93d55a85ad06056d7d8cc78d7d01180b0c8f7f600b83c3dd8bddd2735d05"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/run-1.html": {
+      "bytes": 83683,
+      "sha256": "115710389d19426903e38a3c37659318c7ffa9bc8c51d0425985353cfad167e4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/run-1.json": {
+      "bytes": 151311,
+      "sha256": "aed00eae38fbb97cac2a6bd9deeb493fbca0a93cc4d0e3c6c9ece608255111a2"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/run.log": {
+      "bytes": 1723,
+      "sha256": "55ee870913c43d3f52a1a1de42165d16022584f6d1e1a419f3f835fa63591c30"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-A/summary.json": {
+      "bytes": 59001,
+      "sha256": "8ac4e2c54405884122aed1ca663e975e0111c40be686ec1cf93b1452f071256c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/host-after.json": {
+      "bytes": 504,
+      "sha256": "1a7b2fac3ace603e25a9b0c64a9c97e48dd71388f7a4b3d973b7b8cff6a00ce4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/host-before.json": {
+      "bytes": 503,
+      "sha256": "57f62cc004dfea6f3fcbc73147868f0184f597149cd17836c6e9f7739786bdba"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/run-1.html": {
+      "bytes": 83599,
+      "sha256": "f3b07dec13449d6b113fb5c8a05f8a9aa12205c1e247f7cbdac2ed71e858ad03"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/run-1.json": {
+      "bytes": 151194,
+      "sha256": "b000316405a76619d1274398609f04a35945dcc92335488da4c793e25af66404"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/run.log": {
+      "bytes": 1726,
+      "sha256": "5042bd38916da3d565c9a3c6a8a7e19e13d2f417c63d06225aae0e827b06116a"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-01-C/summary.json": {
+      "bytes": 59011,
+      "sha256": "79a316358aabf4750727f06787eca7873b99dc261b0f5e45241838f622c28bef"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "bdb9a7aad5b41eb1df03c15c4d30d42eb3afdc528fa50b4725c42aee2a747e22"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "937e6e865cc528981f741bd8de147cd65233fd61d47dd34f7355bd50a8815f8d"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/run-1.html": {
+      "bytes": 83854,
+      "sha256": "229ebb032487e5f0a110aa9fd257cea2155952f9d542fc7dd9c529718972a151"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/run-1.json": {
+      "bytes": 151496,
+      "sha256": "d93d6e9abc322999c3257b1a33fb7a18e5a04bc47695ec0165648e7b0c97605d"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/run.log": {
+      "bytes": 1723,
+      "sha256": "f7bd7979e5f287e3cd6800287ae6e95afd183faa46ae74154f75702ba168abc1"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-A/summary.json": {
+      "bytes": 58982,
+      "sha256": "dd38f657b9720cea225d0f483077682397977e6a7f4d7123f911233f4c7783ce"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/host-after.json": {
+      "bytes": 504,
+      "sha256": "9192b54895fce4a93457bf2d9ddf69e1f7baa7e5731d1952cfc05d295075c03b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/host-before.json": {
+      "bytes": 504,
+      "sha256": "3959a851287ccff64c147ebf9c2836e351d69e833d681ba9d71a7c61c8050e25"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/run-1.html": {
+      "bytes": 83354,
+      "sha256": "99a5af9bbb9bf941cf6b578dff9301294f6917020482502c4b50fff3a9dfcbd4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/run-1.json": {
+      "bytes": 150662,
+      "sha256": "e869ab7067c2091569df8d310a7080d5fa95fe1f0919dea04addebe087b4aefe"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/run.log": {
+      "bytes": 1723,
+      "sha256": "88de6ac2675133cd9a17e89a109170c89a280021dad634d797b30aa2c7c11b1a"
+    },
+    "hosted-BA/record-field-lengths-jmdict/control-02-C/summary.json": {
+      "bytes": 58726,
+      "sha256": "1234194262111cc101d7a1772dbb4ebbd37c809aaf6632ac797df06d392e1138"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-A/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-A/run-1.html": {
+      "bytes": 83634,
+      "sha256": "693e5db62c50e649a42078ba932fc0228705d536969bb1ae506c7a52464ba6e3"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-A/run-1.json": {
+      "bytes": 151087,
+      "sha256": "5b9824a730f67f1f2369eda18424644e3682635667593ace58a1f9e951da7a66"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-A/run.log": {
+      "bytes": 1744,
+      "sha256": "8de35301b0aaea485e675b11e37a8449e31c9f49cd85af8133dd6fc3898cf02b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-A/summary.json": {
+      "bytes": 58767,
+      "sha256": "4af297948833f7d281f3a83b2c6134678aee7ace30bf6c992886883fb6262bc2"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-B/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-B/run-1.html": {
+      "bytes": 83654,
+      "sha256": "feb2f30a564a734919b933ad14dae35f5dc243f2e417d48c672560d05b227649"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-B/run-1.json": {
+      "bytes": 151276,
+      "sha256": "891ce8fb89e41dd68555d74c5dc2c6f65185a6800c12c42aae12493e43ff4c3b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-B/run.log": {
+      "bytes": 1745,
+      "sha256": "e03edc8f94a0abdf4e4a04cab711a65a7b714bf0da641fb81710dd5b4e77f570"
+    },
+    "hosted-BA/record-field-lengths-jmdict/exhaustive-media-B/summary.json": {
+      "bytes": 58957,
+      "sha256": "8ecb16e3b4a53a4f728078794631d2a0e7b8d96039b7649697817061566d3069"
+    },
+    "hosted-BA/record-field-lengths-jmdict/fixtures.log": {
+      "bytes": 157,
+      "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+    },
+    "hosted-BA/record-field-lengths-jmdict/libs-A.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/libs-B.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/license-A.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/license-B.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "27e6ee646cbc83ac13187b4157a2221107650babe653652f9043cf3077b2c2aa"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/memory.json": {
+      "bytes": 1986589,
+      "sha256": "369a7dd14d4dd12550cbddf2c9488792a1c52a323aed32741c585fcee0393d03"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/run-1.html": {
+      "bytes": 83715,
+      "sha256": "b7e5500519be0bfdf069c8d7653d6dd827592eff0c12a3b8feccfff35f3c9542"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/run-1.json": {
+      "bytes": 151339,
+      "sha256": "156084810e392708e8dd3258007d52fc38b98cb155caaca7297fced3b3214ed5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/run.log": {
+      "bytes": 1722,
+      "sha256": "a29fbf95738896541c599f2b3f0c731dc035999acd871a8b885c525f8f6bf58f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A1/summary.json": {
+      "bytes": 58929,
+      "sha256": "6201f41bf4dc37f588f94199bd0b97d65edf00c47e16a1fc2b3eb0ec24aa964e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "a77976fb2ac24e144f5390f8bf7e455d10a94bdf994ef214b977764f7d87d6c6"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/memory.json": {
+      "bytes": 1883356,
+      "sha256": "ad97dbad9a4b2302e5cca2f2512c8ced8269963382d56c0f11a756f787383e74"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/run-1.html": {
+      "bytes": 83425,
+      "sha256": "728daeb19fcdd98036567fccad10a8ef6ce843d2f090843570cdf8e2194122b3"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/run-1.json": {
+      "bytes": 150856,
+      "sha256": "de5397533107795e00554c9c4359e9cb3efd76f97b104d604add8168a7eadb81"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/run.log": {
+      "bytes": 1720,
+      "sha256": "afae64e5f6ac11bb0b1dab5bea14ba97d2a626bd2bd8c7234434f6c8e68b6a14"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/A2/summary.json": {
+      "bytes": 58874,
+      "sha256": "55d46c53d7e00f1a9bc5b7618957980304a99d6a0d9f859b15d955337309534c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "cba073329b846ad3b52da20e7c33c50dabd6928bdbfcabc98c3aee306ec276f7"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/memory.json": {
+      "bytes": 1948403,
+      "sha256": "aa5e67aceb7314a52aff1394c5c79a83cc4cfb27bd920e555fecbdb725893531"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/run-1.html": {
+      "bytes": 84299,
+      "sha256": "f6f9da127b1c135698961e2a104978fbd922acfb78196f022f02aee151653a4c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/run-1.json": {
+      "bytes": 151532,
+      "sha256": "ca17a72ed77100261056d8e2fffe2fd3b438214a54fef6071c56c0e11eebf940"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/run.log": {
+      "bytes": 1808,
+      "sha256": "4e6c7365d80e005e938f143425977e8539144670cd72d0ff162788be60bdb803"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B1/summary.json": {
+      "bytes": 58996,
+      "sha256": "9ee2e3d86ec4b91f9b04aaf1a3399cf9501097f6321aa25e8de8d3a5fbbfd212"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "c506dcc80a5ce120d494b3a1ed900ab2c6c7a3b82e2dfbd791dbf00b6fc3e409"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/memory.json": {
+      "bytes": 1916331,
+      "sha256": "3183988b31c60d039c163c1c5d61734666c468c976e2a25d04db3238f7fd8ccb"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/run-1.html": {
+      "bytes": 83737,
+      "sha256": "369b09b70c7414e63c159b600ff0e32cf82b4839dc68f088f535c21d04a8b09d"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/run-1.json": {
+      "bytes": 151358,
+      "sha256": "92bafc4ffda4ca37d6a4b3c9efa1d0a60a1c92257ce7bd99f948dd015107200f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/run.log": {
+      "bytes": 1720,
+      "sha256": "99c382cefbacb2a01eb9f3db5e5b87c4d1c9d004ac6203c3289168f87b45bfdf"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/B2/summary.json": {
+      "bytes": 58968,
+      "sha256": "b60aa77c5a751357516ce192b7ac3ac7528673e0db3cec6a4ed6e23b82b9328b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/harness-instrumented.js": {
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/harness-original.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/memory-audit.json": {
+      "bytes": 461,
+      "sha256": "8ad8ceb49ad9d640b43ca7342f1c6a9983c0a971bd94e24b170786ca044eb6a9"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/memory-comparison.json": {
+      "bytes": 10126,
+      "sha256": "945ac60a1075820d41d82d57798118c2c0cf3bae1d0175e0946c24ae6f28ad3c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/observations.json": {
+      "bytes": 8493,
+      "sha256": "6ca899c07c41aa948b05cbb96684101ca786671a13ed7600e5fa6e13fca25667"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/plan.json": {
+      "bytes": 129296,
+      "sha256": "ea79c4e7624c0311f0514b31c90190e16418dec0dc84952cbfc74821bfc237a9"
+    },
+    "hosted-BA/record-field-lengths-jmdict/memory/semantic-failures.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "hosted-BA/record-field-lengths-jmdict/observations.json": {
+      "bytes": 2464,
+      "sha256": "8d4d49e1f9b8525f69c22a21d26c58a5eb76f429a91d888ace04e256079dd008"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "13f5b0db07c20401113f3e6babb6f57f2942b1c535d426f2db5e3b5e0d5f4788"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "1d301e2ab0180e4dc03972e2e93f8a36b92ed33a576eca3aba2dea2827553b13"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/run-1.html": {
+      "bytes": 83598,
+      "sha256": "095dd7d76aef765690d3613c6496299fe453e4ff4922da9a2d07752d6364c789"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/run-1.json": {
+      "bytes": 151181,
+      "sha256": "0c04f29b3895b59fce8ddc7019a576097a99c33d03d0a459819ad20a97b48b0e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/run.log": {
+      "bytes": 1717,
+      "sha256": "f7ed6722b34923129b9b363f5300e462c4f2529139bc658606b259d67a6bf2ad"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-A/summary.json": {
+      "bytes": 58932,
+      "sha256": "02d1ee88c26dfa6683c63766c06c166164bd8d01059669e9d9cdfaaea56bf3e5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/host-after.json": {
+      "bytes": 503,
+      "sha256": "e0963d154d71403f2509a3662883484f564042c684d3fc6e0a5e95a2fb418450"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "1bb5f0bd926992e12951d93c428bb1fef43abc496318a0912b5eb124a4a8a4b7"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/run-1.html": {
+      "bytes": 83497,
+      "sha256": "be8a9f97519e212e02a0a8e00a75f4d073bcf0d1e6258bff778a94ee79050da5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/run-1.json": {
+      "bytes": 150989,
+      "sha256": "b7746059c9b95b87b5616321fe4a523d498aa9026b9114f0bd3c068004c0b401"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/run.log": {
+      "bytes": 1717,
+      "sha256": "006abdd7604508619cb0920cdb58574307cbc7ce69fac1a3663f9a2cc5db4feb"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-01-B/summary.json": {
+      "bytes": 58905,
+      "sha256": "4e4c1387ed20e46543a024f15ea6058bb7478c3599794a8cb4c62a0c3d5794ee"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "c4df4061220f8bd108bfe3860e3b870a6a0db2f4945716df3958ba6f39244b85"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "e2b444f2df2d1357e0bf1daab608b26937a5233e078c0de2d558206d9fe0452c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/run-1.html": {
+      "bytes": 83648,
+      "sha256": "510a92aa6040baccc1b424736120184a1d993f7444309313bf0d0f0cba138ee6"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/run-1.json": {
+      "bytes": 151288,
+      "sha256": "370d42128dd605e029e5f1c730158c4db52fdbaef8f51cfbfa983a76ee212434"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/run.log": {
+      "bytes": 1717,
+      "sha256": "ff950c508372f65c71756477da7c8b941285d2e4a057f1416dbabe0ffa9dcebc"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-A/summary.json": {
+      "bytes": 59018,
+      "sha256": "b90b4b2e33f9e59c50bebea6a52cf2d98748c982df9446fa014bda84661151e8"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "888988ca44d46c8fa43d1e4ba752fcde14b498303fa69ac01ec5b4ecb2d4d1e3"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "c6d6cab6a0953cf7521fbbc9b36eb8ea72b77bb6108877c5b83b516a69fc8627"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/run-1.html": {
+      "bytes": 83715,
+      "sha256": "393d377f2a684dd4ac0b2cae75ec2b7344295c59b75a6a7918e2b3fdac8a85cd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/run-1.json": {
+      "bytes": 151364,
+      "sha256": "9f4145d288770f44969a7491d161c20e0577a4532d155320fe336f2d77083b29"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/run.log": {
+      "bytes": 1717,
+      "sha256": "2ba3962d2f0fb0a29726ba2c3dc58e8b55bc1090304c64210cb544324e83f467"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-02-B/summary.json": {
+      "bytes": 58927,
+      "sha256": "119f9af684e499f905931a053191fc304ab26f4fd45538323c14b2783701e78f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "eda6c07da975ded49f740abd8ff1f6189500be0d0e6f6de3a24afd14789040b5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "fef2c9e4f9f74522d17f4e5d7d2bdd7ee1b7abd4acb8497cd0628324d4877497"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/run-1.html": {
+      "bytes": 83732,
+      "sha256": "fe5cfa8ee8f6ae53282198ddaab2730bd3341a6c3cc1dc2a91faf143d8e45a2f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/run-1.json": {
+      "bytes": 151426,
+      "sha256": "53091e6868f002b6e55aeff55f5d6687a5917d0f0fab8318ffa17ee7953b87b4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/run.log": {
+      "bytes": 1715,
+      "sha256": "9303dab8f597831d0b0b9ab68f6231b6ef8cd683e1826120c9e9355d8dbc2bfd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-A/summary.json": {
+      "bytes": 58899,
+      "sha256": "78f7e4d72be216744c6d3e15630ea1e931a2e4ed2ac30bfe9d2423b8034df168"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "68cb134a9d9dcbedea6f32a966b9a795900063d27d7458e6060d78d37832668e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "f8759beb07d33cf7ee74fbfdd943fb381dc36b9b5e7fb422effe8832f66709d9"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/run-1.html": {
+      "bytes": 83723,
+      "sha256": "f0c181c7b44f54b0697691136cf6f4b6ceac5e7b217616f67dec6df516083124"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/run-1.json": {
+      "bytes": 151322,
+      "sha256": "301731008e05658875ae2b8a0060c3c1df57260a4d8b974545f02ac267084a27"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/run.log": {
+      "bytes": 1717,
+      "sha256": "f4b4faa091f70e2a43d3a9b9c50622a1860155f899d46907d24ca52cd092e29f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-03-B/summary.json": {
+      "bytes": 58923,
+      "sha256": "74c93272d05bb82931a8a00a6f3acb46aa36622892bd0017861798d35279843b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "074ce69f8fcc47a2250e2cc448aa4ae7815d38e1363897978fefebe04ac8a97e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "6732e084920800a8f8a84acf9a928639d1d036173637e82d1973816f6dfd7446"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/run-1.html": {
+      "bytes": 83717,
+      "sha256": "a01585f8d54eff868af34e2abcf232a6cd45c7ccfa2e66ef6eb05859ab83246d"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/run-1.json": {
+      "bytes": 151310,
+      "sha256": "5b1547564b83eea812c2e3ed9eb14e6da2aa3f6bffeb6db55f145b523c4d533e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/run.log": {
+      "bytes": 1714,
+      "sha256": "f476412507ad75c715713dfd929dd21703c32c17f8c008cc10ea814b5fef3d5c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-A/summary.json": {
+      "bytes": 58888,
+      "sha256": "362c1ca151aba5e75c9e03674d3d2bc8ab7bf3808ebe69eb312c4d635836fdf5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "d34ce22e2f369c3e4870d9d674499536814a77a08da3e30f8a69b9765bb8f1d7"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "36d97ca7b5edd14a7f5f2172bba305cac23417efb4ca5f54218932aa4a74743c"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/run-1.html": {
+      "bytes": 83900,
+      "sha256": "b6ad4f78452c4fb52d07e9e3238783e605d9aba9399d614f9d997357df4e1e9d"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/run-1.json": {
+      "bytes": 150890,
+      "sha256": "2038293dab48dd5e842f8a96395838071ad9d88e239cfa4a71f40e31909faca0"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/run.log": {
+      "bytes": 1806,
+      "sha256": "98743462cd15f58702902d0571c47fa0c80bb255f772d03681b7497444c7b203"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-04-B/summary.json": {
+      "bytes": 58836,
+      "sha256": "5a73d4cc3292aa141e5ea5f61464fed55806c0d39c98693c75515399ad5332bb"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "90eb51fd2ddc770a24dd0e91d50d89ed2938f1bdf5ee3a871dc6c32c79469b72"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "7a2f57d8d0a4697109617856a22cf1158c8905d2739eda280360d7bbe85e8513"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/run-1.html": {
+      "bytes": 83651,
+      "sha256": "016a0a8b2658879caccbfc434a1a5fa5f3b945987252e8e47bab093d26d0e962"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/run-1.json": {
+      "bytes": 151197,
+      "sha256": "157b093e565ba87553d6b1fe0eec8631b611ff52da83544172826df1eec22620"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/run.log": {
+      "bytes": 1717,
+      "sha256": "8e8b2d1b803c143c3afbd53487d8cab06d13df208406c0964cd59fe740766df3"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-A/summary.json": {
+      "bytes": 58859,
+      "sha256": "5e3c0f3dbda2b1a55d11fce421af8e77433ae7ed46a38bb52e14a02b92bbb772"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/host-after.json": {
+      "bytes": 503,
+      "sha256": "f87a7f46f103334ff57bc72ce1559b79ecca26a4bf091bdbe78746fc99343207"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "8093bc9442ee82cb83641a5bf74acc4baa4775f0e817f021a62c6b252eb2a81f"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/run-1.html": {
+      "bytes": 83420,
+      "sha256": "2d7e5085a07145d037d88de483ceb1a629bfef96354c13e526c3bbfd02ccd423"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/run-1.json": {
+      "bytes": 150868,
+      "sha256": "a8d2cb9b2b3d17ee1bd116b42b87d84e4462ed1864c9593c7386d3f19999919b"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/run.log": {
+      "bytes": 1718,
+      "sha256": "93dea312367580e6b185fb5c422eb5406fadde360f0b077ba28d4c67d12e7092"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-05-B/summary.json": {
+      "bytes": 58913,
+      "sha256": "94503e4cdd41fb4b575e1bb4bc1d054307813562068bddad95f49ef128ff6774"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "a16da718ac09bccd069201c77ffffe67da6665c62750218e32469e03fa40dead"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "f7f72ea7ef36ea7f129baa4542b557e84ff438bac9ea5133e7e9603f244cc8ea"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/run-1.html": {
+      "bytes": 83499,
+      "sha256": "21a26c3519cb48bf7ac29458a84a750df97171632505045cba1f136b20be63e6"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/run-1.json": {
+      "bytes": 150865,
+      "sha256": "dca3dcb9deb138d8fb21f467335662b1c4e48e8c1f4dd61e3e873786fd420a88"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/run.log": {
+      "bytes": 1717,
+      "sha256": "c42a8a461aa8dafc468716c242b670474f3a1ba569a0d7fc5437c3bc45ad416a"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-A/summary.json": {
+      "bytes": 58781,
+      "sha256": "6a1174f08af9436a86d1068b92e925a4d2e0adc50b534a17e16da095ff920e38"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "1fc4da5c10869958a91d50831ce2057f63f3190802495b7d9a00c1b0da9cc2e8"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "e3833a1acd5afab0c9b12aed6f4d683efbf87e9a3eabcac981ccf5f57e557a07"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/run-1.html": {
+      "bytes": 83616,
+      "sha256": "3f359f22c2edc298c5c4479f292abda9c441698790f8af7e2a8d04d0b3bfe469"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/run-1.json": {
+      "bytes": 151219,
+      "sha256": "a625597ccaa343bf8cb3901cd291af16063c51c189cd76931b48057163d0a5ee"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/run.log": {
+      "bytes": 1718,
+      "sha256": "b118a324e52dd7b4b24745281ca32e5953737ca069725de1a9e305f633fe3289"
+    },
+    "hosted-BA/record-field-lengths-jmdict/pair-06-B/summary.json": {
+      "bytes": 58946,
+      "sha256": "21b010b62f5a5cfd759908f827014570efba31758d96ce92bf6f2297522ace17"
+    },
+    "hosted-BA/record-field-lengths-jmdict/registered-plan.json": {
+      "bytes": 3315,
+      "sha256": "c874a309fe54cc301f5c073305f6352b194e042007992e8ee28fa0b7e1af9c44"
+    },
+    "hosted-BA/record-field-lengths-jmdict/source-identities.json": {
+      "bytes": 128938,
+      "sha256": "203fa4f122faedf6fb98569e6a7151ab6ae0a1dbb8ffbcc305673c7ad2f43cbf"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "a9f5478b6b2e8a322033410275710ce886be8a4c5da854ec0fe5f38023733b03"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "a40ba664ebb4d043e13ff5d68d7ba83320123a534b5635bb3cac133accd84b95"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/run-1.html": {
+      "bytes": 83478,
+      "sha256": "5b41c3dda71f04de5e488b4832712fcedf4665f4d424a829c6471bab5b4c6b96"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/run-1.json": {
+      "bytes": 150973,
+      "sha256": "3ac1bfb051e29ab1633e4c91d8ee41525eb799cc2841d84d6b04f6824f406e4e"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/run.log": {
+      "bytes": 1720,
+      "sha256": "e617a900b0b6323d87f9f8cde3398cfc78db2f337a7951e174d2ecddd48e2143"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-A/summary.json": {
+      "bytes": 58834,
+      "sha256": "7241f5197240b0b4c8d08c40371b4a97929cd8e1b0af9852d65d99277b208926"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "82f8e5b2263117e9f602907842298f2ddaf541331fdaeedb5c7f15720a12a6e6"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "979885ad472912a1c9ca2ffe465f94de214702a32523abf640e2f8f09279dd55"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/run-1.html": {
+      "bytes": 83481,
+      "sha256": "9d8fd3069020adb392a6b3d0073acbd29b5725d69197ddb0cfe9a6b19f470345"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/run-1.json": {
+      "bytes": 151081,
+      "sha256": "0d70125ff413f2689e39272f4e44dfafddb1183025c1938e6d01883a3020bfb5"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/run.log": {
+      "bytes": 1721,
+      "sha256": "741242ded80694065fabe80e56ea8679def1df3ea78af2999e26286dd4a16915"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-1-B/summary.json": {
+      "bytes": 58900,
+      "sha256": "25dafd22a9be073e09bf6b5c170605d07eeceed801d7323916a58beb57c56f10"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "9ea8581b299fc7444d04b0985baa9b27385ab9bc7cc387a1fc75d6adf8019abf"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "e539fcd3b32dc955ace12a1b1cbf435d86b6caacd7f2d28193be26048c05dcd8"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/run-1.html": {
+      "bytes": 83606,
+      "sha256": "2cf51c2731ded0399ea86bab56928784b79eda72ffd7210f92f5d13eb4d63fcc"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/run-1.json": {
+      "bytes": 151266,
+      "sha256": "ce72efc0762f61f5d6c9463a8f306ebb067c08cf5ebc0ae85c4109d1dbbb06c4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/run.log": {
+      "bytes": 1720,
+      "sha256": "02db6ea7341f80d2a5fe038222c7c9c7997a34c54f4ae09858e0f2f2f33f9304"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-A/summary.json": {
+      "bytes": 59067,
+      "sha256": "c3ef5321af93eb99a8af3028b62665937ec33e5fbc5d07a220ca2011a18ab244"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "642caaa3d53c6fdd9d67182ad12d65bd39a6518b1f579f44a54ddd704af156e8"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "e5b5a90b8b585c52a6e6e3833e27a56a6ce50bc45e68f2e851e9b2e653907cfd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/run-1.html": {
+      "bytes": 84347,
+      "sha256": "78f1205abc33b39594cd3daa9481efb4e715064c1d6fdb67f85a2e7b2d4ea3a9"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/run-1.json": {
+      "bytes": 151578,
+      "sha256": "2781a31f49e701b96d884df70426c788176ab668e6ad82f125b7a71e251415ba"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/run.log": {
+      "bytes": 1809,
+      "sha256": "0212a96b029cea06b87c27ca88fe6508a707b91b83f6b4015571f996e6ea94dd"
+    },
+    "hosted-BA/record-field-lengths-jmdict/warmup-2-B/summary.json": {
+      "bytes": 58954,
+      "sha256": "1a5e0048d7c10323865569a0d7693c7604c613b1d560b687ef5e9d817590c122"
+    },
+    "hosted-BA/record-field-lengths-jmdict/worktree-A.log": {
+      "bytes": 158,
+      "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    "hosted-BA/record-field-lengths-jmdict/worktree-B.log": {
+      "bytes": 118,
+      "sha256": "721f34ab2bde85bb4418dc0c7799902b5c8552d201f2ac317b2f9d73f87185b3"
+    },
+    "hosted-BA/reproduced-original-audit.json": {
+      "bytes": 17930,
+      "sha256": "20413b00c230974f8776074f7230da4b8e5be5a5ccdd4074426cf296d5c883e4"
+    },
+    "hosted-BA/verified-module-A.js": {
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+    },
+    "hosted-BA/verified-module-B.js": {
+      "bytes": 365990,
+      "sha256": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca"
+    },
+    "published-component/failed-local-attempts/baseline-direct-tests.log": {
+      "bytes": 1214,
+      "sha256": "e92722c4afb63a03df582026eaa4ac273ddeeb53a25a2886c72353551a667f85"
+    },
+    "published-component/failed-local-attempts/focused-direct-tests.log": {
+      "bytes": 1662,
+      "sha256": "b5d873d1fdad30b5968f679e912bd6088da10c691a961ebbe95286b0d40a901a"
+    },
+    "published-component/failed-local-attempts/focused-tests.log": {
+      "bytes": 2024,
+      "sha256": "d130ab35581028274d26ef9d51f717e52d0ece477b5d52c8d0701af2dd386197"
+    },
+    "published-component/field-replay.mjs.txt": {
+      "bytes": 12701,
+      "sha256": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+    },
+    "published-component/focused-tests-passed.log": {
+      "bytes": 939,
+      "sha256": "8f15bf291f0da36fcba5daa2bc33afaad26ab7936ef650f09342e600201ef60a"
+    },
+    "published-component/jmdict-component-six-pairs.json": {
+      "bytes": 53556,
+      "sha256": "f1e930f20ffbcb5eb36465f8540702f7f1009330cc87a5da73c97708e5576e05"
+    },
+    "published-component/jmdict-component-six-pairs.log": {
+      "bytes": 570,
+      "sha256": "6eb13a24bb941e53cad18fd58f9461a3170db3f9db5eebb05498f1f0d11b52cf"
+    },
+    "published-component/jmdict-snapshot-provenance.json": {
+      "bytes": 2273,
+      "sha256": "f22e07f737373fcc837e89566c04ee61bb799cc19e4e6df4bc9da239581305ab"
+    },
+    "published-component/prepare-jmdict.log": {
+      "bytes": 414,
+      "sha256": "023eb3717dc2abf3906012fbcdc361457d79269ccda3766b9975fe382d1bf8f5"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.1-A.log": {
+      "bytes": 2648,
+      "sha256": "1c247b223effa81db5da68b538f64e5fbd6ca2944763774868de5e01939802e5"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.1-B.log": {
+      "bytes": 2667,
+      "sha256": "e897a57595bcdf8d4ec28313f0df619b1439c901680f237ed0f5a489fdde0ebb"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.2-A.log": {
+      "bytes": 2648,
+      "sha256": "97bc516e1c5173f96b39f98bd05f5297a8a434bef782583c43df7205fd03db94"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.2-B.log": {
+      "bytes": 2658,
+      "sha256": "a8103ca3850d89fda27e85ecae953dc7a95677faae97fe6af003ff94aa8a9e1c"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.3-A.log": {
+      "bytes": 2631,
+      "sha256": "fd7f174cd83bb28931bd597589da7ebb7d7cc9129712c080f4d85ae00d6832e8"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.3-B.log": {
+      "bytes": 2651,
+      "sha256": "fb15cdee8f37ec5c96bdfd216031a48e90afe8ceb2e75c4c22f93af674a61bed"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.4-A.log": {
+      "bytes": 2631,
+      "sha256": "ea5a4907ff09e6c25a98790ed407eb070837fdc56d7ef11157b3febd5dc51c68"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.4-B.log": {
+      "bytes": 2643,
+      "sha256": "fa9365c3fa7cf98ad134ca7da26199210fb3a28ab7ef0713c017c204574929af"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.5-A.log": {
+      "bytes": 2654,
+      "sha256": "c165d51a9a68c6f906bafc48ce4785d9f035054d39dfc0078668a583a2baa059"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.5-B.log": {
+      "bytes": 2658,
+      "sha256": "50102ec6f419ae2a7280b0c2a2f1cd892097e16d79253313579c7fd6b7d14f50"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.6-A.log": {
+      "bytes": 2649,
+      "sha256": "d22a7f5cc7ba8960db7b3892aa8f932d5c27098bd5d3a8b4e75c73a7152ee031"
+    },
+    "published-component/raw/jmdict-component-six-pairs.json.6-B.log": {
+      "bytes": 2644,
+      "sha256": "28839a10a7d047236348d3b1cb318b01177b12eddbec7c4bc6d3830027897453"
+    },
+    "recovery/connector-snapshots.json": {
+      "bytes": 11407,
+      "sha256": "5be3d9031abf4d2f270f18c4a47959af417be09a20436bcab17553215b240522"
+    },
+    "recovery/initial-failed-job-retrieved.log": {
+      "bytes": 247770,
+      "sha256": "ac64aa6a8ffd88b23848f5d0d44114f0e22a71ffb743a7b94e7b36c20971d1b7"
+    },
+    "recovery/lost-prepared-index.json": {
+      "bytes": 4546,
+      "sha256": "1d2b760f27e4334756505caf260d44543d0393bcb798b79031a214eed3e4c3e6"
+    },
+    "recovery/make-recovery-pack.py": {
+      "bytes": 10321,
+      "sha256": "86b4dd52cffa234758bd6e0b95b67026fb061e44c543430a62f964c8fbbb4a1c"
+    },
+    "recovery/original-audit-hosted.py": {
+      "bytes": 7360,
+      "sha256": "cf2b18b91d005217c59fdde6e749955734b9e8337f01f50246a20ef06a67a4f9"
+    },
+    "recovery/packaging-first-attempt-manifest.json": {
+      "bytes": 86429,
+      "sha256": "07e051d0932321b66eddd95e8d6be269477fdaab48ac86e6cbfaf6489b9b5c12"
+    },
+    "recovery/packaging-first-attempt.json": {
+      "bytes": 1172,
+      "sha256": "b79875c4eda5b2388f725dc44537e339631c183e1989a07b8370867fbe419bee"
+    },
+    "recovery/published-component-index.json": {
+      "bytes": 3205,
+      "sha256": "2a9281c90bd836bd571763340717b05dc68a35652a2f184de6c867873cfeb548"
+    },
+    "recovery/recovery-audit-AB.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "recovery/recovery-audit-AB.stdout.log": {
+      "bytes": 1315,
+      "sha256": "93a5d7b251830b814342cd27307186d2dbab6bfaab68fe28f2a62c7926637c31"
+    },
+    "recovery/recovery-audit-BA.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "recovery/recovery-audit-BA.stdout.log": {
+      "bytes": 1312,
+      "sha256": "3a7b7e3ccdf91f50bc562543803127b9ac9930307e4846b1f44abc08a970a8c5"
+    },
+    "validation/build.log": {
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    "validation/lint.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    "validation/observers.log": {
+      "bytes": 8428,
+      "sha256": "343c5aae94c345dd55db2c49e272bd9bcdcd854f7c17b8bd27aec2a1a9e154ee"
+    },
+    "validation/original.zip": {
+      "bytes": 47132,
+      "sha256": "0115dae32253c88b5a8ca8ef2496971e2e1f2379df6de4be40e53f2048bab8d9"
+    },
+    "validation/python.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "validation/types-main.log": {
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    "validation/types-test.log": {
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    "validation/unit.log": {
+      "bytes": 583064,
+      "sha256": "ab987211ee0e33111d089cf017f2aa3c0fd6a9b089b20eac0c84a863ba790bc7"
+    }
+  },
+  "frozenSourceHashes": {
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+  },
+  "recovery": {
+    "cause": "Executor replacement removed /tmp and /home/agent after the first complete pack was reviewed but before publication.",
+    "method": "Download the exact original AB, BA and corrected-validation CI ZIPs; recover the original audit source from V8; audit only original receipts; reproduce both prior audit output hashes; recover all21 published local files by exact Git blob; create a new byte-exact archive of recovered payloads.",
+    "originalAuditorBytes": 7360,
+    "originalAuditorSha256": "cf2b18b91d005217c59fdde6e749955734b9e8337f01f50246a20ef06a67a4f9",
+    "priorPreparedIndex": "recovery/lost-prepared-index.json",
+    "missingPriorFiles": "The first compressed pack, its new portable verifier and independent packaging-review files are unavailable. Their recorded sizes/SHA256/Git blob identities remain in the index. This archive does not represent replacement files as those originals.",
+    "failedSourceJob": {
+      "runId": 46102040540,
+      "jobId": 140846425703,
+      "log": "recovery/initial-failed-job-retrieved.log",
+      "provenance": "Fresh retrieval of the same original GitHub job log. Prior decoded log length was247770bytes, but its individual prior SHA was not retained; no pre-loss byte-equality claim."
+    }
+  },
+  "packageLimitation": "Original artifact and product ZIP bytes were verified in full. Only the four product ZIPs are omitted from the compact pack; archive/member hashes, exact changed modules, original source identities and reproduced complete-package audits remain. Omitted ZIP bytes cannot be recreated or independently rehashed from this compact pack.",
+  "verifier": {
+    "file": "verify-recovered-evidence.py",
+    "bytes": 14191,
+    "sha256": "0b99891cacec0f5f2cd2b16d77b67a492364989e3f094c9cc73256d67777e5e4"
+  }
+}
