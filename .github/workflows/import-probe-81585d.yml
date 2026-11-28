@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   profile:
+    if: github.sha == 'd9951a9ed793c0b776068fe4d6215428a70b54c9'
     name: Current baseline (${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -33,7 +34,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$EVIDENCE"
           git diff --exit-code "$FROZEN_BASELINE" -- ext dev/lib dev/data dev/build-libs.js package.json package-lock.json test/perf/dictionaries.lock.json
-          git rev-parse HEAD HEAD^{tree} > "$EVIDENCE/tooling-identity.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$EVIDENCE/tooling-identity.txt"
           git rev-parse "$FROZEN_BASELINE" "$FROZEN_BASELINE^{tree}" > "$EVIDENCE/product-identity.txt"
           sha256sum package-lock.json test/perf/dictionaries.lock.json dev/perf/import-benchmark.js dev/perf/benchmark-support.js test/chromium/extension-two-dictionary-import.e2e.js > "$EVIDENCE/input-sha256.txt"
 
