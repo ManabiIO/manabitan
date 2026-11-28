@@ -1,0 +1,67 @@
+name: Frozen baseline import profiles 7c02
+
+on:
+  push:
+    branches: [perf/import-baseline-20261128-7c02]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baseline-import-profile-7c02-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    name: Baseline profile ${{ matrix.dictionary }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare evidence directory
+        run: mkdir -p builds/profile-baseline-7c02
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Install pinned native toolchain
+        run: |
+          set -euo pipefail
+          sudo apt-get update 2>&1 | tee builds/profile-baseline-7c02/toolchain-setup.log
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee -a builds/profile-baseline-7c02/toolchain-setup.log
+      - name: Install exact dependencies and verify stored native modules
+        run: |
+          set -euo pipefail
+          {
+            npm ci
+            npm run build:dictionary-wasm -- --check
+            npm run build:libs
+            npm run license-report:html
+          } 2>&1 | tee builds/profile-baseline-7c02/build-setup.log
+      - name: Install lockfile-pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee builds/profile-baseline-7c02/browser-setup.log
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Record fixed ordinary-trace-ordinary sequence
+        run: python3 dev/perf/profile-import-baseline-7c02.py '${{ matrix.dictionary }}'
+      - name: Retain package, raw profiles, observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: baseline-import-profile-7c02-${{ matrix.dictionary }}
+          path: builds/profile-baseline-7c02
+          if-no-files-found: error
+          retention-days: 14
