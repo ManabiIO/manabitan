@@ -1,0 +1,99 @@
+{
+  "artifact": {
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252673899/zip",
+    "created_at": "2026-11-28T07:01:48Z",
+    "digest": "sha256:66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+    "expired": false,
+    "expires_at": "2026-12-12T07:01:45Z",
+    "id": 15252673899,
+    "name": "canonical-sidecar-browser-beb5-jmdict-AB",
+    "node_id": "MDg6QXJ0aWZhY3QxNTI1MjY3Mzg5OQ==",
+    "size_in_bytes": 35634582,
+    "updated_at": "2026-11-28T07:01:48Z",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252673899",
+    "workflow_run": {
+      "head_branch": "test/canonical-sidecar-browser-20261128-beb5",
+      "head_repository_id": 1165902460,
+      "head_sha": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "id": 46112170828,
+      "repository_id": 1165902460
+    }
+  },
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "auditFileSha256": {
+    "README.md": "51c3937a0760c0aacf38aada80817a52963821db2c37dc7fae461f3829d10ccc",
+    "acquire-and-audit.py": "389a5f23447a72b85f334cb9b598ed2499795052d2c6347585c3fb4d8720ff97",
+    "audit-recent-first.py": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+    "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
+    "verify-prefix-known-answer.py": "60c34bcd9c099327a03123e8b401f55a2a0e236ef654587785a0aac7e9e86730"
+  },
+  "auditRegistrationSha256": "f3c4ae22ec6b8f6dd796dc18fb33a02ea9589505bc6c408db334a6ca1eb7999e",
+  "auditorReturncode": 0,
+  "auditorSha256": "8422368e7e720d5ba0165b47054612cf20ca01c766377a97d8321bab0f33a656",
+  "complete": true,
+  "entry": "canonical-jmdict",
+  "expected": {
+    "artifactBytes": 35634582,
+    "artifactId": 15252673899,
+    "artifactName": "canonical-sidecar-browser-beb5-jmdict-AB",
+    "artifactSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+    "dictionary": "jmdict",
+    "jobId": 140877908946,
+    "jobName": "Canonical checksum imports (jmdict, 12 pairs)",
+    "maxArtifactBytes": 67108864,
+    "required": true,
+    "study": "canonical"
+  },
+  "independentAuditPerformed": true,
+  "job": {
+    "completed_at": "2026-11-28T07:01:55Z",
+    "conclusion": "success",
+    "head_sha": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "id": 140877908946,
+    "name": "Canonical checksum imports (jmdict, 12 pairs)",
+    "run_id": 46112170828,
+    "started_at": "2026-11-28T06:55:35Z",
+    "status": "completed"
+  },
+  "noTimingOrParserReexecution": true,
+  "originalArchiveVerified": true,
+  "resolvedIdentity": {
+    "artifactBytes": 35634582,
+    "artifactId": 15252673899,
+    "artifactName": "canonical-sidecar-browser-beb5-jmdict-AB",
+    "artifactSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+    "jobId": 140877908946,
+    "runAttempt": 1,
+    "runId": 46112170828,
+    "selection": "Unique exact artifact name under the locked run/head/attempt; any prelocked ID/digest also matched.",
+    "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609"
+  },
+  "run": {
+    "conclusion": "failure",
+    "created_at": "2026-11-28T05:27:10Z",
+    "event": "push",
+    "head_branch": "test/canonical-sidecar-browser-20261128-beb5",
+    "head_sha": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "id": 46112170828,
+    "path": ".github/workflows/canonical-sidecar-browser-beb5.yml",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-28T07:37:21Z"
+  },
+  "sourceBindingsVerified": true,
+  "sourceGitObject": {
+    "sha": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "tree": "002e46ab6976eeb6b366b04ce67ef57c467bb47d"
+  },
+  "study": {
+    "auditorPath": "dev/perf/canonical-sidecar-acquisition-20261128-beb5/audit-canonical-sidecar-browser.py",
+    "auditorSha256": "8422368e7e720d5ba0165b47054612cf20ca01c766377a97d8321bab0f33a656",
+    "kind": "canonical",
+    "runAttempt": 1,
+    "runId": 46112170828,
+    "runtimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a",
+    "sourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "sourceTree": "002e46ab6976eeb6b366b04ce67ef57c467bb47d",
+    "workflowPath": ".github/workflows/canonical-sidecar-browser-beb5.yml"
+  }
+}

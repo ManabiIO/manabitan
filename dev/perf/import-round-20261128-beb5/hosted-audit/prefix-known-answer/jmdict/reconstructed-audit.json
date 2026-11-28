@@ -1,0 +1,699 @@
+{
+  "complete": true,
+  "profile": "prefix-first-known-answer",
+  "dictionary": "jmdict",
+  "sourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+  "sourceTree": "023368b2731c17c91f16cd740d868ae2ebafa27b",
+  "runtimeCommit": null,
+  "registrationSha256": null,
+  "auditorSha256": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+  "auditorOrigin": "New reconstruction reviewed after experiment publication; original prefix-first auditor source was unavailable.",
+  "sourceAndPackageMemberMapsVerified": true,
+  "originalReleaseZipBytesRehashed": false,
+  "packageEntryCount": 554,
+  "oracleComparisons": 242,
+  "exactJournalEntries": 447,
+  "reports": [
+    {
+      "file": "screen.json",
+      "sha256": "bf9abcfcde84c8149c302b7ec814ae15c21eb01f9e9ac73d07a3a9e952408519",
+      "journalSha256": "2d715f7657cf2016d3e817a524e1d0e86723d4090314b123eb59b0fee1c3791d",
+      "exactJournalEntries": 324,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": 12,
+          "diagnostics": {
+            "baseline": {
+              "rows": 528299,
+              "glossaryWitnesses": 54641,
+              "contentWitnesses": 154416,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 43384832,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 528299,
+              "glossaryWitnesses": 200168,
+              "contentWitnesses": 159158,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 43384832,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 528299,
+              "glossaryWitnesses": 54641,
+              "contentWitnesses": 154416,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 43384832,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  496.4526379999981,
+                  476.62304799999816
+                ],
+                [
+                  485.3034690000012,
+                  478.870260999998
+                ],
+                [
+                  483.14233899999533,
+                  463.1214750000004
+                ],
+                [
+                  492.6867360000024,
+                  468.91979800000126
+                ],
+                [
+                  482.82808399999817,
+                  464.42244099999994
+                ],
+                [
+                  485.9537900000032,
+                  471.3345460000012
+                ]
+              ],
+              "pairedPercentChanges": [
+                -3.9942561449336056,
+                -1.325605195705537,
+                -4.143885224680166,
+                -4.823945169086308,
+                -3.812048969379811,
+                -3.008360939010668
+              ],
+              "medianPairedPercentChange": -3.9031525571567083,
+              "equalWorkPercentChange": -3.5223020566972685,
+              "alternateFasterPairs": 6
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  486.767499000001,
+                  501.86348999999893
+                ],
+                [
+                  486.9963179999978,
+                  481.76876899999945
+                ],
+                [
+                  489.47323200000005,
+                  500.76582100000417
+                ],
+                [
+                  487.05436400000076,
+                  478.75332700000354
+                ],
+                [
+                  491.9604659999977,
+                  498.72757299999967
+                ],
+                [
+                  490.42273100000193,
+                  481.9598239999998
+                ]
+              ],
+              "pairedPercentChanges": [
+                3.101273406916172,
+                -1.0734268015550774,
+                2.307090206723328,
+                -1.7043347957759414,
+                1.375538781606478,
+                -1.7256351439391415
+              ],
+              "medianPairedPercentChange": 0.15105599002570025,
+              "equalWorkPercentChange": 0.3806830107212722,
+              "alternateFasterPairs": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "file": "reuse-disabled.json",
+      "sha256": "d99f6bf3de3a8e4406055816a6179300a1fd642392e34204cb83ddb7553511cb",
+      "journalSha256": "22e50753545fdd1f5b8c00259584f700cb554fd54408e9284519f325e5ab48c0",
+      "exactJournalEntries": 15,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "rows": 50000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 50000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 14289,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 37027840,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 50000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 14289,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 37027840,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 50000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 14289,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 37027840,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  44.29238700000002,
+                  41.671032000000025
+                ],
+                [
+                  45.04747400000008,
+                  43.75801200000001
+                ],
+                [
+                  40.06154300000003,
+                  47.24952899999994
+                ]
+              ],
+              "pairedPercentChanges": [
+                -5.918296975053505,
+                -2.8624512886118114,
+                17.942359334486714
+              ],
+              "medianPairedPercentChange": -2.8624512886118114,
+              "equalWorkPercentChange": 2.532560620439517,
+              "alternateFasterPairs": 2
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  43.18227799999994,
+                  43.34226100000001
+                ],
+                [
+                  41.82590600000003,
+                  45.85573099999999
+                ],
+                [
+                  42.7696719999999,
+                  45.46720700000003
+                ]
+              ],
+              "pairedPercentChanges": [
+                0.370483002309574,
+                9.634758419817512,
+                6.30712108336986
+              ],
+              "medianPairedPercentChange": 6.30712108336986,
+              "equalWorkPercentChange": 5.390091222066018,
+              "alternateFasterPairs": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "file": "enabled-probe-negatives.json",
+      "sha256": "3734c71637b05a0efa16f78cd235164de58e24112fd5b408f7bbf324236b9506",
+      "journalSha256": "b7ccb30274ddf057fefba4786fc31ec52414d26744ed5c546614df22d8cc1e46",
+      "exactJournalEntries": 108,
+      "dictionaries": [
+        {
+          "dictionary": "unique-prefixes",
+          "rows": 10000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 28966912,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 28966912,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 28966912,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  17.126690999999994,
+                  18.77195999999998
+                ],
+                [
+                  16.555864000000042,
+                  18.606642000000022
+                ],
+                [
+                  18.06228999999996,
+                  19.385288999999943
+                ],
+                [
+                  15.545787000000018,
+                  17.936213000000066
+                ],
+                [
+                  17.834721999999942,
+                  16.19863900000007
+                ],
+                [
+                  18.216230999999993,
+                  20.55280300000004
+                ]
+              ],
+              "pairedPercentChanges": [
+                9.606461633481821,
+                12.387018883460122,
+                7.324647096242964,
+                15.376680511575547,
+                -9.17358285708001,
+                12.82686852181467
+              ],
+              "medianPairedPercentChange": 10.996740258470972,
+              "equalWorkPercentChange": 7.8477226762103225,
+              "alternateFasterPairs": 1
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  19.086656999999946,
+                  17.867602999999974
+                ],
+                [
+                  16.32117500000004,
+                  16.67667700000004
+                ],
+                [
+                  18.30483300000003,
+                  16.766824999999926
+                ],
+                [
+                  15.72845099999995,
+                  18.287573000000066
+                ],
+                [
+                  19.650169000000005,
+                  18.227904999999964
+                ],
+                [
+                  15.788988000000018,
+                  18.232758999999987
+                ]
+              ],
+              "pairedPercentChanges": [
+                -6.3869435071839735,
+                2.178164255943593,
+                -8.402196294279774,
+                16.270655006015055,
+                -7.237922483007864,
+                15.477692427152178
+              ],
+              "medianPairedPercentChange": -2.10438962562019,
+              "equalWorkPercentChange": 1.1242047396272214,
+              "alternateFasterPairs": 3
+            }
+          }
+        },
+        {
+          "dictionary": "common-prefix-unique-middles",
+          "rows": 10000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  19.970058999999992,
+                  21.319709000000103
+                ],
+                [
+                  17.19065999999998,
+                  21.07427500000017
+                ],
+                [
+                  19.396942999999965,
+                  20.462706000000026
+                ],
+                [
+                  17.48468899999989,
+                  18.69133499999998
+                ],
+                [
+                  16.91588200000001,
+                  17.192583000000013
+                ],
+                [
+                  16.79023899999993,
+                  17.384217000000035
+                ]
+              ],
+              "pairedPercentChanges": [
+                6.758367614237448,
+                22.591424645709914,
+                5.494489518271317,
+                6.9011579216542,
+                1.6357468088273652,
+                3.5376387435587464
+              ],
+              "medianPairedPercentChange": 6.126428566254383,
+              "equalWorkPercentChange": 7.7739877369217725,
+              "alternateFasterPairs": 0
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  17.23174199999994,
+                  22.003742000000102
+                ],
+                [
+                  19.908782999999858,
+                  19.45833000000016
+                ],
+                [
+                  17.16303199999993,
+                  20.99412499999994
+                ],
+                [
+                  20.264141999999993,
+                  16.812559000000192
+                ],
+                [
+                  16.67510900000002,
+                  17.94207499999993
+                ],
+                [
+                  16.948196000000053,
+                  16.649055999999973
+                ]
+              ],
+              "pairedPercentChanges": [
+                27.693079434454027,
+                -2.2625843076379937,
+                22.3217727497101,
+                -17.03295900709638,
+                7.597947335756006,
+                -1.7650256109858486
+              ],
+              "medianPairedPercentChange": 2.9164608623850787,
+              "equalWorkPercentChange": 5.239699041891233,
+              "alternateFasterPairs": 3
+            }
+          }
+        },
+        {
+          "dictionary": "short-unique",
+          "rows": 10000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  2.98758399999997,
+                  3.2318709999999555
+                ],
+                [
+                  2.930165999999872,
+                  4.252731999999924
+                ],
+                [
+                  2.9386160000001382,
+                  2.9499809999999798
+                ],
+                [
+                  2.628789999999981,
+                  2.842879000000039
+                ],
+                [
+                  2.5780889999998635,
+                  2.7715270000001055
+                ],
+                [
+                  2.629654000000073,
+                  2.78941500000019
+                ]
+              ],
+              "pairedPercentChanges": [
+                8.176740804609617,
+                45.13621412575635,
+                0.38674668618972063,
+                8.144013025006181,
+                7.503154468300055,
+                6.0753620058042745
+              ],
+              "medianPairedPercentChange": 7.823583746653118,
+              "equalWorkPercentChange": 12.852806453811949,
+              "alternateFasterPairs": 0
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  2.606608999999935,
+                  2.636749000000009
+                ],
+                [
+                  2.6311500000001615,
+                  2.641885000000002
+                ],
+                [
+                  2.6355160000000524,
+                  2.601382000000058
+                ],
+                [
+                  2.5683989999999994,
+                  2.585223000000042
+                ],
+                [
+                  2.5621810000000096,
+                  2.6013070000001335
+                ],
+                [
+                  2.545455999999831,
+                  2.550711000000092
+                ]
+              ],
+              "pairedPercentChanges": [
+                1.1562915650208616,
+                0.40799650342397964,
+                -1.295154345486571,
+                0.6550384110896479,
+                1.5270583928350012,
+                0.20644631061237373
+              ],
+              "medianPairedPercentChange": 0.5315174572568138,
+              "equalWorkPercentChange": 0.4369711301056789,
+              "alternateFasterPairs": 1
+            }
+          }
+        },
+        {
+          "dictionary": "nonlocal-reuse",
+          "rows": 10000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 10000,
+              "glossaryWitnesses": 9966,
+              "contentWitnesses": 9966,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 10484232,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 10000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 0,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 30212096,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  14.836814000000004,
+                  4.063358999999991
+                ],
+                [
+                  14.732960999999705,
+                  5.264795999999933
+                ],
+                [
+                  14.764818000000105,
+                  3.8286550000002535
+                ],
+                [
+                  14.734241999999995,
+                  3.801011000000017
+                ],
+                [
+                  14.837402000000111,
+                  3.8000779999997576
+                ],
+                [
+                  14.688658999999916,
+                  3.808110000000397
+                ]
+              ],
+              "pairedPercentChanges": [
+                -72.61299494621964,
+                -64.26518742566387,
+                -74.06906742771753,
+                -74.20287382275914,
+                -74.3885216562864,
+                -74.07448835186099
+              ],
+              "medianPairedPercentChange": -74.07177788978926,
+              "equalWorkPercentChange": -72.27153017934533,
+              "alternateFasterPairs": 6
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  14.821226999999908,
+                  14.970919000000322
+                ],
+                [
+                  14.762716000000182,
+                  14.729306999999608
+                ],
+                [
+                  14.845421999999871,
+                  14.737071999999898
+                ],
+                [
+                  14.702013000000079,
+                  14.634090999999898
+                ],
+                [
+                  14.801817999999912,
+                  14.743661999999858
+                ],
+                [
+                  14.771169999999984,
+                  14.688364000000092
+                ]
+              ],
+              "pairedPercentChanges": [
+                1.009983856265162,
+                -0.2263065956194965,
+                -0.7298546312794252,
+                -0.46199115726656137,
+                -0.39289768324440866,
+                -0.5605920180993929
+              ],
+              "medianPairedPercentChange": -0.427444420255485,
+              "equalWorkPercentChange": -0.2265401457243521,
+              "alternateFasterPairs": 5
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "referenceOracle": null,
+  "scope": "Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs.",
+  "diagnosticLimit": "Complete means receipt/source/protocol integrity; cross-arm heap and fallback equality is not asserted."
+}

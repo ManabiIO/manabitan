@@ -1,0 +1,66 @@
+{
+  "scope": "Frozen current-develop CRC candidate source/correctness review and required local source gates; no performance measurements.",
+  "localCandidate": "59ad5a6ddb8342e563cfd09b6fe605cb76bae765",
+  "publishedCandidate": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+  "tree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+  "parent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "allRequiredLocalGatesPassedAfterEnvironmentCorrection": true,
+  "initialFullUnitFailureRetained": true,
+  "initialReportStillReportsFailure": true,
+  "environmentCorrection": "Prepend the existing pinned LLVM21 usr/bin and LLVMbin directories to PATH. The DebianClang driver invokes wasm-ld-21, which was initially undiscoverable; no test/source/timeout change.",
+  "compilerAvailabilityEnabledAdditionalTests": 21,
+  "unitCounts": {
+    "initial": {
+      "filesPassed": 667,
+      "filesFailed": 2,
+      "testsPassed": 15118,
+      "testsSkipped": 68
+    },
+    "corrected": {
+      "filesPassed": 669,
+      "filesFailed": 0,
+      "testsPassed": 15139,
+      "testsSkipped": 47
+    }
+  },
+  "passedGates": [
+    "source-bound third-party libraries",
+    "full unit suite after exact linker PATH correction",
+    "complete JavaScript lint",
+    "types main",
+    "types dev",
+    "types test",
+    "types bench",
+    "all-target build dry run",
+    "JSON format"
+  ],
+  "nativeCorrectnessReviewed": {
+    "independentVectors": 837,
+    "productionSourceCases": 157,
+    "jmdictGroups": 12,
+    "jmdictBanks": 53,
+    "jmdictRows": 528299,
+    "byteIdenticalOtherParserAssemblyFunctions": 49,
+    "productionModulesExactlyReproduced": true,
+    "ownership": "Agent3 native/oracle execution; independent receipt and source review here."
+  },
+  "nativeSourceReview": "independent-native-review.json",
+  "browserProtocolSourceReview": "independent-protocol-review.json",
+  "runtimeUnmodified": true,
+  "testsUnmodified": true,
+  "timeoutsUnchanged": true,
+  "nodeVersion": "v22.22.0",
+  "compilerVersion": "21.1.8",
+  "linkerVersion": "21.1.8",
+  "unitWorkers": 2,
+  "firstReportSha256": "a19ad1203fcb7fa1651c727349f59e62d2963682f3759a985147bd7ddbc76994",
+  "correctedReportSha256": "55b37a0cadcbaf482bfce14aa4559282c2a812f772fa5bbd95f49af8a7ab62b3",
+  "initialUnitLogSha256": "56193f15ab3f10b6493d690dcf9f5173e7be4beaa2530a2440d77220dd4c12f6",
+  "correctedUnitLogSha256": "77ea68586017298b2422e0567e45ee15b1b6f868236c2499be4f290d7a7efbdf",
+  "limitations": [
+    "This is not an import-performance result.",
+    "The build gate is an all-target dry run; actual qualification release packages remain separately built and hashed.",
+    "Compiler-enabled tests changed skipped count; the full corrected suite was rerun, not only the two failed files.",
+    "Complete native/oracle execution artifacts remain in the separately retained crc-current-validation directory; this bundle contains their independently reviewed receipt bindings."
+  ]
+}

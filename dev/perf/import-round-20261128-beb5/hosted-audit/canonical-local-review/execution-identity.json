@@ -1,0 +1,9 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "auditorSourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+  "auditorSourceTree": "002e46ab6976eeb6b366b04ce67ef57c467bb47d",
+  "auditorSha256": "8422368e7e720d5ba0165b47054612cf20ca01c766377a97d8321bab0f33a656",
+  "acquisitionHelperSource": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "noMeasurementsReexecuted": true
+}

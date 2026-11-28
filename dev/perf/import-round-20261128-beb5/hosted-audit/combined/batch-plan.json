@@ -1,0 +1,24 @@
+{
+  "acquisition": {
+    "auditorTimeoutSeconds": 600,
+    "completeBatchMeaning": "Every registered entry attempted. Acquisition, independent audit, memory/protocol gates and retention are separate results.",
+    "continueOtherEntriesAfterFailure": true,
+    "futureIdentityRule": "One exact artifact name under the registered run/head/attempt 1 and completed registered job. Resolve and retain its API ID/size/digest; reject ambiguity, expiry or any mismatch with prelocked identities.",
+    "maximumSharedWaitSeconds": 3600,
+    "optionalPreserveWaitSeconds": 600,
+    "pollSeconds": 45,
+    "retriesOfMeasurements": 0
+  },
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "entryOrder": [
+    "canonical-jmdict",
+    "canonical-jitendex",
+    "prefix-jmdict",
+    "prefix-jitendex",
+    "prefix-vndb",
+    "canonical-vndb",
+    "crc-no-unroll-jmdict"
+  ],
+  "noTimingOrParserReexecution": true,
+  "registrationSha256": "f3c4ae22ec6b8f6dd796dc18fb33a02ea9589505bc6c408db334a6ca1eb7999e"
+}

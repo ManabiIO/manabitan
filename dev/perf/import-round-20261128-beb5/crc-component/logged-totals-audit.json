@@ -1,0 +1,694 @@
+{
+  "scope": "Independent arithmetic and exact schedule audit of complete CI per-arm logged totals only. No independent per-group artifact, decoded output, module, or memory audit is claimed.",
+  "expectedRun": 46120623371,
+  "expectedResearchCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+  "loggedGateEvidence": {
+    "buildGate": {
+      "line": 329,
+      "value": {
+        "passed": true,
+        "sourceCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+        "variants": {
+          "baseline": {
+            "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+            "wasmBytes": 67659
+          },
+          "candidate": {
+            "wasmSha256": "1d0990753b18591d0befd2be35e6fc5a7ba9ae93e48e883184d13f01fe0526e8",
+            "wasmBytes": 66638
+          }
+        }
+      }
+    },
+    "captureGate": {
+      "line": 348,
+      "value": {
+        "dictionary": "jmdict",
+        "groups": 12,
+        "banks": 53,
+        "rows": 528299,
+        "compressedBytes": 15632849,
+        "decodedBytes": 171617523,
+        "allImmediateCrc": true
+      }
+    },
+    "correctnessGate": {
+      "line": 362,
+      "value": {
+        "passed": true,
+        "crcVectors": 837,
+        "productionConformance": 157,
+        "fullJmdictGroups": 12,
+        "rows": 528299,
+        "decodedBytes": 171617523
+      }
+    }
+  },
+  "gateEvidenceScope": "Frozen-job logged assertions are bound and ordered; module and full output bytes are not independently rehashed by this log-only audit.",
+  "loggedArms": [
+    {
+      "line": 377,
+      "value": {
+        "armId": "treatment-01-A",
+        "passed": true,
+        "firstPassMs": 178.30764600000003,
+        "secondPassMs": 142.61679500000014,
+        "initializationWallMs": 63.49051200000001
+      }
+    },
+    {
+      "line": 378,
+      "value": {
+        "armId": "treatment-01-B",
+        "passed": true,
+        "firstPassMs": 172.75542499999995,
+        "secondPassMs": 136.63719399999968,
+        "initializationWallMs": 60.428338
+      }
+    },
+    {
+      "line": 379,
+      "value": {
+        "armId": "control-01-A",
+        "passed": true,
+        "firstPassMs": 178.27511199999987,
+        "secondPassMs": 146.52596800000015,
+        "initializationWallMs": 63.064498
+      }
+    },
+    {
+      "line": 380,
+      "value": {
+        "armId": "control-01-C",
+        "passed": true,
+        "firstPassMs": 172.17984900000016,
+        "secondPassMs": 148.49856899999986,
+        "initializationWallMs": 61.855016000000006
+      }
+    },
+    {
+      "line": 381,
+      "value": {
+        "armId": "control-02-C",
+        "passed": true,
+        "firstPassMs": 172.4103319999999,
+        "secondPassMs": 142.65932999999995,
+        "initializationWallMs": 60.297336
+      }
+    },
+    {
+      "line": 382,
+      "value": {
+        "armId": "control-02-A",
+        "passed": true,
+        "firstPassMs": 173.05219699999998,
+        "secondPassMs": 142.47942299999977,
+        "initializationWallMs": 61.628783000000006
+      }
+    },
+    {
+      "line": 383,
+      "value": {
+        "armId": "treatment-02-B",
+        "passed": true,
+        "firstPassMs": 171.140201,
+        "secondPassMs": 136.6826209999998,
+        "initializationWallMs": 61.41899300000001
+      }
+    },
+    {
+      "line": 384,
+      "value": {
+        "armId": "treatment-02-A",
+        "passed": true,
+        "firstPassMs": 174.8117509999999,
+        "secondPassMs": 141.99911500000007,
+        "initializationWallMs": 61.416033999999996
+      }
+    },
+    {
+      "line": 385,
+      "value": {
+        "armId": "treatment-03-A",
+        "passed": true,
+        "firstPassMs": 178.09935500000012,
+        "secondPassMs": 142.17371199999968,
+        "initializationWallMs": 62.989318
+      }
+    },
+    {
+      "line": 386,
+      "value": {
+        "armId": "treatment-03-B",
+        "passed": true,
+        "firstPassMs": 166.9586579999999,
+        "secondPassMs": 136.36741499999994,
+        "initializationWallMs": 63.882464
+      }
+    },
+    {
+      "line": 387,
+      "value": {
+        "armId": "control-03-A",
+        "passed": true,
+        "firstPassMs": 179.30057999999997,
+        "secondPassMs": 142.5908859999996,
+        "initializationWallMs": 65.08752999999999
+      }
+    },
+    {
+      "line": 388,
+      "value": {
+        "armId": "control-03-C",
+        "passed": true,
+        "firstPassMs": 173.35235099999989,
+        "secondPassMs": 142.49173000000008,
+        "initializationWallMs": 63.81938099999999
+      }
+    },
+    {
+      "line": 389,
+      "value": {
+        "armId": "control-04-C",
+        "passed": true,
+        "firstPassMs": 176.119002,
+        "secondPassMs": 142.13685099999998,
+        "initializationWallMs": 60.727056
+      }
+    },
+    {
+      "line": 390,
+      "value": {
+        "armId": "control-04-A",
+        "passed": true,
+        "firstPassMs": 173.293608,
+        "secondPassMs": 142.31454699999972,
+        "initializationWallMs": 63.720341000000005
+      }
+    },
+    {
+      "line": 391,
+      "value": {
+        "armId": "treatment-04-B",
+        "passed": true,
+        "firstPassMs": 168.1310410000001,
+        "secondPassMs": 136.4384080000002,
+        "initializationWallMs": 64.020489
+      }
+    },
+    {
+      "line": 392,
+      "value": {
+        "armId": "treatment-04-A",
+        "passed": true,
+        "firstPassMs": 171.63385399999993,
+        "secondPassMs": 142.097802,
+        "initializationWallMs": 61.49090100000001
+      }
+    },
+    {
+      "line": 393,
+      "value": {
+        "armId": "treatment-05-A",
+        "passed": true,
+        "firstPassMs": 172.4165250000001,
+        "secondPassMs": 142.49934900000005,
+        "initializationWallMs": 64.28555999999999
+      }
+    },
+    {
+      "line": 394,
+      "value": {
+        "armId": "treatment-05-B",
+        "passed": true,
+        "firstPassMs": 162.65154400000006,
+        "secondPassMs": 136.2959840000001,
+        "initializationWallMs": 62.296533000000004
+      }
+    },
+    {
+      "line": 395,
+      "value": {
+        "armId": "control-05-A",
+        "passed": true,
+        "firstPassMs": 174.552708,
+        "secondPassMs": 141.8934409999997,
+        "initializationWallMs": 60.91920300000001
+      }
+    },
+    {
+      "line": 396,
+      "value": {
+        "armId": "control-05-C",
+        "passed": true,
+        "firstPassMs": 177.51083699999987,
+        "secondPassMs": 141.88717499999984,
+        "initializationWallMs": 62.072018
+      }
+    },
+    {
+      "line": 397,
+      "value": {
+        "armId": "control-06-C",
+        "passed": true,
+        "firstPassMs": 168.59160100000003,
+        "secondPassMs": 142.1501300000001,
+        "initializationWallMs": 61.768511
+      }
+    },
+    {
+      "line": 398,
+      "value": {
+        "armId": "control-06-A",
+        "passed": true,
+        "firstPassMs": 170.17799799999995,
+        "secondPassMs": 142.07659000000012,
+        "initializationWallMs": 62.330345
+      }
+    },
+    {
+      "line": 399,
+      "value": {
+        "armId": "treatment-06-B",
+        "passed": true,
+        "firstPassMs": 161.18422499999997,
+        "secondPassMs": 136.9083559999998,
+        "initializationWallMs": 60.279348
+      }
+    },
+    {
+      "line": 400,
+      "value": {
+        "armId": "treatment-06-A",
+        "passed": true,
+        "firstPassMs": 169.99871299999992,
+        "secondPassMs": 142.69379300000026,
+        "initializationWallMs": 63.351124
+      }
+    }
+  ],
+  "finalAggregateLine": 401,
+  "completeArmTotals": 24,
+  "declaredMeasuredGroups": 576,
+  "independentRawGroupAudit": false,
+  "cells": [
+    {
+      "scenario": "treatment",
+      "phase": "first-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "treatment-01-A",
+          "comparedArmId": "treatment-01-B",
+          "baselineMs": 178.30764600000003,
+          "comparedMs": 172.75542499999995,
+          "ratio": 0.9688615652522266,
+          "deltaMs": -5.552221000000088
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "treatment-02-A",
+          "comparedArmId": "treatment-02-B",
+          "baselineMs": 174.8117509999999,
+          "comparedMs": 171.140201,
+          "ratio": 0.9789971213090823,
+          "deltaMs": -3.671549999999911
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "treatment-03-A",
+          "comparedArmId": "treatment-03-B",
+          "baselineMs": 178.09935500000012,
+          "comparedMs": 166.9586579999999,
+          "ratio": 0.9374467302253834,
+          "deltaMs": -11.140697000000216
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "treatment-04-A",
+          "comparedArmId": "treatment-04-B",
+          "baselineMs": 171.63385399999993,
+          "comparedMs": 168.1310410000001,
+          "ratio": 0.9795913631351549,
+          "deltaMs": -3.5028129999998328
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "treatment-05-A",
+          "comparedArmId": "treatment-05-B",
+          "baselineMs": 172.4165250000001,
+          "comparedMs": 162.65154400000006,
+          "ratio": 0.9433640075972994,
+          "deltaMs": -9.764981000000034
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "treatment-06-A",
+          "comparedArmId": "treatment-06-B",
+          "baselineMs": 169.99871299999992,
+          "comparedMs": 161.18422499999997,
+          "ratio": 0.9481496780507982,
+          "deltaMs": -8.814487999999955
+        }
+      ],
+      "baselineSumMs": 1045.267844,
+      "comparedSumMs": 1002.8210939999999,
+      "medianRatio": 0.9585056216515124,
+      "equalWorkRatio": 0.9593915088427803,
+      "medianDeltaMs": -7.183354500000021,
+      "fasterPairs": 6
+    },
+    {
+      "scenario": "treatment",
+      "phase": "second-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "treatment-01-A",
+          "comparedArmId": "treatment-01-B",
+          "baselineMs": 142.61679500000014,
+          "comparedMs": 136.63719399999968,
+          "ratio": 0.958072252289778,
+          "deltaMs": -5.979601000000457
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "treatment-02-A",
+          "comparedArmId": "treatment-02-B",
+          "baselineMs": 141.99911500000007,
+          "comparedMs": 136.6826209999998,
+          "ratio": 0.9625596680655351,
+          "deltaMs": -5.316494000000262
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "treatment-03-A",
+          "comparedArmId": "treatment-03-B",
+          "baselineMs": 142.17371199999968,
+          "comparedMs": 136.36741499999994,
+          "ratio": 0.9591605443909367,
+          "deltaMs": -5.806296999999745
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "treatment-04-A",
+          "comparedArmId": "treatment-04-B",
+          "baselineMs": 142.097802,
+          "comparedMs": 136.4384080000002,
+          "ratio": 0.9601725436963494,
+          "deltaMs": -5.659393999999793
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "treatment-05-A",
+          "comparedArmId": "treatment-05-B",
+          "baselineMs": 142.49934900000005,
+          "comparedMs": 136.2959840000001,
+          "ratio": 0.956467415159911,
+          "deltaMs": -6.2033649999999625
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "treatment-06-A",
+          "comparedArmId": "treatment-06-B",
+          "baselineMs": 142.69379300000026,
+          "comparedMs": 136.9083559999998,
+          "ratio": 0.9594555805240915,
+          "deltaMs": -5.7854370000004565
+        }
+      ],
+      "baselineSumMs": 854.0805660000002,
+      "comparedSumMs": 819.3299779999995,
+      "medianRatio": 0.9593080624575141,
+      "equalWorkRatio": 0.9593122834269002,
+      "medianDeltaMs": -5.795867000000101,
+      "fasterPairs": 6
+    },
+    {
+      "scenario": "treatment",
+      "phase": "startup-plus-first-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "treatment-01-A",
+          "comparedArmId": "treatment-01-B",
+          "baselineMs": 241.79815800000006,
+          "comparedMs": 233.18376299999994,
+          "ratio": 0.9643736119776392,
+          "deltaMs": -8.614395000000115
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "treatment-02-A",
+          "comparedArmId": "treatment-02-B",
+          "baselineMs": 236.2277849999999,
+          "comparedMs": 232.559194,
+          "ratio": 0.9844701121843059,
+          "deltaMs": -3.668590999999907
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "treatment-03-A",
+          "comparedArmId": "treatment-03-B",
+          "baselineMs": 241.0886730000001,
+          "comparedMs": 230.8411219999999,
+          "ratio": 0.9574946808056792,
+          "deltaMs": -10.247551000000215
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "treatment-04-A",
+          "comparedArmId": "treatment-04-B",
+          "baselineMs": 233.12475499999994,
+          "comparedMs": 232.1515300000001,
+          "ratio": 0.9958253039236444,
+          "deltaMs": -0.973224999999843
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "treatment-05-A",
+          "comparedArmId": "treatment-05-B",
+          "baselineMs": 236.70208500000007,
+          "comparedMs": 224.94807700000007,
+          "ratio": 0.9503426089381511,
+          "deltaMs": -11.754007999999999
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "treatment-06-A",
+          "comparedArmId": "treatment-06-B",
+          "baselineMs": 233.34983699999992,
+          "comparedMs": 221.46357299999997,
+          "ratio": 0.9490624713828278,
+          "deltaMs": -11.886263999999954
+        }
+      ],
+      "baselineSumMs": 1422.291293,
+      "comparedSumMs": 1375.147259,
+      "medianRatio": 0.9609341463916592,
+      "equalWorkRatio": 0.9668534608683709,
+      "medianDeltaMs": -9.430973000000165,
+      "fasterPairs": 6
+    },
+    {
+      "scenario": "control",
+      "phase": "first-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "control-01-A",
+          "comparedArmId": "control-01-C",
+          "baselineMs": 178.27511199999987,
+          "comparedMs": 172.17984900000016,
+          "ratio": 0.965809792900314,
+          "deltaMs": -6.095262999999704
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "control-02-A",
+          "comparedArmId": "control-02-C",
+          "baselineMs": 173.05219699999998,
+          "comparedMs": 172.4103319999999,
+          "ratio": 0.9962909167804436,
+          "deltaMs": -0.641865000000081
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "control-03-A",
+          "comparedArmId": "control-03-C",
+          "baselineMs": 179.30057999999997,
+          "comparedMs": 173.35235099999989,
+          "ratio": 0.9668253778097088,
+          "deltaMs": -5.948229000000083
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "control-04-A",
+          "comparedArmId": "control-04-C",
+          "baselineMs": 173.293608,
+          "comparedMs": 176.119002,
+          "ratio": 1.016304086645827,
+          "deltaMs": 2.8253939999999886
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "control-05-A",
+          "comparedArmId": "control-05-C",
+          "baselineMs": 174.552708,
+          "comparedMs": 177.51083699999987,
+          "ratio": 1.0169469098124784,
+          "deltaMs": 2.9581289999998717
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "control-06-A",
+          "comparedArmId": "control-06-C",
+          "baselineMs": 170.17799799999995,
+          "comparedMs": 168.59160100000003,
+          "ratio": 0.9906780134997244,
+          "deltaMs": -1.58639699999992
+        }
+      ],
+      "baselineSumMs": 1048.6522029999996,
+      "comparedSumMs": 1040.1639719999998,
+      "medianRatio": 0.993484465140084,
+      "equalWorkRatio": 0.991905580348073,
+      "medianDeltaMs": -1.1141310000000004,
+      "fasterPairs": 4
+    },
+    {
+      "scenario": "control",
+      "phase": "second-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "control-01-A",
+          "comparedArmId": "control-01-C",
+          "baselineMs": 146.52596800000015,
+          "comparedMs": 148.49856899999986,
+          "ratio": 1.0134624669396466,
+          "deltaMs": 1.9726009999997132
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "control-02-A",
+          "comparedArmId": "control-02-C",
+          "baselineMs": 142.47942299999977,
+          "comparedMs": 142.65932999999995,
+          "ratio": 1.001262687595248,
+          "deltaMs": 0.17990700000018478
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "control-03-A",
+          "comparedArmId": "control-03-C",
+          "baselineMs": 142.5908859999996,
+          "comparedMs": 142.49173000000008,
+          "ratio": 0.9993046119371224,
+          "deltaMs": -0.09915599999953884
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "control-04-A",
+          "comparedArmId": "control-04-C",
+          "baselineMs": 142.31454699999972,
+          "comparedMs": 142.13685099999998,
+          "ratio": 0.998751385548803,
+          "deltaMs": -0.17769599999974162
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "control-05-A",
+          "comparedArmId": "control-05-C",
+          "baselineMs": 141.8934409999997,
+          "comparedMs": 141.88717499999984,
+          "ratio": 0.9999558401011653,
+          "deltaMs": -0.006265999999868654
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "control-06-A",
+          "comparedArmId": "control-06-C",
+          "baselineMs": 142.07659000000012,
+          "comparedMs": 142.1501300000001,
+          "ratio": 1.0005176081436076,
+          "deltaMs": 0.07353999999997995
+        }
+      ],
+      "baselineSumMs": 857.8808549999991,
+      "comparedSumMs": 859.8237849999998,
+      "medianRatio": 1.0002367241223864,
+      "equalWorkRatio": 1.0022648016780846,
+      "medianDeltaMs": 0.03363700000005565,
+      "fasterPairs": 3
+    },
+    {
+      "scenario": "control",
+      "phase": "startup-plus-first-pass",
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineArmId": "control-01-A",
+          "comparedArmId": "control-01-C",
+          "baselineMs": 241.33960999999988,
+          "comparedMs": 234.03486500000017,
+          "ratio": 0.9697325068189191,
+          "deltaMs": -7.304744999999713
+        },
+        {
+          "pair": 2,
+          "baselineArmId": "control-02-A",
+          "comparedArmId": "control-02-C",
+          "baselineMs": 234.68097999999998,
+          "comparedMs": 232.7076679999999,
+          "ratio": 0.9915915128699391,
+          "deltaMs": -1.9733120000000781
+        },
+        {
+          "pair": 3,
+          "baselineArmId": "control-03-A",
+          "comparedArmId": "control-03-C",
+          "baselineMs": 244.38810999999995,
+          "comparedMs": 237.17173199999988,
+          "ratio": 0.9704716485593342,
+          "deltaMs": -7.216378000000077
+        },
+        {
+          "pair": 4,
+          "baselineArmId": "control-04-A",
+          "comparedArmId": "control-04-C",
+          "baselineMs": 237.01394900000003,
+          "comparedMs": 236.846058,
+          "ratio": 0.9992916408476868,
+          "deltaMs": -0.16789100000002577
+        },
+        {
+          "pair": 5,
+          "baselineArmId": "control-05-A",
+          "comparedArmId": "control-05-C",
+          "baselineMs": 235.471911,
+          "comparedMs": 239.58285499999988,
+          "ratio": 1.0174583201136032,
+          "deltaMs": 4.110943999999876
+        },
+        {
+          "pair": 6,
+          "baselineArmId": "control-06-A",
+          "comparedArmId": "control-06-C",
+          "baselineMs": 232.50834299999994,
+          "comparedMs": 230.36011200000002,
+          "ratio": 0.9907606283186151,
+          "deltaMs": -2.1482309999999245
+        }
+      ],
+      "baselineSumMs": 1425.402903,
+      "comparedSumMs": 1410.70329,
+      "medianRatio": 0.9911760705942771,
+      "equalWorkRatio": 0.9896873978795313,
+      "medianDeltaMs": -2.0607715000000013,
+      "fasterPairs": 5
+    }
+  ],
+  "decodedLogSha256": "63bf261b087d4e821b230ea4f497602ad6b8f9e55c86adb948287ff862d6ea6f",
+  "decodedLogBytes": 42442
+}

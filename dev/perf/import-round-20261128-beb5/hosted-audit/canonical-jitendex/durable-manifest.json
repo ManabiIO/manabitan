@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "canonical-jitendex",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 4267,
+      "gitBlobSha": "467524ddb110f1bea12c11d5a80dc710cb9a14d8",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/acquisition.json",
+      "sha256": "d809fa9d9ce2c7243faf2b05774748ac830cf3a543dad9d1d2eb8d0a4899857f"
+    },
+    {
+      "bytes": 89206,
+      "gitBlobSha": "1fafcca3de31589d40d0b18e448c7ab1c2ab794b",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/archive-members.json",
+      "sha256": "ca6d20d33b4863c5a8f18abd798be24adbdeff00350f4ebc3c9fbcd6fec06b58"
+    },
+    {
+      "bytes": 215825,
+      "gitBlobSha": "498c15d6408e04d39c775c81a5106e14b36d55ad",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/independent-audit.json",
+      "sha256": "45ff8f26d67b54ad7ec1613e9c6af0984ffe12d29958db1a0cf62de7cda0a69c"
+    },
+    {
+      "bytes": 12846,
+      "gitBlobSha": "262fd344d24b9191f2e3ddebc41257c31f8b7bac",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/summary.json",
+      "sha256": "7c78520aacc279ec1f23481d011cc69a4a0e30a763fcb552cc5b1fd1c8b549f5"
+    },
+    {
+      "bytes": 1376,
+      "gitBlobSha": "186fe34bb6dcdc55111936025091c50e6a9c4d55",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/audit.stdout.log",
+      "sha256": "7764d9a01a26c18332daba4e204d8a0d77784020b04c0a70b4ebe0a27ee99ce5"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1377,
+      "gitBlobSha": "20e2d469b4266be96e930a912308b478d4a86f54",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/retention.json",
+      "sha256": "6f9626933444947d8eb78b33666ed57427b3d0f0ec6bbb8dfd4a2eb39f99b8b2"
+    },
+    {
+      "bytes": 192,
+      "gitBlobSha": "82282c2f3710e38f62f669ba3aa45f1224431600",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/resolution-polls.jsonl",
+      "sha256": "f1dc642852961fb97e4bb7c51c4f21e900c60b4df218a1b70d711d7604759169"
+    },
+    {
+      "bytes": 2356817,
+      "gitBlobSha": "8f933ade7154aae525c8d5fe8721200521d6f55e",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/evidence-without-reproducible-packages.zip",
+      "sha256": "662fe6401595f28193360f415007e660aea029502f9107d2059173f65b105396"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15252164797,
+  "originalArtifactSha256": "3283503cb9b05e7b67ca5df7f07bf50e6c2f066e78b1067195c75cee7275f19e",
+  "originalRunId": 46112170828,
+  "unreferencedBlobsOnly": true
+}

@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "prefix-jitendex",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 5045,
+      "gitBlobSha": "53cdec7a7f5d7c9ca36cff43a16582ee739192d5",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/acquisition.json",
+      "sha256": "596aa8f7da1f2b89769bf2862805a48809c5a46cb652bc0b3a36788092338cc2"
+    },
+    {
+      "bytes": 4876,
+      "gitBlobSha": "89f19d30a088b4c8f48439d6218fff8b72cd97c0",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/archive-members.json",
+      "sha256": "4c33654a70f50dc3a925d8ef8fa1c8aecfac1e024e1118738089e39b638a388b"
+    },
+    {
+      "bytes": 8263,
+      "gitBlobSha": "a1f4fc7b7ca6418952fc6e067b3ea2b5d29518c2",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/independent-audit.json",
+      "sha256": "9654e346a19f4ce817fc3070db7b424a5f0998370986781c1dc315cbce5360a7"
+    },
+    {
+      "bytes": 7498,
+      "gitBlobSha": "304a72b54735162fba834ca9b206a7c15c158652",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/summary.json",
+      "sha256": "06171680e16c6692a1b83c0d2aa8eab56b0a2ed283b8871a12199297c2d893ff"
+    },
+    {
+      "bytes": 73,
+      "gitBlobSha": "536fbae4a387b74eba42fce8c534d23db9eddb7e",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/audit.stdout.log",
+      "sha256": "8ad04cec65d3ee144eb62ab17733caa4fbf9a113fc39ba363bb9835242965c7f"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 174,
+      "gitBlobSha": "48822256e37c139d3f4245da1d84a92125a7e65b",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/retention.json",
+      "sha256": "9e28085d5677b277a2333c898fdbb6ba7eda32d90b7a9a610153369fc3575c2b"
+    },
+    {
+      "bytes": 191,
+      "gitBlobSha": "1b6a929fa41adcb936e238288a78ca1fc635276b",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/resolution-polls.jsonl",
+      "sha256": "1e124f4f62c2b823f387f1d28de499c0d294010733247314feb78f7855e1037b"
+    },
+    {
+      "bytes": 201105,
+      "gitBlobSha": "2f31e7a4da48e8939278618629b9ada3499766cc",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/original-artifact.zip",
+      "sha256": "f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15254136620,
+  "originalArtifactSha256": "f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a",
+  "originalRunId": 46114428610,
+  "unreferencedBlobsOnly": true
+}

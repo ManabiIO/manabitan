@@ -1,0 +1,28 @@
+{
+  "limitations": "The retained archive is not the original outer ZIP. Complete original-member census and original outer digest are retained. Only exact package-A.zip/package-B.zip members are omitted; original observations remain byte-identical. The full byte audit completed before omission; memory gates remain separate. A later full package/byte audit cannot be repeated from this reduced archive alone without the original package ZIPs.",
+  "mode": "all-original-member-bytes-except-listed-reproducible-package-zips",
+  "omittedOriginalMembers": [
+    {
+      "bytes": 16805714,
+      "compressedBytes": 16729372,
+      "crc32": 142111799,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "package-A.zip",
+      "sha256": "dda83b912805e59430e8b9fc38906685aec77332a8e4508b9d316b6e12a92258"
+    },
+    {
+      "bytes": 16812065,
+      "compressedBytes": 16735684,
+      "crc32": 3196079431,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "package-B.zip",
+      "sha256": "1130cc6d13dc2d2751e6e3b35abf37345dd9b8e2b93ea470c427743b5ed78825"
+    }
+  ],
+  "originalOuterBytes": 35634582,
+  "originalOuterSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+  "retainedArchiveBytes": 2205460,
+  "retainedArchiveSha256": "6fd93e7f5ff94e6bbd1fa98f8d0e476bb78d47d97dab99b9ba9125e179118669"
+}

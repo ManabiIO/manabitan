@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "scope": "Complete decoded hosted source-gate log and GitHub API metadata; source-only correction, no new import measurements",
+  "workflowCommit": "b61310f94c51f2e12bb5069df1d2c667b11e6ba9",
+  "workflowTree": "ab0437c55e8aaf04e4d727fcaa6f38582992145b",
+  "originalMeasuredRuntimeCommit": "570ccc3968046269cb00d2053e49d3c32367031a",
+  "correctedSourceCommit": "ee903e032650430839468fef391b8d820196e61d",
+  "runId": 46119597739,
+  "runAttempt": 1,
+  "jobId": 140900952796,
+  "conclusion": "success",
+  "reviewedSourceGates": [
+    "exact comment-only source proof",
+    "complete JavaScript lint",
+    "complete type validation",
+    "pinned Clang/LLD 21.1.8 native byte reproduction",
+    "complete all-target build dry run/validation (node ./dev/bin/build.js --dryRun --all); no emitted release archives",
+    "complete JSON format gate"
+  ],
+  "nativeSha256": {
+    "term-content-canonical-scan-v1.wasm": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+    "term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "originalArtifact": {
+    "id": 15255161140,
+    "name": "canonical-sidecar-source-beb5-ee903e0",
+    "bytes": 2844,
+    "apiAndUploadReportedSha256": "b702af6c1cfe4e0b7ed7e6ec94358de3fdfd4446bd6430a4d58965526a5e2110",
+    "archiveIndependentlyDownloadedOrRehashed": false,
+    "reason": "Local executor unavailable; complete decoded source-gate log and API identity are retained. No archive extraction or additional analysis workflow was performed."
+  },
+  "metadataScope": {
+    "run": "Full REST response body, formatted as JSON",
+    "jobs": "Exact structured response from fetch_workflow_run_jobs; wrapper projection includes job identity, conclusion and all step conclusions",
+    "artifacts": "Exact structured response from fetch_workflow_run_artifacts"
+  },
+  "commentOnlyProof": "The hosted proof step succeeded. Root independently retained the exact two inserted JSDoc-line removal proof; these comments do not change the frozen measured runtime tokens or native bytes.",
+  "retention": "Only unreferenced Git blobs created; no refs, existing sources, measurements, artifacts or branches changed",
+  "entries": [
+    {
+      "path": "hosted-audit/source-followup/job-140900952796.log",
+      "gitBlobSha": "7910afe6a496033d1f6606a946cd086a08014a0f",
+      "sha256": "d8b4fcc36ff57d2037b267ab909220bccb301d692efba1c4088ce6e276516b78",
+      "bytes": 297914
+    },
+    {
+      "path": "hosted-audit/source-followup/run-46119597739-api.json",
+      "gitBlobSha": "5786f3e950ce4b0d032add121fa064b7c47c8047",
+      "sha256": "e9e45d97a9dfbfdb4f98b64491b99d27d42da1914ae67899aa0aa64207ef2b3b",
+      "bytes": 13471
+    },
+    {
+      "path": "hosted-audit/source-followup/jobs-46119597739-api.json",
+      "gitBlobSha": "c07f2ed4fc1686a6e2e67891bc8c90e1df9e3fd7",
+      "sha256": "19f6e2621409d1e869f76e7e24007e6656c8c6eac589d5b6c2cd6d7d520e0caf",
+      "bytes": 2585
+    },
+    {
+      "path": "hosted-audit/source-followup/artifacts-46119597739-api.json",
+      "gitBlobSha": "03ec0c4049f253bae2b36ea8b572e592cc258b8b",
+      "sha256": "546af87ba2508ff6ffa95ad8d786504ed2cd6eab25df308cbfac976f3540921f",
+      "bytes": 873
+    }
+  ]
+}

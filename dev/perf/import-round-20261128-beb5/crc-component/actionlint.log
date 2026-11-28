@@ -1,0 +1,180 @@
+﻿2026-11-28T08:12:30.3453855Z Current runner version: '2.338.2'
+2026-11-28T08:12:30.3477444Z ##[group]Runner Image Provisioner
+2026-11-28T08:12:30.3478344Z Hosted Compute Agent
+2026-11-28T08:12:30.3478955Z Version: 20261111.635
+2026-11-28T08:12:30.3479557Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T08:12:30.3480236Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T08:12:30.3480945Z Worker ID: {3b265119-c45c-4756-909a-93cbaf4b11db}
+2026-11-28T08:12:30.3481614Z Region: westus2
+2026-11-28T08:12:30.3482144Z Cloud: Azure
+2026-11-28T08:12:30.3482934Z ##[endgroup]
+2026-11-28T08:12:30.3484256Z ##[group]Operating System
+2026-11-28T08:12:30.3484989Z Ubuntu
+2026-11-28T08:12:30.3485499Z 26.04.1
+2026-11-28T08:12:30.3485993Z LTS
+2026-11-28T08:12:30.3486488Z ##[endgroup]
+2026-11-28T08:12:30.3487013Z ##[group]Runner Image
+2026-11-28T08:12:30.3487618Z Image: ubuntu-26.04
+2026-11-28T08:12:30.3488147Z Version: 20261122.9.1
+2026-11-28T08:12:30.3489345Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T08:12:30.3490767Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T08:12:30.3491686Z ##[endgroup]
+2026-11-28T08:12:30.3492921Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T08:12:30.3495120Z Contents: read
+2026-11-28T08:12:30.3495670Z Metadata: read
+2026-11-28T08:12:30.3496586Z ##[endgroup]
+2026-11-28T08:12:30.3498514Z Secret source: Actions
+2026-11-28T08:12:30.3499422Z Cache mode: write
+2026-11-28T08:12:30.3500053Z Prepare workflow directory
+2026-11-28T08:12:30.3801610Z Prepare all required actions
+2026-11-28T08:12:30.3850567Z Getting action download info
+2026-11-28T08:12:30.7355068Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T08:12:30.9197887Z Complete job name: actionlint
+2026-11-28T08:12:30.9926252Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:12:30.9927297Z with:
+2026-11-28T08:12:30.9927834Z   repository: ManabiIO/manabitan
+2026-11-28T08:12:30.9931773Z   token: ***
+2026-11-28T08:12:30.9932312Z   ssh-strict: true
+2026-11-28T08:12:30.9933072Z   ssh-user: git
+2026-11-28T08:12:30.9933638Z   persist-credentials: true
+2026-11-28T08:12:30.9934191Z   clean: true
+2026-11-28T08:12:30.9934720Z   sparse-checkout-cone-mode: true
+2026-11-28T08:12:30.9935327Z   fetch-depth: 1
+2026-11-28T08:12:30.9935853Z   fetch-tags: false
+2026-11-28T08:12:30.9936383Z   show-progress: true
+2026-11-28T08:12:30.9936888Z   lfs: false
+2026-11-28T08:12:30.9937351Z   submodules: false
+2026-11-28T08:12:30.9937892Z   set-safe-directory: true
+2026-11-28T08:12:30.9938523Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:12:30.9939316Z ##[endgroup]
+2026-11-28T08:12:31.3730620Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:12:31.3732530Z ##[group]Getting Git version info
+2026-11-28T08:12:31.3733763Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:12:31.3819853Z [command]/usr/bin/git version
+2026-11-28T08:12:31.3861663Z git version 2.56.1
+2026-11-28T08:12:31.3885449Z ##[endgroup]
+2026-11-28T08:12:31.3899814Z Temporarily overriding HOME='/home/runner/work/_temp/62d5d9f0-1410-4d85-8637-2bb342aa1211' before making global git config changes
+2026-11-28T08:12:31.3901266Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:12:31.3905338Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:12:31.3982332Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:12:31.3986720Z ##[group]Determining repository object format
+2026-11-28T08:12:31.3988939Z ##[endgroup]
+2026-11-28T08:12:31.3991699Z ##[group]Initializing the repository
+2026-11-28T08:12:31.4004633Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-28T08:12:31.4137904Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:12:31.4139760Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:12:31.4143989Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:12:31.4145348Z hint: call:
+2026-11-28T08:12:31.4146120Z hint:
+2026-11-28T08:12:31.4147128Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:12:31.4148536Z hint:
+2026-11-28T08:12:31.4149469Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:12:31.4150432Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:12:31.4151497Z hint:
+2026-11-28T08:12:31.4152154Z hint: 	git branch -m <name>
+2026-11-28T08:12:31.4153065Z hint:
+2026-11-28T08:12:31.4153987Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:12:31.4155671Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-28T08:12:31.4174783Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:12:31.4290478Z ##[endgroup]
+2026-11-28T08:12:31.4292049Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:12:31.4297523Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:12:31.4363088Z ##[endgroup]
+2026-11-28T08:12:31.4364729Z ##[group]Setting up auth
+2026-11-28T08:12:31.4365808Z Removing SSH command configuration
+2026-11-28T08:12:31.4371495Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:12:31.4425793Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:12:31.4894567Z Removing HTTP extra header
+2026-11-28T08:12:31.4900296Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:12:31.4929685Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:12:31.5142100Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:12:31.5148722Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:12:31.5179508Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:12:31.5400580Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:12:31.5437048Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:31.5468018Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:31.5501398Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:31.5566550Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:31.5597725Z ##[endgroup]
+2026-11-28T08:12:31.5598618Z ##[group]Fetching the repository
+2026-11-28T08:12:31.5605761Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +887884769ad1b7d54872975920fc0f8fd43a56ee:refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:34.4779216Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:12:34.4782943Z  * [new ref]         887884769ad1b7d54872975920fc0f8fd43a56ee -> origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:34.4795613Z [command]/usr/bin/git branch --list --remote origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:34.4814999Z   origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:34.4823683Z [command]/usr/bin/git rev-parse refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:34.4844445Z 887884769ad1b7d54872975920fc0f8fd43a56ee
+2026-11-28T08:12:34.4849645Z ##[endgroup]
+2026-11-28T08:12:34.4851998Z ##[group]Determining the checkout info
+2026-11-28T08:12:34.4854628Z ##[endgroup]
+2026-11-28T08:12:34.4855836Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T08:12:34.4915638Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T08:12:34.4945503Z ##[group]Checking out the ref
+2026-11-28T08:12:34.4948961Z [command]/usr/bin/git checkout --progress --force -B test/crc-no-unroll-screen-20261128-beb5 refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:12:35.2114240Z Switched to a new branch 'test/crc-no-unroll-screen-20261128-beb5'
+2026-11-28T08:12:35.2479225Z branch 'test/crc-no-unroll-screen-20261128-beb5' set up to track 'origin/test/crc-no-unroll-screen-20261128-beb5'.
+2026-11-28T08:12:35.2496912Z ##[endgroup]
+2026-11-28T08:12:35.2786531Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:12:35.2810808Z 887884769ad1b7d54872975920fc0f8fd43a56ee
+2026-11-28T08:12:35.3335633Z ##[group]Run echo "::add-matcher::.github/actionlint-matcher.json"
+2026-11-28T08:12:35.3336511Z [36;1mecho "::add-matcher::.github/actionlint-matcher.json"[0m
+2026-11-28T08:12:35.3337231Z [36;1m# Download script source pinned to v1.7.12 commit 914e7df21a07ef503a81201c76d2b11c789d3fca.[0m
+2026-11-28T08:12:35.3338060Z [36;1m# Pass the version explicitly because the script's default version can differ from its source revision.[0m
+2026-11-28T08:12:35.3338759Z [36;1mactionlint_dir="$(mktemp -d "$RUNNER_TEMP/actionlint.XXXXXX")"[0m
+2026-11-28T08:12:35.3339881Z [36;1mcurl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash -o "$actionlint_dir/download-actionlint.bash"[0m
+2026-11-28T08:12:35.3340944Z [36;1mbash "$actionlint_dir/download-actionlint.bash" 1.7.12 "$actionlint_dir"[0m
+2026-11-28T08:12:35.3341504Z [36;1m"$actionlint_dir/actionlint" -color[0m
+2026-11-28T08:12:35.3369337Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:12:35.3369924Z ##[endgroup]
+2026-11-28T08:12:35.5166163Z Start downloading actionlint v1.7.12 to /home/runner/work/_temp/actionlint.2CBCzt
+2026-11-28T08:12:35.5191350Z Detected OS=linux ext=tar.gz arch=amd64
+2026-11-28T08:12:35.5192428Z Downloading https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz with curl
+2026-11-28T08:12:35.5239820Z   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+2026-11-28T08:12:35.5241017Z                                  Dload  Upload  Total   Spent   Left   Speed
+2026-11-28T08:12:35.5241573Z 
+2026-11-28T08:12:35.6612502Z   0      0   0      0   0      0      0      0                              0
+2026-11-28T08:12:35.6613747Z   0      0   0      0   0      0      0      0                              0
+2026-11-28T08:12:35.6614638Z   0      0   0      0   0      0      0      0                              0
+2026-11-28T08:12:35.6615008Z 
+2026-11-28T08:12:35.7045997Z actionlint
+2026-11-28T08:12:35.7404964Z   0      0   0      0   0      0      0      0                              0
+2026-11-28T08:12:35.7406166Z 100  2.24M 100  2.24M   0      0 10.37M      0                              0
+2026-11-28T08:12:35.7407080Z 100  2.24M 100  2.24M   0      0 10.37M      0                              0
+2026-11-28T08:12:35.7407973Z 100  2.24M 100  2.24M   0      0 10.37M      0                              0
+2026-11-28T08:12:35.7471077Z Downloaded and unarchived executable: /home/runner/work/_temp/actionlint.2CBCzt/actionlint
+2026-11-28T08:12:35.7501672Z Done: 1.7.12
+2026-11-28T08:12:35.7502540Z installed by downloading from release page
+2026-11-28T08:12:35.7503911Z built with go1.26.1 compiler for linux/amd64
+2026-11-28T08:12:37.0413141Z Post job cleanup.
+2026-11-28T08:12:37.1240108Z [command]/usr/bin/git version
+2026-11-28T08:12:37.1288478Z git version 2.56.1
+2026-11-28T08:12:37.1332624Z Temporarily overriding HOME='/home/runner/work/_temp/ee2afa6a-f9e8-4e06-bf8d-95c56b5324ce' before making global git config changes
+2026-11-28T08:12:37.1338756Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:12:37.1339687Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:12:37.1373848Z Removing SSH command configuration
+2026-11-28T08:12:37.1380755Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:12:37.1415638Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:12:37.1685501Z Removing HTTP extra header
+2026-11-28T08:12:37.1691399Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:12:37.1735873Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:12:37.1982116Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:12:37.1988712Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:12:37.2011302Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:12:37.2012840Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:12:37.2014688Z includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:12:37.2015837Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:12:37.2040656Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:12:37.2053766Z /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2073985Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2114330Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:12:37.2140963Z /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2155724Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2190706Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:12:37.2214255Z /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2224431Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2259364Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:12:37.2277931Z /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2285597Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config
+2026-11-28T08:12:37.2317344Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:12:37.2569518Z Removing credentials config '/home/runner/work/_temp/git-credentials-6cfdc81d-0ff3-4133-9de8-496b8bb00419.config'
+2026-11-28T08:12:37.2708393Z Cleaning up orphan processes

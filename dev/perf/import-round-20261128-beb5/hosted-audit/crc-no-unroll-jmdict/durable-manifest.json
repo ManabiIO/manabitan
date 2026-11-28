@@ -1,0 +1,57 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "crc-no-unroll-jmdict",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 3808,
+      "gitBlobSha": "3f788f3bbc7d11295f4998e9e8104a721f8c99db",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/acquisition.json",
+      "sha256": "c469aa27b90115e5f14ef0c0ab2e47c6e38dc9e6fb474a9813b33d2def9de8b7"
+    },
+    {
+      "bytes": 95778,
+      "gitBlobSha": "94300e48f9302b80d41048644d6cb8d1b6f69625",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/archive-members.json",
+      "sha256": "7c0f2a6e444c8d33514703d328b626871054206a982fe7d74a8fe9aed2cd2a0b"
+    },
+    {
+      "bytes": 231,
+      "gitBlobSha": "bb6cf910c05d00185b4ad303d844bd18c4fe95a1",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/independent-audit.json",
+      "sha256": "4f1e7eb78a17cf2c6a5ca229a544e9f185bdd0e4ca97406f0fc545ae89b1ac71"
+    },
+    {
+      "bytes": 563,
+      "gitBlobSha": "d3e2702bd85f624a2ec6af9ae0bd63a1b70202b2",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/summary.json",
+      "sha256": "b6365bab711690c82490ad8178ecfed7146149871240f04a2e5fe1179e5a2a08"
+    },
+    {
+      "bytes": 174,
+      "gitBlobSha": "055f86c805e9dea1fc3d2862eef6aea9e7d47d47",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/retention.json",
+      "sha256": "6492eefb421c6efc22221f99040288c2aede12468d4e8eb78a1764f35b0dd061"
+    },
+    {
+      "bytes": 192,
+      "gitBlobSha": "9ff88378d3065bef28594d005d4bfd58627d2bd6",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/resolution-polls.jsonl",
+      "sha256": "7492ff5e7016c3c59733685775bee3d7b1eefc72cae234201f781402a321087d"
+    },
+    {
+      "bytes": 641405,
+      "gitBlobSha": "a7cf94d586213bf61f19b920b2267d78ee55f504",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/original-artifact.zip",
+      "sha256": "7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15255386235,
+  "originalArtifactSha256": "7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d",
+  "originalRunId": 46120623371,
+  "unreferencedBlobsOnly": true
+}

@@ -1,0 +1,248 @@
+[
+  {
+    "candidate": {
+      "count": 12,
+      "descriptiveBootstrap95Percent": [
+        -2.4158950955845415,
+        -0.5346013847361997
+      ],
+      "equalWorkChangePercent": -1.4582958565700244,
+      "fasterPairs": 10,
+      "medianPairedChangePercent": -1.0972902467091705,
+      "ratios": [
+        0.9760410724472504,
+        0.9894918669928797,
+        0.995170496121779,
+        0.9941374761834969,
+        0.9530229917684108,
+        1.0042546948355435,
+        0.9899650959860042,
+        0.9885623280729369,
+        0.9756410256410588,
+        0.9857430875575707,
+        1.0147612156296235,
+        0.9608329885532696
+      ],
+      "worstPairChangePercent": 1.4761215629623514
+    },
+    "complete": true,
+    "control": {
+      "count": 4,
+      "descriptiveBootstrap95Percent": [
+        -0.28868360277134464,
+        2.7850304612980548
+      ],
+      "equalWorkChangePercent": 1.4408804576121703,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": 1.6386876954990193,
+      "ratios": [
+        0.9971131639722866,
+        1.0278503046129805,
+        1.0114260919873055,
+        1.021347661922675
+      ],
+      "worstPairChangePercent": 2.7850304612980548
+    },
+    "dictionary": "jmdict",
+    "error": null,
+    "memoryPairs": [
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 779936,
+          "candidate": 795844,
+          "changePercent": 2.0396545357567852
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1012087,
+          "candidate": 1024636,
+          "changePercent": 1.2399131695200127
+        },
+        "pair": 1,
+        "qualified": true
+      },
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 785820,
+          "candidate": 779500,
+          "changePercent": -0.8042554274515834
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1020025,
+          "candidate": 1012147,
+          "changePercent": -0.772334011421294
+        },
+        "pair": 2,
+        "qualified": true
+      }
+    ],
+    "memoryPassed": true,
+    "memoryReceiptFailures": [],
+    "returncode": 0,
+    "type": null,
+    "validatedObservationCount": 42
+  },
+  {
+    "candidate": {
+      "count": 12,
+      "descriptiveBootstrap95Percent": [
+        -2.58388457958032,
+        0.810296228308971
+      ],
+      "equalWorkChangePercent": -0.6836529009321635,
+      "fasterPairs": 7,
+      "medianPairedChangePercent": -0.3977380580337364,
+      "ratios": [
+        0.9732799330504018,
+        0.996055934026512,
+        0.9718875502008101,
+        0.9671558350803664,
+        0.9750423753579919,
+        1.011389251394004,
+        1.0086691378691854,
+        1.0125044237348189,
+        1.0075367866969942,
+        1.004980630879933,
+        0.9951567986439036,
+        0.9959893048128131
+      ],
+      "worstPairChangePercent": 1.250442373481886
+    },
+    "complete": true,
+    "control": {
+      "count": 4,
+      "descriptiveBootstrap95Percent": [
+        -2.399576545314863,
+        0.11920371915603578
+      ],
+      "equalWorkChangePercent": -1.0533509634664817,
+      "fasterPairs": 3,
+      "medianPairedChangePercent": -0.9612561869768221,
+      "ratios": [
+        0.9916136495083864,
+        1.0011920371915604,
+        0.9760042345468514,
+        0.9891612267520773
+      ],
+      "worstPairChangePercent": 0.11920371915603578
+    },
+    "dictionary": "jitendex",
+    "error": null,
+    "memoryPairs": [
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 837768,
+          "candidate": 800480,
+          "changePercent": -4.450874227709822
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1066567,
+          "candidate": 1032471,
+          "changePercent": -3.1967987008786114
+        },
+        "pair": 1,
+        "qualified": true
+      },
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 844520,
+          "candidate": 850748,
+          "changePercent": 0.7374603324965756
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1076696,
+          "candidate": 1079869,
+          "changePercent": 0.2946978534331013
+        },
+        "pair": 2,
+        "qualified": true
+      }
+    ],
+    "memoryPassed": true,
+    "memoryReceiptFailures": [],
+    "returncode": 0,
+    "type": null,
+    "validatedObservationCount": 42
+  },
+  {
+    "candidate": {
+      "count": 12,
+      "descriptiveBootstrap95Percent": [
+        -2.6099486865651222,
+        4.320223879607754
+      ],
+      "equalWorkChangePercent": 0.18640815491410834,
+      "fasterPairs": 5,
+      "medianPairedChangePercent": 1.1336785267001215,
+      "ratios": [
+        0.980982355746302,
+        1.0155410855153149,
+        1.0117987614964576,
+        1.0361067809820823,
+        1.0566875962563749,
+        1.052699358110152,
+        0.9958618277898799,
+        1.050297696610073,
+        0.9668186705223957,
+        0.9361942618163881,
+        0.9192587565509309,
+        1.0108748090375446
+      ],
+      "worstPairChangePercent": 5.668759625637487
+    },
+    "complete": true,
+    "control": {
+      "count": 4,
+      "descriptiveBootstrap95Percent": [
+        -0.7549306407473866,
+        4.096677682393879
+      ],
+      "equalWorkChangePercent": 1.571764477735016,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": 1.5114836945972598,
+      "ratios": [
+        0.9924506935925261,
+        1.0409667768239388,
+        1.0206799859796845,
+        1.009549687912261
+      ],
+      "worstPairChangePercent": 4.096677682393879
+    },
+    "dictionary": "vndb",
+    "error": null,
+    "memoryPairs": [
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1013660,
+          "candidate": 1003712,
+          "changePercent": -0.9813941558313388
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1237181,
+          "candidate": 1235167,
+          "changePercent": -0.1627894382471129
+        },
+        "pair": 1,
+        "qualified": true
+      },
+      {
+        "maxSampledPrivateKiB": {
+          "baseline": 1025420,
+          "candidate": null,
+          "changePercent": null
+        },
+        "maxSampledPssKiB": {
+          "baseline": 1254685,
+          "candidate": null,
+          "changePercent": null
+        },
+        "pair": 2,
+        "qualified": false
+      }
+    ],
+    "memoryPassed": false,
+    "memoryReceiptFailures": [],
+    "returncode": 0,
+    "type": null,
+    "validatedObservationCount": 42
+  }
+]

@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "prefix-jmdict",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 5031,
+      "gitBlobSha": "dff96d048145d8e276ac98f8de9373f855c353a5",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/acquisition.json",
+      "sha256": "b2d2564571c298283c4d5c39736acfd22b342dc4ec3648416b3f55fdae54acba"
+    },
+    {
+      "bytes": 5758,
+      "gitBlobSha": "d3e86196922621e20b9fc31e832b866f746cf5b2",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/archive-members.json",
+      "sha256": "96dc209f29950ea6c2b755bf2bc713ccdf7f33e53e8b707106553ef81aac206f"
+    },
+    {
+      "bytes": 22321,
+      "gitBlobSha": "65df2138e8e44f8e897ce6d456c9aba22db00ef3",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/independent-audit.json",
+      "sha256": "bb27dfc517da902c684c184a3f13360d963af28abf01af16169d862a19ddf906"
+    },
+    {
+      "bytes": 22303,
+      "gitBlobSha": "6cefe93f58e0382119e4c91b4a74e4e8eb73e760",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/summary.json",
+      "sha256": "f4e106e58128a6114fe7d4851fd8d0ebea06a1485f4ea147e1b183470f11e5e0"
+    },
+    {
+      "bytes": 71,
+      "gitBlobSha": "7c0645c29f1292f66bfc57fa0cf64283e74aa88b",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/audit.stdout.log",
+      "sha256": "da82f90b3bc0b0e079c4f42c8f0ace58550d03cccc9709fabc267435cd4e909d"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 174,
+      "gitBlobSha": "ff839c6713f96ab5846b2b2a94ce07d1119b5883",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/retention.json",
+      "sha256": "0bbf1f4b0b125e4120c6996cfa543dc630d6ba1c530820907f93bb0e7b52530b"
+    },
+    {
+      "bytes": 192,
+      "gitBlobSha": "e97023953dc6d41f0b998104d56dcd4db3f16503",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/resolution-polls.jsonl",
+      "sha256": "3ecdce29d7505378edbbcd24ba62aedfa0fdf68cf32fc934a31a12ca01b2905d"
+    },
+    {
+      "bytes": 175190,
+      "gitBlobSha": "0bd07064498f459c0ea2d6b5380970a4b6d0123c",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/original-artifact.zip",
+      "sha256": "207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15252998358,
+  "originalArtifactSha256": "207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae",
+  "originalRunId": 46114428610,
+  "unreferencedBlobsOnly": true
+}

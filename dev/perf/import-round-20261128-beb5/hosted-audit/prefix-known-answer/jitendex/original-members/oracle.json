@@ -1,0 +1,4776 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "sources": [
+    {
+      "directory": "/home/runner/work/_temp/prefix-baseline",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    {
+      "directory": "/home/runner/work/manabitan/manabitan",
+      "wasmSha256": "9972fb2df890f77fe43b3401b464c0ff1c36c4b89784b47268e3888bd7979d23",
+      "cSha256": "f66471812cf9748ba04d5f86ecc52fa9739a6e7a6afa5cf2e6e96798c425e942"
+    }
+  ],
+  "parserJavascriptPath": "/home/runner/work/_temp/prefix-baseline/ext/js/dictionary/term-bank-wasm-parser.js",
+  "parserJavascriptSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+  "cases": 42,
+  "comparisons": 242,
+  "passedSuccesses": 175,
+  "passedErrors": 67,
+  "observations": [
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "d074fce3bf69bcbc953ab3ba524d8b59fff1a07c82416250f52454d38ac2c1cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "d074fce3bf69bcbc953ab3ba524d8b59fff1a07c82416250f52454d38ac2c1cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "d074fce3bf69bcbc953ab3ba524d8b59fff1a07c82416250f52454d38ac2c1cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 11862016,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "d074fce3bf69bcbc953ab3ba524d8b59fff1a07c82416250f52454d38ac2c1cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "d074fce3bf69bcbc953ab3ba524d8b59fff1a07c82416250f52454d38ac2c1cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "9b7f1545feeeb874abf919b7f585853d2cb1437e1021afb6f24fe95775484528",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "6a4ca23a4b68b3e2173c6b896bd85a7e1e324fa2808e56ee12faf66e925a0fbf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "6a4ca23a4b68b3e2173c6b896bd85a7e1e324fa2808e56ee12faf66e925a0fbf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "6a4ca23a4b68b3e2173c6b896bd85a7e1e324fa2808e56ee12faf66e925a0fbf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "6a4ca23a4b68b3e2173c6b896bd85a7e1e324fa2808e56ee12faf66e925a0fbf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "6a4ca23a4b68b3e2173c6b896bd85a7e1e324fa2808e56ee12faf66e925a0fbf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-5",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "c67e87e407a8d09492914947a10371149ca4c0435d72554223783e819af5eb05",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "a470eeaaf09d405ebfd30c2d2166061f767210ea520ec00487d8d58e91ce2ef9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "a470eeaaf09d405ebfd30c2d2166061f767210ea520ec00487d8d58e91ce2ef9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "a470eeaaf09d405ebfd30c2d2166061f767210ea520ec00487d8d58e91ce2ef9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "a470eeaaf09d405ebfd30c2d2166061f767210ea520ec00487d8d58e91ce2ef9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "a470eeaaf09d405ebfd30c2d2166061f767210ea520ec00487d8d58e91ce2ef9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-19",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "207446feba7a80b279827d41360d307325d1099f434fe911f02daf95934bd8fd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "a346111bd55b5a4b6b54f2bf7f48e2838ad3439bef3545329959cdb444605972",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "a346111bd55b5a4b6b54f2bf7f48e2838ad3439bef3545329959cdb444605972",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "a346111bd55b5a4b6b54f2bf7f48e2838ad3439bef3545329959cdb444605972",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "a346111bd55b5a4b6b54f2bf7f48e2838ad3439bef3545329959cdb444605972",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "a346111bd55b5a4b6b54f2bf7f48e2838ad3439bef3545329959cdb444605972",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-63",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "bd290811ab706ab1552d9bd9f62b8cbbb7d247240d77faea5cb3e5bf0b92b5a9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "2d7ba82d37bc05d43c613640bcf3c3ee2c2aa31ed6984049bec1d21e4d359618",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "2d7ba82d37bc05d43c613640bcf3c3ee2c2aa31ed6984049bec1d21e4d359618",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "2d7ba82d37bc05d43c613640bcf3c3ee2c2aa31ed6984049bec1d21e4d359618",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "2d7ba82d37bc05d43c613640bcf3c3ee2c2aa31ed6984049bec1d21e4d359618",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "2d7ba82d37bc05d43c613640bcf3c3ee2c2aa31ed6984049bec1d21e4d359618",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-64",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "5c9e5352bca9fab44438644ffd81100e85907fe4507d948625c69204d8561dcf",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "2e936bb4d0c260555fec1007128cc61efbb0dd009ca77038692f8d3f8d0d4b73",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "2e936bb4d0c260555fec1007128cc61efbb0dd009ca77038692f8d3f8d0d4b73",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "2e936bb4d0c260555fec1007128cc61efbb0dd009ca77038692f8d3f8d0d4b73",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "2e936bb4d0c260555fec1007128cc61efbb0dd009ca77038692f8d3f8d0d4b73",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "2e936bb4d0c260555fec1007128cc61efbb0dd009ca77038692f8d3f8d0d4b73",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-65",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "a905e66b084a7137d051823211e3beabe157b38134d662af2fa8fa8a73fca17a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "68b9706d8f38acae5f27114d3158519c6b085220e3a6bca572f08b432adbda3c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "68b9706d8f38acae5f27114d3158519c6b085220e3a6bca572f08b432adbda3c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "68b9706d8f38acae5f27114d3158519c6b085220e3a6bca572f08b432adbda3c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "68b9706d8f38acae5f27114d3158519c6b085220e3a6bca572f08b432adbda3c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "68b9706d8f38acae5f27114d3158519c6b085220e3a6bca572f08b432adbda3c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-66",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "aadb58f004fc256ce6f91acf2d77e8e183206ad1d6a5fd8d041b78f8cd9409db",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "4f6687d18d8fb24798486cce54b43eff61e249bd94fde7d0d9ccb3ebe068cf81",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "4f6687d18d8fb24798486cce54b43eff61e249bd94fde7d0d9ccb3ebe068cf81",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "4f6687d18d8fb24798486cce54b43eff61e249bd94fde7d0d9ccb3ebe068cf81",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "4f6687d18d8fb24798486cce54b43eff61e249bd94fde7d0d9ccb3ebe068cf81",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "4f6687d18d8fb24798486cce54b43eff61e249bd94fde7d0d9ccb3ebe068cf81",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-67",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "8e0cbef84f1ba433f66748841cb3fc594c5c5cd69efb1b39b3680f0373a5bc2b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "27f39ad3f5f2f0fe051167f9c1ae52e5f7796e5bafac3ba6cf75ea1188ebd05b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "27f39ad3f5f2f0fe051167f9c1ae52e5f7796e5bafac3ba6cf75ea1188ebd05b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "27f39ad3f5f2f0fe051167f9c1ae52e5f7796e5bafac3ba6cf75ea1188ebd05b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "27f39ad3f5f2f0fe051167f9c1ae52e5f7796e5bafac3ba6cf75ea1188ebd05b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "27f39ad3f5f2f0fe051167f9c1ae52e5f7796e5bafac3ba6cf75ea1188ebd05b",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-68",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "43a868fce4a1c2e220ce8506099c00236d69600fd12efc452dd43203314d58de",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "40f59ec89ede56426500d232e348e4a5e05edd6259621e5be941635586d59e7a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "40f59ec89ede56426500d232e348e4a5e05edd6259621e5be941635586d59e7a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "40f59ec89ede56426500d232e348e4a5e05edd6259621e5be941635586d59e7a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "40f59ec89ede56426500d232e348e4a5e05edd6259621e5be941635586d59e7a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "40f59ec89ede56426500d232e348e4a5e05edd6259621e5be941635586d59e7a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-69",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "2c6eeefd3d1f0f5881ffb519b9aba1aded69bb4bcee6bd88d66790192fa93f07",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "a4a726d2d5a07eb89bb2cdd012de3f72b51ab5ffc8bd89312fec93f31a9b0bab",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "a4a726d2d5a07eb89bb2cdd012de3f72b51ab5ffc8bd89312fec93f31a9b0bab",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "a4a726d2d5a07eb89bb2cdd012de3f72b51ab5ffc8bd89312fec93f31a9b0bab",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "a4a726d2d5a07eb89bb2cdd012de3f72b51ab5ffc8bd89312fec93f31a9b0bab",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "a4a726d2d5a07eb89bb2cdd012de3f72b51ab5ffc8bd89312fec93f31a9b0bab",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-131",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "96e03764ffc51f85827c20d7c2ae138190a40ba82e302aa2c8e05308226a4aea",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "e8f277a8f04fd85dfc445f5c13a00a656649b6fc7d63ad635ec79a797b122ef7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "e8f277a8f04fd85dfc445f5c13a00a656649b6fc7d63ad635ec79a797b122ef7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "e8f277a8f04fd85dfc445f5c13a00a656649b6fc7d63ad635ec79a797b122ef7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "e8f277a8f04fd85dfc445f5c13a00a656649b6fc7d63ad635ec79a797b122ef7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "e8f277a8f04fd85dfc445f5c13a00a656649b6fc7d63ad635ec79a797b122ef7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-512",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "cc8499a496024899fb7fefc199fba78555dfdd54ae95d2514e4fc3c7cf11f32e",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "7be79ce87fb20fc4ef4aed6ec8ef29ca594cb66eb8b13369337e0a46b50262f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "7be79ce87fb20fc4ef4aed6ec8ef29ca594cb66eb8b13369337e0a46b50262f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "7be79ce87fb20fc4ef4aed6ec8ef29ca594cb66eb8b13369337e0a46b50262f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "7be79ce87fb20fc4ef4aed6ec8ef29ca594cb66eb8b13369337e0a46b50262f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "7be79ce87fb20fc4ef4aed6ec8ef29ca594cb66eb8b13369337e0a46b50262f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-513",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "acc983af2819d2be31957fac529778095a2c1ef9a2bcb3dfa01fdbe88cab8c46",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "24097d8740063c2a4111079dd131e67d07074a0f6038f026a3cecaa99062d399",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "24097d8740063c2a4111079dd131e67d07074a0f6038f026a3cecaa99062d399",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "24097d8740063c2a4111079dd131e67d07074a0f6038f026a3cecaa99062d399",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "24097d8740063c2a4111079dd131e67d07074a0f6038f026a3cecaa99062d399",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "24097d8740063c2a4111079dd131e67d07074a0f6038f026a3cecaa99062d399",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-515",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "52d8f2eea221c7b83513c27c896e6b86ae037d72178569492aa5ee004df27413",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "9704a99dad2197f41bfb4610d0b477927a15f11e5d09f088cbe07da54299b0b7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "9704a99dad2197f41bfb4610d0b477927a15f11e5d09f088cbe07da54299b0b7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "9704a99dad2197f41bfb4610d0b477927a15f11e5d09f088cbe07da54299b0b7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "9704a99dad2197f41bfb4610d0b477927a15f11e5d09f088cbe07da54299b0b7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "9704a99dad2197f41bfb4610d0b477927a15f11e5d09f088cbe07da54299b0b7",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-516",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "7560467dbd115e4bcf7ff6589a3ddc0ebfc8a1f27ed90c35fb2e0340596abe1c",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "74339b0beed4aad418562256d765344734ae90f0fee91bd104a33b7d7fee6ed4",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "74339b0beed4aad418562256d765344734ae90f0fee91bd104a33b7d7fee6ed4",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "74339b0beed4aad418562256d765344734ae90f0fee91bd104a33b7d7fee6ed4",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "74339b0beed4aad418562256d765344734ae90f0fee91bd104a33b7d7fee6ed4",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "74339b0beed4aad418562256d765344734ae90f0fee91bd104a33b7d7fee6ed4",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-517",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "ddbaad396eedb70a193a53e4982ca766343bc7adca288dcfaf1e73b451b7e74d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "042cb8907dfb5668ba19849c17e812a6e8863109933fecc26a9184968e7881f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "042cb8907dfb5668ba19849c17e812a6e8863109933fecc26a9184968e7881f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "042cb8907dfb5668ba19849c17e812a6e8863109933fecc26a9184968e7881f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "042cb8907dfb5668ba19849c17e812a6e8863109933fecc26a9184968e7881f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "042cb8907dfb5668ba19849c17e812a6e8863109933fecc26a9184968e7881f3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "raw-glossary-length-4101",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "29377abb1c9ceda67b4f6b8913118d4f09a449e44b0792ff478c96334eb3d959",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "default",
+      "rows": 78,
+      "error": null,
+      "digest": "b92e4e9c1955932504e57e7957c12dbb59bcf2d4209b05ccdb59e4d2b3fe289f",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 59,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "preload-crc",
+      "rows": 78,
+      "error": null,
+      "digest": "b92e4e9c1955932504e57e7957c12dbb59bcf2d4209b05ccdb59e4d2b3fe289f",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 59,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "reuse-disabled",
+      "rows": 78,
+      "error": null,
+      "digest": "b92e4e9c1955932504e57e7957c12dbb59bcf2d4209b05ccdb59e4d2b3fe289f",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "global-raw-reuse",
+      "rows": 78,
+      "error": null,
+      "digest": "b92e4e9c1955932504e57e7957c12dbb59bcf2d4209b05ccdb59e4d2b3fe289f",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 59,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "media-hints-off",
+      "rows": 78,
+      "error": null,
+      "digest": "d732bc5e8aa7fe37d8f4c49196f5afdf15ecdddec1ae47f29105ef2d3dfa34b1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 59,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "media-and-normalization-hints",
+      "variant": "split-chunks",
+      "rows": 78,
+      "error": null,
+      "digest": "ae962d744dcaca84599d61437287129405127a8f8cebcb43280f978bb805f4e6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 59,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "default",
+      "rows": 520,
+      "error": null,
+      "digest": "fda923d854edc551085dab03255d7b08b7040c75a626def6da0703293f252172",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "preload-crc",
+      "rows": 520,
+      "error": null,
+      "digest": "fda923d854edc551085dab03255d7b08b7040c75a626def6da0703293f252172",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "reuse-disabled",
+      "rows": 520,
+      "error": null,
+      "digest": "fda923d854edc551085dab03255d7b08b7040c75a626def6da0703293f252172",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "global-raw-reuse",
+      "rows": 520,
+      "error": null,
+      "digest": "fda923d854edc551085dab03255d7b08b7040c75a626def6da0703293f252172",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "media-hints-off",
+      "rows": 520,
+      "error": null,
+      "digest": "fda923d854edc551085dab03255d7b08b7040c75a626def6da0703293f252172",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-unique-negative-control",
+      "variant": "split-chunks",
+      "rows": 520,
+      "error": null,
+      "digest": "162f8a1178ca9c98cc91a2a3aae18c861fe5e1555f01d09db7e43423768d5ca0",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "default",
+      "rows": 520,
+      "error": null,
+      "digest": "05ec028e057692930a7567103df1d75373011c01713a2aef27fe4171ff6aa419",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "preload-crc",
+      "rows": 520,
+      "error": null,
+      "digest": "05ec028e057692930a7567103df1d75373011c01713a2aef27fe4171ff6aa419",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "reuse-disabled",
+      "rows": 520,
+      "error": null,
+      "digest": "05ec028e057692930a7567103df1d75373011c01713a2aef27fe4171ff6aa419",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "global-raw-reuse",
+      "rows": 520,
+      "error": null,
+      "digest": "05ec028e057692930a7567103df1d75373011c01713a2aef27fe4171ff6aa419",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "media-hints-off",
+      "rows": 520,
+      "error": null,
+      "digest": "05ec028e057692930a7567103df1d75373011c01713a2aef27fe4171ff6aa419",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "all-unique-negative-control",
+      "variant": "split-chunks",
+      "rows": 520,
+      "error": null,
+      "digest": "d65ec4af838887257024fbdb50f098c538d3da6eab7a523a8b6938ea7eb5a5f9",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "default",
+      "rows": 600,
+      "error": null,
+      "digest": "2beeec6bb8f34902bf00d06e1b607f82a309caeebcb619e9ca16af086e3700d2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "preload-crc",
+      "rows": 600,
+      "error": null,
+      "digest": "2beeec6bb8f34902bf00d06e1b607f82a309caeebcb619e9ca16af086e3700d2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "reuse-disabled",
+      "rows": 600,
+      "error": null,
+      "digest": "2beeec6bb8f34902bf00d06e1b607f82a309caeebcb619e9ca16af086e3700d2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "global-raw-reuse",
+      "rows": 600,
+      "error": null,
+      "digest": "2beeec6bb8f34902bf00d06e1b607f82a309caeebcb619e9ca16af086e3700d2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "media-hints-off",
+      "rows": 600,
+      "error": null,
+      "digest": "2beeec6bb8f34902bf00d06e1b607f82a309caeebcb619e9ca16af086e3700d2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "bounded-slot-overwrite-and-repeats",
+      "variant": "split-chunks",
+      "rows": 600,
+      "error": null,
+      "digest": "e90bff6a31b49c8b6f20f82d90df5580993e2784ea046d51d24fccb12d699481",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "default",
+      "rows": 2,
+      "error": null,
+      "digest": "f1216887c857136a8af1fdd7361818bf3982829f62acac76d7d1427335f3beff",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "preload-crc",
+      "rows": 2,
+      "error": null,
+      "digest": "f1216887c857136a8af1fdd7361818bf3982829f62acac76d7d1427335f3beff",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "reuse-disabled",
+      "rows": 2,
+      "error": null,
+      "digest": "f1216887c857136a8af1fdd7361818bf3982829f62acac76d7d1427335f3beff",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "global-raw-reuse",
+      "rows": 2,
+      "error": null,
+      "digest": "f1216887c857136a8af1fdd7361818bf3982829f62acac76d7d1427335f3beff",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "media-hints-off",
+      "rows": 2,
+      "error": null,
+      "digest": "f1216887c857136a8af1fdd7361818bf3982829f62acac76d7d1427335f3beff",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "generic-object-glossary",
+      "variant": "split-chunks",
+      "rows": 2,
+      "error": null,
+      "digest": "400dd8e21827f910662b92576701a81a91888bb594d62ca8055ea6654bce05cd",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "default",
+      "rows": 80,
+      "error": null,
+      "digest": "4029a264eb5e3095b37411e18e04bcd0f5bc76cac802330411312b47187d5a72",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 79,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "preload-crc",
+      "rows": 80,
+      "error": null,
+      "digest": "4029a264eb5e3095b37411e18e04bcd0f5bc76cac802330411312b47187d5a72",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 79,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "reuse-disabled",
+      "rows": 80,
+      "error": null,
+      "digest": "4029a264eb5e3095b37411e18e04bcd0f5bc76cac802330411312b47187d5a72",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "global-raw-reuse",
+      "rows": 80,
+      "error": null,
+      "digest": "4029a264eb5e3095b37411e18e04bcd0f5bc76cac802330411312b47187d5a72",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 72,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 79,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "media-hints-off",
+      "rows": 80,
+      "error": null,
+      "digest": "4029a264eb5e3095b37411e18e04bcd0f5bc76cac802330411312b47187d5a72",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 79,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "same-raw-different-metadata",
+      "variant": "split-chunks",
+      "rows": 80,
+      "error": null,
+      "digest": "a897acdf6bd54bf4ba64ca8af347b3e0f181ad3610e5c62f3cdff5b467aae492",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 79,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "default",
+      "rows": 14,
+      "error": null,
+      "digest": "383da5adbace89b907fa2270d29c0d5c409679f51a0ff058b4ed9673da770d43",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 2,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "preload-crc",
+      "rows": 14,
+      "error": null,
+      "digest": "383da5adbace89b907fa2270d29c0d5c409679f51a0ff058b4ed9673da770d43",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 2,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "reuse-disabled",
+      "rows": 14,
+      "error": null,
+      "digest": "383da5adbace89b907fa2270d29c0d5c409679f51a0ff058b4ed9673da770d43",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "global-raw-reuse",
+      "rows": 14,
+      "error": null,
+      "digest": "383da5adbace89b907fa2270d29c0d5c409679f51a0ff058b4ed9673da770d43",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 2,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "media-hints-off",
+      "rows": 14,
+      "error": null,
+      "digest": "383da5adbace89b907fa2270d29c0d5c409679f51a0ff058b4ed9673da770d43",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 2,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "nonlocal-identical-content-witness",
+      "variant": "split-chunks",
+      "rows": 14,
+      "error": null,
+      "digest": "7b944133ba526099dc9262dbc61c657a479c941ed4ff75099c7e544ac3bd275d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 2,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "default",
+      "rows": 200,
+      "error": null,
+      "digest": "8a21bbb90a1c86e4744d643ae1eb7276919d68005a6bf1256ffc632abd4883c6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "preload-crc",
+      "rows": 200,
+      "error": null,
+      "digest": "8a21bbb90a1c86e4744d643ae1eb7276919d68005a6bf1256ffc632abd4883c6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "reuse-disabled",
+      "rows": 200,
+      "error": null,
+      "digest": "8a21bbb90a1c86e4744d643ae1eb7276919d68005a6bf1256ffc632abd4883c6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "global-raw-reuse",
+      "rows": 200,
+      "error": null,
+      "digest": "8a21bbb90a1c86e4744d643ae1eb7276919d68005a6bf1256ffc632abd4883c6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "media-hints-off",
+      "rows": 200,
+      "error": null,
+      "digest": "8a21bbb90a1c86e4744d643ae1eb7276919d68005a6bf1256ffc632abd4883c6",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "common-prefix-and-tail-distinct-middle",
+      "variant": "split-chunks",
+      "rows": 200,
+      "error": null,
+      "digest": "a2c38f6e928a450921ae0142e917f20a3cbb0a9c97aee521f0647e2cb9e34ca8",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "default",
+      "rows": 4,
+      "error": null,
+      "digest": "48060020ad8c803c106e65847db82a098359d12facdeb73e40a93a85671e1ae2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "preload-crc",
+      "rows": 4,
+      "error": null,
+      "digest": "48060020ad8c803c106e65847db82a098359d12facdeb73e40a93a85671e1ae2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "reuse-disabled",
+      "rows": 4,
+      "error": null,
+      "digest": "48060020ad8c803c106e65847db82a098359d12facdeb73e40a93a85671e1ae2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "global-raw-reuse",
+      "rows": 4,
+      "error": null,
+      "digest": "48060020ad8c803c106e65847db82a098359d12facdeb73e40a93a85671e1ae2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "media-hints-off",
+      "rows": 4,
+      "error": null,
+      "digest": "48060020ad8c803c106e65847db82a098359d12facdeb73e40a93a85671e1ae2",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "distinct-prefix-hash-collision",
+      "variant": "split-chunks",
+      "rows": 4,
+      "error": null,
+      "digest": "a98105784d100dc83fd1e42c8268ff04c7841495f4bbe52117bf6c9bc3daca41",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 1,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-26",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-27",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-28",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-29",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "default",
+      "rows": 2,
+      "error": null,
+      "digest": "2e727e6c0e226b0a13d117c19ebf7a400edebb2240cc93c89aa1e914b697c33a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "preload-crc",
+      "rows": 2,
+      "error": null,
+      "digest": "2e727e6c0e226b0a13d117c19ebf7a400edebb2240cc93c89aa1e914b697c33a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "reuse-disabled",
+      "rows": 2,
+      "error": null,
+      "digest": "2e727e6c0e226b0a13d117c19ebf7a400edebb2240cc93c89aa1e914b697c33a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "global-raw-reuse",
+      "rows": 2,
+      "error": null,
+      "digest": "2e727e6c0e226b0a13d117c19ebf7a400edebb2240cc93c89aa1e914b697c33a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "media-hints-off",
+      "rows": 2,
+      "error": null,
+      "digest": "2e727e6c0e226b0a13d117c19ebf7a400edebb2240cc93c89aa1e914b697c33a",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-30",
+      "variant": "split-chunks",
+      "rows": 2,
+      "error": null,
+      "digest": "8939d4aacccd4e22e4f74baa7a50236f4f1f08029f508923856f6100102ed595",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "malformed-tail-31",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "digest": "eb4f98babbfa7a2d1b3d1967e742c0ee3afa4e788c7e4310db55a7f39af68543",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-32",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "digest": "eb4f98babbfa7a2d1b3d1967e742c0ee3afa4e788c7e4310db55a7f39af68543",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-33",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "digest": "eb4f98babbfa7a2d1b3d1967e742c0ee3afa4e788c7e4310db55a7f39af68543",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-34",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "digest": "eb4f98babbfa7a2d1b3d1967e742c0ee3afa4e788c7e4310db55a7f39af68543",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-35",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Compressed term-bank source failed validation: inflated term bank is not a JSON array"
+      },
+      "digest": "eb4f98babbfa7a2d1b3d1967e742c0ee3afa4e788c7e4310db55a7f39af68543",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "truncated-bank-36",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "Expected a JSON array in term-bank source fragment"
+      },
+      "digest": "269a35274da8f72157783ac9df276232ab3613142b10e5b7a2f3ec902ccc3980",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "default",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "reuse-disabled",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "global-raw-reuse",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "media-hints-off",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "invalid-row-delimiter-after-reuse",
+      "variant": "split-chunks",
+      "rows": 0,
+      "error": {
+        "name": "Error",
+        "message": "fused term-bank parser failed with code -1"
+      },
+      "digest": "53d8f52ad9b896b741f9027ea42861b65de4800a330b7b9011a996a1a56e4406",
+      "baseline": {
+        "crcDeferred": false
+      },
+      "candidate": {
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "default",
+      "rows": 2,
+      "error": null,
+      "digest": "fb128eb150c53fd516f882886ae63370b4ba845751188e881a0a5041642b18a1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "preload-crc",
+      "rows": 2,
+      "error": null,
+      "digest": "fb128eb150c53fd516f882886ae63370b4ba845751188e881a0a5041642b18a1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "reuse-disabled",
+      "rows": 2,
+      "error": null,
+      "digest": "fb128eb150c53fd516f882886ae63370b4ba845751188e881a0a5041642b18a1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "global-raw-reuse",
+      "rows": 2,
+      "error": null,
+      "digest": "fb128eb150c53fd516f882886ae63370b4ba845751188e881a0a5041642b18a1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "media-hints-off",
+      "rows": 2,
+      "error": null,
+      "digest": "fb128eb150c53fd516f882886ae63370b4ba845751188e881a0a5041642b18a1",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "escaped-equivalent-raw-different",
+      "variant": "split-chunks",
+      "rows": 2,
+      "error": null,
+      "digest": "85da11c8c8ba7b9801d62067f0a467c56aef3cb7fe5e2778655f2e4ce5063df3",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "default",
+      "rows": 2,
+      "error": null,
+      "digest": "49b3df0d1dc588705bfc3ef00e8a5914fb5821e244d9e6f40b578d7057493e8d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "preload-crc",
+      "rows": 2,
+      "error": null,
+      "digest": "49b3df0d1dc588705bfc3ef00e8a5914fb5821e244d9e6f40b578d7057493e8d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "reuse-disabled",
+      "rows": 2,
+      "error": null,
+      "digest": "49b3df0d1dc588705bfc3ef00e8a5914fb5821e244d9e6f40b578d7057493e8d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "global-raw-reuse",
+      "rows": 2,
+      "error": null,
+      "digest": "49b3df0d1dc588705bfc3ef00e8a5914fb5821e244d9e6f40b578d7057493e8d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "media-hints-off",
+      "rows": 2,
+      "error": null,
+      "digest": "49b3df0d1dc588705bfc3ef00e8a5914fb5821e244d9e6f40b578d7057493e8d",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "deep-valid-structured-content",
+      "variant": "split-chunks",
+      "rows": 2,
+      "error": null,
+      "digest": "c555db35551ac589f88fcd655398caea50b40683d521e5695496d8eb79fe7c47",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 12255232,
+        "crcDeferred": false
+      }
+    },
+    {
+      "case": "actual-deferred-crc-nonlocal-witnesses",
+      "variant": "preload-crc",
+      "rows": 24000,
+      "error": null,
+      "digest": "01a78c2d5229c3783ebdf517d99663ff46187160e6b14c3352ea3f2018d97163",
+      "baseline": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 0,
+        "maxWasmHeapBytes": 23330816,
+        "crcVerified": true,
+        "crcDeferred": true,
+        "crcReusedGlossaryCount": 0
+      },
+      "candidate": {
+        "fusedAttempts": 1,
+        "fusedFallbacks": 0,
+        "glossaryReuseHits": 23932,
+        "maxWasmHeapBytes": 23330816,
+        "crcVerified": true,
+        "crcDeferred": true,
+        "crcReusedGlossaryCount": 23932
+      }
+    },
+    {
+      "case": "actual-deferred-crc-invalid-signature",
+      "variant": "preload-crc",
+      "rows": 0,
+      "error": {
+        "name": "DictionarySourceIntegrityError",
+        "message": "Compressed term-bank source failed validation: inflated bytes do not match the ZIP CRC32"
+      },
+      "digest": "69264820e5887cc71c4566a62f241de37072aa9df1721b2d1255efd7935fae48",
+      "baseline": {
+        "crcDeferred": true
+      },
+      "candidate": {
+        "crcDeferred": true
+      }
+    }
+  ],
+  "notes": "Independent correctness only. Both frozen native modules use byte-identical baseline production JS. Full exposed columns, canonical bytes, hashes, keys, lookup bytes, dedup plans, media and exact errors/emitted prefixes are compared. Sequential parses reuse each instance to check call-local cache lifetime. No timing or full-browser claim."
+}

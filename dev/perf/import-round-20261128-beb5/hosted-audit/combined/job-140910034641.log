@@ -1,0 +1,1392 @@
+﻿2026-11-28T08:24:54.7615566Z Current runner version: '2.338.2'
+2026-11-28T08:24:54.7637251Z ##[group]Runner Image Provisioner
+2026-11-28T08:24:54.7638056Z Hosted Compute Agent
+2026-11-28T08:24:54.7638634Z Version: 20261111.635
+2026-11-28T08:24:54.7639345Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T08:24:54.7640300Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T08:24:54.7640910Z Worker ID: {754d1a82-738e-4a43-bbfd-cf18c886a911}
+2026-11-28T08:24:54.7641513Z Region: eastus2
+2026-11-28T08:24:54.7642016Z Cloud: Azure
+2026-11-28T08:24:54.7642523Z ##[endgroup]
+2026-11-28T08:24:54.7643790Z ##[group]Operating System
+2026-11-28T08:24:54.7644323Z Ubuntu
+2026-11-28T08:24:54.7644992Z 24.04.5
+2026-11-28T08:24:54.7645540Z LTS
+2026-11-28T08:24:54.7645986Z ##[endgroup]
+2026-11-28T08:24:54.7646465Z ##[group]Runner Image
+2026-11-28T08:24:54.7647028Z Image: ubuntu-24.04
+2026-11-28T08:24:54.7647503Z Version: 20261122.23.1
+2026-11-28T08:24:54.7648582Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261122.23/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-28T08:24:54.7649821Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261122.23
+2026-11-28T08:24:54.7650674Z ##[endgroup]
+2026-11-28T08:24:54.7651652Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T08:24:54.7653454Z Actions: read
+2026-11-28T08:24:54.7653988Z Contents: write
+2026-11-28T08:24:54.7654572Z Metadata: read
+2026-11-28T08:24:54.7655286Z ##[endgroup]
+2026-11-28T08:24:54.7657326Z Secret source: Actions
+2026-11-28T08:24:54.7658189Z Cache mode: write
+2026-11-28T08:24:54.7658932Z Prepare workflow directory
+2026-11-28T08:24:54.8230247Z Prepare all required actions
+2026-11-28T08:24:54.8285207Z Getting action download info
+2026-11-28T08:24:55.0072491Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T08:24:55.1594193Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-28T08:24:55.4065917Z Complete job name: Audit six frozen corpora and preserve the registered CRC screen
+2026-11-28T08:24:55.5722323Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:24:55.5723134Z with:
+2026-11-28T08:24:55.5723464Z   path: audit
+2026-11-28T08:24:55.5723817Z   persist-credentials: false
+2026-11-28T08:24:55.5724232Z   repository: ManabiIO/manabitan
+2026-11-28T08:24:55.5727378Z   token: ***
+2026-11-28T08:24:55.5727726Z   ssh-strict: true
+2026-11-28T08:24:55.5728063Z   ssh-user: git
+2026-11-28T08:24:55.5728391Z   clean: true
+2026-11-28T08:24:55.5728733Z   sparse-checkout-cone-mode: true
+2026-11-28T08:24:55.5729133Z   fetch-depth: 1
+2026-11-28T08:24:55.5729460Z   fetch-tags: false
+2026-11-28T08:24:55.5729799Z   show-progress: true
+2026-11-28T08:24:55.5730148Z   lfs: false
+2026-11-28T08:24:55.5730466Z   submodules: false
+2026-11-28T08:24:55.5730810Z   set-safe-directory: true
+2026-11-28T08:24:55.5731203Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:24:55.5731794Z ##[endgroup]
+2026-11-28T08:24:55.8293024Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:24:55.8295158Z ##[group]Getting Git version info
+2026-11-28T08:24:55.8296089Z Working directory is '/home/runner/work/manabitan/manabitan/audit'
+2026-11-28T08:24:55.8297389Z [command]/usr/bin/git version
+2026-11-28T08:24:55.8369259Z git version 2.56.1
+2026-11-28T08:24:55.8387841Z ##[endgroup]
+2026-11-28T08:24:55.8399927Z Temporarily overriding HOME='/home/runner/work/_temp/e8c4185b-a6dc-48cb-86d5-f4ef7b3f5139' before making global git config changes
+2026-11-28T08:24:55.8402024Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:24:55.8404314Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/audit
+2026-11-28T08:24:55.8467519Z ##[group]Determining repository object format
+2026-11-28T08:24:55.8469877Z ##[endgroup]
+2026-11-28T08:24:55.8470785Z ##[group]Initializing the repository
+2026-11-28T08:24:55.8473916Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/audit
+2026-11-28T08:24:55.8581847Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:24:55.8583116Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:24:55.8583879Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:24:55.8584454Z hint: call:
+2026-11-28T08:24:55.8584941Z hint:
+2026-11-28T08:24:55.8585357Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:24:55.8585838Z hint:
+2026-11-28T08:24:55.8586290Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:24:55.8587005Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:24:55.8587573Z hint:
+2026-11-28T08:24:55.8587900Z hint: 	git branch -m <name>
+2026-11-28T08:24:55.8588278Z hint:
+2026-11-28T08:24:55.8588898Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:24:55.8590422Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/audit/.git/
+2026-11-28T08:24:55.8606459Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:24:55.8650631Z ##[endgroup]
+2026-11-28T08:24:55.8651550Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:24:55.8654626Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:24:55.8685113Z ##[endgroup]
+2026-11-28T08:24:55.8686027Z ##[group]Setting up auth
+2026-11-28T08:24:55.8687049Z Removing SSH command configuration
+2026-11-28T08:24:55.8691392Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:24:55.8734393Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:24:55.9127031Z Removing HTTP extra header
+2026-11-28T08:24:55.9137748Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:24:55.9177516Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:24:55.9373653Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:24:55.9379233Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:24:55.9415699Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:24:55.9621571Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:24:55.9662129Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/audit/.git.path /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:55.9697831Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/audit/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:55.9733471Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/audit/.git.path /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:55.9769856Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/audit/.git/worktrees/*.path /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:55.9801699Z ##[endgroup]
+2026-11-28T08:24:55.9802283Z ##[group]Fetching the repository
+2026-11-28T08:24:55.9808598Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb:refs/remotes/origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.3261381Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:24:58.3263064Z  * [new ref]         12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb -> origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.3276591Z [command]/usr/bin/git branch --list --remote origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.3312845Z   origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.3322524Z [command]/usr/bin/git rev-parse refs/remotes/origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.3351726Z 12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb
+2026-11-28T08:24:58.3376634Z ##[endgroup]
+2026-11-28T08:24:58.3377588Z ##[group]Determining the checkout info
+2026-11-28T08:24:58.3378630Z ##[endgroup]
+2026-11-28T08:24:58.3379424Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T08:24:58.3421930Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T08:24:58.3459756Z ##[group]Checking out the ref
+2026-11-28T08:24:58.3462267Z [command]/usr/bin/git checkout --progress --force -B test/frozen-import-artifact-audit-20261128-beb5 refs/remotes/origin/test/frozen-import-artifact-audit-20261128-beb5
+2026-11-28T08:24:58.8725049Z Switched to a new branch 'test/frozen-import-artifact-audit-20261128-beb5'
+2026-11-28T08:24:58.8728718Z branch 'test/frozen-import-artifact-audit-20261128-beb5' set up to track 'origin/test/frozen-import-artifact-audit-20261128-beb5'.
+2026-11-28T08:24:58.8756892Z ##[endgroup]
+2026-11-28T08:24:58.8804585Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:24:58.8833141Z 12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb
+2026-11-28T08:24:58.8844561Z ##[group]Removing auth
+2026-11-28T08:24:58.8845144Z Removing SSH command configuration
+2026-11-28T08:24:58.8847204Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:24:58.8882106Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:24:58.9087122Z Removing HTTP extra header
+2026-11-28T08:24:58.9090859Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:24:58.9126662Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:24:58.9331476Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:24:58.9335531Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:24:58.9370094Z includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git.path
+2026-11-28T08:24:58.9371105Z includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git/worktrees/*.path
+2026-11-28T08:24:58.9372137Z includeif.gitdir:/github/workspace/audit/.git.path
+2026-11-28T08:24:58.9372990Z includeif.gitdir:/github/workspace/audit/.git/worktrees/*.path
+2026-11-28T08:24:58.9378445Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git.path
+2026-11-28T08:24:58.9405804Z /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9414183Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git.path /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9452688Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git/worktrees/*.path
+2026-11-28T08:24:58.9479536Z /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9487917Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/audit/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9528058Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/audit/.git.path
+2026-11-28T08:24:58.9561394Z /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9568459Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/audit/.git.path /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9603265Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/audit/.git/worktrees/*.path
+2026-11-28T08:24:58.9629222Z /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9636421Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/audit/.git/worktrees/*.path /github/runner_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config
+2026-11-28T08:24:58.9672320Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:24:58.9872116Z Removing credentials config '/home/runner/work/_temp/git-credentials-7f1e598e-e875-418f-8c4a-b8bbb7e7cb5c.config'
+2026-11-28T08:24:58.9881320Z ##[endgroup]
+2026-11-28T08:24:59.0112795Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:24:59.0113294Z with:
+2026-11-28T08:24:59.0113641Z   ref: 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0
+2026-11-28T08:24:59.0114050Z   path: original-source
+2026-11-28T08:24:59.0114410Z   persist-credentials: false
+2026-11-28T08:24:59.0115223Z   sparse-checkout: ext/js
+dev/data/dictionary-wasm
+dev/perf/whole-glossary-prefix-20261128
+test/perf
+.github/workflows
+
+2026-11-28T08:24:59.0115886Z   repository: ManabiIO/manabitan
+2026-11-28T08:24:59.0118274Z   token: ***
+2026-11-28T08:24:59.0118592Z   ssh-strict: true
+2026-11-28T08:24:59.0118917Z   ssh-user: git
+2026-11-28T08:24:59.0119250Z   clean: true
+2026-11-28T08:24:59.0119590Z   sparse-checkout-cone-mode: true
+2026-11-28T08:24:59.0119967Z   fetch-depth: 1
+2026-11-28T08:24:59.0120279Z   fetch-tags: false
+2026-11-28T08:24:59.0120601Z   show-progress: true
+2026-11-28T08:24:59.0120925Z   lfs: false
+2026-11-28T08:24:59.0121228Z   submodules: false
+2026-11-28T08:24:59.0121591Z   set-safe-directory: true
+2026-11-28T08:24:59.0121961Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:24:59.0122324Z ##[endgroup]
+2026-11-28T08:24:59.0823871Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:24:59.0830445Z ##[group]Getting Git version info
+2026-11-28T08:24:59.0831409Z Working directory is '/home/runner/work/manabitan/manabitan/original-source'
+2026-11-28T08:24:59.0859684Z [command]/usr/bin/git version
+2026-11-28T08:24:59.0895921Z git version 2.56.1
+2026-11-28T08:24:59.0913758Z ##[endgroup]
+2026-11-28T08:24:59.0925928Z Temporarily overriding HOME='/home/runner/work/_temp/804bcc23-dde4-478d-888f-6353f25b4785' before making global git config changes
+2026-11-28T08:24:59.0927623Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:24:59.0929868Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/original-source
+2026-11-28T08:24:59.0962697Z ##[group]Determining repository object format
+2026-11-28T08:24:59.0965141Z ##[endgroup]
+2026-11-28T08:24:59.0966110Z ##[group]Initializing the repository
+2026-11-28T08:24:59.0969192Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/original-source
+2026-11-28T08:24:59.1010905Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:24:59.1012689Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:24:59.1014096Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:24:59.1015886Z hint: call:
+2026-11-28T08:24:59.1016547Z hint:
+2026-11-28T08:24:59.1017310Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:24:59.1018558Z hint:
+2026-11-28T08:24:59.1019537Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:24:59.1020904Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:24:59.1022059Z hint:
+2026-11-28T08:24:59.1022926Z hint: 	git branch -m <name>
+2026-11-28T08:24:59.1023565Z hint:
+2026-11-28T08:24:59.1024323Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:24:59.1025669Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/original-source/.git/
+2026-11-28T08:24:59.1027841Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:24:59.1051309Z ##[endgroup]
+2026-11-28T08:24:59.1052231Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:24:59.1055029Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:24:59.1118030Z ##[endgroup]
+2026-11-28T08:24:59.1118649Z ##[group]Setting up auth
+2026-11-28T08:24:59.1119113Z Removing SSH command configuration
+2026-11-28T08:24:59.1123272Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:24:59.1158432Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:24:59.1401426Z Removing HTTP extra header
+2026-11-28T08:24:59.1408955Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:24:59.1442921Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:24:59.1660141Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:24:59.1665602Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:24:59.1703198Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:24:59.1925494Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:24:59.1965706Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git.path /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:24:59.1999918Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:24:59.2035511Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/original-source/.git.path /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:24:59.2076316Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/original-source/.git/worktrees/*.path /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:24:59.2108086Z ##[endgroup]
+2026-11-28T08:24:59.2108545Z ##[group]Fetching the repository
+2026-11-28T08:24:59.2113908Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0
+2026-11-28T08:24:59.4157956Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:24:59.4159004Z  * branch            47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0 -> FETCH_HEAD
+2026-11-28T08:24:59.4169145Z [command]/usr/bin/git rev-parse --verify --quiet 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0^{object}
+2026-11-28T08:24:59.4201266Z 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0
+2026-11-28T08:24:59.4206524Z ##[endgroup]
+2026-11-28T08:24:59.4207056Z ##[group]Determining the checkout info
+2026-11-28T08:24:59.4208042Z ##[endgroup]
+2026-11-28T08:24:59.4208495Z ##[group]Setting up sparse checkout
+2026-11-28T08:24:59.4211861Z [command]/usr/bin/git sparse-checkout set ext/js dev/data/dictionary-wasm dev/perf/whole-glossary-prefix-20261128 test/perf .github/workflows
+2026-11-28T08:24:59.4256880Z ##[endgroup]
+2026-11-28T08:24:59.4257232Z ##[group]Checking out the ref
+2026-11-28T08:24:59.4259912Z [command]/usr/bin/git checkout --progress --force 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0
+2026-11-28T08:25:00.7698318Z Updating files:   0% (1/1129)
+2026-11-28T08:25:00.7705307Z Updating files:   1% (12/1129)
+2026-11-28T08:25:00.7710961Z Updating files:   2% (23/1129)
+2026-11-28T08:25:00.7714655Z Updating files:   3% (34/1129)
+2026-11-28T08:25:00.7721419Z Updating files:   4% (46/1129)
+2026-11-28T08:25:00.7730875Z Updating files:   5% (57/1129)
+2026-11-28T08:25:00.7750770Z Updating files:   6% (68/1129)
+2026-11-28T08:25:00.7759667Z Updating files:   7% (80/1129)
+2026-11-28T08:25:00.7765763Z Updating files:   8% (91/1129)
+2026-11-28T08:25:00.7795316Z Updating files:   9% (102/1129)
+2026-11-28T08:25:00.7802377Z Updating files:  10% (113/1129)
+2026-11-28T08:25:00.7810264Z Updating files:  11% (125/1129)
+2026-11-28T08:25:00.7826356Z Updating files:  12% (136/1129)
+2026-11-28T08:25:00.7835435Z Updating files:  13% (147/1129)
+2026-11-28T08:25:00.7843031Z Updating files:  14% (159/1129)
+2026-11-28T08:25:00.7848135Z Updating files:  15% (170/1129)
+2026-11-28T08:25:00.7854357Z Updating files:  16% (181/1129)
+2026-11-28T08:25:00.7863023Z Updating files:  17% (192/1129)
+2026-11-28T08:25:00.7874311Z Updating files:  18% (204/1129)
+2026-11-28T08:25:00.7888247Z Updating files:  19% (215/1129)
+2026-11-28T08:25:00.7898529Z Updating files:  20% (226/1129)
+2026-11-28T08:25:00.7908617Z Updating files:  21% (238/1129)
+2026-11-28T08:25:00.7922357Z Updating files:  22% (249/1129)
+2026-11-28T08:25:00.7938107Z Updating files:  23% (260/1129)
+2026-11-28T08:25:00.7951772Z Updating files:  24% (271/1129)
+2026-11-28T08:25:00.7962353Z Updating files:  25% (283/1129)
+2026-11-28T08:25:00.7971859Z Updating files:  26% (294/1129)
+2026-11-28T08:25:00.7980297Z Updating files:  27% (305/1129)
+2026-11-28T08:25:00.7985986Z Updating files:  28% (317/1129)
+2026-11-28T08:25:00.7992987Z Updating files:  29% (328/1129)
+2026-11-28T08:25:00.8001262Z Updating files:  30% (339/1129)
+2026-11-28T08:25:00.8016376Z Updating files:  31% (350/1129)
+2026-11-28T08:25:00.8023809Z Updating files:  32% (362/1129)
+2026-11-28T08:25:00.8034242Z Updating files:  33% (373/1129)
+2026-11-28T08:25:00.8043429Z Updating files:  34% (384/1129)
+2026-11-28T08:25:00.8052089Z Updating files:  35% (396/1129)
+2026-11-28T08:25:00.8066045Z Updating files:  36% (407/1129)
+2026-11-28T08:25:00.8073950Z Updating files:  37% (418/1129)
+2026-11-28T08:25:00.8083631Z Updating files:  38% (430/1129)
+2026-11-28T08:25:00.8090601Z Updating files:  39% (441/1129)
+2026-11-28T08:25:00.8097047Z Updating files:  40% (452/1129)
+2026-11-28T08:25:00.8105083Z Updating files:  41% (463/1129)
+2026-11-28T08:25:00.8118914Z Updating files:  42% (475/1129)
+2026-11-28T08:25:00.8124384Z Updating files:  43% (486/1129)
+2026-11-28T08:25:00.8131275Z Updating files:  44% (497/1129)
+2026-11-28T08:25:00.8137597Z Updating files:  45% (509/1129)
+2026-11-28T08:25:00.8144066Z Updating files:  46% (520/1129)
+2026-11-28T08:25:00.8150560Z Updating files:  47% (531/1129)
+2026-11-28T08:25:00.8157423Z Updating files:  48% (542/1129)
+2026-11-28T08:25:00.8163147Z Updating files:  49% (554/1129)
+2026-11-28T08:25:00.8168986Z Updating files:  50% (565/1129)
+2026-11-28T08:25:00.8176249Z Updating files:  51% (576/1129)
+2026-11-28T08:25:00.8182476Z Updating files:  52% (588/1129)
+2026-11-28T08:25:00.8189288Z Updating files:  53% (599/1129)
+2026-11-28T08:25:00.8200436Z Updating files:  54% (610/1129)
+2026-11-28T08:25:00.8206704Z Updating files:  55% (621/1129)
+2026-11-28T08:25:00.8212929Z Updating files:  56% (633/1129)
+2026-11-28T08:25:00.8219769Z Updating files:  57% (644/1129)
+2026-11-28T08:25:00.8229155Z Updating files:  58% (655/1129)
+2026-11-28T08:25:00.8236281Z Updating files:  59% (667/1129)
+2026-11-28T08:25:00.8241803Z Updating files:  60% (678/1129)
+2026-11-28T08:25:00.8248810Z Updating files:  61% (689/1129)
+2026-11-28T08:25:00.8256775Z Updating files:  62% (700/1129)
+2026-11-28T08:25:00.8263961Z Updating files:  63% (712/1129)
+2026-11-28T08:25:00.8270482Z Updating files:  64% (723/1129)
+2026-11-28T08:25:00.8280187Z Updating files:  65% (734/1129)
+2026-11-28T08:25:00.8286554Z Updating files:  66% (746/1129)
+2026-11-28T08:25:00.8292376Z Updating files:  67% (757/1129)
+2026-11-28T08:25:00.8298915Z Updating files:  68% (768/1129)
+2026-11-28T08:25:00.8306263Z Updating files:  69% (780/1129)
+2026-11-28T08:25:00.8311982Z Updating files:  70% (791/1129)
+2026-11-28T08:25:00.8319143Z Updating files:  71% (802/1129)
+2026-11-28T08:25:00.8326730Z Updating files:  72% (813/1129)
+2026-11-28T08:25:00.8331176Z Updating files:  73% (825/1129)
+2026-11-28T08:25:00.8338833Z Updating files:  74% (836/1129)
+2026-11-28T08:25:00.8344939Z Updating files:  75% (847/1129)
+2026-11-28T08:25:00.8352427Z Updating files:  76% (859/1129)
+2026-11-28T08:25:00.8360915Z Updating files:  77% (870/1129)
+2026-11-28T08:25:00.8367830Z Updating files:  78% (881/1129)
+2026-11-28T08:25:00.8375849Z Updating files:  79% (892/1129)
+2026-11-28T08:25:00.8383062Z Updating files:  80% (904/1129)
+2026-11-28T08:25:00.8389407Z Updating files:  81% (915/1129)
+2026-11-28T08:25:00.8393908Z Updating files:  82% (926/1129)
+2026-11-28T08:25:00.8400676Z Updating files:  83% (938/1129)
+2026-11-28T08:25:00.8407980Z Updating files:  84% (949/1129)
+2026-11-28T08:25:00.8414167Z Updating files:  85% (960/1129)
+2026-11-28T08:25:00.8420625Z Updating files:  86% (971/1129)
+2026-11-28T08:25:00.8428187Z Updating files:  87% (983/1129)
+2026-11-28T08:25:00.8433950Z Updating files:  88% (994/1129)
+2026-11-28T08:25:00.8440846Z Updating files:  89% (1005/1129)
+2026-11-28T08:25:00.8452841Z Updating files:  90% (1017/1129)
+2026-11-28T08:25:00.8460952Z Updating files:  91% (1028/1129)
+2026-11-28T08:25:00.8466697Z Updating files:  92% (1039/1129)
+2026-11-28T08:25:00.8481147Z Updating files:  93% (1050/1129)
+2026-11-28T08:25:00.8487673Z Updating files:  94% (1062/1129)
+2026-11-28T08:25:00.8493404Z Updating files:  95% (1073/1129)
+2026-11-28T08:25:00.8499953Z Updating files:  96% (1084/1129)
+2026-11-28T08:25:00.8504639Z Updating files:  97% (1096/1129)
+2026-11-28T08:25:00.8510513Z Updating files:  98% (1107/1129)
+2026-11-28T08:25:00.8517183Z Updating files:  99% (1118/1129)
+2026-11-28T08:25:00.8517662Z Updating files: 100% (1129/1129)
+2026-11-28T08:25:00.8518001Z Updating files: 100% (1129/1129), done.
+2026-11-28T08:25:00.8544979Z Note: switching to '47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0'.
+2026-11-28T08:25:00.8545364Z 
+2026-11-28T08:25:00.8545617Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T08:25:00.8546188Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T08:25:00.8546763Z state without impacting any branches by switching back to a branch.
+2026-11-28T08:25:00.8547095Z 
+2026-11-28T08:25:00.8547296Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T08:25:00.8547825Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T08:25:00.8548139Z 
+2026-11-28T08:25:00.8548264Z   git switch -c <new-branch-name>
+2026-11-28T08:25:00.8548487Z 
+2026-11-28T08:25:00.8548610Z Or undo this operation with:
+2026-11-28T08:25:00.8548802Z 
+2026-11-28T08:25:00.8548911Z   git switch -
+2026-11-28T08:25:00.8549049Z 
+2026-11-28T08:25:00.8549301Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T08:25:00.8549656Z 
+2026-11-28T08:25:00.8550016Z HEAD is now at 47f3c32 Stage real dependency paths for strict prefix package identity checks
+2026-11-28T08:25:00.8556610Z ##[endgroup]
+2026-11-28T08:25:00.8601130Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:25:00.8630739Z 47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0
+2026-11-28T08:25:00.8639073Z ##[group]Removing auth
+2026-11-28T08:25:00.8639510Z Removing SSH command configuration
+2026-11-28T08:25:00.8642402Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:00.8679799Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:00.8887480Z Removing HTTP extra header
+2026-11-28T08:25:00.8891821Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:00.8927209Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:00.9131296Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:00.9135459Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:00.9163636Z includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git.path
+2026-11-28T08:25:00.9164340Z includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git/worktrees/*.path
+2026-11-28T08:25:00.9164948Z includeif.gitdir:/github/workspace/original-source/.git.path
+2026-11-28T08:25:00.9165622Z includeif.gitdir:/github/workspace/original-source/.git/worktrees/*.path
+2026-11-28T08:25:00.9172439Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git.path
+2026-11-28T08:25:00.9200445Z /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9209448Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git.path /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9248457Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git/worktrees/*.path
+2026-11-28T08:25:00.9276547Z /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9283818Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/original-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9335320Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/original-source/.git.path
+2026-11-28T08:25:00.9354442Z /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9380668Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/original-source/.git.path /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9402863Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/original-source/.git/worktrees/*.path
+2026-11-28T08:25:00.9431145Z /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9438080Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/original-source/.git/worktrees/*.path /github/runner_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config
+2026-11-28T08:25:00.9475272Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:00.9676661Z Removing credentials config '/home/runner/work/_temp/git-credentials-0014241c-b3c8-4082-ac45-3109e9055b17.config'
+2026-11-28T08:25:00.9685035Z ##[endgroup]
+2026-11-28T08:25:00.9853453Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:25:00.9853761Z with:
+2026-11-28T08:25:00.9853964Z   ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T08:25:00.9854195Z   path: baseline
+2026-11-28T08:25:00.9854372Z   persist-credentials: false
+2026-11-28T08:25:00.9855011Z   sparse-checkout: ext/js
+dev/data/dictionary-wasm
+test/perf
+
+2026-11-28T08:25:00.9855294Z   repository: ManabiIO/manabitan
+2026-11-28T08:25:00.9857293Z   token: ***
+2026-11-28T08:25:00.9857463Z   ssh-strict: true
+2026-11-28T08:25:00.9857630Z   ssh-user: git
+2026-11-28T08:25:00.9857791Z   clean: true
+2026-11-28T08:25:00.9857965Z   sparse-checkout-cone-mode: true
+2026-11-28T08:25:00.9858176Z   fetch-depth: 1
+2026-11-28T08:25:00.9858339Z   fetch-tags: false
+2026-11-28T08:25:00.9858508Z   show-progress: true
+2026-11-28T08:25:00.9858682Z   lfs: false
+2026-11-28T08:25:00.9858855Z   submodules: false
+2026-11-28T08:25:00.9859029Z   set-safe-directory: true
+2026-11-28T08:25:00.9859269Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:25:00.9859476Z ##[endgroup]
+2026-11-28T08:25:01.0550993Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:25:01.0551734Z ##[group]Getting Git version info
+2026-11-28T08:25:01.0552292Z Working directory is '/home/runner/work/manabitan/manabitan/baseline'
+2026-11-28T08:25:01.0579780Z [command]/usr/bin/git version
+2026-11-28T08:25:01.0646773Z git version 2.56.1
+2026-11-28T08:25:01.0664377Z ##[endgroup]
+2026-11-28T08:25:01.0676215Z Temporarily overriding HOME='/home/runner/work/_temp/1a125fd9-7ee0-4638-9354-5fe27554b190' before making global git config changes
+2026-11-28T08:25:01.0677240Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:25:01.0680818Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/baseline
+2026-11-28T08:25:01.0717054Z ##[group]Determining repository object format
+2026-11-28T08:25:01.0717697Z ##[endgroup]
+2026-11-28T08:25:01.0718171Z ##[group]Initializing the repository
+2026-11-28T08:25:01.0718779Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/baseline
+2026-11-28T08:25:01.0759563Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:25:01.0760363Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:25:01.0761188Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:25:01.0761808Z hint: call:
+2026-11-28T08:25:01.0762169Z hint:
+2026-11-28T08:25:01.0762598Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:25:01.0763113Z hint:
+2026-11-28T08:25:01.0763602Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:25:01.0764363Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:25:01.0765179Z hint:
+2026-11-28T08:25:01.0765610Z hint: 	git branch -m <name>
+2026-11-28T08:25:01.0766094Z hint:
+2026-11-28T08:25:01.0766666Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:25:01.0767582Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/baseline/.git/
+2026-11-28T08:25:01.0770205Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:01.0800794Z ##[endgroup]
+2026-11-28T08:25:01.0801306Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:25:01.0805825Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:25:01.0848276Z ##[endgroup]
+2026-11-28T08:25:01.0849048Z ##[group]Setting up auth
+2026-11-28T08:25:01.0849739Z Removing SSH command configuration
+2026-11-28T08:25:01.0865550Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:01.0898192Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:01.1148536Z Removing HTTP extra header
+2026-11-28T08:25:01.1156107Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:01.1191140Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:01.1414458Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:01.1421685Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:01.1464332Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:01.1672083Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:25:01.1712868Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git.path /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:01.1748966Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:01.1784179Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/baseline/.git.path /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:01.1825726Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/baseline/.git/worktrees/*.path /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:01.1857408Z ##[endgroup]
+2026-11-28T08:25:01.1857723Z ##[group]Fetching the repository
+2026-11-28T08:25:01.1863755Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T08:25:01.3878082Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:01.3878591Z  * branch            9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 -> FETCH_HEAD
+2026-11-28T08:25:01.3890299Z [command]/usr/bin/git rev-parse --verify --quiet 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2^{object}
+2026-11-28T08:25:01.3923205Z 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T08:25:01.3926191Z ##[endgroup]
+2026-11-28T08:25:01.3926666Z ##[group]Determining the checkout info
+2026-11-28T08:25:01.3927290Z ##[endgroup]
+2026-11-28T08:25:01.3927809Z ##[group]Setting up sparse checkout
+2026-11-28T08:25:01.3930385Z [command]/usr/bin/git sparse-checkout set ext/js dev/data/dictionary-wasm test/perf
+2026-11-28T08:25:01.3970947Z ##[endgroup]
+2026-11-28T08:25:01.3971367Z ##[group]Checking out the ref
+2026-11-28T08:25:01.3975948Z [command]/usr/bin/git checkout --progress --force 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T08:25:02.6665881Z Updating files:   0% (1/1051)
+2026-11-28T08:25:02.6674623Z Updating files:   1% (11/1051)
+2026-11-28T08:25:02.6696199Z Updating files:   2% (22/1051)
+2026-11-28T08:25:02.6701366Z Updating files:   3% (32/1051)
+2026-11-28T08:25:02.6707962Z Updating files:   4% (43/1051)
+2026-11-28T08:25:02.6718206Z Updating files:   5% (53/1051)
+2026-11-28T08:25:02.6733065Z Updating files:   6% (64/1051)
+2026-11-28T08:25:02.6740912Z Updating files:   7% (74/1051)
+2026-11-28T08:25:02.6748232Z Updating files:   8% (85/1051)
+2026-11-28T08:25:02.6752361Z Updating files:   9% (95/1051)
+2026-11-28T08:25:02.6759200Z Updating files:  10% (106/1051)
+2026-11-28T08:25:02.6767171Z Updating files:  11% (116/1051)
+2026-11-28T08:25:02.6789072Z Updating files:  12% (127/1051)
+2026-11-28T08:25:02.6802717Z Updating files:  13% (137/1051)
+2026-11-28T08:25:02.6811864Z Updating files:  14% (148/1051)
+2026-11-28T08:25:02.6820679Z Updating files:  15% (158/1051)
+2026-11-28T08:25:02.6835485Z Updating files:  16% (169/1051)
+2026-11-28T08:25:02.6842609Z Updating files:  17% (179/1051)
+2026-11-28T08:25:02.6861286Z Updating files:  18% (190/1051)
+2026-11-28T08:25:02.6869595Z Updating files:  19% (200/1051)
+2026-11-28T08:25:02.6880091Z Updating files:  20% (211/1051)
+2026-11-28T08:25:02.6889744Z Updating files:  21% (221/1051)
+2026-11-28T08:25:02.6896412Z Updating files:  22% (232/1051)
+2026-11-28T08:25:02.6902377Z Updating files:  23% (242/1051)
+2026-11-28T08:25:02.6908788Z Updating files:  24% (253/1051)
+2026-11-28T08:25:02.6917038Z Updating files:  25% (263/1051)
+2026-11-28T08:25:02.6930754Z Updating files:  26% (274/1051)
+2026-11-28T08:25:02.6938638Z Updating files:  27% (284/1051)
+2026-11-28T08:25:02.6946027Z Updating files:  28% (295/1051)
+2026-11-28T08:25:02.6957514Z Updating files:  29% (305/1051)
+2026-11-28T08:25:02.6962366Z Updating files:  30% (316/1051)
+2026-11-28T08:25:02.6978379Z Updating files:  31% (326/1051)
+2026-11-28T08:25:02.6984179Z Updating files:  32% (337/1051)
+2026-11-28T08:25:02.6993241Z Updating files:  33% (347/1051)
+2026-11-28T08:25:02.7001916Z Updating files:  34% (358/1051)
+2026-11-28T08:25:02.7008974Z Updating files:  35% (368/1051)
+2026-11-28T08:25:02.7013031Z Updating files:  36% (379/1051)
+2026-11-28T08:25:02.7023594Z Updating files:  37% (389/1051)
+2026-11-28T08:25:02.7034627Z Updating files:  38% (400/1051)
+2026-11-28T08:25:02.7039733Z Updating files:  39% (410/1051)
+2026-11-28T08:25:02.7045582Z Updating files:  40% (421/1051)
+2026-11-28T08:25:02.7051703Z Updating files:  41% (431/1051)
+2026-11-28T08:25:02.7058136Z Updating files:  42% (442/1051)
+2026-11-28T08:25:02.7064569Z Updating files:  43% (452/1051)
+2026-11-28T08:25:02.7070806Z Updating files:  44% (463/1051)
+2026-11-28T08:25:02.7076698Z Updating files:  45% (473/1051)
+2026-11-28T08:25:02.7081732Z Updating files:  46% (484/1051)
+2026-11-28T08:25:02.7087601Z Updating files:  47% (494/1051)
+2026-11-28T08:25:02.7093231Z Updating files:  48% (505/1051)
+2026-11-28T08:25:02.7100296Z Updating files:  49% (515/1051)
+2026-11-28T08:25:02.7108945Z Updating files:  50% (526/1051)
+2026-11-28T08:25:02.7115904Z Updating files:  51% (537/1051)
+2026-11-28T08:25:02.7121425Z Updating files:  52% (547/1051)
+2026-11-28T08:25:02.7127216Z Updating files:  53% (558/1051)
+2026-11-28T08:25:02.7133139Z Updating files:  54% (568/1051)
+2026-11-28T08:25:02.7141386Z Updating files:  55% (579/1051)
+2026-11-28T08:25:02.7147855Z Updating files:  56% (589/1051)
+2026-11-28T08:25:02.7152885Z Updating files:  57% (600/1051)
+2026-11-28T08:25:02.7159530Z Updating files:  58% (610/1051)
+2026-11-28T08:25:02.7166941Z Updating files:  59% (621/1051)
+2026-11-28T08:25:02.7173753Z Updating files:  60% (631/1051)
+2026-11-28T08:25:02.7179515Z Updating files:  61% (642/1051)
+2026-11-28T08:25:02.7187315Z Updating files:  62% (652/1051)
+2026-11-28T08:25:02.7193760Z Updating files:  63% (663/1051)
+2026-11-28T08:25:02.7199796Z Updating files:  64% (673/1051)
+2026-11-28T08:25:02.7204642Z Updating files:  65% (684/1051)
+2026-11-28T08:25:02.7210442Z Updating files:  66% (694/1051)
+2026-11-28T08:25:02.7216571Z Updating files:  67% (705/1051)
+2026-11-28T08:25:02.7221653Z Updating files:  68% (715/1051)
+2026-11-28T08:25:02.7228921Z Updating files:  69% (726/1051)
+2026-11-28T08:25:02.7235821Z Updating files:  70% (736/1051)
+2026-11-28T08:25:02.7239548Z Updating files:  71% (747/1051)
+2026-11-28T08:25:02.7246661Z Updating files:  72% (757/1051)
+2026-11-28T08:25:02.7250929Z Updating files:  73% (768/1051)
+2026-11-28T08:25:02.7257608Z Updating files:  74% (778/1051)
+2026-11-28T08:25:02.7265051Z Updating files:  75% (789/1051)
+2026-11-28T08:25:02.7272819Z Updating files:  76% (799/1051)
+2026-11-28T08:25:02.7277925Z Updating files:  77% (810/1051)
+2026-11-28T08:25:02.7285221Z Updating files:  78% (820/1051)
+2026-11-28T08:25:02.7291579Z Updating files:  79% (831/1051)
+2026-11-28T08:25:02.7297114Z Updating files:  80% (841/1051)
+2026-11-28T08:25:02.7300562Z Updating files:  81% (852/1051)
+2026-11-28T08:25:02.7307284Z Updating files:  82% (862/1051)
+2026-11-28T08:25:02.7322416Z Updating files:  83% (873/1051)
+2026-11-28T08:25:02.7324175Z Updating files:  84% (883/1051)
+2026-11-28T08:25:02.7329177Z Updating files:  85% (894/1051)
+2026-11-28T08:25:02.7336997Z Updating files:  86% (904/1051)
+2026-11-28T08:25:02.7342136Z Updating files:  87% (915/1051)
+2026-11-28T08:25:02.7348059Z Updating files:  88% (925/1051)
+2026-11-28T08:25:02.7358761Z Updating files:  89% (936/1051)
+2026-11-28T08:25:02.7367035Z Updating files:  90% (946/1051)
+2026-11-28T08:25:02.7372612Z Updating files:  91% (957/1051)
+2026-11-28T08:25:02.7379764Z Updating files:  92% (967/1051)
+2026-11-28T08:25:02.7392470Z Updating files:  93% (978/1051)
+2026-11-28T08:25:02.7398529Z Updating files:  94% (988/1051)
+2026-11-28T08:25:02.7403773Z Updating files:  95% (999/1051)
+2026-11-28T08:25:02.7409671Z Updating files:  96% (1009/1051)
+2026-11-28T08:25:02.7413741Z Updating files:  97% (1020/1051)
+2026-11-28T08:25:02.7419641Z Updating files:  98% (1030/1051)
+2026-11-28T08:25:02.7425403Z Updating files:  99% (1041/1051)
+2026-11-28T08:25:02.7425707Z Updating files: 100% (1051/1051)
+2026-11-28T08:25:02.7425999Z Updating files: 100% (1051/1051), done.
+2026-11-28T08:25:02.7452425Z Note: switching to '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'.
+2026-11-28T08:25:02.7452745Z 
+2026-11-28T08:25:02.7452977Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T08:25:02.7453536Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T08:25:02.7453965Z state without impacting any branches by switching back to a branch.
+2026-11-28T08:25:02.7454179Z 
+2026-11-28T08:25:02.7454322Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T08:25:02.7454685Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T08:25:02.7455091Z 
+2026-11-28T08:25:02.7455187Z   git switch -c <new-branch-name>
+2026-11-28T08:25:02.7455318Z 
+2026-11-28T08:25:02.7455403Z Or undo this operation with:
+2026-11-28T08:25:02.7455533Z 
+2026-11-28T08:25:02.7455607Z   git switch -
+2026-11-28T08:25:02.7455707Z 
+2026-11-28T08:25:02.7455876Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T08:25:02.7456110Z 
+2026-11-28T08:25:02.7456362Z HEAD is now at 9e10d3b Merge pull request #957 from ManabiIO/test/import-allocation-verification-20261126-b4b3
+2026-11-28T08:25:02.7462538Z ##[endgroup]
+2026-11-28T08:25:02.7508957Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:25:02.7539782Z 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+2026-11-28T08:25:02.7548253Z ##[group]Removing auth
+2026-11-28T08:25:02.7548575Z Removing SSH command configuration
+2026-11-28T08:25:02.7551981Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:02.7589048Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:02.7794974Z Removing HTTP extra header
+2026-11-28T08:25:02.7799071Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:02.7834556Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:02.8038201Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:02.8041986Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:02.8071691Z includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git.path
+2026-11-28T08:25:02.8072366Z includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git/worktrees/*.path
+2026-11-28T08:25:02.8072776Z includeif.gitdir:/github/workspace/baseline/.git.path
+2026-11-28T08:25:02.8073091Z includeif.gitdir:/github/workspace/baseline/.git/worktrees/*.path
+2026-11-28T08:25:02.8080211Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git.path
+2026-11-28T08:25:02.8108126Z /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8116726Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git.path /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8155784Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git/worktrees/*.path
+2026-11-28T08:25:02.8182485Z /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8190286Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/baseline/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8232864Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/baseline/.git.path
+2026-11-28T08:25:02.8260138Z /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8266438Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/baseline/.git.path /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8304059Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/baseline/.git/worktrees/*.path
+2026-11-28T08:25:02.8331833Z /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8337732Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/baseline/.git/worktrees/*.path /github/runner_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config
+2026-11-28T08:25:02.8373587Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:02.8578592Z Removing credentials config '/home/runner/work/_temp/git-credentials-53de75f0-7f3f-4b24-b01c-f6078df02f3c.config'
+2026-11-28T08:25:02.8587552Z ##[endgroup]
+2026-11-28T08:25:02.8726089Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:25:02.8726382Z with:
+2026-11-28T08:25:02.8726573Z   ref: a355146b6c511f8ccdea3fd7fa60af9c450d904f
+2026-11-28T08:25:02.8726819Z   path: original-evidence
+2026-11-28T08:25:02.8727012Z   persist-credentials: false
+2026-11-28T08:25:02.8727284Z   sparse-checkout: dev/perf/import-round-20261128-beb5/prefix-component
+2026-11-28T08:25:02.8727578Z   repository: ManabiIO/manabitan
+2026-11-28T08:25:02.8729537Z   token: ***
+2026-11-28T08:25:02.8729699Z   ssh-strict: true
+2026-11-28T08:25:02.8729861Z   ssh-user: git
+2026-11-28T08:25:02.8730018Z   clean: true
+2026-11-28T08:25:02.8730196Z   sparse-checkout-cone-mode: true
+2026-11-28T08:25:02.8730402Z   fetch-depth: 1
+2026-11-28T08:25:02.8730561Z   fetch-tags: false
+2026-11-28T08:25:02.8730737Z   show-progress: true
+2026-11-28T08:25:02.8730906Z   lfs: false
+2026-11-28T08:25:02.8731056Z   submodules: false
+2026-11-28T08:25:02.8731221Z   set-safe-directory: true
+2026-11-28T08:25:02.8731453Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:25:02.8731657Z ##[endgroup]
+2026-11-28T08:25:02.9413059Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:25:02.9414138Z ##[group]Getting Git version info
+2026-11-28T08:25:02.9415083Z Working directory is '/home/runner/work/manabitan/manabitan/original-evidence'
+2026-11-28T08:25:02.9445715Z [command]/usr/bin/git version
+2026-11-28T08:25:02.9507910Z git version 2.56.1
+2026-11-28T08:25:02.9526948Z ##[endgroup]
+2026-11-28T08:25:02.9538370Z Temporarily overriding HOME='/home/runner/work/_temp/9d616dac-57a4-4be8-989b-8eaed9563b1c' before making global git config changes
+2026-11-28T08:25:02.9539416Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:25:02.9542380Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/original-evidence
+2026-11-28T08:25:02.9575209Z ##[group]Determining repository object format
+2026-11-28T08:25:02.9577199Z ##[endgroup]
+2026-11-28T08:25:02.9577941Z ##[group]Initializing the repository
+2026-11-28T08:25:02.9581211Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/original-evidence
+2026-11-28T08:25:02.9620571Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:25:02.9621753Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:25:02.9622556Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:25:02.9623387Z hint: call:
+2026-11-28T08:25:02.9623797Z hint:
+2026-11-28T08:25:02.9624319Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:25:02.9625000Z hint:
+2026-11-28T08:25:02.9625477Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:25:02.9638228Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:25:02.9638671Z hint:
+2026-11-28T08:25:02.9638841Z hint: 	git branch -m <name>
+2026-11-28T08:25:02.9639041Z hint:
+2026-11-28T08:25:02.9639304Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:25:02.9639790Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/original-evidence/.git/
+2026-11-28T08:25:02.9641327Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:02.9671230Z ##[endgroup]
+2026-11-28T08:25:02.9671716Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:25:02.9676996Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:25:02.9717213Z ##[endgroup]
+2026-11-28T08:25:02.9717666Z ##[group]Setting up auth
+2026-11-28T08:25:02.9717977Z Removing SSH command configuration
+2026-11-28T08:25:02.9718455Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:02.9745935Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:02.9983364Z Removing HTTP extra header
+2026-11-28T08:25:02.9995321Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:03.0028682Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:03.0257061Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:03.0260665Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:03.0300170Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:03.0507455Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:25:03.0548039Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git.path /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.0583836Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.0619893Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/original-evidence/.git.path /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.0656728Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/original-evidence/.git/worktrees/*.path /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.0689294Z ##[endgroup]
+2026-11-28T08:25:03.0689735Z ##[group]Fetching the repository
+2026-11-28T08:25:03.0698160Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin a355146b6c511f8ccdea3fd7fa60af9c450d904f
+2026-11-28T08:25:03.2664038Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:03.2664935Z  * branch            a355146b6c511f8ccdea3fd7fa60af9c450d904f -> FETCH_HEAD
+2026-11-28T08:25:03.2674302Z [command]/usr/bin/git rev-parse --verify --quiet a355146b6c511f8ccdea3fd7fa60af9c450d904f^{object}
+2026-11-28T08:25:03.2704364Z a355146b6c511f8ccdea3fd7fa60af9c450d904f
+2026-11-28T08:25:03.2708482Z ##[endgroup]
+2026-11-28T08:25:03.2708938Z ##[group]Determining the checkout info
+2026-11-28T08:25:03.2709641Z ##[endgroup]
+2026-11-28T08:25:03.2710053Z ##[group]Setting up sparse checkout
+2026-11-28T08:25:03.2712999Z [command]/usr/bin/git sparse-checkout set dev/perf/import-round-20261128-beb5/prefix-component
+2026-11-28T08:25:03.2751174Z ##[endgroup]
+2026-11-28T08:25:03.2751697Z ##[group]Checking out the ref
+2026-11-28T08:25:03.2754567Z [command]/usr/bin/git checkout --progress --force a355146b6c511f8ccdea3fd7fa60af9c450d904f
+2026-11-28T08:25:03.5724895Z Note: switching to 'a355146b6c511f8ccdea3fd7fa60af9c450d904f'.
+2026-11-28T08:25:03.5725296Z 
+2026-11-28T08:25:03.5725782Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T08:25:03.5726204Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T08:25:03.5726579Z state without impacting any branches by switching back to a branch.
+2026-11-28T08:25:03.5726786Z 
+2026-11-28T08:25:03.5726940Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T08:25:03.5727282Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T08:25:03.5727480Z 
+2026-11-28T08:25:03.5727565Z   git switch -c <new-branch-name>
+2026-11-28T08:25:03.5727707Z 
+2026-11-28T08:25:03.5727787Z Or undo this operation with:
+2026-11-28T08:25:03.5727916Z 
+2026-11-28T08:25:03.5728035Z   git switch -
+2026-11-28T08:25:03.5728435Z 
+2026-11-28T08:25:03.5728689Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T08:25:03.5729020Z 
+2026-11-28T08:25:03.5729285Z HEAD is now at a355146 Preserve rejected JMdict browser decompression experiment
+2026-11-28T08:25:03.5731927Z ##[endgroup]
+2026-11-28T08:25:03.5776509Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:25:03.5806615Z a355146b6c511f8ccdea3fd7fa60af9c450d904f
+2026-11-28T08:25:03.5814020Z ##[group]Removing auth
+2026-11-28T08:25:03.5814267Z Removing SSH command configuration
+2026-11-28T08:25:03.5817458Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:03.5852344Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:03.6059718Z Removing HTTP extra header
+2026-11-28T08:25:03.6062862Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:03.6098705Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:03.6305283Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:03.6309292Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:03.6339391Z includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git.path
+2026-11-28T08:25:03.6340208Z includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git/worktrees/*.path
+2026-11-28T08:25:03.6340811Z includeif.gitdir:/github/workspace/original-evidence/.git.path
+2026-11-28T08:25:03.6341396Z includeif.gitdir:/github/workspace/original-evidence/.git/worktrees/*.path
+2026-11-28T08:25:03.6346180Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git.path
+2026-11-28T08:25:03.6373563Z /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6385002Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git.path /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6425682Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git/worktrees/*.path
+2026-11-28T08:25:03.6453043Z /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6460738Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/original-evidence/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6499081Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/original-evidence/.git.path
+2026-11-28T08:25:03.6527008Z /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6533926Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/original-evidence/.git.path /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6575081Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/original-evidence/.git/worktrees/*.path
+2026-11-28T08:25:03.6609480Z /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6616446Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/original-evidence/.git/worktrees/*.path /github/runner_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config
+2026-11-28T08:25:03.6652981Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:03.6855370Z Removing credentials config '/home/runner/work/_temp/git-credentials-c8f3665a-03a4-4345-b4dc-7724de7c897c.config'
+2026-11-28T08:25:03.6863374Z ##[endgroup]
+2026-11-28T08:25:03.7003339Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:25:03.7003645Z with:
+2026-11-28T08:25:03.7003835Z   ref: 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+2026-11-28T08:25:03.7004070Z   path: canonical-source
+2026-11-28T08:25:03.7004267Z   persist-credentials: false
+2026-11-28T08:25:03.7004465Z   repository: ManabiIO/manabitan
+2026-11-28T08:25:03.7006761Z   token: ***
+2026-11-28T08:25:03.7006930Z   ssh-strict: true
+2026-11-28T08:25:03.7007100Z   ssh-user: git
+2026-11-28T08:25:03.7007255Z   clean: true
+2026-11-28T08:25:03.7007427Z   sparse-checkout-cone-mode: true
+2026-11-28T08:25:03.7007633Z   fetch-depth: 1
+2026-11-28T08:25:03.7007797Z   fetch-tags: false
+2026-11-28T08:25:03.7007971Z   show-progress: true
+2026-11-28T08:25:03.7008140Z   lfs: false
+2026-11-28T08:25:03.7008292Z   submodules: false
+2026-11-28T08:25:03.7008473Z   set-safe-directory: true
+2026-11-28T08:25:03.7008670Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:25:03.7008891Z ##[endgroup]
+2026-11-28T08:25:03.7716198Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:25:03.7717081Z ##[group]Getting Git version info
+2026-11-28T08:25:03.7717646Z Working directory is '/home/runner/work/manabitan/manabitan/canonical-source'
+2026-11-28T08:25:03.7732422Z [command]/usr/bin/git version
+2026-11-28T08:25:03.7771006Z git version 2.56.1
+2026-11-28T08:25:03.7790545Z ##[endgroup]
+2026-11-28T08:25:03.7803158Z Temporarily overriding HOME='/home/runner/work/_temp/2c98227b-0a74-4a24-a515-964ac77c22f9' before making global git config changes
+2026-11-28T08:25:03.7803946Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:25:03.7807847Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/canonical-source
+2026-11-28T08:25:03.7840403Z ##[group]Determining repository object format
+2026-11-28T08:25:03.7842319Z ##[endgroup]
+2026-11-28T08:25:03.7842807Z ##[group]Initializing the repository
+2026-11-28T08:25:03.7847196Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/canonical-source
+2026-11-28T08:25:03.7888337Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:25:03.7889102Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:25:03.7889959Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:25:03.7890657Z hint: call:
+2026-11-28T08:25:03.7891013Z hint:
+2026-11-28T08:25:03.7891465Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:25:03.7891887Z hint:
+2026-11-28T08:25:03.7892375Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:25:03.7893099Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:25:03.7893713Z hint:
+2026-11-28T08:25:03.7894118Z hint: 	git branch -m <name>
+2026-11-28T08:25:03.7894489Z hint:
+2026-11-28T08:25:03.7895086Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:25:03.7896076Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/canonical-source/.git/
+2026-11-28T08:25:03.7899847Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:03.7932518Z ##[endgroup]
+2026-11-28T08:25:03.7932980Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:25:03.7936799Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:25:03.7966934Z ##[endgroup]
+2026-11-28T08:25:03.7967227Z ##[group]Setting up auth
+2026-11-28T08:25:03.7969097Z Removing SSH command configuration
+2026-11-28T08:25:03.7974605Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:03.8003986Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:03.8247406Z Removing HTTP extra header
+2026-11-28T08:25:03.8253269Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:03.8286458Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:03.8507128Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:03.8513803Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:03.8552622Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:03.8762241Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:25:03.8834603Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git.path /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:03.8871641Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:03.8907490Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/canonical-source/.git.path /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:03.8943470Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/canonical-source/.git/worktrees/*.path /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:03.8977544Z ##[endgroup]
+2026-11-28T08:25:03.8978114Z ##[group]Fetching the repository
+2026-11-28T08:25:03.8985604Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+2026-11-28T08:25:06.1621669Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:06.1622055Z  * branch            55113f0d9f85faf4a867a311d1d78dd9d2e80609 -> FETCH_HEAD
+2026-11-28T08:25:06.1631316Z [command]/usr/bin/git rev-parse --verify --quiet 55113f0d9f85faf4a867a311d1d78dd9d2e80609^{object}
+2026-11-28T08:25:06.1661382Z 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+2026-11-28T08:25:06.1665095Z ##[endgroup]
+2026-11-28T08:25:06.1665534Z ##[group]Determining the checkout info
+2026-11-28T08:25:06.1666533Z ##[endgroup]
+2026-11-28T08:25:06.1669966Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T08:25:06.1713034Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T08:25:06.1745617Z ##[group]Checking out the ref
+2026-11-28T08:25:06.1748573Z [command]/usr/bin/git checkout --progress --force 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+2026-11-28T08:25:06.6968082Z Note: switching to '55113f0d9f85faf4a867a311d1d78dd9d2e80609'.
+2026-11-28T08:25:06.6968495Z 
+2026-11-28T08:25:06.6968739Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T08:25:06.6969310Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T08:25:06.6969874Z state without impacting any branches by switching back to a branch.
+2026-11-28T08:25:06.6970208Z 
+2026-11-28T08:25:06.6970431Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T08:25:06.6970960Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T08:25:06.6971266Z 
+2026-11-28T08:25:06.6971399Z   git switch -c <new-branch-name>
+2026-11-28T08:25:06.6971603Z 
+2026-11-28T08:25:06.6971726Z Or undo this operation with:
+2026-11-28T08:25:06.6971917Z 
+2026-11-28T08:25:06.6972013Z   git switch -
+2026-11-28T08:25:06.6972159Z 
+2026-11-28T08:25:06.6972410Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T08:25:06.6972786Z 
+2026-11-28T08:25:06.6973241Z HEAD is now at 55113f0 test: qualify frozen canonical sidecar checksums
+2026-11-28T08:25:06.6999842Z ##[endgroup]
+2026-11-28T08:25:06.7042482Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:25:06.7071820Z 55113f0d9f85faf4a867a311d1d78dd9d2e80609
+2026-11-28T08:25:06.7079443Z ##[group]Removing auth
+2026-11-28T08:25:06.7079681Z Removing SSH command configuration
+2026-11-28T08:25:06.7083074Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:06.7117307Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:06.7324168Z Removing HTTP extra header
+2026-11-28T08:25:06.7328039Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:06.7363679Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:06.7575512Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:06.7576195Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:06.7604387Z includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git.path
+2026-11-28T08:25:06.7605301Z includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git/worktrees/*.path
+2026-11-28T08:25:06.7605765Z includeif.gitdir:/github/workspace/canonical-source/.git.path
+2026-11-28T08:25:06.7606145Z includeif.gitdir:/github/workspace/canonical-source/.git/worktrees/*.path
+2026-11-28T08:25:06.7613260Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git.path
+2026-11-28T08:25:06.7644490Z /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7653171Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git.path /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7692466Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git/worktrees/*.path
+2026-11-28T08:25:06.7719176Z /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7727075Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/canonical-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7763786Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/canonical-source/.git.path
+2026-11-28T08:25:06.7793712Z /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7800787Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/canonical-source/.git.path /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7844290Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/canonical-source/.git/worktrees/*.path
+2026-11-28T08:25:06.7871880Z /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7878671Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/canonical-source/.git/worktrees/*.path /github/runner_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config
+2026-11-28T08:25:06.7915206Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:06.8118319Z Removing credentials config '/home/runner/work/_temp/git-credentials-1e95d6c0-f217-4a42-bd76-cebac1e05826.config'
+2026-11-28T08:25:06.8127410Z ##[endgroup]
+2026-11-28T08:25:06.8266754Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:25:06.8267063Z with:
+2026-11-28T08:25:06.8267245Z   ref: 633761548509a77b43b414b83a80033e17ed7399
+2026-11-28T08:25:06.8267472Z   path: recent-source
+2026-11-28T08:25:06.8267657Z   persist-credentials: false
+2026-11-28T08:25:06.8268098Z   sparse-checkout: ext/js
+dev/data/dictionary-wasm
+dev/perf/whole-glossary-prefix-followup-20261128
+test/perf
+.github/workflows
+
+2026-11-28T08:25:06.8268548Z   repository: ManabiIO/manabitan
+2026-11-28T08:25:06.8270645Z   token: ***
+2026-11-28T08:25:06.8270820Z   ssh-strict: true
+2026-11-28T08:25:06.8270988Z   ssh-user: git
+2026-11-28T08:25:06.8271149Z   clean: true
+2026-11-28T08:25:06.8271324Z   sparse-checkout-cone-mode: true
+2026-11-28T08:25:06.8271536Z   fetch-depth: 1
+2026-11-28T08:25:06.8271705Z   fetch-tags: false
+2026-11-28T08:25:06.8271871Z   show-progress: true
+2026-11-28T08:25:06.8272035Z   lfs: false
+2026-11-28T08:25:06.8272186Z   submodules: false
+2026-11-28T08:25:06.8272374Z   set-safe-directory: true
+2026-11-28T08:25:06.8272580Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:25:06.8272778Z ##[endgroup]
+2026-11-28T08:25:06.8972221Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:25:06.8972932Z ##[group]Getting Git version info
+2026-11-28T08:25:06.8973492Z Working directory is '/home/runner/work/manabitan/manabitan/recent-source'
+2026-11-28T08:25:06.8998789Z [command]/usr/bin/git version
+2026-11-28T08:25:06.9033526Z git version 2.56.1
+2026-11-28T08:25:06.9082527Z ##[endgroup]
+2026-11-28T08:25:06.9093654Z Temporarily overriding HOME='/home/runner/work/_temp/3a92a7e8-c89b-405d-a224-b7e49a5a8170' before making global git config changes
+2026-11-28T08:25:06.9094938Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:25:06.9097688Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/recent-source
+2026-11-28T08:25:06.9137475Z ##[group]Determining repository object format
+2026-11-28T08:25:06.9138423Z ##[endgroup]
+2026-11-28T08:25:06.9150029Z ##[group]Initializing the repository
+2026-11-28T08:25:06.9150698Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan/recent-source
+2026-11-28T08:25:06.9180635Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:25:06.9181381Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:25:06.9182124Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:25:06.9182722Z hint: call:
+2026-11-28T08:25:06.9183062Z hint:
+2026-11-28T08:25:06.9183475Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:25:06.9183983Z hint:
+2026-11-28T08:25:06.9184467Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:25:06.9185389Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:25:06.9185985Z hint:
+2026-11-28T08:25:06.9186380Z hint: 	git branch -m <name>
+2026-11-28T08:25:06.9186821Z hint:
+2026-11-28T08:25:06.9187344Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:25:06.9188207Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/recent-source/.git/
+2026-11-28T08:25:06.9191372Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:06.9223907Z ##[endgroup]
+2026-11-28T08:25:06.9224375Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:25:06.9228129Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:25:06.9260787Z ##[endgroup]
+2026-11-28T08:25:06.9261105Z ##[group]Setting up auth
+2026-11-28T08:25:06.9272099Z Removing SSH command configuration
+2026-11-28T08:25:06.9272625Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:06.9306178Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:06.9529443Z Removing HTTP extra header
+2026-11-28T08:25:06.9536238Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:06.9575804Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:06.9798822Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:06.9806120Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:06.9847308Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:07.0058026Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:25:07.0099147Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git.path /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:07.0135333Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:07.0178951Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/recent-source/.git.path /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:07.0214369Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/recent-source/.git/worktrees/*.path /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:07.0245893Z ##[endgroup]
+2026-11-28T08:25:07.0246291Z ##[group]Fetching the repository
+2026-11-28T08:25:07.0252011Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin 633761548509a77b43b414b83a80033e17ed7399
+2026-11-28T08:25:07.2201160Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:25:07.2201691Z  * branch            633761548509a77b43b414b83a80033e17ed7399 -> FETCH_HEAD
+2026-11-28T08:25:07.2211868Z [command]/usr/bin/git rev-parse --verify --quiet 633761548509a77b43b414b83a80033e17ed7399^{object}
+2026-11-28T08:25:07.2242824Z 633761548509a77b43b414b83a80033e17ed7399
+2026-11-28T08:25:07.2246592Z ##[endgroup]
+2026-11-28T08:25:07.2247046Z ##[group]Determining the checkout info
+2026-11-28T08:25:07.2247884Z ##[endgroup]
+2026-11-28T08:25:07.2248291Z ##[group]Setting up sparse checkout
+2026-11-28T08:25:07.2251422Z [command]/usr/bin/git sparse-checkout set ext/js dev/data/dictionary-wasm dev/perf/whole-glossary-prefix-followup-20261128 test/perf .github/workflows
+2026-11-28T08:25:07.2290087Z ##[endgroup]
+2026-11-28T08:25:07.2290632Z ##[group]Checking out the ref
+2026-11-28T08:25:07.2293116Z [command]/usr/bin/git checkout --progress --force 633761548509a77b43b414b83a80033e17ed7399
+2026-11-28T08:25:08.5673320Z Updating files:   0% (1/1131)
+2026-11-28T08:25:08.5679529Z Updating files:   1% (12/1131)
+2026-11-28T08:25:08.5685186Z Updating files:   2% (23/1131)
+2026-11-28T08:25:08.5689615Z Updating files:   3% (34/1131)
+2026-11-28T08:25:08.5698218Z Updating files:   4% (46/1131)
+2026-11-28T08:25:08.5706470Z Updating files:   5% (57/1131)
+2026-11-28T08:25:08.5726491Z Updating files:   6% (68/1131)
+2026-11-28T08:25:08.5735140Z Updating files:   7% (80/1131)
+2026-11-28T08:25:08.5740953Z Updating files:   8% (91/1131)
+2026-11-28T08:25:08.5771462Z Updating files:   9% (102/1131)
+2026-11-28T08:25:08.5777622Z Updating files:  10% (114/1131)
+2026-11-28T08:25:08.5785109Z Updating files:  11% (125/1131)
+2026-11-28T08:25:08.5801625Z Updating files:  12% (136/1131)
+2026-11-28T08:25:08.5811085Z Updating files:  13% (148/1131)
+2026-11-28T08:25:08.5817683Z Updating files:  14% (159/1131)
+2026-11-28T08:25:08.5823564Z Updating files:  15% (170/1131)
+2026-11-28T08:25:08.5830412Z Updating files:  16% (181/1131)
+2026-11-28T08:25:08.5838259Z Updating files:  17% (193/1131)
+2026-11-28T08:25:08.5849936Z Updating files:  18% (204/1131)
+2026-11-28T08:25:08.5864520Z Updating files:  19% (215/1131)
+2026-11-28T08:25:08.5873983Z Updating files:  20% (227/1131)
+2026-11-28T08:25:08.5882717Z Updating files:  21% (238/1131)
+2026-11-28T08:25:08.5898266Z Updating files:  22% (249/1131)
+2026-11-28T08:25:08.5913683Z Updating files:  23% (261/1131)
+2026-11-28T08:25:08.5926233Z Updating files:  24% (272/1131)
+2026-11-28T08:25:08.5936595Z Updating files:  25% (283/1131)
+2026-11-28T08:25:08.5947104Z Updating files:  26% (295/1131)
+2026-11-28T08:25:08.5954393Z Updating files:  27% (306/1131)
+2026-11-28T08:25:08.5960568Z Updating files:  28% (317/1131)
+2026-11-28T08:25:08.5968404Z Updating files:  29% (328/1131)
+2026-11-28T08:25:08.5976358Z Updating files:  30% (340/1131)
+2026-11-28T08:25:08.5989784Z Updating files:  31% (351/1131)
+2026-11-28T08:25:08.5999661Z Updating files:  32% (362/1131)
+2026-11-28T08:25:08.6007617Z Updating files:  33% (374/1131)
+2026-11-28T08:25:08.6022102Z Updating files:  34% (385/1131)
+2026-11-28T08:25:08.6029338Z Updating files:  35% (396/1131)
+2026-11-28T08:25:08.6044135Z Updating files:  36% (408/1131)
+2026-11-28T08:25:08.6052054Z Updating files:  37% (419/1131)
+2026-11-28T08:25:08.6061835Z Updating files:  38% (430/1131)
+2026-11-28T08:25:08.6068843Z Updating files:  39% (442/1131)
+2026-11-28T08:25:08.6075570Z Updating files:  40% (453/1131)
+2026-11-28T08:25:08.6083538Z Updating files:  41% (464/1131)
+2026-11-28T08:25:08.6097169Z Updating files:  42% (476/1131)
+2026-11-28T08:25:08.6102476Z Updating files:  43% (487/1131)
+2026-11-28T08:25:08.6109173Z Updating files:  44% (498/1131)
+2026-11-28T08:25:08.6115573Z Updating files:  45% (509/1131)
+2026-11-28T08:25:08.6122072Z Updating files:  46% (521/1131)
+2026-11-28T08:25:08.6128826Z Updating files:  47% (532/1131)
+2026-11-28T08:25:08.6134994Z Updating files:  48% (543/1131)
+2026-11-28T08:25:08.6142063Z Updating files:  49% (555/1131)
+2026-11-28T08:25:08.6147373Z Updating files:  50% (566/1131)
+2026-11-28T08:25:08.6154665Z Updating files:  51% (577/1131)
+2026-11-28T08:25:08.6160772Z Updating files:  52% (589/1131)
+2026-11-28T08:25:08.6167663Z Updating files:  53% (600/1131)
+2026-11-28T08:25:08.6179321Z Updating files:  54% (611/1131)
+2026-11-28T08:25:08.6184867Z Updating files:  55% (623/1131)
+2026-11-28T08:25:08.6191147Z Updating files:  56% (634/1131)
+2026-11-28T08:25:08.6198271Z Updating files:  57% (645/1131)
+2026-11-28T08:25:08.6207495Z Updating files:  58% (656/1131)
+2026-11-28T08:25:08.6214386Z Updating files:  59% (668/1131)
+2026-11-28T08:25:08.6220817Z Updating files:  60% (679/1131)
+2026-11-28T08:25:08.6228071Z Updating files:  61% (690/1131)
+2026-11-28T08:25:08.6235081Z Updating files:  62% (702/1131)
+2026-11-28T08:25:08.6242655Z Updating files:  63% (713/1131)
+2026-11-28T08:25:08.6249589Z Updating files:  64% (724/1131)
+2026-11-28T08:25:08.6258456Z Updating files:  65% (736/1131)
+2026-11-28T08:25:08.6264502Z Updating files:  66% (747/1131)
+2026-11-28T08:25:08.6271362Z Updating files:  67% (758/1131)
+2026-11-28T08:25:08.6277280Z Updating files:  68% (770/1131)
+2026-11-28T08:25:08.6284515Z Updating files:  69% (781/1131)
+2026-11-28T08:25:08.6290773Z Updating files:  70% (792/1131)
+2026-11-28T08:25:08.6298028Z Updating files:  71% (804/1131)
+2026-11-28T08:25:08.6304543Z Updating files:  72% (815/1131)
+2026-11-28T08:25:08.6309541Z Updating files:  73% (826/1131)
+2026-11-28T08:25:08.6317358Z Updating files:  74% (837/1131)
+2026-11-28T08:25:08.6322845Z Updating files:  75% (849/1131)
+2026-11-28T08:25:08.6329185Z Updating files:  76% (860/1131)
+2026-11-28T08:25:08.6339070Z Updating files:  77% (871/1131)
+2026-11-28T08:25:08.6345919Z Updating files:  78% (883/1131)
+2026-11-28T08:25:08.6353146Z Updating files:  79% (894/1131)
+2026-11-28T08:25:08.6361512Z Updating files:  80% (905/1131)
+2026-11-28T08:25:08.6367853Z Updating files:  81% (917/1131)
+2026-11-28T08:25:08.6372101Z Updating files:  82% (928/1131)
+2026-11-28T08:25:08.6378831Z Updating files:  83% (939/1131)
+2026-11-28T08:25:08.6386056Z Updating files:  84% (951/1131)
+2026-11-28T08:25:08.6392307Z Updating files:  85% (962/1131)
+2026-11-28T08:25:08.6397951Z Updating files:  86% (973/1131)
+2026-11-28T08:25:08.6405716Z Updating files:  87% (984/1131)
+2026-11-28T08:25:08.6411197Z Updating files:  88% (996/1131)
+2026-11-28T08:25:08.6417205Z Updating files:  89% (1007/1131)
+2026-11-28T08:25:08.6429611Z Updating files:  90% (1018/1131)
+2026-11-28T08:25:08.6438183Z Updating files:  91% (1030/1131)
+2026-11-28T08:25:08.6442759Z Updating files:  92% (1041/1131)
+2026-11-28T08:25:08.6457075Z Updating files:  93% (1052/1131)
+2026-11-28T08:25:08.6463304Z Updating files:  94% (1064/1131)
+2026-11-28T08:25:08.6469571Z Updating files:  95% (1075/1131)
+2026-11-28T08:25:08.6475928Z Updating files:  96% (1086/1131)
+2026-11-28T08:25:08.6480721Z Updating files:  97% (1098/1131)
+2026-11-28T08:25:08.6486707Z Updating files:  98% (1109/1131)
+2026-11-28T08:25:08.6493037Z Updating files:  99% (1120/1131)
+2026-11-28T08:25:08.6493625Z Updating files: 100% (1131/1131)
+2026-11-28T08:25:08.6494155Z Updating files: 100% (1131/1131), done.
+2026-11-28T08:25:08.6521345Z Note: switching to '633761548509a77b43b414b83a80033e17ed7399'.
+2026-11-28T08:25:08.6521725Z 
+2026-11-28T08:25:08.6522111Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-28T08:25:08.6522848Z changes and commit them, and you can discard any commits you make in this
+2026-11-28T08:25:08.6523559Z state without impacting any branches by switching back to a branch.
+2026-11-28T08:25:08.6523982Z 
+2026-11-28T08:25:08.6524291Z If you want to create a new branch to retain commits you create, you may
+2026-11-28T08:25:08.6525206Z do so (now or later) by using -c with the switch command. Example:
+2026-11-28T08:25:08.6525550Z 
+2026-11-28T08:25:08.6525739Z   git switch -c <new-branch-name>
+2026-11-28T08:25:08.6526046Z 
+2026-11-28T08:25:08.6526476Z Or undo this operation with:
+2026-11-28T08:25:08.6526762Z 
+2026-11-28T08:25:08.6526909Z   git switch -
+2026-11-28T08:25:08.6527128Z 
+2026-11-28T08:25:08.6527454Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-28T08:25:08.6527925Z 
+2026-11-28T08:25:08.6528311Z HEAD is now at 6337615 test(perf): register recent-first glossary witness component screen
+2026-11-28T08:25:08.6533160Z ##[endgroup]
+2026-11-28T08:25:08.6577857Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:25:08.6608439Z 633761548509a77b43b414b83a80033e17ed7399
+2026-11-28T08:25:08.6616979Z ##[group]Removing auth
+2026-11-28T08:25:08.6617554Z Removing SSH command configuration
+2026-11-28T08:25:08.6620773Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:25:08.6657363Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:25:08.6866505Z Removing HTTP extra header
+2026-11-28T08:25:08.6870117Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:25:08.6905869Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:25:08.7111116Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:25:08.7115128Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:25:08.7145334Z includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git.path
+2026-11-28T08:25:08.7146552Z includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git/worktrees/*.path
+2026-11-28T08:25:08.7147322Z includeif.gitdir:/github/workspace/recent-source/.git.path
+2026-11-28T08:25:08.7148356Z includeif.gitdir:/github/workspace/recent-source/.git/worktrees/*.path
+2026-11-28T08:25:08.7154463Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git.path
+2026-11-28T08:25:08.7182930Z /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7192257Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git.path /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7232755Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git/worktrees/*.path
+2026-11-28T08:25:08.7260494Z /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7267977Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/recent-source/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7316118Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/recent-source/.git.path
+2026-11-28T08:25:08.7338021Z /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7345152Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/recent-source/.git.path /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7385405Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/recent-source/.git/worktrees/*.path
+2026-11-28T08:25:08.7413613Z /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7419816Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/recent-source/.git/worktrees/*.path /github/runner_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config
+2026-11-28T08:25:08.7457761Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:25:08.7663021Z Removing credentials config '/home/runner/work/_temp/git-credentials-5ff88453-63c1-4afc-b9f4-f1a220d5268e.config'
+2026-11-28T08:25:08.7671741Z ##[endgroup]
+2026-11-28T08:25:08.7792179Z ##[group]Run set -euo pipefail
+2026-11-28T08:25:08.7792491Z [36;1mset -euo pipefail[0m
+2026-11-28T08:25:08.7792704Z [36;1mmkdir -p evidence[0m
+2026-11-28T08:25:08.7793024Z [36;1mpython -m py_compile audit/dev/perf/frozen-import-audit-20261128-beb5/*.py[0m
+2026-11-28T08:25:08.7835641Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:25:08.7835930Z ##[endgroup]
+2026-11-28T08:25:08.8336636Z ##[group]Run set -euo pipefail
+2026-11-28T08:25:08.8336903Z [36;1mset -euo pipefail[0m
+2026-11-28T08:25:08.8337297Z [36;1mpython audit/dev/perf/frozen-import-audit-20261128-beb5/verify-prefix-known-answer.py \[0m
+2026-11-28T08:25:08.8337772Z [36;1m  --source-root original-source --baseline-root baseline \[0m
+2026-11-28T08:25:08.8338160Z [36;1m  --evidence-root original-evidence --out evidence/prefix-known-answer[0m
+2026-11-28T08:25:08.8375280Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:25:08.8375561Z ##[endgroup]
+2026-11-28T08:25:09.9267449Z PREFIX_KNOWN_ANSWER {"baselineOracleProjectionSha256":"2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9","cases":[{"complete":true,"dictionary":"jmdict","oracleComparisons":242,"reports":[{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":324,"file":"screen.json","sha256":"bf9abcfcde84c8149c302b7ec814ae15c21eb01f9e9ac73d07a3a9e952408519"},{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":15,"file":"reuse-disabled.json","sha256":"d99f6bf3de3a8e4406055816a6179300a1fd642392e34204cb83ddb7553511cb"},{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":108,"file":"enabled-probe-negatives.json","sha256":"3734c71637b05a0efa16f78cd235164de58e24112fd5b408f7bbf324236b9506"}]},{"complete":true,"dictionary":"jitendex","oracleComparisons":242,"reports":[{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":594,"file":"screen.json","sha256":"184ff3958cb86491f87db523da20f2cb58f2b995a3d4306583ce5489cc07ce6d"},{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":15,"file":"reuse-disabled.json","sha256":"30e502a4b9f738851937c0afde4fd35b91d6ff8b2971bcc47b7099c5065473b8"}]},{"complete":true,"dictionary":"vndb","oracleComparisons":242,"reports":[{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":4590,"file":"screen.json","sha256":"d13fa404cb2a201c53981b727296a2bcc3607c065d9eceaede63228c3983ec9c"},{"derivedArithmeticWithinRegisteredTolerance":true,"exactJournalEntries":15,"file":"reuse-disabled.json","sha256":"6cdd252d4334f600c6cb70e668d7b6adb8241427d69a361a98729d7c128d4980"}]}],"complete":true,"derivedArithmeticTolerance":{"milliseconds":1e-09,"percentagePoints":1e-10,"rawReceiptValues":"exact"},"exactJournalEntries":5661,"knownAnswerOnly":true,"newAuditorSha256":"2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58","noNewMeasurements":true,"originalIndependentAuditGitBlob":"03a0efff5529523183fe92997b0946ff98e7d622","originalIndependentAuditSha256":"322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c","referenceOracles":{"jitendex":{"baselineProjectionSha256":"2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9","path":"jitendex/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"},"jmdict":{"baselineProjectionSha256":"2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9","path":"jmdict/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"},"vndb":{"baselineProjectionSha256":"2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9","path":"vndb/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"}},"retainedEvidenceCommit":"a355146b6c511f8ccdea3fd7fa60af9c450d904f","schemaDifferences":"New reports add explicit source/profile/origin, diagnostics and journal digests. Raw receipt values, source/output identities, counts and protocol gates remain exact. Only derived pair sums allow absolute 1e-9 ms and derived percentages absolute 1e-10 percentage points for Python-version rounding. The new auditor is not represented as recovered original code.","sourceCommit":"47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0","sourceTree":"023368b2731c17c91f16cd740d868ae2ebafa27b"}
+2026-11-28T08:25:09.9379318Z ##[group]Run set -euo pipefail
+2026-11-28T08:25:09.9379572Z [36;1mset -euo pipefail[0m
+2026-11-28T08:25:09.9379902Z [36;1mpython audit/dev/perf/frozen-import-audit-20261128-beb5/acquire-and-audit.py \[0m
+2026-11-28T08:25:09.9380351Z [36;1m  batch --canonical-root canonical-source --prefix-root recent-source \[0m
+2026-11-28T08:25:09.9380762Z [36;1m  --baseline-root baseline --reference-source-root original-source \[0m
+2026-11-28T08:25:09.9381154Z [36;1m  --known-answer-root evidence/prefix-known-answer --out evidence[0m
+2026-11-28T08:25:09.9419325Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:25:09.9419591Z env:
+2026-11-28T08:25:09.9421595Z   GITHUB_TOKEN: ***
+2026-11-28T08:25:09.9421779Z ##[endgroup]
+2026-11-28T08:25:10.4745590Z DURABLE_EVIDENCE_BLOB {"bytes":4129,"gitBlobSha":"a912413a4878295eebd8377dfffa49843c8a3fda","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/known-answer.json","sha256":"ebfa02adc2f5c5abd97210675650ee41bc69edaf746a7cb211e94e5bbdf5aa64"}
+2026-11-28T08:25:10.7332648Z DURABLE_EVIDENCE_BLOB {"bytes":21875,"gitBlobSha":"c5898074d067216a61239d5cf3efebc160ff424a","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jmdict/reconstructed-audit.json","sha256":"de3f0d4299dd46408af6202813d743736695b95d466d54509fe9f633ab7c3bb1"}
+2026-11-28T08:25:10.9900881Z DURABLE_EVIDENCE_BLOB {"bytes":4937,"gitBlobSha":"499d09c97bb38dca63f61074fcfb5d870c50a37b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jmdict/archive-members.json","sha256":"0e307ab5f95d0365291d16b99c959cc991b768fdc9e820ece1a0800003710199"}
+2026-11-28T08:25:11.2312713Z DURABLE_EVIDENCE_BLOB {"bytes":71,"gitBlobSha":"7c0645c29f1292f66bfc57fa0cf64283e74aa88b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jmdict/audit.stdout.log","sha256":"da82f90b3bc0b0e079c4f42c8f0ace58550d03cccc9709fabc267435cd4e909d"}
+2026-11-28T08:25:11.5316225Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jmdict/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:11.9038264Z DURABLE_EVIDENCE_BLOB {"bytes":131698,"gitBlobSha":"eb28194fab17398c8ef828c20abaece4051b1397","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jmdict/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"}
+2026-11-28T08:25:12.1379165Z DURABLE_EVIDENCE_BLOB {"bytes":7812,"gitBlobSha":"c14ede59c00168979a6426140b9683ba3b1bf153","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jitendex/reconstructed-audit.json","sha256":"3bc2473a5a9f6106f6dfad232f7fc4073477e813f1092eba81b6950124fd292f"}
+2026-11-28T08:25:12.6082883Z DURABLE_EVIDENCE_BLOB {"bytes":4109,"gitBlobSha":"a28a8d9032371da53061f944598ecdb9d23f344c","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jitendex/archive-members.json","sha256":"0fb22d6dd3d52df8791243fa7e6e56120c2bdd5de267bb9506fc45dc2a8c826c"}
+2026-11-28T08:25:12.8436741Z DURABLE_EVIDENCE_BLOB {"bytes":73,"gitBlobSha":"536fbae4a387b74eba42fce8c534d23db9eddb7e","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jitendex/audit.stdout.log","sha256":"8ad04cec65d3ee144eb62ab17733caa4fbf9a113fc39ba363bb9835242965c7f"}
+2026-11-28T08:25:13.0702402Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jitendex/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:13.4162286Z DURABLE_EVIDENCE_BLOB {"bytes":131698,"gitBlobSha":"eb28194fab17398c8ef828c20abaece4051b1397","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/jitendex/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"}
+2026-11-28T08:25:13.6686399Z DURABLE_EVIDENCE_BLOB {"bytes":7823,"gitBlobSha":"015a671cbfe73a8362fc89d52bff5d399ae4a5e5","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/vndb/reconstructed-audit.json","sha256":"83d342da7fd45989c017e42d734acfb11c4d8aa519c725ed7adedc49f6789497"}
+2026-11-28T08:25:13.9258799Z DURABLE_EVIDENCE_BLOB {"bytes":4116,"gitBlobSha":"a63d1b1c96bd3cd24b3e82b0a45c6d14656d9fee","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/vndb/archive-members.json","sha256":"f5722c19903984b57ed7e9a85f739f943843fccccc138d087332891bb1202a9d"}
+2026-11-28T08:25:14.3095794Z DURABLE_EVIDENCE_BLOB {"bytes":70,"gitBlobSha":"ef3793c253263f12eb5d516894d131d180918dd7","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/vndb/audit.stdout.log","sha256":"ac576daf5999c5be37040937ce81511476617a4314c9c63f5b77f3e3546a90b4"}
+2026-11-28T08:25:14.6515673Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/vndb/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:15.1324476Z DURABLE_EVIDENCE_BLOB {"bytes":131698,"gitBlobSha":"eb28194fab17398c8ef828c20abaece4051b1397","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/vndb/original-members/oracle.json","sha256":"c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"}
+2026-11-28T08:25:15.4886440Z DURABLE_EVIDENCE_MANIFEST {"bytes":5123,"gitBlobSha":"0faf7e08c6c9ea4836ae44ecdb7b837bee4284a1","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-known-answer/durable-manifest.json","sha256":"a29f815e52cbd03c45155a96b74c18c50d63aa642bebbf2018c5210e384a9f61"}
+2026-11-28T08:25:16.4709959Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15252673899,"entry":"canonical-jmdict","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"failure","runStatus":"completed"}
+2026-11-28T08:25:18.2546639Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15252673899,"artifactSha256":"66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf","auditPassed":true,"entry":"canonical-jmdict","memoryPassed":true,"performancePromotionDecision":"not automatic","report":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-2.4158950955845415,-0.5346013847361997],"equalWorkChangePercent":-1.4582958565700244,"fasterPairs":10,"medianPairedChangePercent":-1.0972902467091705,"ratios":[0.9760410724472504,0.9894918669928797,0.995170496121779,0.9941374761834969,0.9530229917684108,1.0042546948355435,0.9899650959860042,0.9885623280729369,0.9756410256410588,0.9857430875575707,1.0147612156296235,0.9608329885532696],"worstPairChangePercent":1.4761215629623514},"complete":true,"control":{"count":4,"descriptiveBootstrap95Percent":[-0.28868360277134464,2.7850304612980548],"equalWorkChangePercent":1.4408804576121703,"fasterPairs":1,"medianPairedChangePercent":1.6386876954990193,"ratios":[0.9971131639722866,1.0278503046129805,1.0114260919873055,1.021347661922675],"worstPairChangePercent":2.7850304612980548},"dictionary":"jmdict","limits":"One AB-start host only; ordinary elapsed clocks and overlapping diagnostic phase counters are reported separately. No host pooling, control subtraction, partial-schedule replacement or memory-coverage imputation.","memoryPassed":true,"memoryReceiptFailures":[],"phaseComparisons":{"step4.bulkAddTermsMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-3.546685844420472,0.3772135318270031],"equalWorkChangePercent":-2.2076860179885527,"fasterPairs":8,"medianPairedChangePercent":-2.672675696003135,"ratios":[1.0024937655860349,0.970873786407767,1.0151515151515151,0.9751861042183623,0.9110070257611241,1.0151133501259446,1.005050505050505,0.9611650485436893,0.9568345323741008,0.9679012345679012,0.9901719901719902,0.9713603818615751],"worstPairChangePercent":1.5151515151515138},"control":{"count":4,"descriptiveBootstrap95Percent":[-0.2450980392156854,5.076142131979688],"equalWorkChangePercent":1.2931034482758674,"fasterPairs":2,"medianPairedChangePercent":0.24094673715493453,"ratios":[0.9975490196078431,1.0072639225181599,0.9975550122249389,1.0507614213197969],"worstPairChangePercent":5.076142131979688}},"step4.termParseMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-3.9218541439145715,1.798836901929679],"equalWorkChangePercent":-0.7509386733416723,"fasterPairs":5,"medianPairedChangePercent":0.2538071065989911,"ratios":[0.9292452830188679,1.0205128205128204,1.0,1.0154639175257731,1.036649214659686,0.9800995024875622,0.9414634146341463,1.0050761421319796,1.005128205128205,0.995049504950495,1.0561224489795917,0.9395348837209302],"worstPairChangePercent":5.612244897959173},"control":{"count":4,"descriptiveBootstrap95Percent":[-1.0000000000000009,6.315789473684208],"equalWorkChangePercent":2.405063291139231,"fasterPairs":1,"medianPairedChangePercent":2.2859143657463,"ratios":[0.99,1.063157894736842,1.0408163265306123,1.0049019607843137],"worstPairChangePercent":6.315789473684208}},"termRecordEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-20.105708245412004,8.33237789505612],"equalWorkChangePercent":-5.583972719527708,"fasterPairs":7,"medianPairedChangePercent":-5.066484729108156,"ratios":[0.7711111111110738,0.7613065326676343,1.1492957746499335,0.9468354430370906,0.9354838709674391,0.9518348623807464,1.0229591836771967,0.8069767441800715,0.7909090909116886,1.1753846153825545,1.064606741574384,1.1020408163267383],"worstPairChangePercent":17.538461538255447},"control":{"count":4,"descriptiveBootstrap95Percent":[-25.283018867365037,27.700831024948624],"equalWorkChangePercent":2.4420788978013475,"fasterPairs":1,"medianPairedChangePercent":10.485976788424555,"ratios":[1.2770083102494862,1.127272727271316,1.082446808497175,0.7471698113263496],"worstPairChangePercent":27.700831024948624}},"termRecordEndImportSessionCloseWritableMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-5.050373457731472,14.715909090212765],"equalWorkChangePercent":1.059494702517405,"fasterPairs":7,"medianPairedChangePercent":-1.3746157232146783,"ratios":[0.9649122807047105,0.8141592920372672,0.851851851853848,1.0471698113205994,0.9603960396130902,1.1125000000029104,0.9898989898896063,1.181818181801345,1.1847826086915259,1.2164948453714652,0.9826086956461001,0.9385964912322803],"worstPairChangePercent":21.649484537146524},"control":{"count":4,"descriptiveBootstrap95Percent":[-22.321428572328784,-3.669724769819127],"equalWorkChangePercent":-11.03286384954042,"fasterPairs":4,"medianPairedChangePercent":-8.623975604513623,"ratios":[0.9595959595993448,0.7767857142767122,0.9633027523018087,0.8679245283103828],"worstPairChangePercent":-3.669724769819127}},"termRecordEndImportSessionMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-8.299197815267402,19.219045414236735],"equalWorkChangePercent":6.328524895344501,"fasterPairs":5,"medianPairedChangePercent":7.6498997632094445,"ratios":[1.0508474576284006,0.8712871287140981,0.8749999999986008,1.220858895707822,0.957671957669546,1.1635220125769126,0.9748743718591789,1.4714285714269084,1.1021505376357883,1.2709677419324796,1.1405405405455746,0.8763440860251059],"worstPairChangePercent":47.14285714269084},"control":{"count":4,"descriptiveBootstrap95Percent":[-16.203703703633842,11.39240506281547],"equalWorkChangePercent":-3.1336044870045043e-10,"fasterPairs":1,"medianPairedChangePercent":4.771398192010556,"ratios":[1.0701754385936246,1.1139240506281547,1.0252525252465863,0.8379629629636616],"worstPairChangePercent":11.39240506281547}},"termRecordFieldEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-19.64690239339567,8.488906926677874],"equalWorkChangePercent":-5.888720502290267,"fasterPairs":7,"medianPairedChangePercent":-5.90454772616914,"ratios":[0.7972027972047993,0.7608142493646854,1.1681159420328733,0.8948717948680712,0.9347826086984717,0.9471264367781455,1.025706940877167,0.8098591549272873,0.7958715596318394,1.1281249999910643,1.0596590909085084,1.110119047625049],"worstPairChangePercent":16.811594203287328},"control":{"count":4,"descriptiveBootstrap95Percent":[-15.665236050860443,37.12574850292827],"equalWorkChangePercent":8.634538152341854,"fasterPairs":1,"medianPairedChangePercent":11.51069518620993,"ratios":[1.3712574850292827,1.1499999999936334,1.0802139037305651,0.8433476394913956],"worstPairChangePercent":37.12574850292827}},"termRecordValidationMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-34.406873422463555,17.690985990315156],"equalWorkChangePercent":-9.238011179713867,"fasterPairs":7,"medianPairedChangePercent":-9.190981432091561,"ratios":[0.8931034482784576,0.6559139784936591,1.161512027491292,0.9230769230797112,1.6853932584490854,0.6559485530570697,1.86249999995498,1.027027027020791,0.8201970443313735,0.6039325842772778,1.1923076923150113,0.5341176470577279],"worstPairChangePercent":86.249999995498},"control":{"count":4,"descriptiveBootstrap95Percent":[-6.143344708854814,74.0000000010943],"equalWorkChangePercent":9.890109890598996,"fasterPairs":3,"medianPairedChangePercent":-3.669179341966866,"ratios":[0.9637681159420748,1.740000000010943,0.9385665529114519,0.9628482972185878],"worstPairChangePercent":74.0000000010943}},"termRecordWriteMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-36.91316526611268,-24.58327348927928],"equalWorkChangePercent":-31.924269626262923,"fasterPairs":12,"medianPairedChangePercent":-32.00875022353116,"ratios":[0.8054919908483248,0.6274509803905497,0.6783733826248922,0.6814516129044845,0.5290909090861293,0.6730769230776981,0.6342857142871968,0.7490347490349747,0.6880907372415858,0.8551401869140195,0.7592997811794397,0.5716814159309103],"worstPairChangePercent":-14.48598130859805},"control":{"count":4,"descriptiveBootstrap95Percent":[-22.064056939584344,22.966507176545782],"equalWorkChangePercent":4.13898824718375,"fasterPairs":1,"medianPairedChangePercent":11.235898511147525,"ratios":[0.7793594306041566,1.2296650717654578,1.1410526315832143,1.0836653386397361],"worstPairChangePercent":22.966507176545782}}},"validatedObservationCount":42},"required":true,"requiredGatesPassed":true}
+2026-11-28T08:25:18.8243534Z DURABLE_EVIDENCE_BLOB {"bytes":4253,"gitBlobSha":"84d32911ef1c33e4f2cada65e801407e7cd6a3e6","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/acquisition.json","sha256":"70a04d01b681ae7444456db99f626b4149a1f24e7fb76e52521e43015472ad3a"}
+2026-11-28T08:25:19.1485989Z DURABLE_EVIDENCE_BLOB {"bytes":89205,"gitBlobSha":"642084d59ce974963f4a960d1c1ab135c49c68d6","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/archive-members.json","sha256":"331d19d0804b509a48ce6e6f06e51ce057d4931bf5e4f7473963d26260089796"}
+2026-11-28T08:25:19.5568171Z DURABLE_EVIDENCE_BLOB {"bytes":213712,"gitBlobSha":"169ccb97c48843d000838b4a451021cedf651405","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/independent-audit.json","sha256":"b571deb78f48a438b7f9f89638820bb424cce3c3f158062605a836931b8a6c94"}
+2026-11-28T08:25:19.8388469Z DURABLE_EVIDENCE_BLOB {"bytes":12839,"gitBlobSha":"b0a0cfe0a2267e0dfc7f026fdc15b95d47e1b2f0","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/summary.json","sha256":"62d2bfa07f76296d19b299ba711bcff1b1d112e1a6af69b9bf176ee38c559062"}
+2026-11-28T08:25:20.0544572Z DURABLE_EVIDENCE_BLOB {"bytes":1379,"gitBlobSha":"90de68bccbe9d26263113bc752096c2c12efc41f","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/audit.stdout.log","sha256":"c68401b39e4d0a2e7783b0887f933ec9c92928f85392556571f5033302d36770"}
+2026-11-28T08:25:20.3401891Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:20.5812593Z DURABLE_EVIDENCE_BLOB {"bytes":1376,"gitBlobSha":"b677ec2f76c69c1ab575a6a823132062c1e5c5d9","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/retention.json","sha256":"a05e6001f560d2f968bb593091e93f8d64025e520e76590bf37749ae206a4ebc"}
+2026-11-28T08:25:20.8511747Z DURABLE_EVIDENCE_BLOB {"bytes":192,"gitBlobSha":"96d5cf007f60fdc239c545511c018b2527ca2a48","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/resolution-polls.jsonl","sha256":"1a527c2a50a9862030a52d024b910fa6bf2ac8450f7531cbd203243177ab6831"}
+2026-11-28T08:25:21.5454605Z DURABLE_EVIDENCE_BLOB {"bytes":2205460,"gitBlobSha":"6d1826ad0126438b3df94609795761af66a6fbbf","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/evidence-without-reproducible-packages.zip","sha256":"6fd93e7f5ff94e6bbd1fa98f8d0e476bb78d47d97dab99b9ba9125e179118669"}
+2026-11-28T08:25:21.8485510Z DURABLE_EVIDENCE_MANIFEST {"bytes":3025,"gitBlobSha":"1dbacd8a90208b81fe0a1b8c4018b59a70ed2209","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/durable-manifest.json","sha256":"65d49ff55dc7d7221dbf89efa45a5f0e9ec522efa57244a5f9003c1b0dd3944d"}
+2026-11-28T08:25:22.8408282Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15252164797,"entry":"canonical-jitendex","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"failure","runStatus":"completed"}
+2026-11-28T08:25:24.6999008Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15252164797,"artifactSha256":"3283503cb9b05e7b67ca5df7f07bf50e6c2f066e78b1067195c75cee7275f19e","auditPassed":true,"entry":"canonical-jitendex","memoryPassed":true,"performancePromotionDecision":"not automatic","report":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-2.58388457958032,0.810296228308971],"equalWorkChangePercent":-0.6836529009321635,"fasterPairs":7,"medianPairedChangePercent":-0.3977380580337364,"ratios":[0.9732799330504018,0.996055934026512,0.9718875502008101,0.9671558350803664,0.9750423753579919,1.011389251394004,1.0086691378691854,1.0125044237348189,1.0075367866969942,1.004980630879933,0.9951567986439036,0.9959893048128131],"worstPairChangePercent":1.250442373481886},"complete":true,"control":{"count":4,"descriptiveBootstrap95Percent":[-2.399576545314863,0.11920371915603578],"equalWorkChangePercent":-1.0533509634664817,"fasterPairs":3,"medianPairedChangePercent":-0.9612561869768221,"ratios":[0.9916136495083864,1.0011920371915604,0.9760042345468514,0.9891612267520773],"worstPairChangePercent":0.11920371915603578},"dictionary":"jitendex","limits":"One AB-start host only; ordinary elapsed clocks and overlapping diagnostic phase counters are reported separately. No host pooling, control subtraction, partial-schedule replacement or memory-coverage imputation.","memoryPassed":true,"memoryReceiptFailures":[],"phaseComparisons":{"step4.bulkAddTermsMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-4.596870664254582,1.548838713567613],"equalWorkChangePercent":-1.4106131849150771,"fasterPairs":8,"medianPairedChangePercent":-2.573447770474324,"ratios":[0.9509918319719953,0.9831730769230769,0.9414414414414415,1.0404624277456647,0.9653579676674365,1.0573770491803278,0.9524348810872028,1.004566210045662,0.9556277056277056,1.0264105642256902,0.9602272727272727,0.9988412514484357],"worstPairChangePercent":5.737704918032782},"control":{"count":4,"descriptiveBootstrap95Percent":[-7.011494252873563,-0.6703910614525133],"equalWorkChangePercent":-3.3389926428975647,"fasterPairs":4,"medianPairedChangePercent":-2.8818893209294316,"ratios":[0.9932960893854749,0.9673055242390078,0.9298850574712644,0.9750566893424036],"worstPairChangePercent":-0.6703910614525133}},"step4.termParseMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-2.0242318269672044,3.6184838304292644],"equalWorkChangePercent":1.1631612492033039,"fasterPairs":5,"medianPairedChangePercent":0.7532956685499137,"ratios":[1.0188323917137476,0.9825479930191972,1.015065913370998,0.8633093525179856,1.0,0.9769673704414588,1.12109375,1.0535372848948374,1.148471615720524,0.9767441860465116,1.017786561264822,0.9960552268244576],"worstPairChangePercent":14.847161572052393},"control":{"count":4,"descriptiveBootstrap95Percent":[-2.4074074074074026,7.45697896749522],"equalWorkChangePercent":3.505355404089583,"fasterPairs":1,"medianPairedChangePercent":4.5762069049891,"ratios":[0.975925925925926,1.064327485380117,1.0745697896749522,1.0271966527196652],"worstPairChangePercent":7.45697896749522}},"termRecordEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-41.91932624120249,13.187845936576114],"equalWorkChangePercent":-19.62034927865135,"fasterPairs":8,"medianPairedChangePercent":-24.449499025630807,"ratios":[0.8138138138135619,1.6289308176124633,0.7226502311249069,1.1832740213509374,0.6282051282064471,0.5791666666672326,1.080482897380585,1.9131736526955656,0.4250764525991924,0.788359788362477,0.4150076569695594,0.5824468085087177],"worstPairChangePercent":91.31736526955656},"control":{"count":4,"descriptiveBootstrap95Percent":[-41.76470588230158,-31.06960950770684],"equalWorkChangePercent":-36.3795365107125,"fasterPairs":4,"medianPairedChangePercent":-35.85726416550423,"ratios":[0.654901960784947,0.5823529411769842,0.6279527559049682,0.6893039049229316],"worstPairChangePercent":-31.06960950770684}},"termRecordEndImportSessionCloseWritableMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-9.86339510338603,2.4958139725528294],"equalWorkChangePercent":-2.833221200565561,"fasterPairs":8,"medianPairedChangePercent":-4.053398058237123,"ratios":[0.923701298701117,1.1772639691717277,1.0097959183672043,0.8118466898954483,0.8384740259738522,0.924757281553478,0.892441860465354,0.999999999999489,0.9102902374669253,1.0401203610838523,1.2212674543505915,0.9941747572817794],"worstPairChangePercent":22.12674543505915},"control":{"count":4,"descriptiveBootstrap95Percent":[-13.438368860106653,11.434108527119214],"equalWorkChangePercent":-2.2484173761285975,"fasterPairs":3,"medianPairedChangePercent":-3.0787608901937102,"ratios":[0.991909385113269,1.1143410852711921,0.9465153970828568,0.8656163113989335],"worstPairChangePercent":11.434108527119214}},"termRecordEndImportSessionMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-9.396714118966344,2.301563317683941],"equalWorkChangePercent":-2.555028664449477,"fasterPairs":6,"medianPairedChangePercent":-3.6264942981457216,"ratios":[0.9266409266409267,1.1724137931034755,1.006220839813284,0.8254755996690915,0.8483448806775719,0.9261538461538014,0.9023722627736476,1.0008291873961588,0.9096934548470255,1.0398104265403947,1.2117527862212072,1.0036798528055662],"worstPairChangePercent":21.175278622120718},"control":{"count":4,"descriptiveBootstrap95Percent":[-12.279151943437094,9.881061299166971],"equalWorkChangePercent":-2.0315091210651226,"fasterPairs":2,"medianPairedChangePercent":-2.585083804720223,"ratios":[1.00076745970841,1.0988106129916697,0.9475308641971857,0.8772084805656291],"worstPairChangePercent":9.881061299166971}},"termRecordFieldEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-44.53586549256827,8.166769393253626],"equalWorkChangePercent":-20.985543292366838,"fasterPairs":9,"medianPairedChangePercent":-29.839682908507804,"ratios":[0.8054711246203754,1.6210191082831504,0.7204968944106172,1.1877256317688678,0.6240740740744922,0.5792426367464826,0.9756097560962047,1.915151515155246,0.4487804878041717,0.6827094474192267,0.4543918918930894,0.530040053402152],"worstPairChangePercent":91.51515151552461},"control":{"count":4,"descriptiveBootstrap95Percent":[-42.8994082840015,-33.9662447259599],"equalWorkChangePercent":-38.086723290205086,"fasterPairs":4,"medianPairedChangePercent":-37.10340695561132,"ratios":[0.6003976143146019,0.5710059171599849,0.660337552740401,0.6575342465731716],"worstPairChangePercent":-33.9662447259599}},"termRecordValidationMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-5.475851309237645,30.54708401716524],"equalWorkChangePercent":12.942612942650399,"fasterPairs":4,"medianPairedChangePercent":3.095391122026303,"ratios":[1.3342618384407066,0.7264770240691063,1.0359712230205131,0.9783950617307267,0.9120879120845206,1.0259365994200127,1.8708609271645906,0.8467336683414587,1.6692015209163849,1.0212765957396415,1.2766798419025984,1.2647058823565116],"worstPairChangePercent":87.08609271645906},"control":{"count":4,"descriptiveBootstrap95Percent":[-28.48484848517132,23.38709677375064],"equalWorkChangePercent":-0.7168458783077258,"fasterPairs":2,"medianPairedChangePercent":5.972960992942333,"ratios":[1.2338709677375064,1.2187499999965183,0.7151515151482868,0.9007092198623281],"worstPairChangePercent":23.38709677375064}},"termRecordWriteMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-33.26818905257374,-5.657451029188643],"equalWorkChangePercent":-19.911190053328376,"fasterPairs":9,"medianPairedChangePercent":-24.993236439384546,"ratios":[0.7698185291303711,0.6609403254970422,0.730316742081938,0.673695893451483,0.6441495778035293,1.0960187353617445,0.6567164179117877,0.8616216216193174,0.7035957240033887,1.0252293577969096,1.1170351105299197,0.810513447434601],"worstPairChangePercent":11.703511052991967},"control":{"count":4,"descriptiveBootstrap95Percent":[-15.925266903844925,18.51851851851125],"equalWorkChangePercent":-2.7033919917463733,"fasterPairs":3,"medianPairedChangePercent":-4.688189991556202,"ratios":[1.1851851851851125,0.9800884955772483,0.8407473309615507,0.9261477045916277],"worstPairChangePercent":18.51851851851125}}},"validatedObservationCount":42},"required":true,"requiredGatesPassed":true}
+2026-11-28T08:25:25.2589044Z DURABLE_EVIDENCE_BLOB {"bytes":4267,"gitBlobSha":"467524ddb110f1bea12c11d5a80dc710cb9a14d8","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/acquisition.json","sha256":"d809fa9d9ce2c7243faf2b05774748ac830cf3a543dad9d1d2eb8d0a4899857f"}
+2026-11-28T08:25:25.6223652Z DURABLE_EVIDENCE_BLOB {"bytes":89206,"gitBlobSha":"1fafcca3de31589d40d0b18e448c7ab1c2ab794b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/archive-members.json","sha256":"ca6d20d33b4863c5a8f18abd798be24adbdeff00350f4ebc3c9fbcd6fec06b58"}
+2026-11-28T08:25:26.0722940Z DURABLE_EVIDENCE_BLOB {"bytes":215825,"gitBlobSha":"498c15d6408e04d39c775c81a5106e14b36d55ad","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/independent-audit.json","sha256":"45ff8f26d67b54ad7ec1613e9c6af0984ffe12d29958db1a0cf62de7cda0a69c"}
+2026-11-28T08:25:26.3442202Z DURABLE_EVIDENCE_BLOB {"bytes":12846,"gitBlobSha":"262fd344d24b9191f2e3ddebc41257c31f8b7bac","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/summary.json","sha256":"7c78520aacc279ec1f23481d011cc69a4a0e30a763fcb552cc5b1fd1c8b549f5"}
+2026-11-28T08:25:26.6003564Z DURABLE_EVIDENCE_BLOB {"bytes":1376,"gitBlobSha":"186fe34bb6dcdc55111936025091c50e6a9c4d55","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/audit.stdout.log","sha256":"7764d9a01a26c18332daba4e204d8a0d77784020b04c0a70b4ebe0a27ee99ce5"}
+2026-11-28T08:25:26.8220608Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:27.0694933Z DURABLE_EVIDENCE_BLOB {"bytes":1377,"gitBlobSha":"20e2d469b4266be96e930a912308b478d4a86f54","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/retention.json","sha256":"6f9626933444947d8eb78b33666ed57427b3d0f0ec6bbb8dfd4a2eb39f99b8b2"}
+2026-11-28T08:25:27.4210390Z DURABLE_EVIDENCE_BLOB {"bytes":192,"gitBlobSha":"82282c2f3710e38f62f669ba3aa45f1224431600","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/resolution-polls.jsonl","sha256":"f1dc642852961fb97e4bb7c51c4f21e900c60b4df218a1b70d711d7604759169"}
+2026-11-28T08:25:28.2807822Z DURABLE_EVIDENCE_BLOB {"bytes":2356817,"gitBlobSha":"8f933ade7154aae525c8d5fe8721200521d6f55e","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/evidence-without-reproducible-packages.zip","sha256":"662fe6401595f28193360f415007e660aea029502f9107d2059173f65b105396"}
+2026-11-28T08:25:28.5107360Z DURABLE_EVIDENCE_MANIFEST {"bytes":3045,"gitBlobSha":"e06f3d3b06c237793e88f301c594fa73b7e1f116","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jitendex/durable-manifest.json","sha256":"08c5317a463a5cbb1e122babf8c8959bf6776966be3e33be63acd2f3b66e0dc8"}
+2026-11-28T08:25:29.5385565Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15252998358,"entry":"prefix-jmdict","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"success","runStatus":"completed"}
+2026-11-28T08:25:30.1429567Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15252998358,"artifactSha256":"207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae","auditPassed":true,"entry":"prefix-jmdict","memoryPassed":null,"performancePromotionDecision":"not automatic","report":{"complete":true,"dictionary":"jmdict","exactJournalEntries":447,"reports":[{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":4,"equalWorkPercentChange":-0.8325652253562854,"medianPairedPercentChange":-1.1043716168280981,"pairTotals":[[515.6914379999957,518.9371760000014],[518.2956749999975,507.82556900000395],[527.2592849999987,516.0031140000015],[516.8446749999978,511.32195199999774],[517.7992080000017,521.776179000002],[515.612363,509.7333649999998]],"pairedPercentChanges":[0.6293953633578875,-2.020102907475263,-2.1348454774006154,-1.0685459804727682,0.7680527390842018,-1.1401972531834281]},"treatment":{"alternateFasterPairs":6,"equalWorkPercentChange":-2.3635720656661974,"medianPairedPercentChange":-2.751287673514613,"pairTotals":[[523.0508389999961,502.81149099999976],[522.8359249999999,507.1687740000043],[512.1198809999972,503.75809799999513],[514.872749000004,501.49661700000297],[503.51599899999724,503.06539800000223],[517.498423999996,502.4670290000008]],"pairedPercentChanges":[-3.8694800755298076,-2.9965712474703365,-1.63277843923465,-2.597949109946174,-0.08949090016799888,-2.9046262370830522]}},"diagnostics":{"baseline":{"contentWitnesses":154416,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":54641,"maxHeapBytes":43384832,"rows":528299},"candidate":{"contentWitnesses":158576,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":143409,"maxHeapBytes":43384832,"rows":528299},"control":{"contentWitnesses":154416,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":54641,"maxHeapBytes":43384832,"rows":528299}},"dictionary":"jmdict","groups":12,"rows":528299}],"exactJournalEntries":324,"file":"screen.json"},{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":1,"equalWorkPercentChange":2.2671067630859687,"medianPairedPercentChange":1.3889355692271232,"pairTotals":[[45.606275000000096,45.35391400000003],[45.540917000000036,48.25892399999998],[45.46287199999995,46.09432200000015]],"pairedPercentChanges":[-0.5533470997139411,5.9682746397046404,1.3889355692271232]},"treatment":{"alternateFasterPairs":2,"equalWorkPercentChange":2.013543540327767,"medianPairedPercentChange":-4.006346994412679,"pairTotals":[[46.431336999999985,43.341297],[47.48263200000008,45.58031300000005],[43.965045999999916,51.73365899999999]],"pairedPercentChanges":[-6.655074352048029,-4.006346994412679,17.66997582579599]}},"diagnostics":{"baseline":{"contentWitnesses":14289,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":37027840,"rows":50000},"candidate":{"contentWitnesses":14289,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":37027840,"rows":50000},"control":{"contentWitnesses":14289,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":37027840,"rows":50000}},"dictionary":"jmdict","groups":1,"rows":50000}],"exactJournalEntries":15,"file":"reuse-disabled.json"},{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":4,"equalWorkPercentChange":0.00924261878538779,"medianPairedPercentChange":-2.428829844305924,"pairTotals":[[18.66486900000001,21.448703999999964],[19.654434999999978,17.96029999999996],[19.203862999999956,18.744022000000086],[19.01624400000003,18.54784799999993],[19.265855999999985,20.934744000000023],[22.591912999999977,20.772505000000024]],"pairedPercentChanges":[14.914838137893982,-8.619606719806594,-2.3945234352060862,-2.463136253405762,8.662412923672003,-8.053359624746935]},"treatment":{"alternateFasterPairs":0,"equalWorkPercentChange":11.190911531251801,"medianPairedPercentChange":12.698898788676994,"pairTotals":[[20.429116000000022,23.871646],[20.474024999999983,20.62779000000006],[18.351982999999905,21.032209999999964],[18.918499999999995,20.960418000000004],[20.274136999999996,20.294742999999926],[19.06554399999993,23.87730799999997]],"pairedPercentChanges":[16.85109624909846,0.7510247740738718,14.604563441455198,10.793234135898789,0.10163687855089254,25.238010517822396]}},"diagnostics":{"baseline":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":28966912,"rows":10000},"candidate":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":28966912,"rows":10000},"control":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":28966912,"rows":10000}},"dictionary":"unique-prefixes","groups":1,"rows":10000},{"comparisons":{"control":{"alternateFasterPairs":6,"equalWorkPercentChange":-8.139303340986537,"medianPairedPercentChange":-7.230891164835123,"pairTotals":[[23.49542499999984,21.64293100000009],[23.688885000000028,19.680811999999833],[23.579941999999846,21.143178000000034],[21.08183400000007,20.072663000000148],[21.186511999999993,20.97304299999996],[20.48035200000004,19.13329900000008]],"pairedPercentChanges":[-7.884488150351665,-16.919635516826524,-10.334054256790914,-4.78692223835896,-1.0075702881155335,-6.577294179318582]},"treatment":{"alternateFasterPairs":1,"equalWorkPercentChange":5.085334978909373,"medianPairedPercentChange":3.6309082961717754,"pairTotals":[[19.83502599999997,22.345861000000014],[20.096430000000055,22.627005999999938],[21.417200000000093,21.07031700000016],[21.082842000000028,21.162099999999782],[19.995566000000053,20.467990999999984],[20.11723300000017,21.10281000000009]],"pairedPercentChanges":[12.658591927230379,12.592166867447974,-1.6196468259153107,0.3759360336701878,2.3626487992384426,4.899167793105108]}},"diagnostics":{"baseline":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000},"candidate":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000},"control":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000}},"dictionary":"common-prefix-unique-middles","groups":1,"rows":10000},{"comparisons":{"control":{"alternateFasterPairs":1,"equalWorkPercentChange":4.718999577620742,"medianPairedPercentChange":1.0287582614400992,"pairTotals":[[2.7263440000001538,2.7775389999999334],[2.6531059999999798,2.6541959999999563],[2.635461000000305,3.297700000000077],[2.6461060000001453,2.703254999999899],[2.6516280000000734,2.628450000000157],[2.649573000000146,2.654334999999719]],"pairedPercentChanges":[1.8777894498924752,0.04108392201354061,25.128013656802196,2.159739632492075,-0.8741045123944802,0.17972707298772317]},"treatment":{"alternateFasterPairs":3,"equalWorkPercentChange":-2.649947843530387,"medianPairedPercentChange":-0.38603096065809583,"pairTotals":[[3.007765999999947,3.0221460000000206],[2.9894019999999273,2.7723010000001977],[3.0001270000000204,2.722189999999955],[2.676546999999573,2.647954000000027],[2.657506999999896,2.66537900000003],[2.639701999999943,2.6913570000001528]],"pairedPercentChanges":[0.4780957029261623,-7.262355481120797,-9.264174483282329,-1.0682793913034394,0.29621746998724774,1.9568496747061292]}},"diagnostics":{"baseline":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000},"candidate":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000},"control":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000}},"dictionary":"short-unique","groups":1,"rows":10000},{"comparisons":{"control":{"alternateFasterPairs":3,"equalWorkPercentChange":1.6391281520170997,"medianPairedPercentChange":3.1757310248358372,"pairTotals":[[15.754199999999855,16.949482999999873],[18.014838000000054,15.48368100000016],[15.479417999999896,17.164610000000266],[16.33212500000036,15.881214],[15.391579999999976,17.287657999999738],[16.25355000000036,16.052719000000252]],"pairedPercentChanges":[7.58707519264723,-14.050401119343325,10.886662534730828,-2.7608838408985426,12.318930220287738,-1.2356131429755557]},"treatment":{"alternateFasterPairs":6,"equalWorkPercentChange":-60.855775724074576,"medianPairedPercentChange":-60.5846423482856,"pairTotals":[[16.352722000000085,5.660839000000124],[15.955881999999747,6.572927000000163],[15.541588000000047,5.938623000000007],[15.942411999999877,6.333397000000332],[15.677726999999777,6.130617999999686],[15.725334999999632,6.627201000000241]],"pairedPercentChanges":[-65.38289466426389,-58.805617890629506,-61.788827499480824,-60.27328236153738,-60.89600233503381,-57.856535329769464]}},"diagnostics":{"baseline":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000},"candidate":{"contentWitnesses":9964,"crcReusedBytes":10482128,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":9964,"maxHeapBytes":30212096,"rows":10000},"control":{"contentWitnesses":0,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":30212096,"rows":10000}},"dictionary":"nonlocal-reuse","groups":1,"rows":10000}],"exactJournalEntries":108,"file":"enabled-probe-negatives.json"}],"scope":"Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs."},"required":true,"requiredGatesPassed":true}
+2026-11-28T08:25:30.4551458Z DURABLE_EVIDENCE_BLOB {"bytes":5031,"gitBlobSha":"dff96d048145d8e276ac98f8de9373f855c353a5","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/acquisition.json","sha256":"b2d2564571c298283c4d5c39736acfd22b342dc4ec3648416b3f55fdae54acba"}
+2026-11-28T08:25:30.8692658Z DURABLE_EVIDENCE_BLOB {"bytes":5758,"gitBlobSha":"d3e86196922621e20b9fc31e832b866f746cf5b2","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/archive-members.json","sha256":"96dc209f29950ea6c2b755bf2bc713ccdf7f33e53e8b707106553ef81aac206f"}
+2026-11-28T08:25:31.1433117Z DURABLE_EVIDENCE_BLOB {"bytes":22321,"gitBlobSha":"65df2138e8e44f8e897ce6d456c9aba22db00ef3","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/independent-audit.json","sha256":"bb27dfc517da902c684c184a3f13360d963af28abf01af16169d862a19ddf906"}
+2026-11-28T08:25:31.4596121Z DURABLE_EVIDENCE_BLOB {"bytes":22303,"gitBlobSha":"6cefe93f58e0382119e4c91b4a74e4e8eb73e760","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/summary.json","sha256":"f4e106e58128a6114fe7d4851fd8d0ebea06a1485f4ea147e1b183470f11e5e0"}
+2026-11-28T08:25:31.7328154Z DURABLE_EVIDENCE_BLOB {"bytes":71,"gitBlobSha":"7c0645c29f1292f66bfc57fa0cf64283e74aa88b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/audit.stdout.log","sha256":"da82f90b3bc0b0e079c4f42c8f0ace58550d03cccc9709fabc267435cd4e909d"}
+2026-11-28T08:25:32.0222535Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:32.3163226Z DURABLE_EVIDENCE_BLOB {"bytes":174,"gitBlobSha":"ff839c6713f96ab5846b2b2a94ce07d1119b5883","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/retention.json","sha256":"0bbf1f4b0b125e4120c6996cfa543dc630d6ba1c530820907f93bb0e7b52530b"}
+2026-11-28T08:25:32.5664042Z DURABLE_EVIDENCE_BLOB {"bytes":192,"gitBlobSha":"e97023953dc6d41f0b998104d56dcd4db3f16503","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/resolution-polls.jsonl","sha256":"3ecdce29d7505378edbbcd24ba62aedfa0fdf68cf32fc934a31a12ca01b2905d"}
+2026-11-28T08:25:33.0022425Z DURABLE_EVIDENCE_BLOB {"bytes":175190,"gitBlobSha":"0bd07064498f459c0ea2d6b5380970a4b6d0123c","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/original-artifact.zip","sha256":"207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae"}
+2026-11-28T08:25:33.4166888Z DURABLE_EVIDENCE_MANIFEST {"bytes":2968,"gitBlobSha":"eb0770cbdf446cd54005e589cc6bce2b6c990581","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jmdict/durable-manifest.json","sha256":"24bebd3dd8fbdcd695287f00f2d3e22c8619f9fe24546588f468459f0203f31d"}
+2026-11-28T08:25:34.3741948Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15254136620,"entry":"prefix-jitendex","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"success","runStatus":"completed"}
+2026-11-28T08:25:34.8813648Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15254136620,"artifactSha256":"f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a","auditPassed":true,"entry":"prefix-jitendex","memoryPassed":null,"performancePromotionDecision":"not automatic","report":{"complete":true,"dictionary":"jitendex","exactJournalEntries":609,"reports":[{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":2,"equalWorkPercentChange":0.5574256700560998,"medianPairedPercentChange":0.8481499658280489,"pairTotals":[[1313.405628999988,1340.1456409999914],[1289.505638000007,1283.0881199999965],[1311.8251780000003,1292.4988609999998],[1284.0206849999995,1304.4672370000117],[1303.402648999991,1311.722033],[1294.984904999987,1308.6860780000038]],"pairedPercentChanges":[2.0359294500940317,-0.49767273681438073,-1.4732387610874476,1.5923849388775446,0.6382819619395352,1.0580179697165626]},"treatment":{"alternateFasterPairs":1,"equalWorkPercentChange":2.1380317081971523,"medianPairedPercentChange":2.4046617469580256,"pairTotals":[[1348.1172140000047,1400.1264509999896],[1320.8225330000007,1336.5044379999877],[1276.1811519999922,1333.896657000015],[1326.9058410000102,1307.3109530000006],[1282.9618470000078,1308.1597829999787],[1292.0564010000016,1328.8190159999817]],"pairedPercentChanges":[3.8579165416683825,1.187283272974482,4.522516643469698,-1.4767353789958526,1.9640440640454004,2.8452794298706507]}},"diagnostics":{"baseline":{"contentWitnesses":73242,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":85996,"maxHeapBytes":76087296,"rows":436555},"candidate":{"contentWitnesses":73242,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":86011,"maxHeapBytes":76087296,"rows":436555},"control":{"contentWitnesses":73242,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":85996,"maxHeapBytes":76087296,"rows":436555}},"dictionary":"jitendex","groups":22,"rows":436555}],"exactJournalEntries":594,"file":"screen.json"},{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":3,"equalWorkPercentChange":-7.333268911797197,"medianPairedPercentChange":-6.238768706699349,"pairTotals":[[72.11577499999999,63.24522999999999],[67.57291699999996,63.35719900000004],[64.14583500000003,62.284364000000096]],"pairedPercentChanges":[-12.300422480379636,-6.238768706699349,-2.901935877832029]},"treatment":{"alternateFasterPairs":2,"equalWorkPercentChange":-2.0676653540219525,"medianPairedPercentChange":-7.8492921692327915,"pairTotals":[[64.52550099999996,71.43580999999995],[71.49300700000003,65.88131199999998],[69.33077600000001,63.78622599999994]],"pairedPercentChanges":[10.709423240278259,-7.8492921692327915,-7.997242090583367]}},"diagnostics":{"baseline":{"contentWitnesses":4251,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":54198272,"rows":16000},"candidate":{"contentWitnesses":4251,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":54198272,"rows":16000},"control":{"contentWitnesses":4251,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":54198272,"rows":16000}},"dictionary":"jitendex","groups":1,"rows":16000}],"exactJournalEntries":15,"file":"reuse-disabled.json"}],"scope":"Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs."},"required":true,"requiredGatesPassed":true}
+2026-11-28T08:25:35.1087614Z DURABLE_EVIDENCE_BLOB {"bytes":5045,"gitBlobSha":"53cdec7a7f5d7c9ca36cff43a16582ee739192d5","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/acquisition.json","sha256":"596aa8f7da1f2b89769bf2862805a48809c5a46cb652bc0b3a36788092338cc2"}
+2026-11-28T08:25:35.3442955Z DURABLE_EVIDENCE_BLOB {"bytes":4876,"gitBlobSha":"89f19d30a088b4c8f48439d6218fff8b72cd97c0","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/archive-members.json","sha256":"4c33654a70f50dc3a925d8ef8fa1c8aecfac1e024e1118738089e39b638a388b"}
+2026-11-28T08:25:35.6859547Z DURABLE_EVIDENCE_BLOB {"bytes":8263,"gitBlobSha":"a1f4fc7b7ca6418952fc6e067b3ea2b5d29518c2","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/independent-audit.json","sha256":"9654e346a19f4ce817fc3070db7b424a5f0998370986781c1dc315cbce5360a7"}
+2026-11-28T08:25:35.9183475Z DURABLE_EVIDENCE_BLOB {"bytes":7498,"gitBlobSha":"304a72b54735162fba834ca9b206a7c15c158652","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/summary.json","sha256":"06171680e16c6692a1b83c0d2aa8eab56b0a2ed283b8871a12199297c2d893ff"}
+2026-11-28T08:25:36.1917836Z DURABLE_EVIDENCE_BLOB {"bytes":73,"gitBlobSha":"536fbae4a387b74eba42fce8c534d23db9eddb7e","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/audit.stdout.log","sha256":"8ad04cec65d3ee144eb62ab17733caa4fbf9a113fc39ba363bb9835242965c7f"}
+2026-11-28T08:25:36.4713663Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:36.8850319Z DURABLE_EVIDENCE_BLOB {"bytes":174,"gitBlobSha":"48822256e37c139d3f4245da1d84a92125a7e65b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/retention.json","sha256":"9e28085d5677b277a2333c898fdbb6ba7eda32d90b7a9a610153369fc3575c2b"}
+2026-11-28T08:25:37.1865005Z DURABLE_EVIDENCE_BLOB {"bytes":191,"gitBlobSha":"1b6a929fa41adcb936e238288a78ca1fc635276b","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/resolution-polls.jsonl","sha256":"1e124f4f62c2b823f387f1d28de499c0d294010733247314feb78f7855e1037b"}
+2026-11-28T08:25:37.5766668Z DURABLE_EVIDENCE_BLOB {"bytes":201105,"gitBlobSha":"2f31e7a4da48e8939278618629b9ada3499766cc","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/original-artifact.zip","sha256":"f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a"}
+2026-11-28T08:25:37.8725471Z DURABLE_EVIDENCE_MANIFEST {"bytes":2986,"gitBlobSha":"09d970e3ed9d3216db53383c5c2d4314a38c1b41","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-jitendex/durable-manifest.json","sha256":"c983a734acb306a1060bd4d464bac29ea7b8ec857aaddfb1ea13fd2d3bf92cde"}
+2026-11-28T08:25:38.8067508Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15254106199,"entry":"prefix-vndb","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"success","runStatus":"completed"}
+2026-11-28T08:25:39.8693308Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15254106199,"artifactSha256":"db0cb3a7ae4209e326fcb539965be563b81626cb33f087f52e4613020583c6f8","auditPassed":true,"entry":"prefix-vndb","memoryPassed":null,"performancePromotionDecision":"not automatic","report":{"complete":true,"dictionary":"vndb","exactJournalEntries":4605,"reports":[{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":1,"equalWorkPercentChange":0.9250506694774341,"medianPairedPercentChange":0.37942066753996473,"pairTotals":[[5697.445870999882,5719.626913000002],[5403.933997000118,5615.975478999884],[5378.416368999894,5398.29100500003],[5379.3607040000215,5373.532262000088],[5397.782119999741,5432.294726999995],[5356.658978000003,5375.569960000104]],"pairedPercentChanges":[0.38931553721330836,3.9238355264419544,0.3695257978666211,-0.10834822798924115,0.6393849590997647,0.35303688507648534]},"treatment":{"alternateFasterPairs":0,"equalWorkPercentChange":1.1693722149433095,"medianPairedPercentChange":1.2089910492887657,"pairTotals":[[5540.629966999925,5566.3820050002505],[5492.238763999989,5578.826292000054],[5296.25270699981,5392.631348000163],[5363.923377999962,5457.012957000015],[5331.896942999929,5376.761587000035],[5375.354156999856,5407.5617850000635]],"pairedPercentChanges":[0.46478537916634366,1.5765434046243865,1.8197515551509502,1.7354755547377643,0.8414386939531449,0.5991722044633274]}},"diagnostics":{"baseline":{"contentWitnesses":5514978,"crcReusedBytes":3154233291,"floatScoreGroups":26,"fusedFallbacks":26,"glossaryWitnesses":6010152,"maxHeapBytes":45219840,"rows":6648310},"candidate":{"contentWitnesses":5514978,"crcReusedBytes":3154277208,"floatScoreGroups":26,"fusedFallbacks":26,"glossaryWitnesses":6010269,"maxHeapBytes":45219840,"rows":6648310},"control":{"contentWitnesses":5514978,"crcReusedBytes":3154233291,"floatScoreGroups":26,"fusedFallbacks":26,"glossaryWitnesses":6010152,"maxHeapBytes":45219840,"rows":6648310}},"dictionary":"vndb","groups":170,"rows":6648310}],"exactJournalEntries":4590,"file":"screen.json"},{"dictionaries":[{"comparisons":{"control":{"alternateFasterPairs":2,"equalWorkPercentChange":-4.54319099864029,"medianPairedPercentChange":-7.614372468262253,"pairTotals":[[52.07970599999999,53.79590200000007],[55.40130199999999,50.61315600000012],[58.971360000000004,54.48106100000018]],"pairedPercentChanges":[3.2953258223079818,-8.642659697780875,-7.614372468262253]},"treatment":{"alternateFasterPairs":0,"equalWorkPercentChange":17.230397265642374,"medianPairedPercentChange":17.41696894184328,"pairTotals":[[56.36947500000008,68.26923599999998],[48.260644000000184,54.29938799999991],[48.06740500000001,56.43929000000003]],"pairedPercentChanges":[21.110292405596965,12.512771275906932,17.41696894184328]}},"diagnostics":{"baseline":{"contentWitnesses":39178,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":44761088,"rows":40000},"candidate":{"contentWitnesses":39178,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":44761088,"rows":40000},"control":{"contentWitnesses":39178,"crcReusedBytes":0,"floatScoreGroups":0,"fusedFallbacks":0,"glossaryWitnesses":0,"maxHeapBytes":44761088,"rows":40000}},"dictionary":"vndb","groups":1,"rows":40000}],"exactJournalEntries":15,"file":"reuse-disabled.json"}],"scope":"Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs."},"required":true,"requiredGatesPassed":true}
+2026-11-28T08:25:40.1646365Z DURABLE_EVIDENCE_BLOB {"bytes":5020,"gitBlobSha":"fae6b0e99ab6449e0d9d8d86b1d527933ce42974","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/acquisition.json","sha256":"16f772444a41b45195ec324c794f3c3383cef37bca8cca2c82b74e93b67af388"}
+2026-11-28T08:25:40.4861266Z DURABLE_EVIDENCE_BLOB {"bytes":4884,"gitBlobSha":"54c800301a98ccfa8ec9518be03dd3c7c93faac8","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/archive-members.json","sha256":"82bdce811fccdc6fda9ba2b83cadd8cbe4ce792972efdb1982291e6516e068ee"}
+2026-11-28T08:25:40.8447297Z DURABLE_EVIDENCE_BLOB {"bytes":8293,"gitBlobSha":"2f2bab0bcdf2a46414fae5a6d02127c3ff14a855","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/independent-audit.json","sha256":"981a1c21e7d807ff5b05e08182262ec4160f0041a87b056118c0e3a6baf023ce"}
+2026-11-28T08:25:41.1781330Z DURABLE_EVIDENCE_BLOB {"bytes":7524,"gitBlobSha":"ad3f39c31cee8b5bdc99b4c102f17d1467e90306","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/summary.json","sha256":"a499efb6a4a2c5db9de153e6b18d3a943c1cc1a3954c09941581d4ca8196a386"}
+2026-11-28T08:25:41.5424042Z DURABLE_EVIDENCE_BLOB {"bytes":70,"gitBlobSha":"ef3793c253263f12eb5d516894d131d180918dd7","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/audit.stdout.log","sha256":"ac576daf5999c5be37040937ce81511476617a4314c9c63f5b77f3e3546a90b4"}
+2026-11-28T08:25:42.0997065Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:42.4350101Z DURABLE_EVIDENCE_BLOB {"bytes":175,"gitBlobSha":"e06cf47e34fe2c93049cc0d2c91ed24e89824b14","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/retention.json","sha256":"c91ed708e51ed1682ed104ff1ed660f1c6e658c6de44a53d5dca869422b1f872"}
+2026-11-28T08:25:42.6836104Z DURABLE_EVIDENCE_BLOB {"bytes":191,"gitBlobSha":"941cca355c58a8b9dfde7fda5fb8ac699883aa1a","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/resolution-polls.jsonl","sha256":"5e8e3731cc7c59f7c8636109f970f43eca138812fef81b263631f3738731af9f"}
+2026-11-28T08:25:43.1712163Z DURABLE_EVIDENCE_BLOB {"bytes":1145989,"gitBlobSha":"822d96135c66a61cf6d8815bd822bb2a6c939757","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/original-artifact.zip","sha256":"db0cb3a7ae4209e326fcb539965be563b81626cb33f087f52e4613020583c6f8"}
+2026-11-28T08:25:43.4158931Z DURABLE_EVIDENCE_MANIFEST {"bytes":2947,"gitBlobSha":"a9c0b7204c13add1d8244c608655f1be91881a62","path":"dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/durable-manifest.json","sha256":"0de906a4ca529957d7f967702d15428008ace7b1b60d950cccfcdcc0408a161c"}
+2026-11-28T08:25:44.3821317Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15253333819,"entry":"canonical-vndb","jobConclusion":"failure","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"failure","runStatus":"completed"}
+2026-11-28T08:25:46.2549534Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15253333819,"artifactSha256":"3c67c9b0dd9f2d359ec1e82c6a9d5ecd6788e7f6f4224f26499bea4206ffa742","auditPassed":true,"entry":"canonical-vndb","memoryPassed":false,"performancePromotionDecision":"not automatic","report":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-2.6099486865651222,4.320223879607754],"equalWorkChangePercent":0.18640815491410834,"fasterPairs":5,"medianPairedChangePercent":1.1336785267001215,"ratios":[0.980982355746302,1.0155410855153149,1.0117987614964576,1.0361067809820823,1.0566875962563749,1.052699358110152,0.9958618277898799,1.050297696610073,0.9668186705223957,0.9361942618163881,0.9192587565509309,1.0108748090375446],"worstPairChangePercent":5.668759625637487},"complete":true,"control":{"count":4,"descriptiveBootstrap95Percent":[-0.7549306407473866,4.096677682393879],"equalWorkChangePercent":1.571764477735016,"fasterPairs":1,"medianPairedChangePercent":1.5114836945972598,"ratios":[0.9924506935925261,1.0409667768239388,1.0206799859796845,1.009549687912261],"worstPairChangePercent":4.096677682393879},"dictionary":"vndb","limits":"One AB-start host only; ordinary elapsed clocks and overlapping diagnostic phase counters are reported separately. No host pooling, control subtraction, partial-schedule replacement or memory-coverage imputation.","memoryPassed":false,"memoryReceiptFailures":[],"phaseComparisons":{"step4.bulkAddTermsMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-3.3825995100055573,0.6404196417929775],"equalWorkChangePercent":-2.252006545624563,"fasterPairs":6,"medianPairedChangePercent":-0.0014120600964062646,"ratios":[0.9242355089000457,1.0070224719101124,0.967461044912924,0.9648869648869649,0.9760147601476015,1.0018648018648018,1.0038332534738859,1.0057859209257474,1.024142926122646,0.8671679197994987,1.008390918065153,0.9981069569332702],"worstPairChangePercent":2.4142926122646013},"control":{"count":4,"descriptiveBootstrap95Percent":[-2.4193548387096753,3.0952380952380842],"equalWorkChangePercent":-0.023419203747077066,"fasterPairs":2,"medianPairedChangePercent":-0.3099864807658115,"ratios":[1.0309523809523808,1.015267175572519,0.9785330948121646,0.9758064516129032],"worstPairChangePercent":3.0952380952380842}},"step4.termParseMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-2.672772889622288,5.191936341342096],"equalWorkChangePercent":1.2191845234096776,"fasterPairs":5,"medianPairedChangePercent":0.4893722288553448,"ratios":[0.9767080745341615,1.0197979797979797,0.974171164225135,1.1248995983935743,1.1101836393989983,1.0840407470288624,0.9620797498045348,1.002460024600246,1.0073274199768607,1.0190355329949239,0.9060534591194969,0.9723733779824194],"worstPairChangePercent":12.489959839357434},"control":{"count":4,"descriptiveBootstrap95Percent":[-4.307463795024136,8.114961961115807],"equalWorkChangePercent":1.548451548451557,"fasterPairs":2,"medianPairedChangePercent":1.5952742285537003,"ratios":[0.9569253620497586,0.997979797979798,1.081149619611158,1.0339256865912763],"worstPairChangePercent":8.114961961115807}},"termRecordEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-7.847198456682847,10.17065138370028],"equalWorkChangePercent":1.7086083608408575,"fasterPairs":5,"medianPairedChangePercent":1.195588077686116,"ratios":[1.0012476606363794,0.9373773066348108,1.0650824234645184,0.9056787242315323,0.9054524361956786,0.9815483353387021,1.0998531571230123,0.8828543111995256,1.1035598705509932,1.0226641009173427,1.1919821826274297,1.1569965870315133],"worstPairChangePercent":19.198218262742973},"control":{"count":4,"descriptiveBootstrap95Percent":[-13.423860329524173,5.223559759269003],"equalWorkChangePercent":-6.0810810809915905,"fasterPairs":3,"medianPairedChangePercent":-7.558967160585084,"ratios":[0.9465605457636549,1.05223559759269,0.9022601110246434,0.8657613967047583],"worstPairChangePercent":5.223559759269003}},"termRecordEndImportSessionCloseWritableMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-43.14548046579846,17.325179303237714],"equalWorkChangePercent":-18.991450284991295,"fasterPairs":8,"medianPairedChangePercent":-3.7975606286150487,"ratios":[0.9901185770751,0.9864341085269077,1.0066598360655137,0.44677661169433674,1.5383141762446446,1.3398437499992406,0.9132149901377274,5.205882352941177,0.15862738750409444,0.690313778989694,0.2875131164739604,0.9376146789007914],"worstPairChangePercent":420.5882352941177},"control":{"count":4,"descriptiveBootstrap95Percent":[-6.958250496796115,138.14229249022816],"equalWorkChangePercent":38.102409638585954,"fasterPairs":1,"medianPairedChangePercent":9.657162253783813,"ratios":[1.1666666666656809,2.3814229249022816,1.0264765784099952,0.9304174950320389],"worstPairChangePercent":138.14229249022816}},"termRecordEndImportSessionMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-37.83758938312651,39.781124154712664],"equalWorkChangePercent":-13.316701503594308,"fasterPairs":8,"medianPairedChangePercent":-5.761267189016817,"ratios":[0.9985401459853165,0.9734513274337955,0.870862280343141,0.45949535192577917,1.4435975609762997,1.3520249221179537,2.064377682403412,4.134416543577782,0.18033292231817755,0.7837528604116906,0.34874371859308184,0.9113233287858681],"worstPairChangePercent":313.4416543577782},"control":{"count":4,"descriptiveBootstrap95Percent":[-10.28985507243002,101.49253731343282],"equalWorkChangePercent":26.455026455050778,"fasterPairs":1,"medianPairedChangePercent":7.066753800008829,"ratios":[1.0670926517573993,2.014925373134328,1.074242424242777,0.8971014492756998],"worstPairChangePercent":101.49253731343282}},"termRecordFieldEncodeMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-4.165166459606762,6.486129194324164],"equalWorkChangePercent":0.7705751509380798,"fasterPairs":6,"medianPairedChangePercent":1.0855035249589973,"ratios":[0.981004507404955,0.9608721624846959,1.0407055630942248,0.9375192366874234,0.9558245083231689,1.0753851196341009,0.9673534072916048,0.847112117779972,1.0482600131310629,1.1615541922248172,1.1124702684329055,1.0543374642523824],"worstPairChangePercent":16.155419222481715},"control":{"count":4,"descriptiveBootstrap95Percent":[-10.53763440841694,0.6394640680242203],"equalWorkChangePercent":-4.5204737206780194,"fasterPairs":3,"medianPairedChangePercent":-4.110716852970087,"ratios":[1.0063946406802422,0.991859737008772,0.8946236559158306,0.9259259259318264],"worstPairChangePercent":0.6394640680242203}},"termRecordValidationMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-16.69971086309838,5.251923028421968],"equalWorkChangePercent":-4.082789907552808,"fasterPairs":7,"medianPairedChangePercent":-6.097437090797619,"ratios":[0.8215613382964624,1.0726643598595742,1.923857867997612,0.7929936305641332,0.9274809160065285,0.6142241379257976,0.9505703421775191,1.1522491349088462,0.84444444444157,1.0323741007088652,0.8915662650585089,1.0066666666496182],"worstPairChangePercent":92.38578679976119},"control":{"count":4,"descriptiveBootstrap95Percent":[-43.990929704029604,-1.454545457587264],"equalWorkChangePercent":-21.613832854131754,"fasterPairs":4,"medianPairedChangePercent":-13.832199548752545,"ratios":[0.7539682539584647,0.560090702959704,0.9693877550664843,0.9854545454241274],"worstPairChangePercent":-1.454545457587264}},"termRecordWriteMs":{"candidate":{"count":12,"descriptiveBootstrap95Percent":[-13.372658516470615,0.08315404347607469],"equalWorkChangePercent":-9.030282138332613,"fasterPairs":9,"medianPairedChangePercent":-4.392278059792498,"ratios":[0.8366546367485044,1.006263048016508,0.8495510083919947,0.882995821278593,1.0159878828663338,0.9584171696855407,0.9954000328530133,0.9537372691186095,0.9615319437364844,0.631555456373156,0.9432203389824702,1.0447813207879437],"worstPairChangePercent":4.478132078794372},"control":{"count":4,"descriptiveBootstrap95Percent":[-4.259288045892462,7.571428571403915],"equalWorkChangePercent":3.0539147919748544,"fasterPairs":1,"medianPairedChangePercent":4.890076861300319,"ratios":[1.0757142857140392,1.0551619433181136,0.9574071195410754,1.0426395939078925],"worstPairChangePercent":7.571428571403915}}},"validatedObservationCount":42},"required":true,"requiredGatesPassed":false}
+2026-11-28T08:25:46.8823204Z DURABLE_EVIDENCE_BLOB {"bytes":4239,"gitBlobSha":"68d34e8feb9efd898489be7c842646852cb10940","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/acquisition.json","sha256":"df50ade53c56da5f42e3a6eabb9dc52f54b74b41f93cec5e7dc9048718c23eed"}
+2026-11-28T08:25:47.2190041Z DURABLE_EVIDENCE_BLOB {"bytes":89220,"gitBlobSha":"5f88e9983d7783d294cccbde533600306f6f8069","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/archive-members.json","sha256":"f9ac35657be67f3e92d95f4ec14f3d9d8af43c2e5de835ff96e661839a403e4e"}
+2026-11-28T08:25:47.5962195Z DURABLE_EVIDENCE_BLOB {"bytes":218654,"gitBlobSha":"9ad0b9b7a58520046f78668bc8bd67ef4fb5bc66","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/independent-audit.json","sha256":"f4f0d0d16c76e7d1a3e21e7a8b474e7257bf22866e7de9fa7393a20b838ca6d1"}
+2026-11-28T08:25:47.8833953Z DURABLE_EVIDENCE_BLOB {"bytes":12866,"gitBlobSha":"6bd4e2d84698d2abf531db0f59a0300235b533af","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/summary.json","sha256":"e3db706410f310125eaf68589bee89d62d37b8caad57167301fb4636e876be62"}
+2026-11-28T08:25:48.1090639Z DURABLE_EVIDENCE_BLOB {"bytes":1312,"gitBlobSha":"0117b56ea926dd05611e6f71582515cd24a8bfe2","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/audit.stdout.log","sha256":"6ac5fb34a3c5a83ac0c753d73513159251e9ff5e812fdad5abdc41fcd155e4e1"}
+2026-11-28T08:25:48.3461320Z DURABLE_EVIDENCE_BLOB {"bytes":0,"gitBlobSha":"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/audit.stderr.log","sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+2026-11-28T08:25:48.6008145Z DURABLE_EVIDENCE_BLOB {"bytes":1377,"gitBlobSha":"6c332ff7b05ddc523da9e14fdb79963695be9f47","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/retention.json","sha256":"0ffbefd5b4989cae83f233be4e15167cf26a3f470d1e36677f410275b33b7b73"}
+2026-11-28T08:25:48.8804246Z DURABLE_EVIDENCE_BLOB {"bytes":191,"gitBlobSha":"f20b8f0e72d0c48d4b8761f8268894a9ec3c8bdb","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/resolution-polls.jsonl","sha256":"5eeb6ad1d8a0b889407c45ee0233576cf80f564d5110b8421dc9c9da11531bee"}
+2026-11-28T08:25:49.4998717Z DURABLE_EVIDENCE_BLOB {"bytes":2469289,"gitBlobSha":"81cc830d0ca8b330af7de68422577abaf1649e18","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/evidence-without-reproducible-packages.zip","sha256":"5beb5d4328b146109ae97a410db2ca6afb76e166533ef6baf1e5b04f88e7b407"}
+2026-11-28T08:25:49.7352470Z DURABLE_EVIDENCE_MANIFEST {"bytes":3005,"gitBlobSha":"9cf92dd313a5fa2e0c0f9cc9e1b8da4357e3f587","path":"dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/durable-manifest.json","sha256":"b5cea129cd496f39ddf12914cb8d7fb34bf0dea7d9c377763a558e1040a26721"}
+2026-11-28T08:25:50.7073486Z FROZEN_ARTIFACT_RESOLUTION {"artifactId":15255386235,"entry":"crc-no-unroll-jmdict","jobConclusion":"success","jobStatus":"completed","matchingArtifacts":1,"runConclusion":"success","runStatus":"completed"}
+2026-11-28T08:25:51.2683937Z FROZEN_AUDIT_SUMMARY {"acquisitionComplete":true,"artifactId":15255386235,"artifactSha256":"7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d","auditPassed":null,"entry":"crc-no-unroll-jmdict","memoryPassed":null,"preserveOnly":true,"report":{"auditNotPerformed":true,"complete":false,"dictionary":"jmdict","scope":"Preservation only: exact API-bound original outer ZIP and full member census. No independent correctness, timing, or qualification audit."},"required":false,"requiredGatesPassed":null}
+2026-11-28T08:25:51.5325983Z DURABLE_EVIDENCE_BLOB {"bytes":3808,"gitBlobSha":"3f788f3bbc7d11295f4998e9e8104a721f8c99db","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/acquisition.json","sha256":"c469aa27b90115e5f14ef0c0ab2e47c6e38dc9e6fb474a9813b33d2def9de8b7"}
+2026-11-28T08:25:51.8461506Z DURABLE_EVIDENCE_BLOB {"bytes":95778,"gitBlobSha":"94300e48f9302b80d41048644d6cb8d1b6f69625","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/archive-members.json","sha256":"7c0f2a6e444c8d33514703d328b626871054206a982fe7d74a8fe9aed2cd2a0b"}
+2026-11-28T08:25:52.0827866Z DURABLE_EVIDENCE_BLOB {"bytes":231,"gitBlobSha":"bb6cf910c05d00185b4ad303d844bd18c4fe95a1","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/independent-audit.json","sha256":"4f1e7eb78a17cf2c6a5ca229a544e9f185bdd0e4ca97406f0fc545ae89b1ac71"}
+2026-11-28T08:25:52.3525672Z DURABLE_EVIDENCE_BLOB {"bytes":563,"gitBlobSha":"d3e2702bd85f624a2ec6af9ae0bd63a1b70202b2","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/summary.json","sha256":"b6365bab711690c82490ad8178ecfed7146149871240f04a2e5fe1179e5a2a08"}
+2026-11-28T08:25:52.6231219Z DURABLE_EVIDENCE_BLOB {"bytes":174,"gitBlobSha":"055f86c805e9dea1fc3d2862eef6aea9e7d47d47","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/retention.json","sha256":"6492eefb421c6efc22221f99040288c2aede12468d4e8eb78a1764f35b0dd061"}
+2026-11-28T08:25:52.8809682Z DURABLE_EVIDENCE_BLOB {"bytes":192,"gitBlobSha":"9ff88378d3065bef28594d005d4bfd58627d2bd6","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/resolution-polls.jsonl","sha256":"7492ff5e7016c3c59733685775bee3d7b1eefc72cae234201f781402a321087d"}
+2026-11-28T08:25:53.3459318Z DURABLE_EVIDENCE_BLOB {"bytes":641405,"gitBlobSha":"a7cf94d586213bf61f19b920b2267d78ee55f504","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/original-artifact.zip","sha256":"7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d"}
+2026-11-28T08:25:53.5930328Z DURABLE_EVIDENCE_MANIFEST {"bytes":2470,"gitBlobSha":"411e32baf2cb045c39fe292129be5de55b2e1525","path":"dev/perf/import-round-20261128-beb5/hosted-audit/crc-no-unroll-jmdict/durable-manifest.json","sha256":"87024175e77046794ff0aba54aae3f018a5fe754e6753e4e1c01f3ea9b50ad60"}
+2026-11-28T08:25:53.5956381Z FROZEN_AUDIT_BATCH {"complete":true,"entries":[{"acquisitionComplete":true,"auditPassed":true,"entry":"canonical-jmdict","requiredGatesPassed":true,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":true,"entry":"canonical-jitendex","requiredGatesPassed":true,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":true,"entry":"prefix-jmdict","requiredGatesPassed":true,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":true,"entry":"prefix-jitendex","requiredGatesPassed":true,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":true,"entry":"prefix-vndb","requiredGatesPassed":true,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":true,"entry":"canonical-vndb","requiredGatesPassed":false,"retentionComplete":true},{"acquisitionComplete":true,"auditPassed":null,"entry":"crc-no-unroll-jmdict","requiredGatesPassed":null,"retentionComplete":true}],"requiredGatesPassed":false,"requiredRetentionComplete":true}
+2026-11-28T08:25:53.8262564Z DURABLE_EVIDENCE_BLOB {"bytes":1005,"gitBlobSha":"043ee943735371161fd814e6ce99f4ba0a36084a","path":"dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-plan.json","sha256":"edd6ce09661bf29d93e38335aa2b218107fc9788f07c37de46f3b18322b4a352"}
+2026-11-28T08:25:54.1002897Z DURABLE_EVIDENCE_BLOB {"bytes":43332,"gitBlobSha":"12181e0ade1a8641f3f06bb232924235e5114314","path":"dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-journal.jsonl","sha256":"684103205b2de47eefb1d6b904d298dfbd69e68060469559bc72306671e01f49"}
+2026-11-28T08:25:54.4602616Z DURABLE_EVIDENCE_BLOB {"bytes":92371,"gitBlobSha":"b7c667c777d029bd765fce99b1eb4fc9c4db79cb","path":"dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-summary.json","sha256":"6f04f0d30e4035f23cc7d2b1b67c229cb95e8116e3b3b344534488083f8897bc"}
+2026-11-28T08:25:54.6888346Z DURABLE_EVIDENCE_MANIFEST {"bytes":1159,"gitBlobSha":"cc81f19189f64123917bb0974746ecfb025e71a0","path":"dev/perf/import-round-20261128-beb5/hosted-audit/combined/durable-manifest.json","sha256":"6aac7ac231cbf86bbbdf1fd5c08efc885dc9d93c9d4ebc31be48395b41fcdf69"}
+2026-11-28T08:25:54.7122475Z ##[error]Process completed with exit code 1.
+2026-11-28T08:25:54.7179873Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-28T08:25:54.7180211Z with:
+2026-11-28T08:25:54.7180402Z   name: frozen-import-audit-beb5-combined
+2026-11-28T08:25:54.7180628Z   path: evidence
+2026-11-28T08:25:54.7180797Z   if-no-files-found: error
+2026-11-28T08:25:54.7181150Z   retention-days: 14
+2026-11-28T08:25:54.7181326Z   compression-level: 6
+2026-11-28T08:25:54.7181500Z   overwrite: false
+2026-11-28T08:25:54.7181683Z   include-hidden-files: false
+2026-11-28T08:25:54.7181878Z ##[endgroup]
+2026-11-28T08:25:54.8841021Z (node:3463) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:25:54.8841758Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:25:55.0584403Z With the provided path, there will be 1466 files uploaded
+2026-11-28T08:25:55.0589060Z Artifact name is valid!
+2026-11-28T08:25:55.0589382Z Root directory input is valid!
+2026-11-28T08:25:55.3053107Z Beginning upload of artifact content to blob storage
+2026-11-28T08:25:55.5603743Z (node:3463) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T08:25:55.6654973Z Uploaded bytes 8388608
+2026-11-28T08:25:55.8447740Z Uploaded bytes 16777216
+2026-11-28T08:25:56.0637311Z Uploaded bytes 25165824
+2026-11-28T08:25:56.2653927Z Uploaded bytes 33554432
+2026-11-28T08:25:56.6309370Z Uploaded bytes 41943040
+2026-11-28T08:25:56.8673723Z Uploaded bytes 50331648
+2026-11-28T08:25:57.0152868Z Uploaded bytes 58720256
+2026-11-28T08:25:57.2287433Z Uploaded bytes 67108864
+2026-11-28T08:25:57.6154346Z Uploaded bytes 75497472
+2026-11-28T08:25:57.8439385Z Uploaded bytes 83886080
+2026-11-28T08:25:58.0077237Z Uploaded bytes 92274688
+2026-11-28T08:25:58.2260096Z Uploaded bytes 100663296
+2026-11-28T08:25:58.4316617Z Uploaded bytes 109051904
+2026-11-28T08:25:58.7582098Z Uploaded bytes 117440512
+2026-11-28T08:25:58.9834966Z Uploaded bytes 125829120
+2026-11-28T08:25:59.2009578Z Uploaded bytes 134217728
+2026-11-28T08:25:59.3748699Z Uploaded bytes 142606336
+2026-11-28T08:25:59.7629523Z Uploaded bytes 150994944
+2026-11-28T08:25:59.9340457Z Uploaded bytes 159383552
+2026-11-28T08:26:00.1570228Z Uploaded bytes 167772160
+2026-11-28T08:26:00.3697428Z Uploaded bytes 176160768
+2026-11-28T08:26:00.5648531Z Uploaded bytes 184549376
+2026-11-28T08:26:00.9174998Z Uploaded bytes 192937984
+2026-11-28T08:26:01.1451501Z Uploaded bytes 201326592
+2026-11-28T08:26:01.3392979Z Uploaded bytes 209715200
+2026-11-28T08:26:01.5214298Z Uploaded bytes 218103808
+2026-11-28T08:26:02.4541008Z Uploaded bytes 226492416
+2026-11-28T08:26:02.4626354Z Uploaded bytes 226602955
+2026-11-28T08:26:02.4749513Z Finished uploading artifact content to blob storage!
+2026-11-28T08:26:02.4752474Z SHA256 digest of uploaded artifact zip is f01765aea0ecae69bdad8eaf6b9b887c3b2ca73f942cc8e42cba035cf12189f7
+2026-11-28T08:26:02.4754177Z Finalizing artifact upload
+2026-11-28T08:26:02.8148328Z Artifact frozen-import-audit-beb5-combined.zip successfully finalized. Artifact ID 15255533520
+2026-11-28T08:26:02.8151334Z Artifact frozen-import-audit-beb5-combined has been successfully uploaded! Final size is 226602955 bytes. Artifact ID is 15255533520
+2026-11-28T08:26:02.8155678Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/46122561920/artifacts/15255533520
+2026-11-28T08:26:02.8418431Z Post job cleanup.
+2026-11-28T08:26:02.9122408Z [command]/usr/bin/git version
+2026-11-28T08:26:02.9160582Z git version 2.56.1
+2026-11-28T08:26:02.9191660Z Temporarily overriding HOME='/home/runner/work/_temp/9d37cb00-0280-4030-ac36-2473829d8204' before making global git config changes
+2026-11-28T08:26:02.9207032Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:02.9207836Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/recent-source
+2026-11-28T08:26:02.9228562Z Removing SSH command configuration
+2026-11-28T08:26:02.9234113Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:02.9267356Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:02.9504946Z Removing HTTP extra header
+2026-11-28T08:26:02.9505677Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:02.9538086Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:02.9771247Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:02.9777868Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:02.9813449Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.0188665Z Post job cleanup.
+2026-11-28T08:26:03.0905920Z [command]/usr/bin/git version
+2026-11-28T08:26:03.0944229Z git version 2.56.1
+2026-11-28T08:26:03.0976632Z Temporarily overriding HOME='/home/runner/work/_temp/208fd60f-8702-4a77-989d-637ff1e5dff9' before making global git config changes
+2026-11-28T08:26:03.0977587Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:03.0981394Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/canonical-source
+2026-11-28T08:26:03.1015793Z Removing SSH command configuration
+2026-11-28T08:26:03.1021406Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:03.1080901Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:03.1325410Z Removing HTTP extra header
+2026-11-28T08:26:03.1330946Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:03.1375109Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:03.1681640Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:03.1688826Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:03.1746114Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.2099135Z Post job cleanup.
+2026-11-28T08:26:03.2822935Z [command]/usr/bin/git version
+2026-11-28T08:26:03.2861555Z git version 2.56.1
+2026-11-28T08:26:03.2895169Z Temporarily overriding HOME='/home/runner/work/_temp/6fbab628-2c2e-4d7b-944d-f4bf36602e55' before making global git config changes
+2026-11-28T08:26:03.2896450Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:03.2899951Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/original-evidence
+2026-11-28T08:26:03.2929732Z Removing SSH command configuration
+2026-11-28T08:26:03.2935896Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:03.2968881Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:03.3201792Z Removing HTTP extra header
+2026-11-28T08:26:03.3202529Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:03.3248854Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:03.3489036Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:03.3489959Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:03.3556227Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.3954937Z Post job cleanup.
+2026-11-28T08:26:03.4655875Z [command]/usr/bin/git version
+2026-11-28T08:26:03.4694962Z git version 2.56.1
+2026-11-28T08:26:03.4731021Z Temporarily overriding HOME='/home/runner/work/_temp/aa17d9d1-89c5-427e-ac3f-57b05d0b8cf6' before making global git config changes
+2026-11-28T08:26:03.4732166Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:03.4737728Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/baseline
+2026-11-28T08:26:03.4779348Z Removing SSH command configuration
+2026-11-28T08:26:03.4795549Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:03.4840799Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:03.5186018Z Removing HTTP extra header
+2026-11-28T08:26:03.5186505Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:03.5260451Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:03.5543441Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:03.5559498Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:03.5637624Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.6036240Z Post job cleanup.
+2026-11-28T08:26:03.6752553Z [command]/usr/bin/git version
+2026-11-28T08:26:03.6787191Z git version 2.56.1
+2026-11-28T08:26:03.6823439Z Temporarily overriding HOME='/home/runner/work/_temp/a10f7bef-620c-49e1-8ffa-768483f0782b' before making global git config changes
+2026-11-28T08:26:03.6824355Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:03.6829506Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/original-source
+2026-11-28T08:26:03.6859976Z Removing SSH command configuration
+2026-11-28T08:26:03.6865804Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:03.6925749Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:03.7186620Z Removing HTTP extra header
+2026-11-28T08:26:03.7187351Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:03.7246079Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:03.7448315Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:03.7456141Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:03.7497549Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.7871625Z Post job cleanup.
+2026-11-28T08:26:03.8625384Z [command]/usr/bin/git version
+2026-11-28T08:26:03.8662908Z git version 2.56.1
+2026-11-28T08:26:03.8695503Z Temporarily overriding HOME='/home/runner/work/_temp/dbf6f632-3cdb-4aa9-92f0-a38c2aeb666b' before making global git config changes
+2026-11-28T08:26:03.8697026Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:26:03.8699607Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan/audit
+2026-11-28T08:26:03.8730628Z Removing SSH command configuration
+2026-11-28T08:26:03.8736392Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:26:03.8767913Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:26:03.8998535Z Removing HTTP extra header
+2026-11-28T08:26:03.9003366Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:26:03.9035770Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:26:03.9282655Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:26:03.9290210Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:26:03.9327869Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:26:03.9701117Z Cleaning up orphan processes
+2026-11-28T08:26:03.9991429Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

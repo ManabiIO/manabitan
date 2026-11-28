@@ -1,0 +1,458 @@
+﻿2026-11-28T08:10:09.8815473Z Current runner version: '2.338.2'
+2026-11-28T08:10:09.8836835Z ##[group]Runner Image Provisioner
+2026-11-28T08:10:09.8837529Z Hosted Compute Agent
+2026-11-28T08:10:09.8838718Z Version: 20261111.635
+2026-11-28T08:10:09.8839231Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-28T08:10:09.8839851Z Build Date: 2026-11-11T01:49:01Z
+2026-11-28T08:10:09.8840425Z Worker ID: {18435028-e538-4555-b2f0-a67524729daa}
+2026-11-28T08:10:09.8840998Z Region: centralus
+2026-11-28T08:10:09.8841549Z Cloud: Azure
+2026-11-28T08:10:09.8841995Z ##[endgroup]
+2026-11-28T08:10:09.8843223Z ##[group]Operating System
+2026-11-28T08:10:09.8843765Z Ubuntu
+2026-11-28T08:10:09.8844202Z 26.04.1
+2026-11-28T08:10:09.8844723Z LTS
+2026-11-28T08:10:09.8845150Z ##[endgroup]
+2026-11-28T08:10:09.8845597Z ##[group]Runner Image
+2026-11-28T08:10:09.8846156Z Image: ubuntu-26.04
+2026-11-28T08:10:09.8846671Z Version: 20261122.9.1
+2026-11-28T08:10:09.8847726Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-28T08:10:09.8849230Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-28T08:10:09.8850084Z ##[endgroup]
+2026-11-28T08:10:09.8851034Z ##[group]GITHUB_TOKEN Permissions
+2026-11-28T08:10:09.8852950Z Contents: read
+2026-11-28T08:10:09.8853449Z Metadata: read
+2026-11-28T08:10:09.8853978Z ##[endgroup]
+2026-11-28T08:10:09.8855749Z Secret source: Actions
+2026-11-28T08:10:09.8856587Z Cache mode: write
+2026-11-28T08:10:09.8857385Z Prepare workflow directory
+2026-11-28T08:10:09.9180430Z Prepare all required actions
+2026-11-28T08:10:09.9220554Z Getting action download info
+2026-11-28T08:10:10.1510547Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-28T08:10:10.2268538Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-11-28T08:10:10.4657755Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-28T08:10:10.6798655Z Complete job name: Single fixed CRC candidate (JMdict)
+2026-11-28T08:10:10.7519019Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-28T08:10:10.7519876Z with:
+2026-11-28T08:10:10.7520237Z   persist-credentials: false
+2026-11-28T08:10:10.7520639Z   fetch-depth: 2
+2026-11-28T08:10:10.7521006Z   repository: ManabiIO/manabitan
+2026-11-28T08:10:10.7524039Z   token: ***
+2026-11-28T08:10:10.7524403Z   ssh-strict: true
+2026-11-28T08:10:10.7524759Z   ssh-user: git
+2026-11-28T08:10:10.7525111Z   clean: true
+2026-11-28T08:10:10.7525475Z   sparse-checkout-cone-mode: true
+2026-11-28T08:10:10.7525893Z   fetch-tags: false
+2026-11-28T08:10:10.7526252Z   show-progress: true
+2026-11-28T08:10:10.7526613Z   lfs: false
+2026-11-28T08:10:10.7526946Z   submodules: false
+2026-11-28T08:10:10.7527306Z   set-safe-directory: true
+2026-11-28T08:10:10.7527706Z   allow-unsafe-pr-checkout: false
+2026-11-28T08:10:10.7528474Z env:
+2026-11-28T08:10:10.7528821Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:10.7529273Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:10.7529742Z   NODE_OPTIONS: 
+2026-11-28T08:10:10.7530106Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:10.7530467Z ##[endgroup]
+2026-11-28T08:10:10.9871674Z Syncing repository: ManabiIO/manabitan
+2026-11-28T08:10:10.9873548Z ##[group]Getting Git version info
+2026-11-28T08:10:10.9874205Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:10:10.9875121Z [command]/usr/bin/git version
+2026-11-28T08:10:10.9928139Z git version 2.56.1
+2026-11-28T08:10:10.9949830Z ##[endgroup]
+2026-11-28T08:10:10.9961002Z Temporarily overriding HOME='/home/runner/work/_temp/702fc7e2-a79b-458d-8aff-9766184c500e' before making global git config changes
+2026-11-28T08:10:10.9962773Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:10:10.9965449Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:10:11.0025260Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-28T08:10:11.0034792Z ##[group]Determining repository object format
+2026-11-28T08:10:11.0035891Z ##[endgroup]
+2026-11-28T08:10:11.0039004Z ##[group]Initializing the repository
+2026-11-28T08:10:11.0039920Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-28T08:10:11.0110060Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-28T08:10:11.0111386Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-28T08:10:11.0112536Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-28T08:10:11.0113452Z hint: call:
+2026-11-28T08:10:11.0113991Z hint:
+2026-11-28T08:10:11.0114662Z hint: 	git config --global init.defaultBranch <name>
+2026-11-28T08:10:11.0115445Z hint:
+2026-11-28T08:10:11.0116193Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-28T08:10:11.0117422Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-28T08:10:11.0118505Z hint:
+2026-11-28T08:10:11.0119073Z hint: 	git branch -m <name>
+2026-11-28T08:10:11.0119690Z hint:
+2026-11-28T08:10:11.0120466Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-28T08:10:11.0121704Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-28T08:10:11.0129433Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-28T08:10:11.0186457Z ##[endgroup]
+2026-11-28T08:10:11.0187682Z ##[group]Disabling automatic garbage collection
+2026-11-28T08:10:11.0191786Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-28T08:10:11.0224333Z ##[endgroup]
+2026-11-28T08:10:11.0225569Z ##[group]Setting up auth
+2026-11-28T08:10:11.0230020Z Removing SSH command configuration
+2026-11-28T08:10:11.0231100Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:10:11.0264153Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:10:11.0655971Z Removing HTTP extra header
+2026-11-28T08:10:11.0663205Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:10:11.0721724Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:10:11.0958882Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:10:11.0964720Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:10:11.0996896Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:10:11.1242553Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-28T08:10:11.1283312Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:11.1317486Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:11.1350518Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:11.1385865Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:11.1411167Z ##[endgroup]
+2026-11-28T08:10:11.1411796Z ##[group]Fetching the repository
+2026-11-28T08:10:11.1417807Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=2 origin +887884769ad1b7d54872975920fc0f8fd43a56ee:refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:13.6143487Z From https://github.com/ManabiIO/manabitan
+2026-11-28T08:10:13.6144723Z  * [new ref]         887884769ad1b7d54872975920fc0f8fd43a56ee -> origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:13.6169808Z [command]/usr/bin/git branch --list --remote origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:13.6179012Z   origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:13.6187534Z [command]/usr/bin/git rev-parse refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:13.6211752Z 887884769ad1b7d54872975920fc0f8fd43a56ee
+2026-11-28T08:10:13.6221856Z ##[endgroup]
+2026-11-28T08:10:13.6222513Z ##[group]Determining the checkout info
+2026-11-28T08:10:13.6223215Z ##[endgroup]
+2026-11-28T08:10:13.6224883Z [command]/usr/bin/git sparse-checkout disable
+2026-11-28T08:10:13.6275633Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-28T08:10:13.6307565Z ##[group]Checking out the ref
+2026-11-28T08:10:13.6312393Z [command]/usr/bin/git checkout --progress --force -B test/crc-no-unroll-screen-20261128-beb5 refs/remotes/origin/test/crc-no-unroll-screen-20261128-beb5
+2026-11-28T08:10:14.1851534Z Switched to a new branch 'test/crc-no-unroll-screen-20261128-beb5'
+2026-11-28T08:10:14.1854025Z branch 'test/crc-no-unroll-screen-20261128-beb5' set up to track 'origin/test/crc-no-unroll-screen-20261128-beb5'.
+2026-11-28T08:10:14.1883566Z ##[endgroup]
+2026-11-28T08:10:14.1927518Z [command]/usr/bin/git log -1 --format=%H
+2026-11-28T08:10:14.1951793Z 887884769ad1b7d54872975920fc0f8fd43a56ee
+2026-11-28T08:10:14.1964113Z ##[group]Removing auth
+2026-11-28T08:10:14.1964585Z Removing SSH command configuration
+2026-11-28T08:10:14.1965048Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:10:14.1995362Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:10:14.2243841Z Removing HTTP extra header
+2026-11-28T08:10:14.2247080Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:10:14.2277404Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:10:14.2522598Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:10:14.2525352Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:10:14.2553774Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:10:14.2554540Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:10:14.2555302Z includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:10:14.2555990Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:10:14.2562571Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-28T08:10:14.2585456Z /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2602284Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2630820Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-28T08:10:14.2654438Z /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2664874Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2699009Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-28T08:10:14.2772236Z /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2774679Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2776606Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-28T08:10:14.2779172Z /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2787381Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config
+2026-11-28T08:10:14.2819016Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:10:14.3061411Z Removing credentials config '/home/runner/work/_temp/git-credentials-7d87008e-4361-46b9-96ad-8643bb56ac66.config'
+2026-11-28T08:10:14.3070335Z ##[endgroup]
+2026-11-28T08:10:14.3254421Z ##[group]Run set -euo pipefail
+2026-11-28T08:10:14.3254848Z [36;1mset -euo pipefail[0m
+2026-11-28T08:10:14.3255276Z [36;1mevidence="$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-screen-beb5/jmdict"[0m
+2026-11-28T08:10:14.3255726Z [36;1mmkdir -p "$evidence"[0m
+2026-11-28T08:10:14.3256176Z [36;1mcp dev/perf/crc-no-unroll-20261128-beb5/registration.json "$evidence/registration.json"[0m
+2026-11-28T08:10:14.3256699Z [36;1mgit rev-parse HEAD > "$evidence/source-sha.txt"[0m
+2026-11-28T08:10:14.3257138Z [36;1mgit rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"[0m
+2026-11-28T08:10:14.3291438Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:14.3291834Z env:
+2026-11-28T08:10:14.3292085Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:14.3292403Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:14.3292708Z   NODE_OPTIONS: 
+2026-11-28T08:10:14.3292948Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:14.3293193Z ##[endgroup]
+2026-11-28T08:10:14.3559568Z Prepare all required actions
+2026-11-28T08:10:14.3560216Z Getting action download info
+2026-11-28T08:10:14.4485178Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-28T08:10:14.6563090Z ##[group]Run ./.github/actions/setup
+2026-11-28T08:10:14.6563337Z with:
+2026-11-28T08:10:14.6563511Z   node-version: 22.22.0
+2026-11-28T08:10:14.6563698Z env:
+2026-11-28T08:10:14.6563868Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:14.6564120Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:14.6564346Z   NODE_OPTIONS: 
+2026-11-28T08:10:14.6564520Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:14.6564698Z ##[endgroup]
+2026-11-28T08:10:14.6611866Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-28T08:10:14.6686838Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-28T08:10:14.6687177Z with:
+2026-11-28T08:10:14.6687449Z   node-version: 22.22.0
+2026-11-28T08:10:14.6687640Z   cache: npm
+2026-11-28T08:10:14.6687817Z   always-auth: false
+2026-11-28T08:10:14.6688149Z   check-latest: false
+2026-11-28T08:10:14.6689981Z   token: ***
+2026-11-28T08:10:14.6690153Z env:
+2026-11-28T08:10:14.6690326Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:14.6690559Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:14.6690771Z   NODE_OPTIONS: 
+2026-11-28T08:10:14.6690939Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:14.6691116Z ##[endgroup]
+2026-11-28T08:10:14.7876742Z Attempting to download 22.22.0...
+2026-11-28T08:10:14.7993011Z (node:2394) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:10:14.7994040Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:10:15.5115912Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-28T08:10:16.0119447Z Extracting ...
+2026-11-28T08:10:16.0217299Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/818fed31-859c-49cb-a269-ca228715c0ec -f /home/runner/work/_temp/eb17b1d4-2b1e-448d-816c-5fbc2c9f519e
+2026-11-28T08:10:16.6726433Z Adding to the cache ...
+2026-11-28T08:10:18.6054972Z ##[group]Environment details
+2026-11-28T08:10:18.8023129Z node: v22.22.0
+2026-11-28T08:10:18.8023483Z npm: 10.9.4
+2026-11-28T08:10:18.8023719Z yarn: 1.22.22
+2026-11-28T08:10:18.8024248Z ##[endgroup]
+2026-11-28T08:10:18.8039978Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-28T08:10:18.8839494Z /home/runner/.npm
+2026-11-28T08:10:19.0241963Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T08:10:19.0344391Z (node:2394) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T08:10:19.7505634Z Received 63143556 of 63143556 (100.0%), 99.7 MBs/sec
+2026-11-28T08:10:19.7506122Z Cache Size: ~60 MB (63143556 B)
+2026-11-28T08:10:19.7608180Z [command]/usr/bin/tar -xf /home/runner/work/_temp/41d4d05a-8311-410d-af40-f8de09d6bee4/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-28T08:10:19.9744948Z Cache restored successfully
+2026-11-28T08:10:19.9777670Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-28T08:10:19.9940453Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=5332]
+2026-11-28T08:10:19.9943830Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-28T08:10:19.9950633Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-28T08:10:19.9952833Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-28T08:10:19.9972082Z ##[group]Run npm ci
+2026-11-28T08:10:19.9972302Z [36;1mnpm ci[0m
+2026-11-28T08:10:20.0006802Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:20.0007099Z env:
+2026-11-28T08:10:20.0007276Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:20.0007521Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:20.0007742Z   NODE_OPTIONS: 
+2026-11-28T08:10:20.0008044Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:20.0008485Z ##[endgroup]
+2026-11-28T08:10:20.5163444Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-28T08:10:24.7060502Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-28T08:10:25.8396803Z 
+2026-11-28T08:10:25.8397506Z > yomitan@0.0.0 prepare
+2026-11-28T08:10:25.8398052Z > husky
+2026-11-28T08:10:25.8398262Z 
+2026-11-28T08:10:25.8929111Z 
+2026-11-28T08:10:25.8930020Z added 670 packages, and audited 671 packages in 6s
+2026-11-28T08:10:25.8930551Z 
+2026-11-28T08:10:25.8930804Z 232 packages are looking for funding
+2026-11-28T08:10:25.8931193Z   run `npm fund` for details
+2026-11-28T08:10:25.8934830Z 
+2026-11-28T08:10:25.8935482Z found 0 vulnerabilities
+2026-11-28T08:10:25.9548764Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=5959]
+2026-11-28T08:10:25.9552099Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-28T08:10:25.9574971Z ##[group]Run npm run build:libs
+2026-11-28T08:10:25.9575359Z [36;1mnpm run build:libs[0m
+2026-11-28T08:10:25.9575683Z [36;1mnpm run license-report:html[0m
+2026-11-28T08:10:25.9615379Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:25.9615823Z env:
+2026-11-28T08:10:25.9616095Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:25.9616468Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:25.9616817Z   NODE_OPTIONS: 
+2026-11-28T08:10:25.9617099Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:25.9617394Z ##[endgroup]
+2026-11-28T08:10:26.0438595Z 
+2026-11-28T08:10:26.0439478Z > yomitan@0.0.0 build:libs
+2026-11-28T08:10:26.0440011Z > node ./dev/bin/build-libs.js
+2026-11-28T08:10:26.0440237Z 
+2026-11-28T08:10:26.5763330Z 
+2026-11-28T08:10:26.5764150Z > yomitan@0.0.0 license-report:html
+2026-11-28T08:10:26.5765893Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-28T08:10:26.5766948Z 
+2026-11-28T08:10:26.9797320Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=1024]
+2026-11-28T08:10:26.9830359Z ##[group]Run sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+2026-11-28T08:10:26.9830902Z [36;1msudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21[0m
+2026-11-28T08:10:26.9860793Z shell: /usr/bin/bash -e {0}
+2026-11-28T08:10:26.9861013Z env:
+2026-11-28T08:10:26.9861199Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:26.9861440Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:26.9861672Z   NODE_OPTIONS: 
+2026-11-28T08:10:26.9861851Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:26.9862038Z ##[endgroup]
+2026-11-28T08:10:27.0575576Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-28T08:10:27.0856207Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-28T08:10:27.0857463Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-28T08:10:27.0933195Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-28T08:10:27.0942870Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-28T08:10:27.0953608Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-28T08:10:27.1262200Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [928 kB]
+2026-11-28T08:10:27.1427105Z Get:13 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [178 kB]
+2026-11-28T08:10:27.1450039Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [205 kB]
+2026-11-28T08:10:27.1454716Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [402 kB]
+2026-11-28T08:10:27.1498836Z Get:14 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [192 kB]
+2026-11-28T08:10:27.1560998Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [127 kB]
+2026-11-28T08:10:27.1590312Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-28T08:10:27.1600209Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-28T08:10:27.1610822Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [765 kB]
+2026-11-28T08:10:27.1643297Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [165 kB]
+2026-11-28T08:10:27.1660380Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [229 kB]
+2026-11-28T08:10:27.1671750Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [74.4 kB]
+2026-11-28T08:10:27.2093448Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-28T08:10:27.2119780Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-28T08:10:30.5446140Z Fetched 5199 kB in 0s (14.4 MB/s)
+2026-11-28T08:10:31.1956547Z Reading package lists...
+2026-11-28T08:10:31.2262561Z Reading package lists...
+2026-11-28T08:10:31.4252978Z Building dependency tree...
+2026-11-28T08:10:31.4259836Z Reading state information...
+2026-11-28T08:10:31.4670522Z clang-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T08:10:31.4670969Z lld-21 is already the newest version (1:21.1.8-6ubuntu1).
+2026-11-28T08:10:31.5317280Z Solving dependencies...
+2026-11-28T08:10:31.6600935Z 0 upgraded, 0 newly installed, 0 to remove and 38 not upgraded.
+2026-11-28T08:10:31.7240447Z ##[group]Run actions/cache@caa296126883cff596d87d8935842f9db880ef25
+2026-11-28T08:10:31.7240758Z with:
+2026-11-28T08:10:31.7240946Z   path: builds/e2e-dictionary-cache
+2026-11-28T08:10:31.7241373Z   key: perf-source-dictionaries-Linux-135fa9494dd8057f6b94a6e37cd6590e9f8b3031446905583261ec64c998b1db
+2026-11-28T08:10:31.7241834Z   enableCrossOsArchive: false
+2026-11-28T08:10:31.7242054Z   fail-on-cache-miss: false
+2026-11-28T08:10:31.7242256Z   lookup-only: false
+2026-11-28T08:10:31.7242434Z   save-always: false
+2026-11-28T08:10:31.7242608Z env:
+2026-11-28T08:10:31.7242778Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:31.7243008Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:31.7243226Z   NODE_OPTIONS: 
+2026-11-28T08:10:31.7243408Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:31.7243583Z ##[endgroup]
+2026-11-28T08:10:31.9675138Z Cache not found for input keys: perf-source-dictionaries-Linux-135fa9494dd8057f6b94a6e37cd6590e9f8b3031446905583261ec64c998b1db
+2026-11-28T08:10:31.9771721Z ##[group]Run set -euo pipefail
+2026-11-28T08:10:31.9771986Z [36;1mset -euo pipefail[0m
+2026-11-28T08:10:31.9772296Z [36;1mevidence="$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-screen-beb5/jmdict"[0m
+2026-11-28T08:10:31.9772719Z [36;1mnode dev/perf/host-environment.js > "$evidence/host-before.json"[0m
+2026-11-28T08:10:31.9773180Z [36;1mfor script in dev/perf/crc-no-unroll-20261128-beb5/*.mjs; do node --check "$script"; done[0m
+2026-11-28T08:10:31.9773625Z [36;1mpython dev/perf/crc-no-unroll-20261128-beb5/build.py "$evidence" \[0m
+2026-11-28T08:10:31.9773951Z [36;1m  2>&1 | tee "$evidence/build.log"[0m
+2026-11-28T08:10:31.9804685Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:31.9804961Z env:
+2026-11-28T08:10:31.9805150Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:31.9805381Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:31.9805598Z   NODE_OPTIONS: 
+2026-11-28T08:10:31.9805773Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:31.9806001Z ##[endgroup]
+2026-11-28T08:10:47.2401467Z {"passed": true, "sourceCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee", "variants": {"baseline": {"wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee", "wasmBytes": 67659}, "candidate": {"wasmSha256": "1d0990753b18591d0befd2be35e6fc5a7ba9ae93e48e883184d13f01fe0526e8", "wasmBytes": 66638}}}
+2026-11-28T08:10:47.2501991Z ##[group]Run set -euo pipefail
+2026-11-28T08:10:47.2502284Z [36;1mset -euo pipefail[0m
+2026-11-28T08:10:47.2502622Z [36;1mevidence="$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-screen-beb5/jmdict"[0m
+2026-11-28T08:10:47.2503407Z [36;1mnode --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", ["jmdict"])'[0m
+2026-11-28T08:10:47.2504169Z [36;1mnode dev/perf/crc-no-unroll-20261128-beb5/capture.mjs \[0m
+2026-11-28T08:10:47.2504585Z [36;1m  "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$RUNNER_TEMP/crc-no-unroll-inputs" \[0m
+2026-11-28T08:10:47.2504969Z [36;1m  2>&1 | tee "$evidence/capture.log"[0m
+2026-11-28T08:10:47.2505216Z [36;1mmkdir "$evidence/capture"[0m
+2026-11-28T08:10:47.2505576Z [36;1mcp "$RUNNER_TEMP/crc-no-unroll-inputs/manifest.json" "$evidence/capture/manifest.json"[0m
+2026-11-28T08:10:47.2506322Z [36;1mcp "$RUNNER_TEMP/crc-no-unroll-inputs/conformance.json" "$evidence/capture/conformance.json"[0m
+2026-11-28T08:10:47.2506793Z [36;1mcp "$RUNNER_TEMP"/crc-no-unroll-inputs/conformance-*.bin "$evidence/capture/"[0m
+2026-11-28T08:10:47.2537078Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:47.2537370Z env:
+2026-11-28T08:10:47.2537558Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:47.2537801Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:47.2538240Z   NODE_OPTIONS: 
+2026-11-28T08:10:47.2538420Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:47.2538600Z ##[endgroup]
+2026-11-28T08:10:49.8785296Z {"dictionary":"jmdict","groups":12,"banks":53,"rows":528299,"compressedBytes":15632849,"decodedBytes":171617523,"allImmediateCrc":true}
+2026-11-28T08:10:49.9229621Z ##[group]Run set -euo pipefail
+2026-11-28T08:10:49.9229915Z [36;1mset -euo pipefail[0m
+2026-11-28T08:10:49.9230235Z [36;1mevidence="$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-screen-beb5/jmdict"[0m
+2026-11-28T08:10:49.9230661Z [36;1mnode dev/perf/crc-no-unroll-20261128-beb5/verify.mjs \[0m
+2026-11-28T08:10:49.9231004Z [36;1m  "$RUNNER_TEMP/crc-no-unroll-inputs" "$evidence" \[0m
+2026-11-28T08:10:49.9231292Z [36;1m  2>&1 | tee "$evidence/verify.log"[0m
+2026-11-28T08:10:49.9267792Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:49.9268252Z env:
+2026-11-28T08:10:49.9268440Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:49.9268692Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:49.9268911Z   NODE_OPTIONS: 
+2026-11-28T08:10:49.9269089Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:49.9269274Z ##[endgroup]
+2026-11-28T08:10:51.5684929Z {"passed":true,"crcVectors":837,"productionConformance":157,"fullJmdictGroups":12,"rows":528299,"decodedBytes":171617523}
+2026-11-28T08:10:51.5826415Z ##[group]Run set -euo pipefail
+2026-11-28T08:10:51.5826703Z [36;1mset -euo pipefail[0m
+2026-11-28T08:10:51.5827021Z [36;1mevidence="$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-screen-beb5/jmdict"[0m
+2026-11-28T08:10:51.5827434Z [36;1mnode dev/perf/crc-no-unroll-20261128-beb5/campaign.mjs \[0m
+2026-11-28T08:10:51.5827766Z [36;1m  "$RUNNER_TEMP/crc-no-unroll-inputs" "$evidence" \[0m
+2026-11-28T08:10:51.5828246Z [36;1m  2>&1 | tee "$evidence/campaign.log"[0m
+2026-11-28T08:10:51.5828563Z [36;1mnode dev/perf/host-environment.js > "$evidence/host-after.json"[0m
+2026-11-28T08:10:51.5858732Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-28T08:10:51.5859022Z env:
+2026-11-28T08:10:51.5859200Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:10:51.5859436Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:10:51.5859653Z   NODE_OPTIONS: 
+2026-11-28T08:10:51.5859833Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:10:51.5860011Z ##[endgroup]
+2026-11-28T08:10:52.6166072Z {"armId":"treatment-01-A","passed":true,"firstPassMs":178.30764600000003,"secondPassMs":142.61679500000014,"initializationWallMs":63.49051200000001}
+2026-11-28T08:10:53.6006426Z {"armId":"treatment-01-B","passed":true,"firstPassMs":172.75542499999995,"secondPassMs":136.63719399999968,"initializationWallMs":60.428338}
+2026-11-28T08:10:54.6043216Z {"armId":"control-01-A","passed":true,"firstPassMs":178.27511199999987,"secondPassMs":146.52596800000015,"initializationWallMs":63.064498}
+2026-11-28T08:10:55.6069520Z {"armId":"control-01-C","passed":true,"firstPassMs":172.17984900000016,"secondPassMs":148.49856899999986,"initializationWallMs":61.855016000000006}
+2026-11-28T08:10:56.6050306Z {"armId":"control-02-C","passed":true,"firstPassMs":172.4103319999999,"secondPassMs":142.65932999999995,"initializationWallMs":60.297336}
+2026-11-28T08:10:57.6011387Z {"armId":"control-02-A","passed":true,"firstPassMs":173.05219699999998,"secondPassMs":142.47942299999977,"initializationWallMs":61.628783000000006}
+2026-11-28T08:10:58.5884799Z {"armId":"treatment-02-B","passed":true,"firstPassMs":171.140201,"secondPassMs":136.6826209999998,"initializationWallMs":61.41899300000001}
+2026-11-28T08:10:59.5870051Z {"armId":"treatment-02-A","passed":true,"firstPassMs":174.8117509999999,"secondPassMs":141.99911500000007,"initializationWallMs":61.416033999999996}
+2026-11-28T08:11:00.6014067Z {"armId":"treatment-03-A","passed":true,"firstPassMs":178.09935500000012,"secondPassMs":142.17371199999968,"initializationWallMs":62.989318}
+2026-11-28T08:11:01.5858748Z {"armId":"treatment-03-B","passed":true,"firstPassMs":166.9586579999999,"secondPassMs":136.36741499999994,"initializationWallMs":63.882464}
+2026-11-28T08:11:02.5944784Z {"armId":"control-03-A","passed":true,"firstPassMs":179.30057999999997,"secondPassMs":142.5908859999996,"initializationWallMs":65.08752999999999}
+2026-11-28T08:11:03.5890641Z {"armId":"control-03-C","passed":true,"firstPassMs":173.35235099999989,"secondPassMs":142.49173000000008,"initializationWallMs":63.81938099999999}
+2026-11-28T08:11:04.5901034Z {"armId":"control-04-C","passed":true,"firstPassMs":176.119002,"secondPassMs":142.13685099999998,"initializationWallMs":60.727056}
+2026-11-28T08:11:05.5870768Z {"armId":"control-04-A","passed":true,"firstPassMs":173.293608,"secondPassMs":142.31454699999972,"initializationWallMs":63.720341000000005}
+2026-11-28T08:11:06.5698909Z {"armId":"treatment-04-B","passed":true,"firstPassMs":168.1310410000001,"secondPassMs":136.4384080000002,"initializationWallMs":64.020489}
+2026-11-28T08:11:07.5625983Z {"armId":"treatment-04-A","passed":true,"firstPassMs":171.63385399999993,"secondPassMs":142.097802,"initializationWallMs":61.49090100000001}
+2026-11-28T08:11:08.5536613Z {"armId":"treatment-05-A","passed":true,"firstPassMs":172.4165250000001,"secondPassMs":142.49934900000005,"initializationWallMs":64.28555999999999}
+2026-11-28T08:11:09.5340093Z {"armId":"treatment-05-B","passed":true,"firstPassMs":162.65154400000006,"secondPassMs":136.2959840000001,"initializationWallMs":62.296533000000004}
+2026-11-28T08:11:10.5251322Z {"armId":"control-05-A","passed":true,"firstPassMs":174.552708,"secondPassMs":141.8934409999997,"initializationWallMs":60.91920300000001}
+2026-11-28T08:11:11.5221331Z {"armId":"control-05-C","passed":true,"firstPassMs":177.51083699999987,"secondPassMs":141.88717499999984,"initializationWallMs":62.072018}
+2026-11-28T08:11:12.5198269Z {"armId":"control-06-C","passed":true,"firstPassMs":168.59160100000003,"secondPassMs":142.1501300000001,"initializationWallMs":61.768511}
+2026-11-28T08:11:13.5104300Z {"armId":"control-06-A","passed":true,"firstPassMs":170.17799799999995,"secondPassMs":142.07659000000012,"initializationWallMs":62.330345}
+2026-11-28T08:11:14.4859403Z {"armId":"treatment-06-B","passed":true,"firstPassMs":161.18422499999997,"secondPassMs":136.9083559999998,"initializationWallMs":60.279348}
+2026-11-28T08:11:15.4850172Z {"armId":"treatment-06-A","passed":true,"firstPassMs":169.99871299999992,"secondPassMs":142.69379300000026,"initializationWallMs":63.351124}
+2026-11-28T08:11:15.4862089Z {"passed":true,"observations":24,"measuredGroups":576,"cells":[{"scenario":"treatment","phase":"first-pass","medianRatio":0.9585056216515124,"equalWorkRatio":0.9593915088427803,"fasterPairs":6},{"scenario":"treatment","phase":"second-pass","medianRatio":0.9593080624575141,"equalWorkRatio":0.9593122834269002,"fasterPairs":6},{"scenario":"treatment","phase":"startup-plus-first-pass","medianRatio":0.9609341463916592,"equalWorkRatio":0.9668534608683709,"fasterPairs":6},{"scenario":"control","phase":"first-pass","medianRatio":0.993484465140084,"equalWorkRatio":0.991905580348073,"fasterPairs":4},{"scenario":"control","phase":"second-pass","medianRatio":1.0002367241223864,"equalWorkRatio":1.0022648016780846,"fasterPairs":3},{"scenario":"control","phase":"startup-plus-first-pass","medianRatio":0.9911760705942771,"equalWorkRatio":0.9896873978795313,"fasterPairs":5}]}
+2026-11-28T08:11:15.5221713Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-28T08:11:15.5222177Z with:
+2026-11-28T08:11:15.5222503Z   name: crc-no-unroll-screen-beb5-jmdict
+2026-11-28T08:11:15.5222858Z   path: builds/perf/crc-no-unroll-screen-beb5
+2026-11-28T08:11:15.5223179Z   if-no-files-found: error
+2026-11-28T08:11:15.5223762Z   retention-days: 14
+2026-11-28T08:11:15.5224045Z   compression-level: 6
+2026-11-28T08:11:15.5224351Z   overwrite: false
+2026-11-28T08:11:15.5224625Z   include-hidden-files: false
+2026-11-28T08:11:15.5224973Z env:
+2026-11-28T08:11:15.5225288Z   MANABITAN_CLANG: /usr/bin/clang-21
+2026-11-28T08:11:15.5225613Z   MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+2026-11-28T08:11:15.5225960Z   NODE_OPTIONS: 
+2026-11-28T08:11:15.5226268Z   NODE_COMPILE_CACHE: 
+2026-11-28T08:11:15.5226591Z ##[endgroup]
+2026-11-28T08:11:15.6621003Z (node:3268) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:11:15.6622310Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:11:15.7054952Z With the provided path, there will be 327 files uploaded
+2026-11-28T08:11:15.7055983Z Artifact name is valid!
+2026-11-28T08:11:15.7056496Z Root directory input is valid!
+2026-11-28T08:11:15.9678837Z Beginning upload of artifact content to blob storage
+2026-11-28T08:11:16.1968342Z (node:3268) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-28T08:11:16.5667628Z Uploaded bytes 641405
+2026-11-28T08:11:16.6140724Z Finished uploading artifact content to blob storage!
+2026-11-28T08:11:16.6141639Z SHA256 digest of uploaded artifact zip is 7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d
+2026-11-28T08:11:16.6142751Z Finalizing artifact upload
+2026-11-28T08:11:16.9579574Z Artifact crc-no-unroll-screen-beb5-jmdict.zip successfully finalized. Artifact ID 15255386235
+2026-11-28T08:11:16.9580764Z Artifact crc-no-unroll-screen-beb5-jmdict has been successfully uploaded! Final size is 641405 bytes. Artifact ID is 15255386235
+2026-11-28T08:11:16.9585754Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/46120623371/artifacts/15255386235
+2026-11-28T08:11:17.0254735Z Post job cleanup.
+2026-11-28T08:11:17.1449277Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/manabitan/manabitan --files-from manifest.txt --use-compress-program zstdmt
+2026-11-28T08:11:17.8396337Z Sent 15645730 of 15645730 (100.0%), 27.6 MBs/sec
+2026-11-28T08:11:17.9780066Z Cache saved with key: perf-source-dictionaries-Linux-135fa9494dd8057f6b94a6e37cd6590e9f8b3031446905583261ec64c998b1db
+2026-11-28T08:11:17.9911819Z Post job cleanup.
+2026-11-28T08:11:17.9915440Z ##[start-action display=Setup node;id=__b92aeb42-3d8c-4353-8742-1207c1e86539.__actions_setup-node]
+2026-11-28T08:11:17.9950272Z Post job cleanup.
+2026-11-28T08:11:18.1015198Z (node:3313) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-28T08:11:18.1015845Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-28T08:11:18.1019211Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-28T08:11:18.1085171Z ##[end-action id=__b92aeb42-3d8c-4353-8742-1207c1e86539.__actions_setup-node;outcome=success;conclusion=success;duration_ms=116]
+2026-11-28T08:11:18.1139529Z Post job cleanup.
+2026-11-28T08:11:18.1924797Z [command]/usr/bin/git version
+2026-11-28T08:11:18.1966169Z git version 2.56.1
+2026-11-28T08:11:18.2003284Z Temporarily overriding HOME='/home/runner/work/_temp/8580f452-3cd8-4d89-b6c9-7114a486f9d2' before making global git config changes
+2026-11-28T08:11:18.2004386Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-28T08:11:18.2010711Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-28T08:11:18.2040187Z Removing SSH command configuration
+2026-11-28T08:11:18.2055085Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-28T08:11:18.2121202Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-28T08:11:18.2403268Z Removing HTTP extra header
+2026-11-28T08:11:18.2411896Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-28T08:11:18.2447693Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-28T08:11:18.2732633Z Removing includeIf entries pointing to credentials config files
+2026-11-28T08:11:18.2739577Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-28T08:11:18.2771267Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-28T08:11:18.3145647Z Cleaning up orphan processes
+2026-11-28T08:11:18.3465726Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

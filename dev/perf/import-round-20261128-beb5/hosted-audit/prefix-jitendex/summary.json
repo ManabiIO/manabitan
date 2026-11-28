@@ -1,0 +1,229 @@
+{
+  "acquisitionComplete": true,
+  "artifactId": 15254136620,
+  "artifactSha256": "f64e5f3afee7a30f626c4ce8101c921aaff9ee7f23c40042ab84385d9da4515a",
+  "auditPassed": true,
+  "entry": "prefix-jitendex",
+  "memoryPassed": null,
+  "performancePromotionDecision": "not automatic",
+  "report": {
+    "complete": true,
+    "dictionary": "jitendex",
+    "exactJournalEntries": 609,
+    "reports": [
+      {
+        "dictionaries": [
+          {
+            "comparisons": {
+              "control": {
+                "alternateFasterPairs": 2,
+                "equalWorkPercentChange": 0.5574256700560998,
+                "medianPairedPercentChange": 0.8481499658280489,
+                "pairTotals": [
+                  [
+                    1313.405628999988,
+                    1340.1456409999914
+                  ],
+                  [
+                    1289.505638000007,
+                    1283.0881199999965
+                  ],
+                  [
+                    1311.8251780000003,
+                    1292.4988609999998
+                  ],
+                  [
+                    1284.0206849999995,
+                    1304.4672370000117
+                  ],
+                  [
+                    1303.402648999991,
+                    1311.722033
+                  ],
+                  [
+                    1294.984904999987,
+                    1308.6860780000038
+                  ]
+                ],
+                "pairedPercentChanges": [
+                  2.0359294500940317,
+                  -0.49767273681438073,
+                  -1.4732387610874476,
+                  1.5923849388775446,
+                  0.6382819619395352,
+                  1.0580179697165626
+                ]
+              },
+              "treatment": {
+                "alternateFasterPairs": 1,
+                "equalWorkPercentChange": 2.1380317081971523,
+                "medianPairedPercentChange": 2.4046617469580256,
+                "pairTotals": [
+                  [
+                    1348.1172140000047,
+                    1400.1264509999896
+                  ],
+                  [
+                    1320.8225330000007,
+                    1336.5044379999877
+                  ],
+                  [
+                    1276.1811519999922,
+                    1333.896657000015
+                  ],
+                  [
+                    1326.9058410000102,
+                    1307.3109530000006
+                  ],
+                  [
+                    1282.9618470000078,
+                    1308.1597829999787
+                  ],
+                  [
+                    1292.0564010000016,
+                    1328.8190159999817
+                  ]
+                ],
+                "pairedPercentChanges": [
+                  3.8579165416683825,
+                  1.187283272974482,
+                  4.522516643469698,
+                  -1.4767353789958526,
+                  1.9640440640454004,
+                  2.8452794298706507
+                ]
+              }
+            },
+            "diagnostics": {
+              "baseline": {
+                "contentWitnesses": 73242,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 85996,
+                "maxHeapBytes": 76087296,
+                "rows": 436555
+              },
+              "candidate": {
+                "contentWitnesses": 73242,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 86011,
+                "maxHeapBytes": 76087296,
+                "rows": 436555
+              },
+              "control": {
+                "contentWitnesses": 73242,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 85996,
+                "maxHeapBytes": 76087296,
+                "rows": 436555
+              }
+            },
+            "dictionary": "jitendex",
+            "groups": 22,
+            "rows": 436555
+          }
+        ],
+        "exactJournalEntries": 594,
+        "file": "screen.json"
+      },
+      {
+        "dictionaries": [
+          {
+            "comparisons": {
+              "control": {
+                "alternateFasterPairs": 3,
+                "equalWorkPercentChange": -7.333268911797197,
+                "medianPairedPercentChange": -6.238768706699349,
+                "pairTotals": [
+                  [
+                    72.11577499999999,
+                    63.24522999999999
+                  ],
+                  [
+                    67.57291699999996,
+                    63.35719900000004
+                  ],
+                  [
+                    64.14583500000003,
+                    62.284364000000096
+                  ]
+                ],
+                "pairedPercentChanges": [
+                  -12.300422480379636,
+                  -6.238768706699349,
+                  -2.901935877832029
+                ]
+              },
+              "treatment": {
+                "alternateFasterPairs": 2,
+                "equalWorkPercentChange": -2.0676653540219525,
+                "medianPairedPercentChange": -7.8492921692327915,
+                "pairTotals": [
+                  [
+                    64.52550099999996,
+                    71.43580999999995
+                  ],
+                  [
+                    71.49300700000003,
+                    65.88131199999998
+                  ],
+                  [
+                    69.33077600000001,
+                    63.78622599999994
+                  ]
+                ],
+                "pairedPercentChanges": [
+                  10.709423240278259,
+                  -7.8492921692327915,
+                  -7.997242090583367
+                ]
+              }
+            },
+            "diagnostics": {
+              "baseline": {
+                "contentWitnesses": 4251,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 0,
+                "maxHeapBytes": 54198272,
+                "rows": 16000
+              },
+              "candidate": {
+                "contentWitnesses": 4251,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 0,
+                "maxHeapBytes": 54198272,
+                "rows": 16000
+              },
+              "control": {
+                "contentWitnesses": 4251,
+                "crcReusedBytes": 0,
+                "floatScoreGroups": 0,
+                "fusedFallbacks": 0,
+                "glossaryWitnesses": 0,
+                "maxHeapBytes": 54198272,
+                "rows": 16000
+              }
+            },
+            "dictionary": "jitendex",
+            "groups": 1,
+            "rows": 16000
+          }
+        ],
+        "exactJournalEntries": 15,
+        "file": "reuse-disabled.json"
+      }
+    ],
+    "scope": "Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs."
+  },
+  "required": true,
+  "requiredGatesPassed": true
+}

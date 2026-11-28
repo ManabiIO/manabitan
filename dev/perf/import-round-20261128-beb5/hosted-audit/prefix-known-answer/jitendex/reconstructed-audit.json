@@ -1,0 +1,235 @@
+{
+  "complete": true,
+  "profile": "prefix-first-known-answer",
+  "dictionary": "jitendex",
+  "sourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+  "sourceTree": "023368b2731c17c91f16cd740d868ae2ebafa27b",
+  "runtimeCommit": null,
+  "registrationSha256": null,
+  "auditorSha256": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+  "auditorOrigin": "New reconstruction reviewed after experiment publication; original prefix-first auditor source was unavailable.",
+  "sourceAndPackageMemberMapsVerified": true,
+  "originalReleaseZipBytesRehashed": false,
+  "packageEntryCount": 554,
+  "oracleComparisons": 242,
+  "exactJournalEntries": 609,
+  "reports": [
+    {
+      "file": "screen.json",
+      "sha256": "184ff3958cb86491f87db523da20f2cb58f2b995a3d4306583ce5489cc07ce6d",
+      "journalSha256": "5ea945286c972da4fa911c6de523042fc61dcbf79509e15bf352d113a3a6908f",
+      "exactJournalEntries": 594,
+      "dictionaries": [
+        {
+          "dictionary": "jitendex",
+          "rows": 436555,
+          "groups": 22,
+          "diagnostics": {
+            "baseline": {
+              "rows": 436555,
+              "glossaryWitnesses": 85996,
+              "contentWitnesses": 73242,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 76087296,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 436555,
+              "glossaryWitnesses": 86011,
+              "contentWitnesses": 73242,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 76087296,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 436555,
+              "glossaryWitnesses": 85996,
+              "contentWitnesses": 73242,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 76087296,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  1316.1014040000014,
+                  1346.7432329999983
+                ],
+                [
+                  1356.5495940000028,
+                  1343.0118259999924
+                ],
+                [
+                  1315.450286999984,
+                  1347.4639490000106
+                ],
+                [
+                  1349.1074099999953,
+                  1331.8022300000082
+                ],
+                [
+                  1317.391211000011,
+                  1364.4497470000156
+                ],
+                [
+                  1328.8471789999999,
+                  1334.9445830000013
+                ]
+              ],
+              "pairedPercentChanges": [
+                2.32822705810265,
+                -0.9979559951134642,
+                2.4336656669129653,
+                -1.282713286704662,
+                3.572100345521756,
+                0.4588491510807202
+              ],
+              "medianPairedPercentChange": 1.393538104591685,
+              "equalWorkPercentChange": 1.064308212923204,
+              "alternateFasterPairs": 2
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  1332.9444319999914,
+                  1319.274885999997
+                ],
+                [
+                  1321.5287060000044,
+                  1314.4654160000073
+                ],
+                [
+                  1348.2873529999981,
+                  1318.4533529999883
+                ],
+                [
+                  1324.5037009999958,
+                  1305.941866999992
+                ],
+                [
+                  1332.3968939999943,
+                  1320.545546000012
+                ],
+                [
+                  1319.0747110000157,
+                  1304.7280579999833
+                ]
+              ],
+              "pairedPercentChanges": [
+                -1.0255150681325986,
+                -0.534478741772948,
+                -2.2127330597315087,
+                -1.4014180546260135,
+                -0.8894758050961182,
+                -1.0876300546430628
+              ],
+              "medianPairedPercentChange": -1.0565725613878307,
+              "equalWorkPercentChange": -1.1947590874717529,
+              "alternateFasterPairs": 6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "file": "reuse-disabled.json",
+      "sha256": "30e502a4b9f738851937c0afde4fd35b91d6ff8b2971bcc47b7099c5065473b8",
+      "journalSha256": "48d56432d286a7cca9b9cfb907ea26e4f3053a0ed7c4624db94175497f7ec1f7",
+      "exactJournalEntries": 15,
+      "dictionaries": [
+        {
+          "dictionary": "jitendex",
+          "rows": 16000,
+          "groups": 1,
+          "diagnostics": {
+            "baseline": {
+              "rows": 16000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 4251,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 54198272,
+              "floatScoreGroups": 0
+            },
+            "candidate": {
+              "rows": 16000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 4251,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 54198272,
+              "floatScoreGroups": 0
+            },
+            "control": {
+              "rows": 16000,
+              "glossaryWitnesses": 0,
+              "contentWitnesses": 4251,
+              "fusedFallbacks": 0,
+              "crcReusedBytes": 0,
+              "maxHeapBytes": 54198272,
+              "floatScoreGroups": 0
+            }
+          },
+          "comparisons": {
+            "treatment": {
+              "pairTotals": [
+                [
+                  64.28501700000004,
+                  71.16334700000004
+                ],
+                [
+                  68.87264499999992,
+                  81.43311200000016
+                ],
+                [
+                  62.83909900000003,
+                  73.60111900000015
+                ]
+              ],
+              "pairedPercentChanges": [
+                10.699740500963074,
+                18.23723627864191,
+                17.12631175695265
+              ],
+              "medianPairedPercentChange": 17.12631175695265,
+              "equalWorkPercentChange": 15.40883474089676,
+              "alternateFasterPairs": 0
+            },
+            "control": {
+              "pairTotals": [
+                [
+                  66.24646900000005,
+                  63.182799000000045
+                ],
+                [
+                  62.72455799999989,
+                  73.0245829999999
+                ],
+                [
+                  69.94448699999998,
+                  62.2047419999999
+                ]
+              ],
+              "pairedPercentChanges": [
+                -4.624654032503983,
+                16.421040384214457,
+                -11.065554030012525
+              ],
+              "medianPairedPercentChange": -4.624654032503983,
+              "equalWorkPercentChange": -0.2530672393909361,
+              "alternateFasterPairs": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "referenceOracle": null,
+  "scope": "Sequential group-by-group warm synchronous component work. No import or parser reruns, prior-host pooling, control subtraction, trimming, or independent cold-start claim. VNDB synchronous options and fallback counts do not establish production worker activation. Original release ZIP bytes are absent; package-member hash maps are audited, not rehashed release ZIPs.",
+  "diagnosticLimit": "Complete means receipt/source/protocol integrity; cross-arm heap and fallback equality is not asserted."
+}

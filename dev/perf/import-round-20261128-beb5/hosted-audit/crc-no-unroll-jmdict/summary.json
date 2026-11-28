@@ -1,0 +1,17 @@
+{
+  "acquisitionComplete": true,
+  "artifactId": 15255386235,
+  "artifactSha256": "7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d",
+  "auditPassed": null,
+  "entry": "crc-no-unroll-jmdict",
+  "memoryPassed": null,
+  "preserveOnly": true,
+  "report": {
+    "auditNotPerformed": true,
+    "complete": false,
+    "dictionary": "jmdict",
+    "scope": "Preservation only: exact API-bound original outer ZIP and full member census. No independent correctness, timing, or qualification audit."
+  },
+  "required": false,
+  "requiredGatesPassed": null
+}

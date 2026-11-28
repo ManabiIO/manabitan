@@ -1,0 +1,69 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "currentDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "currentSourceSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+  "baselineSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "commonPrefixBytes": 60921,
+  "commonPrefixLastLine": 1477,
+  "functions": [
+    {
+      "name": "crc32_read_u32_le",
+      "identical": true,
+      "bytes": 190,
+      "sha256": "a5d3cbf19b2b852d22e32983395cd22f59a30cb2b215eaeef606e1ec8ed15a6d"
+    },
+    {
+      "name": "crc32_step16",
+      "identical": true,
+      "bytes": 1015,
+      "sha256": "8bc9381200929ff8190b5ef4e5a39f08434fe2693a003ab5037f4caf30e6fff0"
+    },
+    {
+      "name": "crc32_bytes_serial",
+      "identical": true,
+      "bytes": 361,
+      "sha256": "4ccf6a4d71c03532cfa0508a04c81c14a1d87ce521fd84f4acf71c56801142be"
+    },
+    {
+      "name": "crc32_word8",
+      "identical": true,
+      "bytes": 380,
+      "sha256": "9478bec8d331978db59c99dfd23533e4741cd2c62bfadd5488791c7ad42e7f0e"
+    },
+    {
+      "name": "crc32_bytes_braided",
+      "identical": true,
+      "bytes": 1393,
+      "sha256": "19e3d882cc974f7e718c0645f835e86da74d1e762a9a23ba86989ed42cc53cfe"
+    },
+    {
+      "name": "crc32_bytes",
+      "identical": true,
+      "bytes": 848,
+      "sha256": "23afd9294d68e3b325b6b5e54749977a3a167db6c81ba4b70d2bb18720c4f0e3"
+    },
+    {
+      "name": "inflate_and_join_term_banks",
+      "identical": true,
+      "bytes": 4114,
+      "sha256": "b9e18927a41921d3964e233595631d20eb31dcedbda3e9d4b0a31e3a087f4e61"
+    },
+    {
+      "name": "verify_term_bank_source_crcs",
+      "identical": true,
+      "bytes": 3338,
+      "sha256": "63e4aebc35f8d967bf2841a11d0938707d28069002689626a001ea1314b4efea"
+    }
+  ],
+  "firstDifference": {
+    "baseline": "= skip_ws(src, len, i + 1u);\n    if (i >= len) { return 0; }\n    *position = i;\n    return 1;\n}\n\n/* Strict source validation has exactly eight fields with known token types.\n * Keep its grammar explicit instead of dispatching each field twice through\n * the permissive row parser and set_field. Every",
+    "current": "= skip_ws(src, len, i + 1u);\n    if (i >= len) { return 0; }\n    *position = i;\n    return 1;\n}\n\n/* Recognize one compact structured-content list. A change in key order, list\n * structure or styling returns control to the general JSON parser with its\n * cursor and hints intact. Only leaf text varies"
+  },
+  "toolchainIdentical": true,
+  "parserSourcesIdentical": true,
+  "parserBuildArgumentsIdentical": true,
+  "baselineModuleSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "currentModuleSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+  "inflateSourceIdentical": true,
+  "scope": "Read-only source comparison. No build, runtime change or measurement. Current generated CRC code not proven equal; complete parser module changed."
+}

@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "canonical-jmdict",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 4253,
+      "gitBlobSha": "84d32911ef1c33e4f2cada65e801407e7cd6a3e6",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/acquisition.json",
+      "sha256": "70a04d01b681ae7444456db99f626b4149a1f24e7fb76e52521e43015472ad3a"
+    },
+    {
+      "bytes": 89205,
+      "gitBlobSha": "642084d59ce974963f4a960d1c1ab135c49c68d6",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/archive-members.json",
+      "sha256": "331d19d0804b509a48ce6e6f06e51ce057d4931bf5e4f7473963d26260089796"
+    },
+    {
+      "bytes": 213712,
+      "gitBlobSha": "169ccb97c48843d000838b4a451021cedf651405",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/independent-audit.json",
+      "sha256": "b571deb78f48a438b7f9f89638820bb424cce3c3f158062605a836931b8a6c94"
+    },
+    {
+      "bytes": 12839,
+      "gitBlobSha": "b0a0cfe0a2267e0dfc7f026fdc15b95d47e1b2f0",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/summary.json",
+      "sha256": "62d2bfa07f76296d19b299ba711bcff1b1d112e1a6af69b9bf176ee38c559062"
+    },
+    {
+      "bytes": 1379,
+      "gitBlobSha": "90de68bccbe9d26263113bc752096c2c12efc41f",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/audit.stdout.log",
+      "sha256": "c68401b39e4d0a2e7783b0887f933ec9c92928f85392556571f5033302d36770"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1376,
+      "gitBlobSha": "b677ec2f76c69c1ab575a6a823132062c1e5c5d9",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/retention.json",
+      "sha256": "a05e6001f560d2f968bb593091e93f8d64025e520e76590bf37749ae206a4ebc"
+    },
+    {
+      "bytes": 192,
+      "gitBlobSha": "96d5cf007f60fdc239c545511c018b2527ca2a48",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/resolution-polls.jsonl",
+      "sha256": "1a527c2a50a9862030a52d024b910fa6bf2ac8450f7531cbd203243177ab6831"
+    },
+    {
+      "bytes": 2205460,
+      "gitBlobSha": "6d1826ad0126438b3df94609795761af66a6fbbf",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-jmdict/evidence-without-reproducible-packages.zip",
+      "sha256": "6fd93e7f5ff94e6bbd1fa98f8d0e476bb78d47d97dab99b9ba9125e179118669"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15252673899,
+  "originalArtifactSha256": "66302131cac152bfc8eadbbc3d695be3e65f629b9c938d1fc18e10a43f6c58bf",
+  "originalRunId": 46112170828,
+  "unreferencedBlobsOnly": true
+}

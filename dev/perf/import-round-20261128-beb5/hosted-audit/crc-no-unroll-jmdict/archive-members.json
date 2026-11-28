@@ -1,0 +1,2952 @@
+{
+  "artifactId": 15255386235,
+  "complete": true,
+  "memberCount": 327,
+  "members": [
+    {
+      "bytes": 44,
+      "compressedBytes": 44,
+      "crc32": 2692033731,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/build-progress.json",
+      "sha256": "7573b418e44bafdeeaa6f48bf7ed780612e274360a51d5b43389bac332477b21"
+    },
+    {
+      "bytes": 324,
+      "compressedBytes": 217,
+      "crc32": 1499182693,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/build.log",
+      "sha256": "f6abfba18471d735fe48c3173df0680f4d0dd5e3a3d006d653b33614f771ed3b"
+    },
+    {
+      "bytes": 13038,
+      "compressedBytes": 2814,
+      "crc32": 2845252529,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/build.json",
+      "sha256": "93c9f145503ac3117b3fa22a320134a82b35beead71ff028dded86396b0c65e6"
+    },
+    {
+      "bytes": 12447,
+      "compressedBytes": 2285,
+      "crc32": 1698633964,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/analysis.json",
+      "sha256": "706072ee9eda2ac14f6691f63b5492ef232a2e54b1b9536f08baca40672f48e4"
+    },
+    {
+      "bytes": 323546,
+      "compressedBytes": 17453,
+      "crc32": 2860967929,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/arms.jsonl",
+      "sha256": "b488d2ef2083044418496417e5bd6b3f911c70dbfe2dd7858176e606f839c621"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 2306659875,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-A/identity.json",
+      "sha256": "d1a9f06e514c70a187fdd63b166d5e8fcd413ce0d7d2a550f8dc912528671e14"
+    },
+    {
+      "bytes": 15950,
+      "compressedBytes": 2100,
+      "crc32": 1066186,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-A/observations.jsonl",
+      "sha256": "51e349c4fb22e2bb07f42ee51f934062ef2fee16109fa1c333730489f1a43261"
+    },
+    {
+      "bytes": 17865,
+      "compressedBytes": 2607,
+      "crc32": 1926227151,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-A/report.json",
+      "sha256": "3f0a29319fd2a1c3d30eefb162cd996da95b50ae1c723f43ed98711e1770a28a"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 745,
+      "compressedBytes": 346,
+      "crc32": 411537409,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-A/stdout.log",
+      "sha256": "529e5d6be2c68e214810ce056473bb7bf510755a50116672ccb84eb1dd08ea7b"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 3270058379,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-C/identity.json",
+      "sha256": "d4eaa1f89d5115a0a4613acbb77f14266b5f25316352f73a8d108c657bb1aaec"
+    },
+    {
+      "bytes": 15981,
+      "compressedBytes": 2094,
+      "crc32": 3044732013,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-C/observations.jsonl",
+      "sha256": "f08b5fa54e6cea6e901cd101681686fc5fb43140ffc025ef4767f8466b0130e9"
+    },
+    {
+      "bytes": 17896,
+      "compressedBytes": 2614,
+      "crc32": 1207139330,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-C/report.json",
+      "sha256": "25794efafca86534eb967ebcffcf80df6a70f36d55c0bc433eb756dd1d3933c2"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 764,
+      "compressedBytes": 354,
+      "crc32": 505376393,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-01-C/stdout.log",
+      "sha256": "b3ada67096a7abdbc499e1566df938942b6c05f17c135a06270149c201a68961"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 3441519023,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-A/identity.json",
+      "sha256": "7457140f864e1aa3e86458403a2351d53646c251a6160e7a4ef3856f59b2f122"
+    },
+    {
+      "bytes": 15959,
+      "compressedBytes": 2081,
+      "crc32": 4044161154,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-A/observations.jsonl",
+      "sha256": "568f3233b9634748b8d97e8caef5660b0589ea18a1f2fbf355e72f44da4e65bb"
+    },
+    {
+      "bytes": 17874,
+      "compressedBytes": 2599,
+      "crc32": 2095224975,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-A/report.json",
+      "sha256": "e0d8111d32ccb0250b1b374d566acd5d9cbc564bb6849f05bb322a1bad4cc7cd"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 753,
+      "compressedBytes": 350,
+      "crc32": 4025758996,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-A/stdout.log",
+      "sha256": "897b1f1a2dbd87d98b4092fbf580fccdd444cbfa420f522d7fa05d867e12da21"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 2259983879,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-C/identity.json",
+      "sha256": "8814e716777998e3c0059b8cf865a9c9084ee5bac0a3b6710019458d8c9a8ab2"
+    },
+    {
+      "bytes": 15953,
+      "compressedBytes": 2092,
+      "crc32": 2123632824,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-C/observations.jsonl",
+      "sha256": "bd7c802b88524f29dc89a8fe47491e4ccfcbc7fbce480c7cd6ded2dd3325656d"
+    },
+    {
+      "bytes": 17867,
+      "compressedBytes": 2601,
+      "crc32": 979186157,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-C/report.json",
+      "sha256": "282f88664d835b37a0e4fedf4d38a301885f4c9d5a5af2e8209b147b50b89867"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 754,
+      "compressedBytes": 349,
+      "crc32": 281249290,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-02-C/stdout.log",
+      "sha256": "5894a52a75ce1191f4b90c1d5463fecc6b38a047fdc30f867ee02b337d7fdd96"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 4119366952,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-A/identity.json",
+      "sha256": "90a95d0ac63347dd578c939500758c18987fb130d2454eba158c5d45dafa5856"
+    },
+    {
+      "bytes": 15941,
+      "compressedBytes": 2097,
+      "crc32": 4165673731,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-A/observations.jsonl",
+      "sha256": "9390837463e4ca043ccdb65375244c4aff2478264e3306b07520d7702e7d90dc"
+    },
+    {
+      "bytes": 17856,
+      "compressedBytes": 2614,
+      "crc32": 4254058843,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-A/report.json",
+      "sha256": "52310ef601af0cf5e19f4de24f2d3fac7daf40d012298219abfc4cb8a73ff6df"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 753,
+      "compressedBytes": 349,
+      "crc32": 1657581534,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-A/stdout.log",
+      "sha256": "15953012b273456143cc0e3a5a5a6071f52ede4a10ab5db3407036f7d48ff4da"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 3189602944,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-C/identity.json",
+      "sha256": "58cb71cfd585a5b20026a8abbcc2866d11dd9f11cc7feb4e4ff462a438d3c740"
+    },
+    {
+      "bytes": 15966,
+      "compressedBytes": 2105,
+      "crc32": 4071434506,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-C/observations.jsonl",
+      "sha256": "503981fcbb2c34b05fb3c072f4a340c9a4190c2e641cead7494206d91f3d3339"
+    },
+    {
+      "bytes": 17881,
+      "compressedBytes": 2613,
+      "crc32": 3140562796,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-C/report.json",
+      "sha256": "5cef2d5a9fd7e4a30dcb5642eb0e85f55429b50e52af3c05ac0102d01ba14712"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 762,
+      "compressedBytes": 355,
+      "crc32": 2081091943,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-03-C/stdout.log",
+      "sha256": "9947101d6942e6dd863ce2e9ac1fc82957b3891d0a43e9c8b0324307b168e196"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 1167726263,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-A/identity.json",
+      "sha256": "1159a01b8322e6e28072110f04d724453a27d6fd99de567d91d33f72a75d91c8"
+    },
+    {
+      "bytes": 15956,
+      "compressedBytes": 2090,
+      "crc32": 374596084,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-A/observations.jsonl",
+      "sha256": "ca38481113fea3e76bad193f2bbcf0e509a33c7e3eb6f21870baa66c4b23eaa3"
+    },
+    {
+      "bytes": 17871,
+      "compressedBytes": 2604,
+      "crc32": 1602661837,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-A/report.json",
+      "sha256": "b97017c70380e1553b68e1952bca105850f8832b59aecc34e0de0484769dd1f6"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 755,
+      "compressedBytes": 353,
+      "crc32": 3591720591,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-A/stdout.log",
+      "sha256": "f8bd0c87d4b9b98b6fd6a2df14c7fdde217110c42f2718b33e765cfaa140fdac"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 235921695,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-C/identity.json",
+      "sha256": "e11c8d2af50d56b3b6dff25bc507fdae0eaae32376a7f175ae3e73d1bcbdb9ba"
+    },
+    {
+      "bytes": 15943,
+      "compressedBytes": 2092,
+      "crc32": 2575129042,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-C/observations.jsonl",
+      "sha256": "ee5d15713740bde40164d3119ff95a364d8cb10f47af5e480bcf9e4006317fe3"
+    },
+    {
+      "bytes": 17850,
+      "compressedBytes": 2602,
+      "crc32": 3063195122,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-C/report.json",
+      "sha256": "dd56e0982ef1c2c50d9c049d1f4d1d63fd433672fb17a6f7589fc57eebbdda4f"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 731,
+      "compressedBytes": 344,
+      "crc32": 2012277176,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-04-C/stdout.log",
+      "sha256": "89ccd1a07ae7ae7ec4f0115c53ebfc8efcd2bc5aa1a054f55740fe12ea2025ab"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 1888772149,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-A/identity.json",
+      "sha256": "5b94ff303920a4934090524dbe0ce73a4a6189a42db43fcbd96bb464cf801103"
+    },
+    {
+      "bytes": 17880,
+      "compressedBytes": 2622,
+      "crc32": 1550856635,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-A/report.json",
+      "sha256": "20dd87456980125940443ed8ff4dc094860dd186f95f2046b9f868584c8019c0"
+    },
+    {
+      "bytes": 15973,
+      "compressedBytes": 2103,
+      "crc32": 401548009,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-A/observations.jsonl",
+      "sha256": "5e8de8835be066bc0164cfc951418657b25b1cfc262d24f5038f0b83427b3ec9"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 745,
+      "compressedBytes": 352,
+      "crc32": 4066375614,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-A/stdout.log",
+      "sha256": "06caec11f02fd98d6d9e025074b5e09d63006198ee0a15d7bd2cb4d665a6bc1d"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 989960093,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-C/identity.json",
+      "sha256": "75d5ebdf13cfdf14d16841c21ccf4c52e076026dffc25ca4f6f119208499cbfd"
+    },
+    {
+      "bytes": 17864,
+      "compressedBytes": 2610,
+      "crc32": 2241915992,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-C/report.json",
+      "sha256": "214b14575959598e9d4fd0c420014cd614f32f2ef0f7eb4c2db8983a1b428744"
+    },
+    {
+      "bytes": 15949,
+      "compressedBytes": 2091,
+      "crc32": 2076396865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-C/observations.jsonl",
+      "sha256": "1580e4023796f2b5f0ed5ef20983a3b10e3bee0a34e608e56d01a58a11513f21"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 746,
+      "compressedBytes": 349,
+      "crc32": 534446468,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-05-C/stdout.log",
+      "sha256": "6785cf1a33742f4043fee1851637f5c5385c9fc9b57e624ca86788a66e6e537b"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 885645241,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-A/identity.json",
+      "sha256": "6654e9a152b71a63fcd95f5a31869bedbb20c5b52fba24673f03495097e2bc0e"
+    },
+    {
+      "bytes": 15945,
+      "compressedBytes": 2083,
+      "crc32": 4290922173,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-A/observations.jsonl",
+      "sha256": "e94ced4082af4529add9e32f54e0b81f260664c81a9b124ac175d745fda2dbee"
+    },
+    {
+      "bytes": 17860,
+      "compressedBytes": 2599,
+      "crc32": 673344236,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-A/report.json",
+      "sha256": "a38f63c8e90c455bd50ec66bc6f35eba032fd905cae049e1127ffddb344b6234"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 755,
+      "compressedBytes": 350,
+      "crc32": 1783764791,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-A/stdout.log",
+      "sha256": "445efa74ca0b0f7506e55df0281284d279854b9db124bc496bfe95502df8fb75"
+    },
+    {
+      "bytes": 109,
+      "compressedBytes": 84,
+      "crc32": 2136746001,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-C/identity.json",
+      "sha256": "2de4d8f979f4159d0476d121c183a0e68e1fdb1786284e25d50a185445b167d1"
+    },
+    {
+      "bytes": 15963,
+      "compressedBytes": 2105,
+      "crc32": 2046067829,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-C/observations.jsonl",
+      "sha256": "bdcca522c14f97290fade37dff01d480fc4f1e6567112b57b8c6a547b379bdbd"
+    },
+    {
+      "bytes": 17878,
+      "compressedBytes": 2602,
+      "crc32": 1763326581,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-C/report.json",
+      "sha256": "4dfea067f731146e934696d87f8fac1cdba31041aab455a39614bc675e1d1ed0"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-C/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 754,
+      "compressedBytes": 348,
+      "crc32": 2276323560,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/control-06-C/stdout.log",
+      "sha256": "f3c7e709266fdf585703686f12cf1dcf97a8fa69b5674c4af133095af0c66fd2"
+    },
+    {
+      "bytes": 3896,
+      "compressedBytes": 613,
+      "crc32": 607426588,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/registered-plan.json",
+      "sha256": "1273340c12d9f04971526f580eae56663f37e4b7baaa19edc3537310d4ef68c6"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 3214487681,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-A/identity.json",
+      "sha256": "493006a7313c67f92d12ddf164b8ce8237183c4e0e1ff064da5f05cb52df2d74"
+    },
+    {
+      "bytes": 15969,
+      "compressedBytes": 2100,
+      "crc32": 840476530,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-A/observations.jsonl",
+      "sha256": "5118d05afa4d0a73d890e88f8b886a36d2ae810e8de5c0de316945b2a3bde76d"
+    },
+    {
+      "bytes": 17886,
+      "compressedBytes": 2613,
+      "crc32": 1858248810,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-A/report.json",
+      "sha256": "c33b758c5070199cdc927cdafe545be9278ba280551a91f7b9d7107a72850a85"
+    },
+    {
+      "bytes": 756,
+      "compressedBytes": 352,
+      "crc32": 4127886991,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-A/stdout.log",
+      "sha256": "4d4d163fcc9b583139c7e1b0d8eb39ded4dfe9f08c67d4647d6e28812be363ed"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 86,
+      "crc32": 3013248075,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-B/identity.json",
+      "sha256": "302924452068a2379b385e9799317329c08cf6d71a35baa4fe1525f5d1de92a5"
+    },
+    {
+      "bytes": 15936,
+      "compressedBytes": 2075,
+      "crc32": 2246223586,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-B/observations.jsonl",
+      "sha256": "63c215d56a5c5f5b98147a5a8b53052ef96b70b830c62906dd4e383955ad9be9"
+    },
+    {
+      "bytes": 17854,
+      "compressedBytes": 2596,
+      "crc32": 2635618189,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-B/report.json",
+      "sha256": "d16692a541d0873572b935d0f6a3f89dc22a7c3befb68c269d957675dfbd2425"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 750,
+      "compressedBytes": 351,
+      "crc32": 2167682229,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-01-B/stdout.log",
+      "sha256": "3d021748b874695eb845c31636845a21b52ea07a32c34038cab9e6011d83c46d"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 12212771,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-A/identity.json",
+      "sha256": "0c26c71bddeb28adee70d23d2fcc74e96b1d0fcee443a4707dc1cab4861a3a16"
+    },
+    {
+      "bytes": 15950,
+      "compressedBytes": 2096,
+      "crc32": 1328692059,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-A/observations.jsonl",
+      "sha256": "6f0ba139b12601473395ef1527e8f52a59c3af61c3d3732577e7b7d7f7524c45"
+    },
+    {
+      "bytes": 17866,
+      "compressedBytes": 2611,
+      "crc32": 4172053455,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-A/report.json",
+      "sha256": "a633c5fe67a93e0c0448949bca0d68d2778e7c559a048da74a5f085cd07eef04"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 756,
+      "compressedBytes": 351,
+      "crc32": 937520406,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-A/stdout.log",
+      "sha256": "3cb7e5069b990b29e02bcc53d7c006ac626868256260cff4f27b4444b967d47c"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 87,
+      "crc32": 882538651,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-B/identity.json",
+      "sha256": "ba6324070456a44881dfc93974769f56ad069b473a896d3f5a777e220140b4db"
+    },
+    {
+      "bytes": 15946,
+      "compressedBytes": 2089,
+      "crc32": 534375363,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-B/observations.jsonl",
+      "sha256": "d11d34738d9cbdd62823dba24c2de17760df3ab5d2192667339c239ec22d05bb"
+    },
+    {
+      "bytes": 17856,
+      "compressedBytes": 2603,
+      "crc32": 323668254,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-B/report.json",
+      "sha256": "15952166644868f36ca8ba652261ea4e189e4ce85622ffe27dca06705339d179"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 740,
+      "compressedBytes": 348,
+      "crc32": 1204387953,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-02-B/stdout.log",
+      "sha256": "f44c89061b45ccd7b7f20e3cd44f5384b7f40ad105ace6073fbb9030460a4a55"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 4007774103,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-A/identity.json",
+      "sha256": "94b22de65fe3f0180b882358fb08e50387abb3d7a6a4efc2eb39ebf8ee31e567"
+    },
+    {
+      "bytes": 15934,
+      "compressedBytes": 2075,
+      "crc32": 580023420,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-A/observations.jsonl",
+      "sha256": "0183eb24195b8084c089ca4ac7dbdace1ecc81f4685067a957a9f0300d689451"
+    },
+    {
+      "bytes": 17850,
+      "compressedBytes": 2602,
+      "crc32": 1598071385,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-A/report.json",
+      "sha256": "f61aa6aafda87d09405800662d32cde53489c28edeb4ee0a8f85d61e561ec378"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 755,
+      "compressedBytes": 350,
+      "crc32": 3210253777,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-A/stdout.log",
+      "sha256": "73e6fba901c6a7c180e83b7af5de1aa2e50c1b51a794d81c5887f97c34306f58"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 87,
+      "crc32": 2460311481,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-B/identity.json",
+      "sha256": "388bc270fff148d192b859745313e90207631f9ac8ab7c648b544eacbafb3a18"
+    },
+    {
+      "bytes": 15957,
+      "compressedBytes": 2080,
+      "crc32": 3070092704,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-B/observations.jsonl",
+      "sha256": "e3e2741868f4400cc4e61f9ff9f394e243a086b843b3637e8dc3c01734d4fb5c"
+    },
+    {
+      "bytes": 17874,
+      "compressedBytes": 2601,
+      "crc32": 3600960221,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-B/report.json",
+      "sha256": "5dd1e202e1e1094a4b1cd13e69527391e403e1de2169ec59121e732da3200d7d"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 755,
+      "compressedBytes": 348,
+      "crc32": 3739948521,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-03-B/stdout.log",
+      "sha256": "60121b7744675368849322f5f0a7f47f8ea10d3db0f1d5ad4adccf132dbaca28"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 2777516326,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-A/identity.json",
+      "sha256": "aef8d1313a781ee6c29338b78fc72aa3e930d23daa83c9468bbe11ab0bfa4ea8"
+    },
+    {
+      "bytes": 15918,
+      "compressedBytes": 2098,
+      "crc32": 745506133,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-A/observations.jsonl",
+      "sha256": "1b798b2e4796521f58677fad82a9cea44178b75a01df904d53ca6f6d93e1df21"
+    },
+    {
+      "bytes": 17835,
+      "compressedBytes": 2604,
+      "crc32": 24145683,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-A/report.json",
+      "sha256": "3717aa220e8ac0361c373a4496d206ec1b6bcdf68f3367041d9d137718eb6f28"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 749,
+      "compressedBytes": 351,
+      "crc32": 3654390140,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-A/stdout.log",
+      "sha256": "6813d8e039065ea7f991b691f293a845cc19e513c36ed37ab5b61580fc8a4de7"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 87,
+      "crc32": 3790243706,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-B/identity.json",
+      "sha256": "c182c632420aa7ac3aa193c8040ce36827c01f2aa1500db2ec0c3423958a1ab6"
+    },
+    {
+      "bytes": 15910,
+      "compressedBytes": 2076,
+      "crc32": 744138814,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-B/observations.jsonl",
+      "sha256": "85dcdf0fbdf8d9cf8309d924465be4249719a1001ce1a7c558d1903ea7bb4f5b"
+    },
+    {
+      "bytes": 17827,
+      "compressedBytes": 2593,
+      "crc32": 2283381527,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-B/report.json",
+      "sha256": "f7954ca45e216f10cb69075d438ff002ee5232af8e42a45d79a7bcccff2ea654"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 745,
+      "compressedBytes": 349,
+      "crc32": 756304717,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-04-B/stdout.log",
+      "sha256": "e8edbed455faeeea0c8418fa749466dcd311f24c933b95aabe0dbbdb973b190c"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 493412013,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-A/identity.json",
+      "sha256": "e505a2c58eba562c7240a82fa19b447b3cf6718c3b8590f3275998ae99decaa4"
+    },
+    {
+      "bytes": 15963,
+      "compressedBytes": 2100,
+      "crc32": 799268754,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-A/observations.jsonl",
+      "sha256": "c2f01072f16cc1a24ef75ed25192e477e56427ba3236512f32cc5c0567ba4daa"
+    },
+    {
+      "bytes": 17880,
+      "compressedBytes": 2614,
+      "crc32": 894026416,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-A/report.json",
+      "sha256": "7b1e9fc35c59ed63354f1edee357184c8279de5c55fa0dc68cd7af34a3483005"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 755,
+      "compressedBytes": 351,
+      "crc32": 603319900,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-A/stdout.log",
+      "sha256": "e68cebd546ff053ba321dc9d85fd0b2516813b22f48beb2a1c2bcc8c2d68084f"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 87,
+      "crc32": 4058330031,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-B/identity.json",
+      "sha256": "ddf491a42e829c21be0ac38c3c1369620ce026e29c003c95c1644606516ec576"
+    },
+    {
+      "bytes": 15933,
+      "compressedBytes": 2091,
+      "crc32": 3458169831,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-B/observations.jsonl",
+      "sha256": "2d208b03e468325c5b56f546bbd90cfecd8033b86a5674bb8e40ba2c6717b377"
+    },
+    {
+      "bytes": 17851,
+      "compressedBytes": 2603,
+      "crc32": 2998969628,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-B/report.json",
+      "sha256": "34d0dd223e60e9cee87bc1ded87b89c32a403a8c2cbd3a2ea8a065245c785c8a"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 757,
+      "compressedBytes": 351,
+      "crc32": 3547815035,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-05-B/stdout.log",
+      "sha256": "ab175b14d94e526f83f94f8328405b2f3da55eeb3ea3ee1122ad3125f4a74654"
+    },
+    {
+      "bytes": 113,
+      "compressedBytes": 86,
+      "crc32": 2722870287,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-A/identity.json",
+      "sha256": "f172e049d8e0a84c62a8c27fd02f249096f766515da701c496e3bb8fc4068b5f"
+    },
+    {
+      "bytes": 15950,
+      "compressedBytes": 2098,
+      "crc32": 1275236336,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-A/observations.jsonl",
+      "sha256": "9352b6c2091c638a7d00f2e1910fee278f7f3e63931e71b7a5ae98a831b1382c"
+    },
+    {
+      "bytes": 17867,
+      "compressedBytes": 2606,
+      "crc32": 4227610210,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-A/report.json",
+      "sha256": "e7c90eb883bf84e45ca03bff6be9c87e6c73945b41ac29c415b2d797c8eeffcc"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-A/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 756,
+      "compressedBytes": 350,
+      "crc32": 338451272,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-A/stdout.log",
+      "sha256": "29bd7539a444e52c76c39e81538df840f64d536a84fbce2022d04a3eda7f76cb"
+    },
+    {
+      "bytes": 114,
+      "compressedBytes": 87,
+      "crc32": 1994772351,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-B/identity.json",
+      "sha256": "5ace354e9423124efc88e1a80e85e4905020099b7ddc8443974361c08282da05"
+    },
+    {
+      "bytes": 15950,
+      "compressedBytes": 2080,
+      "crc32": 1326779848,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-B/observations.jsonl",
+      "sha256": "e7b9f3fa557635dd2d59b683203386b00bbb7e823263b6156689f7cd73fd41d9"
+    },
+    {
+      "bytes": 17868,
+      "compressedBytes": 2594,
+      "crc32": 3223814350,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-B/report.json",
+      "sha256": "192c1e39749b0f63dd897989e7d066dc3a54941e6a415a26a8ab390892e71a8a"
+    },
+    {
+      "bytes": 748,
+      "compressedBytes": 348,
+      "crc32": 3979931481,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-B/stdout.log",
+      "sha256": "61a4eff543f5a5f0db40e6e7d1969b3668fef8aa0fbc5ff94214290e5899e1b2"
+    },
+    {
+      "bytes": 0,
+      "compressedBytes": 2,
+      "crc32": 0,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign/treatment-06-B/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4280,
+      "compressedBytes": 979,
+      "crc32": 3193999086,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/campaign.log",
+      "sha256": "e6d0bbb723f8cb9cbc804c4403f3b800bca3438e3529c4d2f017edd8a5121006"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0000.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0001.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0002.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0003.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0004.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 3,
+      "compressedBytes": 5,
+      "crc32": 3343608889,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0005.bin",
+      "sha256": "849c350ee8718ca24eea1af3870553c3b171ecf5a8a8abddbd12c03ce15daf30"
+    },
+    {
+      "bytes": 2,
+      "compressedBytes": 4,
+      "crc32": 2477718872,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0006.bin",
+      "sha256": "eca2fdcb8fb09ec55fe68d9824c1f844940970d9124ea28ae22143cb9f728b67"
+    },
+    {
+      "bytes": 5,
+      "compressedBytes": 7,
+      "crc32": 190412157,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0007.bin",
+      "sha256": "172ba56aa26c10d3d05bdf3e904f5793e5626bf435c82fc707dd16d69d7ccc61"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1264684221,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0008.bin",
+      "sha256": "aa325e7a5d4ca8e27bbaecdf93261bfa53d59fd9d78104e1cfe56f488cae8c7b"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 1326691596,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0009.bin",
+      "sha256": "5afda22540d1a9601b2f80dfe89e0b72c04758375f1ee0eda3733a25f7ee0b0c"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 15,
+      "crc32": 3971363745,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0010.bin",
+      "sha256": "8e8d58b8e979e9404fa9d4360396ab426217e829d00f856b61feb4047fdd39bc"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0011.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0012.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0013.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0014.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0015.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 3,
+      "compressedBytes": 5,
+      "crc32": 3343608889,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0017.bin",
+      "sha256": "849c350ee8718ca24eea1af3870553c3b171ecf5a8a8abddbd12c03ce15daf30"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 2378181865,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0016.bin",
+      "sha256": "4e28da181f8c91d90cd5eccd0899f0bdf35c00e2591f2d342afb7428da3ceeac"
+    },
+    {
+      "bytes": 2,
+      "compressedBytes": 4,
+      "crc32": 2477718872,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0018.bin",
+      "sha256": "eca2fdcb8fb09ec55fe68d9824c1f844940970d9124ea28ae22143cb9f728b67"
+    },
+    {
+      "bytes": 5,
+      "compressedBytes": 7,
+      "crc32": 190412157,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0019.bin",
+      "sha256": "172ba56aa26c10d3d05bdf3e904f5793e5626bf435c82fc707dd16d69d7ccc61"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1264684221,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0020.bin",
+      "sha256": "aa325e7a5d4ca8e27bbaecdf93261bfa53d59fd9d78104e1cfe56f488cae8c7b"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 1326691596,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0021.bin",
+      "sha256": "5afda22540d1a9601b2f80dfe89e0b72c04758375f1ee0eda3733a25f7ee0b0c"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 15,
+      "crc32": 3971363745,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0022.bin",
+      "sha256": "8e8d58b8e979e9404fa9d4360396ab426217e829d00f856b61feb4047fdd39bc"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0023.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 4040304256,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0024.bin",
+      "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 4040304256,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0025.bin",
+      "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 4040304256,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0026.bin",
+      "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 4040304256,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0027.bin",
+      "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 4040304256,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0028.bin",
+      "sha256": "8ae3c269049db3a22917d3166b3edf249c16669489f8efcfc16a1053b6b15696"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 3537876203,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0029.bin",
+      "sha256": "2b7ab2e1353a7dab49ae73d8798d3a8b9f38882687d83fcf0ed427decd83f638"
+    },
+    {
+      "bytes": 3,
+      "compressedBytes": 5,
+      "crc32": 3434467751,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0030.bin",
+      "sha256": "d7b3d4012540102c40a23acdeee417e06a42a74a5d66c7efe59f4e4aa0537c5c"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 1061863051,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0031.bin",
+      "sha256": "7179a54a6233666c220c7a9705cac33ad89144d9de2dfb8d85f1eacd84e3a85a"
+    },
+    {
+      "bytes": 9,
+      "compressedBytes": 11,
+      "crc32": 529254495,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0032.bin",
+      "sha256": "5187947beeaec573571d82dc1ba8bbc0bdc64cc3556160b2e4a30acb3c2e13a3"
+    },
+    {
+      "bytes": 27,
+      "compressedBytes": 18,
+      "crc32": 4201062414,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0034.bin",
+      "sha256": "71a7e7b641058bea7efa4ba915de184a4c84ed514ada72ad53110f4fd38055b4"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0035.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0036.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 12,
+      "crc32": 3697414343,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0033.bin",
+      "sha256": "4aab9cbed4debe694d22f2c2ef9d4b3584822a3dc567f15d7c679215ebd0f64b"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0037.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0038.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0039.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0040.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 72,
+      "compressedBytes": 77,
+      "crc32": 2535736456,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0041.bin",
+      "sha256": "afd375fc0f4abc84f09c002e255de706ef02d0570f6aab87cdff8b33e916fec4"
+    },
+    {
+      "bytes": 36,
+      "compressedBytes": 41,
+      "crc32": 2939993471,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0042.bin",
+      "sha256": "f36e9fc4c802d8e9991927b34b007914f5751a299bf3bb49a30f409c45608d80"
+    },
+    {
+      "bytes": 74,
+      "compressedBytes": 79,
+      "crc32": 3274838545,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0043.bin",
+      "sha256": "5b3b2b83356e714a458ae7f752d77c189d41a8e19583c4a28c13e4ec28c18814"
+    },
+    {
+      "bytes": 75,
+      "compressedBytes": 80,
+      "crc32": 263047849,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0044.bin",
+      "sha256": "6e6fefcb8ddc83e3d4cc6b57a4fdc4ce49e0b1b12f0ba9337a0bcc8dc9444ce5"
+    },
+    {
+      "bytes": 146,
+      "compressedBytes": 82,
+      "crc32": 927867476,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0045.bin",
+      "sha256": "886b6d0b1b80dc04d064229f336c826090a0e7a136eed8cc80bd974017c84b22"
+    },
+    {
+      "bytes": 93,
+      "compressedBytes": 88,
+      "crc32": 1312962263,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0046.bin",
+      "sha256": "01643dac3081c2c2dfe8dd5b908b01c99848d2bdac8de01a081f235bd8019f85"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0047.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0048.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0049.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0050.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0051.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 73,
+      "compressedBytes": 78,
+      "crc32": 838254811,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0052.bin",
+      "sha256": "da6e09afc7ef38e523f8b4129ddaa0191c5deaf64e6225822c3227612c777c28"
+    },
+    {
+      "bytes": 72,
+      "compressedBytes": 77,
+      "crc32": 2535736456,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0053.bin",
+      "sha256": "afd375fc0f4abc84f09c002e255de706ef02d0570f6aab87cdff8b33e916fec4"
+    },
+    {
+      "bytes": 36,
+      "compressedBytes": 41,
+      "crc32": 2939993471,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0054.bin",
+      "sha256": "f36e9fc4c802d8e9991927b34b007914f5751a299bf3bb49a30f409c45608d80"
+    },
+    {
+      "bytes": 74,
+      "compressedBytes": 79,
+      "crc32": 3274838545,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0055.bin",
+      "sha256": "5b3b2b83356e714a458ae7f752d77c189d41a8e19583c4a28c13e4ec28c18814"
+    },
+    {
+      "bytes": 75,
+      "compressedBytes": 80,
+      "crc32": 263047849,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0056.bin",
+      "sha256": "6e6fefcb8ddc83e3d4cc6b57a4fdc4ce49e0b1b12f0ba9337a0bcc8dc9444ce5"
+    },
+    {
+      "bytes": 146,
+      "compressedBytes": 82,
+      "crc32": 927867476,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0057.bin",
+      "sha256": "886b6d0b1b80dc04d064229f336c826090a0e7a136eed8cc80bd974017c84b22"
+    },
+    {
+      "bytes": 93,
+      "compressedBytes": 88,
+      "crc32": 1312962263,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0058.bin",
+      "sha256": "01643dac3081c2c2dfe8dd5b908b01c99848d2bdac8de01a081f235bd8019f85"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0059.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 85,
+      "compressedBytes": 79,
+      "crc32": 2093534946,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0060.bin",
+      "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+    },
+    {
+      "bytes": 85,
+      "compressedBytes": 79,
+      "crc32": 2093534946,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0061.bin",
+      "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+    },
+    {
+      "bytes": 85,
+      "compressedBytes": 79,
+      "crc32": 2093534946,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0062.bin",
+      "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+    },
+    {
+      "bytes": 85,
+      "compressedBytes": 79,
+      "crc32": 2093534946,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0063.bin",
+      "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+    },
+    {
+      "bytes": 85,
+      "compressedBytes": 79,
+      "crc32": 2093534946,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0064.bin",
+      "sha256": "da8151427537cd89288fe2b65c6127b7920229ee840d91e3d06084f0a08d5ad2"
+    },
+    {
+      "bytes": 84,
+      "compressedBytes": 78,
+      "crc32": 457909685,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0065.bin",
+      "sha256": "07797d0967a35bdb4630ce5115a35a0f35d44584c07bf584af9d3511c8a297b1"
+    },
+    {
+      "bytes": 42,
+      "compressedBytes": 43,
+      "crc32": 1943306295,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0066.bin",
+      "sha256": "f6d8d8d65de2bf72732e4a45df5d60894c5834b51614e5afc96da653d6bd1627"
+    },
+    {
+      "bytes": 86,
+      "compressedBytes": 80,
+      "crc32": 2625283095,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0067.bin",
+      "sha256": "d62ed35651262fb891923cc79f5088e3c2be0bf2bbf47b8b9670f7d2edcad1cd"
+    },
+    {
+      "bytes": 87,
+      "compressedBytes": 81,
+      "crc32": 3868272426,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0068.bin",
+      "sha256": "8735120e5e05ee8b0e3fc3b423482d9a5ee2200d16e5d97173e8f1d198f73b3c"
+    },
+    {
+      "bytes": 170,
+      "compressedBytes": 82,
+      "crc32": 2827254516,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0069.bin",
+      "sha256": "95413a289147fa0487531b6cdc75615c4189a8ff6dccedf7d3609efc3b833efc"
+    },
+    {
+      "bytes": 105,
+      "compressedBytes": 88,
+      "crc32": 2964523275,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0070.bin",
+      "sha256": "19c59f236d6a8834ba331b4b7969d17d93e62ecfd1f72b07ec759e9d00aac384"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0071.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0072.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0073.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0074.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0075.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0076.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 13,
+      "compressedBytes": 15,
+      "crc32": 1059822639,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0077.bin",
+      "sha256": "5540df98cb8469962686f16dbef7f4f083fa2d8b97731cc56e298295a828e7b9"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 3863110263,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0078.bin",
+      "sha256": "092e1775c119c6c9664c3c87b0e83bff02b51d87b1d964155d40f991fde29dda"
+    },
+    {
+      "bytes": 16,
+      "compressedBytes": 19,
+      "crc32": 180671330,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0080.bin",
+      "sha256": "3056c0375642a1f9b9c89ec3b8f5a433e8ec8c9d75be2e280815c8a0a0f45afd"
+    },
+    {
+      "bytes": 15,
+      "compressedBytes": 17,
+      "crc32": 2860305110,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0079.bin",
+      "sha256": "3c4dcbb53c143be5630819c08f7a2f13c6ed4dd1568ec4489dbbbe0b3efa99b5"
+    },
+    {
+      "bytes": 28,
+      "compressedBytes": 19,
+      "crc32": 1593270763,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0081.bin",
+      "sha256": "0d0f5784f0c381e58c0e59188088f800a0f8437cbaa7f158d2d582dba5371ce6"
+    },
+    {
+      "bytes": 34,
+      "compressedBytes": 26,
+      "crc32": 3221679354,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0082.bin",
+      "sha256": "e664d2b17e49f0319f3b965d0cc5431d7879a4574fbf879304337f73dcc1fb0c"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0083.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0084.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0085.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0086.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0087.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 14,
+      "compressedBytes": 16,
+      "crc32": 2045573448,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0088.bin",
+      "sha256": "b85f8657593217c3e2bbe36d7ec93244de0c21f5bb9b98c05e414441c17697e6"
+    },
+    {
+      "bytes": 13,
+      "compressedBytes": 15,
+      "crc32": 1059822639,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0089.bin",
+      "sha256": "5540df98cb8469962686f16dbef7f4f083fa2d8b97731cc56e298295a828e7b9"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 3863110263,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0090.bin",
+      "sha256": "092e1775c119c6c9664c3c87b0e83bff02b51d87b1d964155d40f991fde29dda"
+    },
+    {
+      "bytes": 15,
+      "compressedBytes": 17,
+      "crc32": 2860305110,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0091.bin",
+      "sha256": "3c4dcbb53c143be5630819c08f7a2f13c6ed4dd1568ec4489dbbbe0b3efa99b5"
+    },
+    {
+      "bytes": 16,
+      "compressedBytes": 19,
+      "crc32": 180671330,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0092.bin",
+      "sha256": "3056c0375642a1f9b9c89ec3b8f5a433e8ec8c9d75be2e280815c8a0a0f45afd"
+    },
+    {
+      "bytes": 28,
+      "compressedBytes": 19,
+      "crc32": 1593270763,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0093.bin",
+      "sha256": "0d0f5784f0c381e58c0e59188088f800a0f8437cbaa7f158d2d582dba5371ce6"
+    },
+    {
+      "bytes": 34,
+      "compressedBytes": 26,
+      "crc32": 3221679354,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0094.bin",
+      "sha256": "e664d2b17e49f0319f3b965d0cc5431d7879a4574fbf879304337f73dcc1fb0c"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0095.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 17,
+      "compressedBytes": 17,
+      "crc32": 1640085971,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0096.bin",
+      "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+    },
+    {
+      "bytes": 17,
+      "compressedBytes": 17,
+      "crc32": 1640085971,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0097.bin",
+      "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+    },
+    {
+      "bytes": 17,
+      "compressedBytes": 17,
+      "crc32": 1640085971,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0098.bin",
+      "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+    },
+    {
+      "bytes": 17,
+      "compressedBytes": 17,
+      "crc32": 1640085971,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0099.bin",
+      "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+    },
+    {
+      "bytes": 17,
+      "compressedBytes": 17,
+      "crc32": 1640085971,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0100.bin",
+      "sha256": "1bde1067a5acf218af92b8d991258e802b5f1306d68c39e46e33868b692e7986"
+    },
+    {
+      "bytes": 16,
+      "compressedBytes": 18,
+      "crc32": 2771153138,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0101.bin",
+      "sha256": "0521609f246284f3996dc1b0e2ce62b700d63c1da73fb229bd713918f6ed7f41"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 679942379,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0102.bin",
+      "sha256": "1b5f5d792e9d559b3df36db77c4099e1dd431173a3ff46aadb17492ce70c0ad2"
+    },
+    {
+      "bytes": 18,
+      "compressedBytes": 18,
+      "crc32": 3451497818,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0103.bin",
+      "sha256": "a219531e7a986a6e608dab6534ced576489a75205b75239fc25eb04e8ee6d546"
+    },
+    {
+      "bytes": 19,
+      "compressedBytes": 19,
+      "crc32": 4004370702,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0104.bin",
+      "sha256": "16f4224ae3bad1c691b0095fe72aba5a96f22e5ba8fe39b87778f5a91dcceb8a"
+    },
+    {
+      "bytes": 34,
+      "compressedBytes": 20,
+      "crc32": 2651540878,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0105.bin",
+      "sha256": "0ecd8eb2280c2d477426d9f786a595f796e4abf759bb9a7e04aa6477784b65cd"
+    },
+    {
+      "bytes": 37,
+      "compressedBytes": 26,
+      "crc32": 3497098854,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0106.bin",
+      "sha256": "6b860f109c584f106a0b3dedf3345c55a57f05dc355b73802eb776cf19c4282e"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0107.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 6378,
+      "compressedBytes": 1089,
+      "crc32": 555202329,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0108.bin",
+      "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+    },
+    {
+      "bytes": 6378,
+      "compressedBytes": 1089,
+      "crc32": 555202329,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0109.bin",
+      "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+    },
+    {
+      "bytes": 6378,
+      "compressedBytes": 1089,
+      "crc32": 555202329,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0110.bin",
+      "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+    },
+    {
+      "bytes": 6378,
+      "compressedBytes": 1089,
+      "crc32": 555202329,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0111.bin",
+      "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+    },
+    {
+      "bytes": 6378,
+      "compressedBytes": 1089,
+      "crc32": 555202329,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0112.bin",
+      "sha256": "1d5995d7a2d60cec2ef1d06fee8c44ae64a0e906fee3089abf97cbc20b2a5849"
+    },
+    {
+      "bytes": 6377,
+      "compressedBytes": 1088,
+      "crc32": 2888424461,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0113.bin",
+      "sha256": "f0e2711a3efe29ecb5089eb7fb5f912ccab3b1ae6b14b80acd80b8a30cbd71af"
+    },
+    {
+      "bytes": 3189,
+      "compressedBytes": 745,
+      "crc32": 3324846708,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0114.bin",
+      "sha256": "dbf212465205a932882e8b8b760fe20d3322d72e11b141baa37c582ff00884bd"
+    },
+    {
+      "bytes": 6379,
+      "compressedBytes": 1090,
+      "crc32": 3058192634,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0115.bin",
+      "sha256": "1dc8e5ba9b4b9c7a25bba61d9c7a3c5cda92a0a5a8885fed84d982162781c392"
+    },
+    {
+      "bytes": 6380,
+      "compressedBytes": 1092,
+      "crc32": 939559707,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0116.bin",
+      "sha256": "b893ebee2c0a385076c828b8856689b778becfd3b59b3518b64fa6c723531fce"
+    },
+    {
+      "bytes": 12756,
+      "compressedBytes": 1197,
+      "crc32": 1785805161,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0117.bin",
+      "sha256": "705b7448cd2be5d75914cd2a2cc243d766628e0c74454555b6725661de3d20fa"
+    },
+    {
+      "bytes": 6398,
+      "compressedBytes": 1100,
+      "crc32": 303721859,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0118.bin",
+      "sha256": "17bab76db980ea3e649f8423e7f3cba8bafa11300a1d8d5c0b255d36a10e3e17"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0119.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 10108,
+      "compressedBytes": 1342,
+      "crc32": 3496520947,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0120.bin",
+      "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+    },
+    {
+      "bytes": 10108,
+      "compressedBytes": 1342,
+      "crc32": 3496520947,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0121.bin",
+      "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+    },
+    {
+      "bytes": 10108,
+      "compressedBytes": 1342,
+      "crc32": 3496520947,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0122.bin",
+      "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+    },
+    {
+      "bytes": 10108,
+      "compressedBytes": 1342,
+      "crc32": 3496520947,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0124.bin",
+      "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+    },
+    {
+      "bytes": 10108,
+      "compressedBytes": 1342,
+      "crc32": 3496520947,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0123.bin",
+      "sha256": "a41eeebdcc07de6a35f6ed3d872ba24be5441317b0bd4e92547627c228af68e0"
+    },
+    {
+      "bytes": 10107,
+      "compressedBytes": 1341,
+      "crc32": 131101891,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0125.bin",
+      "sha256": "9d7e88dc6bc70f3b95d5e975cfcc1684197e2e5332673c85af6286bb63f4fc02"
+    },
+    {
+      "bytes": 5054,
+      "compressedBytes": 938,
+      "crc32": 1663077327,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0126.bin",
+      "sha256": "bfc920ff27b9d2e08d608c5145d80ab314d8d14ebe9b981c445ac8184001addf"
+    },
+    {
+      "bytes": 10109,
+      "compressedBytes": 1343,
+      "crc32": 4133889159,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0127.bin",
+      "sha256": "75dd44207a98db2443d115476331afaf20dd98b95bb04263f4aaf941c3a62fd7"
+    },
+    {
+      "bytes": 10110,
+      "compressedBytes": 1344,
+      "crc32": 385132782,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0128.bin",
+      "sha256": "551e062375ae0281a3c0814764bc1fccb3921cbf472533317f1738e01ca51618"
+    },
+    {
+      "bytes": 20216,
+      "compressedBytes": 1439,
+      "crc32": 1020434350,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0129.bin",
+      "sha256": "6eb50be417cc2f751a38ee073dd32ea9e2d7dbf41a253f4ed0937f80f9613f2b"
+    },
+    {
+      "bytes": 10128,
+      "compressedBytes": 1356,
+      "crc32": 4102481904,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0130.bin",
+      "sha256": "8690b161432c182b45549dceea0ca9f0b18d40e10b2039999cd530ea43690577"
+    },
+    {
+      "bytes": 359389,
+      "compressedBytes": 6501,
+      "crc32": 1831656155,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0132.bin",
+      "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0131.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 359389,
+      "compressedBytes": 6501,
+      "crc32": 1831656155,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0133.bin",
+      "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+    },
+    {
+      "bytes": 359389,
+      "compressedBytes": 6501,
+      "crc32": 1831656155,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0134.bin",
+      "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+    },
+    {
+      "bytes": 359389,
+      "compressedBytes": 6501,
+      "crc32": 1831656155,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0135.bin",
+      "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+    },
+    {
+      "bytes": 359389,
+      "compressedBytes": 6501,
+      "crc32": 1831656155,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0136.bin",
+      "sha256": "5e6dddd303d85acf64887159aa2ea4489f1d2b38be200aa099e8451451d82d4c"
+    },
+    {
+      "bytes": 179694,
+      "compressedBytes": 3249,
+      "crc32": 4282741857,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0138.bin",
+      "sha256": "57caae7b2855c1d65628da9f827e3d6b76fb141a98c61100b0c9313760d2b1ea"
+    },
+    {
+      "bytes": 359388,
+      "compressedBytes": 6500,
+      "crc32": 4266934382,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0137.bin",
+      "sha256": "864457182d5a0570989db1cf88ac5a92fdf09d3c2f182b61a1cb232b83c5669b"
+    },
+    {
+      "bytes": 359390,
+      "compressedBytes": 6502,
+      "crc32": 3278817291,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0139.bin",
+      "sha256": "079e9771ef2cfe71b8a46a91b525f0b557323772efc444b613ebad05b2a31862"
+    },
+    {
+      "bytes": 359391,
+      "compressedBytes": 6506,
+      "crc32": 4073680649,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0140.bin",
+      "sha256": "17cb076698b0809d998fa17a44cc61c62416be9d1bd4ba993c10e7686e5eb876"
+    },
+    {
+      "bytes": 718778,
+      "compressedBytes": 12925,
+      "crc32": 1857870082,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0141.bin",
+      "sha256": "ddc22e9df4fd98fae614fa17e1834e77b7c3f683198268c9bd51c03bf6ed18fe"
+    },
+    {
+      "bytes": 359409,
+      "compressedBytes": 6517,
+      "crc32": 1284174586,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0142.bin",
+      "sha256": "31f5200d752ef1ce8506059ec13af7925659bcb22fd8c5674ae365f317abda02"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0143.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 364889399,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0144.bin",
+      "sha256": "300099f6d348411bf80b08bcfc365abc6649651cf0abaab5729075e6f27b6f47"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 1325936697,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0145.bin",
+      "sha256": "8ea7bc5df8b678dc138daebde527ab3f72c557bdcda3b712f2a776f929f97d8a"
+    },
+    {
+      "bytes": 12,
+      "compressedBytes": 14,
+      "crc32": 1425265651,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0146.bin",
+      "sha256": "4e1bd4111be33dd831f28c67fd01b4adfcfeee934d57f9572aa83a4222cc6d02"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 1198430398,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0147.bin",
+      "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 1198430398,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0148.bin",
+      "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 1198430398,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0149.bin",
+      "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 1198430398,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0150.bin",
+      "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0152.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0151.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0153.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 1281784366,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0154.bin",
+      "sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0155.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 4,
+      "compressedBytes": 6,
+      "crc32": 364889399,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0156.bin",
+      "sha256": "300099f6d348411bf80b08bcfc365abc6649651cf0abaab5729075e6f27b6f47"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0157.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0158.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0159.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0160.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 7,
+      "compressedBytes": 9,
+      "crc32": 619296288,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0161.bin",
+      "sha256": "706f1fd36f8ba9b68e0e6049db11e054eb3c0400811678f38a1cf4ef6404d6d7"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0162.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 3523407757,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0163.bin",
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 1586762039,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0164.bin",
+      "sha256": "ab9a2ba71adec51b0ca2a1302321b8994d5fd64725de711bfb8f71a25ba70a2e"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0165.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 2,
+      "compressedBytes": 4,
+      "crc32": 4127532347,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0166.bin",
+      "sha256": "59ca84fb79f2a7447b9e82c7412df58c688910cba202b7d4e9bf329ce07f931c"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0168.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 8,
+      "compressedBytes": 10,
+      "crc32": 3261429040,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0167.bin",
+      "sha256": "55be257f14f29270c9504dff681cc7bcf882fcbd91958b10405c3c489da3e7a5"
+    },
+    {
+      "bytes": 2,
+      "compressedBytes": 4,
+      "crc32": 1794392380,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0169.bin",
+      "sha256": "9b4fb24edd6d1d8830e272398263cdbf026b97392cc35387b991dc0248a628f9"
+    },
+    {
+      "bytes": 6,
+      "compressedBytes": 8,
+      "crc32": 1384117973,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0170.bin",
+      "sha256": "fa93f4883410a579d5b98ae865fe4e4c19cd4b5eac14f98ba110e647cfc45c98"
+    },
+    {
+      "bytes": 25,
+      "compressedBytes": 21,
+      "crc32": 3562947800,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0171.bin",
+      "sha256": "6e055263bcf63e77ad9120beafced0812d829a197365e5d91e3e8fc4174d4fc4"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 21,
+      "crc32": 3927853637,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0172.bin",
+      "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+    },
+    {
+      "bytes": 1,
+      "compressedBytes": 3,
+      "crc32": 3523407757,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0173.bin",
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 21,
+      "crc32": 3927853637,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0175.bin",
+      "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+    },
+    {
+      "bytes": 26,
+      "compressedBytes": 25,
+      "crc32": 3976387819,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0174.bin",
+      "sha256": "02efdcc74b76f3f5d0c03b06a1829b06d1d3e8ab0676d9c47c16f687bcf3cc45"
+    },
+    {
+      "bytes": 2,
+      "compressedBytes": 4,
+      "crc32": 4127532347,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0176.bin",
+      "sha256": "59ca84fb79f2a7447b9e82c7412df58c688910cba202b7d4e9bf329ce07f931c"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 21,
+      "crc32": 3927853637,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0178.bin",
+      "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+    },
+    {
+      "bytes": 44,
+      "compressedBytes": 29,
+      "crc32": 2811432747,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0177.bin",
+      "sha256": "57b263a5147557bc04fd3e1e2b62ec7ede0f233645f935bb569491d4b51d3ab2"
+    },
+    {
+      "bytes": 20,
+      "compressedBytes": 12,
+      "crc32": 1161266512,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0179.bin",
+      "sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "bytes": 24,
+      "compressedBytes": 21,
+      "crc32": 3927853637,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance-0180.bin",
+      "sha256": "aeec2deddde135d2208dc60210e2c4341f65011174bd9001de0ca86713770efe"
+    },
+    {
+      "bytes": 109210,
+      "compressedBytes": 7358,
+      "crc32": 983200435,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/conformance.json",
+      "sha256": "d2c012fef05752d68705c1ef90a5124fac017d3898804d5ab6491186db434459"
+    },
+    {
+      "bytes": 29656,
+      "compressedBytes": 6987,
+      "crc32": 1378527486,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture/manifest.json",
+      "sha256": "a8704cafa7f0c7e967a71d49b7f3f43058d6cb152eba6846a2198c7ddfe0fc30"
+    },
+    {
+      "bytes": 136,
+      "compressedBytes": 114,
+      "crc32": 749197764,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/capture.log",
+      "sha256": "e7c7d84aad3508d1dd09e8eb06441e1cfa5471fc923b6ed70eb06c98fa707d72"
+    },
+    {
+      "bytes": 503,
+      "compressedBytes": 302,
+      "crc32": 709272620,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/host-after.json",
+      "sha256": "b2f70417ba0a9327e0b443f2c0790451b54ba56de549e9d7a14a3233627429fa"
+    },
+    {
+      "bytes": 504,
+      "compressedBytes": 301,
+      "crc32": 1343725773,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/host-before.json",
+      "sha256": "77f958a7c376fb6e3536b9430812ad68d218ad6a00b0015a6200a878c1725822"
+    },
+    {
+      "bytes": 67757,
+      "compressedBytes": 25562,
+      "crc32": 3278034029,
+      "directory": false,
+      "externalAttributes": 2179792928,
+      "path": "jmdict/modules/baseline-test.wasm",
+      "sha256": "3d4d402e2514766ca1d79c4bf7be1fbe8d024e97a7cb268899618430dac8ad9b"
+    },
+    {
+      "bytes": 158441,
+      "compressedBytes": 29400,
+      "crc32": 560493925,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/modules/baseline.c",
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    {
+      "bytes": 67659,
+      "compressedBytes": 25475,
+      "crc32": 688940691,
+      "directory": false,
+      "externalAttributes": 2179792928,
+      "path": "jmdict/modules/baseline.wasm",
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    {
+      "bytes": 66736,
+      "compressedBytes": 25633,
+      "crc32": 3779578064,
+      "directory": false,
+      "externalAttributes": 2179792928,
+      "path": "jmdict/modules/candidate-test.wasm",
+      "sha256": "d4c601c665e0eb07732b8fa30490c83d3050f68e4ca8e62b9f6c2a4278aa53d2"
+    },
+    {
+      "bytes": 770633,
+      "compressedBytes": 66039,
+      "crc32": 3308706527,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/modules/baseline.s",
+      "sha256": "3721b50dc7392f02f85e4db737ac88bed2d93b9d907fa02ddf62243c55588698"
+    },
+    {
+      "bytes": 158484,
+      "compressedBytes": 29431,
+      "crc32": 3572102223,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/modules/candidate.c",
+      "sha256": "31f1f3f0e56fdbf82da5ba721a756c1412341f663e6fc5ad4f1634caafcd19ba"
+    },
+    {
+      "bytes": 764615,
+      "compressedBytes": 66098,
+      "crc32": 2056910961,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/modules/candidate.s",
+      "sha256": "42248905d846a7d539360f98fffdf9b2bd630228ba8f9bea10f1a1dc2c7d2580"
+    },
+    {
+      "bytes": 66638,
+      "compressedBytes": 25541,
+      "crc32": 911471357,
+      "directory": false,
+      "externalAttributes": 2179792928,
+      "path": "jmdict/modules/candidate.wasm",
+      "sha256": "1d0990753b18591d0befd2be35e6fc5a7ba9ae93e48e883184d13f01fe0526e8"
+    },
+    {
+      "bytes": 4537,
+      "compressedBytes": 2264,
+      "crc32": 281517588,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/registration.json",
+      "sha256": "a9317625436a75c2d716dc3f200d79a5a66027e97637ff760d3cec9c7773ddda"
+    },
+    {
+      "bytes": 41,
+      "compressedBytes": 42,
+      "crc32": 2661799245,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/source-sha.txt",
+      "sha256": "7cca820af0e77a4ac980a6fe0abfdb83338fc7e8bbc920b6e52bc25bae0436c7"
+    },
+    {
+      "bytes": 41,
+      "compressedBytes": 40,
+      "crc32": 259142102,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/source-tree.txt",
+      "sha256": "1ac6ff197d5b72256a569afc4ac15e879698c5c165715185220d1cd006bcddca"
+    },
+    {
+      "bytes": 339541,
+      "compressedBytes": 13147,
+      "crc32": 345045240,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/verify.json",
+      "sha256": "3caff14a1ace96629ba5de6e0cb3f70d8c540a82b56f84e14e4d3b53063b936e"
+    },
+    {
+      "bytes": 122,
+      "compressedBytes": 112,
+      "crc32": 191574831,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/verify.log",
+      "sha256": "404f9aea26a6e3b957786182eea405e5e701d7646b867c67a934ea2d70481b9d"
+    },
+    {
+      "bytes": 223731,
+      "compressedBytes": 10997,
+      "crc32": 3543931765,
+      "directory": false,
+      "externalAttributes": 2175008800,
+      "path": "jmdict/verify.observations.jsonl",
+      "sha256": "5fbc64104c2c8c8f71037b62f70079035ddfad881e03a875294ec5a0393741ef"
+    }
+  ],
+  "outerBytes": 641405,
+  "outerSha256": "7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d"
+}

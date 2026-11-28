@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "canonical-vndb",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 4239,
+      "gitBlobSha": "68d34e8feb9efd898489be7c842646852cb10940",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/acquisition.json",
+      "sha256": "df50ade53c56da5f42e3a6eabb9dc52f54b74b41f93cec5e7dc9048718c23eed"
+    },
+    {
+      "bytes": 89220,
+      "gitBlobSha": "5f88e9983d7783d294cccbde533600306f6f8069",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/archive-members.json",
+      "sha256": "f9ac35657be67f3e92d95f4ec14f3d9d8af43c2e5de835ff96e661839a403e4e"
+    },
+    {
+      "bytes": 218654,
+      "gitBlobSha": "9ad0b9b7a58520046f78668bc8bd67ef4fb5bc66",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/independent-audit.json",
+      "sha256": "f4f0d0d16c76e7d1a3e21e7a8b474e7257bf22866e7de9fa7393a20b838ca6d1"
+    },
+    {
+      "bytes": 12866,
+      "gitBlobSha": "6bd4e2d84698d2abf531db0f59a0300235b533af",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/summary.json",
+      "sha256": "e3db706410f310125eaf68589bee89d62d37b8caad57167301fb4636e876be62"
+    },
+    {
+      "bytes": 1312,
+      "gitBlobSha": "0117b56ea926dd05611e6f71582515cd24a8bfe2",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/audit.stdout.log",
+      "sha256": "6ac5fb34a3c5a83ac0c753d73513159251e9ff5e812fdad5abdc41fcd155e4e1"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1377,
+      "gitBlobSha": "6c332ff7b05ddc523da9e14fdb79963695be9f47",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/retention.json",
+      "sha256": "0ffbefd5b4989cae83f233be4e15167cf26a3f470d1e36677f410275b33b7b73"
+    },
+    {
+      "bytes": 191,
+      "gitBlobSha": "f20b8f0e72d0c48d4b8761f8268894a9ec3c8bdb",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/resolution-polls.jsonl",
+      "sha256": "5eeb6ad1d8a0b889407c45ee0233576cf80f564d5110b8421dc9c9da11531bee"
+    },
+    {
+      "bytes": 2469289,
+      "gitBlobSha": "81cc830d0ca8b330af7de68422577abaf1649e18",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/canonical-vndb/evidence-without-reproducible-packages.zip",
+      "sha256": "5beb5d4328b146109ae97a410db2ca6afb76e166533ef6baf1e5b04f88e7b407"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15253333819,
+  "originalArtifactSha256": "3c67c9b0dd9f2d359ec1e82c6a9d5ecd6788e7f6f4224f26499bea4206ffa742",
+  "originalRunId": 46112170828,
+  "unreferencedBlobsOnly": true
+}

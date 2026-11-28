@@ -1,0 +1,146 @@
+[
+  {
+    "bytes": 813,
+    "compressedBytes": 444,
+    "crc32": 3722097910,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "build-baseline.log",
+    "sha256": "85b995e3ead8c710b5ca476bf4410076faec46b94a595583053275ae4b9cbe69"
+  },
+  {
+    "bytes": 504,
+    "compressedBytes": 309,
+    "crc32": 866548248,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "host-after.json",
+    "sha256": "a03f8b17861c217f8287ad118a702d02ec6e107b4621b61613c15d181d04827b"
+  },
+  {
+    "bytes": 504,
+    "compressedBytes": 306,
+    "crc32": 423621161,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "host-before.json",
+    "sha256": "cb02616f41f04b19e933f83f97ccec4db8577d97bf33e3db1defb8ee869f10f1"
+  },
+  {
+    "bytes": 813,
+    "compressedBytes": 446,
+    "crc32": 61325229,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "build-candidate.log",
+    "sha256": "87b56d8545f9c9c34664c4261e0323729d2b5ab5d08365bd86c1836236598dd7"
+  },
+  {
+    "bytes": 128188,
+    "compressedBytes": 53294,
+    "crc32": 658427457,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "identities.json",
+    "sha256": "1e10e32054acedaa2925c0e602efaade45db9c1f63094afef2d2869456421cc3"
+  },
+  {
+    "bytes": 131698,
+    "compressedBytes": 5908,
+    "crc32": 2466145254,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "oracle.json",
+    "sha256": "c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"
+  },
+  {
+    "bytes": 523,
+    "compressedBytes": 328,
+    "crc32": 3604101125,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "oracle.log",
+    "sha256": "67b66651aeec039feb982ad51dfeb3ec2a5ae1c1b41e73fbb857406c75437a6a"
+  },
+  {
+    "bytes": 68857,
+    "compressedBytes": 4852,
+    "crc32": 1975720944,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "reuse-disabled.json",
+    "sha256": "30e502a4b9f738851937c0afde4fd35b91d6ff8b2971bcc47b7099c5065473b8"
+  },
+  {
+    "bytes": 36492,
+    "compressedBytes": 2173,
+    "crc32": 1725171062,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "reuse-disabled.json.observations.jsonl",
+    "sha256": "48d56432d286a7cca9b9cfb907ea26e4f3053a0ed7c4624db94175497f7ec1f7"
+  },
+  {
+    "bytes": 66,
+    "compressedBytes": 68,
+    "crc32": 604556841,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "reuse-disabled.log",
+    "sha256": "80ae2aa05574b6516112ef07e929ecdf648e9b232bdd60a791f067c584dbf19a"
+  },
+  {
+    "bytes": 2512525,
+    "compressedBytes": 78401,
+    "crc32": 101571040,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "screen.json",
+    "sha256": "184ff3958cb86491f87db523da20f2cb58f2b995a3d4306583ce5489cc07ce6d"
+  },
+  {
+    "bytes": 1448113,
+    "compressedBytes": 45682,
+    "crc32": 3103788128,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "screen.json.observations.jsonl",
+    "sha256": "5ea945286c972da4fa911c6de523042fc61dcbf79509e15bf352d113a3a6908f"
+  },
+  {
+    "bytes": 1619,
+    "compressedBytes": 299,
+    "crc32": 2761885726,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "screen.log",
+    "sha256": "94fdfc75f2ef00d2b2a0ceb8e166418f5908cdc0132cd14bdf2e9477af63dda8"
+  },
+  {
+    "bytes": 41,
+    "compressedBytes": 41,
+    "crc32": 361021612,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "source-sha.txt",
+    "sha256": "83847dbdcd9d08c3dac749516515bd98447471203d2caf20200e7cc05b10a4fd"
+  },
+  {
+    "bytes": 41,
+    "compressedBytes": 41,
+    "crc32": 2187837446,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "source-tree.txt",
+    "sha256": "3077c307e0dab2b8e9ebac148e5107bd1b0e0a36a6bba15599d3dbfb74bbdeb0"
+  },
+  {
+    "bytes": 1475,
+    "compressedBytes": 582,
+    "crc32": 1488298438,
+    "directory": false,
+    "externalAttributes": 2175008800,
+    "path": "unit.log",
+    "sha256": "eb1d5cf40a695963bc25f717dafc9d5a2a53b5dba9cfaf7f0e4bb932ea55db11"
+  }
+]

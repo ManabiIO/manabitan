@@ -1,0 +1,34 @@
+{
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "combined",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 1005,
+      "gitBlobSha": "043ee943735371161fd814e6ce99f4ba0a36084a",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-plan.json",
+      "sha256": "edd6ce09661bf29d93e38335aa2b218107fc9788f07c37de46f3b18322b4a352"
+    },
+    {
+      "bytes": 43332,
+      "gitBlobSha": "12181e0ade1a8641f3f06bb232924235e5114314",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-journal.jsonl",
+      "sha256": "684103205b2de47eefb1d6b904d298dfbd69e68060469559bc72306671e01f49"
+    },
+    {
+      "bytes": 92371,
+      "gitBlobSha": "b7c667c777d029bd765fce99b1eb4fc9c4db79cb",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/combined/batch-summary.json",
+      "sha256": "6f04f0d30e4035f23cc7d2b1b67c229cb95e8116e3b3b344534488083f8897bc"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "noTimingOrParserReexecution": true,
+  "originalRunIds": [
+    46112170828,
+    46114428610,
+    46120623371
+  ],
+  "unreferencedBlobsOnly": true
+}

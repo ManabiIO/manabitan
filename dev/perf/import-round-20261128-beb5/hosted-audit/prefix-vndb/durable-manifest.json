@@ -1,0 +1,69 @@
+{
+  "acquisitionComplete": true,
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "complete": true,
+  "entry": "prefix-vndb",
+  "failures": [],
+  "files": [
+    {
+      "bytes": 5020,
+      "gitBlobSha": "fae6b0e99ab6449e0d9d8d86b1d527933ce42974",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/acquisition.json",
+      "sha256": "16f772444a41b45195ec324c794f3c3383cef37bca8cca2c82b74e93b67af388"
+    },
+    {
+      "bytes": 4884,
+      "gitBlobSha": "54c800301a98ccfa8ec9518be03dd3c7c93faac8",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/archive-members.json",
+      "sha256": "82bdce811fccdc6fda9ba2b83cadd8cbe4ce792972efdb1982291e6516e068ee"
+    },
+    {
+      "bytes": 8293,
+      "gitBlobSha": "2f2bab0bcdf2a46414fae5a6d02127c3ff14a855",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/independent-audit.json",
+      "sha256": "981a1c21e7d807ff5b05e08182262ec4160f0041a87b056118c0e3a6baf023ce"
+    },
+    {
+      "bytes": 7524,
+      "gitBlobSha": "ad3f39c31cee8b5bdc99b4c102f17d1467e90306",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/summary.json",
+      "sha256": "a499efb6a4a2c5db9de153e6b18d3a943c1cc1a3954c09941581d4ca8196a386"
+    },
+    {
+      "bytes": 70,
+      "gitBlobSha": "ef3793c253263f12eb5d516894d131d180918dd7",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/audit.stdout.log",
+      "sha256": "ac576daf5999c5be37040937ce81511476617a4314c9c63f5b77f3e3546a90b4"
+    },
+    {
+      "bytes": 0,
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/audit.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 175,
+      "gitBlobSha": "e06cf47e34fe2c93049cc0d2c91ed24e89824b14",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/retention.json",
+      "sha256": "c91ed708e51ed1682ed104ff1ed660f1c6e658c6de44a53d5dca869422b1f872"
+    },
+    {
+      "bytes": 191,
+      "gitBlobSha": "941cca355c58a8b9dfde7fda5fb8ac699883aa1a",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/resolution-polls.jsonl",
+      "sha256": "5e8e3731cc7c59f7c8636109f970f43eca138812fef81b263631f3738731af9f"
+    },
+    {
+      "bytes": 1145989,
+      "gitBlobSha": "822d96135c66a61cf6d8815bd822bb2a6c939757",
+      "path": "dev/perf/import-round-20261128-beb5/hosted-audit/prefix-vndb/original-artifact.zip",
+      "sha256": "db0cb3a7ae4209e326fcb539965be563b81626cb33f087f52e4613020583c6f8"
+    }
+  ],
+  "noRefOrBranchOrPullRequestWrite": true,
+  "originalArchiveVerified": true,
+  "originalArtifactId": 15254106199,
+  "originalArtifactSha256": "db0cb3a7ae4209e326fcb539965be563b81626cb33f087f52e4613020583c6f8",
+  "originalRunId": 46114428610,
+  "unreferencedBlobsOnly": true
+}

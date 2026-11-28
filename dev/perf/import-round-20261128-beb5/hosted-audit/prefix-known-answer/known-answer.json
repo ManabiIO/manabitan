@@ -1,0 +1,101 @@
+{
+  "baselineOracleProjectionSha256": "2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9",
+  "cases": [
+    {
+      "complete": true,
+      "dictionary": "jmdict",
+      "oracleComparisons": 242,
+      "reports": [
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 324,
+          "file": "screen.json",
+          "sha256": "bf9abcfcde84c8149c302b7ec814ae15c21eb01f9e9ac73d07a3a9e952408519"
+        },
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 15,
+          "file": "reuse-disabled.json",
+          "sha256": "d99f6bf3de3a8e4406055816a6179300a1fd642392e34204cb83ddb7553511cb"
+        },
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 108,
+          "file": "enabled-probe-negatives.json",
+          "sha256": "3734c71637b05a0efa16f78cd235164de58e24112fd5b408f7bbf324236b9506"
+        }
+      ]
+    },
+    {
+      "complete": true,
+      "dictionary": "jitendex",
+      "oracleComparisons": 242,
+      "reports": [
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 594,
+          "file": "screen.json",
+          "sha256": "184ff3958cb86491f87db523da20f2cb58f2b995a3d4306583ce5489cc07ce6d"
+        },
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 15,
+          "file": "reuse-disabled.json",
+          "sha256": "30e502a4b9f738851937c0afde4fd35b91d6ff8b2971bcc47b7099c5065473b8"
+        }
+      ]
+    },
+    {
+      "complete": true,
+      "dictionary": "vndb",
+      "oracleComparisons": 242,
+      "reports": [
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 4590,
+          "file": "screen.json",
+          "sha256": "d13fa404cb2a201c53981b727296a2bcc3607c065d9eceaede63228c3983ec9c"
+        },
+        {
+          "derivedArithmeticWithinRegisteredTolerance": true,
+          "exactJournalEntries": 15,
+          "file": "reuse-disabled.json",
+          "sha256": "6cdd252d4334f600c6cb70e668d7b6adb8241427d69a361a98729d7c128d4980"
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "derivedArithmeticTolerance": {
+    "milliseconds": 1e-09,
+    "percentagePoints": 1e-10,
+    "rawReceiptValues": "exact"
+  },
+  "exactJournalEntries": 5661,
+  "knownAnswerOnly": true,
+  "newAuditorSha256": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+  "noNewMeasurements": true,
+  "originalIndependentAuditGitBlob": "03a0efff5529523183fe92997b0946ff98e7d622",
+  "originalIndependentAuditSha256": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
+  "referenceOracles": {
+    "jitendex": {
+      "baselineProjectionSha256": "2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9",
+      "path": "jitendex/original-members/oracle.json",
+      "sha256": "c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"
+    },
+    "jmdict": {
+      "baselineProjectionSha256": "2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9",
+      "path": "jmdict/original-members/oracle.json",
+      "sha256": "c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"
+    },
+    "vndb": {
+      "baselineProjectionSha256": "2e3b18a87c5a2168fa6661f5f1e3e6c5331d607ec4a62354db81d8de6fb590f9",
+      "path": "vndb/original-members/oracle.json",
+      "sha256": "c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812"
+    }
+  },
+  "retainedEvidenceCommit": "a355146b6c511f8ccdea3fd7fa60af9c450d904f",
+  "schemaDifferences": "New reports add explicit source/profile/origin, diagnostics and journal digests. Raw receipt values, source/output identities, counts and protocol gates remain exact. Only derived pair sums allow absolute 1e-9 ms and derived percentages absolute 1e-10 percentage points for Python-version rounding. The new auditor is not represented as recovered original code.",
+  "sourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+  "sourceTree": "023368b2731c17c91f16cd740d868ae2ebafa27b"
+}

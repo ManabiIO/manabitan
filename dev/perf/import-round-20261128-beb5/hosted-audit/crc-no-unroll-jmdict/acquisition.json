@@ -1,0 +1,92 @@
+{
+  "artifact": {
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255386235/zip",
+    "created_at": "2026-11-28T08:11:16Z",
+    "digest": "sha256:7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d",
+    "expired": false,
+    "expires_at": "2026-12-12T08:11:15Z",
+    "id": 15255386235,
+    "name": "crc-no-unroll-screen-beb5-jmdict",
+    "node_id": "MDg6QXJ0aWZhY3QxNTI1NTM4NjIzNQ==",
+    "size_in_bytes": 641405,
+    "updated_at": "2026-11-28T08:11:16Z",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15255386235",
+    "workflow_run": {
+      "head_branch": "test/crc-no-unroll-screen-20261128-beb5",
+      "head_repository_id": 1165902460,
+      "head_sha": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+      "id": 46120623371,
+      "repository_id": 1165902460
+    }
+  },
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "auditFileSha256": {
+    "README.md": "51c3937a0760c0aacf38aada80817a52963821db2c37dc7fae461f3829d10ccc",
+    "acquire-and-audit.py": "389a5f23447a72b85f334cb9b598ed2499795052d2c6347585c3fb4d8720ff97",
+    "audit-recent-first.py": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+    "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
+    "verify-prefix-known-answer.py": "60c34bcd9c099327a03123e8b401f55a2a0e236ef654587785a0aac7e9e86730"
+  },
+  "auditRegistrationSha256": "f3c4ae22ec6b8f6dd796dc18fb33a02ea9589505bc6c408db334a6ca1eb7999e",
+  "complete": true,
+  "entry": "crc-no-unroll-jmdict",
+  "expected": {
+    "artifactName": "crc-no-unroll-screen-beb5-jmdict",
+    "dictionary": "jmdict",
+    "jobId": 140904102572,
+    "jobName": "Single fixed CRC candidate (JMdict)",
+    "maxArtifactBytes": 67108864,
+    "required": false,
+    "study": "crc"
+  },
+  "independentAuditPerformed": false,
+  "job": {
+    "completed_at": "2026-11-28T08:11:20Z",
+    "conclusion": "success",
+    "head_sha": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+    "id": 140904102572,
+    "name": "Single fixed CRC candidate (JMdict)",
+    "run_id": 46120623371,
+    "started_at": "2026-11-28T08:10:09Z",
+    "status": "completed"
+  },
+  "noTimingOrParserReexecution": true,
+  "originalArchiveVerified": true,
+  "resolvedIdentity": {
+    "artifactBytes": 641405,
+    "artifactId": 15255386235,
+    "artifactName": "crc-no-unroll-screen-beb5-jmdict",
+    "artifactSha256": "7f48f3a5957a0de458455086e7babb22b876278f62dda934d0a5906d5719c59d",
+    "jobId": 140904102572,
+    "runAttempt": 1,
+    "runId": 46120623371,
+    "selection": "Unique exact artifact name under the locked run/head/attempt; any prelocked ID/digest also matched.",
+    "sourceCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee"
+  },
+  "run": {
+    "conclusion": "success",
+    "created_at": "2026-11-28T07:18:50Z",
+    "event": "push",
+    "head_branch": "test/crc-no-unroll-screen-20261128-beb5",
+    "head_sha": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+    "id": 46120623371,
+    "path": ".github/workflows/crc-no-unroll-screen-beb5.yml",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-28T08:11:21Z"
+  },
+  "sourceBindingsVerified": false,
+  "sourceGitObject": {
+    "sha": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+    "tree": "2dc2cfa2a858ca7cea7ee8317abc2c14fd3f34af"
+  },
+  "study": {
+    "kind": "preserve-only",
+    "runAttempt": 1,
+    "runId": 46120623371,
+    "scope": "Optional verbatim original outer ZIP, API provenance and member census only. No independent correctness, timing or efficacy audit.",
+    "sourceCommit": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+    "sourceTree": "2dc2cfa2a858ca7cea7ee8317abc2c14fd3f34af",
+    "workflowPath": ".github/workflows/crc-no-unroll-screen-beb5.yml"
+  }
+}

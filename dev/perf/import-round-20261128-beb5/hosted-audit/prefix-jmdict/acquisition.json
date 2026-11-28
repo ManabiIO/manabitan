@@ -1,0 +1,111 @@
+{
+  "artifact": {
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252998358/zip",
+    "created_at": "2026-11-28T07:23:43Z",
+    "digest": "sha256:207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae",
+    "expired": false,
+    "expires_at": "2026-12-12T07:23:41Z",
+    "id": 15252998358,
+    "name": "whole-glossary-recent-first-screen-beb5-jmdict",
+    "node_id": "MDg6QXJ0aWZhY3QxNTI1Mjk5ODM1OA==",
+    "size_in_bytes": 175190,
+    "updated_at": "2026-11-28T07:23:43Z",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252998358",
+    "workflow_run": {
+      "head_branch": "test/whole-glossary-recent-first-screen-20261128-beb5",
+      "head_repository_id": 1165902460,
+      "head_sha": "633761548509a77b43b414b83a80033e17ed7399",
+      "id": 46114428610,
+      "repository_id": 1165902460
+    }
+  },
+  "auditCommit": "12bd5ff3ef1614c1d9c9a8551de7688a91a15bcb",
+  "auditFileSha256": {
+    "README.md": "51c3937a0760c0aacf38aada80817a52963821db2c37dc7fae461f3829d10ccc",
+    "acquire-and-audit.py": "389a5f23447a72b85f334cb9b598ed2499795052d2c6347585c3fb4d8720ff97",
+    "audit-recent-first.py": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+    "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
+    "verify-prefix-known-answer.py": "60c34bcd9c099327a03123e8b401f55a2a0e236ef654587785a0aac7e9e86730"
+  },
+  "auditRegistrationSha256": "f3c4ae22ec6b8f6dd796dc18fb33a02ea9589505bc6c408db334a6ca1eb7999e",
+  "auditorReturncode": 0,
+  "auditorSha256": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+  "complete": true,
+  "entry": "prefix-jmdict",
+  "expected": {
+    "artifactBytes": 175190,
+    "artifactId": 15252998358,
+    "artifactName": "whole-glossary-recent-first-screen-beb5-jmdict",
+    "artifactSha256": "207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae",
+    "dictionary": "jmdict",
+    "jobId": 140884941261,
+    "jobName": "Recent-first witness (jmdict)",
+    "maxArtifactBytes": 8388608,
+    "required": true,
+    "study": "prefix"
+  },
+  "independentAuditPerformed": true,
+  "job": {
+    "completed_at": "2026-11-28T07:23:47Z",
+    "conclusion": "success",
+    "head_sha": "633761548509a77b43b414b83a80033e17ed7399",
+    "id": 140884941261,
+    "name": "Recent-first witness (jmdict)",
+    "run_id": 46114428610,
+    "started_at": "2026-11-28T07:22:12Z",
+    "status": "completed"
+  },
+  "knownAnswerProofSha256": "ebfa02adc2f5c5abd97210675650ee41bc69edaf746a7cb211e94e5bbdf5aa64",
+  "noTimingOrParserReexecution": true,
+  "originalArchiveVerified": true,
+  "referenceOracleSha256": "c5c3e3c8f3f0a4b6eb95a1460c1dac3d60604ad35902842a994a9864b6203812",
+  "referenceSourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+  "resolvedIdentity": {
+    "artifactBytes": 175190,
+    "artifactId": 15252998358,
+    "artifactName": "whole-glossary-recent-first-screen-beb5-jmdict",
+    "artifactSha256": "207568147f283fc3985ec42acc56b35df6222243bfb3c0bbba7d4999e8a7b1ae",
+    "jobId": 140884941261,
+    "runAttempt": 1,
+    "runId": 46114428610,
+    "selection": "Unique exact artifact name under the locked run/head/attempt; any prelocked ID/digest also matched.",
+    "sourceCommit": "633761548509a77b43b414b83a80033e17ed7399"
+  },
+  "run": {
+    "conclusion": "success",
+    "created_at": "2026-11-28T05:57:55Z",
+    "event": "push",
+    "head_branch": "test/whole-glossary-recent-first-screen-20261128-beb5",
+    "head_sha": "633761548509a77b43b414b83a80033e17ed7399",
+    "id": 46114428610,
+    "path": ".github/workflows/whole-glossary-recent-first-screen-beb5.yml",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-28T07:26:11Z"
+  },
+  "sourceBindingsVerified": true,
+  "sourceGitObject": {
+    "sha": "633761548509a77b43b414b83a80033e17ed7399",
+    "tree": "db21a53519b602b29234cb535cc59cead5118494"
+  },
+  "study": {
+    "kind": "prefix",
+    "knownAnswer": {
+      "evidenceCommit": "a355146b6c511f8ccdea3fd7fa60af9c450d904f",
+      "exactJournalEntries": 5661,
+      "mode": "same-job-required",
+      "originalIndependentAuditGitBlob": "03a0efff5529523183fe92997b0946ff98e7d622",
+      "rawReceiptValues": "exact",
+      "referenceOracle": "same-job prefix-known-answer/jmdict/original-members/oracle.json",
+      "sourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+      "sourceTree": "023368b2731c17c91f16cd740d868ae2ebafa27b"
+    },
+    "runAttempt": 1,
+    "runId": 46114428610,
+    "runtimeCommit": "1a935bddf29c4d87606d2facd4b168af7e1a40f1",
+    "scope": "New reconstructed auditor; recent-first data is accepted only after this same job's successful original-prefix known-answer reconstruction and exact baseline oracle projection binding.",
+    "sourceCommit": "633761548509a77b43b414b83a80033e17ed7399",
+    "sourceTree": "db21a53519b602b29234cb535cc59cead5118494",
+    "workflowPath": ".github/workflows/whole-glossary-recent-first-screen-beb5.yml"
+  }
+}
