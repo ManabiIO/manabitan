@@ -44,6 +44,7 @@ import {
     decodeRawTermContentHeader,
     decodeRawTermContentTokenHeader,
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+    getRawTermContentBlockReferenceBytes,
     decodeRawTermContentSharedGlossaryHeader,
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
@@ -52,8 +53,8 @@ import {
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
-    getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_DICT_NAME,
+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
@@ -123,6 +124,7 @@ const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
 const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
+const IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS = Symbol('inFlightTermContentSourceWitness');
 
 /**
  * @typedef {object} InFlightTermContentSourceBatch
@@ -583,7 +585,7 @@ export class DictionaryDatabase {
         this._termEntryContentMetaHash2Table = new Uint32Array(0);
         /** @type {Uint8Array} */
         this._termEntryContentMetaStateTable = new Uint8Array(0);
-        /** @type {Float64Array} */
+        /** @type {Float64Array} Empty until an ID differs from the import default zero. */
         this._termEntryContentMetaIdTable = new Float64Array(0);
         /** @type {Float64Array} */
         this._termEntryContentMetaOffsetTable = new Float64Array(0);
@@ -6515,7 +6517,7 @@ void 0 :
             dictName === RAW_TERM_CONTENT_DICT_NAME ||
             dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
             dictName === RAW_TERM_CONTENT_TOKEN_DICT_NAME ||
-            typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'
+            typeof getRawTermContentBlockReferenceBytes(dictName) !== 'undefined'
         );
     }
 
@@ -6974,6 +6976,7 @@ void 0 :
      * @param {string|string[]} pendingResolvedDictNames
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
+     * @param {{offsets: Float64Array, lengths: Uint32Array, spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}, dictName: string}|null} [producerWitness]
      * @returns {() => void}
      * @throws {Error} If source metadata is inconsistent or aliases an active reservation.
      */
@@ -6983,10 +6986,46 @@ void 0 :
         pendingResolvedDictNames,
         pendingContentBytes,
         pendingContentSpans,
+        producerWitness = null,
     ) {
         const count = pendingOffsets.length;
         if (pendingLengths.length !== count) {
             throw new RangeError('In-flight term content offset and length counts do not match');
+        }
+        if (
+            count > 0 &&
+            this._inFlightTermContentSourceBatches.size === 0 &&
+            producerWitness !== null &&
+            producerWitness.offsets === pendingOffsets &&
+            producerWitness.lengths === pendingLengths &&
+            producerWitness.spans === pendingContentSpans &&
+            pendingContentSpans !== null &&
+            pendingContentSpans.lengths === pendingLengths &&
+            producerWitness.dictName === pendingResolvedDictNames &&
+            typeof pendingResolvedDictNames === 'string'
+        ) {
+            const start = pendingOffsets[0];
+            const end = pendingOffsets[count - 1];
+            const expectedEnd = start + (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            if (
+                Number.isSafeInteger(start) && start >= 0 &&
+                Number.isSafeInteger(end) && end === expectedEnd
+            ) {
+                const batch = {
+                    offsets: pendingOffsets,
+                    lengths: pendingLengths,
+                    dictNames: pendingResolvedDictNames,
+                    contentBytes: pendingContentBytes,
+                    contentSpans: pendingContentSpans,
+                    sortedOffsets: true,
+                    minimumOffset: start,
+                    maximumOffset: end,
+                };
+                this._inFlightTermContentSourceBatches.add(batch);
+                return () => {
+                    this._inFlightTermContentSourceBatches.delete(batch);
+                };
+            }
         }
         let sortedOffsets = true;
         let minimumOffset = Infinity;
@@ -7183,13 +7222,16 @@ void 0 :
         return id;
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @param {number} index
      * @returns {{id: number, offset: number, length: number, dictName: string, hash2: number, signature1?: number, signature2?: number, signature3?: number, tableIndex: number}}
      */
     _readTermEntryContentMetaHashPairIndex(index) {
         const meta = {
-            id: this._termEntryContentMetaIdTable[index],
+            id: this._termEntryContentMetaIdTable.length === 0 && typeof this._termEntryContentMetaStateTable[index] !== 'undefined' ?
+                0 :
+                this._termEntryContentMetaIdTable[index],
             offset: this._termEntryContentMetaOffsetTable[index],
             length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?
                 -1 :
@@ -7212,8 +7254,9 @@ void 0 :
      * @throws {RangeError} If the metadata cannot be represented by the typed tables.
      */
     _writeTermEntryContentMetaHashPairIndex(index, meta) {
-        if (!Number.isSafeInteger(meta.id) || meta.id < 0) {
-            throw new RangeError(`Invalid term content metadata id: ${meta.id}`);
+        const id = meta.id
+        if (!Number.isSafeInteger(id) || id < 0) {
+            throw new RangeError(`Invalid term content metadata id: ${id}`)
         }
         if (!Number.isSafeInteger(meta.offset) || meta.offset < 0) {
             throw new RangeError(`Invalid term content metadata offset: ${meta.offset}`);
@@ -7224,10 +7267,16 @@ void 0 :
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
-        // Interning can allocate and fail; retain an existing entry unchanged
-        // until its replacement is ready to write.
+        // Normal import IDs are implicitly zero. Allocate the legacy column
+        // only for a distinct value, including signed zero, and publish it only
+        // after interning succeeds so either allocation failure remains atomic.
+        let idTable = this._termEntryContentMetaIdTable
+        if (idTable.length === 0 && !Object.is(id, 0)) {
+            idTable = new Float64Array(this._termEntryContentMetaStateTable.length)
+        }
         const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);
-        this._termEntryContentMetaIdTable[index] = meta.id;
+        this._termEntryContentMetaIdTable = idTable
+        idTable[index] = id
         this._termEntryContentMetaOffsetTable[index] = meta.offset;
         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
         this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
@@ -7243,6 +7292,7 @@ void 0 :
             this._termEntryContentMetaSignature3Table[index] = meta.signature3;
         }
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {number} requiredCount
@@ -7275,7 +7325,8 @@ void 0 :
         }
         /* eslint-enable @stylistic/semi */
         const growDense = capacity !== oldCapacity;
-        const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
+        // eslint-disable-next-line @stylistic/semi
+        const idTable = growDense && this._termEntryContentMetaIdTable.length > 0 ? new Float64Array(capacity) : this._termEntryContentMetaIdTable
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
@@ -8550,6 +8601,7 @@ this._readTermContentSignature(
                             pendingResolvedDictNames,
                             pendingContentBytes,
                             pendingContentSpans,
+                            persistenceResult[IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS] ?? null,
                         );
                     }
                     resolvedContentDictNames = this._publishArtifactTermContentMetadata({
@@ -9599,6 +9651,22 @@ null :
             pendingLengths: blockStorage.contentLengths,
             pendingResolvedDictNames: blockStorage.contentDictName,
             [VALIDATED_TERM_CONTENT_METADATA]: true,
+            [IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS]: (
+                blockStorage.singleReferenceSlab === true &&
+                blockStorage.contentLengths === pendingContentSpans.lengths &&
+                pendingContentSpans.offsets.buffer instanceof ArrayBuffer &&
+                pendingContentSpans.offsets.buffer.resizable !== true &&
+                pendingContentSpans.lengths.buffer instanceof ArrayBuffer &&
+                pendingContentSpans.lengths.buffer.resizable !== true &&
+                pendingContentSpans.offsets.length === pendingContentSpans.lengths.length ?
+                    {
+                        offsets: blockStorage.contentOffsets,
+                        lengths: blockStorage.contentLengths,
+                        spans: pendingContentSpans,
+                        dictName: blockStorage.contentDictName,
+                    } :
+                    null
+            ),
         }));
         const completion = operation.completion.then((blockStorage) => ({
             packMs: blockStorage.packMs,
@@ -9817,7 +9885,7 @@ null :
             endIndex > this._termEntryContentMetaHash1Table.length ||
             endIndex > this._termEntryContentMetaHash2Table.length ||
             endIndex > this._termEntryContentMetaLengthTable.length ||
-            endIndex > this._termEntryContentMetaIdTable.length ||
+            (this._termEntryContentMetaIdTable.length > 0 && endIndex > this._termEntryContentMetaIdTable.length) ||
             endIndex > this._termEntryContentMetaOffsetTable.length ||
             endIndex > this._termEntryContentMetaDictNameIdTable.length
         ) {
@@ -9850,6 +9918,7 @@ null :
         ]
         for (let i = 0; i < writes.length; ++i) {
             const target = writes[i]
+            if (target.length === 0) { continue }
             const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
             const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
             for (const {values, start} of reads) {
@@ -11511,13 +11580,21 @@ null :
     }
 
     /**
-     * @param {Iterable<import('./term-record-opfs-store.js').TermRecord>} records
+     * @param {Iterable<Pick<import('./term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>} records
      * @yields {{offset: number, length: number}}
      * @returns {IterableIterator<{offset: number, length: number}>}
      */
     *_iterateTermRecordContentSpans(records) {
-        for (const {entryContentOffset: offset, entryContentLength: length} of records) {
-            yield {offset, length};
+        for (const {entryContentOffset: offset, entryContentLength: length, entryContentDictName} of records) {
+            let prefetchLength = length;
+            if (offset >= 0 && length > 0) {
+                const dictName = typeof entryContentDictName === 'string' ? entryContentDictName : '';
+                const referenceBytes = getRawTermContentBlockReferenceBytes(dictName);
+                if (typeof referenceBytes !== 'undefined') {
+                    prefetchLength = referenceBytes;
+                }
+            }
+            yield {offset, length: prefetchLength};
         }
     }
 
@@ -11698,7 +11775,7 @@ null :
                                 // Block references describe their container compression; the
                                 // extracted entry is the original raw payload and must not be
                                 // decompressed a second time.
-                                const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
+                                const isBlockContent = typeof getRawTermContentBlockReferenceBytes(contentDictName) !== 'undefined';
                                 let decodedContentBytes = contentBytes;
                                 if (contentDictName !== 'raw' && !isBlockContent) {
                                     try {
