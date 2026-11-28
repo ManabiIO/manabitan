@@ -17,6 +17,11 @@
 
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {toError} from '../core/to-error.js';
+import {createDictionaryImportSessionId} from './dictionary-import-journal.js';
+
+const ARENA_DIRECTORY = 'manabitan-term-content-arenas-v1';
+const ARENA_IDENTIFIER = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/;
 
 const FILE_NAME = 'manabitan-term-content.bin';
 const FILE_NAME_SEGMENT_SEPARATOR = '^';
@@ -154,6 +159,269 @@ export class TermContentOpfsStore {
         this._lastReadErrorDetails = null;
         /** @type {Promise<void>} */
         this._mutationQueue = Promise.resolve();
+        /** @type {{storageEpoch: number, logicalHighWater: number}|null} */
+        this._committedRoot = null;
+        /** @type {FileSystemDirectoryHandle|null} */
+        this._arenaDirectory = null;
+        /** @type {import('dictionary-import-journal').TermContentArenaCheckpoint|null} */
+        this._arenaCheckpoint = null;
+        /** @type {boolean} */
+        this._arenaSealed = false;
+        /** @type {number} */
+        this._logicalBase = 0;
+        /** @type {Set<string>} */
+        this._publishedArenas = new Set();
+    }
+
+    /**
+     * Uses only the prepared legacy segment table and private File snapshots.
+     * Optional probing never flushes writers or mutates lookup caches.
+     * @param {() => void} assertOwner
+     * @returns {import('./term-content-legacy-eligibility.js').LegacyEligibilitySource}
+     */
+    createLegacyEligibilitySource(assertOwner) {
+        const logicalHighWater = this._length;
+        const segments = this._segmentStates;
+        /** @type {Map<FileSystemFileHandle, File>} */
+        const files = new Map();
+        const assertCurrent = () => {
+            assertOwner();
+            if (this._committedRoot !== null || this._importSessionActive || this._writable !== null ||
+            this._pendingWriteBytes !== 0 || this._queuedWriteBytes !== 0 ||
+            this._segmentStates !== segments || this._length !== logicalHighWater) {
+                throw new Error('Legacy content eligibility source is no longer stable');
+            }
+        };
+        assertCurrent();
+        return {logicalHighWater,
+            assertCurrent,
+            readSlice: async (offset, length) => {
+                if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(length) || offset < 0 ||
+                length < 1 || length > 64 || offset > logicalHighWater - length) {
+                    throw new RangeError('Legacy content eligibility read exceeds its bounded range');
+                }
+                const bytes = new Uint8Array(length);
+                for (let written = 0; written < length;) {
+                    assertCurrent();
+                    const state = this._findSegmentStateForOffset(offset + written);
+                    if (state === null) { throw new Error('Legacy content eligibility segment is unavailable'); }
+                    const local = offset + written - state.startOffset;
+                    const count = Math.min(length - written, state.fileLength - local);
+                    let file = files.get(state.fileHandle);
+                    if (typeof file === 'undefined') {
+                        file = await state.fileHandle.getFile();
+                        assertCurrent();
+                        if (file.size !== state.fileLength) { throw new Error('Legacy content eligibility snapshot changed'); }
+                        files.set(state.fileHandle, file);
+                    }
+                    const part = new Uint8Array(await file.slice(local, local + count).arrayBuffer());
+                    assertCurrent();
+                    if (part.byteLength !== count) { throw new Error('Legacy content eligibility read was short'); }
+                    bytes.set(part, written);
+                    written += count;
+                }
+                return bytes;
+            }};
+    }
+
+    /**
+     * Inventory once before immutable-root activation. The SQL owner persists
+     * these exact cumulative intervals; no filename arithmetic defines addresses.
+     * @returns {Promise<import('dictionary-import-journal').TermContentArenaFile[]>}
+     */
+    async inventoryLegacyFiles() {
+        return await this._runMutationExclusive(async () => {
+            if (this._committedRoot !== null) { throw new Error('Legacy inventory is unavailable after immutable activation'); }
+            if (this._importSessionActive) { throw new Error('Cannot activate immutable storage during import'); }
+            await this._flushPendingWrites();
+            await this._awaitQueuedWrites();
+            await this._closeWritable();
+            const states = await this._loadSegmentStates(await navigator.storage.getDirectory());
+            return states.map((state) => ({fileId: 'legacy-' + state.index,
+                path: state.fileName,
+                byteLength: state.fileLength,
+                logicalStart: state.startOffset,
+                logicalEnd: addSafeByteLength(state.startOffset, state.fileLength)}));
+        });
+    }
+
+    /** @param {{storageEpoch: number, logicalHighWater: number}} root @returns {Promise<void>} */
+    async activateCommittedRoot(root) {
+        this._validateCommittedRoot(root);
+        const admitted = {...root};
+        await this._runMutationExclusive(async () => {
+            if (this._arenaCheckpoint !== null || this._importSessionActive) { throw new Error('Cannot replace root during content import'); }
+            await this._flushPendingWrites();
+            await this._awaitQueuedWrites();
+            await this._closeWritable();
+            this._setCommittedRoot(admitted);
+        });
+    }
+
+    /**
+     * Repacking changes the physical root without moving the import append position.
+     * The database owns mutation admission for this synchronous transition.
+     * @param {number} storageEpoch
+     * @param {number} logicalHighWater
+     * @throws {Error} If the committed append root is not idle and current.
+     */
+    assertRepackableRoot(storageEpoch, logicalHighWater) {
+        if (this._committedRoot?.storageEpoch !== storageEpoch ||
+        this._committedRoot.logicalHighWater !== logicalHighWater ||
+        this._arenaCheckpoint !== null || this._importSessionActive) {
+            throw new Error('Content repacking requires the current idle append root');
+        }
+    }
+
+    /**
+     * @param {number} previousEpoch
+     * @param {number} logicalHighWater
+     */
+    adoptRepackedRoot(previousEpoch, logicalHighWater) {
+        this.assertRepackableRoot(previousEpoch, logicalHighWater);
+        this._committedRoot = Object.freeze({storageEpoch: previousEpoch + 1, logicalHighWater});
+    }
+
+    /**
+     * @param {{storageEpoch: number, logicalHighWater: number}} root
+     * @throws {TypeError} If the immutable root identity is invalid.
+     */
+    _validateCommittedRoot(root) {
+        if (!root || !Number.isSafeInteger(root.storageEpoch) || root.storageEpoch < 0 ||
+        !Number.isSafeInteger(root.logicalHighWater) || root.logicalHighWater < 0) {
+            throw new TypeError('Invalid immutable content root');
+        }
+    }
+
+    /** @param {{storageEpoch: number, logicalHighWater: number}} root */
+    _setCommittedRoot(root) {
+        this._committedRoot = Object.freeze({...root});
+        this._logicalBase = root.logicalHighWater;
+        this._length = root.logicalHighWater;
+        this._arenaCheckpoint = null;
+        this._arenaDirectory = null;
+        this._arenaSealed = false;
+        this._segmentStates = [];
+        this._syncActiveSegmentState();
+        this._chunks = [];
+        this._chunkOffsets = [];
+        this._clearImportReadOverlay();
+        this._invalidateReadState();
+    }
+
+    /**
+     * @param {unknown} value
+     * @returns {asserts value is import('dictionary-import-journal').TermContentArenaCheckpoint}
+     * @throws {TypeError} If the import arena checkpoint is invalid.
+     */
+    _validateArenaCheckpoint(value) {
+        const checkpoint = /** @type {import('dictionary-import-journal').TermContentArenaCheckpoint} */ (value);
+        if (!checkpoint || checkpoint.version !== 2 || !Number.isSafeInteger(checkpoint.storageEpoch) || checkpoint.storageEpoch < 0 ||
+        !Number.isSafeInteger(checkpoint.logicalHighWater) || checkpoint.logicalHighWater < 0 ||
+        typeof checkpoint.arenaNamespace !== 'string' || checkpoint.arenaNamespace.length > 96 || !ARENA_IDENTIFIER.test(checkpoint.arenaNamespace) ||
+        !Array.isArray(checkpoint.segments) || checkpoint.segments.length > 0) {
+            throw new TypeError('Invalid immutable content arena checkpoint');
+        }
+    }
+
+    /** @returns {Promise<FileSystemDirectoryHandle>} */
+    async _getStorageDirectory() {
+        return this._arenaDirectory ?? await navigator.storage.getDirectory();
+    }
+
+    /**
+     * Joins every started write and seals even the final partial file. The SQL
+     * owner inserts this observation in its existing import transaction.
+     * @returns {Promise<import('dictionary-import-journal').SealedTermContentArena>}
+     */
+    async sealImportArena() {
+        if (this._arenaCheckpoint === null) { throw new Error('No immutable content import arena'); }
+        this._arenaSealed = true;
+        await this.endImportSession();
+        return await this._runMutationExclusive(async () => {
+            const checkpoint = this._arenaCheckpoint;
+            if (checkpoint === null) { throw new Error('No immutable content import arena'); }
+            if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
+            this._arenaSealed = true;
+            const files = [];
+            for (const state of this._segmentStates) {
+                const file = await state.fileHandle.getFile();
+                if (file.size !== state.fileLength) { throw new TermContentIntegrityError('Sealed content arena length changed'); }
+                if (file.size === 0) {
+                    await this._arenaDirectory?.removeEntry(state.fileName);
+                    continue;
+                }
+                files.push({fileId: checkpoint.arenaNamespace + '-' + state.index,
+                    path: ARENA_DIRECTORY + '/' + checkpoint.arenaNamespace + '/' + state.fileName,
+                    byteLength: file.size,
+                    logicalStart: state.startOffset,
+                    logicalEnd: addSafeByteLength(state.startOffset, file.size)});
+            }
+            this._segmentStates = this._segmentStates.filter((state) => state.fileLength > 0);
+            this._syncActiveSegmentState();
+            const logicalHighWater = this._computeSegmentedLength();
+            if (logicalHighWater !== this._length) { throw new TermContentIntegrityError('Sealed content arena has incomplete writes'); }
+            return {checkpoint: {...checkpoint, segments: []},
+                arenaNamespace: checkpoint.arenaNamespace,
+                storageEpoch: checkpoint.storageEpoch,
+                logicalStart: checkpoint.logicalHighWater,
+                logicalEnd: logicalHighWater,
+                logicalHighWater,
+                files};
+        });
+    }
+
+    /**
+     * Called only after the SQL commit or its durable publication receipt proves
+     * success. Adoption never changes any published physical bytes.
+     * @param {import('dictionary-import-journal').TermContentArenaCheckpoint} checkpoint
+     * @param {{storageEpoch: number, logicalHighWater: number}} committedRoot
+     * @returns {Promise<void>}
+     */
+    async adoptImportArena(checkpoint, committedRoot) {
+        this._validateArenaCheckpoint(checkpoint);
+        this._validateCommittedRoot(committedRoot);
+        await this._runMutationExclusive(async () => {
+            if (this._arenaCheckpoint !== null && (!this._arenaSealed || this._arenaCheckpoint.arenaNamespace !== checkpoint.arenaNamespace ||
+            committedRoot.logicalHighWater < this._length)) { throw new Error('Cannot adopt an unsealed or unrelated content arena'); }
+            if (committedRoot.storageEpoch < checkpoint.storageEpoch || committedRoot.logicalHighWater < checkpoint.logicalHighWater) {
+                throw new Error('Committed content root precedes import checkpoint');
+            }
+            await this._awaitQueuedWrites();
+            await this._closeWritable();
+            this._publishedArenas.add(checkpoint.arenaNamespace);
+            this._setCommittedRoot(committedRoot);
+        });
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async readImportSlice(offset, length) {
+        const checkpoint = this._arenaCheckpoint;
+        if (checkpoint === null || !Number.isSafeInteger(offset) || !Number.isSafeInteger(length) || length <= 0 ||
+        offset < checkpoint.logicalHighWater || !Number.isSafeInteger(offset + length) || offset + length > this._length) { return null; }
+        return await this._readSlice(offset, length);
+    }
+
+    /**
+     * @param {Array<{offset: number, length: number}>} spans
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'unavailable'}|{status: 'error', error: unknown}>>}
+     */
+    async readImportSlicesDetailed(spans) {
+        return await Promise.all(spans.map(async ({offset, length}) => {
+            try {
+                const bytes = await this.readImportSlice(offset, length);
+                return bytes === null ? {status: /** @type {const} */ ('unavailable')} : {status: /** @type {const} */ ('ok'), bytes};
+            } catch (error) { return {status: /** @type {const} */ ('error'), error}; }
+        }));
+    }
+
+    /** @returns {number} Logical high-water mark after prepare or import publication. */
+    getLogicalLength() {
+        return this._length;
     }
 
     /**
@@ -181,12 +449,13 @@ export class TermContentOpfsStore {
      */
     async prepare() {
         await this._runMutationExclusive(async () => {
+            if (this._committedRoot !== null) { return; }
             await this._awaitQueuedWrites();
             await this._closeWritable();
             if (!this._hasStorageDirectoryApi()) {
                 return;
             }
-            const root = await navigator.storage.getDirectory();
+            const root = await this._getStorageDirectory();
             this._segmentStates = await this._loadSegmentStates(root);
             if (this._segmentStates.length === 0) {
                 const fileHandle = await root.getFileHandle(FILE_NAME, {create: true});
@@ -213,11 +482,39 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * @param {import('dictionary-import-journal').TermContentCheckpoint} [checkpoint]
      * @returns {Promise<void>}
      */
-    async beginImportSession() {
+    async beginImportSession(checkpoint) {
         await this._runMutationExclusive(async () => {
             if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
+            if (checkpoint?.version === 2 && this._committedRoot === null) { throw new Error('Immutable content root must be activated before import'); }
+            if (this._committedRoot !== null) {
+                this._validateArenaCheckpoint(checkpoint);
+                if (this._arenaCheckpoint !== null) { throw new Error('Content arena already reserved'); }
+                if (checkpoint.storageEpoch !== this._committedRoot.storageEpoch || checkpoint.logicalHighWater !== this._committedRoot.logicalHighWater) {
+                    throw new Error('Content arena checkpoint does not match committed root');
+                }
+                const root = await navigator.storage.getDirectory();
+                const arenas = await root.getDirectoryHandle(ARENA_DIRECTORY, {create: true});
+                try {
+                    await arenas.getDirectoryHandle(checkpoint.arenaNamespace, {create: false});
+                    throw new Error('Content arena namespace already exists');
+                } catch (error) {
+                    if (!(error instanceof Error) || error.name !== 'NotFoundError') { throw error; }
+                }
+                this._arenaCheckpoint = Object.freeze({...checkpoint, segments: /** @type {[]} */ ([])});
+                this._arenaDirectory = await arenas.getDirectoryHandle(checkpoint.arenaNamespace, {create: true});
+                this._logicalBase = checkpoint.logicalHighWater;
+                this._length = checkpoint.logicalHighWater;
+                const handle = await this._arenaDirectory.getFileHandle(FILE_NAME, {create: true});
+                if ((await handle.getFile()).size > 0) { throw new Error('Fresh content arena is not empty'); }
+                this._segmentStates = [this._createSegmentState(0, FILE_NAME, handle, 0, this._logicalBase)];
+                this._syncActiveSegmentState();
+                this._loadedForRead = true;
+                this._arenaSealed = false;
+            }
+            if (this._queuedWriteError !== null) { throw toError(this._queuedWriteError); }
             if (this._importSessionActive) {
                 return;
             }
@@ -260,11 +557,16 @@ export class TermContentOpfsStore {
      */
     async createImportCheckpoint() {
         return await this._runMutationExclusive(async () => {
+            if (this._committedRoot !== null) {
+                if (this._arenaCheckpoint !== null) { throw new Error('Cannot checkpoint an active content arena'); }
+                if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
+                return /** @type {import('dictionary-import-journal').TermContentArenaCheckpoint} */ ({version: 2, ...this._committedRoot, arenaNamespace: createDictionaryImportSessionId(), segments: []});
+            }
             await this._flushPendingWrites();
             await this._awaitQueuedWrites();
             await this._closeWritable();
             if (!this._hasStorageDirectoryApi()) { return {segments: []}; }
-            const root = await navigator.storage.getDirectory();
+            const root = await this._getStorageDirectory();
             const states = await this._loadSegmentStates(root);
             return {segments: states.map(({fileName, fileLength}) => ({fileName, fileLength}))};
         });
@@ -275,6 +577,11 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async rollbackImportSession(checkpoint) {
+        if (checkpoint?.version === 2) {
+            await this._rollbackImportArena(checkpoint);
+            return;
+        }
+        if (this._committedRoot !== null) { throw new Error('Legacy rollback is forbidden after immutable activation'); }
         const rollback = async () => {
             if (
                 typeof checkpoint !== 'object' ||
@@ -304,7 +611,7 @@ export class TermContentOpfsStore {
             // A corrupt journal must not mutate a live import before rejection.
             await this._abandonImportWritesForRollback();
             if (!this._hasStorageDirectoryApi()) { return; }
-            const root = await navigator.storage.getDirectory();
+            const root = await this._getStorageDirectory();
             /** @type {Error[]} */
             const errors = [];
             /** @type {Array<{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}>} */
@@ -387,6 +694,55 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * The database must prove that this exact arena has no publication receipt
+     * before calling recovery. Never infer publication from dictionary titles.
+     * @param {import('dictionary-import-journal').TermContentArenaCheckpoint} checkpoint
+     * @returns {Promise<void>}
+     */
+    async _rollbackImportArena(checkpoint) {
+        this._validateArenaCheckpoint(checkpoint);
+        const admitted = {...checkpoint};
+        await this._runMutationExclusive(async () => {
+            if (this._publishedArenas.has(admitted.arenaNamespace) ||
+            (this._arenaCheckpoint !== null && this._arenaCheckpoint.arenaNamespace !== admitted.arenaNamespace)) {
+                throw new Error('Cannot remove a published or unrelated content arena');
+            }
+            try {
+                await this._abandonImportWritesForRollback();
+                const root = await navigator.storage.getDirectory();
+                let arenas;
+                let arena;
+                try {
+                    arenas = await root.getDirectoryHandle(ARENA_DIRECTORY, {create: false});
+                    arena = await arenas.getDirectoryHandle(admitted.arenaNamespace, {create: false});
+                } catch (error) {
+                    if (!(error instanceof Error) || error.name !== 'NotFoundError') { throw error; }
+                }
+                if (arena && arenas) {
+                    // A malformed or unrelated namespace must never become a
+                    // recursive cleanup target, even with a damaged journal.
+                    const entriesMethod = /** @type {unknown} */ (Reflect.get(arena, 'entries'));
+                    if (typeof entriesMethod !== 'function') { throw new Error('Cannot verify unpublished content arena inventory'); }
+                    const entries = /** @type {() => AsyncIterable<[string, FileSystemHandle]>} */ (entriesMethod).call(arena);
+                    for await (const [name, handle] of entries) {
+                        const index = this._parseSegmentIndexFromFileName(name);
+                        if (handle.kind !== 'file' || index === null || this._getSegmentFileName(index) !== name) {
+                            throw new Error('Unrecognized file in unpublished content arena');
+                        }
+                    }
+                    await arenas.removeEntry(admitted.arenaNamespace, {recursive: true});
+                }
+                const committed = this._committedRoot ?? {storageEpoch: admitted.storageEpoch, logicalHighWater: admitted.logicalHighWater};
+                this._setCommittedRoot(committed);
+                this._queuedWriteError = null;
+            } catch (error) {
+                this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+                throw this._queuedWriteError;
+            }
+        });
+    }
+
+    /**
      * Joins and retires writes whose bytes will be restored or explicitly reset.
      * The mutation owner verifies its durable result after these writers have
      * released their files; ordinary appends cannot discard sticky write errors.
@@ -421,7 +777,11 @@ export class TermContentOpfsStore {
                     /** @type {() => Promise<void>} */ (abort).call(writable) :
                     writable.close();
                 await closePromise;
-            } catch (_) {
+            } catch (error) {
+                if (this._arenaCheckpoint !== null) {
+                    this._writable = writable;
+                    throw error;
+                }
                 // Rollback or reset below verifies its durable result independently.
             }
         }
@@ -556,7 +916,34 @@ export class TermContentOpfsStore {
     /**
      * @returns {Promise<void>}
      */
-    async reset() {
+    async resetForPurge() {
+        await this._runMutationExclusive(async () => {
+            await this._abandonImportWritesForRollback();
+            if (this._hasStorageDirectoryApi()) {
+                const root = await navigator.storage.getDirectory();
+                for (const name of [ARENA_DIRECTORY, 'manabitan-online-content-v1']) {
+                    try { await root.removeEntry(name, {recursive: true}); } catch (error) {
+                        if (!(error instanceof Error) || error.name !== 'NotFoundError') { throw error; }
+                    }
+                }
+            }
+            this._committedRoot = null;
+            this._logicalBase = 0;
+            this._arenaCheckpoint = null;
+            this._arenaDirectory = null;
+            this._arenaSealed = false;
+            this._publishedArenas.clear();
+        });
+        await this.reset();
+    }
+
+    /** @param {{purgeImmutable?: boolean}} [options] @returns {Promise<void>} */
+    async reset({purgeImmutable = false} = {}) {
+        if (purgeImmutable) {
+            await this.resetForPurge();
+            return;
+        }
+        if (this._committedRoot !== null) { throw new Error('Immutable content reset requires SQL-owned file reclamation'); }
         await this._runMutationExclusive(async () => {
             await this._abandonImportWritesForRollback();
             if (!this._hasStorageDirectoryApi()) {
@@ -576,7 +963,7 @@ export class TermContentOpfsStore {
                 this._invalidateReadState();
                 return;
             }
-            const root = await navigator.storage.getDirectory();
+            const root = await this._getStorageDirectory();
             /** @type {Error[]} */
             const resetErrors = [];
             const states = await this._loadSegmentStates(root, true);
@@ -898,6 +1285,9 @@ export class TermContentOpfsStore {
      * @throws {Error} If an earlier storage write failed.
      */
     _getBufferedLength() {
+        if (this._committedRoot !== null && (this._arenaCheckpoint === null || this._arenaSealed)) {
+            throw new Error('Immutable content appends require an unsealed import arena');
+        }
         // Every append reserves its cursor here. Do not admit more work after
         // a background write has failed, even when its promise has settled.
         if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
@@ -959,6 +1349,10 @@ export class TermContentOpfsStore {
 
     /** @returns {Promise<void>} */
     async _ensureLoadedForRead() {
+        if (this._committedRoot !== null && this._arenaCheckpoint === null) {
+            this._loadedForRead = true;
+            return;
+        }
         while (!this._loadedForRead) {
             const generation = this._readStateGeneration;
             let operation = this._ensureLoadedForReadOperation;
@@ -1010,7 +1404,7 @@ export class TermContentOpfsStore {
             const states = this._segmentStates;
             /** @type {Array<{state: {index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}, file: File, startOffset: number}>} */
             const snapshots = [];
-            let startOffset = 0;
+            let startOffset = this._logicalBase;
             for (const state of states) {
                 const file = await state.fileHandle.getFile();
                 snapshots.push({state, file, startOffset});
@@ -1269,6 +1663,16 @@ export class TermContentOpfsStore {
      * @returns {Promise<Uint8Array|null>}
      */
     async readSlice(offset, length) {
+        if (this._committedRoot !== null) { return null; }
+        return await this._readSlice(offset, length);
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async _readSlice(offset, length) {
         if (
             !Number.isSafeInteger(offset) || offset < 0 ||
             !Number.isSafeInteger(length) || length <= 0 ||
@@ -1371,6 +1775,7 @@ export class TermContentOpfsStore {
      * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'unavailable'}|{status: 'error', error: unknown}>>}
      */
     async readSlicesDetailed(spans) {
+        if (this._committedRoot !== null) { return spans.map(() => ({status: /** @type {const} */ ('unavailable')})); }
         const results = new Array(spans.length);
         const pending = [];
         for (let index = 0; index < spans.length; ++index) {
@@ -1479,6 +1884,7 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async warmSlices(spans) {
+        if (this._committedRoot !== null) { return; }
         if (this._fileHandle === null) {
             return;
         }
@@ -1886,7 +2292,7 @@ export class TermContentOpfsStore {
                     'storage' in navigator &&
                     'getDirectory' in navigator.storage
                 ) {
-                    const root = await navigator.storage.getDirectory();
+                    const root = await this._getStorageDirectory();
                     const states = await this._loadSegmentStates(root);
                     this._assertReadableSegmentGrowth(states);
                     this._segmentStates = states;
@@ -1899,7 +2305,7 @@ export class TermContentOpfsStore {
         }
         try {
             const snapshots = [];
-            let startOffset = 0;
+            let startOffset = this._logicalBase;
             for (const state of this._segmentStates) {
                 const file = await state.fileHandle.getFile();
                 snapshots.push({state, file, startOffset});
@@ -1939,7 +2345,7 @@ export class TermContentOpfsStore {
         if (!this._hasStorageDirectoryApi()) {
             return false;
         }
-        const root = await navigator.storage.getDirectory();
+        const root = await this._getStorageDirectory();
         const states = await this._loadSegmentStates(root);
         this._assertReadableSegmentGrowth(states);
         if (states.length === 0) {
@@ -2019,7 +2425,7 @@ export class TermContentOpfsStore {
             states.push(this._createSegmentState(index, fileName, fileHandle, fileLength, 0));
         }
         states.sort((a, b) => a.index - b.index);
-        let startOffset = 0;
+        let startOffset = this._logicalBase;
         for (let index = 0; index < states.length; ++index) {
             const state = states[index];
             if (!allowIncomplete && state.index !== index) {
@@ -2047,11 +2453,11 @@ export class TermContentOpfsStore {
      * @returns {number}
      */
     _computeSegmentedLength() {
-        let total = 0;
+        let total = this._logicalBase;
         for (const state of this._segmentStates) {
             total = addSafeByteLength(total, state.fileLength);
         }
-        let startOffset = 0;
+        let startOffset = this._logicalBase;
         for (const state of this._segmentStates) {
             state.startOffset = startOffset;
             startOffset += state.fileLength;
@@ -2188,7 +2594,7 @@ export class TermContentOpfsStore {
         const nextIndex = activeSegment.index + 1;
         const nextFileName = this._getSegmentFileName(nextIndex);
         await this._closeWritable();
-        const root = await navigator.storage.getDirectory();
+        const root = await this._getStorageDirectory();
         const nextFileHandle = await root.getFileHandle(nextFileName, {create: true});
         const nextFile = await nextFileHandle.getFile();
         const nextState = this._createSegmentState(nextIndex, nextFileName, nextFileHandle, nextFile.size, activeSegment.startOffset + activeSegment.fileLength);

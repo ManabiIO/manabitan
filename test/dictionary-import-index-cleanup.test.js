@@ -74,7 +74,7 @@ async function createFixture(enabled = false) {
  * @returns {import('@sqlite.org/sqlite-wasm').SqlValue[]}
  */
 function secondaryIndexes(sql) {
-    return sql.selectValues("SELECT name FROM sqlite_schema WHERE type = 'index' AND name LIKE 'idx_%' ORDER BY name")
+    return sql.selectValues("SELECT name FROM sqlite_schema WHERE type = 'index' AND name LIKE 'idx_%' AND name <> 'idx_term_content_single_active_job' ORDER BY name")
 }
 
 /**
@@ -144,9 +144,11 @@ describe('dictionary import secondary-index cleanup', () => {
         const {database, sql} = await createFixture(true)
         const initial = secondaryIndexes(sql)
         expect(initial).toHaveLength(8)
+        expect(sql.selectValue("SELECT 1 FROM sqlite_schema WHERE type = 'index' AND name = 'idx_term_content_single_active_job'")).toBe(1)
         const exec = vi.spyOn(sql, 'exec')
         const session = await database.startBulkImport()
         expect(secondaryIndexes(sql)).toEqual([])
+        expect(sql.selectValue("SELECT 1 FROM sqlite_schema WHERE type = 'index' AND name = 'idx_term_content_single_active_job'")).toBe(1)
         await addTag(database, 'Jitendex', finish)
         await (finish === 'abort' ?
             database.abortBulkImport(session) :

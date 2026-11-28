@@ -18,6 +18,7 @@
 import {ExtensionError} from '../core/extension-error.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {getDictionaryRuntimeActionPolicy} from './dictionary-runtime-action-policy.js';
+import {termContentOptimizationNotificationId} from './term-content-optimization-control.js';
 
 const timeoutByClass = Object.freeze({
     'interactive': 30_000,
@@ -269,6 +270,20 @@ export class DictionaryWorkerClient {
             if (typeof oldest !== 'number') { break; }
             this._retiredResponseIds.delete(oldest);
             this._retiredResponseIdFloor = Math.max(this._retiredResponseIdFloor, oldest);
+        }
+    }
+
+    /**
+     * Send optional state to the current healthy worker without opening or
+     * recovering it. A later ordinary request carries the same snapshot.
+     * @param {import('offscreen').TermContentOptimizationState} optimizationState
+     */
+    notifyTermContentOptimizationState(optimizationState) {
+        if (this._fatalError !== null) { return; }
+        try {
+            this._worker.postMessage({id: termContentOptimizationNotificationId, optimizationState});
+        } catch (error) {
+            reportDiagnostics('term-content-optimization-control-deferred', {error: error instanceof Error ? error.message : String(error)});
         }
     }
 

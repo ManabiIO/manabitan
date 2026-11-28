@@ -33,6 +33,7 @@ const requiredNativeAssets = new Set([
     'lib/term-bank-parser.wasm',
     'lib/zstd.wasm',
     'lib/term-content-canonical-scan-v1.wasm',
+    'js/dictionary/zstd-trainer.wasm',
 ]);
 const manifestUtil = new ManifestUtil();
 /** @type {Map<string, string>} */

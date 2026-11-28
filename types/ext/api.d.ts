@@ -387,6 +387,7 @@ type ApiSurface = {
         params: {
             active: boolean;
             ownerId?: string;
+            frontendPending?: boolean;
         };
         return: void;
     };

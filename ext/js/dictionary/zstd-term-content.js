@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {getLegacyTermContentZstdCodecId} from './term-content-zstd-codec.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {
     compress,
@@ -38,6 +39,8 @@ let isInitialized = false;
 let initializePromise = null;
 /** @type {Uint8Array|null} */
 let jmdictDict = null;
+/** @type {Map<string, Uint8Array>} Persisted dictionary identities loaded by the sole storage owner. */
+const trainedDictionaryByName = new Map();
 /** @type {number|null} */
 let cctx = null;
 /** @type {number|null} */
@@ -52,6 +55,51 @@ const COMPRESSION_WORKER_READY_TIMEOUT_MS = 30_000;
 const COMPRESSION_JOB_TIMEOUT_MS = 60_000;
 const JMDICT_COMPRESSION_LEVEL = -1;
 const EMPTY_COMPRESSION_DICTIONARY = new Uint8Array(0);
+
+export class ZstdDictionaryUnavailableError extends Error {
+    /** @param {string} message */
+    constructor(message) {
+        super(message);
+        /**
+         *
+         */
+        this.name = 'ZstdDictionaryUnavailableError';
+    }
+}
+
+/**
+ * Registers a privately owned, SHA-verified dictionary supplied by the
+ * database codec loader. Registration is intentionally separate from lookup
+ * module initialization and never fetches or prewarms import workers.
+ * @param {string} name
+ * @param {Uint8Array} dictionary
+ * @throws {TypeError} If the verified dictionary identity or size is invalid.
+ */
+export function registerTermContentZstdDictionary(name, dictionary) {
+    if (!/^manabitan-zstd-[a-f0-9]{64}$/.test(name) || !(dictionary instanceof Uint8Array) ||
+    dictionary.byteLength < 8 || dictionary.byteLength > 112640) {
+        throw new TypeError('Invalid trained Zstd dictionary identity or size');
+    }
+    trainedDictionaryByName.set(name, new Uint8Array(dictionary));
+}
+
+/** @param {string} name */
+export function unregisterTermContentZstdDictionary(name) {
+    trainedDictionaryByName.delete(name);
+}
+
+/**
+ * @param {string} name
+ * @returns {Uint8Array}
+ * @throws {ZstdDictionaryUnavailableError} If the codec loader has not registered its bytes.
+ */
+function getTrainedDictionary(name) {
+    const dictionary = trainedDictionaryByName.get(name);
+    if (typeof dictionary === 'undefined') {
+        throw new ZstdDictionaryUnavailableError(`Trained Zstd dictionary is not ready: ${name}`);
+    }
+    return dictionary;
+}
 
 /**
  * @param {unknown} value
@@ -991,7 +1039,7 @@ export function finishWrappedTermContentZstdSpans(prepared) {
 /**
  * @param {Uint8Array} content
  * @param {string|null} dictName
- * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number, codecSource?: 'immutable-layout'}} [options]
  * @returns {Uint8Array}
  * @throws {Error}
  */
@@ -1007,9 +1055,13 @@ export function decompressTermContentZstd(content, dictName, options = {}) {
         }
         dctx = context
     }
-    // Generic frames can use the existing decoder without allocating another
-    // native context. A null dictionary also clears any preceding dictionary.
-    return decompressUsingDict(dctx, content, dictName === 'jmdict' ? jmdictDict : null, options)
+    // A record selector remains opaque even if its text equals a registered
+    // codec ID. Only the resolved immutable layout may choose that dictionary.
+    const codecId = options.codecSource === 'immutable-layout' ? dictName : getLegacyTermContentZstdCodecId(dictName)
+    const dictionary = codecId === 'jmdict' ? jmdictDict :
+        (codecId === null ? null : getTrainedDictionary(codecId))
+    // A null dictionary clears any preceding dictionary in the shared context.
+    return decompressUsingDict(dctx, content, dictionary, options)
     /* eslint-enable @stylistic/semi */
 }
 

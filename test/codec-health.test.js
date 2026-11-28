@@ -14,14 +14,10 @@ import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store
 import {encodeRawTermContentBlockReference, encodeRawTermContentSharedGlossaryBinary, RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 import {isZstdResourceError} from '../ext/js/dictionary/zstd-resource-error.js';
 
-const {decode, sharedDecode} = vi.hoisted(() => ({decode: vi.fn(), sharedDecode: vi.fn()}));
+const {decode} = vi.hoisted(() => ({decode: vi.fn()}));
 vi.mock('../ext/js/dictionary/zstd-term-content.js', async (original) => ({
     ...await original(),
     decompressTermContentZstd: decode,
-}));
-vi.mock('../ext/lib/zstd-wasm.js', async (original) => ({
-    ...await original(),
-    decompress: sharedDecode,
 }));
 
 const resourceErrors = [
@@ -54,7 +50,6 @@ const decoderErrors = [
 afterEach(() => {
     vi.restoreAllMocks();
     decode.mockReset();
-    sharedDecode.mockReset();
 });
 
 async function fixture(/** @type {string} */ path) {
@@ -106,9 +101,8 @@ async function fixture(/** @type {string} */ path) {
         entryContentDictName: contentDictName,
     };
     const read = () => Reflect.get(database, '_deserializeTermRow').call(database, row);
-    const decoder = path !== 'shared' ? decode : sharedDecode;
-    decoder.mockReturnValue(payload);
-    return {database, mark, read, decoder, payload};
+    decode.mockReturnValue(payload);
+    return {database, mark, read, decoder: decode, payload};
 }
 
 describe.each(['block', 'shared', 'direct'])('%s codec health', (path) => {
@@ -148,6 +142,9 @@ test('resource classification rejects non-errors and vague resource messages', (
     for (const error of [null, 'out of memory', {message: 'Failed to allocate Zstd input buffer'}, new Error('out of memory')]) {
         expect(isZstdResourceError(error)).toBe(false);
     }
+    const missingTrainedCodec = new Error('Trained Zstd dictionary is not ready');
+    missingTrainedCodec.name = 'ZstdDictionaryUnavailableError';
+    expect(isZstdResourceError(missingTrainedCodec)).toBe(true);
 });
 
 describe('cold shared-glossary metadata health', () => {

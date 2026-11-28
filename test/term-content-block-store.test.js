@@ -12,7 +12,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
 import {TermContentIntegrityError, TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
-import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference} from '../ext/js/dictionary/raw-term-content.js';
+import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference, RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES} from '../ext/js/dictionary/raw-term-content.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
@@ -1367,6 +1367,56 @@ describe('TermContentBlockStore', () => {
             blockOffset: 0,
         });
         expect(decompressTermContentZstd).not.toHaveBeenCalled();
+    });
+
+    test('reads an online immutable replacement frame without touching retired source bytes', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const oldBlock = wrapCompressedTermContentBlock(new Uint8Array([9, 9, 9]));
+        await contentStore.appendBatch([oldBlock]);
+        const [{offset: referenceOffset}] = await contentStore.appendBatch([
+            encodeRawTermContentBlockReference(0, oldBlock.byteLength, 3, 0, 3),
+        ]);
+        const readSlice = vi.spyOn(contentStore, 'readSlice');
+        const blockStore = new TermContentBlockStore(contentStore);
+        const release = vi.fn();
+        /** @type {import('../ext/js/dictionary/term-content-block-store.js').TermContentResolvedFrame} */
+        const resolvedFrame = {
+            bytes: new Uint8Array([1, 2, 3]),
+            codecId: 'manabitan-zstd-' + 'b'.repeat(64),
+            envelope: 'none',
+            decodedLength: 3,
+            physicalKey: 'root-1:file-1:0:3',
+            release,
+        };
+        const resolver = vi.fn(async () => resolvedFrame);
+        blockStore.setOnlineFrameResolver(resolver);
+        vi.mocked(decompressTermContentZstd).mockImplementationOnce((bytes) => {
+            expect(release).not.toHaveBeenCalled();
+            return Uint8Array.from(bytes);
+        });
+
+        const legacyLabel = 'raw-block-v1:' + resolvedFrame.codecId;
+        await expect(blockStore.readDetailed(referenceOffset, 3, legacyLabel)).resolves.toEqual({
+            status: 'ok',
+            bytes: new Uint8Array([1, 2, 3]),
+        });
+        expect(resolver).toHaveBeenCalledWith({
+            kind: 'block',
+            logicalOffset: 0,
+            recordLength: oldBlock.byteLength,
+            sourceStoredLength: oldBlock.byteLength,
+            originalCodecId: null,
+            expectedDecodedLength: 3,
+            originalEnvelope: 'mbc2',
+        });
+        expect(readSlice).toHaveBeenCalledOnce();
+        expect(readSlice).toHaveBeenCalledWith(referenceOffset, RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+        expect(decompressTermContentZstd).toHaveBeenCalledWith(
+            new Uint8Array([1, 2, 3]),
+            resolvedFrame.codecId,
+            {defaultHeapSize: 3, maxOutputSize: 3, codecSource: 'immutable-layout'},
+        );
+        expect(release).toHaveBeenCalledOnce();
     });
 
     test('rejects a reference whose entry extends beyond its block', async () => {

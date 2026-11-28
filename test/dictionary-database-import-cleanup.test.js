@@ -17,17 +17,60 @@ async function resolveVoid() {}
 
 /**
  * @param {(...args: never[]) => Promise<void>} rollbackImportSession
- * @returns {{endImportSession: ReturnType<typeof vi.fn>, getLastEndImportSessionMetrics: ReturnType<typeof vi.fn>, rollbackImportSession: (...args: never[]) => Promise<void>}}
+ * @returns {{endImportSession: ReturnType<typeof vi.fn>, getLastEndImportSessionMetrics: ReturnType<typeof vi.fn>, getLogicalLength: ReturnType<typeof vi.fn>, rollbackImportSession: (...args: never[]) => Promise<void>}}
  */
 function makeStore(rollbackImportSession) {
     return {
         endImportSession: vi.fn(resolveVoid),
         getLastEndImportSessionMetrics: vi.fn(() => null),
+        getLogicalLength: vi.fn(() => 0),
         rollbackImportSession,
     };
 }
 
 describe('DictionaryDatabase import cleanup', () => {
+    test('joins writers and preserves OPFS when SQLite rollback cannot be confirmed', async () => {
+        const database = new DictionaryDatabase();
+        const failure = new Error('uncertain SQLite rollback');
+        const connection = {exec: vi.fn(() => { throw failure; })};
+        const clear = vi.fn(resolveVoid);
+        const content = makeStore(vi.fn(resolveVoid));
+        const records = makeStore(vi.fn(resolveVoid));
+        const journal = {
+            version: 1,
+            sessionId: 'uncertain-owner',
+            createdAt: 0,
+            contentCheckpoint: {segments: []},
+            recordCheckpoint: {shards: []},
+        };
+        Reflect.set(database, '_db', connection);
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_bulkImportJournalRecord', journal);
+        Reflect.set(database, '_termContentStore', content);
+        Reflect.set(database, '_termRecordStore', records);
+        Reflect.set(database, '_importJournal', {clear});
+        /** @type {Error[]} */
+        const errors = [];
+
+        const result = await Reflect.get(database, '_rollbackBulkImport').call(
+            database,
+            /** @type {import('@sqlite.org/sqlite-wasm').Database} */ (/** @type {unknown} */ (connection)),
+            errors,
+            true,
+            true,
+        );
+
+        expect(result).toBe(false);
+        expect(errors).toContain(failure);
+        expect(content.endImportSession).toHaveBeenCalledOnce();
+        expect(records.endImportSession).toHaveBeenCalledOnce();
+        expect(content.rollbackImportSession).not.toHaveBeenCalled();
+        expect(records.rollbackImportSession).not.toHaveBeenCalled();
+        expect(clear).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_bulkImportJournalRecord')).toBe(journal);
+        expect(Reflect.get(database, '_importJournalRecoveryPending')).toBe(true);
+    });
+
     test('rolls back title metadata without touching immutable term-record storage when commit fails', async () => {
         const database = new DictionaryDatabase();
         let row = /** @type {DictionaryRow} */ ({
@@ -743,10 +786,12 @@ describe('DictionaryDatabase import cleanup', () => {
 
         expect(exec).not.toHaveBeenCalledWith('COMMIT');
         expect(exec).toHaveBeenCalledWith('ROLLBACK');
-        expect(termContentEndImportSession).toHaveBeenCalledOnce();
-        expect(termRecordEndImportSession).toHaveBeenCalledOnce();
-        expect(termContentRollbackImportSession).toHaveBeenCalledOnce();
-        expect(termRecordRollbackImportSession).toHaveBeenCalledOnce();
+        // SQLite rollback failed, so cleanup only joins writers. It must not
+        // restore or delete OPFS data while the transaction outcome is unknown.
+        expect(termContentEndImportSession).toHaveBeenCalledTimes(2);
+        expect(termRecordEndImportSession).toHaveBeenCalledTimes(2);
+        expect(termContentRollbackImportSession).not.toHaveBeenCalled();
+        expect(termRecordRollbackImportSession).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
         expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
         expect(Reflect.get(database, '_db')).toBeNull();
@@ -826,6 +871,8 @@ describe('DictionaryDatabase import cleanup', () => {
         const makeStore = (/** @type {string} */ name) => ({
             endImportSession: vi.fn(async () => { events.push(`seal-${name}`); }),
             getLastEndImportSessionMetrics: vi.fn(() => null),
+            getLogicalLength: vi.fn(() => 0),
+            rollbackImportSession: vi.fn(resolveVoid),
         });
         Reflect.set(database, '_db', {exec});
         Reflect.set(database, '_bulkImportState', 'active');
@@ -1166,7 +1213,9 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_termContentStore', {rollbackImportSession: vi.fn(resolveVoid)});
         Reflect.set(database, '_termRecordStore', {rollbackImportSession: vi.fn(resolveVoid)});
 
-        await expect(database.close()).rejects.toThrow('SQLite rollback failed');
+        const closeFailure = await database.close().catch((error) => error);
+        expect(closeFailure).toBeInstanceOf(AggregateError);
+        expect(closeFailure.errors).toContainEqual(expect.objectContaining({message: 'SQLite rollback failed'}));
 
         expect(clear).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_bulkImportJournalRecord')).not.toBeNull();
@@ -1360,6 +1409,7 @@ describe('DictionaryDatabase import cleanup', () => {
             .rejects.toThrow('term content reset failed');
 
         expect(termContentReset).toHaveBeenCalledOnce();
+        expect(termContentReset).toHaveBeenCalledWith({purgeImmutable: true});
         expect(termRecordReset).toHaveBeenCalledOnce();
         expect(beginImmediateTransaction).not.toHaveBeenCalled();
     });

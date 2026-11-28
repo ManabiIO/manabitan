@@ -544,9 +544,10 @@ export class API {
     /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
      * @param {string|undefined} [ownerId]
+     * @param {boolean} [frontendPending]
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
-    async setDictionaryImportMode(active, ownerId) {
+    async setDictionaryImportMode(active, ownerId, frontendPending = false) {
         if (active && typeof ownerId === 'string') {
             if (this._runtimeConnectionsShutdown) { throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.'); }
             let session = this._dictionaryImportOwnerSessions.get(ownerId);
@@ -566,9 +567,9 @@ export class API {
         const session = typeof ownerId === 'string' ? this._dictionaryImportOwnerSessions.get(ownerId) : void 0;
         if (session) { session.active = false; }
         try {
-            await this._invoke('setDictionaryImportMode', {active, ownerId});
+            await this._invoke('setDictionaryImportMode', {active, ownerId, frontendPending});
         } finally {
-            if (typeof ownerId === 'string' && this._dictionaryImportOwnerSessions.get(ownerId) === session) {
+            if (!frontendPending && typeof ownerId === 'string' && this._dictionaryImportOwnerSessions.get(ownerId) === session) {
                 this._dictionaryImportOwnerClient.close(ownerId);
                 this._dictionaryImportOwnerSessions.delete(ownerId);
             }

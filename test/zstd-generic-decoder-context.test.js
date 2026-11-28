@@ -4,6 +4,7 @@
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 
+import {createHash} from 'node:crypto'
 import {readFile} from 'node:fs/promises'
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 
@@ -131,6 +132,38 @@ describe('generic term-content decoder context', () => {
         expect(api.decompressTermContentZstd(frame, null)).toEqual(payload)
         expect(api.decompressTermContentZstd(frame, null)).toEqual(payload)
         expect(createDecoder).toHaveBeenCalledTimes(2)
+    })
+
+    test('uses a registered dictionary only for a resolved frame, even when legacy text matches the exact ID', async () => {
+        const {api, module, dictionary} = await setup()
+        const codecId = 'manabitan-zstd-' + createHash('sha256').update(dictionary).digest('hex')
+        const decoded = Uint8Array.from(dictionary.subarray(256, 8192))
+        const generic = api.compressTermContentZstd(decoded, null)
+        const trained = api.compressTermContentZstd(decoded, 'jmdict')
+        const decode = vi.spyOn(module, '_ZSTD_decompress_usingDict')
+        const resolved = {codecSource: /** @type {const} */ ('immutable-layout')}
+
+        expect(() => api.decompressTermContentZstd(trained, codecId, resolved))
+            .toThrow(api.ZstdDictionaryUnavailableError)
+        expect(api.decompressTermContentZstd(generic, codecId)).toEqual(decoded)
+        expect(decode.mock.calls.at(-1)?.slice(5)).toEqual([0, 0])
+
+        api.registerTermContentZstdDictionary(codecId, dictionary)
+        expect(api.decompressTermContentZstd(trained, codecId, resolved)).toEqual(decoded)
+        expect(decode.mock.calls.at(-1)?.[5]).not.toBe(0)
+        expect(api.decompressTermContentZstd(generic, codecId)).toEqual(decoded)
+        expect(decode.mock.calls.at(-1)?.slice(5)).toEqual([0, 0])
+        expect(api.decompressTermContentZstd(generic, 'manabitan-zstd-arbitrary-label')).toEqual(decoded)
+        expect(api.compressTermContentZstd(decoded, codecId)).toEqual(generic)
+        expect(api.compressWrappedTermContentZstd(decoded, codecId).bytes)
+            .toEqual(api.compressWrappedTermContentZstd(decoded, null).bytes)
+        expect(api.decompressTermContentZstd(trained, 'jmdict')).toEqual(decoded)
+        expect(() => api.decompressTermContentZstd(trained, codecId)).toThrow(/Zstd operation/)
+
+        api.unregisterTermContentZstdDictionary(codecId)
+        expect(() => api.decompressTermContentZstd(trained, codecId, resolved))
+            .toThrow(api.ZstdDictionaryUnavailableError)
+        expect(api.decompressTermContentZstd(generic, codecId)).toEqual(decoded)
     })
 
     test('keeps the explicit one-shot adapter compatible', async () => {

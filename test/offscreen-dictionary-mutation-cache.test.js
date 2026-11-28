@@ -73,6 +73,23 @@ describe('offscreen dictionary mutation cache coherence', () => {
 
     test.each(mutationCases)('$action does not clear caches before the mutation settles', async ({action, params, method}) => {
         const {worker, database, translator} = await createHarness();
+        let releaseJoin = () => {};
+        let notifyJoinStarted = () => {};
+        /** @type {Promise<void>} */
+        const joinStarted = new Promise((resolve) => {
+            notifyJoinStarted = () => { resolve(); };
+        });
+        /** @type {Promise<void>} */
+        const joinGate = new Promise((resolve) => {
+            releaseJoin = () => { resolve(); };
+        });
+        Reflect.set(worker, '_termContentIdleScheduler', {
+            setHold: vi.fn(),
+            preemptAndJoin: vi.fn(async () => {
+                notifyJoinStarted();
+                await joinGate;
+            }),
+        });
         /** @type {() => void} */
         let release = () => { throw new Error('Mutation did not start'); };
         const mutation = /** @type {ReturnType<typeof vi.fn>} */ (/** @type {unknown} */ (database[method]));
@@ -80,7 +97,10 @@ describe('offscreen dictionary mutation cache coherence', () => {
             release = () => { resolve(method === 'purge'); };
         }));
         const pending = worker._invokeAction(action, params, []);
-        await Promise.resolve();
+        await joinStarted;
+        expect(mutation).not.toHaveBeenCalled();
+        releaseJoin();
+        await vi.waitFor(() => expect(mutation).toHaveBeenCalledOnce());
         expect(mutation).toHaveBeenCalledOnce();
         expect(translator.clearDatabaseCaches).not.toHaveBeenCalled();
         release();

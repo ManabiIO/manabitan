@@ -52,9 +52,14 @@ function createDatabase(filename = ':memory:') {
             beginImportSession: vi.fn(resolveVoid),
             endImportSession: vi.fn(resolveVoid),
             getLastEndImportSessionMetrics: () => null,
+            ...(key === '_termContentStore' ? {getLogicalLength: vi.fn(() => 0)} : {}),
             rollbackImportSession: vi.fn(resolveVoid),
         });
     }
+    // This is a real SQLite fixture: keep the additive online-content roots
+    // and cursor present so publication exercises the actual atomic updates.
+    database._initializeOnlineContentSchema();
+    database._seedTermContentStorageState();
     return {database, connection};
 }
 
@@ -249,7 +254,7 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         let release = () => {};
         const gate = new Promise((resolve) => { release = () => resolve(void 0); });
         let cleanupStarted = false;
-        vi.mocked(Reflect.get(database, '_termContentStore').rollbackImportSession).mockImplementationOnce(async () => {
+        vi.mocked(Reflect.get(database, '_termContentStore').endImportSession).mockImplementationOnce(async () => {
             cleanupStarted = true;
             await gate;
         });
@@ -270,6 +275,8 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         }
         expect(receipt).toBeNull();
         expect(fenced).toBe(true);
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).not.toHaveBeenCalled();
         expect(database.isPrepared()).toBe(false);
         expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
     });

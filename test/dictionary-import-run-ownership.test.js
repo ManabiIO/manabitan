@@ -179,7 +179,14 @@ test('healthy imports complete all files and publish once', async () => {
     await controller._importDictionaries(files(2), null, done, new ImportProgressTracker([{label: 'Import'}], 2));
 
     expect(importZip).toHaveBeenCalledTimes(2);
-    expect(mode.mock.calls.map(([active]) => active)).toEqual([true, false]);
+    expect(mode.mock.calls.map(([active, , frontendPending]) => [active, frontendPending === true])).toEqual([
+        [true, false],
+        [false, true],
+        [false, false],
+    ]);
+    expect(mode.mock.calls.map(([, ownerId]) => ownerId)).toEqual([
+        mode.mock.calls[0][1], mode.mock.calls[0][1], mode.mock.calls[0][1],
+    ]);
     expect(mode.mock.calls[0][1]).toEqual(expect.any(String));
     expect(mode.mock.calls[1][1]).toBe(mode.mock.calls[0][1]);
     expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
@@ -244,7 +251,11 @@ test('progress finalization failure still releases import ownership and reports 
     await expect(controller._importDictionaries(files(), null, done, tracker)).resolves.toBeUndefined();
 
     expect(end).toHaveBeenCalledOnce();
-    expect(mode.mock.calls.map(([active]) => active)).toEqual([true, false]);
+    expect(mode.mock.calls.map(([active, , frontendPending]) => [active, frontendPending === true])).toEqual([
+        [true, false],
+        [false, true],
+        [false, false],
+    ]);
     expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
     expect(Reflect.get(controller, '_modifying')).toBe(false);
     expect(showErrors).toHaveBeenCalledWith([failure]);

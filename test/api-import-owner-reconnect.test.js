@@ -102,5 +102,5 @@ test.each(['url', 'blob'])('retiring a session prevents %s dispatch while the me
     transport.resolve({active: {postMessage: dispatch}});
     await rejected;
     expect(dispatch).not.toHaveBeenCalled();
-    expect(apiInvoke).toHaveBeenCalledExactlyOnceWith('setDictionaryImportMode', {active: false, ownerId: 'page-A'});
+    expect(apiInvoke).toHaveBeenCalledExactlyOnceWith('setDictionaryImportMode', {active: false, ownerId: 'page-A', frontendPending: false});
 });

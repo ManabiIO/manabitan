@@ -104,7 +104,20 @@ export class OffscreenProxy {
         this._offscreenControlRequestId = 0;
         /** @type {Map<number, {port: MessagePort, accept: (() => void)|null, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
         this._offscreenControlResponseHandlers = new Map();
+        /** @type {import('offscreen').TermContentOptimizationState|undefined} */
+        this._termContentOptimizationState = void 0;
         this._resetOffscreenPortReadyPromise();
+    }
+
+    /** @param {import('offscreen').TermContentOptimizationState} state */
+    setTermContentOptimizationState(state) {
+        this._termContentOptimizationState = state;
+        // The ordinary startup/foreground paths own offscreen creation.
+        try {
+            this._webExtension.sendMessageIgnoreResponse({action: 'setTermContentOptimizationHoldOffscreen', optimizationState: state});
+        } catch (error) {
+            reportDiagnostics('term-content-optimization-control-deferred', {error: error instanceof Error ? error.message : String(error)});
+        }
     }
 
     /**
@@ -255,7 +268,7 @@ export class OffscreenProxy {
             }
         }
         await this._ensureOffscreenDocument();
-        const response = await this._webExtension.sendMessagePromise(message);
+        const response = await this._webExtension.sendMessagePromise({...message, ...(this._termContentOptimizationState ? {optimizationState: this._termContentOptimizationState} : {})});
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
     }
 
@@ -340,7 +353,7 @@ export class OffscreenProxy {
                     if (operation.cancelled) { throw new Error('Dictionary import cancelled before runtime admission'); }
                     dispatchAttempted = true;
                     return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
-                        await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
+                        await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ ({...message, ...(this._termContentOptimizationState ? {optimizationState: this._termContentOptimizationState} : {})}), transfers)
                     );
                 } catch (error) {
                     const transportCause = error instanceof DictionaryImportNotAdmittedError ? error.cause : error;
@@ -500,6 +513,14 @@ export class DictionaryRuntimeWorkerProxy {
     constructor(workerPath) {
         /** @type {DictionaryWorkerClient} */
         this._client = new DictionaryWorkerClient(workerPath, {context: 'Dictionary runtime worker'});
+        /** @type {import('offscreen').TermContentOptimizationState|undefined} */
+        this._termContentOptimizationState = void 0;
+    }
+
+    /** @param {import('offscreen').TermContentOptimizationState} state */
+    setTermContentOptimizationState(state) {
+        this._termContentOptimizationState = state;
+        this._client.notifyTermContentOptimizationState(state);
     }
 
     /**
@@ -514,7 +535,7 @@ export class DictionaryRuntimeWorkerProxy {
         const action = payload.action ?? '';
         return await this._client.invoke(
             action,
-            /** @type {import('core').SerializableObject} */ (payload.params ?? {}),
+            /** @type {import('core').SerializableObject} */ ({...(/** @type {import('core').SerializableObject} */ (payload.params)), ...(this._termContentOptimizationState && {optimizationState: this._termContentOptimizationState})}),
         );
     }
 
@@ -529,7 +550,7 @@ export class DictionaryRuntimeWorkerProxy {
             typeof message === 'object' && message !== null && !Array.isArray(message) ? message : {}
         );
         const action = payload.action ?? '';
-        const params = /** @type {import('core').SerializableObject} */ (payload.params ?? {});
+        const params = /** @type {import('core').SerializableObject} */ ({...(/** @type {import('core').SerializableObject} */ (payload.params)), ...(this._termContentOptimizationState && {optimizationState: this._termContentOptimizationState})});
         if (getDictionaryRuntimeActionPolicy(action).concurrency === 'streamed-import') {
             try {
                 this._client.post(action, params, transfers);

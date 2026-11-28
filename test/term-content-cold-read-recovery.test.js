@@ -1,6 +1,7 @@
 import {afterEach, expect, test, vi} from 'vitest';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 import {TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js';
+import {RAW_TERM_CONTENT_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
 const filename = 'manabitan-term-content.bin';
 
@@ -67,16 +68,16 @@ test('a cold outage is temporarily unavailable and a later lookup retries withou
     const {store, getFile, setUnavailable} = await fixture();
     const blocks = new TermContentBlockStore(store);
     setUnavailable(true);
-    await expect(blocks.readDetailed(0, 4, 'plain')).resolves.toMatchObject({status: 'temporarilyUnavailable'});
+    await expect(blocks.readDetailed(0, 4, RAW_TERM_CONTENT_DICT_NAME)).resolves.toMatchObject({status: 'temporarilyUnavailable'});
     expect(getFile).toHaveBeenCalledTimes(3);
     setUnavailable(false);
-    await expect(blocks.readDetailed(0, 4, 'plain')).resolves.toEqual({status: 'ok', bytes: new TextEncoder().encode('term')});
+    await expect(blocks.readDetailed(0, 4, RAW_TERM_CONTENT_DICT_NAME)).resolves.toEqual({status: 'ok', bytes: new TextEncoder().encode('term')});
 });
 
 test('a cold outage settles every batch entry and the next batch can recover', async () => {
     const {store, getFile, setUnavailable} = await fixture();
     const blocks = new TermContentBlockStore(store);
-    const requests = [0, 2].map((contentOffset) => ({contentOffset, contentLength: 2, contentDictName: 'plain'}));
+    const requests = [0, 2].map((contentOffset) => ({contentOffset, contentLength: 2, contentDictName: RAW_TERM_CONTENT_DICT_NAME}));
     setUnavailable(true);
     await expect(blocks.readDetailedBatch(requests)).resolves.toMatchObject([
         {status: 'temporarilyUnavailable'},

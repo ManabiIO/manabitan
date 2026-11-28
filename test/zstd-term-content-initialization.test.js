@@ -406,3 +406,32 @@ describe('term content zstd initialization', () => {
         }
     });
 });
+
+
+describe('actual stored codec label routing', () => {
+    afterEach(() => { vi.unstubAllGlobals(); });
+    test.each([null, '', 'unrecognized-label', '任意の自作辞書', 'JMdict', 'jmdict', 'trained'])('routes stored label %s to the actual decoder', async (label) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        zstd.createCCtx.mockReset().mockReturnValue(11);
+        zstd.createDCtx.mockReset().mockReturnValue(22);
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]))));
+        const api = await import('../ext/js/dictionary/zstd-term-content.js');
+        await api.initializeTermContentZstd();
+        const low = await import('../ext/lib/zstd-wasm.js');
+        const output = new Uint8Array([4, 5, 6]);
+        vi.mocked(low.decompress).mockReturnValue(output);
+        vi.mocked(low.decompressUsingDict).mockReturnValue(output);
+        const dictionary = new Uint8Array(8).fill(1);
+        const codecId = 'manabitan-zstd-' + 'a'.repeat(64);
+        if (label === 'trained') { api.registerTermContentZstdDictionary(codecId, dictionary); }
+        const input = new Uint8Array([7, 8, 9]);
+        const options = {maxOutputSize: 64};
+        const decodeOptions = label === 'trained' ? {...options, codecSource: /** @type {const} */ ('immutable-layout')} : options;
+        expect(api.decompressTermContentZstd(input, label === 'trained' ? codecId : label, decodeOptions)).toBe(output);
+        expect(low.decompress).not.toHaveBeenCalled();
+        expect(low.decompressUsingDict).toHaveBeenCalledWith(
+            22, input, label === 'trained' ? dictionary : (label === 'jmdict' ? new Uint8Array([1, 2, 3]) : null), decodeOptions,
+        );
+    });
+});

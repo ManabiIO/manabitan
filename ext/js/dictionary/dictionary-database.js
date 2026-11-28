@@ -31,13 +31,13 @@ import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {WeightedLruMap} from '../core/weighted-lru-map.js';
-import {stringReverse} from '../core/utilities.js';
+import {arrayBufferDigest, stringReverse} from '../core/utilities.js';
 import {deleteOpfsDatabaseFiles, didLastOpenUseFallbackStorage, getLastOpenStorageDiagnostics, getSqlite3, openOpfsDatabase} from './sqlite-wasm.js';
 import {
     compressTermContentZstd,
-    decompressTermContentZstd,
     initializeTermContentZstd,
     logTermContentZstdError,
+    registerTermContentZstdDictionary,
     resolveTermContentZstdDictName,
 } from './zstd-term-content.js';
 import {
@@ -52,21 +52,33 @@ import {
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
-    getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
-import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
-import {isZstdResourceError} from './zstd-resource-error.js';
 import {TermContentIntegrityError, TermContentOpfsStore} from './term-content-opfs-store.js';
+import {TermContentImmutableFileStore} from './term-content-immutable-file-store.js';
+import {skipLegacyEligibilitySelector} from './term-content-legacy-eligibility.js';
+import {isRawTermContentTrainingSelector} from './term-content-optimization-candidate-source.js';
+import {assertTermContentOptimizationHeadroom} from './term-content-optimization-headroom.js';
+import {ContentPhysicalFileIntegrityError, parseContentPhysicalFile, TermContentPhysicalFileStore} from './term-content-physical-file-store.js';
+import {createContentLayoutResolver} from './term-content-layout.js';
+import {planContentIdentityLayouts} from './term-content-identity-layout.js';
+import {TermContentOptimizationArtifacts} from './term-content-optimization-artifacts.js';
+import {TermContentOptimizationBatchStore} from './term-content-optimization-batch-store.js';
+import {MAX_BLOCK_DISCOVERY_REFERENCES, TermContentOptimizationController, TermContentOptimizationIntegrityError} from './term-content-optimization-controller.js';
+import {TermContentOptimizationFrameReader} from './term-content-optimization-frame-reader.js';
+import {TermContentOptimizationReclaimer} from './term-content-optimization-reclaimer.js';
+import {TermContentOptimizationReplacement} from './term-content-optimization-replacement.js';
+import {decodeOnlineContentFrameCheckpoint, encodeOnlineContentFrameCheckpoint, ONLINE_CONTENT_FRAME_PAGE_BYTES, ONLINE_CONTENT_FRAME_PAGE_ROWS, ONLINE_CONTENT_FRAME_ROW_BYTES} from './term-content-optimization-checkpoint.js';
+import {ContentStorageSnapshots} from './term-content-storage-snapshots.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
 import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {copyContentReferenceCursor, createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {
     createGlossarySearchQuery,
@@ -80,6 +92,7 @@ import {initializeTermContentPlanResolution} from './term-content-plan-resolutio
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
+const ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION = 12;
 const DICTIONARY_PURGE_MARKER = 'manabitan-dictionary-purge-pending';
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
@@ -231,6 +244,15 @@ function expandUniformContentDictNames(names, count, fillUntil) {
     const values = new Array(count);
     if (fillUntil > 0) { values.fill(names, 0, fillUntil); }
     return values;
+}
+
+class OnlineContentRepackNoGainError extends Error {
+    /** */
+    constructor() {
+        super('Dictionary database allocation consumes content repack savings');
+        /** @type {string} */
+        this.name = 'OnlineContentRepackNoGainError';
+    }
 }
 
 class TermContentLookupReadError extends Error {
@@ -531,6 +553,56 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
     return {packedChunks, packedRowStarts, packedRowCounts};
 }
 
+/** @typedef {{version: 1, legacy?: true, regions: import('./term-content-storage-snapshots.js').ContentRootRegion[]}} OnlineContentRootManifest */
+/** @typedef {OnlineContentRootSnapshot & {manifest: OnlineContentRootManifest}} OnlineContentStorageState */
+/** @typedef {Omit<ReturnType<typeof planContentIdentityLayouts>, 'layouts'> & {layouts: Array<ReturnType<typeof planContentIdentityLayouts>['layouts'][number] & {manifestSha256: string}>}} OnlineContentIdentityPlan */
+
+/**
+ * Validates compact root metadata once, preserving safe large logical offsets.
+ * @param {unknown} value
+ * @param {number} epoch
+ * @param {number} highWater
+ * @returns {OnlineContentRootManifest}
+ * @throws {TermContentIntegrityError} If the persisted directory is inconsistent.
+ */
+function parseOnlineContentRootManifest(value, epoch, highWater) {
+    if (!value || typeof value !== 'object' || Array.isArray(value) || Reflect.get(value, 'version') !== 1 ||
+    !Number.isSafeInteger(epoch) || epoch < 0 || !Number.isSafeInteger(highWater) || highWater < 0) {
+        throw new TermContentIntegrityError('Online content root metadata has an unsupported or invalid manifest version');
+    }
+    if (epoch === 0 && Reflect.get(value, 'legacy') === true) { return {version: 1, legacy: true, regions: []}; }
+    const directory = /** @type {unknown} */ (Reflect.get(value, 'regions'));
+    if (epoch === 0 || Reflect.get(value, 'legacy') === true || !Array.isArray(directory) || directory.length > 32768) {
+        throw new TermContentIntegrityError('Online content root directory is missing or unsupported');
+    }
+    const regionIds = new Set();
+    const layoutIds = new Set();
+    let end = 0;
+    const regions = directory.map((/** @type {unknown} */ entry) => {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) { throw new TermContentIntegrityError('Online content region is invalid'); }
+        const regionId = /** @type {unknown} */ (Reflect.get(entry, 'regionId'));
+        const layoutId = /** @type {unknown} */ (Reflect.get(entry, 'layoutId'));
+        const logicalStart = /** @type {unknown} */ (Reflect.get(entry, 'logicalStart'));
+        const logicalLength = /** @type {unknown} */ (Reflect.get(entry, 'logicalLength'));
+        if (typeof regionId !== 'string' || !/^[a-zA-Z0-9._-]{1,128}$/.test(regionId) ||
+        typeof layoutId !== 'string' || !/^[a-zA-Z0-9._-]{1,128}$/.test(layoutId) || regionIds.has(regionId) || layoutIds.has(layoutId) ||
+        typeof logicalStart !== 'number' || logicalStart !== end || typeof logicalLength !== 'number' ||
+        !Number.isSafeInteger(logicalLength) || logicalLength <= 0 || logicalLength > 128 * 1024 * 1024 || end > Number.MAX_SAFE_INTEGER - logicalLength) {
+            throw new TermContentIntegrityError('Online content root intervals are invalid');
+        }
+        regionIds.add(regionId);
+        layoutIds.add(layoutId);
+        end += logicalLength;
+        return {regionId, layoutId, logicalStart, logicalLength};
+    });
+    if (end !== highWater) { throw new TermContentIntegrityError('Online content root does not reach its logical high-water'); }
+    return {version: 1, regions};
+}
+
+/** @typedef {{rootId: string, epoch: number, logicalHighWater: number}} OnlineContentRootSnapshot */
+/** @typedef {{rootId: string, epoch: number, fileLocators: Map<string, import('./term-content-physical-file-store.js').ContentPhysicalLocator>, resolverData: {manifests: import('./term-content-layout.js').Manifest[], externalFrames: import('./term-content-layout.js').Frame[], files: import('./term-content-layout.js').PhysicalFile[], physicalFiles: import('./term-content-layout.js').PhysicalFile[], codecs: import('./term-content-layout.js').Codec[]}}} OnlineContentLayoutWindow */
+/** @typedef {{physicalFiles: TermContentPhysicalFileStore, windows: Map<string, OnlineContentLayoutWindow>, manifests: Map<string, {sha256: string, manifest: import('./term-content-layout.js').Manifest}>}} OnlineContentReadResources */
+
 export class DictionaryDatabase {
     constructor() {
         /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static|null} */
@@ -666,6 +738,8 @@ export class DictionaryDatabase {
         this._termFieldTextDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
         /** @type {boolean} */
         this._termContentZstdInitialized = false;
+        /** @type {Map<string, {sha256: string, manifest: Record<string, unknown>}>} */
+        this._onlineContentLayoutManifestCache = new Map();
         /** @type {'baseline'|'raw-bytes'} */
         this._termContentStorageMode = TERM_CONTENT_STORAGE_MODE_BASELINE;
         /** @type {Map<string, boolean>} */
@@ -757,10 +831,58 @@ export class DictionaryDatabase {
         this._lastBulkAddTermsMetrics = null;
         /** @type {TermContentOpfsStore} */
         this._termContentStore = new TermContentOpfsStore();
+        /**
+         *
+         */
+        this._onlineContentFileStore = new TermContentImmutableFileStore(undefined, assertTermContentOptimizationHeadroom);
+        /**
+         *
+         */
+        this._onlineContentPhysicalFileStore = new TermContentPhysicalFileStore();
+        /** @type {Map<string, OnlineContentLayoutWindow>} */
+        this._onlineContentLayoutWindowCache = new Map();
+        /**
+         *
+         */
+        this._onlineContentDictionaryCache = new Map();
+        /** @type {ContentStorageSnapshots|null} */
+        this._onlineContentSnapshots = null;
+        /** @type {string|null} */
+        this._onlineContentSnapshotsRootId = null;
+        /** @type {boolean} */
+        this._onlineContentPublicationRecoveryRequired = false;
+        /** @type {ReturnType<DictionaryDatabase['createOnlineContentOptimizationRunner']>|null} */
+        this._onlineContentOptimizationRunner = null;
+        /** @type {TermContentOptimizationReclaimer} */
+        this._onlineContentReclaimer = new TermContentOptimizationReclaimer({
+            getDb: () => this._requireDb(),
+            assertReady: () => {
+                this._assertOnlineContentMutationReady();
+                if (this._isOpening || this._onlineContentSnapshots === null) {
+                    throw new Error('Content reclamation requires an activated immutable root');
+                }
+                const durable = this._requireDb().selectObject('SELECT activeRootId, activeEpoch, logicalHighWater FROM termContentStorageState WHERE singleton = 1');
+                const snapshot = this._onlineContentSnapshots.current;
+                if (!durable || durable.activeRootId !== this._onlineContentSnapshotsRootId ||
+                durable.activeEpoch !== snapshot.epoch || durable.logicalHighWater !== snapshot.logicalHighWater) {
+                    throw new Error('Content reclamation requires an adopted runtime root');
+                }
+                this._termContentStore.assertRepackableRoot(snapshot.epoch, snapshot.logicalHighWater);
+            },
+            hasActiveLeases: () => this._onlineContentSnapshots?.hasActiveLeases ?? false,
+            removeFile: (file) => this._onlineContentPhysicalFileStore.remove(file),
+            confirmAutocommit: (db) => this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) === 1,
+            quarantine: (errors) => {
+                this._onlineContentPublicationRecoveryRequired = true;
+                this._quarantineBulkImportConnection(errors);
+            },
+        });
         /** @type {TermContentBlockStore} */
         this._termContentBlockStore = new TermContentBlockStore(this._termContentStore, {
             blockTargetBytes: TERM_CONTENT_BLOCK_TARGET_BYTES,
         });
+        this._termContentBlockStore.setOnlineFrameResolver(this._resolveOnlineContentFrame.bind(this));
+        this._termContentBlockStore.setReadContextProvider(this._acquireTermContentReadContext.bind(this));
         /** @type {import('./term-content-block-store.js').TermContentBlockImportSession|null} */
         this._termContentBlockImportSession = null;
         /** @type {TermRecordOpfsStore} */
@@ -789,6 +911,21 @@ export class DictionaryDatabase {
             return;
         }
         await this._prepareOnce(false);
+        await this._resetEmptyOnlineContentStorage();
+    }
+
+    /**
+     * Reuse the dictionary-only purge once no committed dictionary can retain
+     * content. The same check on startup retries an interrupted final delete.
+     * @returns {Promise<void>}
+     */
+    async _resetEmptyOnlineContentStorage() {
+        if (this._onlineContentSnapshots === null || this._onlineContentSnapshots.hasActiveLeases ||
+        this._isOpening || this._isBulkImportInProgress() || this._hasUnresolvedImportJournal() ||
+        this._closingPromise !== null || this._purgingPromise !== null ||
+        this._onlineContentPublicationRecoveryRequired) { return; }
+        if (this._requireDb().selectValue('SELECT 1 FROM dictionaries LIMIT 1') === 1) { return; }
+        await this.purge();
     }
 
     /**
@@ -830,6 +967,8 @@ export class DictionaryDatabase {
                     await this._cleanupMissingTermRecordShards();
                 }
                 await this._checkStartupGenerationMediaHealth();
+
+                this._confirmOnlineContentConnectionRecovery();
 
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
@@ -940,6 +1079,7 @@ export class DictionaryDatabase {
         this._clearSharedGlossaryArtifactCaches();
         this._clearTermsVtabCursorState();
         this._termsVtabModuleRegistered = false;
+        this._onlineContentPhysicalFileStore.invalidate();
         const db = this._db;
         this._db = null;
         this._bulkImportTransactionOpen = false;
@@ -1120,6 +1260,18 @@ export class DictionaryDatabase {
             await this._endBulkImportStoreSessions(errors, rollbackTermContent, rollbackTermRecords);
             return sqliteRollbackSucceeded;
         }
+        if (!sqliteRollbackSucceeded) {
+            // Join writers without restoring or deleting potentially published
+            // bytes. Open recovery uses the durable SQLite receipt.
+            const mediaWrite = this._generationMediaWrite;
+            if (mediaWrite !== null) {
+                mediaWrite.cancel?.();
+                await mediaWrite.promise.catch(() => {});
+            }
+            await this._endBulkImportStoreSessions(errors, rollbackTermContent, rollbackTermRecords);
+            this._importJournalRecoveryPending = true;
+            return false;
+        }
 
         const operations = [this._rollbackGenerationMedia(journalRecord.sessionId)];
         if (rollbackTermContent) {
@@ -1201,7 +1353,7 @@ export class DictionaryDatabase {
      */
     async _collectPersistentStoreResetErrors() {
         const results = await Promise.allSettled([
-            this._termContentStore.reset(),
+            this._termContentStore.reset({purgeImmutable: true}),
             this._termRecordStore.reset(),
             this._generationMediaStore.reset(),
         ]);
@@ -1396,7 +1548,7 @@ export class DictionaryDatabase {
                 };
                 await this._importJournal.write(this._bulkImportJournalRecord);
                 termContentSessionStartAttempted = true;
-                await this._termContentStore.beginImportSession();
+                await this._termContentStore.beginImportSession(contentCheckpoint);
                 termRecordSessionStartAttempted = true;
                 await this._termRecordStore.beginImportSession();
                 this._applyImportPragmas();
@@ -1534,6 +1686,8 @@ export class DictionaryDatabase {
             let termContentSessionEnded = false;
             let termRecordSessionEnded = false;
             let sqlitePublished = false;
+            /** @type {{checkpoint: import('dictionary-import-journal').TermContentArenaCheckpoint, expected: OnlineContentStorageState, rootId: string, plan: OnlineContentIdentityPlan, committed: OnlineContentRootSnapshot|null}|null} */
+            let arenaPublication = null;
             try {
                 const generationMedia = publication?.summary.generationMedia;
                 if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
@@ -1606,6 +1760,17 @@ export class DictionaryDatabase {
                 if (endImportSessionErrors.length > 1) {
                     throw new AggregateError(endImportSessionErrors, 'Failed to finalize dictionary import storage');
                 }
+                const contentCheckpoint = this._bulkImportJournalRecord?.contentCheckpoint;
+                if (contentCheckpoint?.version === 2) {
+                    const sealed = await this._termContentStore.sealImportArena();
+                    const expected = this.getOnlineContentStorageState();
+                    if (sealed.storageEpoch !== expected.epoch || sealed.logicalStart !== expected.logicalHighWater) {
+                        throw new Error('Sealed import arena does not extend its committed content root');
+                    }
+                    const rootId = `import-${this._bulkImportJournalRecord.sessionId}`;
+                    const plan = await this._prepareOnlineContentIdentityPlan(rootId, sealed.logicalStart, sealed.logicalHighWater, sealed.files);
+                    arenaPublication = {checkpoint: contentCheckpoint, expected, rootId, plan, committed: null};
+                }
                 if (this._termsVirtualTableDirty) {
                     const tTermsVirtualTableSyncStart = safePerformance.now();
                     await this._syncTermsVirtualTableFromRecordStore();
@@ -1638,11 +1803,31 @@ export class DictionaryDatabase {
                     }
                     if (isGenerationMediaDescriptor(publication?.summary.generationMedia)) {
                         // The storage gate and the summary become durable together.
-                        db.exec(`PRAGMA user_version = ${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}`);
+                        this._raiseDictionaryStorageVersion(PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION);
                     }
                     db.exec({
                         sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
                         bind: [sessionId, Date.now()],
+                    });
+                    if (arenaPublication !== null) {
+                        arenaPublication.committed = this._insertOnlineContentIdentityRoot(arenaPublication.expected, arenaPublication.rootId, arenaPublication.plan, sessionId);
+                    }
+                    // Before online layout activation, the legacy stream is
+                    // still authoritative. Advance its logical high-water in
+                    // the same import transaction as the dictionary summary.
+                    const importedContentHighWater = this._termContentStore.getLogicalLength();
+                    db.exec({
+                        sql: `UPDATE termContentStorageRoots
+                            SET logicalHighWater = $highWater
+                            WHERE rootId = 'legacy-root-v0' AND state = 'active'
+                                AND EXISTS (SELECT 1 FROM termContentStorageState
+                                    WHERE singleton = 1 AND activeRootId = 'legacy-root-v0')`,
+                        bind: {$highWater: importedContentHighWater},
+                    });
+                    db.exec({
+                        sql: `UPDATE termContentStorageState SET logicalHighWater = $highWater
+                            WHERE singleton = 1 AND activeRootId = 'legacy-root-v0'`,
+                        bind: {$highWater: importedContentHighWater},
                     });
                     const tCommitStart = safePerformance.now();
                     db.exec('COMMIT');
@@ -1653,6 +1838,15 @@ export class DictionaryDatabase {
                     this._bulkImportJournalRecord = null;
                     this._importJournalRecoveryPending = true;
                     commitMs = safePerformance.now() - tCommitStart;
+                    if (arenaPublication !== null) {
+                        if (arenaPublication.committed === null) { throw new Error('Content arena publication receipt is missing'); }
+                        await this._termContentStore.adoptImportArena(arenaPublication.checkpoint, {
+                            storageEpoch: arenaPublication.committed.epoch,
+                            logicalHighWater: arenaPublication.committed.logicalHighWater,
+                        });
+                        this._onlineContentLayoutWindowCache.clear();
+                        this.getOnlineContentStorageState();
+                    }
                     if (publication !== null) {
                         const storageName = this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title);
                         this._termRecordGenerationByStorage.set(storageName, sessionId);
@@ -1776,6 +1970,22 @@ export class DictionaryDatabase {
                     totalMs,
                 };
             } catch (e) {
+                const sessionId = this._bulkImportJournalRecord?.sessionId;
+                if (!sqlitePublished && typeof sessionId === 'string' && this._hasDurableImportPublication(sessionId)) {
+                    // COMMIT may succeed while its wrapper/acknowledgement throws.
+                    // Never compensate by deleting files now owned by that commit.
+                    sqlitePublished = true;
+                    this._bulkImportTransactionOpen = false;
+                    if (arenaPublication?.committed) {
+                        try {
+                            await this._termContentStore.adoptImportArena(arenaPublication.checkpoint, {
+                                storageEpoch: arenaPublication.committed.epoch,
+                                logicalHighWater: arenaPublication.committed.logicalHighWater,
+                            });
+                            this.getOnlineContentStorageState();
+                        } catch (adoptionError) { cleanupErrors.push(toError(adoptionError)); }
+                    }
+                }
                 operationError = toError(e);
             } finally {
                 let rollbackSucceeded = true;
@@ -1923,6 +2133,9 @@ export class DictionaryDatabase {
                 // Setup performs its own rollback; purge still resets all persistence.
             }
         }
+        if (this._onlineContentSnapshots?.hasActiveLeases) {
+            throw new Error('Cannot purge dictionary content while physical read leases are active');
+        }
         const previousBulkImportState = this._bulkImportState;
         this._beginExclusiveDatabaseCleanup();
         let root;
@@ -1965,6 +2178,12 @@ export class DictionaryDatabase {
                     errors.push(toError(error));
                 }
             }
+            this._onlineContentSnapshots = null;
+            this._onlineContentSnapshotsRootId = null;
+            this._onlineContentLayoutWindowCache.clear();
+            this._onlineContentLayoutManifestCache.clear();
+            this._onlineContentDictionaryCache.clear();
+            this._onlineContentPhysicalFileStore.invalidate();
             this._releaseRuntimeConnection(errors);
             this._bulkImportTransactionOpen = false;
             this._bulkImportJournalRecord = null;
@@ -2447,7 +2666,9 @@ null;
             }
             // Commit metadata removal before resetting OPFS. An interruption
             // may leave unreferenced bytes, but never offsets into deleted data.
-            await this._termContentStore.reset();
+            await (this._onlineContentSnapshots === null ?
+                this._termContentStore.reset() :
+                this._resetEmptyOnlineContentStorage());
             return;
         }
         await this._beginImmediateTransaction(db);
@@ -4430,6 +4651,2562 @@ void 0 :
     }
 
     /**
+     * Re-enable optional publication only after a reopened connection has an
+     * independently durable root. Keep existing leases; resetting the snapshot
+     * manager here could let GC delete bytes still used by an older reader.
+     * @throws {Error} If the connection is still inside an unconfirmed transaction.
+     */
+    _confirmOnlineContentConnectionRecovery() {
+        if (!this._onlineContentPublicationRecoveryRequired) { return; }
+        const db = this._requireDb();
+        if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1) {
+            throw new Error('Online content recovery requires an autocommit connection');
+        }
+        this.getOnlineContentStorageState();
+        this._onlineContentPublicationRecoveryRequired = false;
+    }
+
+    /**
+     * Pins immutable physical resources through reference/frame/decode reads.
+     * @returns {Required<import('./term-content-block-store.js').TermContentReadContext>|null}
+     * @throws {Error} If lifecycle teardown has started.
+     */
+    _acquireTermContentReadContext() {
+        if (this._purgingPromise !== null || this._closingPromise !== null) {
+            throw new Error('Dictionary content lifecycle is closing');
+        }
+        if (this._onlineContentSnapshots === null || this._onlineContentSnapshotsRootId === null) { return null; }
+        return this._createTermContentReadContext(this._onlineContentSnapshots.acquire(), this._onlineContentSnapshotsRootId);
+    }
+
+    /**
+     * @param {import('./term-content-storage-snapshots.js').ContentStorageLease} lease
+     * @param {string} rootId
+     * @returns {Required<import('./term-content-block-store.js').TermContentReadContext>}
+     */
+    _createTermContentReadContext(lease, rootId) {
+        const snapshot = {rootId, epoch: lease.root.epoch, logicalHighWater: lease.root.logicalHighWater};
+        let released = false;
+        const assertOwned = () => {
+            if (released) { throw new Error('Content read context has already been released'); }
+        };
+        /**
+         *
+         * @param {number} offset
+         * @param {number} length
+         * @returns {Promise<Uint8Array|null>}
+         */
+        const readSlice = async (offset, length) => {
+            assertOwned();
+            return await this._readOnlineContentLogicalSlice(offset, length, snapshot);
+        };
+        return {
+            rootKey: rootId,
+            logicalHighWater: snapshot.logicalHighWater,
+            findFrameOverride: async (query) => {
+                assertOwned();
+                return await this._findOnlineContentFrameOverride(query, snapshot);
+            },
+            readSlice,
+            readSlicesDetailed: async (requests) => {
+                assertOwned();
+                const settled = await Promise.allSettled(requests.map(({offset, length}) => readSlice(offset, length)));
+                return settled.map((result) => (result.status === 'rejected' ?
+{status: 'error', error: /** @type {unknown} */ (result.reason)} :
+                    (result.value === null ? {status: 'unavailable'} : {status: 'ok', bytes: result.value})));
+            },
+            resolveFrame: async (identity) => {
+                assertOwned();
+                if (identity.logicalOffset >= snapshot.logicalHighWater) { return null; }
+                try {
+                    const frame = await this._resolveOnlineContentFrameUnderSnapshot(identity, snapshot);
+                    return frame === null ? null : {...frame, release: () => {}};
+                } catch (error) {
+                    if (error instanceof TermContentIntegrityError && typeof Reflect.get(error, 'layoutId') !== 'string') {
+                        const region = lease.root.regions.find((entry) => identity.logicalOffset >= entry.logicalStart &&
+                        identity.logicalOffset < entry.logicalStart + entry.logicalLength);
+                        if (region) { Reflect.set(error, 'layoutId', region.layoutId); }
+                    }
+                    throw error;
+                }
+            },
+            isCurrentFrame: async (identity, physicalKey) => {
+                assertOwned();
+                const current = this.getOnlineContentStorageState();
+                if (current.rootId === rootId) { return true; }
+                if (this._onlineContentSnapshots === null) { throw new Error('Current content read root is unavailable'); }
+                const currentLease = this._onlineContentSnapshots.acquire();
+                try {
+                    const resolved = await this._describeOnlineContentFrame(identity, {
+                        rootId: current.rootId, epoch: currentLease.root.epoch, logicalHighWater: currentLease.root.logicalHighWater,
+                    });
+                    if (resolved === null) { throw new Error('Current content frame metadata is unavailable'); }
+                    return resolved.physicalKey.slice(resolved.physicalKey.indexOf(':') + 1) ===
+                    physicalKey.slice(physicalKey.indexOf(':') + 1);
+                } finally { currentLease.release(); }
+            },
+            isCurrentFrameLayout: async (identity, layoutId) => {
+                assertOwned();
+                const current = this.getOnlineContentStorageState();
+                const region = current.manifest.regions.find((entry) => identity.logicalOffset >= entry.logicalStart &&
+                identity.logicalOffset < entry.logicalStart + entry.logicalLength);
+                if (!region) { throw new Error('Current frame manifest owner is unavailable'); }
+                return region.layoutId === layoutId;
+            },
+            isCurrentRange: async (offset, length) => {
+                assertOwned();
+                const current = this.getOnlineContentStorageState();
+                if (current.rootId === rootId) { return true; }
+                if (this._onlineContentSnapshots === null) { throw new Error('Current content read root is unavailable'); }
+                const currentLease = this._onlineContentSnapshots.acquire();
+                try {
+                    const next = {rootId: current.rootId,
+                        epoch: currentLease.root.epoch,
+                        logicalHighWater: currentLease.root.logicalHighWater};
+                    const oldIdentity = await this._getOnlineContentLogicalIdentity(offset, length, snapshot);
+                    const currentIdentity = await this._getOnlineContentLogicalIdentity(offset, length, next);
+                    return oldIdentity === currentIdentity;
+                } finally { currentLease.release(); }
+            },
+            fork: () => {
+                assertOwned();
+                return this._createTermContentReadContext(lease.fork(), rootId);
+            },
+            release: () => {
+                if (released) { return; }
+                released = true;
+                lease.release();
+            },
+        };
+    }
+
+    /**
+     * Compares retained physical spans without reading payloads.
+     * @param {number} offset
+     * @param {number} length
+     * @param {OnlineContentRootSnapshot} snapshot
+     * @returns {Promise<string>}
+     */
+    async _getOnlineContentLogicalIdentity(offset, length, snapshot) {
+        if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0 ||
+        offset > snapshot.logicalHighWater - length) {
+            throw new RangeError('Retained content identity lies outside its committed root');
+        }
+        const identity = [];
+        let cursor = offset;
+        while (cursor < offset + length) {
+            const window = await this.getOnlineContentLayoutWindow(cursor, snapshot);
+            if (window === null) { throw new Error('Retained content identity window is unavailable'); }
+            const resolver = createContentLayoutResolver(window.resolverData);
+            const count = Math.min(offset + length - cursor, resolver.logicalEnd - cursor);
+            if (count <= 0) { throw new Error('Retained content identity made no forward progress'); }
+            for (const span of resolver.resolveLogical(cursor, count)) {
+                const file = window.fileLocators.get(span.fileId);
+                if (typeof file === 'undefined') { throw new Error('Retained content physical closure is missing'); }
+                const previous = identity[identity.length - 1];
+                if (previous && previous.fileId === file.fileId && previous.path === file.path &&
+                previous.byteLength === file.byteLength && previous.offset + previous.length === span.physicalOffset) {
+                    previous.length += span.length;
+                } else {
+                    if (identity.length >= 32768) { throw new RangeError('Retained content identity exceeds metadata admission'); }
+                    identity.push({fileId: file.fileId,
+                        path: file.path,
+                        byteLength: file.byteLength,
+                        offset: span.physicalOffset,
+                        length: span.length});
+                }
+                cursor += span.length;
+            }
+        }
+        return JSON.stringify(identity);
+    }
+
+    /**
+     * Reads retained bytes under an immutable root with bounded physical I/O.
+     * @param {number} offset
+     * @param {number} length
+     * @param {OnlineContentRootSnapshot} snapshot
+     * @param {OnlineContentReadResources|null} [readResources]
+     * @returns {Promise<Uint8Array|null>}
+     * @throws {Error} If current immutable metadata or physical bytes are invalid.
+     */
+    async _readOnlineContentLogicalSlice(offset, length, snapshot, readResources = null) {
+        const physicalFiles = readResources?.physicalFiles ?? this._onlineContentPhysicalFileStore;
+        if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0 ||
+        offset > Number.MAX_SAFE_INTEGER - length) { return null; }
+        if (offset >= snapshot.logicalHighWater) {
+            // Only the import owner can have unpublished references. The store
+            // keeps these private bytes separate from its committed reader.
+            return this._isBulkImportInProgress() ? await this._termContentStore.readImportSlice(offset, length) : null;
+        }
+        if (length > snapshot.logicalHighWater - offset) { return null; }
+        const bytes = new Uint8Array(length);
+        let cursor = offset;
+        while (cursor < offset + length) {
+            const window = await this.getOnlineContentLayoutWindow(cursor, snapshot, readResources);
+            if (window === null) { throw new TermContentIntegrityError('Committed content logical mapping is missing'); }
+            let resolver;
+            try { resolver = createContentLayoutResolver(window.resolverData); } catch (error) {
+                throw new TermContentIntegrityError(`Committed content logical mapping is invalid: ${toError(error).message}`);
+            }
+            const partLength = Math.min(offset + length - cursor, resolver.logicalEnd - cursor);
+            if (partLength <= 0) { throw new TermContentIntegrityError('Committed content logical mapping made no forward progress'); }
+            const spans = resolver.resolveLogical(cursor, partLength);
+            for (const span of spans) {
+                const locator = window.fileLocators.get(span.fileId);
+                if (typeof locator === 'undefined') { throw new TermContentIntegrityError('Committed content physical file closure is missing'); }
+                let spanCursor = 0;
+                while (spanCursor < span.length) {
+                    const count = Math.min(4 * 1024 * 1024, span.length - spanCursor);
+                    let chunk;
+                    try {
+                        chunk = await physicalFiles.readSlice(locator, span.physicalOffset + spanCursor, count);
+                    } catch (error) {
+                        if (error instanceof ContentPhysicalFileIntegrityError) {
+                            const integrity = new TermContentIntegrityError(error.message);
+                            Reflect.set(integrity, 'physicalFile', error.physicalFile);
+                            throw integrity;
+                        }
+                        throw error;
+                    }
+                    bytes.set(chunk, cursor - offset);
+                    spanCursor += count;
+                    cursor += count;
+                }
+            }
+        }
+        return bytes;
+    }
+
+    /**
+     * Activates immutable addressing without rewriting existing source bytes.
+     * Journal recovery and idle admission finish before this call.
+     * @param {AbortSignal|null} [signal]
+     * @param {() => void} [assertEligibilityOwner]
+     * @returns {Promise<OnlineContentStorageState>}
+     */
+    async activateOnlineContentStorage(signal = null, assertEligibilityOwner) {
+        this._assertOnlineContentStepSignal(signal);
+        this._assertOnlineContentMutationReady();
+        const expected = this.getOnlineContentStorageState();
+        if (expected.epoch !== 0) { return expected; }
+        const inventory = await this._termContentStore.inventoryLegacyFiles();
+        this._assertOnlineContentStepSignal(signal);
+        const files = inventory;
+        const logicalHighWater = files.length === 0 ? 0 : files[files.length - 1].logicalEnd;
+        if (logicalHighWater !== expected.logicalHighWater) {
+            throw new Error('Legacy content inventory differs from its committed logical high-water');
+        }
+        const namespace = `identity-${createDictionaryImportSessionId()}`;
+        const plan = await this._prepareOnlineContentIdentityPlan(namespace, 0, logicalHighWater, files, signal);
+        this._assertOnlineContentStepSignal(signal);
+        this._assertOnlineContentMutationReady();
+        const db = this._requireDb();
+        try {
+            db.exec('BEGIN IMMEDIATE');
+            assertEligibilityOwner?.();
+            this._insertOnlineContentIdentityRoot(expected, namespace, plan, 'legacy-activation');
+            db.exec('COMMIT');
+        } catch (error) {
+            this._requireCommittedOnlineContentRoot(db, namespace, expected.rootId, error);
+        }
+        try {
+            await this._termContentStore.activateCommittedRoot({storageEpoch: expected.epoch + 1, logicalHighWater});
+        } catch (error) {
+            this._onlineContentPublicationRecoveryRequired = true;
+            const errors = [toError(error)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Published content activation requires connection recovery');
+        }
+        this._onlineContentLayoutWindowCache.clear();
+        try {
+            return this.getOnlineContentStorageState();
+        } catch (error) {
+            this._onlineContentPublicationRecoveryRequired = true;
+            const errors = [toError(error)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Published content activation could not adopt its reader root');
+        }
+    }
+
+    /**
+     * @param {AbortSignal|null} signal
+     * @throws {Error} If foreground work preempted this step.
+     */
+    _assertOnlineContentStepSignal(signal) {
+        if (signal?.aborted) {
+            const error = new Error('Online content maintenance was preempted');
+            error.name = 'AbortError';
+            throw error;
+        }
+    }
+
+    /** @throws {Error} If lifecycle ownership excludes maintenance. */
+    _assertOnlineContentMutationReady() {
+        if (this._isBulkImportInProgress() || this._bulkImportTransactionOpen || this._hasUnresolvedImportJournal() ||
+        this._onlineContentPublicationRecoveryRequired || this._closingPromise !== null || this._purgingPromise !== null) {
+            throw new Error('Online content storage mutation cannot overlap dictionary lifecycle ownership');
+        }
+    }
+
+    /**
+     * Hashes bounded manifests; data packs remain length observations.
+     * @param {string} namespace
+     * @param {number} logicalStart
+     * @param {number} logicalHighWater
+     * @param {import('dictionary-import-journal').TermContentArenaFile[]} files
+     * @param {AbortSignal|null} [signal]
+     * @returns {Promise<OnlineContentIdentityPlan>}
+     */
+    async _prepareOnlineContentIdentityPlan(namespace, logicalStart, logicalHighWater, files, signal = null) {
+        this._assertOnlineContentStepSignal(signal);
+        const plan = planContentIdentityLayouts(namespace, logicalStart, logicalHighWater, files);
+        const encoder = new TextEncoder();
+        /** @type {OnlineContentIdentityPlan['layouts']} */
+        const layouts = [];
+        for (const layout of plan.layouts) {
+            this._assertOnlineContentStepSignal(signal);
+            const bytes = encoder.encode(JSON.stringify(layout.manifest));
+            const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
+            this._assertOnlineContentStepSignal(signal);
+            layouts.push({...layout, manifestSha256: [...digest].map((value) => value.toString(16).padStart(2, '0')).join('')});
+        }
+        return {...plan, layouts};
+    }
+
+    /**
+     * Appends identity metadata inside the established import transaction.
+     * @param {OnlineContentStorageState} expected
+     * @param {string} rootId
+     * @param {OnlineContentIdentityPlan} plan
+     * @param {string} ownerId
+     * @returns {OnlineContentRootSnapshot}
+     * @throws {Error} If root identity or publication closure changed.
+     */
+    _insertOnlineContentIdentityRoot(expected, rootId, plan, ownerId) {
+        const db = this._requireDb();
+        const current = this.getOnlineContentStorageState();
+        if (current.rootId !== expected.rootId || current.epoch !== expected.epoch ||
+        current.logicalHighWater !== expected.logicalHighWater) {
+            throw new Error('Content identity publication source root changed');
+        }
+        const previousRegions = expected.epoch === 0 ? [] : expected.manifest.regions;
+        const regions = [...previousRegions, ...plan.regions];
+        const logicalHighWater = regions.length === 0 ? 0 : regions[regions.length - 1].logicalStart + regions[regions.length - 1].logicalLength;
+        if (regions.length > 32768 || logicalHighWater < expected.logicalHighWater ||
+        (plan.regions.length > 0 && plan.regions[0].logicalStart !== (expected.epoch === 0 ? 0 : expected.logicalHighWater))) {
+            throw new Error('Content identity publication does not extend the committed logical stream');
+        }
+        const epoch = expected.epoch + 1;
+        const manifest = {version: 1, regions};
+        const manifestJson = JSON.stringify(manifest);
+        if (manifestJson.length > 1024 * 1024) { throw new RangeError('Content root directory exceeds its byte bound'); }
+        for (const file of plan.files) {
+            db.exec({sql: `INSERT INTO termContentStorageFiles(fileId, path, byteLength, sha256, state, ownerJobId)
+                VALUES ($fileId, $path, $byteLength, NULL, 'active', $ownerId)`,
+            bind: {$fileId: file.fileId, $path: file.path, $byteLength: file.byteLength, $ownerId: ownerId}});
+        }
+        for (const layout of plan.layouts) {
+            db.exec({sql: `INSERT INTO termContentStorageLayouts(layoutId, version, regionId, manifestJson, manifestSha256)
+                VALUES ($layoutId, 1, $regionId, $manifestJson, $sha256)`,
+            bind: {$layoutId: layout.layoutId,
+                $regionId: layout.regionId,
+                $manifestJson: JSON.stringify(layout.manifest),
+                $sha256: layout.manifestSha256}});
+        }
+        db.exec({sql: `INSERT INTO termContentStorageRoots(rootId, epoch, logicalHighWater, state, manifestJson, createdAt)
+            VALUES ($rootId, $epoch, $highWater, 'staged', $manifestJson, $createdAt)`,
+        bind: {$rootId: rootId, $epoch: epoch, $highWater: logicalHighWater, $manifestJson: manifestJson, $createdAt: Date.now()}});
+        for (const region of regions) {
+            db.exec({sql: `INSERT INTO termContentStorageRootLayouts(rootId, regionId, layoutId, logicalStart, logicalLength)
+                VALUES ($rootId, $regionId, $layoutId, $logicalStart, $logicalLength)`,
+            bind: {$rootId: rootId,
+                $regionId: region.regionId,
+                $layoutId: region.layoutId,
+                $logicalStart: region.logicalStart,
+                $logicalLength: region.logicalLength}});
+        }
+        db.exec({sql: 'UPDATE termContentStorageRoots SET state = \'retired\' WHERE rootId = $rootId AND state = \'active\'',
+            bind: {$rootId: expected.rootId}});
+        if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) { throw new Error('Content identity source root is no longer active'); }
+        db.exec({sql: 'UPDATE termContentStorageRoots SET state = \'active\' WHERE rootId = $rootId', bind: {$rootId: rootId}});
+        db.exec({sql: `UPDATE termContentStorageState SET activeEpoch = $epoch, logicalHighWater = $highWater, activeRootId = $rootId
+            WHERE singleton = 1 AND activeRootId = $expectedRootId AND activeEpoch = $expectedEpoch`,
+        bind: {$epoch: epoch,
+            $highWater: logicalHighWater,
+            $rootId: rootId,
+            $expectedRootId: expected.rootId,
+            $expectedEpoch: expected.epoch}});
+        if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) { throw new Error('Content identity root compare-and-swap failed'); }
+        this._raiseDictionaryStorageVersion(ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION);
+        return {rootId, epoch, logicalHighWater};
+    }
+
+    /**
+     * Resolves an error after a root transaction began. If the exact prior
+     * root cannot be confirmed, forbid additional work until a clean reopen.
+     * @param {import('@sqlite.org/sqlite-wasm').Database} db
+     * @param {string} nextRootId
+     * @param {string} previousRootId
+     * @param {unknown} cause
+     * @throws {Error} If the transaction rolled back or needs recovery.
+     */
+    _requireCommittedOnlineContentRoot(db, nextRootId, previousRootId, cause) {
+        try {
+            if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) === 0) {
+                db.exec('ROLLBACK');
+            }
+            if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1) {
+                throw new Error('SQLite did not return to autocommit');
+            }
+            const durable = db.selectValue('SELECT activeRootId FROM termContentStorageState WHERE singleton = 1');
+            if (durable === nextRootId) { return; }
+            if (durable !== previousRootId) { throw new Error('Unexpected durable root after publication'); }
+        } catch (error) {
+            this._onlineContentPublicationRecoveryRequired = true;
+            const errors = [toError(cause), toError(error)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Online content publication requires connection recovery');
+        }
+        throw toError(cause);
+    }
+
+    /**
+     *
+     * @param {string} sessionId
+     * @returns {boolean}
+     */
+    _hasDurableImportPublication(sessionId) {
+        try {
+            const db = this._requireDb();
+            return this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) === 1 &&
+            this._asNumber(db.selectValue(
+                'SELECT 1 FROM dictionaryImportPublications WHERE sessionId = $sessionId',
+                {$sessionId: sessionId},
+            ), 0) === 1;
+        } catch (_) { return false; }
+    }
+
+    /**
+     * @param {AbortSignal} signal
+     * @returns {Promise<{pending: boolean, retryAt?: number}>}
+     */
+    async runOnlineContentOptimizationStep(signal) {
+        this._onlineContentOptimizationRunner ??= this.createOnlineContentOptimizationRunner();
+        return await this._onlineContentOptimizationRunner(signal);
+    }
+
+    /**
+     * Composes the database-owned idle controller with a bounded repack store.
+     * Use actual frame selectors during discovery, including preset imports.
+     * @param {Partial<Pick<import('./term-content-optimization-controller.js').OptimizationHost, 'planBatch'|'stageBatch'|'verificationPage'|'measureBatch'|'publishBatch'>>} [batch]
+     * @returns {(signal: AbortSignal) => Promise<{pending: boolean, retryAt?: number}>}
+     */
+    createOnlineContentOptimizationRunner(batch = {}) {
+        /** @typedef {import('./term-content-optimization-controller.js').OptimizationJob} Job */
+        const strategyVersion = 'fastcover-f18-level3-16k-w64k-v2';
+        /** @type {import('./term-content-optimization-controller.js').OptimizationHost['getJob']} */
+        const getJob = (jobId) => {
+            this._assertOnlineContentMutationReady();
+            if (typeof jobId === 'string') {
+                return /** @type {Job|undefined} */ (this.getOnlineContentOptimizationJobs().find((job) => job.jobId === jobId)) ?? null;
+            }
+            const jobs = this.getOnlineContentOptimizationJobs(true);
+            const blocking = jobs.filter((job) =>
+                job.phase !== 'deferred' || this._hasUnreclaimedOnlineContentFiles(job.jobId),
+            );
+            if (blocking.length > 1) { throw new Error('Multiple content optimization storage owners'); }
+            const next = blocking[0] ?? jobs
+                .filter((job) => job.retryAfter === null || job.retryAfter <= Date.now())
+                .sort((a, b) => (a.retryAfter ?? 0) - (b.retryAfter ?? 0))[0];
+            return /** @type {Job|undefined} */ (next) ?? null;
+        };
+        /**
+         * @param {Job} job
+         * @throws {Error} If the controller no longer owns this checkpoint.
+         */
+        const assertOwned = (job) => {
+            this._assertOnlineContentMutationReady();
+            const row = this._requireDb().selectObject(
+                'SELECT dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion FROM termContentOptimizationJobs WHERE jobId = $jobId',
+                {$jobId: job.jobId},
+            );
+            if (row?.dictionaryTitle !== job.dictionaryTitle || row.dictionaryGeneration !== job.dictionaryGeneration ||
+            row.strategyVersion !== job.strategyVersion || row.phase !== job.phase || row.checkpointVersion !== job.checkpointVersion) {
+                throw new Error('Content optimization job owner changed');
+            }
+        };
+        const artifacts = new TermContentOptimizationArtifacts({
+            store: this._onlineContentFileStore,
+            assertOwned,
+            lookup: (job, fileId) => {
+                const row = this._getOwnedOnlineContentOptimizationFile(job, fileId);
+                if (row.state === 'active' && job.checkpoint.dictionary?.fileId !== fileId) {
+                    throw new Error('Only the job dictionary may be used after publication');
+                }
+                return row;
+            },
+        });
+        /** @type {import('./term-content-optimization-controller.js').OptimizationHost['acquireSource']} */
+        const acquireSource = (job, signal) => this.acquireOnlineContentOptimizationSource(job, signal);
+        const reader = new TermContentOptimizationFrameReader({
+            acquire: (job, signal) => this.acquireOnlineContentOptimizationSource(job, signal),
+            assertOwned,
+        });
+        const store = new TermContentOptimizationBatchStore({
+            store: this._onlineContentFileStore,
+            replacement: new TermContentOptimizationReplacement({reader}),
+            assertOwned,
+            frames: (job, offset, limit) => this.getOnlineContentOptimizationFramePage(job.jobId, offset === null ? null : {nextLogicalOffset: offset}, limit).frames,
+            acquire: (job, offset, signal) => this._acquireOnlineContentRepackWindow(job, offset, signal),
+            lookup: (job, fileId) => {
+                const row = this._getOwnedOnlineContentOptimizationFile(job, fileId);
+                if (row.state === 'active') { throw new Error('Batch file is already active'); }
+                return {...row, state: row.state};
+            },
+            seal: (job, files) => this._sealOnlineContentRepackStage(job, files),
+            readDictionary: async (job, signal) => {
+                const dictionary = job.checkpoint.dictionary;
+                if (dictionary === null) { throw new Error('Repack dictionary is missing'); }
+                const bytes = await artifacts.read(job, dictionary.fileId, signal);
+                const hash = await arrayBufferDigest('SHA-256', new Uint8Array(bytes).buffer);
+                signal.throwIfAborted();
+                assertOwned(job);
+                if (bytes.byteLength !== dictionary.byteLength || hash !== dictionary.sha256) {
+                    throw new TermContentOptimizationIntegrityError('Repack dictionary receipt changed');
+                }
+                return bytes;
+            },
+        });
+        const controller = new TermContentOptimizationController({
+            dictionaryCapacity: 16 * 1024,
+            strategy: 2,
+            level: 3,
+            strategyVersion,
+            host: {
+                getJob,
+                nextRetryAt: () => this._asNullableNumber(this._requireDb().selectValue(
+                    "SELECT MIN(retryAfter) FROM termContentOptimizationJobs WHERE phase = 'deferred'",
+                )),
+                findCandidate: (version) => this._findOnlineContentOptimizationCandidate(version),
+                createJob: (job) => {
+                    this._assertOnlineContentMutationReady();
+                    const checkpointVersion = this.saveOnlineContentOptimizationJob({...job, cursor: null});
+                    return {...job, checkpointVersion};
+                },
+                assertOwned,
+                isTargetCurrent: (job) => this._getOnlineContentOptimizationTarget(job) !== null,
+                save: (job, phase, checkpoint, effects = {}, retryAfter = null) => {
+                    const checkpointVersion = this.checkpointOnlineContentOptimizationJob({
+                        job: {...job, phase, checkpoint, cursor: null, retryAfter, expectedCheckpointVersion: job.checkpointVersion},
+                        frames: effects.frames ?? [],
+                        reserveFileIds: effects.reserveFileIds,
+                        sealedFiles: effects.checkpointFile ? [effects.checkpointFile.file] : [],
+                    });
+                    return {...job, phase, checkpoint, checkpointVersion, retryAfter};
+                },
+                acquireSource,
+                isLegacyRoot: () => this.getOnlineContentStorageState().epoch === 0,
+                acquireLegacyProbe: (job, signal) => {
+                    const source = this._createLegacyOptimizationEligibilitySource(job, signal, () => assertOwned(job));
+                    return {source,
+                        activate: async () => {
+                            await assertTermContentOptimizationHeadroom(128 * 1024, signal);
+                            source.assertCurrent();
+                            await this.activateOnlineContentStorage(signal, source.assertCurrent);
+                        }};
+                },
+                readDiscovery: (job, cursor, signal, legacyProbe) =>
+                    this.readOnlineContentOptimizationDiscoveryPage(job, cursor, signal, legacyProbe),
+                framePage: (job, cursor) => {
+                    if (cursor !== null && (typeof cursor !== 'number' || !Number.isSafeInteger(cursor) || cursor < 0)) {
+                        throw new TypeError('Invalid content optimization frame cursor');
+                    }
+                    const {frames: [frame]} = this.getOnlineContentOptimizationFramePage(job.jobId, cursor === null ? null : {nextLogicalOffset: cursor}, 1);
+                    return {frame: frame ?? null, cursor: frame?.identity.logicalOffset ?? cursor};
+                },
+                readSample: (job, request, signal) => {
+                    const after = request.frameOffset === 0 ? null : {nextLogicalOffset: request.frameOffset - 1};
+                    const {frames: [frame]} = this.getOnlineContentOptimizationFramePage(job.jobId, after, 1);
+                    if (!frame || frame.physicalKey !== request.key || frame.identity.logicalOffset !== request.frameOffset ||
+                    frame.decodedLength !== request.decodedLength) {
+                        throw new Error('Content optimization sample frame changed');
+                    }
+                    return reader.readWindow(job, frame, request.windowOffset, request.length, signal);
+                },
+                writeFile: (job, fileId, bytes, signal) => artifacts.write(job, fileId, bytes, signal),
+                readFile: (job, file, signal) => artifacts.read(job, file.fileId, signal),
+                reclaimStep: (job, signal) => this._onlineContentReclaimer.runStep(job, signal),
+                planBatch: (job, cursor, signal) => store.planBatch(job, cursor, signal),
+                stageBatch: (job, current, dictionary, signal) => store.stageBatch(job, current, dictionary, signal),
+                verificationPage: async (job, current, cursor, signal) => ({
+                    ...await store.verificationPage(job, current, cursor, signal),
+                    verified: true,
+                }),
+                measureBatch: async (job, current, signal) => {
+                    const prepared = await store.readPreparedBatch(job, current, signal);
+                    signal.throwIfAborted();
+                    assertOwned(job);
+                    return this._matchOnlineContentRepack(job, prepared).sizes;
+                },
+                publishBatch: async (job, current, checkpoint, signal) => {
+                    const prepared = await store.readPreparedBatch(job, current, signal);
+                    signal.throwIfAborted();
+                    assertOwned(job);
+                    const {sizes, publication} = this._matchOnlineContentRepack(job, prepared);
+                    const physicalSavings = sizes.beforeBytes - sizes.afterBytes;
+                    if (physicalSavings <= 0) { return null; }
+                    try {
+                        const frameOffset = current.nextCursor;
+                        if (typeof frameOffset !== 'number' || !Number.isSafeInteger(frameOffset) || frameOffset < 0) {
+                            throw new TermContentOptimizationIntegrityError('Repack has no final verified frame offset');
+                        }
+                        this.publishOnlineContentStorageRoot({...publication,
+                            physicalSavings,
+                            retireFramesThrough: frameOffset,
+                            cursor: null,
+                            checkpoint});
+                    } catch (error) {
+                        if (error instanceof OnlineContentRepackNoGainError) { return null; }
+                        throw error;
+                    }
+                    return {...job, phase: 'reclaim', checkpoint, checkpointVersion: job.checkpointVersion + 1, retryAfter: null};
+                },
+                ...batch,
+            },
+        });
+        return async (signal) => {
+            this._assertOnlineContentStepSignal(signal);
+            this._assertOnlineContentMutationReady();
+            if (this._isOpening) { return {pending: false}; }
+            return await controller.runStep(signal);
+        };
+    }
+
+    /**
+     * New and restored imports are candidates until their actual referenced
+     * codecs have been examined for this immutable generation.
+     * @param {string} strategyVersion
+     * @returns {{jobId: string, dictionaryTitle: string, dictionaryGeneration: string}|null}
+     */
+    _findOnlineContentOptimizationCandidate(strategyVersion) {
+        const db = this._requireDb();
+        let after = 0;
+        for (;;) {
+            const rows = db.selectObjects(
+                'SELECT id, title, summaryJson FROM dictionaries WHERE id > $after ORDER BY id LIMIT 32',
+                {$after: after},
+            );
+            if (rows.length === 0) { return null; }
+            for (const row of rows) {
+                after = this._asNumber(row.id, after);
+                const title = this._asString(row.title);
+                const summary = /** @type {unknown} */ (this._safeParseJson(this._asString(row.summaryJson), null));
+                if (title.length === 0 || title.length > 512 || !summary || typeof summary !== 'object' ||
+                Array.isArray(summary) || Reflect.get(summary, 'importSuccess') !== true) { continue; }
+                const generation = this._getSummaryStorageGenerationId(summary, title);
+                if (generation.length === 0 || generation.length > 256) { continue; }
+                const exists = db.selectValue(
+                    'SELECT 1 FROM termContentOptimizationJobs WHERE dictionaryGeneration = $generation AND strategyVersion = $version',
+                    {$generation: generation, $version: strategyVersion},
+                );
+                if (exists !== 1) {
+                    return {jobId: 'zstd-' + crypto.randomUUID(), dictionaryTitle: title, dictionaryGeneration: generation};
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolves only the current job's optimizer namespace.
+     * @param {import('./term-content-optimization-controller.js').OptimizationJob} job
+     * @param {string} fileId
+     * @returns {import('./term-content-optimization-artifacts.js').ArtifactObservation}
+     * @throws {Error} If the durable file ownership is missing.
+     */
+    _getOwnedOnlineContentOptimizationFile(job, fileId) {
+        const row = this._requireDb().selectObject(
+            'SELECT fileId, state, byteLength, sha256, ownerJobId, path FROM termContentStorageFiles WHERE fileId = $fileId AND ownerJobId = $jobId',
+            {$fileId: fileId, $jobId: job.jobId},
+        );
+        if (row?.path !== 'manabitan-online-content-v1/' + fileId + '.bin') {
+            throw new Error('Content optimization artifact receipt is missing or invalid');
+        }
+        return /** @type {import('./term-content-optimization-artifacts.js').ArtifactObservation} */ (row);
+    }
+
+    /**
+     * Build the replacement against the current directory. A later import may
+     * have appended regions while this job was asleep. Only retired whole files
+     * count toward a gain, including files still used by a region outside the
+     * bounded copy window.
+     * @param {import('./term-content-optimization-controller.js').OptimizationJob} job
+     * @param {import('./term-content-optimization-batch-store.js').PreparedContentOptimizationBatch} prepared
+     * @returns {{sizes: {beforeBytes: number, afterBytes: number}, publication: Omit<Parameters<DictionaryDatabase['publishOnlineContentStorageRoot']>[0], 'cursor'|'checkpoint'>}}
+     * @throws {Error} If the prepared layout or physical closure changed.
+     */
+    _matchOnlineContentRepack(job, prepared) {
+        const state = this.getOnlineContentStorageState();
+        const db = this._requireDb();
+        const current = new Map(state.manifest.regions.map((region) => [region.regionId, region]));
+        const expected = new Map(prepared.sourceLayouts.map((region) => [region.regionId, region]));
+        for (const source of expected.values()) {
+            const region = current.get(source.regionId);
+            if (!region || region.layoutId !== source.layoutId || region.logicalStart !== source.logicalStart ||
+            region.logicalLength !== source.logicalLength) {
+                throw new TermContentOptimizationIntegrityError('Committed repack source layout changed');
+            }
+        }
+        const replacements = new Map(prepared.layouts.map((layout) => [layout.regionId, layout]));
+        const regions = state.manifest.regions.map((entry) => {
+            const replacement = replacements.get(entry.regionId);
+            if (!replacement) { return entry; }
+            if (!expected.has(entry.regionId)) { throw new TermContentOptimizationIntegrityError('Repack layout is outside its planned window'); }
+            return {...entry, layoutId: replacement.layoutId};
+        });
+        const activatedFileIds = prepared.files.map((file) => file.fileId);
+        const retiredFileIds = [];
+        const codecs = [];
+        const retainedFiles = new Set();
+        let beforeBytes = 0;
+        let afterBytes = prepared.files.reduce((total, file) => total + file.byteLength, 0);
+        const codec = prepared.codec;
+        if (codec !== null) {
+            const training = job.checkpoint.dictionary;
+            if (!training || codec.codecId !== 'manabitan-zstd-' + training.sha256 ||
+            codec.dictionarySha256 !== training.sha256 || codec.dictionaryBytes !== training.byteLength) {
+                throw new TermContentOptimizationIntegrityError('Repack codec disagrees with its training receipt');
+            }
+            const registered = db.selectObject(`
+                SELECT c.fileId, c.dictionaryBytes, c.dictionarySha256, c.formatVersion,
+                    f.byteLength, f.sha256, f.state
+                FROM termContentStorageCodecs c JOIN termContentStorageFiles f USING (fileId)
+                WHERE c.codecId = $codecId
+            `, {$codecId: codec.codecId});
+            if (registered) {
+                if (registered.dictionaryBytes !== training.byteLength || registered.dictionarySha256 !== training.sha256 ||
+                registered.formatVersion !== 1 || registered.byteLength !== training.byteLength ||
+                registered.sha256 !== training.sha256 || registered.state !== 'active') {
+                    throw new TermContentOptimizationIntegrityError('Registered repack codec is inconsistent');
+                }
+                retainedFiles.add(this._asString(registered.fileId));
+            } else {
+                const file = this._getOwnedOnlineContentOptimizationFile(job, training.fileId);
+                if (file.fileId !== codec.fileId || file.state !== 'staged' ||
+                file.byteLength !== training.byteLength || file.sha256 !== training.sha256) {
+                    throw new TermContentOptimizationIntegrityError('Repack has no sealed training dictionary');
+                }
+                codecs.push({...codec, strategy: {version: job.strategyVersion, ...job.checkpoint.parameters}});
+                activatedFileIds.push(file.fileId);
+                retainedFiles.add(file.fileId);
+                afterBytes += file.byteLength;
+            }
+        }
+        for (const {manifest} of prepared.layouts) {
+            for (const extent of manifest.extents) { retainedFiles.add(extent.fileId); }
+            for (const frame of manifest.blocks) { retainedFiles.add(frame.fileId); }
+        }
+        const changedRegions = JSON.stringify([...replacements.keys()]);
+        for (const id of new Set(prepared.retiredCandidates)) {
+            if (retainedFiles.has(id)) { continue; }
+            const protectedFile = db.selectValue(`
+                SELECT 1 FROM termContentOptimizationCheckpoints WHERE fileId = $fileId
+                UNION ALL
+                SELECT 1 FROM termContentStorageRootLayouts r
+                    JOIN termContentStorageRoots root USING (rootId)
+                    JOIN termContentStorageLayouts l USING (layoutId)
+                WHERE (root.state = 'staged' OR (
+                    r.rootId = $rootId AND r.regionId NOT IN (SELECT value FROM json_each($changedRegions))
+                )) AND (
+                    EXISTS (SELECT 1 FROM json_each(l.manifestJson, '$.extents') e
+                        WHERE json_extract(e.value, '$.fileId') = $fileId)
+                    OR EXISTS (SELECT 1 FROM json_each(l.manifestJson, '$.blocks') b
+                        LEFT JOIN termContentStorageCodecs c ON c.codecId = json_extract(b.value, '$.codecId')
+                        WHERE json_extract(b.value, '$.fileId') = $fileId OR c.fileId = $fileId)
+                )
+                LIMIT 1
+            `, {$fileId: id, $rootId: state.rootId, $changedRegions: changedRegions});
+            if (protectedFile === 1) { continue; }
+            const byteLength = this._asNumber(db.selectValue(
+                "SELECT byteLength FROM termContentStorageFiles WHERE fileId = $fileId AND state = 'active'",
+                {$fileId: id},
+            ), -1);
+            if (!Number.isSafeInteger(byteLength) || byteLength <= 0) {
+                throw new TermContentOptimizationIntegrityError('Repack retirement file has no active observation');
+            }
+            retiredFileIds.push(id);
+            beforeBytes += byteLength;
+        }
+        return {
+            sizes: {beforeBytes, afterBytes},
+            publication: {
+                jobId: job.jobId,
+                dictionaryGeneration: job.dictionaryGeneration,
+                strategyVersion: job.strategyVersion,
+                expectedCheckpointVersion: job.checkpointVersion,
+                expectedRootId: state.rootId,
+                rootId: prepared.batchId + '-root',
+                logicalHighWater: state.logicalHighWater,
+                manifest: {version: 1, regions},
+                layouts: prepared.layouts,
+                activatedFileIds,
+                retiredFileIds,
+                codecs,
+            },
+        };
+    }
+
+    /**
+     * Opens the bounded layout and its physical closure under one private lease.
+     * @param {import('./term-content-optimization-controller.js').OptimizationJob} job
+     * @param {number} offset
+     * @param {AbortSignal} signal
+     * @returns {Promise<import('./term-content-optimization-batch-store.js').BatchSource>}
+     */
+    async _acquireOnlineContentRepackWindow(job, offset, signal) {
+        const resources = this.createOnlineContentOptimizationReadResources();
+        const lease = this.acquireOnlineContentOptimizationSource(job, signal, resources);
+        try {
+            const current = this.getOnlineContentStorageState();
+            if (current.rootId !== lease.snapshot.rootId) { throw new Error('Content repack root changed during admission'); }
+            const layout = await this.getOnlineContentLayoutWindow(offset, lease.snapshot, resources);
+            lease.source.assertCurrent();
+            if (layout === null) { throw new Error('Content repack has no source layout'); }
+            const regions = layout.resolverData.manifests.map((manifest) => {
+                const region = current.manifest.regions.find((entry) => entry.regionId === manifest.regionId);
+                if (!region) { throw new Error('Content repack region is outside its source directory'); }
+                return region;
+            });
+            return {
+                regions,
+                window: layout.resolverData,
+                describe: (/** @type {import('./term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor} */ frame) => lease.source.describe(frame.identity),
+                /**
+                 * @param {string} fileId
+                 * @param {number} physicalOffset
+                 * @param {number} length
+                 * @returns {Promise<Uint8Array>}
+                 */
+                read: async (fileId, physicalOffset, length) => {
+                    lease.source.assertCurrent();
+                    const locator = layout.fileLocators.get(fileId);
+                    if (!locator) { throw new Error('Content repack file is outside its source layout'); }
+                    const bytes = await resources.physicalFiles.readSlice(locator, physicalOffset, length);
+                    lease.source.assertCurrent();
+                    return bytes;
+                },
+                close: lease.close,
+            };
+        } catch (error) {
+            await lease.close();
+            throw error;
+        }
+    }
+
+    /**
+     * Seals a previously reserved batch without advancing the controller cursor.
+     * The sealed plan is the receipt for the complete transaction.
+     * @param {import('./term-content-optimization-controller.js').OptimizationJob} job
+     * @param {Array<{fileId: string, byteLength: number, sha256: string|null}>} files
+     * @throws {Error} If the batch changed or the short transaction cannot commit.
+     */
+    _sealOnlineContentRepackStage(job, files) {
+        this._assertOnlineContentMutationReady();
+        const db = this._requireDb();
+        if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1 ||
+        job.phase !== 'recompress' || job.checkpoint.batch?.stage !== 'write' ||
+        files.length === 0 || files.length > job.checkpoint.batch.fileIds.length ||
+        new Set(files.map((file) => file.fileId)).size !== files.length ||
+        files.some((file) => !job.checkpoint.batch?.fileIds.includes(file.fileId))) {
+            throw new Error('Invalid content repack stage admission');
+        }
+        const owner = db.selectObject('SELECT phase, checkpointVersion FROM termContentOptimizationJobs WHERE jobId = $jobId', {$jobId: job.jobId});
+        if (owner?.phase !== job.phase || owner.checkpointVersion !== job.checkpointVersion ||
+        this._getOnlineContentOptimizationTarget(job) === null) {
+            throw new Error('Content repack stage owner changed');
+        }
+        try {
+            db.exec('BEGIN IMMEDIATE');
+            for (const file of files) {
+                this.sealOnlineContentStorageFile(job.jobId, file.fileId, file.byteLength, file.sha256);
+            }
+            db.exec('COMMIT');
+        } catch (error) {
+            if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) === 1) { throw error; }
+            try {
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                this._onlineContentPublicationRecoveryRequired = true;
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Content repack stage rollback could not be confirmed');
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Owns optional I/O caches separately from successful foreground reads.
+     * @returns {OnlineContentReadResources}
+     */
+    createOnlineContentOptimizationReadResources() {
+        return {physicalFiles: new TermContentPhysicalFileStore(), windows: new Map(), manifests: new Map()};
+    }
+
+    /**
+     * Pins one immutable root for bounded background discovery and canonical
+     * input streaming. close() stops admission and joins started private I/O
+     * before releasing the lease; foreground reads never await this source.
+     * @param {{dictionaryTitle: string, dictionaryGeneration: string}} job
+     * @param {AbortSignal} signal
+     * @param {OnlineContentReadResources} [readResources]
+     * @returns {{source: import('./term-content-optimization-candidate-source.js').CandidateFrameSource, snapshot: Readonly<OnlineContentRootSnapshot>, target: {title: string, termRecordStorageName: string, generation: string}, readFrameChunks: (identity: import('./term-content-layout.js').FrameIdentity) => AsyncGenerator<Uint8Array>, close: () => Promise<void>}}
+     * @throws {Error} If lifecycle or target ownership is unavailable.
+     */
+    acquireOnlineContentOptimizationSource(job, signal, readResources = this.createOnlineContentOptimizationReadResources()) {
+        this._assertOnlineContentStepSignal(signal);
+        this._assertOnlineContentMutationReady();
+        if (this._isOpening) { throw new Error('Content optimization must wait for database startup'); }
+        const target = this._getOnlineContentOptimizationTarget(job);
+        if (target === null) { throw new Error('Online content optimization target generation is no longer current'); }
+        const state = this.getOnlineContentStorageState();
+        const snapshots = this._onlineContentSnapshots;
+        if (state.epoch === 0 || snapshots === null) { throw new Error('Immutable content storage must be activated before discovery'); }
+        const lease = snapshots.acquire();
+        const snapshot = Object.freeze({rootId: state.rootId, epoch: lease.root.epoch, logicalHighWater: lease.root.logicalHighWater});
+        let closed = false;
+        /** @type {Promise<void>|null} */
+        let closePromise = null;
+        /** @type {Set<Promise<unknown>>} */
+        const inFlight = new Set();
+        /** @throws {Error} If optional ownership was preempted or replaced. */
+        const assertCurrent = () => {
+            this._assertOnlineContentStepSignal(signal);
+            if (closed) { throw new Error('Content optimization read source is closed'); }
+            this._assertOnlineContentMutationReady();
+            if (this._getOnlineContentOptimizationTarget(job) === null) {
+                throw new Error('Online content optimization target generation is no longer current');
+            }
+        };
+        /**
+         * @template T
+         * @param {() => Promise<T>} callback
+         * @returns {Promise<T>}
+         */
+        const runOwned = (callback) => {
+            try {
+                assertCurrent();
+            } catch (error) {
+                return Promise.reject(error);
+            }
+            const operation = Promise.resolve().then(async () => {
+                assertCurrent();
+                const result = await callback();
+                assertCurrent();
+                return result;
+            });
+            inFlight.add(operation);
+            void operation.finally(() => { inFlight.delete(operation); }).catch(() => {});
+            return operation;
+        };
+        /** @type {import('./term-content-optimization-candidate-source.js').CandidateFrameSource} */
+        const source = {
+            logicalHighWater: snapshot.logicalHighWater,
+            assertCurrent,
+            readSlice: (offset, length) => runOwned(async () => await this._readOnlineContentLogicalSlice(offset, length, snapshot, readResources)),
+            describe: (identity) => runOwned(async () => {
+                const description = await this._describeOnlineContentFrame(identity, snapshot, readResources);
+                if (description === null) { throw new Error('Immutable content frame metadata is unavailable'); }
+                const {frame} = description;
+                // Dictionary generation is the durable logical owner. Unrelated
+                // appends change the root ID without changing physical bytes.
+                const physicalKey = description.physicalKey.slice(description.physicalKey.indexOf(':') + 1);
+                return {identity: {...identity},
+                    physicalKey,
+                    storedLength: frame.storedLength,
+                    codecId: frame.codecId,
+                    envelope: frame.envelope,
+                    decodedLength: frame.decodedLength,
+                    decodedDigest: frame.decodedDigest};
+            }),
+            findOverride: (query) => runOwned(async () => {
+                return await this._findOnlineContentFrameOverride(query, snapshot, readResources);
+            }),
+        };
+        const physicalFiles = readResources.physicalFiles;
+        const describeFrame = this._describeOnlineContentFrame.bind(this);
+        /**
+         * @param {import('./term-content-layout.js').FrameIdentity} identity
+         * @yields {Uint8Array} Private input chunks for the independent codec worker.
+         */
+        const readFrameChunks = async function *readFrameChunks(identity) {
+            const description = await runOwned(async () => await describeFrame(identity, snapshot, readResources));
+            if (description === null) { throw new Error('Immutable content frame metadata is unavailable'); }
+            for (const span of description.frame.spans) {
+                const file = description.rootWindow.fileLocators.get(span.fileId);
+                if (typeof file === 'undefined') { throw new TermContentIntegrityError('Private content frame file closure is missing'); }
+                for (let cursor = 0; cursor < span.length; cursor += 4 * 1024 * 1024) {
+                    const count = Math.min(4 * 1024 * 1024, span.length - cursor);
+                    yield await runOwned(async () => await physicalFiles.readSlice(file, span.physicalOffset + cursor, count));
+                }
+            }
+        };
+        return {source,
+            snapshot,
+            target: {title: target.title, termRecordStorageName: this._getSummaryTermRecordStorageName(target.summary, target.title), generation: job.dictionaryGeneration},
+            readFrameChunks,
+            close: () => {
+                if (closePromise !== null) { return closePromise; }
+                closed = true;
+                closePromise = Promise.allSettled(inFlight).then(() => { lease.release(); });
+                return closePromise;
+            }};
+    }
+
+    /**
+     * Job identity keeps its original import label. A rename preserves the
+     * storage generation, so resolve the current successful owner by generation
+     * rather than turning valid resumable work into a stale-title verdict.
+     * SQL failures remain transient; an absent or ambiguous generation is not
+     * permission to operate on a replacement imported under the old name.
+     * @param {{dictionaryTitle: string, dictionaryGeneration: string}} job
+     * @returns {{title: string, summary: Record<string, unknown>}|null}
+     * @throws {Error} If generation metadata is ambiguous or cannot be read.
+     */
+    _getOnlineContentOptimizationTarget(job) {
+        const db = this._requireDb();
+        /**
+         * @param {Record<string, unknown>|undefined} row
+         * @returns {{title: string, summary: Record<string, unknown>}|null}
+         */
+        const parseTarget = (row) => {
+            if (typeof row === 'undefined') { return null; }
+            const title = this._asString(row.title);
+            const parsed = /** @type {unknown} */ (this._safeParseJson(this._asString(row.summaryJson), null));
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) { return null; }
+            const summary = /** @type {Record<string, unknown>} */ (parsed);
+            if (summary.importSuccess !== true || this._getSummaryStorageGenerationId(summary, title) !== job.dictionaryGeneration) { return null; }
+            return {title, summary};
+        };
+        const named = parseTarget(db.selectObject('SELECT title, summaryJson FROM dictionaries WHERE title = $title', {$title: job.dictionaryTitle}));
+        if (named !== null) { return named; }
+        const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries WHERE json_extract(CASE WHEN json_valid(summaryJson) THEN summaryJson ELSE \'{}\' END, \'$.storageGenerationId\') = $generation LIMIT 2', {$generation: job.dictionaryGeneration});
+        const matches = rows.map(parseTarget).filter((target) => target !== null);
+        if (matches.length > 1) { throw new Error('Online content storage generation has multiple installed owners'); }
+        return matches[0] ?? null;
+    }
+
+    /**
+     * Owns legacy proof reads without publishing a reader root or touching
+     * foreground caches. Recheck this same ownership inside root publication.
+     * @param {{dictionaryTitle: string, dictionaryGeneration: string}} job
+     * @param {AbortSignal} signal
+     * @param {() => void} assertOwned
+     * @returns {import('./term-content-legacy-eligibility.js').LegacyEligibilitySource}
+     * @throws {Error} If the original dictionary generation or storage is no longer current.
+     */
+    _createLegacyOptimizationEligibilitySource(job, signal, assertOwned) {
+        const target = this._getOnlineContentOptimizationTarget(job);
+        if (target === null) { throw new Error('Legacy eligibility target generation changed'); }
+        const storageName = this._getSummaryTermRecordStorageName(target.summary, target.title);
+        return this._termContentStore.createLegacyEligibilitySource(() => {
+            this._assertOnlineContentStepSignal(signal);
+            assertOwned();
+            const current = this._getOnlineContentOptimizationTarget(job);
+            if (current === null ||
+            this._getSummaryTermRecordStorageName(current.summary, current.title) !== storageName) {
+                throw new Error('Legacy eligibility target generation or record storage changed');
+            }
+        });
+    }
+
+    /**
+     * Reads one bounded record/artifact discovery page without foreground caches.
+     * The controller persists progress once each read-only page is inspected.
+     * @param {{jobId: string, dictionaryTitle: string, dictionaryGeneration: string, checkpointVersion: number}} job
+     * @param {unknown} cursor
+     * @param {AbortSignal} signal
+     * @param {boolean} [legacyProbe]
+     * @returns {Promise<import('./term-content-optimization-controller.js').DiscoveryPage>}
+     * @throws {Error} If owner, generation, cursor or admitted metadata changes.
+     */
+    async readOnlineContentOptimizationDiscoveryPage(job, cursor, signal, legacyProbe = false) {
+        const db = this._requireDb();
+        const assertCurrent = () => {
+            this._assertOnlineContentStepSignal(signal);
+            this._assertOnlineContentMutationReady();
+            const owner = db.selectObject('SELECT dictionaryTitle, dictionaryGeneration, checkpointVersion, phase FROM termContentOptimizationJobs WHERE jobId = $jobId', {$jobId: job.jobId});
+            if (!owner || owner.dictionaryTitle !== job.dictionaryTitle || owner.dictionaryGeneration !== job.dictionaryGeneration ||
+            owner.checkpointVersion !== job.checkpointVersion || owner.phase !== 'discover') {
+                throw new Error('Online content discovery checkpoint owner is stale');
+            }
+            const target = this._getOnlineContentOptimizationTarget(job);
+            if (target === null) { throw new Error('Online content discovery target generation changed'); }
+            return target;
+        };
+        const target = assertCurrent();
+        if (this._isOpening) { throw new Error('Content discovery must wait for startup reconciliation'); }
+        const storageName = this._getSummaryTermRecordStorageName(target.summary, target.title);
+        /** @type {'records'|'artifact'|'done'} */
+        let stage = 'records';
+        /** @type {import('./term-record-opfs-store.js').ContentReferenceCursor|null} */
+        let referenceCursor = null;
+        let blockRangeRows = MAX_BLOCK_DISCOVERY_REFERENCES;
+        if (cursor !== null) {
+            const cursorJson = JSON.stringify(cursor);
+            const persistedStage = cursor && typeof cursor === 'object' ? /** @type {unknown} */ (Reflect.get(cursor, 'stage')) : null;
+            if (!cursor || typeof cursor !== 'object' || Array.isArray(cursor) || typeof cursorJson !== 'string' || cursorJson.length > 16384 ||
+            Reflect.get(cursor, 'version') !== 1 || typeof persistedStage !== 'string' || !['records', 'artifact', 'done'].includes(persistedStage) ||
+            typeof Reflect.get(cursor, 'storageName') !== 'string') {
+                throw new TypeError('Invalid bounded discovery cursor');
+            }
+            const savedBlockRows = Reflect.get(cursor, 'blockRangeRows');
+            if (typeof savedBlockRows !== 'undefined') {
+                if (!Number.isSafeInteger(savedBlockRows) || savedBlockRows < 64 || savedBlockRows > MAX_BLOCK_DISCOVERY_REFERENCES) {
+                    throw new TypeError('Invalid discovery block-range size');
+                }
+                blockRangeRows = savedBlockRows;
+            }
+            stage = /** @type {'records'|'artifact'|'done'} */ (persistedStage);
+            const previousStorageName = /** @type {unknown} */ (Reflect.get(cursor, 'storageName'));
+            if (previousStorageName === storageName) {
+                const persistedReferenceCursor = /** @type {unknown} */ (Reflect.get(cursor, 'referenceCursor'));
+                referenceCursor = persistedReferenceCursor === null ?
+null :
+                    copyContentReferenceCursor(persistedReferenceCursor, storageName, job.dictionaryGeneration);
+            } else if (stage === 'records') {
+                // A physical shard rename preserves logical generation. Replay
+                // discovery from its start; unique frame checkpoints are exact.
+                referenceCursor = null;
+            }
+        }
+        /**
+         * @param {'records'|'artifact'|'done'} nextStage
+         * @param {import('./term-record-opfs-store.js').ContentReferenceCursor|null} [nextReferenceCursor]
+         * @param {number} [nextBlockRows]
+         * @returns {{version: number, stage: 'records'|'artifact'|'done', storageName: string, referenceCursor: import('./term-record-opfs-store.js').ContentReferenceCursor|null, blockRangeRows?: number}}
+         */
+        const nextCursor = (nextStage, nextReferenceCursor = null, nextBlockRows = MAX_BLOCK_DISCOVERY_REFERENCES) => ({version: 1,
+            stage: nextStage,
+            storageName,
+            referenceCursor: nextReferenceCursor,
+            ...(nextBlockRows < MAX_BLOCK_DISCOVERY_REFERENCES ? {blockRangeRows: nextBlockRows} : {})});
+        if (stage === 'done') { return {items: [], cursor: nextCursor('done'), done: true}; }
+        if (stage === 'artifact') {
+            const row = db.selectObject('SELECT contentOffset, contentLength, contentDictName, uncompressedLength FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary', {$dictionary: target.title});
+            const artifact = typeof row === 'undefined' ?
+null :
+{contentOffset: this._asNumber(row.contentOffset, -1),
+    contentLength: this._asNumber(row.contentLength, -1),
+    contentDictName: this._asString(row.contentDictName),
+    uncompressedLength: this._asNumber(row.uncompressedLength, -1)};
+            return {items: artifact === null ? [] : [{kind: 'artifact', artifact}], cursor: nextCursor('done'), done: true};
+        }
+        const page = await this._termRecordStore.iterateContentReferences(storageName, job.dictionaryGeneration, referenceCursor, {
+            byteBudget: 262144,
+            maxReferences: 64,
+            signal,
+            ...(legacyProbe ? {skipSelector: skipLegacyEligibilitySelector} :
+                {skipSelector: isRawTermContentTrainingSelector, maxBlockReferences: blockRangeRows}),
+            isGenerationCurrent: () => this._getOnlineContentOptimizationTarget({dictionaryTitle: target.title,
+                dictionaryGeneration: job.dictionaryGeneration}) !== null,
+        });
+        const currentTarget = assertCurrent();
+        if (this._getSummaryTermRecordStorageName(currentTarget.summary, currentTarget.title) !== storageName) {
+            throw new Error('Online content discovery physical record storage changed');
+        }
+        const resume = page.cursorAfterBlockReference;
+        const pageLimit = resume && !legacyProbe ? blockRangeRows : 64;
+        if (page.references.length > pageLimit || (!page.done && page.cursor === null)) {
+            throw new Error('Content discovery iterator exceeded its bounded page contract');
+        }
+        const items = page.references.filter((reference) => reference.entryContentOffset !== -1 &&
+        reference.entryContentLength !== -1 && reference.entryContentLength !== 0)
+            .map((reference) => ({kind: /** @type {const} */ ('reference'), reference: {...reference}}));
+        const nextBlockRows = resume ? blockRangeRows * 2 : MAX_BLOCK_DISCOVERY_REFERENCES;
+        const complete = {items, cursor: nextCursor(page.done ? 'artifact' : 'records', page.cursor, nextBlockRows), done: false};
+        if (!resume) { return complete; }
+        if (legacyProbe || page.references.length === 0) { throw new Error('Unexpected immutable block range'); }
+        return {...complete,
+            resumeAfterBlockReference: (/** @type {number} */ recordId) => {
+                // Dense frames may hit the checkpoint budget in the first part
+                // of a range. Shrink subsequent reads to about twice that
+                // useful prefix, then expand when the full range is consumed.
+                const consumed = recordId - page.references[0].recordId + 1;
+                return nextCursor('records', resume(recordId), Math.max(64, consumed * 2));
+            }};
+    }
+
+    /**
+     * Records a bounded unique-frame discovery page and advances its job cursor
+     * in one short transaction. Source reads and hashing finish before admission.
+     * @param {{job: {jobId: string, dictionaryTitle: string, dictionaryGeneration: string, strategyVersion: string, phase: string, cursor: unknown, checkpoint: unknown, expectedCheckpointVersion: number}, frames: import('./term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor[]}} page
+     * @returns {number} The committed checkpoint version.
+     * @throws {Error} If ownership, generation, admission or immutable metadata changed.
+     */
+    recordOnlineContentOptimizationFramePage(page) {
+        if (page?.job?.phase !== 'discover') { throw new TypeError('Invalid online content frame checkpoint phase'); }
+        return this.checkpointOnlineContentOptimizationJob(page);
+    }
+
+    /**
+     * Commits a controller transition with bounded file intents, observations
+     * and unique frame rows. No OPFS operation occurs inside this transaction.
+     * @param {{job: {jobId: string, dictionaryTitle: string, dictionaryGeneration: string, strategyVersion: string, phase: string, cursor: unknown, checkpoint: unknown, expectedCheckpointVersion: number, retryAfter?: number|null}, frames: import('./term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor[], reserveFileIds?: string[], sealedFiles?: Array<{fileId: string, byteLength: number, sha256: string}>}} page
+     * @returns {number} The committed checkpoint version.
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     */
+    checkpointOnlineContentOptimizationJob(page) {
+        this._assertOnlineContentMutationReady();
+        if (!page || typeof page !== 'object' || !page.job ||
+        !Array.isArray(page.frames) || page.frames.length > ONLINE_CONTENT_FRAME_PAGE_ROWS ||
+        !Number.isSafeInteger(page.job.expectedCheckpointVersion) || page.job.expectedCheckpointVersion < 0) {
+            throw new TypeError('Invalid online content frame checkpoint page');
+        }
+        const {job, reserveFileIds = [], sealedFiles = []} = page;
+        if (!Array.isArray(reserveFileIds) || reserveFileIds.length > 16 || new Set(reserveFileIds).size !== reserveFileIds.length ||
+        reserveFileIds.some((id) => typeof id !== 'string' || !/^[a-zA-Z0-9._-]{1,128}$/.test(id)) ||
+        !Array.isArray(sealedFiles) || sealedFiles.length > 16 || new Set(sealedFiles.map((file) => file.fileId)).size !== sealedFiles.length) {
+            throw new TypeError('Invalid online content checkpoint file effects');
+        }
+        /** @type {Map<number, import('./term-content-optimization-checkpoint.js').OnlineContentFrameCheckpoint>} */
+        const unique = new Map();
+        let metadataBytes = 0;
+        for (const frame of page.frames) {
+            const row = encodeOnlineContentFrameCheckpoint(frame);
+            const prior = unique.get(row.sequence);
+            if (prior) {
+                if (prior.metadataJson !== row.metadataJson) { throw new Error('Conflicting references to one logical frame'); }
+                continue;
+            }
+            metadataBytes += this._textEncoder.encode(row.metadataJson).byteLength;
+            if (metadataBytes > ONLINE_CONTENT_FRAME_PAGE_BYTES) { throw new RangeError('Frame page metadata exceeds admission'); }
+            unique.set(row.sequence, row);
+        }
+        const rows = [...unique.values()];
+        const db = this._requireDb();
+        if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1) {
+            throw new Error('Online content frame checkpoint requires transaction ownership');
+        }
+        const cursorJson = JSON.stringify(job.cursor);
+        const checkpointJson = JSON.stringify(job.checkpoint);
+        /**
+         *
+         * @param {import('./term-content-optimization-checkpoint.js').OnlineContentFrameCheckpoint} expected
+         * @returns {boolean}
+         */
+        const matchesFrame = (expected) => {
+            const stored = db.selectObject(
+                'SELECT kind, fileId, byteOffset, byteLength, sha256, metadataJson FROM termContentOptimizationCheckpoints WHERE jobId = $jobId AND sequence = $sequence',
+                {$jobId: job.jobId, $sequence: expected.sequence},
+            );
+            if (typeof stored === 'undefined' || stored.kind !== 'frame' || stored.fileId !== null ||
+            stored.byteOffset !== expected.byteOffset || stored.byteLength !== expected.byteLength || stored.sha256 !== expected.sha256) { return false; }
+            if (stored.metadataJson === expected.metadataJson) { return true; }
+            // A job may replay the same durable frame after a software upgrade.
+            const frame = decodeOnlineContentFrameCheckpoint({
+                sequence: expected.sequence,
+                byteOffset: stored.byteOffset,
+                byteLength: stored.byteLength,
+                sha256: stored.sha256,
+                metadataJson: stored.metadataJson,
+            });
+            return encodeOnlineContentFrameCheckpoint(frame).metadataJson === expected.metadataJson;
+        };
+        /** @returns {boolean} */
+        const matchesReceipt = () => {
+            const receipt = db.selectObject('SELECT dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion, cursorJson, checkpointJson, retryAfter FROM termContentOptimizationJobs WHERE jobId = $jobId', {$jobId: job.jobId});
+            return typeof receipt !== 'undefined' && receipt.dictionaryTitle === job.dictionaryTitle &&
+            receipt.dictionaryGeneration === job.dictionaryGeneration && receipt.strategyVersion === job.strategyVersion &&
+            receipt.phase === job.phase && receipt.checkpointVersion === job.expectedCheckpointVersion + 1 &&
+            receipt.cursorJson === cursorJson && receipt.checkpointJson === checkpointJson &&
+            receipt.retryAfter === (job.retryAfter ?? null) && rows.every(matchesFrame) &&
+            reserveFileIds.every((fileId) => {
+                const file = db.selectObject('SELECT path, ownerJobId, state FROM termContentStorageFiles WHERE fileId = $fileId', {$fileId: fileId});
+                return file?.path === 'manabitan-online-content-v1/' + fileId + '.bin' && file.ownerJobId === job.jobId && file.state === 'intent';
+            }) && sealedFiles.every((expected) => {
+                const file = db.selectObject('SELECT ownerJobId, state, byteLength, sha256 FROM termContentStorageFiles WHERE fileId = $fileId', {$fileId: expected.fileId});
+                return file?.ownerJobId === job.jobId && file.state === 'staged' && file.byteLength === expected.byteLength && file.sha256 === expected.sha256;
+            });
+        };
+        let commitAttempted = false;
+        try {
+            db.exec('BEGIN IMMEDIATE');
+            this._assertOnlineContentMutationReady();
+            const owner = db.selectObject('SELECT dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion FROM termContentOptimizationJobs WHERE jobId = $jobId', {$jobId: job.jobId});
+            if (typeof owner === 'undefined' || owner.dictionaryTitle !== job.dictionaryTitle ||
+            owner.dictionaryGeneration !== job.dictionaryGeneration || owner.strategyVersion !== job.strategyVersion ||
+            (rows.length > 0 && owner.phase !== 'discover') || owner.checkpointVersion !== job.expectedCheckpointVersion) {
+                throw new Error('Online content frame checkpoint is stale or has a different owner');
+            }
+            if (['discover', 'sample', 'train', 'recompress'].includes(job.phase) && this._getOnlineContentOptimizationTarget(job) === null) {
+                throw new Error('Online content optimization target generation is no longer current');
+            }
+            for (const row of rows) {
+                const prior = db.selectValue(
+                    'SELECT 1 FROM termContentOptimizationCheckpoints WHERE jobId = $jobId AND sequence = $sequence',
+                    {$jobId: job.jobId, $sequence: row.sequence},
+                );
+                if (this._asNumber(prior, 0) === 1) {
+                    if (!matchesFrame(row)) { throw new Error('Frame descriptor conflicts with its immutable checkpoint'); }
+                    continue;
+                }
+                db.exec({sql: 'INSERT INTO termContentOptimizationCheckpoints(jobId, sequence, kind, fileId, byteOffset, byteLength, sha256, metadataJson) VALUES ($jobId, $sequence, \'frame\', NULL, $byteOffset, $byteLength, $sha256, $metadataJson)',
+                    bind: {$jobId: job.jobId, $sequence: row.sequence, $byteOffset: row.byteOffset, $byteLength: row.byteLength, $sha256: row.sha256, $metadataJson: row.metadataJson}});
+            }
+            for (const fileId of reserveFileIds) { this.reserveOnlineContentStorageFile(job.jobId, fileId); }
+            for (const file of sealedFiles) {
+                this.sealOnlineContentStorageFile(job.jobId, file.fileId, file.byteLength, file.sha256);
+            }
+            const version = this.saveOnlineContentOptimizationJob(job);
+            commitAttempted = true;
+            db.exec('COMMIT');
+            return version;
+        } catch (error) {
+            if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) === 1) {
+                if (commitAttempted) {
+                    try {
+                        if (matchesReceipt()) {
+                            return job.expectedCheckpointVersion + 1;
+                        }
+                    } catch (_) { /* Optional receipt reads can retry from durable job state. */ }
+                }
+                throw error;
+            }
+            try { db.exec('ROLLBACK'); } catch (rollbackError) {
+                this._onlineContentPublicationRecoveryRequired = true;
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Online content frame checkpoint rollback could not be confirmed');
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Keyset pages are bounded by rows and encoded metadata bytes. No full frame
+     * table is loaded, including when repeated references replay at admission.
+     * @param {string} jobId
+     * @param {{nextLogicalOffset: number}|null} [cursor]
+     * @param {number} [limit]
+     * @returns {{frames: import('./term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor[], cursor: {nextLogicalOffset: number}|null, hasMore: boolean}}
+     * @throws {Error} If optional checkpoint metadata or its cursor is invalid.
+     */
+    getOnlineContentOptimizationFramePage(jobId, cursor = null, limit = 128) {
+        if (typeof jobId !== 'string' || !/^[a-zA-Z0-9._-]{1,128}$/.test(jobId) ||
+        !Number.isSafeInteger(limit) || limit < 1 || limit > ONLINE_CONTENT_FRAME_PAGE_ROWS ||
+        (cursor !== null && (!cursor || !Number.isSafeInteger(cursor.nextLogicalOffset) || cursor.nextLogicalOffset < 0))) {
+            throw new TypeError('Invalid online content frame page cursor');
+        }
+        const rows = this._requireDb().selectObjects(
+            'SELECT sequence, byteOffset, byteLength, sha256, length(CAST(metadataJson AS BLOB)) AS metadataBytes, CASE WHEN length(CAST(metadataJson AS BLOB)) <= $rowBytes THEN metadataJson ELSE NULL END AS metadataJson FROM termContentOptimizationCheckpoints WHERE jobId = $jobId AND kind = \'frame\' AND sequence > $after ORDER BY sequence LIMIT $limit',
+            {$rowBytes: ONLINE_CONTENT_FRAME_ROW_BYTES, $jobId: jobId, $after: cursor?.nextLogicalOffset ?? -1, $limit: limit + 1},
+        );
+        /** @type {import('./term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor[]} */
+        const frames = [];
+        let metadataBytes = 0;
+        for (const row of rows) {
+            if (frames.length === limit) { break; }
+            const bytes = this._asNumber(row.metadataBytes, -1);
+            if (!Number.isSafeInteger(bytes) || bytes < 1 || bytes > ONLINE_CONTENT_FRAME_ROW_BYTES) { throw new Error('Optional frame checkpoint metadata exceeds admission'); }
+            if (metadataBytes + bytes > ONLINE_CONTENT_FRAME_PAGE_BYTES) { break; }
+            frames.push(decodeOnlineContentFrameCheckpoint({sequence: row.sequence, byteOffset: row.byteOffset, byteLength: row.byteLength, sha256: row.sha256, metadataJson: row.metadataJson}));
+            metadataBytes += bytes;
+        }
+        const hasMore = frames.length < rows.length;
+        const last = frames.at(-1);
+        return {frames, cursor: hasMore && last ? {nextLogicalOffset: last.identity.logicalOffset} : null, hasMore};
+    }
+
+    /** @param {string} jobId */
+    _hasUnreclaimedOnlineContentFiles(jobId) {
+        return this._requireDb().selectValue(`
+            SELECT 1 FROM termContentStorageFiles
+                WHERE ownerJobId = $jobId AND state IN ('intent', 'staged', 'retired', 'deleting')
+            UNION ALL SELECT 1 FROM termContentOptimizationCheckpoints
+                WHERE jobId = $jobId AND kind = 'retired-file'
+            LIMIT 1
+        `, {$jobId: jobId}) === 1;
+    }
+
+    /**
+     * Returns durable optimizer ownership before vanilla-codec eligibility is
+     * considered. In particular, `reclaim` jobs must survive a successful
+     * codec cutover and resume after restart.
+     * @param {boolean} [unfinishedOnly]
+     * @returns {Array<{jobId: string, dictionaryTitle: string, dictionaryGeneration: string, strategyVersion: string, phase: string, cursor: unknown, checkpoint: unknown, checkpointVersion: number, retryAfter: number|null, updatedAt: number}>}
+     */
+    getOnlineContentOptimizationJobs(unfinishedOnly = false) {
+        const rows = this._requireDb().selectObjects(`
+            SELECT jobId, dictionaryTitle, dictionaryGeneration, strategyVersion,
+                phase, cursorJson, checkpointJson, checkpointVersion, retryAfter, updatedAt
+            FROM termContentOptimizationJobs
+            WHERE $unfinishedOnly = 0 OR phase NOT IN ('completed', 'no-gain', 'failed')
+            ORDER BY CASE phase WHEN 'reclaim' THEN 0 WHEN 'recompress' THEN 1 ELSE 2 END,
+                updatedAt ASC
+        `, {$unfinishedOnly: unfinishedOnly ? 1 : 0});
+        return rows.map((row) => ({
+            jobId: this._asString(row.jobId),
+            dictionaryTitle: this._asString(row.dictionaryTitle),
+            dictionaryGeneration: this._asString(row.dictionaryGeneration),
+            strategyVersion: this._asString(row.strategyVersion),
+            phase: this._asString(row.phase),
+            cursor: this._safeParseJson(this._asString(row.cursorJson), null),
+            checkpoint: this._safeParseJson(this._asString(row.checkpointJson), null),
+            checkpointVersion: this._asNumber(row.checkpointVersion, 0),
+            retryAfter: this._asNullableNumber(row.retryAfter) ?? null,
+            updatedAt: this._asNumber(row.updatedAt, 0),
+        }));
+    }
+
+    /**
+     * @returns {OnlineContentStorageState}
+     * @throws {Error} If durable root identity cannot be established.
+     */
+    getOnlineContentStorageState() {
+        const db = this._requireDb();
+        if (this._onlineContentPublicationRecoveryRequired && this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1) {
+            throw new Error('Online content root cannot adopt an unconfirmed SQLite transaction');
+        }
+        const state = db.selectObject(`
+            SELECT activeEpoch, logicalHighWater, activeRootId
+            FROM termContentStorageState WHERE singleton = 1
+        `);
+        if (typeof state === 'undefined') { throw new Error('Online content storage state is missing'); }
+        const root = db.selectObject(`
+            SELECT rootId, epoch, logicalHighWater, state, manifestJson
+            FROM termContentStorageRoots WHERE rootId = $rootId
+        `, {$rootId: this._asString(state.activeRootId)});
+        if (typeof root === 'undefined' || this._asString(root.state) !== 'active' ||
+        this._asNumber(root.epoch, -1) !== this._asNumber(state.activeEpoch, -2) ||
+        this._asNumber(root.logicalHighWater, -1) !== this._asNumber(state.logicalHighWater, -2)) {
+            throw new Error('Online content root publication metadata is inconsistent');
+        }
+        const result = {
+            epoch: this._asNumber(state.activeEpoch, -1),
+            logicalHighWater: this._asNumber(state.logicalHighWater, -1),
+            rootId: this._asString(state.activeRootId),
+            manifest: parseOnlineContentRootManifest(
+                /** @type {unknown} */ (this._safeParseJson(this._asString(root.manifestJson), null)),
+                this._asNumber(state.activeEpoch, -1),
+                this._asNumber(state.logicalHighWater, -1),
+            ),
+        };
+        if (result.epoch === 0) { return result; }
+        const snapshotRoot = {
+            epoch: result.epoch,
+            logicalHighWater: result.logicalHighWater,
+            regions: result.manifest.regions,
+        };
+        if (this._onlineContentSnapshots === null) {
+            this._onlineContentSnapshots = new ContentStorageSnapshots(snapshotRoot);
+            this._onlineContentSnapshotsRootId = result.rootId;
+        } else if (this._onlineContentSnapshotsRootId !== result.rootId) {
+            this._onlineContentSnapshots.publish(this._onlineContentSnapshots.current, snapshotRoot);
+            this._onlineContentSnapshotsRootId = result.rootId;
+        } else if (this._onlineContentSnapshots.current.epoch !== result.epoch ||
+        this._onlineContentSnapshots.current.logicalHighWater !== result.logicalHighWater) {
+            throw new Error('Online content root identity changed without a new root ID');
+        }
+        return result;
+    }
+
+    /**
+     * Loads a bounded region window and the exact external frame-owner closure.
+     * Directory entries are compact; no unrelated frame map or pack is read.
+     * @param {number} logicalOffset
+     * @param {{rootId: string, epoch: number, logicalHighWater: number}|null} [snapshot]
+     * @param {OnlineContentReadResources|null} [readResources]
+     * @returns {Promise<OnlineContentLayoutWindow|null>}
+     */
+    async getOnlineContentLayoutWindow(logicalOffset, snapshot = null, readResources = null) {
+        const windowCache = readResources?.windows ?? this._onlineContentLayoutWindowCache;
+        const manifestCache = readResources?.manifests ?? this._onlineContentLayoutManifestCache;
+        if (!Number.isSafeInteger(logicalOffset) || logicalOffset < 0) { throw new RangeError('Invalid logical content offset'); }
+        const db = this._requireDb();
+        const state = snapshot ?? this.getOnlineContentStorageState();
+        const root = db.selectObject(
+            'SELECT epoch, logicalHighWater, state, manifestJson FROM termContentStorageRoots WHERE rootId = $rootId',
+            {$rootId: state.rootId},
+        );
+        if (typeof root === 'undefined' || this._asNumber(root.epoch, -1) !== state.epoch ||
+        this._asNumber(root.logicalHighWater, -1) !== state.logicalHighWater ||
+        !['active', 'retired'].includes(this._asString(root.state))) {
+            throw new Error('Online content snapshot metadata changed while leased');
+        }
+        const directory = parseOnlineContentRootManifest(/** @type {unknown} */ (this._safeParseJson(this._asString(root.manifestJson), null)), state.epoch, state.logicalHighWater);
+        if (state.epoch === 0) { return null; }
+        const regions = directory.regions;
+        if (regions.length === 0) { throw new Error('Online content region directory is empty'); }
+        let previousEnd = 0;
+        for (const region of regions) {
+            if (!region || !Number.isSafeInteger(region.logicalStart) || region.logicalStart !== previousEnd ||
+            !Number.isSafeInteger(region.logicalLength) || region.logicalLength <= 0 ||
+            region.logicalLength > 128 * 1024 * 1024 || previousEnd > Number.MAX_SAFE_INTEGER - region.logicalLength) {
+                throw new Error('Online content root intervals are invalid');
+            }
+            previousEnd += region.logicalLength;
+        }
+        if (previousEnd !== state.logicalHighWater || logicalOffset >= previousEnd) {
+            throw new Error('Online content root does not cover the logical content address');
+        }
+        /**
+         *
+         * @param {number} offset
+         * @returns {number}
+         */
+        const findRegion = (offset) => {
+            let first = 0;
+            let last = regions.length;
+            while (first < last) {
+                const middle = first + Math.floor((last - first) / 2);
+                if (regions[middle].logicalStart <= offset) {
+                    first = middle + 1;
+                } else {
+                    last = middle;
+                }
+            }
+            return first - 1;
+        };
+        const selectedIndex = findRegion(logicalOffset);
+        const cacheKey = state.rootId + ':' + regions[selectedIndex].regionId;
+        const cached = windowCache.get(cacheKey);
+        if (typeof cached !== 'undefined') { return cached; }
+        const selected = regions.slice(selectedIndex, selectedIndex + 2);
+        const manifests = await Promise.all(selected.map((region) => this._loadOnlineContentRegionManifest(state.rootId, region, manifestCache)));
+        const firstOffset = selected[0].logicalStart;
+        const lastRegion = selected[selected.length - 1];
+        const lastOffset = lastRegion.logicalStart + lastRegion.logicalLength;
+        /** @type {Set<number>} */
+        const externalOwners = new Set();
+        for (const manifest of manifests) {
+            for (const removed of manifest.removed) {
+                if (removed.frameLogicalOffset < firstOffset || removed.frameLogicalOffset >= lastOffset) {
+                    externalOwners.add(removed.frameLogicalOffset);
+                }
+            }
+        }
+        // Nonoverlapping source frames permit only one owner crossing the
+        // leading edge of a contiguous window. Do not recursively hydrate roots.
+        if (externalOwners.size > 1) { throw new Error('Online content window has conflicting external frame owners'); }
+        /** @type {import('./term-content-layout.js').Frame[]} */
+        const externalFrames = [];
+        for (const offset of externalOwners) {
+            if (!Number.isSafeInteger(offset) || offset < 0 || offset >= firstOffset) {
+                throw new Error('Online content external frame owner is invalid');
+            }
+            const ownerIndex = findRegion(offset);
+            if (ownerIndex < 0) { throw new Error('Online content external frame owner has no region'); }
+            const ownerRegion = regions[ownerIndex];
+            const owner = await this._loadOnlineContentRegionManifest(state.rootId, ownerRegion, manifestCache);
+            const frame = owner.blocks.find((candidate) => candidate.logicalOffset === offset - ownerRegion.logicalStart);
+            if (typeof frame === 'undefined') { throw new Error('Online content crossing frame owner is missing'); }
+            externalFrames.push({...frame, logicalOffset: offset});
+        }
+        const fileIds = new Set();
+        const codecIds = new Set();
+        for (const manifest of manifests) {
+            for (const extent of manifest.extents) { fileIds.add(extent.fileId); }
+            for (const frame of manifest.blocks) {
+                fileIds.add(frame.fileId);
+                codecIds.add(frame.codecId);
+            }
+        }
+        for (const frame of externalFrames) {
+            fileIds.add(frame.fileId);
+            codecIds.add(frame.codecId);
+        }
+        const codecNames = [...codecIds];
+        const codecRows = codecNames.length === 0 ?
+[] :
+db.selectObjects(
+    'SELECT codecId, fileId, formatVersion, dictionaryBytes, dictionarySha256 FROM termContentStorageCodecs WHERE codecId IN (' + codecNames.map(() => '?').join(',') + ')',
+    codecNames,
+);
+        if (codecRows.length !== codecNames.length) { throw new Error('Online content codec closure is incomplete'); }
+        const codecs = codecRows.map((row) => {
+            if (typeof row.codecId !== 'string' || typeof row.fileId !== 'string' || typeof row.formatVersion !== 'number' ||
+            typeof row.dictionaryBytes !== 'number' || typeof row.dictionarySha256 !== 'string') {
+                throw new TermContentIntegrityError('Active online content codec metadata has invalid field types');
+            }
+            return {codecId: row.codecId,
+                fileId: row.fileId,
+                formatVersion: row.formatVersion,
+                dictionaryBytes: row.dictionaryBytes,
+                dictionarySha256: row.dictionarySha256};
+        });
+        for (const codec of codecs) { fileIds.add(this._asString(codec.fileId)); }
+        const names = [...fileIds];
+        const rows = names.length === 0 ?
+[] :
+db.selectObjects(
+    'SELECT fileId, path, byteLength, sha256 FROM termContentStorageFiles WHERE fileId IN (' + names.map(() => '?').join(',') + ") AND state IN ('active', 'retired')",
+    names,
+);
+        if (rows.length !== names.length) { throw new Error('Online content physical file closure is incomplete'); }
+        /** @type {Map<string, import('./term-content-physical-file-store.js').ContentPhysicalLocator>} */
+        const fileLocators = new Map();
+        const files = rows.map((row) => {
+            const fileId = this._asString(row.fileId);
+            const byteLength = this._asNumber(row.byteLength, -1);
+            const locator = parseContentPhysicalFile({fileId, path: this._asString(row.path), byteLength});
+            fileLocators.set(fileId, locator);
+            return {fileId, byteLength, sha256: row.sha256 === null ? null : this._asString(row.sha256)};
+        });
+        const result = {rootId: state.rootId,
+            epoch: state.epoch,
+            fileLocators,
+            resolverData: {manifests, externalFrames, files, physicalFiles: files.map((file) => ({...file})), codecs}};
+        // Validate all metadata before caching. Data packs are never hashed here.
+        createContentLayoutResolver(result.resolverData);
+        if (windowCache.size >= 64) {
+            const oldest = windowCache.keys().next().value;
+            if (typeof oldest === 'string') { windowCache.delete(oldest); }
+        }
+        windowCache.set(cacheKey, result);
+        return result;
+    }
+
+    /**
+     * @param {string} rootId
+     * @param {import('./term-content-storage-snapshots.js').ContentRootRegion} descriptor
+     * @param {OnlineContentReadResources['manifests']} [cache]
+     * @returns {Promise<import('./term-content-layout.js').Manifest>}
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     */
+    async _loadOnlineContentRegionManifest(rootId, descriptor, cache = this._onlineContentLayoutManifestCache) {
+        const db = this._requireDb();
+        const row = db.selectObject(
+            'SELECT r.regionId, r.layoutId, r.logicalStart, r.logicalLength, l.version, l.manifestJson, l.manifestSha256 FROM termContentStorageRootLayouts r JOIN termContentStorageLayouts l ON l.layoutId = r.layoutId WHERE r.rootId = $rootId AND r.regionId = $regionId',
+            {$rootId: rootId, $regionId: descriptor.regionId},
+        );
+        /**
+         *
+         * @param {string} message
+         * @returns {never}
+         * @throws {TermContentIntegrityError} If immutable metadata is invalid.
+         */
+        const invalid = (message) => {
+            const error = new TermContentIntegrityError(message);
+            Reflect.set(error, 'layoutId', descriptor.layoutId);
+            throw error;
+        };
+        if (typeof row === 'undefined' || this._asString(row.regionId) !== descriptor.regionId ||
+        this._asString(row.layoutId) !== descriptor.layoutId || this._asNumber(row.logicalStart, -1) !== descriptor.logicalStart ||
+        this._asNumber(row.logicalLength, -1) !== descriptor.logicalLength || this._asNumber(row.version, -1) !== 1) {
+            invalid('Online content immutable region identity does not match its root');
+        }
+        const digest = this._asString(row.manifestSha256);
+        const cached = cache.get(descriptor.layoutId);
+        if (cached?.sha256 === digest) { return cached.manifest; }
+        const json = this._asString(row.manifestJson);
+        if (json.length > 1024 * 1024 || !/^[a-f0-9]{64}$/.test(digest)) {
+            invalid('Online content immutable manifest identity is invalid');
+        }
+        if (!globalThis.crypto?.subtle) { throw new Error('Online content manifest hashing is temporarily unavailable'); }
+        const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(json)));
+        if (Array.from(hash, (value) => value.toString(16).padStart(2, '0')).join('') !== digest) {
+            invalid('Online content immutable manifest checksum is invalid');
+        }
+        const manifest = /** @type {import('./term-content-layout.js').Manifest|null} */ (/** @type {unknown} */ (this._safeParseJson(json, null)));
+        if (!manifest || manifest.version !== 1 || manifest.regionId !== descriptor.regionId ||
+        manifest.logicalStart !== descriptor.logicalStart || manifest.logicalLength !== descriptor.logicalLength ||
+        !Array.isArray(manifest.extents) || !Array.isArray(manifest.blocks) || !Array.isArray(manifest.removed)) {
+            invalid('Online content manifest does not match its region directory');
+        }
+        if (cache.size >= 64) {
+            const oldest = cache.keys().next().value;
+            if (typeof oldest === 'string') { cache.delete(oldest); }
+        }
+        cache.set(descriptor.layoutId, {sha256: digest, manifest});
+        return manifest;
+    }
+
+    /**
+     * Looks up the original frame identity before reading intervals which a
+     * replacement may already have removed from the active logical layout.
+     * @param {{kind: import('./term-content-layout.js').FrameIdentity['kind'], logicalOffset: number, recordLength: number, originalCodecId: string|null}} query
+     * @param {OnlineContentRootSnapshot} snapshot
+     * @param {OnlineContentReadResources|null} [readResources]
+     * @returns {Promise<import('./term-content-layout.js').FrameIdentity|null>}
+     */
+    async _findOnlineContentFrameOverride(query, snapshot, readResources = null) {
+        const window = await this.getOnlineContentLayoutWindow(query.logicalOffset, snapshot, readResources);
+        if (window === null) { throw new Error('Immutable content frame metadata is unavailable'); }
+        /** @type {import('./term-content-layout.js').Frame|null} */
+        let found = null;
+        for (const manifest of window.resolverData.manifests) {
+            const relative = query.logicalOffset - manifest.logicalStart;
+            if (relative < 0 || relative >= manifest.logicalLength) { continue; }
+            let first = 0;
+            let last = manifest.blocks.length;
+            while (first < last) {
+                const middle = first + Math.floor((last - first) / 2);
+                if (manifest.blocks[middle].logicalOffset < relative) {
+                    first = middle + 1;
+                } else {
+                    last = middle;
+                }
+            }
+            const candidate = manifest.blocks[first];
+            if (candidate?.logicalOffset === relative) { found = {...candidate, logicalOffset: query.logicalOffset}; }
+        }
+        for (const candidate of window.resolverData.externalFrames) {
+            if (candidate.logicalOffset === query.logicalOffset) { found = candidate; }
+        }
+        if (found === null) { return null; }
+        if (found.kind !== query.kind || found.recordLength !== query.recordLength || found.originalCodecId !== query.originalCodecId) {
+            throw new TermContentIntegrityError('Active frame override disagrees with its stable record identity');
+        }
+        return {kind: found.kind,
+            logicalOffset: found.logicalOffset,
+            recordLength: found.recordLength,
+            sourceStoredLength: found.sourceStoredLength,
+            originalCodecId: found.originalCodecId,
+            expectedDecodedLength: found.expectedDecodedLength,
+            originalEnvelope: found.originalEnvelope};
+    }
+
+    /**
+     * Resolves and reads one immutable compressed block under its active root.
+     * The returned bytes are owned, so physical file leases end after this
+     * method settles and decode never touches logical cache state.
+     * @param {{kind: 'block', logicalOffset: number, recordLength: number, sourceStoredLength: number, originalCodecId: string|null, expectedDecodedLength: number, originalEnvelope: 'mbc2'|'none'}} identity
+     * @param {boolean} [allowRetry]
+     * @returns {Promise<import('./term-content-block-store.js').TermContentResolvedFrame|null>}
+     */
+    async _resolveOnlineContentFrame(identity, allowRetry = true) {
+        if (this._onlineContentSnapshots === null) {
+            const state = this.getOnlineContentStorageState();
+            if (state.epoch === 0 || this._onlineContentSnapshots === null) { return null; }
+        }
+        const snapshots = this._onlineContentSnapshots;
+        if (snapshots === null || this._onlineContentSnapshotsRootId === null) { return null; }
+        const lease = snapshots.acquire();
+        const snapshot = {
+            rootId: this._onlineContentSnapshotsRootId,
+            epoch: lease.root.epoch,
+            logicalHighWater: lease.root.logicalHighWater,
+        };
+        let transferred = false;
+        try {
+            const frame = await this._resolveOnlineContentFrameUnderSnapshot(identity, snapshot);
+            if (frame === null) { return null; }
+            transferred = true;
+            return {...frame, release: () => lease.release()};
+        } catch (error) {
+            if (allowRetry) {
+                let current;
+                try {
+                    current = this.getOnlineContentStorageState();
+                } catch (reconcileError) {
+                    // Do not let a stale physical CRC/layout error escape as
+                    // authoritative while current-root identity is unknown.
+                    throw new Error('Unable to reconcile online content root after a physical read failure', {cause: reconcileError});
+                }
+                if (current.rootId !== snapshot.rootId) {
+                    // Keep the retry outside this catch. A transient/current
+                    // corruption error must retain its own identity and type.
+                    return await this._resolveOnlineContentFrame(identity, false);
+                }
+            }
+            throw error;
+        } finally {
+            if (!transferred) { lease.release(); }
+        }
+    }
+
+    /**
+     * @param {import('./term-content-layout.js').FrameIdentity} identity
+     * @param {OnlineContentRootSnapshot} snapshot
+     * @returns {Promise<Omit<import('./term-content-block-store.js').TermContentResolvedFrame, 'release'>|null>}
+     */
+    async _resolveOnlineContentFrameUnderSnapshot(identity, snapshot) {
+        const description = await this._describeOnlineContentFrame(identity, snapshot);
+        if (description === null) { return null; }
+        const {rootWindow, frame, physicalKey} = description;
+        try {
+            return await this._readOnlineContentResolvedFrame(rootWindow, frame, physicalKey);
+        } catch (error) {
+            if (error instanceof TermContentIntegrityError) { Reflect.set(error, 'physicalKey', physicalKey); }
+            throw error;
+        }
+    }
+
+    /**
+     * Resolves immutable physical identity before payload or dictionary I/O.
+     * @param {import('./term-content-layout.js').FrameIdentity} identity
+     * @param {OnlineContentRootSnapshot} snapshot
+     * @param {OnlineContentReadResources|null} [readResources]
+     * @returns {Promise<{rootWindow: OnlineContentLayoutWindow, frame: import('./term-content-layout.js').ResolvedContentFrame, physicalKey: string}|null>}
+     * @throws {Error} If current immutable metadata is invalid or unavailable.
+     */
+    async _describeOnlineContentFrame(identity, snapshot, readResources = null) {
+        const rootWindow = await this.getOnlineContentLayoutWindow(identity.logicalOffset, snapshot, readResources);
+        if (rootWindow === null) { return null; }
+        let frame;
+        try {
+            frame = createContentLayoutResolver(rootWindow.resolverData).resolveFrame(identity);
+        } catch (error) {
+            throw new TermContentIntegrityError(`Active online content layout is invalid: ${toError(error).message}`);
+        }
+        const physicalParts = frame.spans.map((span) => {
+            const file = rootWindow.fileLocators.get(span.fileId);
+            if (typeof file === 'undefined') { throw new TermContentIntegrityError('Active frame physical file closure is incomplete'); }
+            return `${file.fileId}/${file.path}:${file.byteLength}:${span.physicalOffset}:${span.length}`;
+        });
+        const codec = rootWindow.resolverData.codecs.find((entry) => entry.codecId === frame.codecId);
+        const codecIdentity = typeof codec === 'undefined' ?
+frame.codecId ?? 'vanilla' :
+            `${codec.codecId}/${codec.fileId}/${codec.dictionarySha256}`;
+        const physicalKey = `${rootWindow.rootId}:${physicalParts.join(',')}:${codecIdentity}:${frame.envelope}:${frame.decodedLength}`;
+        return {rootWindow, frame, physicalKey};
+    }
+
+    /**
+     * @param {OnlineContentLayoutWindow} rootWindow
+     * @param {import('./term-content-layout.js').ResolvedContentFrame} frame
+     * @param {string} physicalKey
+     * @returns {Promise<Omit<import('./term-content-block-store.js').TermContentResolvedFrame, 'release'>>}
+     */
+    async _readOnlineContentResolvedFrame(rootWindow, frame, physicalKey) {
+        const codecId = frame.codecId;
+        const activeCodec = rootWindow.resolverData.codecs.find((entry) => entry.codecId === codecId);
+        if (codecId !== null && codecId !== 'jmdict' &&
+        (typeof activeCodec === 'undefined' || codecId !== 'manabitan-zstd-' + activeCodec.dictionarySha256)) {
+            throw new TermContentIntegrityError('Online term block codec metadata is missing or invalid');
+        }
+        if (!Number.isSafeInteger(frame.storedLength) || frame.storedLength <= 0 ||
+        (frame.decodedLength !== null && frame.storedLength > frame.decodedLength + Math.ceil(frame.decodedLength / 128) + 256)) {
+            throw new TermContentIntegrityError('Online term block exceeds its validated decoded-length envelope');
+        }
+        const fileById = new Map(rootWindow.resolverData.files.map((file) => [file.fileId, file]));
+        const bytes = new Uint8Array(frame.storedLength);
+        let cursor = 0;
+        for (const span of frame.spans) {
+            const file = fileById.get(span.fileId);
+            if (typeof file === 'undefined' || span.length > bytes.byteLength - cursor) {
+                throw new TermContentIntegrityError('Online term block physical file closure is incomplete');
+            }
+            let spanCursor = 0;
+            while (spanCursor < span.length) {
+                const chunkLength = Math.min(4 * 1024 * 1024, span.length - spanCursor);
+                const locator = rootWindow.fileLocators.get(span.fileId);
+                if (typeof locator === 'undefined') { throw new TermContentIntegrityError('Online content immutable physical locator is missing'); }
+                const part = await this._readOnlineContentPhysicalSlice(locator, span.physicalOffset + spanCursor, chunkLength);
+                if (part.byteLength !== chunkLength) { throw new Error('Online term block physical slice ended early'); }
+                bytes.set(part, cursor);
+                cursor += part.byteLength;
+                spanCursor += part.byteLength;
+            }
+        }
+        if (cursor !== frame.storedLength) { throw new Error('Online term block frame spans do not match stored length'); }
+
+        if (activeCodec && this._onlineContentDictionaryCache.has(codecId) &&
+        this._onlineContentDictionaryCache.get(codecId) !== activeCodec.dictionarySha256) {
+            throw new TermContentIntegrityError('Immutable online content codec identity changed');
+        }
+        if (typeof codecId === 'string' && activeCodec &&
+        !this._onlineContentDictionaryCache.has(codecId)) {
+            const db = this._requireDb();
+            const codec = db.selectObject(`
+                SELECT fileId, dictionaryBytes, dictionarySha256
+                FROM termContentStorageCodecs WHERE codecId = $codecId
+            `, {$codecId: codecId});
+            if (typeof codec === 'undefined' || codec.fileId !== activeCodec.fileId ||
+            codec.dictionaryBytes !== activeCodec.dictionaryBytes || codec.dictionarySha256 !== activeCodec.dictionarySha256) {
+                throw new TermContentIntegrityError('Online term block codec metadata is missing or differs from the resolved layout');
+            }
+            const dictionaryBytes = this._asNumber(codec.dictionaryBytes, -1);
+            const dictionaryFileId = this._asString(codec.fileId);
+            const file = fileById.get(dictionaryFileId) ?? db.selectObject(`
+                SELECT fileId, byteLength, sha256 FROM termContentStorageFiles
+                WHERE fileId = $fileId AND state = 'active'
+            `, {$fileId: dictionaryFileId});
+            if (typeof file === 'undefined' || dictionaryBytes < 8 || dictionaryBytes > 112640 ||
+            this._asNumber(file.byteLength, -1) !== dictionaryBytes) {
+                throw new TermContentIntegrityError('Online term block dictionary file identity is invalid');
+            }
+            const dictionaryLocator = rootWindow.fileLocators.get(dictionaryFileId);
+            if (typeof dictionaryLocator === 'undefined') { throw new TermContentIntegrityError('Online content dictionary physical locator is missing'); }
+            let dictionary;
+            try {
+                dictionary = await this._readOnlineContentPhysicalSlice(dictionaryLocator, 0, dictionaryBytes);
+            } catch (error) {
+                if ((error instanceof DOMException || error instanceof Error) && error.name === 'NotFoundError') {
+                    throw new TermContentIntegrityError('Online term block dictionary sidecar is missing');
+                }
+                throw error;
+            }
+            const digestBytes = await globalThis.crypto.subtle.digest('SHA-256', dictionary);
+            const digest = [...new Uint8Array(digestBytes)].map((value) => value.toString(16).padStart(2, '0')).join('');
+            if (digest !== this._asString(codec.dictionarySha256) || (file.sha256 !== null && digest !== file.sha256)) {
+                throw new TermContentIntegrityError('Online term block dictionary checksum is invalid');
+            }
+            registerTermContentZstdDictionary(codecId, dictionary);
+            this._onlineContentDictionaryCache.set(codecId, digest);
+        }
+        return {
+            bytes,
+            codecId,
+            envelope: frame.envelope,
+            decodedLength: frame.decodedLength,
+            physicalKey,
+        };
+    }
+
+    /**
+     * Payloads and codec dictionaries are equally authoritative immutable bytes.
+     * Preserve transient access failures while classifying confirmed truncation.
+     * @param {import('./term-content-physical-file-store.js').ContentPhysicalLocator} locator
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Promise<Uint8Array>}
+     */
+    async _readOnlineContentPhysicalSlice(locator, offset, length) {
+        try {
+            return await this._onlineContentPhysicalFileStore.readSlice(locator, offset, length);
+        } catch (error) {
+            if (error instanceof ContentPhysicalFileIntegrityError) {
+                const integrity = new TermContentIntegrityError(`Active online content file is truncated or changed: ${locator.fileId}`);
+                Reflect.set(integrity, 'physicalFile', error.physicalFile);
+                throw integrity;
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Reserves a deterministic private OPFS filename before file creation.
+     * @param {string} jobId
+     * @param {string} fileId
+     * @returns {string} Relative path owned by the optimizer.
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     */
+    reserveOnlineContentStorageFile(jobId, fileId) {
+        if (!/^[a-zA-Z0-9._-]{1,128}$/.test(jobId) || !/^[a-zA-Z0-9._-]{1,128}$/.test(fileId)) {
+            throw new TypeError('Invalid online content file ownership identity');
+        }
+        const path = `manabitan-online-content-v1/${fileId}.bin`;
+        const db = this._requireDb();
+        db.exec({
+            sql: `
+                INSERT OR IGNORE INTO termContentStorageFiles(fileId, path, byteLength, sha256, state, ownerJobId)
+                SELECT $fileId, $path, 0, NULL, 'intent', $jobId
+                WHERE EXISTS (
+                    SELECT 1 FROM termContentOptimizationJobs
+                    WHERE jobId = $jobId AND phase IN ('discover', 'sample', 'train', 'recompress', 'reclaim')
+                )
+            `,
+            bind: {$fileId: fileId, $path: path, $jobId: jobId},
+        });
+        const file = db.selectObject(`SELECT path, ownerJobId, state FROM termContentStorageFiles
+            WHERE fileId = $fileId AND EXISTS (
+                SELECT 1 FROM termContentOptimizationJobs WHERE jobId = $jobId
+                    AND phase IN ('discover', 'sample', 'train', 'recompress', 'reclaim')
+            )`, {$fileId: fileId, $jobId: jobId});
+        if (typeof file === 'undefined' || this._asString(file.ownerJobId) !== jobId || this._asString(file.path) !== path ||
+        this._asString(file.state) !== 'intent') {
+            throw new Error('Online content file intent is missing, conflicting, or already sealed');
+        }
+        return path;
+    }
+
+    /**
+     * Publishes only metadata for a fully closed and readback-validated file.
+     * Large data files may have a null SHA; dictionary and manifest hashes are
+     * validated and stored separately.
+     * @param {string} jobId
+     * @param {string} fileId
+     * @param {number} byteLength
+     * @param {string|null} sha256
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     */
+    sealOnlineContentStorageFile(jobId, fileId, byteLength, sha256 = null) {
+        if (!Number.isSafeInteger(byteLength) || byteLength <= 0 || byteLength > 2 ** 40 ||
+        (sha256 !== null && !/^[a-f0-9]{64}$/.test(sha256))) {
+            throw new TypeError('Invalid online content file observation');
+        }
+        const db = this._requireDb();
+        db.exec({
+            sql: `
+                UPDATE termContentStorageFiles SET byteLength = $byteLength, sha256 = $sha256, state = 'staged'
+                WHERE fileId = $fileId AND ownerJobId = $jobId AND state = 'intent'
+            `,
+            bind: {$byteLength: byteLength, $sha256: sha256, $fileId: fileId, $jobId: jobId},
+        });
+        if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+            const observed = db.selectObject(`SELECT ownerJobId, state, byteLength, sha256
+                FROM termContentStorageFiles WHERE fileId = $fileId`, {$fileId: fileId});
+            if (typeof observed === 'undefined' || this._asString(observed.ownerJobId) !== jobId ||
+            this._asString(observed.state) !== 'staged' || this._asNumber(observed.byteLength, -1) !== byteLength ||
+            (observed.sha256 ?? null) !== sha256) {
+                throw new Error('Online content file intent could not be sealed');
+            }
+        }
+    }
+
+    /**
+     * Stores one bounded state transition for the single post-import optimizer.
+     * Large sample/output bytes belong in closed OPFS checkpoints and are
+     * referenced by metadata rather than embedded in these JSON columns.
+     * @param {{jobId: string, dictionaryTitle: string, dictionaryGeneration: string, strategyVersion: string, phase: string, cursor: unknown, checkpoint: unknown, expectedCheckpointVersion?: number, retryAfter?: number|null}} job
+     * @returns {number} The committed checkpoint version.
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     */
+    saveOnlineContentOptimizationJob(job) {
+        const phases = new Set(['discover', 'sample', 'train', 'recompress', 'reclaim', 'completed', 'no-gain', 'deferred', 'failed']);
+        if (!job || typeof job !== 'object' ||
+        typeof job.jobId !== 'string' || !/^[a-zA-Z0-9._-]{1,128}$/.test(job.jobId) ||
+        typeof job.dictionaryTitle !== 'string' || job.dictionaryTitle.length === 0 || job.dictionaryTitle.length > 512 ||
+        typeof job.dictionaryGeneration !== 'string' || job.dictionaryGeneration.length === 0 || job.dictionaryGeneration.length > 256 ||
+        typeof job.strategyVersion !== 'string' || !/^[a-zA-Z0-9._:-]{1,128}$/.test(job.strategyVersion) ||
+        !phases.has(job.phase) ||
+        (typeof job.retryAfter !== 'undefined' && job.retryAfter !== null && (!Number.isSafeInteger(job.retryAfter) || job.retryAfter < 0))) {
+            throw new TypeError('Invalid online content optimization job');
+        }
+        const cursorJson = JSON.stringify(job.cursor);
+        const checkpointJson = JSON.stringify(job.checkpoint);
+        if (typeof cursorJson !== 'string' || typeof checkpointJson !== 'string' ||
+        cursorJson.length > 1024 * 1024 || checkpointJson.length > 1024 * 1024) {
+            throw new RangeError('Online content optimization checkpoint metadata exceeds its bound');
+        }
+        const db = this._requireDb();
+        if (job.phase === 'completed' || job.phase === 'no-gain' || job.phase === 'failed') {
+            if (this._hasUnreclaimedOnlineContentFiles(job.jobId)) {
+                throw new Error('Online content job must reclaim its pending files before completion');
+            }
+        }
+        if (['discover', 'sample', 'train', 'recompress', 'reclaim'].includes(job.phase)) {
+            const otherOwner = db.selectValue(`
+                SELECT 1 FROM termContentOptimizationJobs AS job
+                WHERE job.jobId <> $jobId AND (
+                    job.phase IN ('discover', 'sample', 'train', 'recompress', 'reclaim') OR
+                    (job.phase = 'deferred' AND (
+                        EXISTS (SELECT 1 FROM termContentStorageFiles AS file WHERE file.ownerJobId = job.jobId
+                            AND file.state IN ('intent', 'staged', 'retired', 'deleting')) OR
+                        EXISTS (SELECT 1 FROM termContentOptimizationCheckpoints AS checkpoint WHERE checkpoint.jobId = job.jobId
+                            AND checkpoint.kind = 'retired-file')
+                    ))
+                ) LIMIT 1
+            `, {$jobId: job.jobId});
+            if (this._asNumber(otherOwner, 0) === 1) { throw new Error('Another unfinished online content job owns maintenance'); }
+        }
+        const existing = db.selectObject(`
+            SELECT dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion
+            FROM termContentOptimizationJobs WHERE jobId = $jobId
+        `, {$jobId: job.jobId});
+        if (typeof existing === 'undefined') {
+            if (['discover', 'sample', 'train', 'recompress'].includes(job.phase) && this._getOnlineContentOptimizationTarget(job) === null) {
+                throw new Error('Online content optimization target generation is no longer current');
+            }
+            if (typeof job.expectedCheckpointVersion !== 'undefined') { throw new Error('Online content job checkpoint is stale'); }
+            const allocationPages = this._asNullableNumber(db.selectValue('PRAGMA page_count')) ?? null;
+            db.exec({
+                sql: `INSERT INTO termContentOptimizationJobs(
+                    jobId, dictionaryTitle, dictionaryGeneration, strategyVersion, phase,
+                    cursorJson, checkpointJson, checkpointVersion, retryAfter, updatedAt, allocationPages
+                ) VALUES ($jobId, $dictionaryTitle, $dictionaryGeneration, $strategyVersion, $phase,
+                    $cursorJson, $checkpointJson, 0, $retryAfter, $updatedAt, $allocationPages)`,
+                bind: {$jobId: job.jobId,
+                    $dictionaryTitle: job.dictionaryTitle,
+                    $dictionaryGeneration: job.dictionaryGeneration,
+                    $strategyVersion: job.strategyVersion,
+                    $phase: job.phase,
+                    $cursorJson: cursorJson,
+                    $checkpointJson: checkpointJson,
+                    $retryAfter: job.retryAfter ?? null,
+                    $updatedAt: Date.now(),
+                    $allocationPages: allocationPages},
+            });
+            if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) { throw new Error('Online content job creation failed'); }
+            return 0;
+        }
+        if (this._asString(existing.dictionaryTitle) !== job.dictionaryTitle ||
+        this._asString(existing.dictionaryGeneration) !== job.dictionaryGeneration ||
+        this._asString(existing.strategyVersion) !== job.strategyVersion) {
+            throw new Error('Online content job identity is immutable');
+        }
+        if (['discover', 'sample', 'train', 'recompress'].includes(job.phase) && this._getOnlineContentOptimizationTarget(job) === null) {
+            throw new Error('Online content optimization target generation is no longer current');
+        }
+        const checkpointVersion = this._asNumber(existing.checkpointVersion, -1);
+        if (!Number.isSafeInteger(job.expectedCheckpointVersion) || job.expectedCheckpointVersion !== checkpointVersion) {
+            throw new Error('Online content job checkpoint is stale');
+        }
+        const previousPhase = this._asString(existing.phase);
+        const transitions = {
+            'discover': ['discover', 'sample', 'reclaim', 'no-gain', 'deferred', 'failed'],
+            'sample': ['sample', 'train', 'reclaim', 'no-gain', 'deferred', 'failed'],
+            'train': ['train', 'recompress', 'reclaim', 'no-gain', 'deferred', 'failed'],
+            'recompress': ['recompress', 'reclaim', 'deferred', 'failed'],
+            'reclaim': ['reclaim', 'recompress', 'completed', 'no-gain', 'deferred', 'failed'],
+            'deferred': ['discover', 'sample', 'train', 'recompress', 'reclaim', 'deferred', 'failed'],
+            'failed': ['discover', 'sample', 'train', 'recompress', 'reclaim', 'failed'],
+            'completed': [],
+            'no-gain': [],
+        };
+        if (!transitions[previousPhase]?.includes(job.phase)) { throw new Error('Invalid online content job phase transition'); }
+        db.exec({
+            sql: `UPDATE termContentOptimizationJobs SET phase = $phase, cursorJson = $cursorJson,
+                checkpointJson = $checkpointJson, checkpointVersion = checkpointVersion + 1,
+                retryAfter = $retryAfter, updatedAt = $updatedAt
+                WHERE jobId = $jobId AND checkpointVersion = $expectedVersion
+                    AND dictionaryTitle = $dictionaryTitle AND dictionaryGeneration = $dictionaryGeneration
+                    AND strategyVersion = $strategyVersion AND phase = $previousPhase`,
+            bind: {$phase: job.phase,
+                $cursorJson: cursorJson,
+                $checkpointJson: checkpointJson,
+                $retryAfter: job.retryAfter ?? null,
+                $updatedAt: Date.now(),
+                $jobId: job.jobId,
+                $expectedVersion: checkpointVersion,
+                $dictionaryTitle: job.dictionaryTitle,
+                $dictionaryGeneration: job.dictionaryGeneration,
+                $strategyVersion: job.strategyVersion,
+                $previousPhase: previousPhase},
+        });
+        if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) { throw new Error('Online content job checkpoint compare-and-swap failed'); }
+        return checkpointVersion + 1;
+    }
+
+    /**
+     * Atomically switches the durable immutable content root and the owning
+     * job cursor after every staged file has been closed and validated.
+     * Filesystem work is deliberately complete before this short SQL section.
+     * @param {{jobId: string, dictionaryGeneration: string, strategyVersion: string, expectedCheckpointVersion: number, expectedRootId: string, rootId: string, logicalHighWater: number, manifest: unknown, layouts: Array<{layoutId: string, regionId: string, manifest: unknown, manifestSha256: string}>, activatedFileIds: string[], retiredFileIds: string[], codecs?: Array<{codecId: string, fileId: string, dictionaryBytes: number, dictionarySha256: string, strategy: unknown}>, cursor: unknown, checkpoint: unknown, physicalSavings?: number, retireFramesThrough?: number}} publication
+     * @throws {Error} If storage metadata, ownership or publication is invalid.
+     * @returns {OnlineContentRootSnapshot}
+     */
+    publishOnlineContentStorageRoot(publication) {
+        this._assertOnlineContentMutationReady();
+        const {jobId, dictionaryGeneration, strategyVersion, expectedCheckpointVersion,
+            expectedRootId, rootId, logicalHighWater, manifest, layouts, activatedFileIds,
+            retiredFileIds, codecs = [], cursor, checkpoint, physicalSavings, retireFramesThrough} = publication;
+        const identifier = /^[a-zA-Z0-9._-]{1,128}$/;
+        if (typeof jobId !== 'string' || !identifier.test(jobId) ||
+        typeof dictionaryGeneration !== 'string' || typeof strategyVersion !== 'string' ||
+        !Number.isSafeInteger(expectedCheckpointVersion) || expectedCheckpointVersion < 0 ||
+        typeof expectedRootId !== 'string' || !identifier.test(expectedRootId) ||
+        typeof rootId !== 'string' || !identifier.test(rootId) || rootId === expectedRootId ||
+        !Number.isSafeInteger(logicalHighWater) || logicalHighWater < 0 ||
+        !Array.isArray(layouts) || layouts.length > 32768 ||
+        !Array.isArray(activatedFileIds) || !Array.isArray(retiredFileIds) ||
+        activatedFileIds.length > 32768 || retiredFileIds.length > 32768 ||
+        [...activatedFileIds, ...retiredFileIds].some((value) => typeof value !== 'string' || !identifier.test(value)) ||
+        new Set(activatedFileIds).size !== activatedFileIds.length || new Set(retiredFileIds).size !== retiredFileIds.length ||
+        activatedFileIds.some((value) => retiredFileIds.includes(value))) {
+            throw new TypeError('Invalid online content root publication');
+        }
+        if (!Array.isArray(codecs) || codecs.length > 8 || new Set(codecs.map((codec) => codec.codecId)).size !== codecs.length) {
+            throw new TypeError('Invalid staged codec publication');
+        }
+        const codecRows = codecs.map((codec) => {
+            const strategyJson = JSON.stringify(codec.strategy);
+            if (!codec || typeof codec.dictionarySha256 !== 'string' || !/^[a-f0-9]{64}$/.test(codec.dictionarySha256) ||
+            codec.codecId !== 'manabitan-zstd-' + codec.dictionarySha256 || !identifier.test(codec.fileId) ||
+            !Number.isSafeInteger(codec.dictionaryBytes) || codec.dictionaryBytes < 8 || codec.dictionaryBytes > 112640 ||
+            typeof strategyJson !== 'string' || strategyJson.length > 16384) {
+                throw new TypeError('Invalid content-addressed staged codec');
+            }
+            return {...codec, strategyJson};
+        });
+        const db = this._requireDb();
+        if (this._sqlite3?.capi.sqlite3_get_autocommit(db.pointer) !== 1) {
+            throw new Error('Online content publication requires transaction ownership');
+        }
+        const current = db.selectObject('SELECT activeEpoch, logicalHighWater FROM termContentStorageState WHERE singleton = 1 AND activeRootId = $rootId', {$rootId: expectedRootId});
+        if (typeof current === 'undefined' || logicalHighWater !== this._asNumber(current.logicalHighWater, -1)) {
+            throw new Error('Online content root changed or logical high-water differs');
+        }
+        if (typeof physicalSavings !== 'undefined' && (!Number.isSafeInteger(physicalSavings) || physicalSavings <= 0)) {
+            throw new TypeError('Invalid content repack physical savings');
+        }
+        if (typeof retireFramesThrough !== 'undefined' && (!Number.isSafeInteger(retireFramesThrough) || retireFramesThrough < 0)) {
+            throw new TypeError('Invalid content repack frame retirement bound');
+        }
+        const pagesBefore = typeof physicalSavings === 'undefined' ? 0 : this._asNumber(db.selectValue('PRAGMA page_count'), -1);
+        const pageSize = typeof physicalSavings === 'undefined' ? 0 : this._asNumber(db.selectValue('PRAGMA page_size'), -1);
+        if (typeof physicalSavings !== 'undefined' && (pagesBefore < 0 || pageSize <= 0)) {
+            throw new Error('Cannot measure dictionary database allocation');
+        }
+        const previousEpoch = this._asNumber(current.activeEpoch, -1);
+        if (previousEpoch < 1 || !Number.isSafeInteger(previousEpoch + 1)) {
+            throw new Error('Content repacking requires an activated immutable root');
+        }
+        this._termContentStore.assertRepackableRoot(previousEpoch, logicalHighWater);
+        const epoch = previousEpoch + 1;
+        const manifestJson = JSON.stringify(manifest);
+        const cursorJson = JSON.stringify(cursor);
+        const checkpointJson = JSON.stringify(checkpoint);
+        if (typeof manifestJson !== 'string' || manifestJson.length > 1024 * 1024 ||
+        typeof cursorJson !== 'string' || cursorJson.length > 1024 * 1024 ||
+        typeof checkpointJson !== 'string' || checkpointJson.length > 1024 * 1024) {
+            throw new RangeError('Online content publication metadata exceeds its bound');
+        }
+        if (typeof manifest !== 'object' || manifest === null || Array.isArray(manifest) ||
+        Reflect.get(manifest, 'version') !== 1 || !Array.isArray(Reflect.get(manifest, 'regions'))) {
+            throw new TypeError('Online content root directory is invalid');
+        }
+        const regionDirectory = parseOnlineContentRootManifest(manifest, epoch, logicalHighWater).regions;
+        if (regionDirectory.length > 32768 || (regionDirectory.length === 0 && logicalHighWater !== 0)) {
+            throw new RangeError('Online content root region directory does not cover logical high-water');
+        }
+        let nextLogicalStart = 0;
+        /** @type {Map<string, import('./term-content-storage-snapshots.js').ContentRootRegion>} */
+        const layoutById = new Map();
+        /** @type {Map<string, import('./term-content-storage-snapshots.js').ContentRootRegion>} */
+        const regionById = new Map();
+        for (const region of regionDirectory) {
+            const {regionId, layoutId, logicalStart, logicalLength} = region;
+            if (typeof regionId !== 'string' || !identifier.test(regionId) || typeof layoutId !== 'string' || !identifier.test(layoutId) ||
+            regionById.has(regionId) || layoutById.has(layoutId) || !Number.isSafeInteger(logicalStart) ||
+            logicalStart !== nextLogicalStart || !Number.isSafeInteger(logicalLength) || logicalLength <= 0 ||
+            logicalStart > Number.MAX_SAFE_INTEGER - logicalLength || logicalLength > 128 * 1024 * 1024) {
+                throw new TypeError('Online content regions must uniquely and contiguously cover the logical address space');
+            }
+            const value = {regionId, layoutId, logicalStart, logicalLength};
+            regionById.set(regionId, value);
+            layoutById.set(layoutId, value);
+            nextLogicalStart += logicalLength;
+        }
+        if (nextLogicalStart !== logicalHighWater) { throw new Error('Online content regions do not reach logical high-water'); }
+        const newLayoutIds = new Set();
+        for (const layout of layouts) {
+            const region = regionById.get(layout.regionId);
+            const layoutJson = JSON.stringify(layout.manifest);
+            if (!identifier.test(layout.layoutId) || newLayoutIds.has(layout.layoutId) || typeof region === 'undefined' ||
+            region.layoutId !== layout.layoutId || typeof layoutJson !== 'string' || layoutJson.length > 1024 * 1024 ||
+            !/^[a-f0-9]{64}$/.test(layout.manifestSha256) ||
+            typeof layout.manifest !== 'object' || layout.manifest === null || Array.isArray(layout.manifest) ||
+            Reflect.get(layout.manifest, 'version') !== 1 || Reflect.get(layout.manifest, 'regionId') !== region.regionId ||
+            Reflect.get(layout.manifest, 'logicalStart') !== region.logicalStart ||
+            Reflect.get(layout.manifest, 'logicalLength') !== region.logicalLength) {
+                throw new TypeError('Online content region manifest does not match its root directory entry');
+            }
+            newLayoutIds.add(layout.layoutId);
+        }
+        try {
+            db.exec('BEGIN IMMEDIATE');
+            const job = db.selectObject(`
+                SELECT jobId, dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion, allocationPages
+                FROM termContentOptimizationJobs WHERE jobId = $jobId
+            `, {$jobId: jobId});
+            if (typeof job === 'undefined' ||
+            this._asString(job.dictionaryGeneration) !== dictionaryGeneration ||
+            this._asString(job.strategyVersion) !== strategyVersion ||
+            this._asNumber(job.checkpointVersion, -1) !== expectedCheckpointVersion ||
+            !['recompress', 'reclaim'].includes(this._asString(job.phase))) {
+                throw new Error('Online content publication job identity or checkpoint is stale');
+            }
+            if (this._getOnlineContentOptimizationTarget({dictionaryTitle: this._asString(job.dictionaryTitle), dictionaryGeneration}) === null) {
+                throw new Error('Online content target dictionary generation changed before publication');
+            }
+            if (typeof retireFramesThrough !== 'undefined') {
+                // Verified frames at or before the new cursor cannot be read
+                // again. Let new manifests reuse these pages inside this
+                // transaction. Rollback restores them and the previous cursor.
+                db.exec({
+                    sql: `
+                        DELETE FROM termContentOptimizationCheckpoints WHERE jobId = $jobId AND sequence IN (
+                            SELECT sequence FROM termContentOptimizationCheckpoints
+                            WHERE jobId = $jobId AND kind = 'frame' AND sequence <= $offset
+                            ORDER BY sequence LIMIT 256
+                        )
+                    `,
+                    bind: {$jobId: jobId, $offset: retireFramesThrough},
+                });
+            }
+            for (const codec of codecRows) {
+                const file = db.selectObject('SELECT byteLength, sha256, state, ownerJobId FROM termContentStorageFiles WHERE fileId = $fileId', {$fileId: codec.fileId});
+                if (typeof file === 'undefined' || this._asNumber(file.byteLength, -1) !== codec.dictionaryBytes ||
+                file.sha256 !== codec.dictionarySha256 ||
+                (file.state !== 'active' && !(file.state === 'staged' && file.ownerJobId === jobId && activatedFileIds.includes(codec.fileId)))) {
+                    throw new Error('Staged codec dictionary is not sealed or owned by this cutover');
+                }
+                db.exec({sql: 'INSERT OR IGNORE INTO termContentStorageCodecs(codecId, fileId, formatVersion, dictionaryBytes, dictionarySha256, strategyJson) VALUES ($codecId, $fileId, 1, $dictionaryBytes, $sha256, $strategyJson)',
+                    bind: {$codecId: codec.codecId,
+                        $fileId: codec.fileId,
+                        $dictionaryBytes: codec.dictionaryBytes,
+                        $sha256: codec.dictionarySha256,
+                        $strategyJson: codec.strategyJson}});
+                const stored = db.selectObject('SELECT fileId, formatVersion, dictionaryBytes, dictionarySha256, strategyJson FROM termContentStorageCodecs WHERE codecId = $codecId', {$codecId: codec.codecId});
+                if (!stored || stored.fileId !== codec.fileId || stored.formatVersion !== 1 ||
+                stored.dictionaryBytes !== codec.dictionaryBytes || stored.dictionarySha256 !== codec.dictionarySha256 ||
+                stored.strategyJson !== codec.strategyJson) {
+                    throw new Error('Content-addressed codec metadata conflicts with its immutable identity');
+                }
+            }
+            const providedLayouts = new Map(layouts.map((layout) => [layout.layoutId, layout.manifest]));
+            const referencedNewFiles = new Set();
+            const referencedNewCodecs = new Set();
+            for (const region of regionDirectory) {
+                const layoutId = region.layoutId;
+                let layoutManifest = providedLayouts.get(layoutId);
+                if (typeof layoutManifest === 'undefined') {
+                    const row = db.selectObject('SELECT manifestJson FROM termContentStorageLayouts WHERE layoutId = $layoutId', {$layoutId: layoutId});
+                    if (typeof row === 'undefined') { throw new Error('Published root layout closure is incomplete'); }
+                    layoutManifest = this._safeParseJson(this._asString(row.manifestJson), null);
+                }
+                if (typeof layoutManifest !== 'object' || layoutManifest === null || Array.isArray(layoutManifest)) {
+                    throw new Error('Published root layout manifest is invalid');
+                }
+                for (const extent of Reflect.get(layoutManifest, 'extents') ?? []) {
+                    referencedNewFiles.add(Reflect.get(extent, 'fileId'));
+                }
+                for (const frame of Reflect.get(layoutManifest, 'blocks') ?? []) {
+                    referencedNewFiles.add(Reflect.get(frame, 'fileId'));
+                    referencedNewCodecs.add(Reflect.get(frame, 'codecId'));
+                }
+            }
+            if ([...referencedNewFiles, ...referencedNewCodecs].some((value) => typeof value !== 'string')) {
+                throw new Error('Published root contains an invalid file or codec reference');
+            }
+            if (referencedNewCodecs.size > 0) {
+                const codecIds = [...referencedNewCodecs];
+                const codecFiles = db.selectObjects(`SELECT codecId, fileId, dictionaryBytes, dictionarySha256 FROM termContentStorageCodecs
+                    WHERE codecId IN (${codecIds.map(() => '?').join(',')})`, codecIds);
+                if (codecFiles.length !== codecIds.length) { throw new Error('Published root codec closure is incomplete'); }
+                for (const codec of codecFiles) {
+                    const codecFileId = this._asString(codec.fileId);
+                    const codecFile = db.selectObject('SELECT byteLength, sha256 FROM termContentStorageFiles WHERE fileId = $fileId', {$fileId: codecFileId});
+                    if (typeof codecFile === 'undefined' ||
+                    this._asNumber(codec.dictionaryBytes, -1) !== this._asNumber(codecFile.byteLength, -2) ||
+                    typeof codec.dictionarySha256 !== 'string' || !/^[a-f0-9]{64}$/.test(codec.dictionarySha256) ||
+                    codec.dictionarySha256 !== codecFile.sha256) {
+                        throw new Error('Published root codec dictionary identity is incomplete or invalid');
+                    }
+                    referencedNewFiles.add(codecFileId);
+                }
+            }
+            for (const codec of codecRows) {
+                if (!referencedNewCodecs.has(codec.codecId)) { throw new Error('Publication registers a codec outside the next root closure'); }
+            }
+            const referencedFileRows = referencedNewFiles.size === 0 ?
+[] :
+db.selectObjects(`
+                SELECT fileId, byteLength, sha256, state, ownerJobId FROM termContentStorageFiles
+                WHERE fileId IN (${[...referencedNewFiles].map(() => '?').join(',')})
+            `, [...referencedNewFiles]);
+            if (referencedFileRows.length !== referencedNewFiles.size) {
+                throw new Error('Published root physical file closure is missing a reserved or unknown file');
+            }
+            const activatedFiles = new Set(activatedFileIds);
+            for (const file of referencedFileRows) {
+                const fileId = this._asString(file.fileId);
+                const state = this._asString(file.state);
+                if (!Number.isSafeInteger(this._asNumber(file.byteLength, -1)) || this._asNumber(file.byteLength, -1) <= 0 ||
+                (state !== 'active' && !(state === 'staged' && this._asString(file.ownerJobId) === jobId && activatedFiles.has(fileId)))) {
+                    throw new Error('Published root references a file that is not active or sealed by this job');
+                }
+            }
+            for (const fileId of activatedFiles) {
+                if (!referencedNewFiles.has(fileId)) {
+                    throw new Error('Publication activates a staged file outside the next root closure');
+                }
+            }
+            for (const fileId of retiredFileIds) {
+                if (referencedNewFiles.has(fileId)) { throw new Error('Published root still references a retired physical file'); }
+            }
+            const currentLayouts = db.selectObjects(`
+                SELECT l.manifestJson FROM termContentStorageRootLayouts r
+                JOIN termContentStorageLayouts l ON l.layoutId = r.layoutId
+                WHERE r.rootId = $rootId
+            `, {$rootId: expectedRootId});
+            const currentFileIds = new Set();
+            const currentCodecIds = new Set();
+            for (const row of currentLayouts) {
+                const currentManifest = this._safeParseJson(this._asString(row.manifestJson), null);
+                if (typeof currentManifest !== 'object' || currentManifest === null || Array.isArray(currentManifest)) {
+                    throw new Error('Current online content layout closure is invalid');
+                }
+                for (const extent of Reflect.get(currentManifest, 'extents') ?? []) { currentFileIds.add(Reflect.get(extent, 'fileId')); }
+                for (const frame of Reflect.get(currentManifest, 'blocks') ?? []) {
+                    currentFileIds.add(Reflect.get(frame, 'fileId'));
+                    currentCodecIds.add(Reflect.get(frame, 'codecId'));
+                }
+            }
+            if (currentCodecIds.size > 0) {
+                const codecIds = [...currentCodecIds];
+                const currentCodecs = db.selectObjects(`SELECT codecId, fileId FROM termContentStorageCodecs
+                    WHERE codecId IN (${codecIds.map(() => '?').join(',')})`, codecIds);
+                if (currentCodecs.length !== codecIds.length) { throw new Error('Current online content codec closure is invalid'); }
+                for (const codec of currentCodecs) { currentFileIds.add(this._asString(codec.fileId)); }
+            }
+            for (const fileId of retiredFileIds) {
+                if (!currentFileIds.has(fileId)) { throw new Error('Publication retires a file outside the current root closure'); }
+            }
+            for (const layout of layouts) {
+                const layoutJson = JSON.stringify(layout.manifest);
+                const existing = db.selectObject('SELECT regionId, manifestJson, manifestSha256 FROM termContentStorageLayouts WHERE layoutId = $layoutId', {$layoutId: layout.layoutId});
+                if (typeof existing !== 'undefined') {
+                    if (this._asString(existing.regionId) !== layout.regionId || this._asString(existing.manifestSha256) !== layout.manifestSha256 ||
+                    this._asString(existing.manifestJson) !== layoutJson) {
+                        throw new Error('Immutable online content layout identity was reused with different bytes');
+                    }
+                    continue;
+                }
+                db.exec({
+                    sql: `INSERT INTO termContentStorageLayouts(layoutId, version, regionId, manifestJson, manifestSha256)
+                        VALUES ($layoutId, 1, $regionId, $manifestJson, $manifestSha256)`,
+                    bind: {$layoutId: layout.layoutId,
+                        $regionId: layout.regionId,
+                        $manifestJson: layoutJson,
+                        $manifestSha256: layout.manifestSha256},
+                });
+            }
+            db.exec({
+                sql: `
+                    INSERT INTO termContentStorageRoots(rootId, epoch, logicalHighWater, state, manifestJson, createdAt)
+                    VALUES ($rootId, $epoch, $logicalHighWater, 'staged', $manifestJson, $createdAt)
+                `,
+                bind: {$rootId: rootId, $epoch: epoch, $logicalHighWater: logicalHighWater, $manifestJson: manifestJson, $createdAt: Date.now()},
+            });
+            for (const region of regionDirectory) {
+                const layoutExists = db.selectValue('SELECT 1 FROM termContentStorageLayouts WHERE layoutId = $layoutId', {$layoutId: region.layoutId});
+                if (this._asNumber(layoutExists, 0) !== 1) { throw new Error('A root region points to an unpublished immutable layout'); }
+                db.exec({
+                    sql: `INSERT INTO termContentStorageRootLayouts(rootId, regionId, layoutId, logicalStart, logicalLength)
+                        VALUES ($rootId, $regionId, $layoutId, $logicalStart, $logicalLength)`,
+                    bind: {$rootId: rootId,
+                        $regionId: region.regionId,
+                        $layoutId: region.layoutId,
+                        $logicalStart: region.logicalStart,
+                        $logicalLength: region.logicalLength},
+                });
+            }
+            for (const fileId of activatedFileIds) {
+                db.exec({
+                    sql: 'UPDATE termContentStorageFiles SET state = \'active\' WHERE fileId = $fileId AND ownerJobId = $jobId AND state = \'staged\'',
+                    bind: {$fileId: fileId, $jobId: jobId},
+                });
+                if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+                    throw new Error('A staged online content file changed before publication');
+                }
+            }
+            let retirementSequence = Math.min(0, this._asNumber(db.selectValue('SELECT MIN(sequence) FROM termContentOptimizationCheckpoints WHERE jobId = $jobId', {$jobId: jobId}), 0));
+            for (const fileId of retiredFileIds) {
+                const observation = db.selectObject('SELECT path, byteLength, sha256, ownerJobId FROM termContentStorageFiles WHERE fileId = $fileId AND state = \'active\'', {$fileId: fileId});
+                if (typeof observation === 'undefined') { throw new Error('A source content file changed before retirement'); }
+                db.exec({
+                    sql: 'UPDATE termContentStorageFiles SET state = \'retired\' WHERE fileId = $fileId AND state = \'active\'',
+                    bind: {$fileId: fileId},
+                });
+                if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+                    throw new Error('A source content file changed before retirement');
+                }
+                --retirementSequence;
+                if (!Number.isSafeInteger(retirementSequence)) { throw new RangeError('Retired file checkpoint sequence exceeds admission'); }
+                // The retiring job owns this GC intent even when the file was
+                // originally created by activation or another import. This
+                // receipt survives cutover and cannot vanish in a caller JSON.
+                db.exec({sql: 'INSERT INTO termContentOptimizationCheckpoints(jobId, sequence, kind, fileId, byteOffset, byteLength, sha256, metadataJson) VALUES ($jobId, $sequence, \'retired-file\', $fileId, 0, $byteLength, $sha256, $metadataJson)',
+                    bind: {$jobId: jobId,
+                        $sequence: retirementSequence,
+                        $fileId: fileId,
+                        $byteLength: observation.byteLength,
+                        $sha256: observation.sha256,
+                        $metadataJson: JSON.stringify({version: 1, path: observation.path, ownerJobId: observation.ownerJobId, sourceRootId: expectedRootId})}});
+            }
+            db.exec({
+                sql: 'UPDATE termContentStorageRoots SET state = \'retired\' WHERE rootId = $rootId AND state = \'active\'',
+                bind: {$rootId: expectedRootId},
+            });
+            if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+                throw new Error('The prior online content root is no longer active');
+            }
+            db.exec({
+                sql: 'UPDATE termContentStorageRoots SET state = \'active\' WHERE rootId = $rootId AND state = \'staged\'',
+                bind: {$rootId: rootId},
+            });
+            db.exec({
+                sql: `
+                    UPDATE termContentStorageState
+                    SET activeEpoch = $epoch, logicalHighWater = $logicalHighWater, activeRootId = $rootId
+                    WHERE singleton = 1 AND activeRootId = $expectedRootId AND activeEpoch = $expectedEpoch
+                `,
+                bind: {$epoch: epoch,
+                    $logicalHighWater: logicalHighWater,
+                    $rootId: rootId,
+                    $expectedRootId: expectedRootId,
+                    $expectedEpoch: epoch - 1},
+            });
+            if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+                throw new Error('Online content root compare-and-swap failed');
+            }
+            db.exec({
+                sql: `
+                    UPDATE termContentOptimizationJobs
+                    SET phase = 'reclaim', cursorJson = $cursorJson, checkpointJson = $checkpointJson,
+                        checkpointVersion = checkpointVersion + 1,
+                        retryAfter = NULL, updatedAt = $updatedAt
+                    WHERE jobId = $jobId AND dictionaryGeneration = $dictionaryGeneration
+                        AND strategyVersion = $strategyVersion AND checkpointVersion = $expectedVersion
+                `,
+                bind: {$cursorJson: cursorJson,
+                    $checkpointJson: checkpointJson,
+                    $updatedAt: Date.now(),
+                    $jobId: jobId,
+                    $dictionaryGeneration: dictionaryGeneration,
+                    $strategyVersion: strategyVersion,
+                    $expectedVersion: expectedCheckpointVersion},
+            });
+            if (this._asNumber(db.selectValue('SELECT changes()'), 0) !== 1) {
+                throw new Error('Online content publication job compare-and-swap failed');
+            }
+            if (typeof physicalSavings !== 'undefined') {
+                // The saved baseline includes work since job creation or the
+                // last accepted cutover, including discovery and staging.
+                const baseline = this._asNumber(job.allocationPages, -1);
+                const pagesAfter = this._asNumber(db.selectValue('PRAGMA page_count'), -1);
+                if (pagesAfter < 0 || baseline < 0) { throw new OnlineContentRepackNoGainError(); }
+                db.exec({sql: 'UPDATE termContentOptimizationJobs SET allocationPages = $pages WHERE jobId = $jobId',
+                    bind: {$pages: pagesAfter, $jobId: jobId}});
+                const committedPages = this._asNumber(db.selectValue('PRAGMA page_count'), -1);
+                if (committedPages < 0 || Math.max(0, committedPages - Math.min(pagesBefore, baseline)) * pageSize >= physicalSavings) {
+                    throw new OnlineContentRepackNoGainError();
+                }
+            }
+            this._raiseDictionaryStorageVersion(ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION);
+            db.exec('COMMIT');
+        } catch (error) {
+            this._requireCommittedOnlineContentRoot(db, rootId, expectedRootId, error);
+            try {
+                const receipt = db.selectObject(`SELECT dictionaryGeneration, strategyVersion, phase,
+                    checkpointVersion, cursorJson, checkpointJson
+                    FROM termContentOptimizationJobs WHERE jobId = $jobId`, {$jobId: jobId});
+                if (typeof receipt === 'undefined' ||
+                this._asString(receipt.dictionaryGeneration) !== dictionaryGeneration ||
+                this._asString(receipt.strategyVersion) !== strategyVersion ||
+                this._asString(receipt.phase) !== 'reclaim' ||
+                this._asNumber(receipt.checkpointVersion, -1) !== expectedCheckpointVersion + 1 ||
+                this._asString(receipt.cursorJson) !== cursorJson ||
+                this._asString(receipt.checkpointJson) !== checkpointJson) {
+                    throw new Error('Committed online content root has no matching job receipt');
+                }
+            } catch (receiptError) {
+                this._onlineContentPublicationRecoveryRequired = true;
+                const errors = [toError(error), toError(receiptError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Committed online content root has no matching job receipt');
+            }
+        }
+        this._onlineContentLayoutWindowCache.clear();
+        try {
+            this._termContentStore.adoptRepackedRoot(previousEpoch, logicalHighWater);
+            this.getOnlineContentStorageState();
+        } catch (error) {
+            // SQL already committed. A reopen reconstructs both runtime roots
+            // before another import or maintenance step can be admitted.
+            this._onlineContentPublicationRecoveryRequired = true;
+            const errors = [toError(error)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Published content repack requires connection recovery');
+        }
+        return {rootId, epoch, logicalHighWater};
+    }
+
+    /**
      * Durable reconciliation after a runtime restart. A title match alone is
      * never evidence that this operation published; require its exact receipt.
      * @param {string} operationId
@@ -5304,31 +8081,19 @@ void 0 :
         ) {
             throw new TermContentLookupReadError('corrupt', 'Compressed shared glossary decoded length is invalid');
         }
-        const readResult = await this._termContentBlockStore.readDetailed(meta.contentOffset, meta.contentLength, 'raw');
+        const readResult = meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ?
+            await this._termContentBlockStore.readDecodedFrameDetailed({kind: 'shared-glossary',
+                logicalOffset: meta.contentOffset,
+                recordLength: meta.contentLength,
+                sourceStoredLength: meta.contentLength,
+                originalCodecId: null,
+                expectedDecodedLength: meta.uncompressedLength,
+                originalEnvelope: 'none'}) :
+            await this._termContentBlockStore.readDetailed(meta.contentOffset, meta.contentLength, 'raw');
         if (readResult.status !== 'ok') {
-            throw new TermContentLookupReadError(readResult.status, readResult.reason);
+            throw new TermContentLookupReadError(readResult.status, readResult.reason, 'cause' in readResult ? {cause: readResult.cause} : undefined);
         }
-        const compressedBytes = readResult.bytes;
-        let inflatedBytes = compressedBytes;
-        if (meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME) {
-            const exactOutputSize = meta.uncompressedLength;
-            try {
-                const decoded = /** @type {unknown} */ (zstdDecompress(compressedBytes, {
-                    defaultHeapSize: exactOutputSize,
-                    maxOutputSize: exactOutputSize,
-                }));
-                if (!(decoded instanceof Uint8Array)) {
-                    throw new TypeError('Shared glossary decoder returned non-byte data');
-                }
-                inflatedBytes = decoded;
-            } catch (error) {
-                throw new TermContentLookupReadError(
-                    isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
-                    'Shared glossary decompression failed',
-                    {cause: error},
-                );
-            }
-        }
+        const inflatedBytes = readResult.bytes;
         if (meta.uncompressedLength > 0 && inflatedBytes.byteLength !== meta.uncompressedLength) {
             throw new TermContentLookupReadError(
                 'corrupt',
@@ -6510,13 +9275,9 @@ void 0 :
      * @returns {boolean}
      */
     _canExactlyComparePersistedTermContent(dictName) {
-        return (
-            dictName === 'raw' ||
-            dictName === RAW_TERM_CONTENT_DICT_NAME ||
-            dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
-            dictName === RAW_TERM_CONTENT_TOKEN_DICT_NAME ||
-            typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'
-        );
+        // Store reads normalize every supported representation to canonical
+        // entry bytes, including legacy ZSTD and shared glossary headers.
+        return typeof dictName === 'string';
     }
 
     /**
@@ -7140,7 +9901,22 @@ void 0 :
      * @returns {Promise<Uint8Array|null>}
      */
     async readRawTermContentBytesForDiagnostics(contentOffset, contentLength) {
-        return await this._termContentStore.readSlice(contentOffset, contentLength);
+        return await this._readRetainedTermContentBytes(contentOffset, contentLength);
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Promise<Uint8Array|null>}
+     */
+    async _readRetainedTermContentBytes(offset, length) {
+        const context = this._acquireTermContentReadContext();
+        if (context === null) { return await this._termContentStore.readSlice(offset, length); }
+        try {
+            return await context.readSlice(offset, length);
+        } finally {
+            context.release();
+        }
     }
 
     /**
@@ -10170,8 +12946,9 @@ null :
 
     /**
      * @param {MessagePort} port
+     * @param {(() => (() => void))|null} [foregroundStarted]
      */
-    async connectToDatabaseWorker(port) {
+    async connectToDatabaseWorker(port, foregroundStarted = null) {
         if (this._worker !== null) {
             this._worker.postMessage({action: 'connectToDatabaseWorker'}, [port]);
             return;
@@ -10179,7 +12956,8 @@ null :
 
         port.onmessage = (/** @type {MessageEvent<import('dictionary-database').ApiMessageAny>} */ event) => {
             const {action, params} = event.data;
-            return invokeApiMapHandler(this._apiMap, action, params, [port], () => {});
+            const release = foregroundStarted?.();
+            return invokeApiMapHandler(this._apiMap, action, params, [port], () => release?.(), release);
         };
         port.onmessageerror = (event) => {
             const error = new ExtensionError('DictionaryDatabase: Error receiving message from main thread');
@@ -10201,17 +12979,22 @@ null :
         return await navigator.storage.getDirectory();
     }
 
-    /** Completes an explicit purge before opening SQLite or recovering an import. */
+    /** @returns {Promise<boolean>} Whether a previously authorized purge was completed. */
     async _resumePersistentDictionaryPurge() {
         const root = await this._getDictionaryPurgeRoot();
-        if (root === null) { return; }
+        if (root === null) { return false; }
         try {
             await root.getFileHandle(DICTIONARY_PURGE_MARKER);
         } catch (error) {
-            if ((error instanceof DOMException || error instanceof Error) && error.name === 'NotFoundError') { return; }
+            if ((error instanceof DOMException || error instanceof Error) && error.name === 'NotFoundError') { return false; }
             throw error;
         }
+        // The guarded open has checked SQLite before any payload removal.
+        // Release its VFS ownership before deleting the files.
+        this._requireDb().close();
+        this._db = null;
         await this._finishPersistentDictionaryPurge(root);
+        return true;
     }
 
     /**
@@ -10230,12 +13013,8 @@ null :
         return result;
     }
 
-    /**
-     * @returns {Promise<void>}
-     */
-    async _openConnection() {
-        await this._resumePersistentDictionaryPurge();
-        this._sqlite3 = await getSqlite3();
+    /** Opens and checks the persisted format before reading or mutating payload files. */
+    async _openSupportedDictionaryConnection() {
         try {
             this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
         } catch (error) {
@@ -10245,14 +13024,37 @@ null :
         }
         this._usesFallbackStorage = didLastOpenUseFallbackStorage();
         this._openStorageDiagnostics = getLastOpenStorageDiagnostics();
-        // A downgraded build must not initialize old tables or inspect newer
-        // OPFS formats before it rejects an unsupported database version.
-        this._getSupportedInstalledSchemaVersion();
-        // An interrupted rollback can leave a sticky store error or gaps among
-        // unpublished segments. Recover the journal before ordinary preparation
-        // tries to admit that incomplete state as a readable content inventory.
+        const installedSchemaVersion = this._getSupportedInstalledSchemaVersion();
+        const db = this._requireDb();
+        const hasContentState = db.selectValue(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'termContentStorageState'",
+        ) === 1;
+        const committedContent = hasContentState ?
+            db.selectObject('SELECT activeEpoch, logicalHighWater FROM termContentStorageState WHERE singleton = 1') :
+            void 0;
+        const storageEpoch = this._asNumber(committedContent?.activeEpoch, 0);
+        if (!Number.isSafeInteger(storageEpoch) || storageEpoch < 0 ||
+        (storageEpoch > 0) !== (installedSchemaVersion === ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION)) {
+            throw new Error('Dictionary schema version and immutable content root disagree');
+        }
+        return {storageEpoch, logicalHighWater: this._asNumber(committedContent?.logicalHighWater, -1)};
+    }
+
+    /** @returns {Promise<void>} */
+    async _openConnection() {
+        this._sqlite3 = await getSqlite3();
+        let committedContent = await this._openSupportedDictionaryConnection();
+        if (await this._resumePersistentDictionaryPurge()) {
+            committedContent = await this._openSupportedDictionaryConnection();
+        }
+        // An interrupted rollback can leave gaps among unpublished segments.
+        // Reconcile its journal before preparing the corresponding store.
         await this._recoverInterruptedImportSession();
-        await this._termContentStore.prepare();
+        if (committedContent.storageEpoch > 0) {
+            await this._termContentStore.activateCommittedRoot(committedContent);
+        } else {
+            await this._termContentStore.prepare();
+        }
         await this._termRecordStore.prepare();
         this._termContentBlockStore.clearCache();
         this._clearTermsVtabCursorState();
@@ -10262,6 +13064,7 @@ null :
 
         await this._initializeSchema();
         await this._runSchemaMigrations();
+        this.getOnlineContentStorageState();
         this._restoreTermRecordDictionaryHealth();
         if (!this._hasUnresolvedImportJournal()) {
             try {
@@ -10288,6 +13091,12 @@ null :
                 'SELECT 1 FROM dictionaryImportPublications WHERE sessionId = $sessionId LIMIT 1',
                 {$sessionId: record.sessionId},
             ), 0) === 1;
+            if (published && record.contentCheckpoint.version === 2) {
+                const state = this.getOnlineContentStorageState();
+                await this._termContentStore.adoptImportArena(record.contentCheckpoint, {
+                    storageEpoch: state.epoch, logicalHighWater: state.logicalHighWater,
+                });
+            }
             if (!published) {
                 const rollbackResults = await Promise.allSettled([
                     this._termContentStore.rollbackImportSession(record.contentCheckpoint),
@@ -10494,6 +13303,8 @@ null :
             ) WITHOUT ROWID;
         `);
         this._migrateDictionaryStorageHealthSchema();
+        this._initializeOnlineContentSchema();
+        this._seedTermContentStorageState();
         await this._ensureTermsVirtualTable();
         await this._migrateTermsContentSchema();
         await this._migrateMediaSchema();
@@ -10505,6 +13316,146 @@ null :
         for (const createIndexSql of this._createIndexesSql()) {
             db.exec(createIndexSql);
         }
+    }
+
+    /** Creates additive metadata independently of the base schema setup order. */
+    _initializeOnlineContentSchema() {
+        const db = this._requireDb();
+        db.exec(`
+            -- Additive online content-layout metadata. Existing stores remain
+            -- readable as the implicit epoch-0 legacy root until a validated
+            -- replacement root is published.
+            CREATE TABLE IF NOT EXISTS termContentStorageState (
+                singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                activeEpoch INTEGER NOT NULL,
+                logicalHighWater INTEGER NOT NULL,
+                activeRootId TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS termContentStorageRoots (
+                rootId TEXT PRIMARY KEY,
+                epoch INTEGER NOT NULL UNIQUE,
+                logicalHighWater INTEGER NOT NULL,
+                state TEXT NOT NULL CHECK (state IN ('staged', 'active', 'retired')),
+                manifestJson TEXT NOT NULL,
+                createdAt INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS termContentStorageLayouts (
+                layoutId TEXT PRIMARY KEY,
+                version INTEGER NOT NULL,
+                regionId TEXT NOT NULL,
+                manifestJson TEXT NOT NULL,
+                manifestSha256 TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS termContentStorageRootLayouts (
+                rootId TEXT NOT NULL,
+                regionId TEXT NOT NULL,
+                layoutId TEXT NOT NULL,
+                logicalStart INTEGER NOT NULL,
+                logicalLength INTEGER NOT NULL,
+                PRIMARY KEY (rootId, regionId),
+                UNIQUE (rootId, layoutId),
+                FOREIGN KEY (rootId) REFERENCES termContentStorageRoots(rootId),
+                FOREIGN KEY (layoutId) REFERENCES termContentStorageLayouts(layoutId)
+            ) WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS termContentStorageFiles (
+                fileId TEXT PRIMARY KEY,
+                path TEXT NOT NULL UNIQUE,
+                byteLength INTEGER NOT NULL,
+                sha256 TEXT,
+                state TEXT NOT NULL CHECK (state IN ('intent', 'staged', 'active', 'retired', 'deleting')),
+                ownerJobId TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS termContentStorageCodecs (
+                codecId TEXT PRIMARY KEY,
+                fileId TEXT NOT NULL,
+                formatVersion INTEGER NOT NULL,
+                dictionaryBytes INTEGER NOT NULL,
+                dictionarySha256 TEXT NOT NULL,
+                strategyJson TEXT NOT NULL,
+                FOREIGN KEY (fileId) REFERENCES termContentStorageFiles(fileId)
+            );
+
+            CREATE TABLE IF NOT EXISTS termContentOptimizationJobs (
+                jobId TEXT PRIMARY KEY,
+                dictionaryTitle TEXT NOT NULL,
+                dictionaryGeneration TEXT NOT NULL,
+                strategyVersion TEXT NOT NULL,
+                phase TEXT NOT NULL CHECK (phase IN ('discover', 'sample', 'train', 'recompress', 'reclaim', 'completed', 'no-gain', 'deferred', 'failed')),
+                cursorJson TEXT NOT NULL,
+                checkpointJson TEXT NOT NULL,
+                checkpointVersion INTEGER NOT NULL DEFAULT 0,
+                retryAfter INTEGER,
+                updatedAt INTEGER NOT NULL,
+                allocationPages INTEGER,
+                UNIQUE (dictionaryGeneration, strategyVersion)
+            );
+
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_term_content_single_active_job
+                ON termContentOptimizationJobs ((1))
+                WHERE phase IN ('discover', 'sample', 'train', 'recompress', 'reclaim');
+
+            CREATE TABLE IF NOT EXISTS termContentOptimizationCheckpoints (
+                jobId TEXT NOT NULL,
+                sequence INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                fileId TEXT,
+                byteOffset INTEGER NOT NULL,
+                byteLength INTEGER NOT NULL,
+                sha256 TEXT,
+                metadataJson TEXT NOT NULL,
+                PRIMARY KEY (jobId, sequence),
+                FOREIGN KEY (jobId) REFERENCES termContentOptimizationJobs(jobId)
+            ) WITHOUT ROWID;
+
+        `);
+        const columns = db.selectObjects('PRAGMA table_info(termContentOptimizationJobs)');
+        if (!columns.some((column) => column.name === 'checkpointVersion')) {
+            db.exec('ALTER TABLE termContentOptimizationJobs ADD COLUMN checkpointVersion INTEGER NOT NULL DEFAULT 0');
+        }
+        if (!columns.some((column) => column.name === 'allocationPages')) {
+            db.exec('ALTER TABLE termContentOptimizationJobs ADD COLUMN allocationPages INTEGER');
+        }
+    }
+
+    /**
+     * Existing OPFS content stays the implicit legacy root. This row only
+     * establishes the additive publication cursor; it does not scan file data.
+     */
+    _seedTermContentStorageState() {
+        const db = this._requireDb();
+        const logicalHighWater = this._termContentStore.getLogicalLength();
+        db.exec(`
+            INSERT OR IGNORE INTO termContentStorageRoots
+                (rootId, epoch, logicalHighWater, state, manifestJson, createdAt)
+            VALUES ('legacy-root-v0', 0, ${logicalHighWater}, 'active', '{"version":1,"legacy":true}', 0)
+        `);
+        db.exec({
+            sql: `
+            INSERT OR IGNORE INTO termContentStorageState
+                (singleton, activeEpoch, logicalHighWater, activeRootId)
+            VALUES (1, 0, $logicalHighWater, 'legacy-root-v0')
+            `,
+            bind: {$logicalHighWater: logicalHighWater},
+        });
+        // Legacy imports may have advanced the immutable stream since the
+        // epoch-0 cursor was first seeded. Never overwrite a published v1 root.
+        db.exec({
+            sql: `UPDATE termContentStorageRoots SET logicalHighWater = $logicalHighWater
+                WHERE rootId = 'legacy-root-v0' AND state = 'active'
+                    AND EXISTS (SELECT 1 FROM termContentStorageState
+                        WHERE singleton = 1 AND activeRootId = 'legacy-root-v0')`,
+            bind: {$logicalHighWater: logicalHighWater},
+        });
+        db.exec({
+            sql: `UPDATE termContentStorageState SET logicalHighWater = $logicalHighWater
+                WHERE singleton = 1 AND activeRootId = 'legacy-root-v0'`,
+            bind: {$logicalHighWater: logicalHighWater},
+        });
     }
 
     /** Additive metadata migration; never rewrites or removes dictionary files. */
@@ -10525,15 +13476,27 @@ null :
         if (!Number.isSafeInteger(installedSchemaVersion) || installedSchemaVersion < 0) {
             throw new Error('Dictionary storage schema version is invalid');
         }
-        if (installedSchemaVersion > PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION) {
+        if (installedSchemaVersion > ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION) {
             reportDiagnostics('dictionary-schema-migration-skipped', {
                 reason: 'newer-installed-version',
                 installedSchemaVersion,
-                currentSchemaVersion: PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION,
+                currentSchemaVersion: ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION,
             });
-            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
+            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
         }
         return installedSchemaVersion;
+    }
+
+    /**
+     * Advances the format gate in the transaction that publishes its references.
+     * Packed media published after the first online root cannot lower the gate.
+     * @param {number} requiredVersion
+     */
+    _raiseDictionaryStorageVersion(requiredVersion) {
+        const installedVersion = this._getSupportedInstalledSchemaVersion();
+        if (installedVersion < requiredVersion) {
+            this._requireDb().exec(`PRAGMA user_version = ${requiredVersion}`);
+        }
     }
 
     /** */
@@ -11695,23 +14658,7 @@ null :
                                     glossary: Array.isArray(glossary) ? glossary : [],
                                 };
                             } else {
-                                // Block references describe their container compression; the
-                                // extracted entry is the original raw payload and must not be
-                                // decompressed a second time.
-                                const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
-                                let decodedContentBytes = contentBytes;
-                                if (contentDictName !== 'raw' && !isBlockContent) {
-                                    try {
-                                        decodedContentBytes = decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null);
-                                    } catch (error) {
-                                        throw new TermContentLookupReadError(
-                                            isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
-                                            'Term content decompression failed',
-                                            {cause: error},
-                                        );
-                                    }
-                                }
-                                const contentJson = this._textDecoder.decode(decodedContentBytes);
+                                const contentJson = this._textDecoder.decode(contentBytes);
                                 const parsedHeader = this._parseSerializedTermEntryContentHeader(contentJson);
                                 if (parsedHeader !== null) {
                                     definitionTags = parsedHeader.definitionTags;
@@ -12162,7 +15109,7 @@ null :
         let content = this._toArrayBuffer(row.content);
         if (contentLength > 0 && content.byteLength === 0) {
             try {
-                let contentBytes = await this._termContentStore.readSlice(contentOffset, contentLength);
+                let contentBytes = await this._readRetainedTermContentBytes(contentOffset, contentLength);
                 if (contentBytes !== null) {
                     if (contentCompressionMethod !== ZIP_COMPRESSION_METHOD_STORE) {
                         contentBytes = await inflateZipMediaContent(contentBytes, contentCompressionMethod, contentUncompressedLength);

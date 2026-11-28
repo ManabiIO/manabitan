@@ -16,8 +16,37 @@
  */
 
 declare module 'dictionary-import-journal' {
-    export type TermContentCheckpoint = {
+    export type LegacyTermContentCheckpoint = {
+        version?: 1;
         segments: Array<{fileName: string, fileLength: number}>;
+    };
+
+    export type TermContentArenaCheckpoint = {
+        version: 2;
+        storageEpoch: number;
+        logicalHighWater: number;
+        arenaNamespace: string;
+        segments: [];
+    };
+
+    export type TermContentCheckpoint = LegacyTermContentCheckpoint | TermContentArenaCheckpoint;
+
+    export type TermContentArenaFile = {
+        fileId: string;
+        path: string;
+        byteLength: number;
+        logicalStart: number;
+        logicalEnd: number;
+    };
+
+    export type SealedTermContentArena = {
+        checkpoint: TermContentArenaCheckpoint;
+        arenaNamespace: string;
+        storageEpoch: number;
+        logicalStart: number;
+        logicalEnd: number;
+        logicalHighWater: number;
+        files: TermContentArenaFile[];
     };
 
     export type TermRecordCheckpoint = {
@@ -25,7 +54,7 @@ declare module 'dictionary-import-journal' {
     };
 
     export type DictionaryImportJournalRecord = {
-        version: 1;
+        version: 1 | 2;
         sessionId: string;
         contentCheckpoint: TermContentCheckpoint;
         recordCheckpoint: TermRecordCheckpoint;

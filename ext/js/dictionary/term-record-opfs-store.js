@@ -18,6 +18,8 @@
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
+import {createTermKeyHashState, finishTermKeyHashState, updateTermKeyHashState} from './term-key-hash.js';
+import {getRawTermContentBlockCompressionDictName} from './raw-term-content.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -657,6 +659,122 @@ function isStorageEntryNotFoundError(error) {
         error.name === 'NotFoundError' ||
         /\b(?:file|entry) not found\b/i.test(error.message)
     );
+}
+
+
+/** Optional metadata reads never publish dictionary health or derived lookup state. */
+export class ContentReferenceIterationError extends Error {
+    /**
+     * @param {'stale'|'unavailable'|'invalid'|'resource'} kind
+     * @param {string} message
+     * @param {unknown} [cause]
+     */
+    constructor(kind, message, cause) {
+        super(message, typeof cause === 'undefined' ? void 0 : {cause});
+        /**
+         *
+         */
+        this.name = 'ContentReferenceIterationError';
+        /**
+         *
+         */
+        this.kind = kind;
+    }
+}
+
+/** @typedef {import('./term-key-hash.js').TermKeyHashState} ContentReferenceHashState */
+/**
+ * @typedef {object} ContentReferenceCursor
+ * @property {number} version
+ * @property {string} dictionaryName
+ * @property {string} generation
+ * @property {string} shardFileName
+ * @property {string|null} shardGeneration
+ * @property {number|null} containerLength
+ * @property {number} chunkOffset
+ * @property {number} chunkIndex
+ * @property {number} rowsBeforeChunk
+ * @property {number} row
+ * @property {number} verifyOffset
+ * @property {string|null} chunkIdentity
+ * @property {ContentReferenceHashState} hash
+ */
+/** @typedef {{recordId: number, entryContentOffset: number, entryContentLength: number, entryContentDictName: string}} ContentReference */
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function contentReferenceIdentity(bytes) {
+    return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+}
+/**
+ * @param {string} dictionaryName
+ * @param {string} generation
+ * @param {string} shardFileName
+ * @returns {ContentReferenceCursor}
+ */
+function createContentReferenceCursor(dictionaryName, generation, shardFileName) {
+    return {version: 1,
+        dictionaryName,
+        generation,
+        shardFileName,
+        shardGeneration: null,
+        containerLength: null,
+        chunkOffset: LOOKUP_INDEX_FILE_HEADER_BYTES,
+        chunkIndex: 0,
+        rowsBeforeChunk: 0,
+        row: 0,
+        verifyOffset: 0,
+        chunkIdentity: null,
+        hash: createTermKeyHashState()};
+}
+
+/**
+ * @param {unknown} persistedCursor
+ * @param {string} dictionaryName
+ * @param {string} generation
+ * @returns {ContentReferenceCursor}
+ * @throws {TypeError} If the persisted cursor is invalid.
+ */
+export function copyContentReferenceCursor(persistedCursor, dictionaryName, generation) {
+    const cursor = /** @type {ContentReferenceCursor} */ (persistedCursor);
+    const fields = ['version',
+        'dictionaryName',
+        'generation',
+        'shardFileName',
+        'shardGeneration',
+        'containerLength',
+        'chunkOffset',
+        'chunkIndex',
+        'rowsBeforeChunk',
+        'row',
+        'verifyOffset',
+        'chunkIdentity',
+        'hash'];
+    const safe = (/** @type {number} */ value, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(value) && value >= minimum && value <= maximum;
+    if (!cursor || typeof cursor !== 'object' || Object.keys(cursor).length !== fields.length ||
+    fields.some((key) => !Object.hasOwn(cursor, key)) || cursor.version !== 1 ||
+    cursor.dictionaryName !== dictionaryName || cursor.generation !== generation ||
+    typeof cursor.shardFileName !== 'string' || cursor.shardFileName.length === 0 || cursor.shardFileName.length > 4096 ||
+    (cursor.shardGeneration !== null && (typeof cursor.shardGeneration !== 'string' || !/^[0-9a-f]{32}$/.test(cursor.shardGeneration))) ||
+    (cursor.containerLength !== null && !safe(cursor.containerLength, LOOKUP_INDEX_FILE_HEADER_BYTES)) ||
+    !safe(cursor.chunkOffset, LOOKUP_INDEX_FILE_HEADER_BYTES) || !safe(cursor.chunkIndex, 0, U32_NULL) ||
+    !safe(cursor.rowsBeforeChunk, 0, U32_NULL) || !safe(cursor.row, 0, U32_NULL) || !safe(cursor.verifyOffset) ||
+    (cursor.chunkIdentity !== null && (typeof cursor.chunkIdentity !== 'string' || !/^[0-9a-f]{80}$/.test(cursor.chunkIdentity))) ||
+    !cursor.hash || Object.keys(cursor.hash).length !== 2 || !Array.isArray(cursor.hash.lanes) ||
+    cursor.hash.lanes.length !== 4 || [...cursor.hash.lanes].some((value) => !safe(value, 0, U32_NULL)) ||
+    !Array.isArray(cursor.hash.tail) || cursor.hash.tail.length !== cursor.verifyOffset % 16 ||
+    [...cursor.hash.tail].some((value) => !safe(value, 0, 255))) {
+        throw new TypeError('Invalid content-reference cursor');
+    }
+    if ((cursor.shardGeneration === null) !== (cursor.containerLength === null) ||
+    (cursor.chunkIdentity === null && (cursor.row !== 0 || cursor.verifyOffset !== 0)) ||
+    (cursor.shardGeneration === null && (cursor.chunkIndex !== 0 || cursor.rowsBeforeChunk !== 0 ||
+    cursor.chunkOffset !== LOOKUP_INDEX_FILE_HEADER_BYTES || cursor.chunkIdentity !== null))) {
+        throw new TypeError('Inconsistent content-reference cursor');
+    }
+    return {...cursor, hash: {lanes: [...cursor.hash.lanes], tail: [...cursor.hash.tail]}};
 }
 
 class DenseIdRecordStore {
@@ -3107,6 +3225,7 @@ export class TermRecordOpfsStore {
         return content.slice(start, end);
     }
 
+
     /**
      * Read a large, already bounded index into its final buffer in the
      * dictionary worker. The caller still validates the on-disk data.
@@ -3179,6 +3298,322 @@ export class TermRecordOpfsStore {
             },
             close,
         };
+    }
+
+    /**
+     * One private maintenance page from authoritative MBTIDX11 record fields.
+     * The .mbti container also holds derived lookup indexes; those bodies are
+     * deliberately never read/parsed here. Corrupt derived sections do not hide
+     * otherwise valid content references. No foreground caches/health are changed.
+     *
+     * byteBudget bounds ranged input bytes plus a conservative per-descriptor
+     * charge; memory is O(byteBudget). Large chunks first stream/verify their
+     * authoritative record-fields checksum across empty resumable pages, then
+     * reread only bounded row columns. Keep the OLD cursor until returned rows
+     * and the new cursor are durably checkpointed together.
+     *
+     * entryContentDictName is the original record selector; the content owner
+     * resolves the actual frame codec separately through its immutable read root.
+     *
+     * The database owner must supply a durable generation ID AND its synchronous
+     * current-generation predicate. The store additionally checks its mutation
+     * counters, state identity and import/mutation admission after every await.
+     * No call to prepare/load/repair is made; prepare the store before idle work.
+     * @param {string} dictionaryName
+     * @param {string} generation
+     * @param {ContentReferenceCursor|null} cursor
+     * @param {{byteBudget?: number, maxReferences?: number, maxBlockReferences?: number, signal?: AbortSignal, isGenerationCurrent: () => boolean, skipSelector?: (selector: string) => boolean}} options
+     * @returns {Promise<{references: ContentReference[], cursor: ContentReferenceCursor|null, done: boolean, bytesRead: number, cursorAfterBlockReference?: (recordId: number) => ContentReferenceCursor}>}
+     */
+    async iterateContentReferences(dictionaryName, generation, cursor, {byteBudget = 262144, maxReferences = 16384, maxBlockReferences, signal, isGenerationCurrent, skipSelector}) {
+        if (typeof dictionaryName !== 'string' || dictionaryName.length === 0 || dictionaryName.length > 1024 ||
+        typeof generation !== 'string' || generation.length === 0 || generation.length > 256 ||
+        typeof isGenerationCurrent !== 'function' || !Number.isSafeInteger(byteBudget) ||
+        byteBudget < 1024 || byteBudget > 1024 * 1024 || !Number.isSafeInteger(maxReferences) || maxReferences < 1 || maxReferences > 16384 ||
+        (typeof maxBlockReferences !== 'undefined' && (!Number.isSafeInteger(maxBlockReferences) ||
+        maxBlockReferences < maxReferences || maxBlockReferences > 16384))) {
+            throw new TypeError('Invalid content-reference iteration request');
+        }
+        const globalGeneration = this._persistentLookupGeneration;
+        const dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName);
+        /**
+         * @param {'stale'|'unavailable'|'invalid'|'resource'} kind
+         * @param {string} message
+         * @returns {never}
+         * @throws {ContentReferenceIterationError} If metadata admission or source integrity fails.
+         */
+        const fail = (kind, message) => { throw new ContentReferenceIterationError(kind, message); };
+        /** @throws {Error} On preemption or a source/admission change. */
+        const assertCurrent = () => {
+            if (signal?.aborted) {
+                const error = new Error('Content-reference iteration aborted');
+                error.name = 'AbortError';
+                throw error;
+            }
+            if (isGenerationCurrent() !== true || globalGeneration !== this._persistentLookupGeneration ||
+            dictionaryGeneration !== this._getPersistentLookupGeneration(dictionaryName) ||
+            this._pendingDictionaryDeletionNames.has(dictionaryName)) {
+                fail('stale', 'Content-reference generation changed');
+            }
+            if (this._importSessionActive || this._storageMutationActive) {
+                fail('unavailable', 'Content-reference maintenance admission was preempted');
+            }
+        };
+        assertCurrent();
+        const directory = this._recordsDirectoryHandle;
+        if (directory === null) { fail('unavailable', 'Term-record storage is not prepared'); }
+        /**
+         * @param {string|null} after
+         * @returns {TermRecordShardState|null}
+         */
+        const nextShard = (after) => {
+            /** @type {TermRecordShardState|null} */
+            let next = null;
+            for (const state of this._shardStateByFileName.values()) {
+                if (this._decodeDictionaryNameFromShardFileName(state.fileName) !== dictionaryName ||
+                (after !== null && state.fileName <= after)) { continue; }
+                if (next === null || state.fileName < next.fileName) { next = state; }
+            }
+            return next;
+        };
+        const current = cursor === null ? null : copyContentReferenceCursor(cursor, dictionaryName, generation);
+        const state = current === null ? nextShard(null) : this._shardStateByFileName.get(current.shardFileName) ?? null;
+        if (state === null) {
+            if (current !== null) { fail('stale', 'Content-reference shard no longer exists'); }
+            return {references: [], cursor: null, done: true, bytesRead: 0};
+        }
+        const position = current ?? createContentReferenceCursor(dictionaryName, generation, state.fileName);
+        const info = this._decodeShardInfoFromShardFileName(state.fileName);
+        if (info === null || info.dictionaryName !== dictionaryName || !this._isCanonicalTermRecordStorageFileName(state.fileName)) {
+            fail('invalid', 'Content-reference shard identity is invalid');
+        }
+        /** @throws {Error} On mutation, deletion, or directory replacement. */
+        const check = () => {
+            assertCurrent();
+            if (this._recordsDirectoryHandle !== directory || this._shardStateByFileName.get(state.fileName) !== state ||
+            state.writable !== null || state.pendingWriteBytes !== 0 || state.queuedWriteBytes !== 0 || state.queuedWritePromise !== null ||
+            state.lookupIndexWritable !== null || state.pendingLookupIndexBytes !== 0 || state.lookupIndexQueuedBytes !== 0 || state.lookupIndexWritePromise !== null) {
+                fail('stale', 'Content-reference shard is no longer immutable');
+            }
+        };
+        let bytesRead = 0;
+        /**
+         * @param {File} file
+         * @param {number} start
+         * @param {number} end
+         * @returns {Promise<Uint8Array>}
+         */
+        const read = async (file, start, end) => {
+            check();
+            if (typeof Reflect.get(file, 'slice') !== 'function') { fail('resource', 'Bounded file slicing is unavailable'); }
+            if (!Number.isSafeInteger(file.size) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+            start < 0 || end < start || end > file.size) { fail('invalid', 'Content-reference range is outside its container'); }
+            if (end - start > byteBudget - bytesRead) { fail('resource', 'Content-reference metadata exceeds the page budget'); }
+            const bytes = await this._readFileRange(file, start, end);
+            check();
+            if (bytes.byteLength !== end - start) { fail('unavailable', 'Content-reference range read was incomplete'); }
+            bytesRead += bytes.byteLength;
+            return bytes;
+        };
+        try {
+            check();
+            const descriptor = await state.fileHandle.getFile();
+            check();
+            const indexHandle = await directory.getFileHandle(state.fileName + LOOKUP_INDEX_FILE_SUFFIX, {create: false});
+            check();
+            const file = await indexHandle.getFile();
+            check();
+            if (!Number.isSafeInteger(descriptor.size) || !Number.isSafeInteger(file.size) ||
+            descriptor.size < BINARY_HEADER_PREFIX_BYTES + 2 || file.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
+                fail('invalid', 'Content-reference authoritative container is truncated');
+            }
+            // Descriptor files contain ONLY the generation and common codec name.
+            // Refuse an unusually large name as a resource deferral, not corruption.
+            if (descriptor.size > byteBudget / 4) { fail('resource', 'Content-reference descriptor exceeds metadata admission'); }
+            const descriptorBytes = await read(descriptor, 0, descriptor.size);
+            if (!this._isBinaryFormat(descriptorBytes)) { fail('invalid', 'Unsupported content-reference descriptor format'); }
+            const generationBytes = descriptorBytes.subarray(BINARY_MAGIC_BYTES, BINARY_HEADER_PREFIX_BYTES);
+            if (!bytesEqual(descriptorBytes, this._createBinaryHeader(info.contentDictName, generationBytes))) {
+                fail('invalid', 'Content-reference descriptor codec metadata is invalid');
+            }
+            const header = await read(file, 0, LOOKUP_INDEX_FILE_HEADER_BYTES);
+            const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
+            if (this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT ||
+            readSafeU64Le(headerView, 8) !== descriptor.size ||
+            !bytesEqual(generationBytes, header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES))) {
+                fail('invalid', 'Content-reference container identity does not match its descriptor');
+            }
+            const shardGeneration = contentReferenceIdentity(generationBytes);
+            if ((position.shardGeneration !== null && position.shardGeneration !== shardGeneration) ||
+            (position.containerLength !== null && position.containerLength !== file.size)) {
+                fail('stale', 'Content-reference container changed since checkpoint');
+            }
+            if (skipSelector?.(info.contentDictName) === true) {
+                const next = nextShard(state.fileName);
+                check();
+                return {references: [],
+                    cursor: next === null ? null : createContentReferenceCursor(dictionaryName, generation, next.fileName),
+                    done: next === null,
+                    bytesRead};
+            }
+            position.shardGeneration = shardGeneration;
+            position.containerLength = file.size;
+            const chunkCount = headerView.getUint32(16, true);
+            const expectedCount = headerView.getUint32(20, true);
+            if (chunkCount === 0 || expectedCount === 0 || chunkCount > expectedCount ||
+            position.chunkIndex >= chunkCount || position.rowsBeforeChunk >= expectedCount) {
+                fail('invalid', 'Content-reference container counters are invalid');
+            }
+            const minimumBytes = LOOKUP_INDEX_FILE_HEADER_BYTES + chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES +
+            expectedCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW;
+            const maximumBytes = Math.max(
+                MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
+                expectedCount * MAX_LOOKUP_INDEX_BYTES_PER_RECORD + MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
+            );
+            if (!Number.isSafeInteger(minimumBytes) || minimumBytes > file.size || file.size > maximumBytes) {
+                fail('invalid', 'Content-reference container size is implausible');
+            }
+            const chunkHeader = await read(file, position.chunkOffset, position.chunkOffset + LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+            const chunk = new DataView(chunkHeader.buffer, chunkHeader.byteOffset, chunkHeader.byteLength);
+            const firstId = chunk.getUint32(0, true);
+            const count = chunk.getUint32(4, true);
+            const offsetBase = readSafeU64Le(chunk, 8);
+            const payloadLength = chunk.getUint32(16, true);
+            const baseLength = chunk.getUint32(20, true);
+            const expectedHash = chunk.getUint32(32, true);
+            const format = chunk.getUint32(36, true);
+            const fieldsStart = position.chunkOffset + LOOKUP_INDEX_CHUNK_HEADER_BYTES + payloadLength;
+            if (firstId === 0 || count === 0 || firstId + count - 1 > MAX_TERM_RECORD_ID ||
+            count > expectedCount - position.rowsBeforeChunk || baseLength === 0 || baseLength >= payloadLength ||
+            !Number.isSafeInteger(fieldsStart) || fieldsStart > file.size || position.row >= count) {
+                fail('invalid', 'Content-reference chunk metadata is invalid');
+            }
+            const identity = contentReferenceIdentity(chunkHeader);
+            if (position.chunkIdentity !== null && position.chunkIdentity !== identity) {
+                fail('stale', 'Content-reference chunk changed since checkpoint');
+            }
+            position.chunkIdentity = identity;
+            const compactHeader = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT ?
+                await read(file, fieldsStart, fieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES) :
+EMPTY_BYTES;
+            let fieldsLength;
+            try {
+                fieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, format);
+            } catch (error) {
+                throw new ContentReferenceIterationError('invalid', 'Content-reference record-fields format is invalid', error);
+            }
+            const fieldsEnd = fieldsStart + fieldsLength;
+            if (!Number.isSafeInteger(fieldsEnd) || fieldsEnd > file.size || position.verifyOffset > fieldsLength ||
+            (position.row > 0 && position.verifyOffset !== fieldsLength)) {
+                fail('invalid', 'Content-reference field dimensions are invalid');
+            }
+            if (position.verifyOffset < fieldsLength) {
+                const length = Math.min(fieldsLength - position.verifyOffset, byteBudget - bytesRead);
+                if (length <= 0) { fail('resource', 'Content-reference checksum has no admitted read budget'); }
+                const bytes = await read(file, fieldsStart + position.verifyOffset, fieldsStart + position.verifyOffset + length);
+                position.hash = updateTermKeyHashState(position.hash, bytes);
+                position.verifyOffset += length;
+                if (position.verifyOffset === fieldsLength && finishTermKeyHashState(position.hash, fieldsLength) !== expectedHash) {
+                    fail('invalid', 'Content-reference authoritative field checksum failed');
+                }
+                return {references: [], cursor: position, done: false, bytesRead};
+            }
+            if (finishTermKeyHashState(position.hash, fieldsLength) !== expectedHash) {
+                fail('invalid', 'Content-reference checkpoint checksum is inconsistent');
+            }
+            const compact = format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
+            const rowBytes = compact ?
+COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
+                (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ? FLOAT64_SCORE_RECORD_FIELDS_BYTES : LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+            const descriptorCharge = 64 + info.contentDictName.length * 2;
+            const blockRange = typeof maxBlockReferences !== 'undefined' &&
+                typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';
+            const rowLimit = blockRange ? maxBlockReferences : maxReferences;
+            const rows = Math.min(rowLimit, count - position.row, Math.floor((byteBudget - bytesRead) / (rowBytes + descriptorCharge)));
+            if (rows <= 0) { fail('resource', 'Content-reference row has no admitted output budget'); }
+            let offsets;
+            let lengths = EMPTY_BYTES;
+            let keys = EMPTY_BYTES;
+            let scoreCount = 0;
+            if (compact) {
+                scoreCount = new DataView(compactHeader.buffer, compactHeader.byteOffset, compactHeader.byteLength).getUint32(8, true);
+                const offsetsStart = fieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES + scoreCount * 4;
+                const lengthsStart = offsetsStart + count * 4;
+                const keysStart = lengthsStart + count * 2;
+                offsets = await read(file, offsetsStart + position.row * 4, offsetsStart + (position.row + rows) * 4);
+                lengths = await read(file, lengthsStart + position.row * 2, lengthsStart + (position.row + rows) * 2);
+                keys = await read(file, keysStart + position.row * 2, keysStart + (position.row + rows) * 2);
+            } else {
+                offsets = await read(file, fieldsStart + position.row * rowBytes, fieldsStart + (position.row + rows) * rowBytes);
+            }
+            const values = new DataView(offsets.buffer, offsets.byteOffset, offsets.byteLength);
+            const lengthValues = new DataView(lengths.buffer, lengths.byteOffset, lengths.byteLength);
+            const keyValues = new DataView(keys.buffer, keys.byteOffset, keys.byteLength);
+            /** @type {ContentReference[]} */
+            const references = [];
+            for (let row = 0; row < rows; ++row) {
+                const delta = values.getUint32(row * (compact ? 4 : rowBytes), true);
+                const length = compact ? lengthValues.getUint16(row * 2, true) : values.getUint32(row * rowBytes + 4, true);
+                const entryContentOffset = delta === U32_NULL ? -1 : offsetBase + delta;
+                const entryContentLength = length === (compact ? U16_NULL : U32_NULL) ? -1 : length;
+                validateContentOffset(entryContentOffset);
+                validateContentLength(entryContentLength);
+                if (compact && keyValues.getUint16(row * 2, true) >= scoreCount) {
+                    fail('invalid', 'Content-reference compact score key is invalid');
+                }
+                references.push({recordId: firstId + position.row + row,
+                    entryContentOffset,
+                    entryContentLength,
+                    entryContentDictName: info.contentDictName});
+            }
+            // Save the verified range start before the ordinary end cursor
+            // can advance to the next chunk or shard. An interior cursor never
+            // grants ownership of the unconsumed suffix.
+            const rangeStart = blockRange ? copyContentReferenceCursor(position, dictionaryName, generation) : null;
+            const cursorAfterBlockReference = rangeStart === null ? void 0 :
+                (/** @type {number} */ recordId) => {
+                    check();
+                    const consumed = recordId - (firstId + rangeStart.row) + 1;
+                    if (!Number.isSafeInteger(consumed) || consumed < 1 || consumed >= rows) {
+                        throw new RangeError('Content-reference cursor must end inside its verified block range');
+                    }
+                    return copyContentReferenceCursor({...rangeStart, row: rangeStart.row + consumed}, dictionaryName, generation);
+                };
+            position.row += rows;
+            if (position.row === count) {
+                position.chunkIndex += 1;
+                position.rowsBeforeChunk += count;
+                position.chunkOffset = fieldsEnd;
+                position.row = 0;
+                position.verifyOffset = 0;
+                position.chunkIdentity = null;
+                position.hash = createTermKeyHashState();
+                if (position.chunkIndex === chunkCount) {
+                    if (position.rowsBeforeChunk !== expectedCount || fieldsEnd !== file.size) {
+                        fail('invalid', 'Content-reference container final counts are invalid');
+                    }
+                    const next = nextShard(state.fileName);
+                    check();
+                    return {references,
+                        cursor: next === null ? null : createContentReferenceCursor(dictionaryName, generation, next.fileName),
+                        done: next === null,
+                        bytesRead,
+                        ...(cursorAfterBlockReference ? {cursorAfterBlockReference} : {})};
+                }
+            }
+            check();
+            return {references, cursor: position, done: false, bytesRead,
+                ...(cursorAfterBlockReference ? {cursorAfterBlockReference} : {})};
+        } catch (error) {
+            // Optional discovery must never quarantine or initiate a whole-file
+            // derived-index repair. The owning scheduler can retry the old cursor.
+            check();
+            if (error instanceof ContentReferenceIterationError || (error instanceof Error && error.name === 'AbortError')) { throw error; }
+            if (error instanceof RangeError) {
+                throw new ContentReferenceIterationError('invalid', 'Content-reference authoritative metadata is invalid', error);
+            }
+            throw new ContentReferenceIterationError('unavailable', 'Content-reference storage read failed; retry this cursor', error);
+        }
     }
 
     /**
@@ -4538,7 +4973,9 @@ export class TermRecordOpfsStore {
         return repair;
     }
 
-    /** @param {string} dictionaryName */
+    /**
+     * @param {string} dictionaryName
+     */
     _deferPersistentIndexRepair(dictionaryName) {
         const attempts = Math.min(6, (this._persistentIndexRepairRetryByDictionary.get(dictionaryName)?.attempts ?? 0) + 1);
         this._persistentIndexRepairRetryByDictionary.set(dictionaryName, {
@@ -5504,18 +5941,18 @@ view.chunks :
     /**
      * @param {string[]|null} [expectedDictionaryNames]
      * @returns {Promise<{
-     *   expectedShardCount: number,
-     *   actualShardCount: number,
-     *   missingShardCount: number,
-     *   missingShardFileNames: string[],
-     *   missingDictionaryNames: string[],
-     *   orphanShardCount: number,
-     *   orphanShardFileNames: string[],
-     *   orphanDictionaryNames: string[],
-     *   removedOrphanShardCount: number,
-     *   invalidShardPayloadCount: number,
-     *   invalidShardFileNames: string[],
-     *   rewroteAllShardsFromMemory: boolean
+     * expectedShardCount: number,
+     * actualShardCount: number,
+     * missingShardCount: number,
+     * missingShardFileNames: string[],
+     * missingDictionaryNames: string[],
+     * orphanShardCount: number,
+     * orphanShardFileNames: string[],
+     * orphanDictionaryNames: string[],
+     * removedOrphanShardCount: number,
+     * invalidShardPayloadCount: number,
+     * invalidShardFileNames: string[],
+     * rewroteAllShardsFromMemory: boolean
      * }>}
      */
     async verifyIntegrity(expectedDictionaryNames = null) {

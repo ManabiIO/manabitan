@@ -24,7 +24,7 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-test.each([12, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
+test.each([13, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec(`PRAGMA user_version = ${version}`);
@@ -39,13 +39,16 @@ test.each([12, -1])('startup refuses schema %s before old SQL or OPFS initializa
         connection.exec('CREATE TABLE old_build_initialized(value TEXT)');
     });
     const pragmas = vi.spyOn(database, '_applyRuntimePragmas').mockImplementation(() => {});
-    vi.spyOn(database, '_recoverInterruptedImportSession').mockResolvedValue();
+    const recover = vi.spyOn(database, '_recoverInterruptedImportSession').mockResolvedValue();
+    const resumePurge = vi.spyOn(database, '_resumePersistentDictionaryPurge').mockResolvedValue(false);
     vi.spyOn(database, '_restoreTermRecordDictionaryHealth').mockImplementation(() => {});
     await expect(database._openConnection()).rejects.toThrow(/schema.*(?:newer|invalid)/iu);
     expect(contentPrepare).not.toHaveBeenCalled();
     expect(recordPrepare).not.toHaveBeenCalled();
     expect(initialize).not.toHaveBeenCalled();
     expect(pragmas).not.toHaveBeenCalled();
+    expect(recover).not.toHaveBeenCalled();
+    expect(resumePurge).not.toHaveBeenCalled();
     expect(connection.selectValue('PRAGMA user_version')).toBe(version);
     expect(connection.selectValues('SELECT value FROM newer_storage')).toEqual(['preserved']);
     expect(connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'table'")).toEqual(['newer_storage']);
@@ -74,4 +77,45 @@ test('keeps ordinary dictionaries at schema 10 and accepts a published packed-me
     await database._runSchemaMigrations();
     expect(connection.selectValue('PRAGMA user_version')).toBe(11);
     expect(connection.selectValues('SELECT value FROM preserved')).toEqual(['text']);
+});
+
+
+test.each([[10, 1], [11, 1], [12, 0]])('rejects schema %s with incompatible root epoch %s before recovery', async (version, epoch) => {
+    const connection = new sqlite3.oo1.DB(':memory:');
+    connections.push(connection);
+    connection.exec(`PRAGMA user_version = ${version}`);
+    connection.exec('CREATE TABLE termContentStorageState(singleton INTEGER PRIMARY KEY, activeEpoch INTEGER, logicalHighWater INTEGER)');
+    connection.exec({sql: 'INSERT INTO termContentStorageState VALUES (1, ?, 32)', bind: [epoch]});
+    vi.mocked(getSqlite3).mockResolvedValue(sqlite3);
+    vi.mocked(openOpfsDatabase).mockResolvedValue(connection);
+    const database = new DictionaryDatabase();
+    const recover = vi.spyOn(database, '_recoverInterruptedImportSession').mockResolvedValue();
+    const resumePurge = vi.spyOn(database, '_resumePersistentDictionaryPurge').mockResolvedValue(false);
+    await expect(database._openConnection()).rejects.toThrow(/schema version and immutable content root disagree/);
+    expect(recover).not.toHaveBeenCalled();
+    expect(resumePurge).not.toHaveBeenCalled();
+});
+
+test('packed-media publication cannot lower a committed online-content format gate', async () => {
+    const connection = new sqlite3.oo1.DB(':memory:');
+    connections.push(connection);
+    connection.exec('PRAGMA user_version = 11');
+    const database = new DictionaryDatabase();
+    Reflect.set(database, '_db', connection);
+
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(12);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(12);
+    connection.exec('ROLLBACK');
+    expect(connection.selectValue('PRAGMA user_version')).toBe(11);
+
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(12);
+    connection.exec('COMMIT');
+
+    connection.exec('BEGIN');
+    database._raiseDictionaryStorageVersion(11);
+    connection.exec('COMMIT');
+    await database._runSchemaMigrations();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(12);
 });
