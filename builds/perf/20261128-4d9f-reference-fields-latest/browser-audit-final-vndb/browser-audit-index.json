@@ -1,0 +1,296 @@
+{
+  "actualTermFileBytesSaved": 24411244,
+  "allReleaseEntriesIdenticalAcrossBothHosts": true,
+  "cells": [
+    {
+      "actualTermFileBytesSaved": 24411244,
+      "artifactBytes": 17262203,
+      "artifactId": 15262007286,
+      "artifactName": "reference-browser-vndb-on-off-a30077-4d9f",
+      "artifactSha256": "f161c5c373beab7e067d3877e82940f4149b8767b6e4ff115bb8421fb528ae6a",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "vndb",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 192,
+            "fieldBytes": 28780532,
+            "floor": 13,
+            "format4Rows": 6328310,
+            "formatCounts": {
+              "1": 0,
+              "2": 30,
+              "3": 0,
+              "4": 162
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 320000,
+              "3": 0,
+              "4": 6328310
+            },
+            "indexBytes": 377488588,
+            "minimumFloor": 13,
+            "requestedFlag": true,
+            "totalRows": 6648310
+          },
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualTermFileBytes": 385022101,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "registeredSahUnits": [
+            77,
+            77
+          ],
+          "reportSha256": "5ed72f11081878d6ac74dd6d6cfbffdbb15993a33c796b680be94c210b243caa",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "bca93c246c5c6118d69d6815dcc6f78f01e22383c873f9d8bf697b4a45480944"
+        },
+        {
+          "activation": {
+            "chunks": 192,
+            "fieldBytes": 53191776,
+            "floor": 11,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 192,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 6648310,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 401899832,
+            "minimumFloor": 11,
+            "requestedFlag": false,
+            "totalRows": 6648310
+          },
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualTermFileBytes": 409433345,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "registeredSahUnits": [
+            77,
+            77
+          ],
+          "reportSha256": "142b1a6d8b3536170a412eaf64ba0608d9ab0bc6eff5a3eaba2d7e7e929424da",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "77e5ade754408b7eec44bd4e782fe80094c5f95e890359b98cfbc8cc3f24446d"
+        }
+      ],
+      "packageDeltaFrom16c": [
+        {
+          "after": "434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45",
+          "before": "3cfb7f4ca9094b05e806bc6715c41ae8c7b596f51cda1b223ddc643ae63e1d44",
+          "path": "js/dictionary/term-record-opfs-store.js"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "94adc3d265c3db9141389f7ce76f14b71992442a8ead01765840f0fc227cd8d1",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "on",
+        "off"
+      ],
+      "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+      "sourceTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+      "toolingTree": "f6381689025ca791493acd1077ddac5eb8277dcf"
+    },
+    {
+      "actualTermFileBytesSaved": 24411244,
+      "artifactBytes": 17262541,
+      "artifactId": 15262577737,
+      "artifactName": "reference-browser-vndb-off-on-a30077-4d9f",
+      "artifactSha256": "62baf2baab181afc9fcd412b2cf63b8383c518c7425de616c2b941b7ab8130ed",
+      "browser": {
+        "executableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "dictionary": "vndb",
+      "observations": [
+        {
+          "activation": {
+            "chunks": 192,
+            "fieldBytes": 53191776,
+            "floor": 11,
+            "format4Rows": 0,
+            "formatCounts": {
+              "1": 0,
+              "2": 192,
+              "3": 0,
+              "4": 0
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 6648310,
+              "3": 0,
+              "4": 0
+            },
+            "indexBytes": 401899832,
+            "minimumFloor": 11,
+            "requestedFlag": false,
+            "totalRows": 6648310
+          },
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualTermFileBytes": 409433345,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "off",
+          "rawStatus": "success",
+          "registeredSahUnits": [
+            77,
+            77
+          ],
+          "reportSha256": "950daf6ebee65d55c159ea4ea0e609d7c0aba63b4c0c662a11d3b80f565d3157",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "17ee227e394779740741966adb42f3011f6fbace3401a24ff051b0359a92d4e6"
+        },
+        {
+          "activation": {
+            "chunks": 192,
+            "fieldBytes": 28780532,
+            "floor": 13,
+            "format4Rows": 6328310,
+            "formatCounts": {
+              "1": 0,
+              "2": 30,
+              "3": 0,
+              "4": 162
+            },
+            "formatRows": {
+              "1": 0,
+              "2": 320000,
+              "3": 0,
+              "4": 6328310
+            },
+            "indexBytes": 377488588,
+            "minimumFloor": 13,
+            "requestedFlag": true,
+            "totalRows": 6648310
+          },
+          "actualSahSizes": [
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            315392
+          ],
+          "actualTermFileBytes": 385022101,
+          "attempted": true,
+          "fullMedia": true,
+          "lookupObservations": 72,
+          "mode": "on",
+          "rawStatus": "success",
+          "registeredSahUnits": [
+            77,
+            77
+          ],
+          "reportSha256": "9480b4bfcd1c39711781f57aab81c4e002a95f1a719db8d31ddcfbf0625ea2f1",
+          "strictSemanticStatus": "passed",
+          "summarySha256": "662121a881cc1298d7b868bb046839f949e3663bfeb00bc79ec90b451095398b"
+        }
+      ],
+      "packageDeltaFrom16c": [
+        {
+          "after": "434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45",
+          "before": "3cfb7f4ca9094b05e806bc6715c41ae8c7b596f51cda1b223ddc643ae63e1d44",
+          "path": "js/dictionary/term-record-opfs-store.js"
+        }
+      ],
+      "packageEntries": 582,
+      "packageSha256": "2c460574c90f581c6d98e7f892c741f869f2d74886acfeff944694a8b6353190",
+      "processMemoryMeasured": false,
+      "schedule": [
+        "off",
+        "on"
+      ],
+      "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+      "sourceTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+      "status": "passed",
+      "timingEligible": false,
+      "tooling": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+      "toolingTree": "f6381689025ca791493acd1077ddac5eb8277dcf"
+    }
+  ],
+  "limitations": [
+    "Four orderly-restart VNDB imports on two independent opposite-order hosts; interruption, corruption and older-reader gates are separate.",
+    "The unchanged validator uses the prospectively registered exact77 parent allocation; no range widening or per-observation adjustment.",
+    "The two prior16c VNDB strict37 failures remain failures. Existing16c JMdict/Jitendex results retain their source identity.",
+    "All582 release-entry hashes match across85 hosts. Exactly one entry differs from16c, matching the independently inspected lint-only source file.",
+    "No import-speed or whole-process-memory improvement is asserted."
+  ],
+  "original16cFailuresRetrospectivelyQualified": false,
+  "packageDeltaFrom16c": [
+    {
+      "after": "434864abaa3939f6e86361d3c01685fa296b3ea8b2120a7411454ef295805e45",
+      "afterGitBlob": "d056b473923f762ab2c4dca91393effa2abc0f40",
+      "before": "3cfb7f4ca9094b05e806bc6715c41ae8c7b596f51cda1b223ddc643ae63e1d44",
+      "path": "js/dictionary/term-record-opfs-store.js",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js"
+    }
+  ],
+  "processMemoryMeasured": false,
+  "qualifiedCells": 2,
+  "qualifiedImports": 4,
+  "registeredVndbUnits": [
+    77,
+    77
+  ],
+  "releaseEntryCount": 582,
+  "runId": 46141945184,
+  "schemaVersion": 1,
+  "source": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "sourceTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "timingEligible": false,
+  "tooling": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+  "toolingTree": "f6381689025ca791493acd1077ddac5eb8277dcf"
+}

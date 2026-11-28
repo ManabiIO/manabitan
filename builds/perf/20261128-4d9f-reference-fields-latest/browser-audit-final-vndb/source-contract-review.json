@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "source-reviewed-not-new-execution",
+  "toolingCommit": "6650e56034b7c4e92451a7032fbf93ffd76d999f",
+  "candidate": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "candidateTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "files": [
+    {
+      "role": "runner",
+      "blob": "be833eb770ecddb1c0b376c3f2f33f8776ac845a",
+      "sha256": "112d99c8276d10d6d4063e38938727dc83d8f3c8311490af1bdbf3caaba65896",
+      "path": "dev/perf/reference-format-browser-4d9f/run-reference-format-browser-v2.py"
+    },
+    {
+      "role": "allocation-contract",
+      "blob": "87ecd25b4a2f0c0333b35279b0d3078ce4d0fd1b",
+      "sha256": "b22fdc0af81d5ecbf682af0065fc8cf5bdbf4e4c5f37b82879ef6adcdcf9ecd7",
+      "path": "dev/perf/reference-format-browser-4d9f/sah_allocation_contract.py"
+    },
+    {
+      "role": "allocation-tests",
+      "blob": "cf7707873e6699467765f8ad2bac3e032bb13c47",
+      "sha256": "4c9e77f10ad4c64ffbc25ae4aba9deeb254c8641a89d50de1ac148c9d3838009",
+      "path": "dev/perf/reference-format-browser-4d9f/test_sah_allocation_contract.py"
+    },
+    {
+      "role": "source-contract",
+      "blob": "f45e88253390f19fcd5384304ae2177cb9fb8d51",
+      "sha256": "008ea4233ac819f5de3fde9286233c21339ad3ce690a024980467cd0777ded2e",
+      "path": "builds/perf/20261128-4d9f-reference-browser/storage-contract-a300-vndb.json"
+    },
+    {
+      "role": "workflow",
+      "blob": "8ac64d715bbba2eea5a6ab0bc3e7fcac25351e0f",
+      "sha256": "e633deceddba1e695a781aa411ad32a5ebc5d801ac3dcd701a0e63b7f2fad7a5",
+      "path": ".github/workflows/reference-fields-vndb77-browser-4d9f.yml"
+    }
+  ],
+  "review": [
+    "The old16c/schema1/37-unit cohort and its failed raw reports remain unchanged.",
+    "The runner adds only the exact parent-allocation helper, schema2/candidate-tree binding, helper retention and the unchanged validator parameter.",
+    "The new helper requires the stated parent/default flags/non-timing observation, aligned77-unit count, exactly seven empty SAH files and equal minimum/maximum77; the original validator still rejects every other actual allocation.",
+    "The frozen contract retains the exact prospective VNDB term-file sizes and observer hashes; only final85 source/tree and independent a300 allocation provenance are new.",
+    "The workflow is VNDB-only, both opposite orders, explicit Bash/pipefail, fresh profiles, exact release package per host and complete artifact retention.",
+    "The parent calibration was independently archive/package/source/raw-hash checked and its full semantic receipt recomputed separately. It is not a candidate comparison.",
+    "No actual85 cohort result is asserted in this review. No source16c result is relabeled as85."
+  ],
+  "executionByReviewer": "Source reads and read-only artifact audits only; no browser import or benchmark launched.",
+  "toolingTree": "f6381689025ca791493acd1077ddac5eb8277dcf",
+  "toolingParents": [
+    "0740b2d462a4be47f4ac0fdd20469d4f72cb52bc"
+  ]
+}
