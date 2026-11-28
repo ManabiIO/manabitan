@@ -72,6 +72,38 @@ parseTermBankWithWasmChunks(encoder.encode(source), 3, (chunk) => {
 }
 
 describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns) => {
+    test.each([
+        '[]',
+        '[ \r\n\t ]',
+        '["","first","日本語🙂","escaped\\n\\\\\\"", "last"]',
+        '["img","imagination","image"]',
+        '["\\u0069mg", "i\\u006dage"]',
+        '["prefix", {"type":"text","text":"normalized"}, "suffix"]',
+        '["image", {"type":"structured-content","content":{"tag":"img","path":"photo.png"}}]',
+        '["prefix", ["nested", {"type":"text","text":"value"}], null, true, 1.25]',
+    ])('preserves plain glossary and mixed-list fallback %s', async (glossary) => {
+        const source = `[["key","",null,"",0,${glossary},1,""]]`
+        const actual = await parse(source, true, columns)
+        expect(actual.rows).toStrictEqual((await parse(source, false, columns)).rows)
+        expect(actual.rows).toHaveLength(1)
+        if (columns) { expect(actual.profile?.fusedParseFallbacks).toBe(0) }
+    })
+
+    test.each([
+        '["first",]',
+        '["first",, "second"]',
+        '["first" "second"]',
+        '["first": "second"]',
+        '["first", "bad\\q"]',
+        '["first", "bad\\u123"]',
+        '["first", "raw\u001fcontrol"]',
+        '["first", {"type":"text","text":null}]',
+        '["first", {"type":"unsupported","text":"value"}]',
+    ])('rejects invalid grammar or glossary objects after a string prefix %s', async (glossary) => {
+        const source = `[["key","",null,"",0,${glossary},1,""]]`
+        await expect(parse(source, true, columns)).rejects.toThrow()
+    })
+
     test.each(['', ' ', '\r\n\t'])('preserves nullable fields, escapes and reused glossary hints with whitespace %j', async (space) => {
         const glossary = [{type: 'structured-content', content: [{tag: 'img', path: 'image.webp'}, 'definition'.repeat(600)]}]
         const rows = [

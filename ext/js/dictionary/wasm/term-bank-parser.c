@@ -1465,6 +1465,56 @@ static int reuse_validated_glossary(
     return 0;
 }
 
+/* A string-only glossary has no nested state or object fields to validate.
+ * Keep the general grammar for every other shape, and publish hints only after
+ * the entire array matches so speculative prefix work cannot affect fallback. */
+static int parse_string_glossary_array(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t start,
+    uint32_t* out_end,
+    uint32_t* media_hint,
+    uint32_t* normalization_hint
+) {
+    if (start >= len || src[start] != '[') { return 0; }
+    uint32_t i = start + 1u;
+    uint32_t media = 0u;
+    uint32_t normalization = 0u;
+    if (i < len && is_ws(src[i])) {
+        normalization = 1u;
+        i = skip_ws(src, len, i);
+    }
+    if (i < len && src[i] == ']') { goto complete; }
+    for (;;) {
+        if (i >= len || src[i] != '"') { return 0; }
+        uint32_t end = 0u;
+        if (!parse_string_span(src, len, i, &end)) { return 0; }
+        const uint8_t first = src[i + 1u];
+        if (media_hint != 0 && media == 0u && (first == 'i' || first == '\\') &&
+            is_media_marker_at(src, end, i)) {
+            media = 1u;
+        }
+        i = end;
+        if (i < len && is_ws(src[i])) {
+            normalization = 1u;
+            i = skip_ws(src, len, i);
+        }
+        if (i >= len) { return 0; }
+        if (src[i] == ']') { goto complete; }
+        if (src[i] != ',') { return 0; }
+        ++i;
+        if (i < len && is_ws(src[i])) {
+            normalization = 1u;
+            i = skip_ws(src, len, i);
+        }
+    }
+complete:
+    *out_end = i + 1u;
+    if (media_hint != 0) { *media_hint = media; }
+    *normalization_hint = normalization;
+    return 1;
+}
+
 static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
     uint32_t i = skip_ws(src, len, *position);
     if (i >= len || src[i] != ',') { return 0; }
@@ -1540,6 +1590,11 @@ static int parse_format3_row(
         !(glossary_witness != 0 && reuse_validated_glossary(
             src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
         )) &&
+        !parse_string_glossary_array(
+            src, len, i, &end,
+            media_hints ? &meta->glossary_may_contain_media : 0,
+            &meta->glossary_requires_normalization
+        ) &&
         !parse_value_span_with_glossary_hints(
             src, len, i, &end,
             media_hints ? &meta->glossary_may_contain_media : 0,
