@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "kind": "Raw-alias conditional ownership design and paused hosted-run status",
+  "writtenAtUtc": "2026-11-28 06:13:27 UTC",
+  "researchSource": {
+    "branch": "perf/vndb-raw-alias-component-20261128-da6c4",
+    "commit": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+    "tree": "7853cbb3eac7967b90386f9f9f9b1ced06e7f764",
+    "sourceHandoffBlob": "3916655ac01a1fc2364518164c3aa9a72841ba25",
+    "protocolBlob": "83930b97ad2fc05697dbf83455229fe148962010"
+  },
+  "status": {
+    "observedAtUtc": "2026-11-28 06:13:27 UTC",
+    "expectedCommit": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+    "expectedTree": "7853cbb3eac7967b90386f9f9f9b1ced06e7f764",
+    "runs": [
+      {
+        "id": 46113754947,
+        "name": "Raw alias component research",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113754947",
+        "status": "queued",
+        "conclusion": null,
+        "event": "push",
+        "attempt": 1,
+        "headSha": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+        "headBranch": "perf/vndb-raw-alias-component-20261128-da6c4",
+        "path": ".github/workflows/perf-raw-alias-component.yml",
+        "createdAt": "2026-11-28T05:48:28Z",
+        "updatedAt": "2026-11-28T05:48:28Z",
+        "runStartedAt": "2026-11-28T05:48:28Z",
+        "jobs": [
+          {
+            "id": 140882831654,
+            "name": "component",
+            "status": "queued",
+            "conclusion": null,
+            "run_id": 46113754947,
+            "logs_url": null,
+            "steps": null
+          }
+        ]
+      },
+      {
+        "id": 46113754928,
+        "name": "Lint GitHub Actions workflows",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113754928",
+        "status": "queued",
+        "conclusion": null,
+        "event": "push",
+        "attempt": 1,
+        "headSha": "d0a79f888b36684f26ca76ef880c019ad06c88f1",
+        "headBranch": "perf/vndb-raw-alias-component-20261128-da6c4",
+        "path": ".github/workflows/actionlint.yml",
+        "createdAt": "2026-11-28T05:48:28Z",
+        "updatedAt": "2026-11-28T05:48:28Z",
+        "runStartedAt": "2026-11-28T05:48:28Z",
+        "jobs": [
+          {
+            "id": 140882831608,
+            "name": "actionlint",
+            "status": "queued",
+            "conclusion": null,
+            "run_id": 46113754928,
+            "logs_url": null,
+            "steps": null
+          }
+        ]
+      }
+    ]
+  },
+  "executionConclusion": "Both jobs remain queued with no steps. No adapter tests, corpus acquisition/capture, timing observations, or result gates have executed. GitHub's run_started_at field is not treated as job-execution evidence while the job status is queued.",
+  "design": {
+    "schemaVersion": 1,
+    "kind": "Conditional source-only production ownership design; no implementation or timing",
+    "status": "Only consider implementation if the unchanged source-bound raw-alias component completes and passes every prospective gate, including both 10 ms and 10% savings against A and C. Passing the component still does not qualify production/browser behavior.",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "sourceFiles": [
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "gitBlob": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+        "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "bytes": 210111
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "gitBlob": "82808931b73e099a604c598460cdeaed43d67bd5",
+        "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "bytes": 16935
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "gitBlob": "e5863de2d3a0e827c514db48c6a24f62f03d6a2b",
+        "sha256": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+        "bytes": 345457
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+        "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+        "bytes": 613153
+      },
+      {
+        "path": "ext/js/dictionary/term-content-plan-resolution.js",
+        "gitBlob": "49533c80d35350a9d3887c3e44a06cec14a70481",
+        "sha256": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+        "bytes": 2491
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+        "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "bytes": 365309
+      },
+      {
+        "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+        "gitBlob": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+        "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "bytes": 11139
+      },
+      {
+        "path": "ext/js/dictionary/term-content-opfs-store.js",
+        "gitBlob": "cd1de078c2cfa58d67f2a7abc6a897805ef2f318",
+        "sha256": "e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1",
+        "bytes": 101919
+      },
+      {
+        "path": "ext/js/dictionary/term-content-block-store.js",
+        "gitBlob": "f085d63ff352d196ce11f473192bdd2f131f1f8f",
+        "sha256": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+        "bytes": 70348
+      },
+      {
+        "path": "ext/js/dictionary/term-content-ownership.js",
+        "gitBlob": "0f8d50ac47427f609ef6eaed121c1d2a2d3c5d8f",
+        "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+        "bytes": 4250
+      }
+    ],
+    "consultedReview": {
+      "reviewer": "/root/import_history",
+      "productionOwnershipAuditBlob": "db1329b6a84425d6de8609b3c9b28d9666ac59ce",
+      "contribution": "Exact record-side await/copy boundaries, protected fields, and snapshot byte accounting; source review only."
+    },
+    "conclusion": "A no-copy private record lease is the smallest plausible integration. It needs two distinct ownership transitions: known worker result to the private importer sink, then the database's completed canonical-reference publication to a record-only alias overlay. Existing content ownership and resolved-reference factory checks cover neither full transition. No hard format blocker was found, but this remains a design proposal whose eligibility and lifetime proof must be implemented and tested before a product claim.",
+    "scope": {
+      "settings": "Keep existing worker counts, compression options, 512 KiB initial selection, 1 MiB blocks, normal selected-session force latch, storage format, and 4 GiB record fallback.",
+      "boundedEligibility": "At most 64 distinct canonical raw-v6 entries and 64 KiB logical raw input within one current mixed group; exactly one existing compact-block family and an already-selected block session; one genuine complete whole prepared map from the protected producer.",
+      "state": "No global promotion cache, canonical hash-table update, recent-source-cache rewrite, logical dedup increment, or canonical resolved-offset replacement. Alias references belong only to this record append.",
+      "initialExclusions": "Generic/factory-only callers, sequential borrowed-WASM output, shared/resizable or otherwise reusable record backing storage, incomplete/multiple prepared runs, modified key/row columns, or an unrecognized producer/lifecycle must keep the existing route. A persisted-only record path is the simplest initial scope if materialized-cache retention cannot be proved."
+    },
+    "phaseOne": {
+      "registrationBoundary": "runParallelParserJob's result receiver, after the existing job-id/row-count/result checks and successful transfer, before it resolves the chunk to the private import pipeline. Register only for a private importer/session context supplied out of band; an ordinary public parser callback must not automatically create DB optimization authority.",
+      "producerFacts": [
+        "copyWasmBackedColumnChunk creates private key bytes, Uint16 key lengths, Uint32 expression/reading IDs, equality, score and sequence columns. It clones native lookup bytes when they share the parser key/WASM backing.",
+        "collectChunkTransferables includes every record/key/lookup/route-filter ArrayBuffer and postMessage detaches those transferable buffers from the worker. SharedArrayBuffer is not transferable and cannot be accepted as an immutable record-column proof.",
+        "The receive gate must inspect the actual complete producer descriptor and all relevant backing/view identities. A message boolean, row count or Map shape alone is insufficient.",
+        "Generic parser APIs and custom onChunk callbacks do not receive the new capability. The private production import callback is part of the contract; otherwise a callback could retain and mutate the same arrays during a DB await."
+      ],
+      "proposedMechanism": "A small module-private WeakMap, keyed by the exact producer chunk, records a descriptor bound to the active import context and a one-use generation. No writable object flag or automatic spreadable Symbol grants authority. Conceptual claim/rebind helpers may be exposed only to the known importer/DB implementation; registration remains at the trusted receiver.",
+      "importerBoundary": "handleParsedChunk removes mediaRows and creates a new object with {...columnPayload, dictionary, dictionaryTotalRows, contentDictNameList:null, uniformContentDictName}. Explicitly rebind the private lease to that exact payload after verifying all protected field/view identities; do not rely on object spread copying authority.",
+      "mediaBoundary": "The existing projected-media diagnostics copy key bytes to a separate owned arena before requirements are awaited. The private route must still prove that every media/requirement callback is read-only with respect to protected record fields; content-rematerializing or key/row-mutating paths invalidate eligibility. Do not simply assume that all media-bearing native output is immutable.",
+      "retention": "The ordered parser already awaits its sink callback before releasing borrowed content or clearing source fields. Keep existing producer lead budgets. Use weak registrations for queued chunks and at most the currently claimed append lease for the serial VNDB sink; do not add a growing strong registry."
+    },
+    "protectedFields": [
+      {
+        "group": "Chunk identity and geometry",
+        "fields": "Exact payload identity, dictionary, rowCount, dictionaryTotalRows, row-origin/full-group geometry, active import-session generation and original whole-map key."
+      },
+      {
+        "group": "Native lookup artifacts",
+        "fields": "preparedLookupIndexes Map structure, selected entry identity, its bytes, optional routeFilter, associated preinterned-plan identity and every referenced backing allocation."
+      },
+      {
+        "group": "String/key plan",
+        "fields": "stringsBuffer, stringLengths, optional stringOffsets/stringHashes, expressionIndexes and readingIndexes; typed-array type, byteOffset, byteLength, backing identity and contents."
+      },
+      {
+        "group": "Record columns",
+        "fields": "readingEqualsExpressionList, scoreList, sequenceList, explicit expressionBytesList/readingBytesList containers and member bytes when present. Empty native lists are still part of the descriptor."
+      },
+      {
+        "group": "Content-row mapping",
+        "fields": "contentUniqueIndexList / resolvedContentReferences.uniqueIndexList and source row geometry. Content ownership alone does not authorize these columns."
+      },
+      {
+        "group": "DB publication output",
+        "fields": "The final resolved offsets, lengths and dictionary-name selection, plus the factory-created reference wrapper. These are deliberately mutable during canonical dedup and need the second phase below."
+      }
+    ],
+    "phaseTwo": {
+      "boundary": "After the normal canonical metadata publication has finished and before the first alias read/append await, under the same ordered import owner. Bind the already-claimed native-row lease to the actual complete resolved-reference tables and name geometry.",
+      "whySeparate": "The native worker emits deferred/empty resolution columns. initializeTermContentPlanResolution allocates them at DB admission, and canonical dedup fills them. A receive-time 'immutable chunk' assertion cannot include these later DB writes.",
+      "referenceOwnership": "Require a private complete group whose resolution tables cannot be repurposed by another append before completion. An active bulk-import flag alone is not enough; retain normal session/ordered-sink ownership and recheck cancellation/generation after awaited work.",
+      "overlay": "Keep canonical metadata, dedup-plan offsets/lengths and recent-source entries unchanged. Allocate one private copy of the unique offsets, replace only selected raw-reference offsets there, and pass the actual compact dictionary name plus unchanged lengths/row IDs/native map through the existing resolved-reference factory.",
+      "completeMap": "The lease permits this private optimization only; do not broaden hasCompletePreparedTermLookupIndexes, the public reference factory, or generic prepared-map integrity assumptions. Retain ordinary record-store checks and format/fallback behavior.",
+      "rawReadPath": "Use the existing canonical content reader with truthful physical references. Copy any retained small read view into a bounded private slab if required to avoid extending the lifetime of an otherwise reusable large backing; count this copy in eventual integration timing. Never relabel raw bytes as compact references without a successful real alias append."
+    },
+    "awaitLifetime": {
+      "begins": "Claim before the first new alias await; the receive/private-import proof must already have remained valid through media preparation and canonical dedup awaits.",
+      "covers": [
+        "Every canonical raw read and the normal block-session append.",
+        "Record-store next-ID readiness and shard readiness.",
+        "Every run/split: per-run reference validation, the async field encoder, and _appendEncodedChunk.",
+        "_appendEncodedChunk's awaited _validateShardAppendFormat, which occurs before _createLookupIndexChunk hashes/copies the original native prepared bytes.",
+        "All ordinary 4 GiB split/fallback appends, derived content completion, queued writes owned by the append, and failure settlement."
+      ],
+      "ends": "Revoke the single-use optimization capability only after the entire append and all started side operations have settled. Releasing it drops references; it must never authorize mutation/recycling of a key arena retained by a materialized record cache.",
+      "cancellation": "Track alias reads/writes inside the existing append owner, so finish/abort cannot dispose storage while they remain live. On error, join all started ordinary content, alias content and record work before metadata rollback; preserve the original first-error contract.",
+      "fallback": "A failed eligibility check or unavailable canonical read before any alias write follows the existing route. Once an alias write starts, propagate failures and drain; do not swallow them and continue as if no side effect occurred.",
+      "inactivePath": "Do not add an unconditional await or new asynchronous close to the ordinary/unwitnessed path. The prior overlap cleanup regression showed that no-op await ordering is observable."
+    },
+    "memory": {
+      "lease": "No copy of native lookup payloads or key/record columns is required if the private lifetime proof is valid. The descriptor adds a fixed number of object/view references; actual heap cost is unmeasured. Existing parser lead budgets and serial sink ownership remain unchanged.",
+      "aliasWorkingSet": "The per-group alias Map is capped at 64 entries, logical read input at 64 KiB, plus one unique-offset copy and actual codec/reference output. The 64 KiB input limit is not a universal backing-allocation/heap cap.",
+      "actualOffsetCopyDerivation": {
+        "sourceManifestBlob": "0d2fe45116a740d91ce665dd2108c15f01c65dde",
+        "sourceManifestSha256": "df0bba78956b41c2949c5b6baa95853c60ec55c10aa9ea2ff3e2ccbcc3a7862e",
+        "basis": "Selected groups' native canonical scan counts equal the complete native unique-content geometry on this successful no-fallback capture; deferred resolution allocates exact uniqueCount-sized columns. Confirm actual capacities again in the new captured graph before treating these as measured allocations.",
+        "groups": [
+          {
+            "group": 1,
+            "rows": 40000,
+            "nativeUniqueRows": 853,
+            "newCanonicalEntries": 852,
+            "derivedOffsetCopyBytes": 6824
+          },
+          {
+            "group": 87,
+            "rows": 40000,
+            "nativeUniqueRows": 869,
+            "newCanonicalEntries": 866,
+            "derivedOffsetCopyBytes": 6952
+          },
+          {
+            "group": 91,
+            "rows": 40000,
+            "nativeUniqueRows": 979,
+            "newCanonicalEntries": 976,
+            "derivedOffsetCopyBytes": 7832
+          },
+          {
+            "group": 92,
+            "rows": 40000,
+            "nativeUniqueRows": 940,
+            "newCanonicalEntries": 937,
+            "derivedOffsetCopyBytes": 7520
+          },
+          {
+            "group": 105,
+            "rows": 40000,
+            "nativeUniqueRows": 1066,
+            "newCanonicalEntries": 1060,
+            "derivedOffsetCopyBytes": 8528
+          },
+          {
+            "group": 123,
+            "rows": 40000,
+            "nativeUniqueRows": 1002,
+            "newCanonicalEntries": 995,
+            "derivedOffsetCopyBytes": 8016
+          },
+          {
+            "group": 126,
+            "rows": 40000,
+            "nativeUniqueRows": 929,
+            "newCanonicalEntries": 915,
+            "derivedOffsetCopyBytes": 7432
+          },
+          {
+            "group": 139,
+            "rows": 40000,
+            "nativeUniqueRows": 1032,
+            "newCanonicalEntries": 1017,
+            "derivedOffsetCopyBytes": 8256
+          }
+        ],
+        "derivedCumulativeOffsetCopyBytes": 61360,
+        "derivedLargestOffsetCopyBytes": 8528,
+        "note": "These are source/counter derivations for the eight known groups, not an observed production peak-RSS result."
+      },
+      "snapshotAlternative": {
+        "restriction": "A full snapshot is valid only on a new private snapshot-at-entry path. Applying it to generic mutable callers would change their existing after-await behavior, so it does not remove the need for a narrow entry contract.",
+        "knownCumulativeCopies": "Across the eight affected groups, native payloads alone add 16,876,960 bytes; separately held key arenas add 8,852,853 bytes and 494,629 Uint16 lengths add 989,258 bytes. Each additional U32 row column adds 1,280,000 bytes across 320,000 rows; equality adds 320,000 bytes. Reference copies add 8U + 4U bytes and optional row-ID copies add 4 bytes per row.",
+        "accounting": "Deduplicate shared backing allocations when estimating copies. Include optional route filters, byte lists, names and object overhead; cumulative bytes are not peak memory. This extra copy/validation cost is absent from the immutable-capture timing and would need a new measured qualification.",
+        "preference": "Prefer the private lease if its provenance is simple. Stop rather than silently substitute a large snapshot or full binary reparsing without measuring those costs."
+      }
+    },
+    "integrationRisksAndStopConditions": [
+      "Any real path exposes the protected arrays or Map to a mutable generic callback before completion, or retains a borrowed/reusable record backing without a valid lease. Identity checks and Object.freeze do not make typed-array bytes immutable.",
+      "The private receiver capability cannot be rebound across importer/DB wrappers without accepting copied/factory-only callers or trusting public boolean flags.",
+      "Per-group canonical resolution tables are shared scratch whose lifetime cannot be confined to the complete append; copying/retaining them plus row fields would need measured cost and a revised contract.",
+      "Alias errors/finalization require bypassing established append draining, mutating canonical offsets, or adding irreversible writes outside the import checkpoint. In that case the path is not acceptable.",
+      "Ordinary 4 GiB fallback discards the whole map after aliases are written. It must remain correct; do not bypass that fallback merely to preserve the benchmark benefit.",
+      "A real import reads current-import content from its existing read overlay, whereas the component reads a completed seed. TermContentOpfsStore.readSlice normally uses the overlay or an already-open snapshot; an actual snapshot refresh calls flush/await/close. Count any such transition in a browser import and do not reinterpret the component as measuring it.",
+      "The completed-tail component cannot establish production-time alias offsets, source release timing, persistence rollback, or interaction with media and parser budgets.",
+      "The component passes but the required capability/snapshot/copy/validation cost consumes the margin, actual eligible groups disappear, or full-browser total/memory/failure behavior regresses. Do not proceed based on the old approximately217 ms mixed lookup counter."
+    ],
+    "requiredEvidenceBeforeProductClaim": [
+      "The exact frozen component completes every source, adapter, capture, semantic, quiescence and fixed arithmetic gate.",
+      "Tests distinguish private receiver provenance from spoofed flags, copied wrappers, incomplete maps, borrowed/shared views and revoked/session-mismatched leases.",
+      "Generic mutation-after-await behavior remains unchanged, including map/key/score/sequence/reference mutations; private paths test each actual await boundary and one-use/release behavior.",
+      "Cancellation and failures at each canonical-read, alias-append, record/lookup-write and finalization boundary settle all owners before rollback and leave canonical metadata/cache unchanged.",
+      "Actual full-corpus browser qualification includes media, source/owner budgets, truthful physical size changes, all reopened lookups/definitions, and identical-code controls."
+    ]
+  },
+  "handoff": {
+    "polling": "Paused after this fresh snapshot at root's instruction. Reactivate when the queued job advances; do not rerun unchanged sources.",
+    "monitor": "First fetch the exact component job's steps/status. Preserve its full decoded logs plus compact reporter receipts on completion/failure. No new implementation unless all frozen component gates pass.",
+    "independentArithmetic": "/root/import_history has an independent fixed-36-observation parser/evaluator ready; send the complete job log/blob after the cohort completes.",
+    "preservation": "Exact research sources and all prereview blobs are already anchored in d0a79f8. This file is source design/status only and does not invent missing post-v2 raw data."
+  }
+}

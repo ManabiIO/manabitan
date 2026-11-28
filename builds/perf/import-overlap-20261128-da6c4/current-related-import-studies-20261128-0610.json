@@ -1,0 +1,1010 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Final duplicate-avoidance snapshot of related external import studies. This is not an optimization result from the da6c4 study.",
+  "repository": "ManabiIO/manabitan",
+  "auditOwner": "/root/import_history in da6c4 collaboration",
+  "statusObservationTimesUtc": {
+    "firstCurrentMetadata": "2026-11-28 06:07:53 UTC",
+    "finalActiveRunMetadata": "2026-11-28 06:10:33 UTC",
+    "completed92c09Metadata": "2026-11-28 06:07:53 UTC"
+  },
+  "scope": {
+    "readOnly": true,
+    "noReruns": true,
+    "noBranchOrPRMutations": true,
+    "noNewArtifactZipDownloads": true,
+    "executorUnavailable": true,
+    "noHostPolling": true,
+    "pausePollingAfterSnapshot": true,
+    "interpretation": "No pooling across studies, source revisions, or hosts. Job success is separated from measured gain; unavailable detailed results remain unavailable."
+  },
+  "frozenProductBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "studies": [
+    {
+      "key": "pr820-current-owned-columns-83b3",
+      "pr": {
+        "number": 820,
+        "title": "perf: reuse owned native lookup key and expression buffers",
+        "state": "open",
+        "draft": true,
+        "merged": false,
+        "head": "perf/r2-transfer-20261123-fcff",
+        "head_sha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+        "base": "develop",
+        "base_sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "updated_at": "2026-11-28T06:00:22Z",
+        "url": "https://github.com/ManabiIO/manabitan/pull/820",
+        "observedAtUtc": "2026-11-28 06:10:33 UTC"
+      },
+      "mechanism": "Reuses native-owned whole-lookup key arena/key lengths and, in this revision, the Uint16 expression-ID column at the immediate parser-worker transfer boundary; generic copy callers retain independent snapshots.",
+      "candidateTree": "9c34079709e7b8f6cae6b61c9ef537bb965ebcee",
+      "run": {
+        "id": 46103918280,
+        "name": "Import owned columns qualification 83b3",
+        "head_sha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+        "head_branch": "perf/r2-transfer-20261123-fcff",
+        "path": ".github/workflows/import-owned-columns-83b3.yml",
+        "event": "pull_request",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_attempt": 1,
+        "created_at": "2026-11-28T03:39:44Z",
+        "updated_at": "2026-11-28T05:59:08Z",
+        "run_started_at": "2026-11-28T03:39:44Z",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280",
+        "observedAtUtc": "2026-11-28 06:10:33 UTC",
+        "apiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46103918280"
+      },
+      "jobs": [
+        {
+          "id": 140852301109,
+          "name": "select",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/job/140852301109"
+        },
+        {
+          "id": 140860646637,
+          "name": "Complete import (jmdict, BA, 12 pairs)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/job/140860646637"
+        },
+        {
+          "id": 140860646643,
+          "name": "Complete import (jmdict, AB, 12 pairs)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/job/140860646643"
+        },
+        {
+          "id": 140860646660,
+          "name": "Complete import (jitendex, AB, 6 pairs)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/job/140860646660"
+        },
+        {
+          "id": 140860646668,
+          "name": "Complete import (vndb, AB, 6 pairs)",
+          "status": "in_progress",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/job/140860646668"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 15250683242,
+          "name": "import-owned-columns-83b3-jmdict-BA",
+          "size_in_bytes": 35603526,
+          "digest": "sha256:c0338f08f186542919e16082e21120d13bc2e66c0fa4a12f99d2878c82dba457",
+          "created_at": "2026-11-28T05:49:13Z",
+          "expires_at": "2026-12-12T05:49:11Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/artifacts/15250683242",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15250472765,
+          "name": "import-owned-columns-83b3-jitendex-AB",
+          "size_in_bytes": 35020840,
+          "digest": "sha256:90665c03115ed16bbdfaf4cc30002a0667642a2eaae8c34559c836f27e4837fb",
+          "created_at": "2026-11-28T05:43:12Z",
+          "expires_at": "2026-12-12T05:43:10Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/artifacts/15250472765",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15250427758,
+          "name": "import-owned-columns-83b3-jmdict-AB",
+          "size_in_bytes": 36116616,
+          "digest": "sha256:98fe348b30a57ebe1eb3adced9c0cde94bc1fb907c9a39fc228ead5b58fe9255",
+          "created_at": "2026-11-28T05:41:44Z",
+          "expires_at": "2026-12-12T05:41:42Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103918280/artifacts/15250427758",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        }
+      ],
+      "completedJobLogRead": [
+        {
+          "jobId": 140860646637,
+          "characters": 309970,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "archive": "Already included in committed 1a08c0e hosted evidence according to its immutable README; not duplicated here"
+        },
+        {
+          "jobId": 140860646643,
+          "characters": 313562,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "archive": "Already included in committed 1a08c0e hosted evidence according to its immutable README; not duplicated here"
+        },
+        {
+          "jobId": 140860646660,
+          "characters": 311675,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "archive": "Already included in committed 1a08c0e hosted evidence according to its immutable README; not duplicated here"
+        }
+      ],
+      "resultAvailability": {
+        "numericSummary": "Newly accessible in immutable committed evidence; supersedes this agent's earlier artifact-only limitation for these three cells.",
+        "committedEvidence": {
+          "commit": "1a08c0ee7751147feee72d47c8ba5a520252c130",
+          "directory": "https://github.com/ManabiIO/manabitan/tree/1a08c0ee7751147feee72d47c8ba5a520252c130/builds/perf/import-owned-columns-83b3-hosted",
+          "summaryPath": "builds/perf/import-owned-columns-83b3-hosted/three-cell-summary.json",
+          "summaryBlob": "909d47dc48d7742a5e3fe83a94b13465324a138b",
+          "readmeBlob": "bca0910a7f4ea7b88fa05e8a2a84603ca7d2f925",
+          "archiveVerificationBlob": "397c31443f49552a176ecec183397a2cd7eb5049"
+        },
+        "independentScopeHere": "Read the committed summary, README and archive-verification receipt. Recomputed candidate/control median ratios and faster-pair counts from every retained ratio in the summary. Did not re-extract the full raw archives, independently re-run semantic checks, verify original package ZIP bytes, or reproduce bootstrap/equal-work statistics.",
+        "summaryRatioArithmetic": [
+          {
+            "cell": "jmdict-AB",
+            "candidateMedianPercent": 0.2584279144347945,
+            "candidateFaster": 6,
+            "controlMedianPercent": 1.0746525548737451,
+            "controlFaster": 2,
+            "passed": true
+          },
+          {
+            "cell": "jmdict-BA",
+            "candidateMedianPercent": 0.04867760906206997,
+            "candidateFaster": 6,
+            "controlMedianPercent": 1.2052069175137181,
+            "controlFaster": 2,
+            "passed": true
+          },
+          {
+            "cell": "jitendex-AB",
+            "candidateMedianPercent": 2.5895404697283797,
+            "candidateFaster": 1,
+            "controlMedianPercent": -0.7961769982134548,
+            "controlFaster": 1,
+            "passed": true
+          }
+        ],
+        "publishedSummary": {
+          "completeStudy": false,
+          "pending": [
+            "vndb-AB"
+          ],
+          "hostPooling": false,
+          "controlSubtraction": false,
+          "sourceHead": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+          "cells": [
+            {
+              "cell": "jmdict-AB",
+              "artifactId": 15250427758,
+              "artifactSha256": "98fe348b30a57ebe1eb3adced9c0cde94bc1fb907c9a39fc228ead5b58fe9255",
+              "allRequiredGatesPassed": true,
+              "completeTimingScheduleVerified": true,
+              "expectedCounts": {
+                "candidate": 24,
+                "control": 8,
+                "exhaustiveMedia": 2,
+                "memory": 4,
+                "ordinary": 36,
+                "warmup": 4
+              },
+              "candidate": {
+                "count": 12,
+                "descriptiveBootstrap95Percent": [
+                  -1.1639688272249815,
+                  2.2056142301287274
+                ],
+                "equalWorkChangePercent": 0.44991878089470916,
+                "fasterPairs": 6,
+                "medianPairedChangePercent": 0.25842791443480007,
+                "ratios": [
+                  1.0277142857143189,
+                  0.9876251390433494,
+                  1.0163979988882557,
+                  1.016009148084637,
+                  1.0300130491517372,
+                  0.9942196531792235,
+                  0.990924092409193,
+                  0.9890954844121509,
+                  0.9752283420979485,
+                  1.0109489051094724,
+                  0.9875495963880461,
+                  1.0309292844088294
+                ],
+                "worstPairChangePercent": 3.092928440882936
+              },
+              "medianPairedDeltaMs": 1.8500000000058208,
+              "control": {
+                "count": 4,
+                "descriptiveBootstrap95Percent": [
+                  -3.502699709260526,
+                  2.390495276276905
+                ],
+                "equalWorkChangePercent": 0.23740529972582358,
+                "fasterPairs": 2,
+                "medianPairedChangePercent": 1.0746525548737562,
+                "ratios": [
+                  0.9986231584744596,
+                  1.0228698926230153,
+                  0.9649730029073947,
+                  1.023904952762769
+                ],
+                "worstPairChangePercent": 2.390495276276905
+              },
+              "memory": {
+                "maxSampledPrivateKiB": {
+                  "maximumPairedChangePercent": 1.0792337898473559,
+                  "medianPairedChangePercent": 0.04157304270797635
+                },
+                "maxSampledPssKiB": {
+                  "maximumPairedChangePercent": 1.0362047686055087,
+                  "medianPairedChangePercent": 0.18613916710494838
+                }
+              },
+              "components": [
+                {
+                  "banks": 53,
+                  "groups": 8,
+                  "policy": 2,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 3068084
+                },
+                {
+                  "banks": 53,
+                  "groups": 12,
+                  "policy": 3,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 10434868
+                },
+                {
+                  "banks": 53,
+                  "groups": 20,
+                  "policy": 5,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 10451462
+                }
+              ]
+            },
+            {
+              "cell": "jmdict-BA",
+              "artifactId": 15250683242,
+              "artifactSha256": "c0338f08f186542919e16082e21120d13bc2e66c0fa4a12f99d2878c82dba457",
+              "allRequiredGatesPassed": true,
+              "completeTimingScheduleVerified": true,
+              "expectedCounts": {
+                "candidate": 24,
+                "control": 8,
+                "exhaustiveMedia": 2,
+                "memory": 4,
+                "ordinary": 36,
+                "warmup": 4
+              },
+              "candidate": {
+                "count": 12,
+                "descriptiveBootstrap95Percent": [
+                  -1.4772294104653305,
+                  6.120122401122097
+                ],
+                "equalWorkChangePercent": 2.2434617972784565,
+                "fasterPairs": 6,
+                "medianPairedChangePercent": 0.04867760906206442,
+                "ratios": [
+                  1.0521859819569621,
+                  1.001523229245998,
+                  1.066999583853501,
+                  0.9787839586028536,
+                  0.9731525784157593,
+                  0.9916714531878398,
+                  0.9994503229352435,
+                  0.9917287014061207,
+                  1.1122334455668215,
+                  1.1016013252346415,
+                  0.9544279689838103,
+                  1.055402864168941
+                ],
+                "worstPairChangePercent": 11.223344556682147
+              },
+              "medianPairedDeltaMs": 0.3999999999869033,
+              "control": {
+                "count": 4,
+                "descriptiveBootstrap95Percent": [
+                  -7.478687677601825,
+                  6.211092246749295
+                ],
+                "equalWorkChangePercent": 0.13705670721260166,
+                "fasterPairs": 2,
+                "medianPairedChangePercent": 1.2052069175137126,
+                "ratios": [
+                  1.062110922467493,
+                  0.980649717514149,
+                  0.9252131232239817,
+                  1.0434544208361254
+                ],
+                "worstPairChangePercent": 6.211092246749295
+              },
+              "memory": {
+                "maxSampledPrivateKiB": {
+                  "maximumPairedChangePercent": 2.076523162580135,
+                  "medianPairedChangePercent": 0.3660188488135707
+                },
+                "maxSampledPssKiB": {
+                  "maximumPairedChangePercent": 1.7587273962758498,
+                  "medianPairedChangePercent": 0.34965096258973705
+                }
+              },
+              "components": [
+                {
+                  "banks": 53,
+                  "groups": 8,
+                  "policy": 2,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 3068084
+                },
+                {
+                  "banks": 53,
+                  "groups": 12,
+                  "policy": 3,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 10434868
+                },
+                {
+                  "banks": 53,
+                  "groups": 20,
+                  "policy": 5,
+                  "rows": 528299,
+                  "savedOwnedResultBytes": 10451462
+                }
+              ]
+            },
+            {
+              "cell": "jitendex-AB",
+              "artifactId": 15250472765,
+              "artifactSha256": "90665c03115ed16bbdfaf4cc30002a0667642a2eaae8c34559c836f27e4837fb",
+              "allRequiredGatesPassed": true,
+              "completeTimingScheduleVerified": true,
+              "expectedCounts": {
+                "candidate": 12,
+                "control": 4,
+                "exhaustiveMedia": 2,
+                "memory": 4,
+                "ordinary": 20,
+                "warmup": 4
+              },
+              "candidate": {
+                "count": 6,
+                "descriptiveBootstrap95Percent": [
+                  -0.6179766776392981,
+                  4.187443706842275
+                ],
+                "equalWorkChangePercent": 2.0372303039347006,
+                "fasterPairs": 1,
+                "medianPairedChangePercent": 2.589540469728391,
+                "ratios": [
+                  1.0040193951767369,
+                  1.0386337469617464,
+                  0.9836210712704773,
+                  1.0395553257497487,
+                  1.0131570624328212,
+                  1.0441935483870968
+                ],
+                "worstPairChangePercent": 4.419354838709677
+              },
+              "medianPairedDeltaMs": 40.60000000002037,
+              "control": {
+                "count": 2,
+                "descriptiveBootstrap95Percent": [
+                  -1.89049064238892,
+                  0.2981366459620105
+                ],
+                "equalWorkChangePercent": -0.7864394034351019,
+                "fasterPairs": 1,
+                "medianPairedChangePercent": -0.7961769982134603,
+                "ratios": [
+                  0.9810950935761108,
+                  1.00298136645962
+                ],
+                "worstPairChangePercent": 0.2981366459620105
+              },
+              "memory": {
+                "maxSampledPrivateKiB": {
+                  "maximumPairedChangePercent": -0.5649744091524966,
+                  "medianPairedChangePercent": -2.438449631549405
+                },
+                "maxSampledPssKiB": {
+                  "maximumPairedChangePercent": -0.5829804539892014,
+                  "medianPairedChangePercent": -1.964669075179759
+                }
+              },
+              "components": [
+                {
+                  "banks": 219,
+                  "groups": 22,
+                  "policy": 2,
+                  "rows": 436555,
+                  "savedOwnedResultBytes": 11477248
+                },
+                {
+                  "banks": 219,
+                  "groups": 22,
+                  "policy": 3,
+                  "rows": 436555,
+                  "savedOwnedResultBytes": 11477248
+                },
+                {
+                  "banks": 219,
+                  "groups": 22,
+                  "policy": 5,
+                  "rows": 436555,
+                  "savedOwnedResultBytes": 11477248
+                }
+              ]
+            }
+          ]
+        },
+        "committedArchiveVerification": {
+          "schemaVersion": 1,
+          "reviewer": "root",
+          "runId": 46103918280,
+          "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+          "completeStudy": false,
+          "pending": [
+            "vndb-AB"
+          ],
+          "cells": [
+            {
+              "cell": "jmdict-AB",
+              "complete": true,
+              "fileCount": 362,
+              "payloadBytes": 31476748,
+              "archiveBytes": 2877521,
+              "archiveSha256": "3b31cd0bf6d4c35c882b76f941c18ef3402271552a65a47abeaeb9649f57d73b",
+              "extracted": false
+            },
+            {
+              "cell": "jmdict-BA",
+              "complete": true,
+              "fileCount": 357,
+              "payloadBytes": 24864325,
+              "archiveBytes": 2397382,
+              "archiveSha256": "59ef18682da60c78b976da74a4ff23d448a467fea69839bfb981d246eb444e61",
+              "extracted": false
+            },
+            {
+              "cell": "jitendex-AB",
+              "complete": true,
+              "fileCount": 245,
+              "payloadBytes": 20678679,
+              "archiveBytes": 1858492,
+              "archiveSha256": "11af28bf85a51b9e3fbc722470d269234c68257099f082572f33ee893c31f505",
+              "extracted": false
+            }
+          ],
+          "note": "All archive members were rehashed against the full manifests and embedded contents. No payloads extracted or executed; semantic/statistical results are in the separate independent-analysis files."
+        },
+        "unavailableHere": [
+          "Full raw evidence archives were not decoded in this audit; their manifests and verification are reported in the linked committed evidence.",
+          "Original package ZIP payloads are excluded from the committed compact archives; inventories/digests are retained there, while re-verifying ZIP bytes requires original Actions artifacts.",
+          "Root's one attempt to access original artifact 15250427758 returned reusable remote file reference file_0000000012948212a629d34a4b50ac33, not decoded ZIP bytes; no repeat download.",
+          "VNDB current candidate timing/memory/semantic observations are unavailable while its job remains in progress."
+        ],
+        "interpretation": "The three published completed cells establish no latency gain. Both JMdict medians and equal-work changes are positive; Jitendex also leans slower. All published descriptive intervals include zero. This is not a completed four-cell study. The allocation count is not a speed or peak-memory result. PR remains draft/HOLD.",
+        "statusNuance": "PR body still called VNDB queued, but the final job API says in_progress; this snapshot reports the latter as the job status."
+      }
+    },
+    {
+      "key": "pr955-current-early-borrowed-release-81585d",
+      "pr": {
+        "number": 955,
+        "title": "Release borrowed parser buffers after compression gathers their bytes",
+        "state": "open",
+        "draft": true,
+        "merged": false,
+        "head": "perf/jitendex-import-20261126-fbc",
+        "head_sha": "bc94ee31a5dbfc1b29766cb9dee3a6fe6b54ea54",
+        "base": "develop",
+        "base_sha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+        "updated_at": "2026-11-26T17:22:36Z",
+        "url": "https://github.com/ManabiIO/manabitan/pull/955",
+        "observedAtUtc": "2026-11-28 06:10:33 UTC"
+      },
+      "originalFailedCampaign": {
+        "jobId": 140067936510,
+        "runId": 45865729451,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/45865729451/job/140067936510",
+        "reportedWholeCampaignState": "All six cells failed before import",
+        "observedFailure": "Missing A/test/chromium/extension-two-dictionary-import.e2e.js during harness preparation",
+        "timingResult": null,
+        "artifact": {
+          "id": 15141912138,
+          "size_in_bytes": 8734,
+          "digest": "sha256:6a5be87018fcf94141a281978588e1341d481180d3c2a2b940afab1a6d919c42"
+        },
+        "fullLog": {
+          "characters": 50555,
+          "rootReportedPreservedPath": "profiling/borrowed-release-pr955-old-jitendex-job.log",
+          "rootReportsAlreadyCheckpointed": true,
+          "exactRemoteCheckpointPathNotReverifiedHere": true,
+          "duplicateBlobCreated": false
+        }
+      },
+      "currentProductPort": {
+        "branch": "perf/early-content-release-20261128-81585d",
+        "candidate": "1de603b81a377391529c9e518a824ff00ac4cc04",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "targetDictionaries": [
+          "jitendex"
+        ],
+        "sourceDelta": [
+          "ext/js/dictionary/dictionary-database.js",
+          "test/dictionary-database-content-dedup.test.js"
+        ],
+        "packagedSha256": {
+          "js/dictionary/dictionary-database.js": "c7f82399b22cc70dd80e94a07d312e8bd8e0b17365d347c9e8c8033ad3c60c4d"
+        },
+        "immutableConfigurationUrl": "https://raw.githubusercontent.com/ManabiIO/manabitan/bc8b16e0228c71e12b0cb560182bdbc2bc83ca73/dev/perf/import-qualification-81585d.json"
+      },
+      "mechanismAndActivation": "Releases borrowed parser content after source gathering plus metadata/record preparation, while retaining sink persistence as an awaited dependency. Worker parsing waits the separate consumed barrier, so release can advance later worker groups within the unchanged lead budget even while ordered sink completion remains pending. It does not widen owned-chunk sink overlap.",
+      "run": {
+        "id": 46104094289,
+        "name": "Import qualification 81585d",
+        "head_sha": "bc8b16e0228c71e12b0cb560182bdbc2bc83ca73",
+        "head_branch": "perf/import-probe-20261127-81585d",
+        "path": ".github/workflows/import-qualification-81585d.yml",
+        "event": "push",
+        "status": "queued",
+        "conclusion": null,
+        "run_attempt": 1,
+        "created_at": "2026-11-28T03:41:58Z",
+        "updated_at": "2026-11-28T04:28:09Z",
+        "run_started_at": "2026-11-28T03:41:58Z",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289",
+        "observedAtUtc": "2026-11-28 06:10:33 UTC",
+        "apiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46104094289"
+      },
+      "jobs": [
+        {
+          "id": 140852834668,
+          "name": "Package preflight (early-borrowed-release)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140852834668"
+        },
+        {
+          "id": 140852834947,
+          "name": "Package preflight (lazy-signatures)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140852834947"
+        },
+        {
+          "id": 140863973002,
+          "name": "Source validation (early-borrowed-release)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973002"
+        },
+        {
+          "id": 140863973041,
+          "name": "Source validation (lazy-signatures)",
+          "status": "in_progress",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973041"
+        },
+        {
+          "id": 140863973088,
+          "name": "lazy-signatures vndb host 1",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973088"
+        },
+        {
+          "id": 140863973114,
+          "name": "lazy-signatures vndb host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973114"
+        },
+        {
+          "id": 140863973116,
+          "name": "early-borrowed-release vndb host 1",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973116"
+        },
+        {
+          "id": 140863973117,
+          "name": "early-borrowed-release vndb host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973117"
+        },
+        {
+          "id": 140863973119,
+          "name": "lazy-signatures jitendex host 1",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973119"
+        },
+        {
+          "id": 140863973121,
+          "name": "early-borrowed-release jmdict host 1",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973121"
+        },
+        {
+          "id": 140863973123,
+          "name": "lazy-signatures jitendex host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973123"
+        },
+        {
+          "id": 140863973126,
+          "name": "lazy-signatures jmdict host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973126"
+        },
+        {
+          "id": 140863973130,
+          "name": "early-borrowed-release jmdict host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973130"
+        },
+        {
+          "id": 140863973143,
+          "name": "early-borrowed-release jitendex host 0",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973143"
+        },
+        {
+          "id": 140863973144,
+          "name": "lazy-signatures jmdict host 1",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973144"
+        },
+        {
+          "id": 140863973150,
+          "name": "early-borrowed-release jitendex host 1",
+          "status": "queued",
+          "conclusion": null,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/job/140863973150"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 15251286861,
+          "name": "import-qualification-81585d-lazy-signatures-vndb-1",
+          "size_in_bytes": 35128016,
+          "digest": "sha256:344387613c11bf2d19b0f107c9d300779cc70ac61731de506f2cb5388a37905f",
+          "created_at": "2026-11-28T06:07:53Z",
+          "expires_at": "2026-12-12T06:07:50Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/artifacts/15251286861",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15250473090,
+          "name": "import-validation-81585d-early-borrowed-release",
+          "size_in_bytes": 54450,
+          "digest": "sha256:4d9e2883d51604d7a11e53431eb0dea06c80bef0e8e770183d5a9e3510da910a",
+          "created_at": "2026-11-28T05:45:34Z",
+          "expires_at": "2026-12-12T05:45:33Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/artifacts/15250473090",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15247777302,
+          "name": "import-preflight-81585d-early-borrowed-release",
+          "size_in_bytes": 33548918,
+          "digest": "sha256:2c718f88968cb41633f84555498128e9ea4229833a80bebcff965effeec6daaa",
+          "created_at": "2026-11-28T04:16:12Z",
+          "expires_at": "2026-12-12T04:16:10Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/artifacts/15247777302",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15247733779,
+          "name": "import-preflight-81585d-lazy-signatures",
+          "size_in_bytes": 33552989,
+          "digest": "sha256:261e44b4c5c3c56ece12510821bf6ccd866400faab7043c9f1ca72a75ecec1e4",
+          "created_at": "2026-11-28T04:28:06Z",
+          "expires_at": "2026-12-12T04:28:04Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46104094289/artifacts/15247733779",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        }
+      ],
+      "sourceValidation": {
+        "jobId": 140863973002,
+        "conclusion": "success",
+        "exactCheckedOutCandidate": "1de603b81a377391529c9e518a824ff00ac4cc04",
+        "unitFilesPassed": 669,
+        "unitTestsPassed": 15143,
+        "existingUnitSkips": 47,
+        "optionsFilesPassed": 1,
+        "optionsTestsPassed": 32,
+        "excerpts": [
+          "2026-11-28T05:38:48.8582905Z HEAD is now at 1de603b81 perf: release borrowed term content after compression gathers it",
+          "2026-11-28T05:42:02.6260682Z  Test Files  669 passed (669)",
+          "2026-11-28T05:42:02.6315553Z       Tests  15143 passed | 47 skipped (15190)",
+          "2026-11-28T05:42:03.4843976Z  Test Files  1 passed (1)",
+          "2026-11-28T05:42:03.4844707Z       Tests  32 passed (32)"
+        ],
+        "otherWorkflowGates": "Full JavaScript lint; main/dev/test/bench TypeScript; all-target dry builds; pinned native rebuild byte equality. The job completed successfully. These are source gates, not timing evidence.",
+        "fullLogCharacters": 1049964,
+        "fullLogStorage": "Read into in-memory store; compact exact checkout/test excerpts retained here. Job and uploaded validation artifact remain linked; full log not duplicated in this snapshot."
+      },
+      "resultAvailability": {
+        "earlyBorrowedTimingCellsCompleted": 0,
+        "earlyBorrowedTimingResults": null,
+        "allSixCandidateBrowserCells": "queued at final snapshot",
+        "jitendexJobIds": [
+          140863973143,
+          140863973150
+        ],
+        "unavailableHere": [
+          "Current early-borrowed browser latency/memory/semantic observations have not completed.",
+          "Validation/preflight ZIP bytes are not decoded in this audit; only API metadata and direct source-validation job log were read."
+        ],
+        "interpretation": "No measured current-base import gain for early-borrowed release is established by this snapshot. Original PR remains draft; this current port is already occupied work and must not be duplicated."
+      },
+      "statusNuances": [
+        "Run endpoint says queued while job endpoint has completed and active children; both raw statuses are retained without assuming a capacity cause.",
+        "During the final metadata read, the separate lazy-signatures VNDB host-1 job changed from in_progress to completed/success, and lazy-signatures source validation changed from queued to in_progress. Neither transition is evidence for the early-borrowed candidate.",
+        "Current run workflow head is bc8b16e0228c71e12b0cb560182bdbc2bc83ca73; do not replace it with a later branch head."
+      ]
+    },
+    {
+      "key": "concurrent-owned-whole-lookup-plan-92c09",
+      "candidate": "9eef39ef86e1fc41d0f6e8ed64fa685d0fc4abbc",
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "branch": "perf/owned-whole-lookup-plan-20261128-92c09",
+      "mechanism": "Avoids repeated whole-plan lookup compaction at a synchronous parser callback using a one-use active owned-plan receipt; the receipt is cleared before awaited onChunk. It does not provide the cross-await immutable ownership needed by a raw-content alias path.",
+      "run": {
+        "id": 46103716468,
+        "name": "Import owned lookup plan qualification 92c09",
+        "head_sha": "9eef39ef86e1fc41d0f6e8ed64fa685d0fc4abbc",
+        "head_branch": "perf/owned-whole-lookup-plan-20261128-92c09",
+        "path": ".github/workflows/import-owned-lookup-92c09.yml",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_attempt": 1,
+        "created_at": "2026-11-28T03:37:03Z",
+        "updated_at": "2026-11-28T05:40:50Z",
+        "run_started_at": "2026-11-28T03:37:03Z",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468",
+        "observedAtUtc": "2026-11-28 06:07:53 UTC",
+        "apiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46103716468"
+      },
+      "jobs": [
+        {
+          "id": 140851666901,
+          "name": "Verify candidate source",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140851666901"
+        },
+        {
+          "id": 140855486455,
+          "name": "Complete import (jitendex, BA)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486455"
+        },
+        {
+          "id": 140855486467,
+          "name": "Complete import (vndb, AB)",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486467"
+        },
+        {
+          "id": 140855486477,
+          "name": "Complete import (jitendex, AB)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486477"
+        },
+        {
+          "id": 140855486491,
+          "name": "Complete import (vndb, BA)",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486491"
+        },
+        {
+          "id": 140855486493,
+          "name": "Complete import (jmdict, BA)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486493"
+        },
+        {
+          "id": 140855486518,
+          "name": "Complete import (jmdict, AB)",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/job/140855486518"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 15250985145,
+          "name": "owned-lookup-92c09-jmdict-BA",
+          "size_in_bytes": 35645346,
+          "digest": "sha256:e19cf9e8ab14f26e078c22f2f6d7eb29ad8977f6d50363f88aac4e08c201b8c8",
+          "created_at": "2026-11-28T05:36:15Z",
+          "expires_at": "2026-12-12T05:36:13Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15250985145",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15250816845,
+          "name": "owned-lookup-92c09-vndb-BA",
+          "size_in_bytes": 35733432,
+          "digest": "sha256:37c0aa1385310d2efb8f3f3c78ce0d4b00efde23a590c26a7649f2f7615396f6",
+          "created_at": "2026-11-28T05:40:47Z",
+          "expires_at": "2026-12-12T05:40:45Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15250816845",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15250095497,
+          "name": "owned-lookup-92c09-jitendex-BA",
+          "size_in_bytes": 35625017,
+          "digest": "sha256:181b4ccf14cb7179595cad40ff186bc7702de19bba70a40aa85c5c466204c8a9",
+          "created_at": "2026-11-28T05:21:15Z",
+          "expires_at": "2026-12-12T05:21:14Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15250095497",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15249863113,
+          "name": "owned-lookup-92c09-jmdict-AB",
+          "size_in_bytes": 35585427,
+          "digest": "sha256:ca9da17a85a5dc740b3de4884104a737af7e72b38d969e69e5fc209b538130ce",
+          "created_at": "2026-11-28T05:26:36Z",
+          "expires_at": "2026-12-12T05:26:33Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15249863113",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15249428679,
+          "name": "owned-lookup-92c09-jitendex-AB",
+          "size_in_bytes": 35658536,
+          "digest": "sha256:3155b0f4594ab5d53289593a515b652343ab292630cf241b3df36923ec139646",
+          "created_at": "2026-11-28T05:13:38Z",
+          "expires_at": "2026-12-12T05:13:35Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15249428679",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15249124991,
+          "name": "owned-lookup-92c09-vndb-AB",
+          "size_in_bytes": 35726443,
+          "digest": "sha256:2f06d5f91450ad8a195057102721b45b73a2cf0e605f29001e6876c66cc6fb20",
+          "created_at": "2026-11-28T05:28:22Z",
+          "expires_at": "2026-12-12T05:28:20Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15249124991",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        },
+        {
+          "id": 15246274500,
+          "name": "owned-lookup-verification-92c09",
+          "size_in_bytes": 51055,
+          "digest": "sha256:3bb23ff2d76025dedb5c894d953294910a9374793b1a62a055e08745423b959a",
+          "created_at": "2026-11-28T03:53:02Z",
+          "expires_at": "2026-12-12T03:53:01Z",
+          "expired": false,
+          "url": "https://github.com/ManabiIO/manabitan/actions/runs/46103716468/artifacts/15246274500",
+          "digestProvenance": "GitHub Actions API advertised SHA256, not independently verified ZIP bytes in this audit"
+        }
+      ],
+      "jobLogRead": [
+        {
+          "jobId": 140855486455,
+          "characters": 306514,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        },
+        {
+          "jobId": 140855486477,
+          "characters": 305164,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        },
+        {
+          "jobId": 140855486493,
+          "characters": 307380,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        },
+        {
+          "jobId": 140855486518,
+          "characters": 306858,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        },
+        {
+          "jobId": 140855486467,
+          "characters": 303048,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [
+            "2026-11-28T05:28:20.1277180Z RuntimeError: Complete timing retained; separate memory/semantic qualification failed"
+          ],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        },
+        {
+          "jobId": 140855486491,
+          "characters": 304253,
+          "readInFull": true,
+          "numericQualificationSummaryPrinted": false,
+          "terminalFailureExcerpts": [
+            "2026-11-28T05:40:44.8249027Z RuntimeError: Complete timing retained; separate memory/semantic qualification failed"
+          ],
+          "fullLogStorage": "Read into this agent's in-memory store and still linked from GitHub job; full text not independently anchored by this compact snapshot"
+        }
+      ],
+      "resultAvailability": {
+        "numericTimingSummary": null,
+        "sourceVerificationJob": "success",
+        "jmdictAndJitendexCells": "Both opposite-order jobs completed successfully for each dictionary; detailed timing arrays and semantic/memory receipts remain artifact-only in this audit.",
+        "vndbCells": "Both opposite-order jobs failed with the exact terminal RuntimeError retained above. The harness states complete timing was retained but a separate memory/semantic qualification failed.",
+        "unavailableHere": [
+          "All original artifact/package ZIP bytes and numerical timing cohorts.",
+          "The detailed reason within VNDB separate memory/semantic qualification failure.",
+          "Exact complete semantic/memory gate receipts for successful browser jobs."
+        ],
+        "interpretation": "No speed, memory regression, product defect, or narrower failure-cause inference is justified from the job outcome or terminal line alone. Do not pool these cells with #820 or da6c4 evidence."
+      }
+    }
+  ],
+  "relatedOwnershipBoundary": "Neither #820's worker-local producer WeakMap nor 92c09's synchronous active receipt proves immutable lookup/record bytes across canonical-read, compression, record-append and final-copy awaits. Generic caller mutation/error behavior must keep its original fallback. The separate detailed audit is already anchored by parent (Git blob db1329b6a84425d6de8609b3c9b28d9666ac59ce).",
+  "durability": "This compact JSON retains source identities, exact status/artifact metadata, available #820 summary, arithmetic check scope and required failure/test excerpts. It links already committed raw evidence instead of duplicating it. Full logs not anchored here are explicitly marked as such. Parent owns anchoring this new blob to an evidence branch.",
+  "followUp": "Paused. Parent may reactivate for newly completed jobs or independently auditable raw-alias observations; no rerun or artifact download has been requested."
+}

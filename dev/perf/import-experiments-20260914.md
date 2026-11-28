@@ -1265,3 +1265,65 @@ extension checks unchanged. The existing `5048ba3e` release-browser
 qualification remains a separate fixed acquisition. No additional performance
 cohort was started by opening the PR; unrelated pre-existing candidate workflow
 gates skipped. Draft status and the full-import/memory hold remain explicit.
+
+### Execution handoff: held draft and queued fixed studies
+
+The source reviews are complete and no further runtime change was made after
+opening draft #977. The clean head remains
+`4702e9e9d73dda0d0f6ea83dce399a249ebb13a6`; develop remains `9e10d3b3`.
+The local executor is unavailable. Hosted jobs have been submitted, but their
+pending status is not validation or timing evidence.
+
+The [qualification/PR snapshot](../../builds/perf/import-overlap-20261128-da6c4/qualification-status-20261128T060938Z.json)
+records the complete observed check metadata at 06:09:38 UTC: current-runtime
+qualification `46108795917`, FIFO hosted2 `46113052837`, their actionlint jobs,
+and PR #977's substantive checks are queued. Intentional unrelated workflow
+skips are distinguished from passes. No queue cause is inferred.
+
+The [FIFO follow-up design](../../builds/perf/import-overlap-20261128-da6c4/fifo-production-followup-design.md)
+is source-only and conditional on the unchanged complete hosted2 advance gate.
+It preserves immediate private buffer transfer and clone boundaries, accounts
+for all posted private/shared jobs when deciding worker availability, keeps
+source-consumed separate from final completion, and distinguishes per-job
+failure from terminal pool failure. Browser termination has no awaitable join;
+the design does not import the stronger Node transport guarantee. No FIFO
+production code was added.
+
+The [VNDB alias ownership design and status](../../builds/perf/import-overlap-20261128-da6c4/raw-alias-conditional-ownership-and-status.json)
+records exact `d0a79f8` run `46113754947` and actionlint `46113754928` still
+queued at 06:13:27 UTC, with no adapter tests, capture, or observations executed.
+A viable product design would need a private receiver-to-importer ownership
+lease, explicit authority rebinding at the importer payload copy, and a second
+publication-bound lease for mutable DB resolution tables. The lifetime must
+cover the whole real record append, including lookup payload copying and split
+runs, rather than ending at field encoding.
+
+A defensive snapshot would copy at least 26,719,071 cumulative bytes across
+the eight affected groups before row columns and other metadata. An
+offset-only overlay is derived at 61,360 cumulative bytes, largest 8,528 bytes.
+These are source/counter derivations to confirm against the new capture,
+not measured peak memory. Production canonical reads may use the import
+overlay; a fallback snapshot refresh can flush/close storage. The completed-seed
+component does not measure that integration cost. Generic/factory-only callers
+retain the existing validation and rebuild behavior. No alias product
+implementation is justified before the fixed 10 ms / 10% component gate.
+
+The [related-study snapshot](../../builds/perf/import-overlap-20261128-da6c4/current-related-import-studies-20261128-0610.json)
+preserves duplicate-avoidance research separately. Newly committed current-base
+#820 summaries show no demonstrated JMdict latency gain; their medians and
+faster-pair counts were recomputed from every published ratio, while full raw
+bootstrap/semantic receipts were not re-audited. Its VNDB cell remained in
+progress. The current #955 port's source validation passed, but all six timing
+cells remained queued. The distinct owned-whole `92c09` study had four
+successful browser cells and two VNDB failures in separate memory/semantic
+qualification; unavailable narrower causes and numerical cohorts stay
+unavailable. No results are pooled across those sources or hosts.
+
+To resume, inspect the exact run/job attempts and preserve their complete logs
+and compact receipts before diagnosis. Analyze only a complete fixed cohort
+against its predeclared controls, identities, semantic checks, and arithmetic.
+Keep failed or superseded acquisitions separate. A passing component permits a
+new implementation and exact-source browser qualification; it does not
+authorize a full-import gain claim or promotion of the held draft. Inspect
+develop and PR heads before any later source integration. No unchanged reruns
+or relaxed acceptance thresholds were requested.

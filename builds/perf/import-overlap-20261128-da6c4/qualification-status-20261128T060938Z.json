@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-11-28 06:09:38 UTC",
+  "repository": "ManabiIO/manabitan",
+  "scope": "Read-only final handoff snapshot. No check ran or completed substantively during this observation; no rerun or new performance cohort was requested.",
+  "observationErrors": [],
+  "fixedResearchRuns": [
+    {
+      "id": 46108795917,
+      "name": "Bounded content overlap qualification",
+      "headSha": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+      "event": "push",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "createdAt": "2026-11-28T04:42:35Z",
+      "updatedAt": "2026-11-28T04:42:35Z",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46108795917",
+      "jobs": [
+        {
+          "id": 140867454834,
+          "name": "Verify import ownership and build",
+          "status": "queued",
+          "conclusion": null,
+          "startedAt": null,
+          "completedAt": null,
+          "steps": []
+        }
+      ]
+    },
+    {
+      "id": 46108795914,
+      "name": "Lint GitHub Actions workflows",
+      "headSha": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
+      "event": "push",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "createdAt": "2026-11-28T04:42:35Z",
+      "updatedAt": "2026-11-28T04:42:35Z",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46108795914",
+      "jobs": [
+        {
+          "id": 140867454887,
+          "name": "actionlint",
+          "status": "queued",
+          "conclusion": null,
+          "startedAt": null,
+          "completedAt": null,
+          "steps": []
+        }
+      ]
+    },
+    {
+      "id": 46113052837,
+      "name": "JMdict FIFO scheduling component",
+      "headSha": "81d35bc83af349b611f9ad51cc223de788a2d0d6",
+      "event": "push",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "createdAt": "2026-11-28T05:38:55Z",
+      "updatedAt": "2026-11-28T05:38:55Z",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113052837",
+      "jobs": [
+        {
+          "id": 140880647245,
+          "name": "Regenerate and verify the fixed FIFO cohort",
+          "status": "queued",
+          "conclusion": null,
+          "startedAt": null,
+          "completedAt": null,
+          "steps": []
+        }
+      ]
+    },
+    {
+      "id": 46113052796,
+      "name": "Lint GitHub Actions workflows",
+      "headSha": "81d35bc83af349b611f9ad51cc223de788a2d0d6",
+      "event": "push",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "createdAt": "2026-11-28T05:38:55Z",
+      "updatedAt": "2026-11-28T05:38:55Z",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113052796",
+      "jobs": [
+        {
+          "id": 140880647133,
+          "name": "actionlint",
+          "status": "queued",
+          "conclusion": null,
+          "startedAt": null,
+          "completedAt": null,
+          "steps": []
+        }
+      ]
+    }
+  ],
+  "pullRequest": {
+    "number": 977,
+    "url": "https://github.com/ManabiIO/manabitan/pull/977",
+    "state": "open",
+    "draft": true,
+    "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+    "baseSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "mergeCommitSha": "9b9240a9b2828e3c81f24289909a95759441f212",
+    "changedFiles": 14,
+    "checksEndpoint": "https://api.github.com/repos/ManabiIO/manabitan/commits/4702e9e9d73dda0d0f6ea83dce399a249ebb13a6/check-runs?per_page=100",
+    "totalChecks": 33,
+    "checkCounts": {
+      "queued:null": 24,
+      "completed:skipped": 9
+    },
+    "checks": [
+      {
+        "id": 140885882672,
+        "name": "acknowledgement",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:01:59Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114733580/job/140885882672"
+      },
+      {
+        "id": 140885472929,
+        "name": "${{ matrix.candidate }} ${{ matrix.dictionary }} host ${{ matrix.replica }}",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:21Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581689/job/140885472929"
+      },
+      {
+        "id": 140885471370,
+        "name": "Complete import (${{ matrix.dictionary }})",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:20Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581690/job/140885471370"
+      },
+      {
+        "id": 140885430336,
+        "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885430336"
+      },
+      {
+        "id": 140885430099,
+        "name": "${{ matrix.dictionary }} (${{ matrix.order }})",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581763/job/140885430099"
+      },
+      {
+        "id": 140885430052,
+        "name": "select",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581690/job/140885430052"
+      },
+      {
+        "id": 140885429907,
+        "name": "Published release upgrade and reimport",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885429907"
+      },
+      {
+        "id": 140885429528,
+        "name": "Full Extension E2E (Edge)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885429528"
+      },
+      {
+        "id": 140885429422,
+        "name": "Firefox Android Installation Smoke (blocking)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885429422"
+      },
+      {
+        "id": 140885429174,
+        "name": "${{ matrix.candidate }} memory ${{ matrix.dictionary }} host ${{ matrix.replication }}",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": "2026-11-28T06:00:10Z",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581639/job/140885429174"
+      },
+      {
+        "id": 140885429070,
+        "name": "Analyze (javascript)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:11Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581906/job/140885429070"
+      },
+      {
+        "id": 140885428896,
+        "name": "Markdown",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428896"
+      },
+      {
+        "id": 140885428885,
+        "name": "chromium",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581823/job/140885428885"
+      },
+      {
+        "id": 140885428780,
+        "name": "TypeScript (main)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428780"
+      },
+      {
+        "id": 140885428742,
+        "name": "Unit Tests",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428742"
+      },
+      {
+        "id": 140885428728,
+        "name": "Restart and interruption recovery (Chromium)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581699/job/140885428728"
+      },
+      {
+        "id": 140885428720,
+        "name": "HTML",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428720"
+      },
+      {
+        "id": 140885428690,
+        "name": "CSS",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428690"
+      },
+      {
+        "id": 140885428664,
+        "name": "Full Extension E2E (Firefox)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428664"
+      },
+      {
+        "id": 140885428662,
+        "name": "Unit Tests (options)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428662"
+      },
+      {
+        "id": 140885428657,
+        "name": "TypeScript (test)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428657"
+      },
+      {
+        "id": 140885428654,
+        "name": "JSON",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428654"
+      },
+      {
+        "id": 140885428628,
+        "name": "TypeScript (bench)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428628"
+      },
+      {
+        "id": 140885428622,
+        "name": "Anki Deduplication Matrix (Chromium)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428622"
+      },
+      {
+        "id": 140885428597,
+        "name": "JavaScript",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428597"
+      },
+      {
+        "id": 140885428588,
+        "name": "TypeScript (dev)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428588"
+      },
+      {
+        "id": 140885428574,
+        "name": "Full Extension E2E (Chromium)",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428574"
+      },
+      {
+        "id": 140885428445,
+        "name": "auto-approve",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581721/job/140885428445"
+      },
+      {
+        "id": 140885428444,
+        "name": "dependency-review",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581661/job/140885428444"
+      },
+      {
+        "id": 140885428434,
+        "name": "Test Build",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581653/job/140885428434"
+      },
+      {
+        "id": 140885428410,
+        "name": "actionlint",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581705/job/140885428410"
+      },
+      {
+        "id": 140885428160,
+        "name": "acknowledgement",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T06:00:10Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114581518/job/140885428160"
+      },
+      {
+        "id": 140885282000,
+        "name": "actionlint",
+        "headSha": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+        "status": "queued",
+        "conclusion": null,
+        "startedAt": "2026-11-28T05:59:30Z",
+        "completedAt": null,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/46114533616/job/140885282000"
+      }
+    ]
+  },
+  "sourceOnlyFifoImplementationPlan": {
+    "blob": "031d1c274cbd0cce1221dbdb10e35f7419d593be",
+    "sha256": "fb8c50f8b362b6998a8f792a9f4034f2d00b8c00934c319d3d3fad72e08e084a",
+    "bytes": 11467,
+    "status": "Design only; implementation blocked on unchanged hosted2 advance gate."
+  },
+  "disposition": {
+    "monitoring": "Paused after this snapshot at parent request; reactivate when appropriate.",
+    "currentRuntimeQualification": "Queued; complete CI, browser correctness/performance, and memory results remain unestablished.",
+    "hosted2": "Queued; no component result and no implementation authorization.",
+    "hosted1": "Superseded regardless of eventual outcome for omitted terminal idle-worker failure assertion.",
+    "localFifoAttempts": "Two exit-137 attempts retained separately; incomplete observations are not pooled.",
+    "queueCause": "No cause inferred from queued status."
+  }
+}
