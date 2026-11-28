@@ -137,7 +137,7 @@ const summary = {manabitanHarnessCommit: process.env.GITHUB_SHA,
         jmdict: {url: 'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip', sha256: '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f'},
         jitendex: {url: 'https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip', sha256: 'e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356'},
         vndb: {url: 'https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip', sha256: 'da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792'},
-    }, datasets, receipts}
+    }, datasets, receipts: records}
 await writeFile(path.join(runDirectory, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`)
 console.log(JSON.stringify(Object.fromEntries(Object.entries(datasets).map(([dataset, result]) => [dataset,
     {medianImportDeltaManabitanMinusHoshidictsMs: result.medianImportDeltaManabitanMinusHoshidictsMs,
