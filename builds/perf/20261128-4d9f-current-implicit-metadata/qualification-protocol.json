@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidate": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+  "localEquivalent": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "scope": "Qualify complete release-browser correctness, process-memory non-regression and descriptive timing for the combined implicit metadata representation. The independently demonstrated claim is avoided typed-array backing; no elapsed or whole-process gain is assumed.",
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "independentHostInitialOrders": [
+    "AB",
+    "BA"
+  ],
+  "pairsPerHost": 12,
+  "warmups": "Two per arm, excluded prospectively",
+  "controls": "Four interleaved identical-source A/C pairs per host",
+  "timingBoundary": "File input change through post-UI completion; fresh profiles, no profiling/memory/screenshot instrumentation",
+  "memory": "Separate existing covered ABBA/BAAB acquisition after timing; every observation must qualify, median PSS/private<=+5%, each pair<=+10%",
+  "persistence": "Current native restart,72 lookup receipts,deterministic media samples per timed import; separate exhaustive media; unchanged exact non-SAH sizes; VNDB37 aligned4096-byte allocation units",
+  "package": "554-entry local release pair audited. Exactly3JS+canonicalC+canonicalWASM entries differ; ZIP+2416B,WASM+458B. All549 other entry bytes identical. Hosted ZIP hashes and sizes independently recorded.",
+  "failurePolicy": "Retain all observations/tails/failures; no replacement run of an unchanged candidate to recover an adverse or incomplete result.",
+  "promotion": "A successful correctness/memory acquisition is not a speed claim. Publish only the demonstrated allocation reduction unless timing benefits independently replicate beyond identical-control variability.",
+  "priorCohort": "dcfc/55e run46133384380 retained separately: no qualified speed gain; baseline memory coverage gaps in JMdict BA and VNDB AB. This is a new f28/81e source integration after #981, not a replacement of that unchanged cohort.",
+  "allocationClaim": "Original dcfc/55e complete corpus proves4MiB JMdict,4MiB Jitendex,1MiB VNDB backing avoided. Current f28/81e replay must independently confirm before promotion; upstream lazy-record-ID gains are excluded."
+}
