@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+  "sourceArchive": "builds/perf/20261128-4d9f-reference-fields/local-experiment-chronology.tar.gz",
+  "sourceArchiveBytes": 1818484,
+  "sourceArchiveSha256": "8494a9252c805062b35c9b9f4f35ca9b613b9187091a1b8b87c1f5dc16aa2da9",
+  "sourceIndexSha256": "5b64a8d0821383eab2655faa611f64fc1f3e2107dbbaac3e99712290d494e427",
+  "workflowCommit": "d387d3c6c237586412512b076e414d63e1485fc4",
+  "verifiedArchiveMembers": 174,
+  "verifiedUncompressedBytes": 4872893,
+  "selectedFiles": {
+    "corpus/actual-fields.mjs": {
+      "bytes": 8043,
+      "sha256": "b1620f207ea53030a5bdb52e6db53dea0226dc0fd2c43080672055af0efbf643"
+    },
+    "corpus/actual-fields.test.mjs": {
+      "bytes": 5930,
+      "sha256": "a91cf1443fa47e842aa9c1143d3a1365e0dc69621810924a26daa33a3e48d88b"
+    },
+    "corpus/archive-catalog.mjs": {
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    "corpus/common.mjs": {
+      "bytes": 9335,
+      "sha256": "a0d9b115338e66088929ac0b2c7b8c7479bd4551dbcb0994673c80c186b609a8"
+    },
+    "corpus/compare-results.mjs": {
+      "bytes": 7021,
+      "sha256": "69ceb0a87e60c8d3d26c6c4b03f84c5da5d43c4cfd35ab4f6f0bf58abb16de36"
+    },
+    "corpus/evidence/oracles/jitendex-output.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/evidence/oracles/jmdict-output.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/evidence/oracles/jmdict-reference.json": {
+      "bytes": 124620,
+      "sha256": "1fec0474fcc8f8fc5a32b4322fb052432dcf265cf076f16d9ce4b2986b0dc923"
+    },
+    "corpus/evidence/oracles/vndb-corpus.json": {
+      "bytes": 578999,
+      "sha256": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a"
+    },
+    "corpus/evidence/oracles/vndb-directory.json": {
+      "bytes": 78941,
+      "sha256": "c2f75c06a1f8408e6a8dd6cbc348f06d0bbb4fe5e05ec9cb09bd6a454096564e"
+    },
+    "corpus/evidence/oracles/vndb-media-files.json": {
+      "bytes": 708,
+      "sha256": "31af569cea779b28393b9bdb1d34f40280194265dc64da73de2119673f531aeb"
+    },
+    "corpus/evidence/oracles/vndb-media-original-helper.py": {
+      "bytes": 2518,
+      "sha256": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0"
+    },
+    "corpus/evidence/oracles/vndb-output.json": {
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    },
+    "corpus/evidence/protocol.json": {
+      "bytes": 3310,
+      "sha256": "31b31b0bca1e37f21ac8779fd2ade56dfba0fe1dddf90607867305e385c47912"
+    },
+    "corpus/evidence/verification-manifest.json": {
+      "bytes": 18568,
+      "sha256": "d08602840907e842d59b8a2eecbc1a780c2f1e4ee877d999ec2f56bc962d11f1"
+    },
+    "corpus/expanded-file-oracle.mjs": {
+      "bytes": 6680,
+      "sha256": "ea602580ce60c7af56500fbc6f995a883a5def06a02b5034f3a5bd6c3f37e051"
+    },
+    "corpus/file-oracle.mjs": {
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    "corpus/helper-frozen-4.json": {
+      "bytes": 2635,
+      "sha256": "4292d6e42e0946ec0b2381f7389f0da2ea945f7d62e9e1e9f982b7e94b9a5611"
+    },
+    "corpus/launch.py": {
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    "corpus/legacy-field-analysis.mjs": {
+      "bytes": 6351,
+      "sha256": "268d22d6d65e7b6282ace3e931599f8bf5b41bc404c3b886aa12bc94d43e45a0"
+    },
+    "corpus/metadata-oracle.mjs": {
+      "bytes": 5557,
+      "sha256": "ac36656f091d57468775ff028188b436e34f135eeea7ba4b8a9a55ec950a29ae"
+    },
+    "corpus/node-opfs-bounded.mjs": {
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    "corpus/node-opfs-bounded.test.mjs": {
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    "corpus/run.mjs": {
+      "bytes": 43713,
+      "sha256": "4a2e6217466a34f7e9cd1e2b56930d8719c7bc07990dd2ece7724e42a76a2feb"
+    },
+    "corpus/vndb-media-oracle.py": {
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    }
+  },
+  "allSelectedBytesUnchanged": true,
+  "scope": "Exact recovery of the accepted format4 derivative and original source oracles. This is not the untouched metadata fb9 helper, and it contains no later implicit-record-ID decoder. No new product validation or performance claim.",
+  "productBranchModified": false
+}

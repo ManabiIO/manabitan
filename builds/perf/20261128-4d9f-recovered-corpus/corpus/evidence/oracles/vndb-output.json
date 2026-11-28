@@ -1,0 +1,174 @@
+{
+  "persisted": {
+    "files": [
+      {
+        "path": "manabitan-term-content.bin",
+        "bytes": 7533449,
+        "sha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+        "normalizedGenerationRange": null
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+        "bytes": 38,
+        "sha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+        "normalizedGenerationRange": [
+          8,
+          24
+        ]
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+        "bytes": 399513708,
+        "sha256": "c533b5176fc5a57d3a3b2e19f6648fadba13ceb5707bfb2f65de1e2d5c0ff175",
+        "normalizedGenerationRange": [
+          24,
+          40
+        ]
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+        "bytes": 26,
+        "sha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+        "normalizedGenerationRange": [
+          8,
+          24
+        ]
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+        "bytes": 2386124,
+        "sha256": "7c0c01f91e2c92fd5bfcc6c57e9dd905bc991ef6622f7708a5724e1303bf446f",
+        "normalizedGenerationRange": [
+          24,
+          40
+        ]
+      }
+    ],
+    "shardCount": 2,
+    "generationLinkageVerified": true
+  },
+  "metadata": {
+    "_termEntryContentMetaByHash": {
+      "type": "Map",
+      "size": 0,
+      "entries": []
+    },
+    "_termEntryContentMetaCollisionsByHashPair": {
+      "type": "Map",
+      "size": 0,
+      "entries": []
+    },
+    "_termEntryContentMetaDenseCount": 157150,
+    "_termEntryContentMetaDictNameIdByValue": {
+      "type": "Map",
+      "size": 3,
+      "entries": [
+        [
+          "raw",
+          0
+        ],
+        [
+          "raw-v6",
+          1
+        ],
+        [
+          "raw-block-v2",
+          2
+        ]
+      ]
+    },
+    "_termEntryContentMetaDictNameIdTable": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "39b8a1574a1257a6d200afc11ff83c4d14bdaf8c4bc15abfc80e087140ee6323"
+    },
+    "_termEntryContentMetaDictNames": [
+      "raw",
+      "raw-v6",
+      "raw-block-v2"
+    ],
+    "_termEntryContentMetaFreeIndexes": [],
+    "_termEntryContentMetaHash1Table": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "cd0bb0aef8ae75792537ba60f0291ee33eae06d67d970ad7fd0c5d314421e548"
+    },
+    "_termEntryContentMetaHash2Table": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "4da10973a0920bae7af83597c56fad56f316b42b39208d4bfb748a1057d9336b"
+    },
+    "_termEntryContentMetaHashPairCount": 157150,
+    "_termEntryContentMetaHashPairMask": 524287,
+    "_termEntryContentMetaHashPairPendingCount": 0,
+    "_termEntryContentMetaHashPairTable": {
+      "type": "Uint32Array",
+      "length": 524288,
+      "bytes": 2097152,
+      "sha256": "bfaec5e1283dbbca172c58f9a9d5ee29bfc9c5222f1feb1c7d2fe084c32bfa2f"
+    },
+    "_termEntryContentMetaIdTable": {
+      "type": "Float64Array",
+      "length": 262144,
+      "bytes": 2097152,
+      "sha256": "5647f05ec18958947d32874eeb788fa396a05d0bab7c1b71f112ceb7e9b31eee"
+    },
+    "_termEntryContentMetaLengthTable": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "f09ff27b23d22dee6add3d464eba1db5d42d3e5cda27ecd139ccc54720014926"
+    },
+    "_termEntryContentMetaOffsetTable": {
+      "type": "Float64Array",
+      "length": 262144,
+      "bytes": 2097152,
+      "sha256": "3c07eb1c61f039f0a72bca4131746669ca8aa7bc32abee8f65625903dcdb24a2"
+    },
+    "_termEntryContentMetaRecentSourceBatchIdTable": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "5240dc7ae52146844bee43a92c61f64cd6702b7f89f6d4600f062bcb6a144c06"
+    },
+    "_termEntryContentMetaRecentSourceOffsetTable": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58"
+    },
+    "_termEntryContentMetaSignature1Table": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "72d48b95e54c961c2bdc546d5463b16730d56c329cc50516b7797e5428ecd515"
+    },
+    "_termEntryContentMetaSignature2Table": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "b7fda5d087228789126294d7aa626e3b1fd7e139631bbb4a4bd0b3421dd22a55"
+    },
+    "_termEntryContentMetaSignature3Table": {
+      "type": "Uint32Array",
+      "length": 262144,
+      "bytes": 1048576,
+      "sha256": "e209d89f5616b0d32c91b4b20fca7caca341fea45f4a99025c135c95b0685145"
+    },
+    "_termEntryContentMetaSignaturePresentTable": {
+      "type": "Uint8Array",
+      "length": 262144,
+      "bytes": 262144,
+      "sha256": "20d341537360c6b1d8a78faafe826d44deef5cc9e82e7f3c30555a598e465fbe"
+    },
+    "_termEntryContentMetaStateTable": {
+      "type": "Uint8Array",
+      "length": 262144,
+      "bytes": 262144,
+      "sha256": "20d341537360c6b1d8a78faafe826d44deef5cc9e82e7f3c30555a598e465fbe"
+    }
+  }
+}

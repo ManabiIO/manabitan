@@ -1,0 +1,35 @@
+{
+  "candidate": "7f94dea1d3f5bd4b35e200d96d8bfd0fa706019d",
+  "files": {
+    "actual-fields.mjs": "b1620f207ea53030a5bdb52e6db53dea0226dc0fd2c43080672055af0efbf643",
+    "actual-fields.test.mjs": "a91cf1443fa47e842aa9c1143d3a1365e0dc69621810924a26daa33a3e48d88b",
+    "archive-catalog.mjs": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302",
+    "common.mjs": "a0d9b115338e66088929ac0b2c7b8c7479bd4551dbcb0994673c80c186b609a8",
+    "compare-results.mjs": "69ceb0a87e60c8d3d26c6c4b03f84c5da5d43c4cfd35ab4f6f0bf58abb16de36",
+    "expanded-file-oracle.mjs": "ea602580ce60c7af56500fbc6f995a883a5def06a02b5034f3a5bd6c3f37e051",
+    "file-oracle.mjs": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e",
+    "launch.py": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef",
+    "legacy-field-analysis.mjs": "268d22d6d65e7b6282ace3e931599f8bf5b41bc404c3b886aa12bc94d43e45a0",
+    "metadata-oracle.mjs": "ac36656f091d57468775ff028188b436e34f135eeea7ba4b8a9a55ec950a29ae",
+    "node-opfs-bounded.mjs": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8",
+    "node-opfs-bounded.test.mjs": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2",
+    "run.mjs": "4a2e6217466a34f7e9cd1e2b56930d8719c7bc07990dd2ece7724e42a76a2feb",
+    "vndb-media-oracle.py": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9",
+    "evidence/oracles/jitendex-output.json": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff",
+    "evidence/oracles/jmdict-output.json": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+    "evidence/oracles/jmdict-reference.json": "1fec0474fcc8f8fc5a32b4322fb052432dcf265cf076f16d9ce4b2986b0dc923",
+    "evidence/oracles/vndb-corpus.json": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a",
+    "evidence/oracles/vndb-directory.json": "c2f75c06a1f8408e6a8dd6cbc348f06d0bbb4fe5e05ec9cb09bd6a454096564e",
+    "evidence/oracles/vndb-media-files.json": "31af569cea779b28393b9bdb1d34f40280194265dc64da73de2119673f531aeb",
+    "evidence/oracles/vndb-media-original-helper.py": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0",
+    "evidence/oracles/vndb-output.json": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62",
+    "evidence/protocol.json": "31b31b0bca1e37f21ac8779fd2ade56dfba0fe1dddf90607867305e385c47912",
+    "evidence/verification-manifest.json": "d08602840907e842d59b8a2eecbc1a780c2f1e4ee877d999ec2f56bc962d11f1"
+  },
+  "contracts": {
+    "attempt": 4,
+    "exit": 0,
+    "tests": 3
+  },
+  "activationRevision": "arm-activation-revision.json"
+}

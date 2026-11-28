@@ -1,0 +1,710 @@
+{
+  "schemaVersion": 1,
+  "archive": {
+    "path": "local-experiment-chronology.tar.gz",
+    "bytes": 1818484,
+    "sha256": "8494a9252c805062b35c9b9f4f35ca9b613b9187091a1b8b87c1f5dc16aa2da9"
+  },
+  "memberCount": 174,
+  "uncompressedBytes": 4872893,
+  "everyMemberReopenedAndVerified": true,
+  "members": {
+    "asset-copy-receipt.json": {
+      "bytes": 3629,
+      "sha256": "fee0437056e601a46ee43656e1d4642ecb5626ac11f15fb2ecbd0ce196f8d277"
+    },
+    "browser-tooling-preflight-1/activation_overlay.py": {
+      "bytes": 7947,
+      "sha256": "94c3f9bc90da8b07476d070adf90bc006efcc4cd3c0ad94b0f6f4d6381e7639a"
+    },
+    "browser-tooling-preflight-1/source.json": {
+      "bytes": 774,
+      "sha256": "a002846aee6dd7fb0313c9a8e0e91bcf65193ade757f283ed0296b90052e2edb"
+    },
+    "browser-tooling-preflight-1/storage-activation.contract.mjs": {
+      "bytes": 11382,
+      "sha256": "d24d1a205655ec2aec75f49a173d0968994eaf7fda53ebf5cb879b91c86c3ed0"
+    },
+    "browser-tooling-preflight-1/storage-activation.mjs": {
+      "bytes": 15874,
+      "sha256": "b39d8fe6aa6e2dbadf1225e2f7d8990fe9f4611867312b3f0c7a65eb143a254f"
+    },
+    "browser-tooling-preflight-1/test_activation_overlay.py": {
+      "bytes": 5047,
+      "sha256": "241f3afc3e7c1ea14840ab44c16e6b2fef90cc076a44ce361c4cfb5f6b40b6cd"
+    },
+    "build-1.log": {
+      "bytes": 384,
+      "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+    },
+    "candidate-2dd9058.patch": {
+      "bytes": 68164,
+      "sha256": "cddef49f0789b7ebb06b6833e56e941196206af5cf7c29fe59b0673292c70dba"
+    },
+    "candidate-7f94dea.patch": {
+      "bytes": 67221,
+      "sha256": "83b206fd7369b48524eeb19c14953b6e6af53ff53c4910cd22ef17a1a4e24c40"
+    },
+    "candidate-final-receipt.json": {
+      "bytes": 617,
+      "sha256": "e0b3430fe79a036ecd2c6f16cecc855964358702c0a1f7620d4ac3f7c54ef9ee"
+    },
+    "candidate-source.json": {
+      "bytes": 1462,
+      "sha256": "3456c83a328f4a78ba2f82be6a85a006728de03b359a4679b7dcdb66a82ae7b9"
+    },
+    "corpus/actual-fields.mjs": {
+      "bytes": 8043,
+      "sha256": "b1620f207ea53030a5bdb52e6db53dea0226dc0fd2c43080672055af0efbf643"
+    },
+    "corpus/actual-fields.test.mjs": {
+      "bytes": 5930,
+      "sha256": "a91cf1443fa47e842aa9c1143d3a1365e0dc69621810924a26daa33a3e48d88b"
+    },
+    "corpus/archive-catalog.mjs": {
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    "corpus/arm-activation-revision.json": {
+      "bytes": 838,
+      "sha256": "c4c2149b0c855c2156361534d9366c45181691ba785610c64cdbbca04a3e58fa"
+    },
+    "corpus/common.mjs": {
+      "bytes": 9335,
+      "sha256": "a0d9b115338e66088929ac0b2c7b8c7479bd4551dbcb0994673c80c186b609a8"
+    },
+    "corpus/compare-results.mjs": {
+      "bytes": 7021,
+      "sha256": "69ceb0a87e60c8d3d26c6c4b03f84c5da5d43c4cfd35ab4f6f0bf58abb16de36"
+    },
+    "corpus/contracts-1.log": {
+      "bytes": 3138,
+      "sha256": "2b0d2e5e5fae191bb0735feb678f3f8c2e163df0b506ddf26f5ca82b906e08a9"
+    },
+    "corpus/contracts-2.log": {
+      "bytes": 1208,
+      "sha256": "429540dbe8dbe91eb348799f4c44a6f08e7b86722e313c2e171d0f1b2d53f4ce"
+    },
+    "corpus/contracts-3.log": {
+      "bytes": 1209,
+      "sha256": "3b7cce5ca1cb3f1540d61b56da9ead56fcda715c44bf798546ccac3193e0c185"
+    },
+    "corpus/contracts-4.log": {
+      "bytes": 1209,
+      "sha256": "a35e91ad781591584c7a06f8940b325d04ffe6659ec7ecab86475e41bce05af4"
+    },
+    "corpus/corpus-revision-1.json": {
+      "bytes": 940,
+      "sha256": "066781f77e355807ca1baa54fadcee61d21d1c3c59fdd5d1d69512110f6e2be5"
+    },
+    "corpus/evidence/oracles/jitendex-output.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/evidence/oracles/jmdict-output.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/evidence/oracles/jmdict-reference.json": {
+      "bytes": 124620,
+      "sha256": "1fec0474fcc8f8fc5a32b4322fb052432dcf265cf076f16d9ce4b2986b0dc923"
+    },
+    "corpus/evidence/oracles/vndb-corpus.json": {
+      "bytes": 578999,
+      "sha256": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a"
+    },
+    "corpus/evidence/oracles/vndb-directory.json": {
+      "bytes": 78941,
+      "sha256": "c2f75c06a1f8408e6a8dd6cbc348f06d0bbb4fe5e05ec9cb09bd6a454096564e"
+    },
+    "corpus/evidence/oracles/vndb-media-files.json": {
+      "bytes": 708,
+      "sha256": "31af569cea779b28393b9bdb1d34f40280194265dc64da73de2119673f531aeb"
+    },
+    "corpus/evidence/oracles/vndb-media-original-helper.py": {
+      "bytes": 2518,
+      "sha256": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0"
+    },
+    "corpus/evidence/oracles/vndb-output.json": {
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    },
+    "corpus/evidence/protocol.json": {
+      "bytes": 3310,
+      "sha256": "31b31b0bca1e37f21ac8779fd2ade56dfba0fe1dddf90607867305e385c47912"
+    },
+    "corpus/evidence/verification-manifest.json": {
+      "bytes": 18568,
+      "sha256": "d08602840907e842d59b8a2eecbc1a780c2f1e4ee877d999ec2f56bc962d11f1"
+    },
+    "corpus/expanded-file-oracle.mjs": {
+      "bytes": 6680,
+      "sha256": "ea602580ce60c7af56500fbc6f995a883a5def06a02b5034f3a5bd6c3f37e051"
+    },
+    "corpus/file-oracle.mjs": {
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    "corpus/helper-frozen-1.json": {
+      "bytes": 3103,
+      "sha256": "dbb6b1832ed6eda0ff964364473469ca93245dc24a5142d23049e578787b50d9"
+    },
+    "corpus/helper-frozen-2.json": {
+      "bytes": 2767,
+      "sha256": "c599a1339af537decc4061ee00511b4800d36b9bb5dc3f0a0f32faabc95fdb76"
+    },
+    "corpus/helper-frozen-3.json": {
+      "bytes": 2706,
+      "sha256": "74c0ac33013ed8f7a7291c1d0dd374c60b7173dbb7db9df97617a8b63da99686"
+    },
+    "corpus/helper-frozen-4.json": {
+      "bytes": 2635,
+      "sha256": "4292d6e42e0946ec0b2381f7389f0da2ea945f7d62e9e1e9f982b7e94b9a5611"
+    },
+    "corpus/launch.py": {
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    "corpus/legacy-field-analysis.mjs": {
+      "bytes": 6351,
+      "sha256": "268d22d6d65e7b6282ace3e931599f8bf5b41bc404c3b886aa12bc94d43e45a0"
+    },
+    "corpus/metadata-oracle.mjs": {
+      "bytes": 5557,
+      "sha256": "ac36656f091d57468775ff028188b436e34f135eeea7ba4b8a9a55ec950a29ae"
+    },
+    "corpus/node-opfs-bounded.mjs": {
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    "corpus/node-opfs-bounded.test.mjs": {
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    "corpus/preflight-1-source/actual-fields.test.mjs": {
+      "bytes": 5619,
+      "sha256": "bf6cb789a1445f422c166fed01ef7ea5fd06d51eb186dbae719b1cd833e02dc4"
+    },
+    "corpus/preflight-1-source/expanded-file-oracle.mjs": {
+      "bytes": 6045,
+      "sha256": "3dec65209db461b0380b5956afb814017aaefd01e5301244fba297917df031dd"
+    },
+    "corpus/preflight-1-source/helper-frozen-1.json": {
+      "bytes": 2746,
+      "sha256": "b8134e7700056acb3984f30163b7abb8aafefbe7b8aae545fe7e7bee31b509c9"
+    },
+    "corpus/preflight-2-source/actual-fields.test.mjs": {
+      "bytes": 5733,
+      "sha256": "261cb0bb25d23bca57f58fedb33a3b531171d71af0df59e0f0559c24e63302c9"
+    },
+    "corpus/preflight-2-source/expanded-file-oracle.mjs": {
+      "bytes": 6257,
+      "sha256": "2ddcaff9e25693c4b24d2198452d2b92ae39ebd2c84f1d36aae67cad982f47c6"
+    },
+    "corpus/preflight-2-source/helper-frozen-2.json": {
+      "bytes": 2767,
+      "sha256": "c599a1339af537decc4061ee00511b4800d36b9bb5dc3f0a0f32faabc95fdb76"
+    },
+    "corpus/preflight-3-source/actual-fields.mjs": {
+      "bytes": 7967,
+      "sha256": "1d98f407458471fe4f7f8e2197e097bbdae9a3f7ae4e1cd896eb2ffb8f35e61c"
+    },
+    "corpus/preflight-3-source/helper-frozen-3.json": {
+      "bytes": 2706,
+      "sha256": "74c0ac33013ed8f7a7291c1d0dd374c60b7173dbb7db9df97617a8b63da99686"
+    },
+    "corpus/preflight-3-source/run.mjs": {
+      "bytes": 43330,
+      "sha256": "cf23a0140bfe9a1d1ef6df67f006f92358de20e9abcf673f5eaba862a45593db"
+    },
+    "corpus/reports/jitendex-A-1/actual-output-oracle.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/reports/jitendex-A-1/complete-file-oracle.json": {
+      "bytes": 450,
+      "sha256": "b5584e9c8462107ff4d5b2af6261688e606c4d543295a17b80da5bbfd226b175"
+    },
+    "corpus/reports/jitendex-A-1/expanded-file-verification.json": {
+      "bytes": 1243,
+      "sha256": "21943bbdb1390326489fbd406d2ae1810054e991e18f71c124ea60a3f869cd17"
+    },
+    "corpus/reports/jitendex-A-1/final-output-oracle.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/reports/jitendex-A-1/preflight.json": {
+      "bytes": 17388,
+      "sha256": "37f6b9b52b59a602e962fa6d9585e85b024e0ab4bb63d68c245f538157623614"
+    },
+    "corpus/reports/jitendex-A-1/progress.json": {
+      "bytes": 190770,
+      "sha256": "75b60d85fe4a4163f98c4764bb44c295f1edb3878459563220ee50cb21f699db"
+    },
+    "corpus/reports/jitendex-A-1/raw-final-files.json": {
+      "bytes": 1006,
+      "sha256": "b9f59f901ab9a40f3e1418c79f79b40d56d32626d8f528cbcb33b74b6d3a00ff"
+    },
+    "corpus/reports/jitendex-A-1/result.json": {
+      "bytes": 233156,
+      "sha256": "22b8e4d75ae7699c64057f35ad640c31ab8a458458b5fff16792e75a1f914e24"
+    },
+    "corpus/reports/jitendex-A-1/setup.json": {
+      "bytes": 16161,
+      "sha256": "6a36bc2e63737d08b20df11bcd1c545283539d78a89383ea9c9eb29043f8c6cb"
+    },
+    "corpus/reports/jitendex-A-1/signature-allocation.json": {
+      "bytes": 7102,
+      "sha256": "6eb15d6b26f38e6af626df1fb9c3928738c84ae169fcc05d443b8149fd378820"
+    },
+    "corpus/reports/jitendex-A-1.log": {
+      "bytes": 1658,
+      "sha256": "7d845cb2c1e7ff1ed8d62740d7dd542a07f07a2933c79e96ff9cff6dc0a6a381"
+    },
+    "corpus/reports/jitendex-B-1/actual-output-oracle.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/reports/jitendex-B-1/complete-file-oracle.json": {
+      "bytes": 451,
+      "sha256": "d577ac4d20d482afe54b5dcb602a9ca749bb027c1aa57a5b90beb3d097085b68"
+    },
+    "corpus/reports/jitendex-B-1/expanded-file-verification.json": {
+      "bytes": 1243,
+      "sha256": "21943bbdb1390326489fbd406d2ae1810054e991e18f71c124ea60a3f869cd17"
+    },
+    "corpus/reports/jitendex-B-1/final-output-oracle.json": {
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    "corpus/reports/jitendex-B-1/preflight.json": {
+      "bytes": 17388,
+      "sha256": "3e7f7fbeffa775d8871c78f6364d9067761a89754e7f7a1bdb39906ba192c9a6"
+    },
+    "corpus/reports/jitendex-B-1/progress.json": {
+      "bytes": 190765,
+      "sha256": "1f4813ca4da59a505e22c5d020e4e46780f77b20a6c50fdde828e8dd04a0a4b7"
+    },
+    "corpus/reports/jitendex-B-1/raw-final-files.json": {
+      "bytes": 1006,
+      "sha256": "ced45286cc33887b3c1ab57378a2e6e326d4320ce64b99baec8b658d99de725c"
+    },
+    "corpus/reports/jitendex-B-1/result.json": {
+      "bytes": 233145,
+      "sha256": "c7900db22a4a1eb748909588f00eb4daa28df1cbc607bb83317866486e2efb47"
+    },
+    "corpus/reports/jitendex-B-1/setup.json": {
+      "bytes": 16161,
+      "sha256": "9326d33a8d4f72468fef384766bae5a43f60262edd01694012cd6927157299c6"
+    },
+    "corpus/reports/jitendex-B-1/signature-allocation.json": {
+      "bytes": 7102,
+      "sha256": "888859be0645e4a9385ac6ec31c8a18e659b0be51a6ddcb03b1a74bc273bf694"
+    },
+    "corpus/reports/jitendex-B-1.log": {
+      "bytes": 1658,
+      "sha256": "7d845cb2c1e7ff1ed8d62740d7dd542a07f07a2933c79e96ff9cff6dc0a6a381"
+    },
+    "corpus/reports/jitendex-comparison-1.json": {
+      "bytes": 2509,
+      "sha256": "bf440effbda050ea1814a2515ece38484a6e14042ca2958baba663a70732001e"
+    },
+    "corpus/reports/jmdict-A-1/actual-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-A-1/failure.json": {
+      "bytes": 120980,
+      "sha256": "6b9d5efed0a63afc986f83c3d93fa57149e6cbaedf27ac45fa009ad012dd58fe"
+    },
+    "corpus/reports/jmdict-A-1/jmdict-oracle-receipt.json": {
+      "bytes": 11148,
+      "sha256": "90c63a76165def010868a0371f1340d6f5efc069fe8fe277fd7ae2552e75e95e"
+    },
+    "corpus/reports/jmdict-A-1/preflight.json": {
+      "bytes": 16835,
+      "sha256": "48ed3b51d3d79c9b6f3dba5ba2743fb4ffbeae6d8db303cb650ea17fc74bea8c"
+    },
+    "corpus/reports/jmdict-A-1/progress.json": {
+      "bytes": 90515,
+      "sha256": "786993e2054a6d54baa372c08d93285f4849a56065f8a4664497b27f5cd2f1af"
+    },
+    "corpus/reports/jmdict-A-1/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "3f83904a61890573e0574555d0296e23e43c95c8f17b6c6fb159faaaf8856a9f"
+    },
+    "corpus/reports/jmdict-A-1/setup.json": {
+      "bytes": 15606,
+      "sha256": "aa2c412a3a3ad6d055626e86cd47107f0d63ec00f7a2a359b53f0747efdbd8a1"
+    },
+    "corpus/reports/jmdict-A-1.log": {
+      "bytes": 1825,
+      "sha256": "faa63147217ea9e40055c3805303c995c41a8a0e30c63d2cfb58adbb04bc8dad"
+    },
+    "corpus/reports/jmdict-A-2/actual-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-A-2/complete-file-oracle.json": {
+      "bytes": 450,
+      "sha256": "88c100fdf40e4b98550cf20bcbd29cd9bdb2b7889e5120010272b8d35e30f22a"
+    },
+    "corpus/reports/jmdict-A-2/expanded-file-verification.json": {
+      "bytes": 1231,
+      "sha256": "67c8a310cf16ffc6a66a2a8b32631189b2b6c03985f6ec7367852419ebfe4531"
+    },
+    "corpus/reports/jmdict-A-2/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-A-2/jmdict-oracle-receipt.json": {
+      "bytes": 11148,
+      "sha256": "90c63a76165def010868a0371f1340d6f5efc069fe8fe277fd7ae2552e75e95e"
+    },
+    "corpus/reports/jmdict-A-2/preflight.json": {
+      "bytes": 16834,
+      "sha256": "cc4f2986dcd42ebf5bcc6d2bc38ad0d576ff1e08e318700577271f886e74c672"
+    },
+    "corpus/reports/jmdict-A-2/progress.json": {
+      "bytes": 90515,
+      "sha256": "4b32714fe47715acaee759b68e6678bb183087126405c170e904dba63132858f"
+    },
+    "corpus/reports/jmdict-A-2/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "66546376a06721eeb938c50f57459aa54e066c53209e516af9e2d27d9745e87b"
+    },
+    "corpus/reports/jmdict-A-2/result.json": {
+      "bytes": 123214,
+      "sha256": "e7bf26b3f90e0f5db1075d85314b29896dfe8cff96e1b536117786bdbfe422cd"
+    },
+    "corpus/reports/jmdict-A-2/setup.json": {
+      "bytes": 15605,
+      "sha256": "6072812f1b0762b8e47d15e0a375b408ab0826fb83b4a7ab193c2a83a1f6af59"
+    },
+    "corpus/reports/jmdict-A-2/signature-allocation.json": {
+      "bytes": 4050,
+      "sha256": "2da7595d5a54ece5fc1d4893f34b0f2cc99822c001f6c32908a6e2cd7e35c2e9"
+    },
+    "corpus/reports/jmdict-A-2.log": {
+      "bytes": 1536,
+      "sha256": "13be89209a8349da94f197786e07be8e91d3cd91e649e2d5d963827c5e38024a"
+    },
+    "corpus/reports/jmdict-A-3/actual-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-A-3/complete-file-oracle.json": {
+      "bytes": 450,
+      "sha256": "88c100fdf40e4b98550cf20bcbd29cd9bdb2b7889e5120010272b8d35e30f22a"
+    },
+    "corpus/reports/jmdict-A-3/expanded-file-verification.json": {
+      "bytes": 1231,
+      "sha256": "67c8a310cf16ffc6a66a2a8b32631189b2b6c03985f6ec7367852419ebfe4531"
+    },
+    "corpus/reports/jmdict-A-3/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-A-3/jmdict-oracle-receipt.json": {
+      "bytes": 11148,
+      "sha256": "90c63a76165def010868a0371f1340d6f5efc069fe8fe277fd7ae2552e75e95e"
+    },
+    "corpus/reports/jmdict-A-3/preflight.json": {
+      "bytes": 16833,
+      "sha256": "e39c1806baf208b256808c850122ba279ba2b3e4707d5a853f792826fb74539b"
+    },
+    "corpus/reports/jmdict-A-3/progress.json": {
+      "bytes": 91031,
+      "sha256": "482ee39ec61475b229a3369e8c934d21e9dc959f840965ab32be849382ee24a2"
+    },
+    "corpus/reports/jmdict-A-3/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "1621fd73ec62f2d871029e78971f535db6349795649e00222dbf720c90d3ac3c"
+    },
+    "corpus/reports/jmdict-A-3/result.json": {
+      "bytes": 124247,
+      "sha256": "797f7f756e50280e1bbc467ed4b39b4db5540f1ddbea6281f5460c52466b4c4d"
+    },
+    "corpus/reports/jmdict-A-3/setup.json": {
+      "bytes": 15604,
+      "sha256": "48620dbf60982c94a847b7fae48c39602af91aba735ae801f3420963f7467ef7"
+    },
+    "corpus/reports/jmdict-A-3/signature-allocation.json": {
+      "bytes": 4050,
+      "sha256": "2da7595d5a54ece5fc1d4893f34b0f2cc99822c001f6c32908a6e2cd7e35c2e9"
+    },
+    "corpus/reports/jmdict-A-3.log": {
+      "bytes": 1536,
+      "sha256": "13be89209a8349da94f197786e07be8e91d3cd91e649e2d5d963827c5e38024a"
+    },
+    "corpus/reports/jmdict-B-1/actual-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-B-1/complete-file-oracle.json": {
+      "bytes": 451,
+      "sha256": "a485c3783f9b0616bba81721238e198cb626b120c2a56e13fb2734a492de3f2d"
+    },
+    "corpus/reports/jmdict-B-1/expanded-file-verification.json": {
+      "bytes": 1231,
+      "sha256": "67c8a310cf16ffc6a66a2a8b32631189b2b6c03985f6ec7367852419ebfe4531"
+    },
+    "corpus/reports/jmdict-B-1/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-B-1/jmdict-oracle-receipt.json": {
+      "bytes": 11148,
+      "sha256": "90c63a76165def010868a0371f1340d6f5efc069fe8fe277fd7ae2552e75e95e"
+    },
+    "corpus/reports/jmdict-B-1/preflight.json": {
+      "bytes": 16835,
+      "sha256": "baf6eb7fb42a04ae16c3d6972b7d4c6303a0d49aa5b05ae83d6c83433f79ce02"
+    },
+    "corpus/reports/jmdict-B-1/progress.json": {
+      "bytes": 90513,
+      "sha256": "dfc846418edbcb885d7488171c7940ec1b97459197973d27444c3c3acaffed99"
+    },
+    "corpus/reports/jmdict-B-1/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "51cbfd3cfa72a795f3e318476dbee767271a78299e783f5d5cfdedb86e1158cf"
+    },
+    "corpus/reports/jmdict-B-1/result.json": {
+      "bytes": 123214,
+      "sha256": "2ef4e21259a99900c9b66766d6d57e9dc412c032894942c1fce61683e22fe75d"
+    },
+    "corpus/reports/jmdict-B-1/setup.json": {
+      "bytes": 15606,
+      "sha256": "876beb74c42571367ff43a8889967be2542cd20ffd51ba2839d1e9ae3fcc9848"
+    },
+    "corpus/reports/jmdict-B-1/signature-allocation.json": {
+      "bytes": 4050,
+      "sha256": "3e46b7f343916a77e82e5e5f673f6ab30d4e59e6e8cfabe7cc508dfd73b6ff32"
+    },
+    "corpus/reports/jmdict-B-1.log": {
+      "bytes": 1536,
+      "sha256": "13be89209a8349da94f197786e07be8e91d3cd91e649e2d5d963827c5e38024a"
+    },
+    "corpus/reports/jmdict-B-2/actual-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "b18ec1aca588c8f6dc3ecbd2dc8a96168382792e8188c5d15b5fc78589907a33"
+    },
+    "corpus/reports/jmdict-B-2/complete-file-oracle.json": {
+      "bytes": 451,
+      "sha256": "a485c3783f9b0616bba81721238e198cb626b120c2a56e13fb2734a492de3f2d"
+    },
+    "corpus/reports/jmdict-B-2/expanded-file-verification.json": {
+      "bytes": 1235,
+      "sha256": "1b0caaa0de1013ccc2e904501e832436a4cf62b2f0a125cd4a16564f760ff8ca"
+    },
+    "corpus/reports/jmdict-B-2/final-output-oracle.json": {
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "corpus/reports/jmdict-B-2/jmdict-oracle-receipt.json": {
+      "bytes": 11148,
+      "sha256": "90c63a76165def010868a0371f1340d6f5efc069fe8fe277fd7ae2552e75e95e"
+    },
+    "corpus/reports/jmdict-B-2/preflight.json": {
+      "bytes": 16833,
+      "sha256": "3e8f53dc7097d5c317be2428ac7180934e5456b4ed79f7f8dd7be3a7b3f1f7fc"
+    },
+    "corpus/reports/jmdict-B-2/progress.json": {
+      "bytes": 91149,
+      "sha256": "d78675e09992811e3d5c912a888c956b3ffbe03effc273e84bdae4d1c20848f3"
+    },
+    "corpus/reports/jmdict-B-2/raw-final-files.json": {
+      "bytes": 988,
+      "sha256": "500a66b876a259ab08189ce194b3230c043fa7d97754439be9bdb6c8e870b369"
+    },
+    "corpus/reports/jmdict-B-2/result.json": {
+      "bytes": 124364,
+      "sha256": "f2e1d6fd454762831c816390b014c0fb10505594e27e151fa922c0d3b1c09703"
+    },
+    "corpus/reports/jmdict-B-2/setup.json": {
+      "bytes": 15604,
+      "sha256": "2e2621ae8d96cacc421d3dabece68fc78a3f252ccaeaf87e87c3311432b6c00b"
+    },
+    "corpus/reports/jmdict-B-2/signature-allocation.json": {
+      "bytes": 4050,
+      "sha256": "3e46b7f343916a77e82e5e5f673f6ab30d4e59e6e8cfabe7cc508dfd73b6ff32"
+    },
+    "corpus/reports/jmdict-B-2.log": {
+      "bytes": 1581,
+      "sha256": "e189064c2a28b42d941bc4125a2fc5ed2548888e7f59992b5c0453af5764dc87"
+    },
+    "corpus/reports/jmdict-comparison-1.json": {
+      "bytes": 2528,
+      "sha256": "f0ccefd1f6fc3d42960de7b54810b69f0f5e01686869e3cc5bc1c8dafd78df5c"
+    },
+    "corpus/reports/jmdict-comparison-2.json": {
+      "bytes": 2549,
+      "sha256": "7338d67a60b4444b3af2905ca3073456cfdb3ed62a601764af9c23d92386839d"
+    },
+    "corpus/reports/vndb-comparison-1.json": {
+      "bytes": 3060,
+      "sha256": "37d09c1721059fd26b0d7b09d3b4adcc374ad0894cd7338c48b375a18ecaca77"
+    },
+    "corpus/run.mjs": {
+      "bytes": 43713,
+      "sha256": "4a2e6217466a34f7e9cd1e2b56930d8719c7bc07990dd2ece7724e42a76a2feb"
+    },
+    "corpus/upstream-source-receipt.json": {
+      "bytes": 1264,
+      "sha256": "6224aca1f73851eb98b4497fe6b8eb40569499a0b6ea480a7b595892d874da16"
+    },
+    "corpus/vndb-actual-format-archive-receipt.json": {
+      "bytes": 4590,
+      "sha256": "e446ec77221f7d59c48c25be02505d0a61f609051b57bfdbd787372f37272cc4"
+    },
+    "corpus/vndb-actual-format-raw.tar.gz": {
+      "bytes": 1029846,
+      "sha256": "61e2fcc85680d04d02394bb3b5a21455d9d653a512b40406cc5ea6547e64aff3"
+    },
+    "corpus/vndb-media-oracle.py": {
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    },
+    "current-activation/asset-copy.json": {
+      "bytes": 3549,
+      "sha256": "906935924561cdb97e04295f5308a4d8046f0a3eae275704f8466cedc002f95d"
+    },
+    "current-activation/lint-1.log": {
+      "bytes": 5272,
+      "sha256": "b9cb122f2c62e43656ea4720c275657a1dc1a5702ab2192d0afa0e6dc26c870a"
+    },
+    "current-activation/lint-2.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "current-activation/node-contracts-1.log": {
+      "bytes": 1702,
+      "sha256": "e092b1977718b452de5b6a34ff6559785d16c1a175fb71299ee27a3b59c2ee75"
+    },
+    "current-activation/node-contracts-2.log": {
+      "bytes": 1703,
+      "sha256": "20b4cc5d10d9a3a2a68ee5e7d441db3c7102d1446bcb04bd13ba3281b7cb73fe"
+    },
+    "current-activation/overlay-identity.json": {
+      "bytes": 739,
+      "sha256": "f32195f4a9ad81c858475926e031e9c6ba60e7e6dc7c938ebab7ca7d894cae16"
+    },
+    "current-activation/overlay-syntax-1.log": {
+      "bytes": 174,
+      "sha256": "db12ad97221988bf346c55d06788e21a01bb6a683d69266bf732ed4d6d9763c8"
+    },
+    "current-activation/python-contracts-1.log": {
+      "bytes": 696,
+      "sha256": "e8451d5fa6d6482d392aefc547184928d922b81f1c37d96844908726bfcb870e"
+    },
+    "current-activation/python-contracts-2.log": {
+      "bytes": 696,
+      "sha256": "f49db9c4c5b3bd09247aa4c1b918df8b21f746aa5550476f5a2c7c8a49f4b5aa"
+    },
+    "focused-1.log": {
+      "bytes": 1677,
+      "sha256": "d042c09eecca4e02e04a7df35ced08801f4fc195e84d03eb3551afa24a818cba"
+    },
+    "focused-2.log": {
+      "bytes": 1807,
+      "sha256": "61f3d690101af2ad8e751590cf0f177bdb48402bc33564b3d28b10a02e8a8647"
+    },
+    "frozen-focused-1.log": {
+      "bytes": 11136,
+      "sha256": "82530660269f52bee37ed05cd5ac5f4ef5ebb0df918e4004a76390f5cbb0f566"
+    },
+    "frozen-focused-2.log": {
+      "bytes": 2904,
+      "sha256": "e8b3d92818ceb5cd78de2e993cb1b600cadf9b66275e21aec472a3c8f9dbf1d1"
+    },
+    "independent-review-current-8c3ca42.md": {
+      "bytes": 5915,
+      "sha256": "071d1b8a42d870e43ad7fa008cd8e2591bc2578769a475025d2d5d21c88f2654"
+    },
+    "lint-1.log": {
+      "bytes": 3904,
+      "sha256": "32bca8e83f7ad7904e6b471b02b1e5ac3a08509e95aab278c618c844d1589879"
+    },
+    "lint-2.log": {
+      "bytes": 1263,
+      "sha256": "a747f1cfdf227f4fb362322d7ca5d3a66e34bf89d2b15fef1afccc994150a226"
+    },
+    "lint-3.log": {
+      "bytes": 1552,
+      "sha256": "9488f1bccca51deb9511df56e18cf658f0fe94198f4a860b4b08e5c0f47b5a73"
+    },
+    "lint-4.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "old-reader-1.log": {
+      "bytes": 577,
+      "sha256": "9439435de30f16f85373c1ce109bab5ba1e58b2365dd8aa36d561302ce43af6d"
+    },
+    "old-reader-compatibility-v1.test.js": {
+      "bytes": 3724,
+      "sha256": "b09cc53ae7d8e8ca8c81c332d18726a29e8728fbce120036e14444152a7ac1da"
+    },
+    "old-reader-compatibility.test.js": {
+      "bytes": 6856,
+      "sha256": "a83634d3b4454e81ddfe4b38f4571be8ac06ee2c190268acdc1642308128a400"
+    },
+    "old-reader-result-v2.json": {
+      "bytes": 1682,
+      "sha256": "a21e89cc394f6c5e097cf45b96831f16b1823c21063dd6f8b48ed1043d8bfd35"
+    },
+    "old-reader-result.json": {
+      "bytes": 682,
+      "sha256": "8b0477c5d1b58a3700f69e4d6a24388f9aac2906bead0817ee07b6144ed0fe52"
+    },
+    "old-reader-source.json": {
+      "bytes": 241,
+      "sha256": "f5254fb8057de9004af7d69f04113633668df8cc901a32a5c25955ed5512dacd"
+    },
+    "runtime-v1.json": {
+      "bytes": 526,
+      "sha256": "961dfc616549f2566e741576db476097bbee8596cf406021dbaf2496a51785c5"
+    },
+    "runtime-v1.patch": {
+      "bytes": 29087,
+      "sha256": "a60475c9e2667a80aef84f3547dd72d1d2f3f27707c47591668e5143222c786c"
+    },
+    "source-and-tests-v2.json": {
+      "bytes": 232,
+      "sha256": "3f95ee9d7a09d98416555bfd94d8f77a2eff4186b195d2a54efd0af13599f233"
+    },
+    "source-and-tests-v2.patch": {
+      "bytes": 52057,
+      "sha256": "2d280fe54293461f9009edec4590ab9c4eeff75a995f5b2dde847aba0b5f0716"
+    },
+    "source-and-tests-v3.json": {
+      "bytes": 323,
+      "sha256": "4a67d9bddb9431a58596cc413c0a26bdfd97f3fef327b9a31ddff4e07842177a"
+    },
+    "source-and-tests-v3.patch": {
+      "bytes": 65387,
+      "sha256": "45a0e9bb483655231acbeb8ac88cea0c27f47f66add95d6441cc90ea88c91759"
+    },
+    "source-and-tests-v4.json": {
+      "bytes": 649,
+      "sha256": "5c1719b2bb9dda9af2a9e5d5bcabe741b3872512db8f23e62df33003450a8fbb"
+    },
+    "source-and-tests-v4.patch": {
+      "bytes": 67197,
+      "sha256": "5d45c2b019556dde780290ee8fc140bf83bbc26fba351707c44e5f9669559529"
+    },
+    "types-main-1.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "types-test-1.log": {
+      "bytes": 1170,
+      "sha256": "b1cce1bc1d8c30df9c59a5f0b31326ea9586470ed9e5d540164849d9f6b22863"
+    },
+    "types-test-2.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "boundary": "Exact local source checkpoints, all failed/pass logs and corpus receipts. VNDB raw results are preserved in the byte-verified nested corpus/vndb-actual-format-raw.tar.gz. Absolute paths in originals are provenance only. This archive does not claim current-parent corpus or browser completion."
+}

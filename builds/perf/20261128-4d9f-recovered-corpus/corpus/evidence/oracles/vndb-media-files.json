@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "scope": "Independent Python zipfile Central Directory image names and uncompressed lengths; no image extraction or payload digest.",
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "fixtureBytes": 291705969,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "archiveEntryCount": 147237,
+  "uniqueImagePaths": 146570,
+  "imagePathsSha256": "be30ba4f81706cfffbe2e7d4d8d3ffefe4366f6f7de9e0f562613c4d2be5b2a3",
+  "digestEncoding": "Ascending ASCII path order, compact JSON string plus LF, UTF-8",
+  "mediaBytes": 188131284,
+  "helperSha256": "50f5145ab2882d19659b52a2280f937efdd386d707906a4d30bc37a977036aa0"
+}
