@@ -1,0 +1,122 @@
+{
+  "status": "UNPUBLISHED_R2_SOURCE_REGISTERED_NO_ACQUISITION",
+  "variant": "copied-envelopes",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "requiredPublicationParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sourceStudyReused": {
+    "workflowSha": "e5933998d27c8dec3e7b2cd1ad72a4ac8ed7028b",
+    "originalWorkflowSha": "33248c7258ffcfd1af7ad76fef65e66031c36c59",
+    "wrapperSha256": "f1b9a3382ee44030584ab7f1e433b8a22120180718f6786e1bf1d97f4fbabe03",
+    "workflowSha256": "24c6fb0278a22be0a4676c3029117c4e858583d5c8a8c8462ed1541bcaef2741"
+  },
+  "wrapperChanges": [
+    "Replace the hard-coded baseline with frozen dcfc.",
+    "Rename only variant-specific descriptive strings and frozen plan output filename.",
+    "Preserve all source-gate commands, owned dependency-link cleanup, before/after status retention, strict clean-tree assertion, acquisition command construction and participation checks."
+  ],
+  "wrapperExecutableAstEqualAfterReversingBaselineAndTerminology": true,
+  "unchangedCopiedFiles": [
+    {
+      "path": "dev/perf/import-qualification-bda85f3c7e15.py",
+      "sha256": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22"
+    },
+    {
+      "path": "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+      "sha256": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43"
+    },
+    {
+      "path": "dev/perf/bda85f3c7e15/test_import_qualification_controls.py",
+      "sha256": "4eb52b18b61c4b18ca60d03bfdb632f9cebf8f6b94caaedc3cb62101b001a4fd"
+    }
+  ],
+  "unchangedInheritedMemoryHelpers": [
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "sameBytesAtOldAndNewBaseline": true
+    }
+  ],
+  "unchangedStudySections": [
+    "matrix",
+    "totalHosts",
+    "totalPlannedImports",
+    "flagsByArm",
+    "vndbSahAllocationUnits",
+    "lockedToolingSha256",
+    "memory",
+    "timing",
+    "failurePolicy",
+    "participationAuditBoundary"
+  ],
+  "candidateSourceAndPackageBinding": "Remote source a0915ff8b2569f492bbea5588acbb75bb6252c99/tree 14611ac636f066109cc86361275e3a08ace1b02c has direct dcfc parent and matches reviewed local 16cb1dc0bfb9144335c102349a66f40b6a14bbde. Only one test JSDoc annotation differs from prior de5 source; all six runtime blobs, executable test/assertion bytes, package/test/lint allowlists and ACK semantics are unchanged. Full hosted gate remains required.",
+  "publicationAndCandidateAncestry": "Local repair actual parent is38057; remote source a0915ff8b2569f492bbea5588acbb75bb6252c99 is independently verified as a direct child of dcfc with exact reviewed tree14611. Root must publish this r2 workflow directly from dcfc. No prior source/study branch is modified.",
+  "noRuntimeOrOldStudyChanged": true,
+  "noPublicationOrCI": true,
+  "priorC321ReplicationHistory": {
+    "source": "c32168f66de7407592d048b7cb2459b92573abc4",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "vndbAB": {
+      "pairedMedianChangePercent": 25.0083,
+      "pairedMedianDeltaMs": 1079.75,
+      "fasterPairs": 0,
+      "pairCount": 12,
+      "memoryAllFourQualified": true,
+      "privatePairedIncreasesPercent": [
+        6.1098,
+        5.0427
+      ],
+      "privateMedianIncreasePercent": 5.5762,
+      "privateMedianLimitPercent": 5,
+      "pssMedianIncreasePercent": 3.7056,
+      "outcome": "timing regression and measured private-memory threshold breach"
+    },
+    "vndbBA": {
+      "pairedMedianChangePercent": 26.822,
+      "pairedMedianDeltaMs": 1107.5,
+      "fasterPairs": 0,
+      "pairCount": 12
+    },
+    "sourceOfRoundedValues": "Parent/source_io completed raw-qualification review; original observations remain retained; no pooling or reinterpretation."
+  },
+  "sourceReviewReceiptSha256": "32c61dd5d34de42c5f804ac7208c4f8aed113a3fb74a3d0e0d3a4c6325611cb6",
+  "remoteCandidate": "a0915ff8b2569f492bbea5588acbb75bb6252c99",
+  "remoteCandidateTree": "14611ac636f066109cc86361275e3a08ace1b02c",
+  "retainedZeroImportFailures": [
+    {
+      "workflow": "f044160ed5527853ccfc86f2fc5ce9597097f5ce",
+      "run": 46132773041,
+      "scope": "Pending-fixture wrapper assertion before product validation; zero imports",
+      "receiptSha256": "bbf89f4a577d0d5d40c194c2657074affb0d70120aa8b208e7fd0587e9316f5d"
+    },
+    {
+      "workflow": "936e07390d6b433d221ea25d002e6361d1258ce9",
+      "run": 46133342198,
+      "scope": "Test TypeScript TS7019 at private-copy.test.js251 after lint/main types; zero imports",
+      "receiptSha256": "7dfaf9ad03414bae17bc9a74279f6fdc3dfb286fbdd559d8f82a600a97aaaaad"
+    }
+  ],
+  "testOnlyRepair": {
+    "localSource": "16cb1dc0bfb9144335c102349a66f40b6a14bbde",
+    "tree": "14611ac636f066109cc86361275e3a08ace1b02c",
+    "actualLocalParent": "38057ec8f182c75909dcd78cd566d19e7186ff8c",
+    "testBlob": "108a706e4422e1e670052943a7c1c1f0da5401aa",
+    "reviewSha256": "dd7622d8a8094a360da6bce8cc70c32f7e955db766fa91f083246919524dd870",
+    "runtimeUnchanged": true,
+    "executableTestAndAssertionsUnchanged": true
+  }
+}

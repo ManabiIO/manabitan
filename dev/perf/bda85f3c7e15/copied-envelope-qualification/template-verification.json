@@ -1,0 +1,72 @@
+{
+  "status": "UNPUBLISHED_R2_SOURCE_REGISTERED",
+  "candidate": "a0915ff8b2569f492bbea5588acbb75bb6252c99",
+  "noAcquisitionLaunched": true,
+  "noPublicationPerformed": true,
+  "pythonSyntaxPassed": [
+    "dev/perf/bda85f3c7e15/copied_envelope_qualification.py",
+    "dev/perf/bda85f3c7e15/test_copied_envelope_qualification.py",
+    "dev/perf/import-qualification-bda85f3c7e15.py",
+    "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+    "dev/perf/bda85f3c7e15/test_import_qualification_controls.py"
+  ],
+  "yamlSelectionPassed": true,
+  "bashSyntaxPassed": [
+    {
+      "job": "validation",
+      "name": "Require exact source, package and counter registration",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "validation",
+      "name": "Check the small wrapper and unchanged observer protocol",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "validation",
+      "name": "Validate the exact candidate source before any import",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Verify the same frozen registration and tooling",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Fetch the registered source objects",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Install the locked Playwright Chromium",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Run the fixed cell and its separate participation audit",
+      "bashSyntaxExit": 0
+    }
+  ],
+  "pureExistingWrapperTests": {
+    "count": 8,
+    "exitCode": 0,
+    "elapsedSeconds": 0.1300938300009875,
+    "registrationScope": "Actual r2 READY plan for remote a0915ff8b2569f492bbea5588acbb75bb6252c99",
+    "scope": "Corrected existing wrapper-only fixtures; no source gate, product tests, build or browser imports",
+    "logSha256": "dff7f2da5d2d58c3e3c127297aa642f52f4b26dfd7597935a016215a9d31e94f"
+  },
+  "pendingRegistrationFailsClosed": "Explicit pending fixture is derived from the actual READY plan by the corrected eight-test suite.",
+  "wrapperAstIdenticalAfterBaselineAndNamingReversal": true,
+  "plannedHosts": 6,
+  "plannedImports": 188,
+  "sourceAndWorkflowAncestryVerification": "Remote source direct dcfc parent and exact reviewed tree14611 verified. Local repair actual parent38057 retained. Prospective r2 workflow direct parent remains root publication check.",
+  "reviewedLocalSource": "16cb1dc0bfb9144335c102349a66f40b6a14bbde",
+  "reviewedLocalTree": "14611ac636f066109cc86361275e3a08ace1b02c",
+  "registeredPackageMembers": 6,
+  "registeredAddedPackageMembers": 1,
+  "registeredLintPaths": 14,
+  "registeredFocusedSuites": 5,
+  "finalReadyRegistrationPassed": true,
+  "sourceValidationScope": "No product tests/types/build executed for this r2 template; inherited local327 result belongs to38057."
+}
