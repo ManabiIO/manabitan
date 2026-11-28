@@ -71,6 +71,7 @@ async function snapshot(sources, fused, nativeEscapedKeys = false) {
         useNativeStringPlan: fused,
         experimentalSkipFusedParse: !fused,
         experimentalNativeEscapedKeys: nativeEscapedKeys,
+        validateGlossaryTypes: true,
     })
     const profile = consumeLastTermBankWasmParseProfile()
     if (result === null) { throw new Error('Expected parser output') }
@@ -147,6 +148,45 @@ describe('fused parser consecutive key reuse', () => {
         ]
         await expect(snapshot(sources, true)).rejects.toThrow()
         await expect(snapshot(sources, false)).rejects.toThrow()
+    })
+
+    maybeTest.each([
+        '"same"true',
+        '"same""',
+        '"same\\q"',
+        '"same\\u00X1"',
+        '"same\n"',
+        '"same',
+    ])('rejects malformed key token %j after a validated adjacent match', async (token) => {
+        for (const field of [0, 1]) {
+            const keys = ['"same"', '"reading"']
+            keys[field] = token
+            const sources = [encoder.encode(
+                `[["same","same","","",0,["first"],1,""],[${keys.join(',')},"","",1,["second"],2,""]]`,
+            )]
+            await expect(snapshot(sources, true, true)).rejects.toThrow()
+            await expect(snapshot(sources, false)).rejects.toThrow()
+        }
+    })
+
+    maybeTest('does not complete a repeated token across an independent bank boundary', async () => {
+        const sources = [
+            encoder.encode('[["same","reading","","",0,["first"],1,""]]'),
+            encoder.encode('[["sam'),
+            encoder.encode('e","reading","","",1,["second"],2,""]]'),
+        ]
+        await expect(snapshot(sources, true)).rejects.toThrow()
+        await expect(snapshot(sources, false)).rejects.toThrow()
+    })
+
+    maybeTest.each([1, 7, 8, 15, 16, 31, 32, 33])('preserves %i-byte keys when adjacent lengths and last bytes differ', async (length) => {
+        const key = 'a'.repeat(length)
+        const keys = [key, key, key + 'b', key, 'b'.repeat(length), key.slice(0, -1) || 'b', key]
+        const rows = keys.map((expression, index) => [expression, keys[(index + 1) % keys.length], '', '', index, [`definition ${index}`], index, ''])
+        const sources = [encoder.encode(JSON.stringify(rows))]
+        const fused = await snapshot(sources, true)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false)).result)
     })
 
     maybeTest('preserves negative zero fallback after reused keys and resets independent parses', async () => {

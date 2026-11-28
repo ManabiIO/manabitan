@@ -1,0 +1,136 @@
+name: Native key witness laboratory
+
+on:
+  push:
+    branches: [lab/native-key-witness-20261128-d2d132]
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    if: github.ref == 'refs/heads/lab/native-key-witness-20261128-d2d132'
+    name: Native screen (${{ matrix.dictionary }}, cohort ${{ matrix.replica }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {dictionary: jmdict, replica: '1'}
+          - {dictionary: jmdict, replica: '2'}
+          - {dictionary: jitendex, replica: '1'}
+          - {dictionary: vndb, replica: '1'}
+          - {dictionary: unique-fixed, replica: '1'}
+          - {dictionary: unique-varying, replica: '1'}
+          - {dictionary: unique-long, replica: '1'}
+    env:
+      LAB_DICTIONARY: ${{ matrix.dictionary }}
+      LAB_REPLICA: ${{ matrix.replica }}
+      LAB_EVIDENCE: ${{ github.workspace }}/builds/perf/native-key-witness-${{ matrix.dictionary }}-${{ matrix.replica }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Initialize evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$LAB_EVIDENCE/binaries" "$LAB_EVIDENCE/inputs"
+          git rev-parse HEAD > "$LAB_EVIDENCE/experiment-sha.txt"
+          cp .github/workflows/native-key-witness-lab-20261128.yml "$LAB_EVIDENCE/workflow.yml"
+          cp dev/perf/native-key-witness-lab/local-attempts.json "$LAB_EVIDENCE/local-attempts.json"
+          uname -a > "$LAB_EVIDENCE/kernel.txt"
+          lscpu > "$LAB_EVIDENCE/cpu.txt"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - name: Install compiler and dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y clang-21 lld-21
+          npm ci
+          clang-21 --version > "$LAB_EVIDENCE/compiler.txt"
+          wasm-ld-21 --version > "$LAB_EVIDENCE/linker.txt"
+      - name: Rebuild both exact pinned modules before testing or timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/native-key-witness-baseline"
+          git worktree add --detach "$baseline" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          printf 'LAB_BASELINE_ROOT=%s\n' "$baseline" >> "$GITHUB_ENV"
+          (
+            cd "$baseline"
+            npm run build:dictionary-wasm -- --check
+          ) 2>&1 | tee "$LAB_EVIDENCE/baseline-rebuild.log"
+          cp "$baseline/dev/data/dictionary-wasm/term-bank-parser.wasm" "$LAB_EVIDENCE/binaries/baseline.wasm"
+          cp "$baseline/dev/data/dictionary-wasm/term-bank-parser.wasm" "$LAB_EVIDENCE/binaries/control.wasm"
+          npm run build:dictionary-wasm -- --write 2>&1 | tee "$LAB_EVIDENCE/candidate-rebuild.log"
+          cp dev/data/dictionary-wasm/term-bank-parser.wasm "$LAB_EVIDENCE/binaries/candidate.wasm"
+          cp dev/data/dictionary-wasm/manifest.json "$LAB_EVIDENCE/binaries/candidate-manifest.json"
+          cp ext/js/dictionary/wasm/term-bank-parser.c "$LAB_EVIDENCE/binaries/candidate-source.c"
+          python3 - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          evidence = Path(os.environ["LAB_EVIDENCE"]) / "binaries"
+          expected = {
+              "baseline.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+              "control.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+              "candidate.wasm": "a3b2e9c93668a96e067d0a948d0beff42385f38549526a30f7e82788c93234dd",
+          }
+          for name, expected_hash in expected.items():
+              actual = hashlib.sha256((evidence / name).read_bytes()).hexdigest()
+              if actual != expected_hash:
+                  raise ValueError(name + " failed exact local/hosted artifact identity: " + actual)
+          PY
+          npm run build:libs
+          (
+            cd "$baseline"
+            npm run build:libs
+          )
+          cmp ext/js/dictionary/term-bank-wasm-parser.js "$baseline/ext/js/dictionary/term-bank-wasm-parser.js"
+      - name: Run correctness gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node node_modules/vitest/vitest.mjs run \
+            test/term-bank-wasm-consecutive-keys.test.js \
+            test/term-bank-wasm-key-escape-hints.test.js \
+            test/term-bank-wasm-parser.test.js \
+            test/term-bank-adjacent-delimiters.test.js \
+            --maxWorkers=1 2>&1 | tee "$LAB_EVIDENCE/focused-tests.log"
+          node node_modules/eslint/bin/eslint.js test/term-bank-wasm-consecutive-keys.test.js
+          npm run test:build 2>&1 | tee "$LAB_EVIDENCE/build-test.log"
+      - name: Restore pinned archive
+        if: startsWith(matrix.dictionary, 'unique-') == false
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify fixture and prepare compressed-source ranges
+        if: startsWith(matrix.dictionary, 'unique-') == false
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$LAB_DICTIONARY"
+          python3 dev/perf/native-key-witness-lab/prepare.py "$GITHUB_WORKSPACE" "$LAB_EVIDENCE/inputs" "$LAB_DICTIONARY"
+      - name: Acquire all balanced observations and complete byte oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/native-key-witness-lab/run.py \
+            "$GITHUB_WORKSPACE" "$LAB_BASELINE_ROOT" "$LAB_EVIDENCE" \
+            "$LAB_DICTIONARY" "$LAB_REPLICA" 2>&1 | tee "$LAB_EVIDENCE/screen.log"
+      - name: Preserve every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-key-witness-${{ matrix.dictionary }}-${{ matrix.replica }}-${{ github.run_id }}
+          path: ${{ env.LAB_EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14

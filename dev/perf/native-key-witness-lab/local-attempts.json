@@ -1,0 +1,91 @@
+{
+  "scope": "Recovered summary records from displayed local tool output. Complete local raw JSON became inaccessible after executor transport failure; these are not represented as recovered raw evidence or a qualified study.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCBlob": "6c8f5ba9783cc95236ac55d7bc09c0a806720b80",
+  "baselineWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "candidateWasmSha256": "a3b2e9c93668a96e067d0a948d0beff42385f38549526a30f7e82788c93234dd",
+  "node": "v24.22.3",
+  "baselineWasmBytes": 67659,
+  "candidateWasmBytes": 69021,
+  "observations": [
+    {
+      "label": "candidate jmdict smoke",
+      "groups": 12,
+      "rows": 528299,
+      "wallMs": 916.5045319999997,
+      "threadCpuMs": 892.0930000000001,
+      "parseThreadCpuMs": 657.5499999999998,
+      "fallbacks": 0,
+      "maxRssKiB": 106924
+    },
+    {
+      "label": "oracle jmdict A",
+      "groups": 12,
+      "rows": 528299,
+      "wallMs": 593.4384510000001,
+      "threadCpuMs": 567.713,
+      "parseThreadCpuMs": 423.93800000000005,
+      "fallbacks": 0,
+      "maxRssKiB": 103384
+    },
+    {
+      "label": "oracle jmdict B",
+      "groups": 12,
+      "rows": 528299,
+      "wallMs": 993.3218419999996,
+      "threadCpuMs": 972.0369999999999,
+      "parseThreadCpuMs": 687.844,
+      "fallbacks": 0,
+      "maxRssKiB": 103628
+    },
+    {
+      "label": "oracle jitendex A",
+      "groups": 22,
+      "rows": 436555,
+      "wallMs": 1154.3452100000002,
+      "threadCpuMs": 1112.183,
+      "parseThreadCpuMs": 731.854,
+      "fallbacks": 0,
+      "maxRssKiB": 136528
+    },
+    {
+      "label": "oracle jitendex B",
+      "groups": 22,
+      "rows": 436555,
+      "wallMs": 1139.5552229999998,
+      "threadCpuMs": 1095.2439999999997,
+      "parseThreadCpuMs": 714.0170000000002,
+      "fallbacks": 0,
+      "maxRssKiB": 138704
+    },
+    {
+      "label": "oracle vndb A",
+      "groups": 170,
+      "rows": 6648310,
+      "wallMs": 5678.2802560000055,
+      "threadCpuMs": 5313.1839999999975,
+      "parseThreadCpuMs": 4769.952999999998,
+      "fallbacks": 0,
+      "maxRssKiB": 156872
+    },
+    {
+      "label": "oracle vndb B",
+      "exitCode": 137,
+      "complete": false
+    }
+  ],
+  "correctness": {
+    "selectedSuites": 4,
+    "testsPassed": 349,
+    "jmdictByteOracle": true,
+    "jitendexByteOracle": true,
+    "vndbByteOracle": "incomplete"
+  },
+  "failures": [
+    "Initial selected parser suite lacked generated resvg bundle; remaining three suites passed147tests.",
+    "Next attempt lacked generated sqlite bundle; two added empty-expression tests hit existing lookup rejection and were corrected to nonempty expression inputs; these tests had not identified a candidate-only defect.",
+    "One unbounded-heap Vitest attempt exited137; shared heavy-process lock then allowed349selectedtests to pass.",
+    "Locked heap256 ESLint and candidateVNDB execution exited137 during workspace memory instability; executor subsequently became unavailable."
+  ],
+  "interpretation": "No speedup established. The much slower local JMdict candidate is retained without exclusion. Unchanged inflate cost also varied; the local cohort had no identical-code control and was stopped by environment failure. Hosted acquisition is a distinct prospectively fixed cohort and must not be pooled with these observations."
+}

@@ -1474,6 +1474,26 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*
     return 1;
 }
 
+typedef struct {
+    uint32_t escaped_mask;
+    uint32_t reused_mask;
+} TermKeyWitness;
+
+/* The preceding completed row already validated this exact raw JSON token.
+ * Keep the existing 32-byte body bound and check the current bank boundary
+ * before comparing. Delimiters remain the current row's responsibility. */
+static inline int reuse_validated_key(
+    const uint8_t* src, uint32_t end, uint32_t start,
+    uint32_t prior_start, uint32_t prior_length, uint32_t* out_end
+) {
+    if (prior_length < 2u || prior_length > 34u || start >= end ||
+        prior_length > end - start || src[start] != '"' ||
+        src[start + prior_length - 1u] != '"' ||
+        !content_bytes_equal_between(src, start + 1u, src, prior_start + 1u, prior_length - 2u)) { return 0; }
+    *out_end = start + prior_length;
+    return 1;
+}
+
 /* Strict source validation has exactly eight fields with known token types.
  * Keep its grammar explicit instead of dispatching each field twice through
  * the permissive row parser and set_field. Every metadata word is assigned
@@ -1489,24 +1509,35 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask
+    TermKeyWitness* key_witness
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
     uint32_t end = 0u;
     uint32_t expression_escaped = 0u;
     uint32_t reading_escaped = 0u;
+    uint32_t reused_mask = 0u;
+    const TermRowMeta* previous = key_witness != 0 && prior_count > 0u ? &prior_rows[prior_count - 1u] : 0;
 
-    if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
+    if (previous != 0 && reuse_validated_key(src, len, i, previous->expression_start, previous->expression_length, &end)) {
+        expression_escaped = key_witness->escaped_mask & 1u;
+        reused_mask |= 1u;
+    } else if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
     meta->expression_start = i;
     meta->expression_length = end - i;
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
-    if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+    if (previous != 0 && reuse_validated_key(src, len, i, previous->reading_start, previous->reading_length, &end)) {
+        reading_escaped = (key_witness->escaped_mask >> 1u) & 1u;
+        reused_mask |= 2u;
+    } else if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
     meta->reading_start = i;
     meta->reading_length = end - i;
-    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
+    if (key_witness != 0) {
+        key_witness->escaped_mask = expression_escaped | (reading_escaped << 1u);
+        key_witness->reused_mask = reused_mask;
+    }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
@@ -1583,19 +1614,19 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask
+    TermKeyWitness* key_witness
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_witness
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
     // Missing generic keys remain conservative; only validated literal keys
     // clear a bit. The fused caller consumes this mask before the next row.
-    if (key_escape_mask != 0) { *key_escape_mask = 3u; }
+    if (key_witness != 0) { key_witness->escaped_mask = 3u; key_witness->reused_mask = 0u; }
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
@@ -1610,10 +1641,10 @@ static int parse_row_single_pass(
         // retain their existing permissive row/glossary contract.
         if (validate_glossary_types && field_index >= 8u) { return 0; }
         uint32_t value_end = 0u;
-        if (key_escape_mask != 0 && field_index < 2u) {
+        if (key_witness != 0 && field_index < 2u) {
             uint32_t has_escape = 0u;
             if (!parse_string_span_with_escape(src, len, i, &value_end, &has_escape)) { return 0; }
-            if (has_escape == 0u) { *key_escape_mask &= ~(1u << field_index); }
+            if (has_escape == 0u) { key_witness->escaped_mask &= ~(1u << field_index); }
         } else if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
@@ -3354,6 +3385,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     const uint32_t table_mask = hash_table_size - 1u;
     const uint32_t raw_content_table_mask = raw_content_hash_table_size > 0u ? raw_content_hash_table_size - 1u : 0u;
     const uint32_t string_table_mask = string_hash_table_size - 1u;
+    TermKeyWitness key_witness = {0u, 0u};
     last_parse_capacity = metas_capacity;
     last_content_capacity = out_capacity;
 
@@ -3377,9 +3409,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 glossary_lookback = 1u;
             }
         }
-        uint32_t key_escape_mask;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_witness)) {
             return -1;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
@@ -3428,8 +3459,14 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
-            // Cap the extra equality scan at 32 raw token-body bytes.
-            if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
+            if ((key_witness.reused_mask & (1u << field)) != 0u) {
+                string_indexes[field] = field == 0u ?
+                    expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+                continue;
+            }
+            // Generic callers retain the existing post-parse comparison.
+            // Strict rows already attempted the same bounded proof above.
+            if (validate_glossary_types == 0u && row_count > 0u && token_length >= 2u && token_length <= 34u) {
                 const TermRowMeta* previous_row = &rows[row_count - 1u];
                 const uint32_t previous_start = field == 0u ?
                     previous_row->expression_start : previous_row->reading_start;
@@ -3447,7 +3484,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if ((key_escape_mask & (1u << field)) != 0u) {
+            if ((key_witness.escaped_mask & (1u << field)) != 0u) {
                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
                 const int32_t decoded_length = decode_escaped_key(
                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
