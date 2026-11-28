@@ -221,7 +221,10 @@ describe('single packed block with an already ready compression pool', () => {
         let settled = false
         try {
             const pending = api.compressWrappedTermContentZstdBlocks(Uint32Array.of(source.length), () => source, dictName, options)
-            void pending.then(() => { settled = true }, () => { settled = true })
+            void pending.then(
+                () => { settled = true },
+                () => { settled = true },
+            )
             expect(workers.map(({calls}) => calls.length)).toEqual([1, 0, 0, 0])
             expect(source.byteLength).toBe(0)
             await flush()
@@ -260,7 +263,10 @@ describe('single packed block with an already ready compression pool', () => {
             const expected = api.compressWrappedTermContentZstd(source, null).bytes
             let settled = false
             const pending = api.compressWrappedTermContentZstdBlocks(Uint32Array.of(source.length), () => source, null)
-            void pending.then(() => { settled = true }, () => { settled = true })
+            void pending.then(
+                () => { settled = true },
+                () => { settled = true },
+            )
             await flush()
             expect(settled).toBe(true)
             expect(source.byteLength).toBe(4096)
