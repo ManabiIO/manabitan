@@ -1,0 +1,63 @@
+{
+  "artifactIntakeExecuted": false,
+  "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+  "files": [
+    {
+      "bytes": 6859,
+      "path": "README.md",
+      "sha256": "da925277d566b90302ab6b710fe9fe0ca3a7fe186e135289df3593bc34271028"
+    },
+    {
+      "bytes": 7033,
+      "path": "binding.py",
+      "sha256": "8b1d329b1affaac6faf318b279968391a66b6d8e7f7e8bd8fa4196755584a37c"
+    },
+    {
+      "bytes": 3979,
+      "path": "extract-artifact.py",
+      "sha256": "715bfbc5f3ea301cb210cb9a42a70dcca87d662bb438cf5a107b437f5a564a71"
+    },
+    {
+      "bytes": 2760,
+      "path": "frozen-repo-inputs.json",
+      "sha256": "b6827e71b38ad2b69f5c58411e610d51a996bd866fdb233ca3aecbcceba9524b"
+    },
+    {
+      "bytes": 8743,
+      "path": "package-cell.py",
+      "sha256": "85d18e9d3f2f5607ec853d4e34d22cc93fed678c9bfd6d95066aea112344a1c3"
+    },
+    {
+      "bytes": 3477,
+      "path": "source-extract-artifact.py",
+      "sha256": "c9bd11059274a774f3931ea476c2226ffa28afbe420602d9c06b96ee6becbd44"
+    },
+    {
+      "bytes": 6831,
+      "path": "source-package-cell.py",
+      "sha256": "f22ade909a8a049e24a0a8ae731eeac5f86468f88c8c4e54a56fe38df2f3b867"
+    },
+    {
+      "bytes": 20568,
+      "path": "transport-adaptation.patch",
+      "sha256": "5ed4b55a74b43e01be9465b44d5f2345858231875a06df0595973163e5f521a7"
+    }
+  ],
+  "frozenRepoInputCount": 14,
+  "frozenRepoInputDerivation": "Exact reader AST TOOLING union non-build PROVENANCE_PATHS; every source byte matched git show of pinned9e baseline",
+  "newAcquisition": false,
+  "outcomeAdmission": "Run and job success/completion are not prerequisites for evidence intake; original outcomes and failed/missing qualification gates remain separate.",
+  "preparedAtUtc": "2026-11-28T06:11:37.621792Z",
+  "pythonSyntax": {
+    "binding.py": "passed",
+    "extract-artifact.py": "passed",
+    "package-cell.py": "passed"
+  },
+  "qualificationGatesChanged": false,
+  "readerChanged": false,
+  "readerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+  "runAttempt": 1,
+  "runId": 46114139837,
+  "schemaVersion": 1,
+  "zipMemberTraversalAstIdentical": true
+}

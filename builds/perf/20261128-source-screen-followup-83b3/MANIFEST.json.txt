@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "kind": "Read-only source screens; no new timing or browser-admission acquisition",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "inflightPublishedHead": "049cb11e6963604435998aa060e1400cc00365cb",
+  "inflightSourceOnlyTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+  "crc910FinalHead": "2fe47fa3db04342d04eb4f309c5d74ef45eef9e3",
+  "crc910MeasuredProduct": "c2cf7647c67b02474301ed48e54a53205be0f027",
+  "crc910MeasuredBase": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "samplingCorrectionCommit": "cf43df9f197b729085950dc9f2f7b3ee7a773e35",
+  "files": [
+    {
+      "path": "crc-screen/README.md",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/README.md",
+      "bytes": 7234,
+      "sha256": "163b015b66c4c37b13866632cdf8db3fb9b4b81c16df5a2d8a8fec0003d99efb",
+      "gitBlobSha1": "2685bc1a63bdf08c653dcf18b7660b2ad02335c2"
+    },
+    {
+      "path": "crc-screen/current-jmdict-coverage.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/current-jmdict-coverage.json",
+      "bytes": 5493,
+      "sha256": "22090f563206c050bc764c732b77a01af38cce8cd25207d0b73c6327f8fea15b",
+      "gitBlobSha1": "748665a23014467c195873c9e3f250c4df955aa9"
+    },
+    {
+      "path": "crc-screen/measured-to-final-910-compare.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/measured-to-final-910-compare.json",
+      "bytes": 13743,
+      "sha256": "846c4f1d53b5d55491e070bca067bdeaf7b8b36638d8b18200cacfce022bfdec",
+      "gitBlobSha1": "5b4944448d2cdd1185945549faa7359dc07403e5"
+    },
+    {
+      "path": "crc-screen/upstream-664-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/upstream-664-files.json",
+      "bytes": 12554,
+      "sha256": "dd68933919b54a4da3027b79a82de77ea2e9cbec946bd2777c1a1c3c39d6bd11",
+      "gitBlobSha1": "c2346da4c000b0e47c8dd38324442906da3918d5"
+    },
+    {
+      "path": "crc-screen/upstream-910-files.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/upstream-910-files.json",
+      "bytes": 22282,
+      "sha256": "5c8de340ad99fbd7c13eeb7b733cbfd26a7fd1723d3d899c51c8445f49baad3f",
+      "gitBlobSha1": "51db79fb64cc57521c0a0accf7024df9d119c24c"
+    },
+    {
+      "path": "crc-screen/upstream-pr-664.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/upstream-pr-664.json",
+      "bytes": 21443,
+      "sha256": "32a34b88e64d02b53f9e8f2743a472b699ba31e396d35d25f928843e1d611d52",
+      "gitBlobSha1": "c7dc36ca16506b610dc9afd37d82c0e01fa51991"
+    },
+    {
+      "path": "crc-screen/upstream-pr-910.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-crc-followup-83b3/upstream-pr-910.json",
+      "bytes": 25670,
+      "sha256": "bea219921e606ae683975e400f5383a1e17b386dfcb2eabb1248148176a64cc6",
+      "gitBlobSha1": "84e909a2a0e0ba379c17957bbd74c5d5b5648830"
+    },
+    {
+      "path": "production-serialization/README.md",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830-ci/production-serialization-review.md",
+      "bytes": 10462,
+      "sha256": "871e0326731dd2984d480ef4035e915dcd79fb546f5d007d1318135e53df3a36",
+      "gitBlobSha1": "462ce672b42408a838ea4b8870939af9fba233bf"
+    },
+    {
+      "path": "production-serialization/source-identity.json",
+      "localPath": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830-ci/production-serialization-source-identity.json",
+      "bytes": 1777,
+      "sha256": "56f6458d208bcf4877c97c2d66b32e841665d7c92b38ce20789ac2c0ccc85c7c",
+      "gitBlobSha1": "ae017ac980f47e08b463e732e09c5b1582d3421e"
+    }
+  ],
+  "archive": {
+    "path": "evidence.tar.gz",
+    "bytes": 24419,
+    "sha256": "9693e1dc7ae8db80fbeeb62405925e15d7bce92a0a5a88dd292d392cef1fb70d",
+    "gitBlobSha1": "9d8c95cefc094055d344d1174a3def61fa644693",
+    "members": 9,
+    "payloadBytes": 120658
+  }
+}

@@ -1,13 +1,13 @@
 {
-  "schemaVersion": 4,
-  "kind": "complete-current-import-evidence-and-three-hosted-cells",
+  "schemaVersion": 5,
+  "kind": "current-import-evidence-with-reviewed-intake-and-source-screens",
   "repository": "ManabiIO/manabitan",
   "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
   "runtimeUnchanged": true,
-  "previousSnapshotCommit": "cf43df9f197b729085950dc9f2f7b3ee7a773e35",
+  "previousSnapshotCommit": "1a08c0ee7751147feee72d47c8ba5a520252c130",
   "selfExcluded": true,
-  "payloadFiles": 78,
-  "payloadBytes": 20652943,
+  "payloadFiles": 93,
+  "payloadBytes": 20754448,
   "entries": [
     {
       "path": "builds/perf/20261128-compressed-worker-profile-83b3/attribution.json.txt",
@@ -333,9 +333,9 @@
       "path": "builds/perf/import-investigation-recovery-83b3/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "e717f6b46a734e1e7518623d51ab787be4e10184",
-      "size": 8338,
-      "sha256": "3f68436b044151843ea6d62f7350105e77399e97cf8cfecfb637b678fb1b9aca"
+      "sha": "a0b084d43af155ec5a9f53e523bbdcae6ec0f59d",
+      "size": 9194,
+      "sha256": "3d1f8d6f614268adb1ffdde445b4a1a09c1112689b71f8f0971643f4e15cb85d"
     },
     {
       "path": "builds/perf/import-investigation-recovery-83b3/recovery-status.json.txt",
@@ -632,6 +632,126 @@
       "sha": "8870544f842392e366c56831ab7cfe173c2db88c",
       "size": 27145,
       "sha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9"
+    },
+    {
+      "path": "builds/perf/20261128-source-screen-followup-83b3/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da3acdd527cdb312caf7cb01ae561025c416a807",
+      "size": 2767,
+      "sha256": "3645df90dd1800ba1bf677732e44057d9b1e49c8bff634904803c59a529b724c"
+    },
+    {
+      "path": "builds/perf/20261128-source-screen-followup-83b3/MANIFEST.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e41f5b1bb7f2682d45b3a48fe09fcb26026729c0",
+      "size": 4179,
+      "sha256": "38ed09ae0b235cc9bfdf87ecb136aa771b4e92803ce6fffc754a540ae22b9129"
+    },
+    {
+      "path": "builds/perf/20261128-source-screen-followup-83b3/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d8c95cefc094055d344d1174a3def61fa644693",
+      "size": 24419,
+      "sha256": "9693e1dc7ae8db80fbeeb62405925e15d7bce92a0a5a88dd292d392cef1fb70d"
+    },
+    {
+      "path": "builds/perf/20261128-source-screen-followup-83b3/production-serialization-independent-review.json.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91d5180e0b88f38da6366429423a23252e3ea414",
+      "size": 1971,
+      "sha256": "dfdafcbb56967276240f076e721e5bcc6f2cea26e7b93cff3cb0131fc6264110"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/binding.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c55f4f1fc7f39033e34bc6d25d55ec1cf89a088c",
+      "size": 7033,
+      "sha256": "8b1d329b1affaac6faf318b279968391a66b6d8e7f7e8bd8fa4196755584a37c"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/extract-artifact.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abcd3fb8710b56868933bcb9913bef5d39d37495",
+      "size": 3979,
+      "sha256": "715bfbc5f3ea301cb210cb9a42a70dcca87d662bb438cf5a107b437f5a564a71"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/frozen-repo-inputs.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7f18a320231a4d2af5be1e9274b15e9d214d017",
+      "size": 2760,
+      "sha256": "b6827e71b38ad2b69f5c58411e610d51a996bd866fdb233ca3aecbcceba9524b"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f334ef9b55f78cbcbfa8ac01cd390638bf97c24",
+      "size": 2616,
+      "sha256": "c22b610e6292dafc628ea2a8bdb03bbff802e6353c290cab39a67dfc6093c2d7"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/package-cell.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "930f99d9996179b019cd75b4bdfe0ae091dcbb09",
+      "size": 8743,
+      "sha256": "85d18e9d3f2f5607ec853d4e34d22cc93fed678c9bfd6d95066aea112344a1c3"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/preparation.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "519ec24b38ecfa1dee9f10eff1fb83f78aaab573",
+      "size": 2153,
+      "sha256": "ad9ebad322cd9f7c6d36f1048479bae984dbd2215b30edc2a1c8a01dfdc22c32"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5d9cd5254563422e9924f8ce104e6252733c785",
+      "size": 6859,
+      "sha256": "da925277d566b90302ab6b710fe9fe0ca3a7fe186e135289df3593bc34271028"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/root-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d233ed10a46c180a7a58d480b7f039bcf41e2c16",
+      "size": 2294,
+      "sha256": "3591df7a2e46790a7e75bacdbfbd32a5037e7d8339cdb605189d38536c0487fa"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/source-extract-artifact.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "339749e94bf430a61786a5c8488d172a9c78093d",
+      "size": 3477,
+      "sha256": "c9bd11059274a774f3931ea476c2226ffa28afbe420602d9c06b96ee6becbd44"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/source-package-cell.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6cc1bb059c2c32b0c3d4dd77e19b20bb9b5948f4",
+      "size": 6831,
+      "sha256": "f22ade909a8a049e24a0a8ae731eeac5f86468f88c8c4e54a56fe38df2f3b867"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-artifact-tools/transport-adaptation.patch",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78ba139c273854e726a314d32e92b7aeef62b787",
+      "size": 20568,
+      "sha256": "5ed4b55a74b43e01be9465b44d5f2345858231875a06df0595973163e5f521a7"
     }
   ]
 }

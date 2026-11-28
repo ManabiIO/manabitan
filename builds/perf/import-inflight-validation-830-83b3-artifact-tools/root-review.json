@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "root",
+  "sourceAndWholeDiffRead": true,
+  "readerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+  "files": {
+    "binding.py": {
+      "bytes": 7033,
+      "sha256": "8b1d329b1affaac6faf318b279968391a66b6d8e7f7e8bd8fa4196755584a37c"
+    },
+    "extract-artifact.py": {
+      "bytes": 3979,
+      "sha256": "715bfbc5f3ea301cb210cb9a42a70dcca87d662bb438cf5a107b437f5a564a71"
+    },
+    "package-cell.py": {
+      "bytes": 8743,
+      "sha256": "85d18e9d3f2f5607ec853d4e34d22cc93fed678c9bfd6d95066aea112344a1c3"
+    },
+    "source-extract-artifact.py": {
+      "bytes": 3477,
+      "sha256": "c9bd11059274a774f3931ea476c2226ffa28afbe420602d9c06b96ee6becbd44"
+    },
+    "source-package-cell.py": {
+      "bytes": 6831,
+      "sha256": "f22ade909a8a049e24a0a8ae731eeac5f86468f88c8c4e54a56fe38df2f3b867"
+    },
+    "frozen-repo-inputs.json": {
+      "bytes": 2760,
+      "sha256": "b6827e71b38ad2b69f5c58411e610d51a996bd866fdb233ca3aecbcceba9524b"
+    },
+    "transport-adaptation.patch": {
+      "bytes": 20568,
+      "sha256": "5ed4b55a74b43e01be9465b44d5f2345858231875a06df0595973163e5f521a7"
+    },
+    "README.md": {
+      "bytes": 6859,
+      "sha256": "da925277d566b90302ab6b710fe9fe0ca3a7fe186e135289df3593bc34271028"
+    },
+    "preparation.json": {
+      "bytes": 2153,
+      "sha256": "ad9ebad322cd9f7c6d36f1048479bae984dbd2215b30edc2a1c8a01dfdc22c32"
+    }
+  },
+  "extractorZipTraversalAstIdentical": true,
+  "all14FrozenRepositoryInputsMatchExactBaseline": true,
+  "normalPythonOnly": true,
+  "strictRunAttemptHeadJobArtifactAndActualLogBinding": true,
+  "outcomeNotUsedToRejectEvidenceIntake": true,
+  "perCellImmutableStagingRequired": true,
+  "sourceAndQualificationGatesUnchanged": true,
+  "readyForBoundArtifactIntake": true,
+  "intakeOrAcquisitionPerformed": false,
+  "notes": [
+    "Parent workflow need not be completed when a matrix job publishes evidence.",
+    "Failed jobs and incomplete schedules remain explicit; archive completeness does not qualify them.",
+    "Each actual tool response must be captured without fabricating transport provenance.",
+    "No temporary signed URL may enter evidence.",
+    "Review covers prospective helper code; actual artifact identity checks remain required."
+  ]
+}

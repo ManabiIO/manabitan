@@ -1,0 +1,78 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "files": [
+    {
+      "bytes": 16788,
+      "path": "dev/perf/benchmark-support.js",
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
+    },
+    {
+      "bytes": 6765,
+      "path": "dev/perf/dictionary-fixtures.js",
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b"
+    },
+    {
+      "bytes": 11064,
+      "path": "dev/perf/import-benchmark.js",
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6"
+    },
+    {
+      "bytes": 5362,
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "bytes": 18389,
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    {
+      "bytes": 4187,
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "bytes": 21897,
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "bytes": 19981,
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    {
+      "bytes": 187268,
+      "path": "ext/js/pages/settings/dictionary-import-controller.js",
+      "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+    },
+    {
+      "bytes": 333801,
+      "path": "package-lock.json",
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    {
+      "bytes": 325917,
+      "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "bytes": 25889,
+      "path": "test/chromium/import-flags-ab-benchmark.js",
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34"
+    },
+    {
+      "bytes": 3293,
+      "path": "test/e2e/import-timing.js",
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c"
+    },
+    {
+      "bytes": 3047,
+      "path": "test/perf/dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  ],
+  "pathSetDerivation": "TOOLING union non-build PROVENANCE_PATHS from the exact frozen reader AST",
+  "readerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+  "schemaVersion": 1
+}

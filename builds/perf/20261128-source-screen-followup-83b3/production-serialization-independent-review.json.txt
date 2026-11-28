@@ -1,0 +1,48 @@
+{
+  "awaitEdges": [
+    {
+      "effect": "Single ordered result-slot loop awaits onChunk before advancing.",
+      "file": "term-bank-wasm-parser.js",
+      "line": 3018
+    },
+    {
+      "effect": "handleParsedChunk awaits downstream onChunk.",
+      "file": "dictionary-importer.js",
+      "line": 5238
+    },
+    {
+      "effect": "Import wrapper awaits processTermChunk; outer parser call2326 is also awaited.",
+      "file": "dictionary-importer.js",
+      "line": 2337
+    },
+    {
+      "effect": "processTermChunk awaits the public artifact sink.",
+      "file": "dictionary-importer.js",
+      "line": 2106
+    },
+    {
+      "effect": "Fallback column callbacks chain dispatchTail even with maxPendingChunks2.",
+      "file": "term-bank-wasm-parser.js",
+      "line": 2635
+    },
+    {
+      "effect": "Overlapped parsing still chains and awaits sinkTail callbacks.",
+      "file": "term-bank-wasm-parser.js",
+      "line": 3929
+    }
+  ],
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "049cb11e6963604435998aa060e1400cc00365cb",
+  "conclusion": "Normal importer does not overlap artifact sink callbacks. Together with the independently reviewed database finally/unregister chain, prior chunk registration is released before the next callback.",
+  "limits": [
+    "Static source flow only; no observed browser admission or timing claim.",
+    "Database method remains callable concurrently by outside callers; its nonempty-active-set fallback is still necessary.",
+    "Other private-origin, typed-array, identity, ordering, bounds and storage requirements remain."
+  ],
+  "review": "Independent importer/parser half of production sink serialization",
+  "schemaVersion": 1,
+  "sourceFiles": {
+    "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+  }
+}

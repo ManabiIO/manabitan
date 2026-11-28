@@ -1,0 +1,367 @@
+--- a/extract-artifact.py
++++ b/extract-artifact.py
+@@ -7,8 +7,11 @@
+ from pathlib import Path, PurePosixPath
+ import zipfile
+ 
++from binding import HEAD, RUN_ATTEMPT, RUN_ID, read_binding
++
+ 
+ parser = argparse.ArgumentParser()
++parser.add_argument("--staging", required=True, type=Path)
+ parser.add_argument("--artifact", required=True, type=Path)
+ parser.add_argument("--expected-sha256", required=True)
+ parser.add_argument("--expected-bytes", required=True, type=int)
+@@ -16,6 +19,11 @@
+ parser.add_argument("--cell", required=True, choices=["jmdict-AB", "jmdict-BA", "jitendex-AB", "vndb-AB"])
+ parser.add_argument("--output", required=True, type=Path)
+ args = parser.parse_args()
++api, identity_binding = read_binding(args.staging, args.cell)
++assert args.artifact.resolve() == (args.staging / (args.cell + "-artifact.zip")).resolve()
++assert args.artifact.is_file() and not args.artifact.is_symlink()
++assert args.artifact_id == api["id"] and args.expected_bytes == api["size_in_bytes"]
++assert api["digest"] == "sha256:" + args.expected_sha256
+ digest = hashlib.sha256()
+ with args.artifact.open("rb") as stream:
+     for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+@@ -56,7 +64,7 @@
+         rows.append({"path": member.filename, "bytes": count, "sha256": hashed.hexdigest(), "retained": retained,
+                      "boundary": "Product ZIP retained as ZIP only" if member.filename.endswith(".zip") else "Exact input bytes" if retained else "Preserved only in source artifact; excluded from ordinary timing analysis"})
+ manifest = {"schemaVersion": 1, "complete": True, "cell": args.cell, "artifactId": args.artifact_id,
+-            "runId": 46103918280, "headSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
++            "runId": RUN_ID, "runAttempt": RUN_ATTEMPT, "headSha": HEAD, "identityBinding": identity_binding,
+             "artifact": {"path": str(args.artifact), "bytes": args.expected_bytes, "sha256": digest.hexdigest()},
+             "extractorSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+             "files": rows, "retainedBytes": sum(row["bytes"] for row in rows if row["retained"])}
+--- a/package-cell.py
++++ b/package-cell.py
+@@ -9,6 +9,8 @@
+ from pathlib import Path, PurePosixPath
+ import tarfile
+ import zipfile
++
++from binding import ARTIFACT_PREFIX, BASELINE, HEAD, READER_SHA256, RUN_ATTEMPT, RUN_ID, read_binding
+ 
+ 
+ def sha(data):
+@@ -23,10 +25,11 @@
+ parser.add_argument("--staging", required=True, type=Path)
+ parser.add_argument("--cell", required=True, choices=["jmdict-AB", "jmdict-BA", "jitendex-AB", "vndb-AB"])
+ parser.add_argument("--repo", required=True, type=Path)
++parser.add_argument("--reader", required=True, type=Path)
+ parser.add_argument("--output", required=True, type=Path)
+ args = parser.parse_args()
+ api_file = args.staging / (args.cell + "-artifact-api.json")
+-api = json.loads(api_file.read_text())
++api, identity_binding = read_binding(args.staging, args.cell)
+ outer = args.staging / (args.cell + "-artifact.zip")
+ outer_digest = hashlib.sha256()
+ with outer.open("rb") as stream:
+@@ -34,20 +37,31 @@
+         outer_digest.update(chunk)
+ assert outer.stat().st_size == api["size_in_bytes"]
+ assert api["digest"] == "sha256:" + outer_digest.hexdigest()
+-assert api["workflow_run"]["id"] == 46103918280
+-assert api["workflow_run"]["head_sha"] == "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963"
+-assert api["name"] == "import-owned-columns-83b3-" + args.cell
++assert api["workflow_run"]["id"] == RUN_ID
++assert api["workflow_run"]["head_sha"] == HEAD
++assert api["name"] == ARTIFACT_PREFIX + "-" + args.cell
+ extraction_file = args.staging / args.cell / "extraction-manifest.json"
+ extraction = json.loads(extraction_file.read_text())
+ assert extraction["complete"] and extraction["cell"] == args.cell and extraction["artifactId"] == api["id"]
+ assert extraction["artifact"]["sha256"] == outer_digest.hexdigest()
++assert extraction["identityBinding"] == identity_binding
++assert extraction["runId"] == RUN_ID and extraction["runAttempt"] == RUN_ATTEMPT and extraction["headSha"] == HEAD
+ source_members = {entry["path"]: entry for entry in extraction["files"]}
+ assert len(source_members) == len(extraction["files"])
+ report_file = args.staging / (args.cell + "-independent-analysis.json")
+ report = json.loads(report_file.read_text())
+-assert report["cell"] == args.cell and report["runId"] == 46103918280
+-reader = Path(__file__).resolve().with_name("analyze-cell.py")
+-assert sha(reader.read_bytes()) == report["analyzerSha256"] == "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9"
++assert report["cell"] == args.cell and report["runId"] == RUN_ID
++assert report["baseline"] == BASELINE and report["candidate"] == HEAD
++reader = args.reader.resolve()
++assert sha(reader.read_bytes()) == report["analyzerSha256"] == READER_SHA256
++tools_root = Path(__file__).resolve().parent
++assert extraction["extractorSha256"] == sha((tools_root / "extract-artifact.py").read_bytes())
++frozen_file = tools_root / "frozen-repo-inputs.json"
++assert sha(frozen_file.read_bytes()) == "b6827e71b38ad2b69f5c58411e610d51a996bd866fdb233ca3aecbcceba9524b"
++frozen = json.loads(frozen_file.read_text())
++assert frozen["baseline"] == BASELINE and frozen["readerSha256"] == READER_SHA256
++frozen_files = {row["path"]: row for row in frozen["files"]}
++assert len(frozen_files) == len(frozen["files"]) == 14
+ args.output.mkdir(parents=True, exist_ok=False)
+ archive_path = args.output / "evidence.tar.gz"
+ entries, names = [], set()
+@@ -74,7 +88,7 @@
+                     if member.is_dir():
+                         continue
+                     expected = source_members[member.filename]
+-                    if member.filename in ["import-owned-columns-83b3/package-A.zip", "import-owned-columns-83b3/package-B.zip"]:
++                    if member.filename in [ARTIFACT_PREFIX + "/package-A.zip", ARTIFACT_PREFIX + "/package-B.zip"]:
+                         continue
+                     assert not member.filename.endswith(".zip"), "Unexpected omitted package"
+                     data = source.read(member)
+@@ -83,27 +97,39 @@
+             add(archive, "source-artifact-api.json", api_file.read_bytes())
+             add(archive, "extraction-manifest.json", extraction_file.read_bytes())
+             add(archive, "independent-analysis.json", report_file.read_bytes())
+-            add(archive, "workflow-job.log", (args.staging / args.cell / "workflow-job.log").read_bytes())
+-            for name in ["analyze-cell.py", "extract-artifact.py", "package-cell.py"]:
+-                add(archive, "tools/" + name, reader.with_name(name).read_bytes())
++            for name in identity_binding["inputFiles"]:
++                data = (args.staging / name).read_bytes()
++                expected = identity_binding["inputFiles"][name]
++                assert len(data) == expected["bytes"] and sha(data) == expected["sha256"]
++                add(archive, "transport/" + name, data)
++            add(archive, "transport/identity-binding.json", (json.dumps(identity_binding, indent=2, sort_keys=True) + "\n").encode())
++            add(archive, "tools/analyze-cell.py", reader.read_bytes())
++            for name in ["extract-artifact.py", "package-cell.py", "binding.py", "frozen-repo-inputs.json"]:
++                add(archive, "tools/" + name, (tools_root / name).read_bytes())
+             prefix = str(args.repo.resolve()) + "/"
+-            source_count = 0
++            reported_repo_inputs = {}
+             for name, expected in sorted(report["inputFiles"].items()):
+-                if not name.startswith(prefix):
+-                    continue
+-                data = Path(name).read_bytes()
++                if name.startswith(prefix):
++                    relative = name[len(prefix):]
++                    assert relative in frozen_files
++                    assert expected == {key: frozen_files[relative][key] for key in ("bytes", "sha256")}
++                    reported_repo_inputs[relative] = expected
++            for name, expected in sorted(frozen_files.items()):
++                source = args.repo / name
++                assert source.is_file() and not source.is_symlink()
++                data = source.read_bytes()
+                 assert len(data) == expected["bytes"] and sha(data) == expected["sha256"]
+-                add(archive, "frozen-repo/" + name[len(prefix):], data)
+-                source_count += 1
+-            assert source_count == 28
++                add(archive, "frozen-repo/" + name, data)
+             contents = {"schemaVersion": 1, "complete": True, "newAcquisition": False,
+-                        "cell": args.cell, "runId": 46103918280, "sourceArtifactId": api["id"],
++                        "cell": args.cell, "runId": RUN_ID, "runAttempt": RUN_ATTEMPT, "sourceArtifactId": api["id"],
++                        "identityBinding": identity_binding, "readerObservedRepoInputCount": len(reported_repo_inputs),
+                         "sourceArtifactBytes": outer.stat().st_size, "sourceArtifactSha256": outer_digest.hexdigest(),
+                         "allRequiredGatesPassed": report["allRequiredGatesPassed"],
+                         "completeTimingScheduleVerified": report["completeTimingScheduleVerified"],
+                         "timingClaim": False, "hostPooling": False, "controlSubtraction": False,
+                         "fileCount": len(entries), "payloadBytes": sum(row["bytes"] for row in entries), "files": entries,
+-                        "exclusions": ["Only original package-A.zip and package-B.zip payloads. Their exact outer-artifact member hashes and complete inner member inventories remain preserved."],
++                        "exclusions": ["Only original package-A.zip and package-B.zip payloads, when present. Their outer member hashes remain; the independent report records whether complete inner-member verification succeeded."],
++                        "meaningOfComplete": "Evidence archive construction completed; qualification failures and incomplete jobs remain separate.",
+                         "scope": "All original non-package artifact members including HTML, diagnostic trace if present, every raw timing/media/memory/source receipt, all tails, workflow log, independent readback and its exact frozen local inputs"}
+             contents_bytes = (json.dumps(contents, indent=2, sort_keys=True) + "\n").encode()
+             header = tarfile.TarInfo("CONTENTS.json")
+--- /dev/null
++++ b/binding.py
+@@ -0,0 +1,125 @@
++"""Bind saved GitHub API records and a job log without acquiring observations."""
++
++import hashlib
++import json
++from pathlib import Path
++import re
++
++
++REPOSITORY = "ManabiIO/manabitan"
++REPOSITORY_ID = 1165902460
++RUN_ID = 46114139837
++RUN_ATTEMPT = 1
++WORKFLOW_ID = 433451382
++WORKFLOW_PATH = ".github/workflows/import-inflight-validation-830-83b3.yml"
++BASELINE = "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
++HEAD = "049cb11e6963604435998aa060e1400cc00365cb"
++BRANCH = "perf/jmdict-inflight-validation-20261123-71149"
++ARTIFACT_PREFIX = "import-inflight-validation-830-83b3"
++READER_SHA256 = "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c"
++READER_DIRECTORY = "import-inflight-validation-830-83b3-analysis-source"
++CELLS = {"jmdict-AB": 12, "jmdict-BA": 12, "jitendex-AB": 6, "vndb-AB": 6}
++
++
++def require(condition, message):
++    if not condition:
++        raise ValueError(message)
++
++
++def unique_object(pairs):
++    value = {}
++    for key, item in pairs:
++        require(key not in value, "Duplicate JSON key: " + key)
++        value[key] = item
++    return value
++
++
++def read_binding(staging, cell):
++    """Return the raw artifact record and independently checkable identity receipt.
++
++    Outcome is deliberately separate: failed/incomplete jobs and an unfinished
++    matrix run may still provide valid evidence. This function does not qualify it.
++    """
++    require(cell in CELLS, "Unexpected qualification cell")
++    inputs = {}
++
++    def read_record(name):
++        path = staging / name
++        require(path.is_file() and not path.is_symlink(), "Missing or linked API input: " + name)
++        data = path.read_bytes()
++        inputs[name] = {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
++        return json.loads(data, object_pairs_hook=unique_object,
++                          parse_constant=lambda value: (_ for _ in ()).throw(ValueError("Nonfinite JSON: " + value)))
++
++    run = read_record("run-api.json")
++    job = read_record(cell + "-job-api.json")
++    artifact = read_record(cell + "-artifact-api.json")
++    log_fetch = read_record(cell + "-job-log-fetch.json")
++    require(run["id"] == RUN_ID and run["run_attempt"] == RUN_ATTEMPT, "Run or attempt differs")
++    require(run["head_sha"] == HEAD and run["head_branch"] == BRANCH, "Run source differs")
++    require(run["workflow_id"] == WORKFLOW_ID and run["path"] == WORKFLOW_PATH, "Workflow differs")
++    require(run["event"] == "pull_request", "Run event differs")
++    require(run["repository"]["id"] == REPOSITORY_ID and run["repository"]["full_name"] == REPOSITORY,
++            "Run repository differs")
++    pulls = [pull for pull in run["pull_requests"] if pull["number"] == 830]
++    require(len(pulls) == 1, "Run does not uniquely identify PR830")
++    pull = pulls[0]
++    require(pull["head"]["sha"] == HEAD and pull["head"]["ref"] == BRANCH, "PR head differs")
++    require(pull["base"]["sha"] == BASELINE and pull["base"]["ref"] == "develop", "PR base differs")
++    require(pull["head"]["repo"]["id"] == pull["base"]["repo"]["id"] == REPOSITORY_ID,
++            "PR repositories differ")
++    dictionary, order = cell.rsplit("-", 1)
++    job_name = f"Complete import ({dictionary}, {order}, {CELLS[cell]} pairs)"
++    require(type(job["id"]) is int and job["id"] > 0, "Invalid job ID")
++    require(job["run_id"] == RUN_ID and job["run_attempt"] == RUN_ATTEMPT, "Job run or attempt differs")
++    require(job["head_sha"] == HEAD and job["head_branch"] == BRANCH, "Job source differs")
++    require(job["name"] == job_name, "Job cell differs")
++    require(job["url"] == f"https://api.github.com/repos/{REPOSITORY}/actions/jobs/{job['id']}",
++            "Job API URL differs")
++    require(log_fetch["tool"] == "mcp__codex_apps__github_fetch_workflow_job_logs" and
++            log_fetch["request"] == {"repo_full_name": REPOSITORY, "job_id": job["id"]},
++            "Job log fetch request differs")
++    require(type(artifact["id"]) is int and artifact["id"] > 0, "Invalid artifact ID")
++    require(type(artifact["size_in_bytes"]) is int and artifact["size_in_bytes"] > 0, "Invalid artifact size")
++    require(re.fullmatch(r"sha256:[0-9a-f]{64}", artifact["digest"]) is not None, "Invalid artifact digest")
++    require(artifact["name"] == ARTIFACT_PREFIX + "-" + cell, "Artifact cell differs")
++    owner = artifact["workflow_run"]
++    require(owner["id"] == RUN_ID and owner["head_sha"] == HEAD and owner["head_branch"] == BRANCH,
++            "Artifact run or source differs")
++    require(owner["repository_id"] == owner["head_repository_id"] == REPOSITORY_ID,
++            "Artifact repositories differ")
++    log_path = staging / (cell + "-workflow-job.log")
++    require(log_path.is_file() and not log_path.is_symlink(), "Missing or linked job log")
++    expected_lines = {
++        "upload": (f"Artifact {artifact['name']} has been successfully uploaded! "
++                   f"Final size is {artifact['size_in_bytes']} bytes. Artifact ID is {artifact['id']}"),
++        "permanentUrl": (f"Artifact download URL: https://github.com/{REPOSITORY}/actions/runs/"
++                         f"{RUN_ID}/artifacts/{artifact['id']}"),
++    }
++    matched, log_hash, log_bytes = {}, hashlib.sha256(), 0
++    with log_path.open("rb") as stream:
++        for line_number, raw in enumerate(stream, 1):
++            log_hash.update(raw)
++            log_bytes += len(raw)
++            line = raw.decode("utf-8", errors="replace").rstrip("\r\n")
++            for label, expected in expected_lines.items():
++                if line.endswith(expected) and label not in matched:
++                    matched[label] = {"lineNumber": line_number, "line": line}
++    require(set(matched) == set(expected_lines), "Job log does not bind exact uploaded artifact name, size, ID and URL")
++    require(log_fetch["output"] == {"encoding": "utf-8", "bytes": log_bytes, "sha256": log_hash.hexdigest()},
++            "Job log bytes differ from the captured authenticated tool response")
++    inputs[log_path.name] = {"bytes": log_bytes, "sha256": log_hash.hexdigest()}
++    receipt = {
++        "schemaVersion": 1, "identityVerified": True, "newAcquisition": False,
++        "cell": cell, "runId": RUN_ID, "runAttempt": RUN_ATTEMPT, "headSha": HEAD,
++        "workflowId": WORKFLOW_ID, "workflowPath": WORKFLOW_PATH,
++        "runOutcome": {"status": run["status"], "conclusion": run["conclusion"]},
++        "job": {"id": job["id"], "name": job_name, "status": job["status"], "conclusion": job["conclusion"]},
++        "artifact": {"id": artifact["id"], "name": artifact["name"], "bytes": artifact["size_in_bytes"],
++                     "sha256": artifact["digest"].removeprefix("sha256:"), "expired": artifact["expired"]},
++        "logBinding": matched, "inputFiles": inputs,
++        "binderSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++        "qualificationClaim": False,
++        "scope": "Saved authenticated API identities, the exact job-log fetch request/output receipt, and the job upload log. Job/run outcome is retained without requiring success.",
++    }
++    return artifact, receipt
+--- /dev/null
++++ b/frozen-repo-inputs.json
+@@ -0,0 +1,78 @@
++{
++  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
++  "files": [
++    {
++      "bytes": 16788,
++      "path": "dev/perf/benchmark-support.js",
++      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
++    },
++    {
++      "bytes": 6765,
++      "path": "dev/perf/dictionary-fixtures.js",
++      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b"
++    },
++    {
++      "bytes": 11064,
++      "path": "dev/perf/import-benchmark.js",
++      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6"
++    },
++    {
++      "bytes": 5362,
++      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
++      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
++    },
++    {
++      "bytes": 18389,
++      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
++      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
++    },
++    {
++      "bytes": 4187,
++      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
++      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
++    },
++    {
++      "bytes": 21897,
++      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
++      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
++    },
++    {
++      "bytes": 19981,
++      "path": "dev/perf/import-qualification-20261125-a7f7.py",
++      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
++    },
++    {
++      "bytes": 187268,
++      "path": "ext/js/pages/settings/dictionary-import-controller.js",
++      "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
++    },
++    {
++      "bytes": 333801,
++      "path": "package-lock.json",
++      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
++    },
++    {
++      "bytes": 325917,
++      "path": "test/chromium/extension-two-dictionary-import.e2e.js",
++      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
++    },
++    {
++      "bytes": 25889,
++      "path": "test/chromium/import-flags-ab-benchmark.js",
++      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34"
++    },
++    {
++      "bytes": 3293,
++      "path": "test/e2e/import-timing.js",
++      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c"
++    },
++    {
++      "bytes": 3047,
++      "path": "test/perf/dictionaries.lock.json",
++      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
++    }
++  ],
++  "pathSetDerivation": "TOOLING union non-build PROVENANCE_PATHS from the exact frozen reader AST",
++  "readerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
++  "schemaVersion": 1
++}

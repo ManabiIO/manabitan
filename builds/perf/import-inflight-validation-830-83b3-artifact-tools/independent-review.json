@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "Independent static review of prospective offline artifact transport",
+  "complete": true,
+  "reviewedSources": {
+    "binding.py": {
+      "bytes": 7033,
+      "sha256": "8b1d329b1affaac6faf318b279968391a66b6d8e7f7e8bd8fa4196755584a37c"
+    },
+    "extract-artifact.py": {
+      "bytes": 3979,
+      "sha256": "715bfbc5f3ea301cb210cb9a42a70dcca87d662bb438cf5a107b437f5a564a71"
+    },
+    "package-cell.py": {
+      "bytes": 8743,
+      "sha256": "85d18e9d3f2f5607ec853d4e34d22cc93fed678c9bfd6d95066aea112344a1c3"
+    }
+  },
+  "readerSha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c",
+  "checks": {
+    "zipTraversalAstIdenticalToOriginal": true,
+    "frozenRepoInputCount": 14,
+    "frozenRepoPathSetMatchesReaderAst": true,
+    "frozenRepoAllBytesSizesHashesMatch": true,
+    "pythonSyntaxParses": true,
+    "runRepositoryWorkflowPrHeadBaseAndAttemptMatchAuthenticatedPreviouslyFetchedApi": true,
+    "jobSourceAttemptAndCellRequired": true,
+    "exactJobLogToolRequestAndOutputDigestRequired": true,
+    "exactPermanentArtifactUrlNameIdSizeRequired": true,
+    "extractionReceiptBoundToPackagedExtractor": true,
+    "failedJobAndIncompleteRunOutcomesRetained": true,
+    "frozenInputsPreservedEvenWhenReaderFailsEarly": true,
+    "qualificationOutcomeSeparateFromArchiveCompleteness": true,
+    "readerGateOrStatisticChanges": false
+  },
+  "runIdentity": {
+    "repository": "ManabiIO/manabitan",
+    "repositoryId": 1165902460,
+    "runId": 46114139837,
+    "runAttempt": 1,
+    "workflowId": 433451382,
+    "workflowPath": ".github/workflows/import-inflight-validation-830-83b3.yml",
+    "pullRequest": 830,
+    "head": "049cb11e6963604435998aa060e1400cc00365cb",
+    "tree": "a47cc23bcfa039a9defe66db2b15d79ea2198072",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  },
+  "operationNote": "Use immutable per-cell staging. Saved run/job/artifact/log receipt bytes must not be refreshed between extraction and packaging; identityBinding equality correctly rejects changes.",
+  "limits": [
+    "Static source and identity review only; no #830 artifact, browser, import or benchmark was executed.",
+    "Saved API records are assumed captured from the authenticated connector; the offline scripts verify internal bindings and exact bytes, not a new network authentication.",
+    "Actual artifact intake must still execute all binding, ZIP integrity, package and qualification gates. Normal Python execution is required; inherited assertions must not be disabled."
+  ],
+  "acquisitions": 0,
+  "artifactsAnalyzed": 0,
+  "blockers": []
+}
