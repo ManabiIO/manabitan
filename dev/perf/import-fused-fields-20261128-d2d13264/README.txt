@@ -2,7 +2,8 @@ Fused compact record fields: exploratory evidence and prospective oracle
 ======================================================================
 
 Frozen baseline: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-Product candidate: daddc68070aeb6156605bd114e8bf2d49367557f
+Product candidate: aa2473f42957648d71912af0547a99039f795840
+Previous prospective source: daddc68070aeb6156605bd114e8bf2d49367557f
 Runtime algorithm review: e66df983c9dc3a55a86fbe27466ea3e6fd8a45bc
 Earlier prototype with a fixedContentOffsetBase getter gap: 6d0dcf330ad65968a6463c3c2e5d3e36763a30d5
 
@@ -78,3 +79,15 @@ receipt/memory tests were executed successfully in hosted job140848450007.
 Browser screening is six pairs per dictionary and cannot justify a PR.
 Two independent12-pair JMdict cohorts with >=3% gain and all prospective
 control/correctness/storage/memory criteria are required for promotion.
+
+Local validation follow-up
+--------------------------
+Candidate aa2473 changes the original-method captures to typed Reflect.get calls
+for repository style, adds missing test docs/layout, and uses Node's exact
+byte-aware deepEqual for large test envelopes. Hot loops and admission logic
+are unchanged. All33 actual-source cases pass. The partial test-only style
+check passes using the official disableTypeChecked diagnostic overlay; local
+full typed lint was killed by resource pressure. All failed setup, heap-limit,
+worker-exit and killed-process attempts remain in local-validation-logs.json.
+No full lint/type or end-to-end claim follows from this local diagnostic.
+See local-validation-manifest.json for exact source bindings and commands.

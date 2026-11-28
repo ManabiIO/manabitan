@@ -1,0 +1,38 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "aa2473f42957648d71912af0547a99039f795840",
+  "candidateTree": "6fb2463c8150ac2e9f3e181c7061968144e1eb7e",
+  "sourceBlobs": [
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "gitBlobSha": "62f1703f38ba7650cda7c3b11cd6f61a8c19a388"
+    },
+    {
+      "path": "test/term-record-fused-fields.test.js",
+      "gitBlobSha": "e1a5027e3630e67a397f37badbb6538c911165a7"
+    }
+  ],
+  "node": "v24.22.3",
+  "environment": "Restored scratch executor, globally contended memory and nearly full disks. Read-only existing dependencies with matching lock, faithful hardlinked9e10/dadd source and atomic replacement of changed files. Team heavyweight lock held. No browser timing.",
+  "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "focusedTests": {
+    "command": "node --max-old-space-size=384 ./node_modules/vitest/vitest.mjs run test/term-record-fused-fields.test.js --maxWorkers=1",
+    "passed": 33,
+    "total": 33,
+    "log": "focused-unit-native-byte-assert.log",
+    "limits": "Focused actual-source test only; complete hosted unit/build/type gates still required."
+  },
+  "testMatcherChange": "Exact typed-array/metadata envelope comparisons now use node:assert/strict deepEqual. This avoids the generic matcher allocations which preceded an exited worker in the retained first attempt. No byte comparison, expected result, test case or timeout was removed.",
+  "styleDiagnostic": {
+    "command": "node --max-old-space-size=256 style-check.mjs test/term-record-fused-fields.test.js",
+    "exit": 0,
+    "log": "style-only-new-test-final.log",
+    "overlay": "Official typescript-eslint configs.disableTypeChecked; labels partial style diagnostics, not complete lint or type validation.",
+    "scope": "The final test-only style check passes. One earlier broader diagnostic identified14 new code/test style issues and22 preexisting DOM-type-name errors due disabled type information; those14 issues were corrected. Rechecks of the full scope were killed137 and do not count as passing."
+  },
+  "fullLint": {
+    "status": "not qualified locally",
+    "failure": "Exit137 under shared memory pressure; one192MiB style-only run also reached V8 heap limit exit134. Original missing-generated-lib setup and incorrect-cwd failures are retained."
+  },
+  "fullSourceValidation": "The hosted workflow retains normal lint, all type projects, complete unit tests, all build targets and exact corpus comparisons before any browser timing."
+}

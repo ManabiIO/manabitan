@@ -1,0 +1,7 @@
+import {ESLint} from 'eslint';
+import tseslint from 'typescript-eslint';
+const engine = new ESLint({overrideConfig: [tseslint.configs.disableTypeChecked]});
+const results = await engine.lintFiles(process.argv.slice(2));
+const formatter = await engine.loadFormatter('stylish');
+process.stdout.write(formatter.format(results));
+process.exitCode = results.some(({errorCount}) => errorCount > 0) ? 1 : 0;

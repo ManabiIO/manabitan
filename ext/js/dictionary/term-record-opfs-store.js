@@ -8078,5 +8078,7 @@ view.chunks :
     }
 }
 
-const originalArtifactChunkEncoder = TermRecordOpfsStore.prototype._encodeArtifactChunkRecords;
-const originalArtifactFieldEncoder = TermRecordOpfsStore.prototype._encodeArtifactRecordFields;
+/** @type {unknown} */
+const originalArtifactChunkEncoder = Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactChunkRecords');
+/** @type {unknown} */
+const originalArtifactFieldEncoder = Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactRecordFields');
