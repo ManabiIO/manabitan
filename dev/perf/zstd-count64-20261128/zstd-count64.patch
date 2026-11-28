@@ -1,0 +1,30 @@
+--- a/lib/compress/zstd_compress_internal.h
++++ b/lib/compress/zstd_compress_internal.h
+@@ -853,6 +853,19 @@
+ ***************************************/
+ MEM_STATIC size_t ZSTD_count(const BYTE* pIn, const BYTE* pMatch, const BYTE* const pInLimit)
+ {
++#if defined(__wasm32__)
++    /* wasm32 has native unaligned i64 loads and ctz despite its 32-bit size_t. */
++    const BYTE* const pStart = pIn;
++    while ((size_t)(pInLimit - pIn) >= sizeof(U64)) {
++        U64 const diff = MEM_read64(pMatch) ^ MEM_read64(pIn);
++        if (diff) return (size_t)(pIn - pStart) + ((unsigned)__builtin_ctzll(diff) >> 3);
++        pIn += sizeof(U64); pMatch += sizeof(U64);
++    }
++    if ((size_t)(pInLimit - pIn) >= 4 && MEM_read32(pMatch) == MEM_read32(pIn)) { pIn += 4; pMatch += 4; }
++    if ((size_t)(pInLimit - pIn) >= 2 && MEM_read16(pMatch) == MEM_read16(pIn)) { pIn += 2; pMatch += 2; }
++    if (pIn < pInLimit && *pMatch == *pIn) pIn++;
++    return (size_t)(pIn - pStart);
++#else
+     const BYTE* const pStart = pIn;
+     const BYTE* const pInLoopLimit = pInLimit - (sizeof(size_t)-1);
+ 
+@@ -870,6 +883,7 @@
+     if ((pIn<(pInLimit-1)) && (MEM_read16(pMatch) == MEM_read16(pIn))) { pIn+=2; pMatch+=2; }
+     if ((pIn<pInLimit) && (*pMatch == *pIn)) pIn++;
+     return (size_t)(pIn - pStart);
++#endif
+ }
+ 
+ /** ZSTD_count_2segments() :
