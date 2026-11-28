@@ -2563,8 +2563,10 @@ export class TermRecordOpfsStore {
             );
             const tEncodeStart = safePerformance.now();
             const encodeChunk = this._encodeArtifactChunkRecords;
-            const canOwnEncodedChunk = lookupIndexConsumer !== null &&
-            encodeChunk === originalTermRecordChunkEncoder && hasOriginalTermRecordEncoders(this);
+            const canOwnEncodedChunk = (
+                lookupIndexConsumer !== null &&
+                encodeChunk === originalTermRecordChunkEncoder && hasOriginalTermRecordAppendMethods(this)
+            );
             const encodedChunk = await /** @type {ReturnType<TermRecordOpfsStore['_encodeArtifactChunkRecords']>} */ (Reflect.apply(encodeChunk, this, [
                 runChunk,
                 runOffsets,
@@ -2578,7 +2580,9 @@ export class TermRecordOpfsStore {
             recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
             lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
             const tAppendStart = safePerformance.now();
-            await this._appendEncodedChunk(
+            const appendChunk = this._appendEncodedChunk;
+            const canOwnAppend = canOwnEncodedChunk && appendChunk === originalTermRecordAppend;
+            await Reflect.apply(appendChunk, this, [
                 state,
                 firstId + runStart,
                 runCount,
@@ -2591,8 +2595,8 @@ export class TermRecordOpfsStore {
                     preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
                     null,
                 preparedLookupIndex,
-                canOwnEncodedChunk ? lookupIndexConsumer : null,
-            );
+                canOwnAppend ? lookupIndexConsumer : null,
+            ]);
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
         }
@@ -6021,7 +6025,7 @@ view.chunks :
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
         const encodeFields = this._encodeArtifactRecordFields;
-        const canOwnRecordFields = encodeFields === originalTermRecordFieldEncoder && hasOriginalTermRecordEncoders(this);
+        const canOwnRecordFields = encodeFields === originalTermRecordFieldEncoder && hasOriginalTermRecordAppendMethods(this);
         const recordFields = /** @type {Uint8Array} */ (Reflect.apply(encodeFields, this, [
             chunk,
             contentOffsets,
@@ -6287,7 +6291,7 @@ view.chunks :
         if (
             !this._importSessionActive || this._rawTermBankSourceBytes === null ||
             this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES ||
-            !hasOriginalTermRecordEncoders(this) ||
+            !hasOriginalTermRecordAppendMethods(this) ||
             !canTakeOwnedTermLookupIndex(prepared, payload, recordFields, consumer)
         ) {
             return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
@@ -7983,21 +7987,25 @@ view.chunks :
 
 const originalTermRecordFieldEncoder = TermRecordOpfsStore.prototype._encodeArtifactRecordFields;
 const originalTermRecordChunkEncoder = TermRecordOpfsStore.prototype._encodeArtifactChunkRecords;
+const originalTermRecordAppend = TermRecordOpfsStore.prototype._appendEncodedChunk;
+const originalTermRecordEnvelope = TermRecordOpfsStore.prototype._createLookupIndexChunk;
 /** @type {Array<[string, unknown]>} */
-const originalTermRecordEncoders = [
+const originalTermRecordAppendMethods = [
     ['_encodeArtifactRecordFields', originalTermRecordFieldEncoder],
     ['_encodeArtifactChunkRecords', originalTermRecordChunkEncoder],
+    ['_appendEncodedChunk', originalTermRecordAppend],
+    ['_createLookupIndexChunk', originalTermRecordEnvelope],
 ];
 
 /**
- * Encoder wrappers can retain returned buffers. Preserve their eager snapshots,
- * and inspect only known store objects without invoking method accessors.
+ * Existing encoder/append wrappers can retain buffers, and envelope overrides
+ * must still run. Inspect known store objects without invoking method accessors.
  * @param {TermRecordOpfsStore} store
  * @returns {boolean}
  */
-function hasOriginalTermRecordEncoders(store) {
+function hasOriginalTermRecordAppendMethods(store) {
     if (!termRecordStoreOrigins.has(store) || Object.getPrototypeOf(store) !== TermRecordOpfsStore.prototype) { return false; }
-    for (const [name, method] of originalTermRecordEncoders) {
+    for (const [name, method] of originalTermRecordAppendMethods) {
         const own = Object.getOwnPropertyDescriptor(store, name);
         const prototype = Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, name);
         if (

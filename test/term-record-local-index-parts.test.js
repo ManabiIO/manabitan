@@ -553,4 +553,37 @@ describe('local owned import index envelopes', () => {
         }
     })
 
+    test.each(['custom-envelope', 'restoring-append'])('preserves the existing %s hook on public append', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        const {store, consumer, prepared} = fixture
+        let calls = 0
+        let retained
+        const failure = new Error('Custom envelope implementation')
+        if (kind === 'custom-envelope') {
+            store._createLookupIndexChunk = () => { ++calls; throw failure }
+        } else {
+            const original = store._appendEncodedChunk.bind(store)
+            store._appendEncodedChunk = async (...args) => {
+                ++calls
+                retained = args[6]
+                Reflect.deleteProperty(store, '_appendEncodedChunk')
+                return await original(...args)
+            }
+        }
+        Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return {} }})
+        Reflect.set(store, '_importSessionActive', false)
+        await store.beginImportSession()
+        const append = store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
+        if (kind === 'custom-envelope') {
+            await expect(append).rejects.toBe(failure)
+        } else {
+            await append
+            expect(retained?.byteLength).toBeGreaterThan(0)
+            const states = Reflect.get(store, '_shardStateByFileName')
+            expect([...states.values()][0].pendingLookupIndexChunks[0]).toEqual(fixture.expected)
+        }
+        expect(calls).toBe(1)
+        expect(prepared.bytes.byteLength).toBeGreaterThan(0)
+    })
+
 })
