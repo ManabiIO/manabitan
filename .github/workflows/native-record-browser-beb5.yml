@@ -1,0 +1,104 @@
+name: Native record browser qualification 20261128 beb5
+
+on:
+  push:
+    branches: ['test/native-record-browser-20261128-beb5']
+    paths:
+      - '.github/workflows/native-record-browser-beb5.yml'
+      - 'dev/perf/import-qualification-20261128-beb5.py'
+
+permissions:
+  contents: read
+
+env:
+  BASELINE_COMMIT: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_COMMIT: 731c7374dc9e1e242142796f597be9939a3cda2c
+
+jobs:
+  browser:
+    name: Complete imports (${{ matrix.dictionary }}, AB)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare exact release packages with independent controls and memory acquisition
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-record-browser-beb5/$PERF_DICTIONARY"
+          extra=()
+          if [ "$PERF_DICTIONARY" = vndb ]; then
+            extra+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261128-beb5.py \
+            --baseline "$BASELINE_COMMIT" --candidate "$CANDIDATE_COMMIT" \
+            --dictionary "$PERF_DICTIONARY" --initial-order AB --pairs 6 \
+            --expected-workers 3 --evidence "$evidence" \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --expected-added-package-entry js/dictionary/term-record-fields-wasm.js \
+            --expected-added-package-entry js/dictionary/wasm/term-record-fields-v1.c \
+            --expected-added-package-entry lib/term-record-fields-v1.wasm \
+            "${extra[@]}"
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-browser-beb5-${{ matrix.dictionary }}-AB
+          path: builds/perf/native-record-browser-beb5/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
+
+  source-checks:
+    name: Candidate ${{ matrix.command }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        command: [test:unit, test:js, test:ts:main, test:ts:dev, test:ts:test, test:ts:bench]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Run complete source gate
+        env:
+          CHECK_COMMAND: ${{ matrix.command }}
+        run: npm run "$CHECK_COMMAND"
+
+  native-and-build:
+    name: Candidate pinned native rebuild and all-target build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Reproduce every dictionary native artifact
+        run: npm run build:dictionary-wasm -- --check
+      - name: Check all extension build targets
+        run: npm run test:build
+      - name: Check generated manifest formatting
+        run: npm run test:json:format
