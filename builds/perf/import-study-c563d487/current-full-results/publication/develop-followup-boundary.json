@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 09:59:17 UTC",
+  "scope": "Bounded primary develop/compare snapshot before preparing a separately source-bound proof-consumer screen. The completed dcfc→4cd cohort is unchanged.",
+  "apiUrls": [
+    "https://api.github.com/repos/ManabiIO/manabitan/branches/develop",
+    "https://api.github.com/repos/ManabiIO/manabitan/compare/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16...f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+  ],
+  "previousFrozenBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "currentBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "currentTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "status": "ahead",
+  "totalCommits": 7,
+  "commits": [
+    {
+      "sha": "c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+      "message": "Restore indexed compact score-key validation\n\n(cherry picked from commit b15bad43acdfd54d541895cac1109c0e5ba51b2f)"
+    },
+    {
+      "sha": "e44210d8b7adf77a05921a697becdd3f491d0501",
+      "message": "Avoid allocating zero-only dictionary content ID columns\n\n(cherry picked from commit 1cf97f9333f4e08df91d893be5a4927b870359d4)"
+    },
+    {
+      "sha": "c2088255fe1a362ea048a7d62110dbd5e029f87a",
+      "message": "perf(lookup): prefetch encoded block reference spans\n\n(cherry picked from commit 8448ac0c3be8a4fc6ad51c1f33925f4094ef2ddb)"
+    },
+    {
+      "sha": "59e72a26051d07c64c435814301fd0a07a236475",
+      "message": "fix(lookup): share block reference format sizing\n\n(cherry picked from commit 8be3268d26887bf26a93e7a3b84519bf22754c9f)"
+    },
+    {
+      "sha": "5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+      "message": "perf: trust validated single-slab content spans\n\n(cherry picked from commit 56ae57fcb5fb1225617cc7e3115754f8a3a71354)"
+    },
+    {
+      "sha": "81692f1df4db660f9c8e81269bd5e26ed241363c",
+      "message": "test: type producer witness coverage"
+    },
+    {
+      "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "message": "Merge pull request #981 from ManabiIO/codex/manabitan-source-integration-978-980-20261128\n\nperf: integrate dictionary lookup and import components"
+    }
+  ],
+  "changedPaths": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "status": "modified",
+      "additions": 92,
+      "deletions": 15
+    },
+    {
+      "path": "ext/js/dictionary/raw-term-content.js",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2
+    },
+    {
+      "path": "test/dictionary-content-lazy-ids.test.js",
+      "status": "added",
+      "additions": 204,
+      "deletions": 0
+    },
+    {
+      "path": "test/dictionary-content-publication-range.test.js",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 1
+    },
+    {
+      "path": "test/dictionary-database-content-dedup.test.js",
+      "status": "modified",
+      "additions": 75,
+      "deletions": 0
+    },
+    {
+      "path": "test/dictionary-database-in-flight-content-source.test.js",
+      "status": "added",
+      "additions": 165,
+      "deletions": 0
+    },
+    {
+      "path": "test/raw-term-content-block.test.js",
+      "status": "modified",
+      "additions": 14,
+      "deletions": 0
+    }
+  ],
+  "nativeParserCChanged": false,
+  "nativeWasmChanged": false,
+  "nativeManifestChanged": false,
+  "dependencyOrFixtureLockChanged": false,
+  "closedStudy": {
+    "runId": 46130093248,
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "gainTransfer": false,
+    "sourceOrObservationChange": false
+  }
+}

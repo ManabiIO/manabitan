@@ -1,5 +1,46 @@
 # Codex instructions: import optimization experiments
 
+## 2026-11-28: current-base numeric suffix qualification completed; no performance PR
+
+The separately frozen comparison of `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16` against numeric-suffix candidate `4cd1abfabcb92c09694f107ff8e856add52e07df` is complete. **Neither VNDB host met the predeclared performance threshold, so this candidate is not promoted to a performance PR.** The conclusion includes all six terminal cells, with no selected retries, omitted observations, pooled hosts or transfer from the earlier `9e10d3b3` study. The prior checkpoint remains unchanged.
+
+[Run 46130093248](https://github.com/ManabiIO/manabitan/actions/runs/46130093248) used tooling `faf6d9d9c282b2da46a7c8ee05835f4db0827039`, production defaults, the unchanged a7f7 observer and locked fixtures. Each dictionary had two separately provisioned jobs, each retaining four excluded warmups, twelve alternating candidate pairs, four identical-code pairs, two media observations and four separate memory observations. The completed inventory is **252 reports, 330 original tagged records, 72 candidate pairs and 24 identical-code pairs**. The timer covers file input through completion of required post-UI work.
+
+### Per-host complete-import results
+
+Changes are paired candidate/baseline percentages; negative values are faster. The intervals are descriptive paired 95% bootstrap intervals. Every control pair remains in the original records; controls were not subtracted.
+
+| Cell | Median paired change | Faster pairs | Descriptive 95% interval | Identical-code paired range |
+| --- | ---: | ---: | --- | --- |
+| jmdict-AB | +1.3049% | 5/12 | [-0.4511%, +2.5130%] | [-4.8745%, +2.9173%] |
+| jmdict-BA | -0.1234% | 7/12 | [-1.1014%, +0.4145%] | [-4.9004%, +1.8466%] |
+| jitendex-AB | -0.2917% | 6/12 | [-1.6682%, +2.2201%] | [-3.5819%, +1.4642%] |
+| jitendex-BA | -0.1027% | 6/12 | [-2.1639%, +1.0476%] | [-0.0175%, +2.1485%] |
+| vndb-AB | -1.3019% | 8/12 | [-2.8086%, +0.5449%] | [-3.2063%, +6.1064%] |
+| vndb-BA | -1.1084% | 7/12 | [-3.5474%, +0.8989%] | [-3.6997%, +4.5339%] |
+
+VNDB AB saved a median paired 54.25 ms and VNDB BA saved 52.65 ms, but both fell short of the frozen requirement for a replicated reduction of at least 2%, at least 9/12 faster pairs and an interval below zero. Both intervals cross zero, and both candidate medians are smaller than the observed identical-code variation. Passing correctness and memory checks does not substitute for the failed latency criteria.
+
+All four JMdict/Jitendex intervals also cross zero. JMdict has discordant host medians; the Jitendex changes are small relative to controls. The specified replicated non-target rejection condition is absent, while these measurements do not establish equivalence or prove non-regression. The exact per-host ratios, browser-clock durations, controls and gate calculations are retained in the [combined primary index](../../builds/perf/import-study-c563d487/current-full-results/combined-primary-index.json) and its original per-cell evidence.
+
+### Correctness, storage, memory and package scope
+
+All six primary and original raw-evidence audits pass. The original canonical validation receipts, restart/lookup/media checks and corpus storage totals agree across arms; same-arm package entry maps and same-corpus persisted semantic digests agree across the two jobs. All **24 separate memory observations qualify** under the unchanged coverage and process-tree rules, and all prospective PSS/private-memory screens pass. The raw replay preserves **2,204 process scans**. This is sampled process-tree evidence, not an exact peak-memory measurement or proof of independently verified physical hardware.
+
+The compiled six-file artifact at build commit `d28d74f9c1047491670942ec6e0414cc9c823101` passed pinned native reproduction, lint, strict main/test types, 15,180 unit tests, 32 options tests and seven dry builds. The subsequent exact-source reuse gate matched the 17 original receipts, all 44 original artifact members and all six product files to `4cd1abfa`. The original full correctness job did not run at that published product commit. Its exact-head actionlint result is recorded separately.
+
+Only the native C and WASM entries differ among the 554 release entries. Every cell records release ZIP sizes of 16,806,965 to 16,808,230 bytes, a **1,265-byte compressed increase**. Hash-bound native source/binary bytes account for a **4,312-byte uncompressed increase**: C +3,382 bytes and WASM +930 bytes. The other 552 entry hashes agree. Individual compressed-entry sizes were not available and are not claimed; the [size receipt](../../builds/perf/import-study-c563d487/current-full-results/package-byte-deltas.json) states the exact derivation.
+
+### Durable raw evidence and recovery history
+
+The [final evidence index](../../builds/perf/import-study-c563d487/current-full-results/index.json) binds all six exact producer-emitted inner ZIPs: **13,604,514 compressed bytes, 1,884 original members and 156,622,152 uncompressed bytes**. Every original report and raw process scan is retained. Lossless provenance archives also preserve each complete primary job log, all tagged records and the recovery/audit receipts. Only the producer's two release-package copies per cell are excluded; their original hashes, byte sizes and full entry maps remain reviewable. No outer artifact or release package was re-downloaded for this raw replay.
+
+The first read-only JMdict AB recovery failed at chunk 192 because one original log line began with U+FEFF. The original parser, failure receipt, stderr and 1,179,648-byte partial output remain intact. A separately reviewed one-line anchored optional-BOM correction recovered the unchanged payload into a new directory. Both parser versions and the synthetic acceptance/rejection receipts are preserved. This was a log-recovery correction, with no source, timer, criterion, input or acquisition change.
+
+The unchanged criteria (`42364fda...`), expected inputs (`bfeeb222...`), independent primary auditor (`0a90d65e...`) and source-gate evidence are referenced at their existing durable paths. The new index includes exact hashes, archive-member inventories and replay commands for auditing the retained logs and recovering their original inner archives in fresh scratch directories. The previously prepared conditional PR body is not included as a deliverable.
+
+At the independent 09:59:17 UTC branch snapshot, develop had advanced to `f28c2801fcfd9416f220b46b9cbafeee901c1cb2` through #981. Its nine changed paths include importer/storage JavaScript; the native parser, WASM, manifest and locks are unchanged in that bounded comparison. The snapshot and full primary compare response are retained. This closed cohort describes only `dcfc02a0` versus `4cd1abfa`; it does not establish performance on the newer source, and any separate follow-up must retain its own source and observation identities.
+
 ## November 28, 2026: original archives preserved and selector artifact audit completed
 
 The execution workspace recovered, allowing the larger original evidence to be preserved after the [outage checkpoint `63c2e40049981460f524f6b36695239a265a430b`](https://github.com/ManabiIO/manabitan/commit/63c2e40049981460f524f6b36695239a265a430b). The selector's previously pending original-artifact audit is now complete. **Neither qualification decision changes:** the old numeric candidate remains held by VNDB AB memory coverage, and the prior-streak selector remains unpromoted because its JMdict component screen failed. No import, native parser, correctness suite or benchmark was rerun to produce this preservation supplement.

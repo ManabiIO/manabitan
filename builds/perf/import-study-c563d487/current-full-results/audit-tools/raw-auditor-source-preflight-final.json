@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "sourceOnly": true,
+  "files": {
+    "recover-raw-archive.py": {
+      "sha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c",
+      "bytes": 12488
+    },
+    "raw-evidence-audit.py": {
+      "sha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c",
+      "bytes": 33738
+    },
+    "recovery-selfcheck.py": {
+      "sha256": "6cfc9a133abba953f87e33469b259bd3251efdbb276835084033f8f77f6f940e",
+      "bytes": 6036
+    },
+    "recovery-selfcheck-1/selfcheck-result.json": {
+      "sha256": "ef5dca410949ba8b19f21f7ad1c69c2f407e3fb5b9ec027b2a5d296365d33fdd",
+      "bytes": 5159
+    },
+    "current-policy-source-binding.json": {
+      "sha256": "e71c6186e434a029f349f0a3c38452e8c9a237ea0710d23fac1a7129f828fbff",
+      "bytes": 1504
+    }
+  },
+  "unchangedOldFunctions": [
+    "sha",
+    "digest",
+    "pick",
+    "module",
+    "compact_validation",
+    "tree_identity",
+    "exited_zombie",
+    "reconstruct_memory"
+  ],
+  "unchangedRawReportAndMemoryGateBlock": {
+    "bytes": 9233,
+    "sha256": "81498fe8bc83c2c3e05333d16974997b9d8c0f10058055950c9cef8fb621e7f4"
+  },
+  "scope": "Current-base bindings and logged inner-archive adaptation only. Exact old per-report validation and memory arithmetic are unchanged. No performance or native execution.",
+  "syntheticRecovery": {
+    "passedOriginal": 1,
+    "rejectedAlterations": 12
+  },
+  "releasePackageScope": "Original 554-entry maps and logged excluded ZIP size/hash only; no independent package re-download.",
+  "earlierSourcePreflightRetained": "raw-auditor-source-preflight.json",
+  "noMeasurementsChanged": true
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 09:51:43 UTC",
+  "scope": "Read-only product branch and current develop status snapshot; no new validation run or performance observation.",
+  "productCommit": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "productBranch": "perf/numeric-row-suffix-972-20261128-c563d487",
+  "developCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "checks": [
+    {
+      "id": 140930279377,
+      "name": "actionlint",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46129144964/job/140930279377",
+      "started_at": "2026-11-28T09:16:06Z",
+      "completed_at": "2026-11-28T09:16:17Z"
+    }
+  ],
+  "validationScope": "Original full source/build/unit/type/native validation belongs to run46126462448. Current qualification run46130093248 independently verifies original artifact and exact product source/tree equivalence; this snapshot does not relabel original validation as an exact-head full CI run."
+}

@@ -1,0 +1,870 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "recordedAt": "2026-11-28T09:56:42.488631+00:00",
+  "scope": "All six original current-base log/inner-archive/raw-observation audits. Artifact integrity and memory replay do not override the independent frozen performance decision.",
+  "runId": 46130093248,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "tooling": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "jobId": 140933489138,
+      "rawArchive": {
+        "path": "jmdict-AB/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2254309,
+        "sha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f",
+        "gitBlobSha1": "711ee1cdf778b26ca24288acfc00fbbda5317b8d"
+      },
+      "recovery": {
+        "path": "jmdict-AB/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 39866,
+        "sha256": "48ed0ccfc99d62d17d3370cd56f91f61c877cc34771b4b1d4c526ae84df97483"
+      },
+      "rawAudit": {
+        "path": "jmdict-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16258,
+        "sha256": "c103ea7c39deb95cabf3b389c58b21c462b63168743a0fad654cac168bf19414"
+      },
+      "execution": {
+        "path": "jmdict-AB/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2423,
+        "sha256": "f40fdf82258bac6685789f1d03c3aa26fe4820312f69c471b2e4f42c1049628d"
+      },
+      "manifest": {
+        "path": "jmdict-AB/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51224,
+        "sha256": "ecdf323826fdd08c35a3a63c4a5d19653cd6e88de8d23ccda60da0585aa13b94"
+      },
+      "memberHashes": {
+        "path": "jmdict-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59858,
+        "sha256": "b8c9afb7cbfeae29856284c3b54d3c0e9e7be5bfcf04cb5d44fbc8721e7af602"
+      },
+      "primaryAudit": {
+        "path": "jmdict-AB/primary-log-audit.json",
+        "bytes": 20904,
+        "sha256": "080f0563ff4f55b8e1c523f9192c6d565044f7f64a4d066980441095202ab07a"
+      },
+      "primaryRecords": {
+        "path": "jmdict-AB/primary-records.jsonl",
+        "bytes": 363344,
+        "sha256": "758c816bbc1b3c0260f0d2f5bd20f23009fbbdf3694c59614b7f1d0273a802f8"
+      },
+      "primaryJobLog": {
+        "path": "jmdict-AB/primary-job.log",
+        "bytes": 3554555,
+        "sha256": "5e035b7430fbc4b732837f2f09a5629138b1c3bb54690ab4544717e03166c79f"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 26346703,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 375,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.5073914168717062,
+            "maximumPairedChangePercent": 1.7862830475104063
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.8771014524151863,
+            "maximumPairedChangePercent": 1.9077820893405262
+          }
+        }
+      },
+      "commonSemanticSha256": "83af726560b47ab7ab41548a1e952e802d06b39aec693bf09ce58c04cedcb7ca",
+      "packages": {
+        "A": {
+          "zipSha256": "2e13588ebd131a60438817e6efaf3aace8f72d4788e48bde11dc28b33ff04ec1",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "b97c501aeb5c5a2a7356db38b7221de34604140dc92dd586eab849442f50502a",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 92,
+          "maximumCoveredSampleGapMs": 92.69899,
+          "maxSampledPssKiB": 1022141,
+          "maxSampledPrivateKiB": 788336
+        },
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 94,
+          "maximumCoveredSampleGapMs": 93.245121,
+          "maxSampledPssKiB": 1034698,
+          "maxSampledPrivateKiB": 802892
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 93,
+          "maximumCoveredSampleGapMs": 116.730156,
+          "maxSampledPssKiB": 1038614,
+          "maxSampledPrivateKiB": 804672
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 96,
+          "maximumCoveredSampleGapMs": 86.40398,
+          "maxSampledPssKiB": 1020387,
+          "maxSampledPrivateKiB": 789608
+        }
+      ]
+    },
+    {
+      "cell": "jmdict-BA",
+      "jobId": 140933489203,
+      "rawArchive": {
+        "path": "jmdict-BA/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2140209,
+        "sha256": "b209b91fcde954f03a7729fec7310270de9916370c4a474a4377d856bdd4654a",
+        "gitBlobSha1": "9367eaf7259b35168297471e5ab9742f9eaeeb52"
+      },
+      "recovery": {
+        "path": "jmdict-BA/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 38876,
+        "sha256": "d07f8a715a8cfbb9879d7d80f239f09eb9691d25ac6798bc488dd32052036964"
+      },
+      "rawAudit": {
+        "path": "jmdict-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16213,
+        "sha256": "8b0527512c08a88e9b9eccb842e98554ae8e032cf5716d472ead38b53738e09d"
+      },
+      "execution": {
+        "path": "jmdict-BA/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2423,
+        "sha256": "c50118eae66718a7d03b268ce64ec973245bed44f55c85ca4e536eefe3e78bbc"
+      },
+      "manifest": {
+        "path": "jmdict-BA/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51224,
+        "sha256": "8f60038e265eec51be3fe287dc7b9ce493f91bba9e145d0d7f46d05ee441012c"
+      },
+      "memberHashes": {
+        "path": "jmdict-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59850,
+        "sha256": "2b763666b0c5036230e78acde432a89819b4b8e088f08b43f4c562f52e98a989"
+      },
+      "primaryAudit": {
+        "path": "jmdict-BA/primary-log-audit.json",
+        "bytes": 20777,
+        "sha256": "ea0318287d52551042c59851167ef46bf66d40d264908cdac45a5bed50294c90"
+      },
+      "primaryRecords": {
+        "path": "jmdict-BA/primary-records.jsonl",
+        "bytes": 361826,
+        "sha256": "5703b9e4bd81bd25e6ac0e0297448dfac0bc3a9045410f2195e65db3a62f314d"
+      },
+      "primaryJobLog": {
+        "path": "jmdict-BA/primary-job.log",
+        "bytes": 3399265,
+        "sha256": "e579c0727e68e08f4d7b522f749b09ed3653867b58e9c9604e3eaadb3679f7be"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 22371912,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 274,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.6374597131591284,
+            "maximumPairedChangePercent": 2.6314265227820544
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.883467909377179,
+            "maximumPairedChangePercent": 2.9006865131049775
+          }
+        }
+      },
+      "commonSemanticSha256": "83af726560b47ab7ab41548a1e952e802d06b39aec693bf09ce58c04cedcb7ca",
+      "packages": {
+        "A": {
+          "zipSha256": "dee1e07ad16bd853deccb59a253b3470352581042392d6bc011120e72f59b06e",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "9be8016b9b1ed14beff0ed26b3e3f047b24750a7601215a7284d43caf4768566",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 68,
+          "maximumCoveredSampleGapMs": 158.940866,
+          "maxSampledPssKiB": 1027708,
+          "maxSampledPrivateKiB": 793212
+        },
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 70,
+          "maximumCoveredSampleGapMs": 148.756288,
+          "maxSampledPssKiB": 1001358,
+          "maxSampledPrivateKiB": 770852
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 67,
+          "maximumCoveredSampleGapMs": 167.742094,
+          "maxSampledPssKiB": 1030936,
+          "maxSampledPrivateKiB": 799308
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 69,
+          "maximumCoveredSampleGapMs": 170.960559,
+          "maxSampledPssKiB": 1037570,
+          "maxSampledPrivateKiB": 806232
+        }
+      ]
+    },
+    {
+      "cell": "jitendex-AB",
+      "jobId": 140933489159,
+      "rawArchive": {
+        "path": "jitendex-AB/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2246717,
+        "sha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+        "gitBlobSha1": "f8c66c72dc8bf93ffbffea932174596c620db582"
+      },
+      "recovery": {
+        "path": "jitendex-AB/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 39820,
+        "sha256": "3c954835d836c919edd0c6f8a22da294fbda3d317c838122235f688e396c3d16"
+      },
+      "rawAudit": {
+        "path": "jitendex-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16293,
+        "sha256": "506b2791d1a3fe5377bb7195a472a8c09590681b7c555aee9c4f7caed26edb75"
+      },
+      "execution": {
+        "path": "jitendex-AB/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2433,
+        "sha256": "59a105def81858484e88052e2e708df26cdbfb542144e987b3169a13bf5c28c8"
+      },
+      "manifest": {
+        "path": "jitendex-AB/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51228,
+        "sha256": "a8daf529fc8e0b84942d80d690938ee86ced68a9ad162412269adf2d3b1f0205"
+      },
+      "memberHashes": {
+        "path": "jitendex-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59861,
+        "sha256": "f9f4ee11dd38ecb33a206925137f981464f600670f865bf122f78992f44eaab9"
+      },
+      "primaryAudit": {
+        "path": "jitendex-AB/primary-log-audit.json",
+        "bytes": 21580,
+        "sha256": "c197cfc84b253dd47996302623e19af3e368d0cd81ef290dfeaba60d027992af"
+      },
+      "primaryRecords": {
+        "path": "jitendex-AB/primary-records.jsonl",
+        "bytes": 362688,
+        "sha256": "dc158f82c6b0d4d1f591ad83bbbe012fceffce028496f90a877bba60c94658f7"
+      },
+      "primaryJobLog": {
+        "path": "jitendex-AB/primary-job.log",
+        "bytes": 3544186,
+        "sha256": "2cc20757fd3a9e7808f5f0859f7bbbd3af2683712cc0520558cd53730d085b86"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 25340080,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 337,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.07262189267810415,
+            "maximumPairedChangePercent": 0.11801191864448946
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.2039598137616616,
+            "maximumPairedChangePercent": -0.17911296436694535
+          }
+        }
+      },
+      "commonSemanticSha256": "73d9e09a8c6060abc56d6d836f8f23ae5f87137cca4e4c3952d8efe4e484b996",
+      "packages": {
+        "A": {
+          "zipSha256": "4f37882ab0d4e7c28a9d4e0992399aece3b5751bfb44e713749d66707d7082d0",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "12e79d528c38eab90f8b888cc00690b8402e4a5c9355dc9ca8834a8eefad3f80",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 85,
+          "maximumCoveredSampleGapMs": 176.739402,
+          "maxSampledPssKiB": 1068601,
+          "maxSampledPrivateKiB": 835640
+        },
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 84,
+          "maximumCoveredSampleGapMs": 112.251583,
+          "maxSampledPssKiB": 1068892,
+          "maxSampledPrivateKiB": 833728
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 83,
+          "maximumCoveredSampleGapMs": 178.762543,
+          "maxSampledPssKiB": 1074039,
+          "maxSampledPrivateKiB": 842648
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 85,
+          "maximumCoveredSampleGapMs": 101.564809,
+          "maxSampledPssKiB": 1072773,
+          "maxSampledPrivateKiB": 844160
+        }
+      ]
+    },
+    {
+      "cell": "jitendex-BA",
+      "jobId": 140933489153,
+      "rawArchive": {
+        "path": "jitendex-BA/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2247702,
+        "sha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9",
+        "gitBlobSha1": "befd9225955103a7b267c699e428dc56ad72e557"
+      },
+      "recovery": {
+        "path": "jitendex-BA/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 39816,
+        "sha256": "8ecdb92c2cb3ee9c3181972c897d9bca5acd5c06aa373891da42b5a47d8a5d5a"
+      },
+      "rawAudit": {
+        "path": "jitendex-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16356,
+        "sha256": "7b31e7922da930a828b497919421d531769367aab2f687a0e632eda81fd8c9bf"
+      },
+      "execution": {
+        "path": "jitendex-BA/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2433,
+        "sha256": "2066f5375029ea5359239859c0d65630d52197e80ff0269ac9236f1347de4f30"
+      },
+      "manifest": {
+        "path": "jitendex-BA/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51228,
+        "sha256": "04f16e2e60e3017ffc1f1c3e81036dc237c955b70a76f0bad0fbdd82db32f8b3"
+      },
+      "memberHashes": {
+        "path": "jitendex-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59866,
+        "sha256": "503da4ee02582d1b428517bb9a001a7cb6787ba7d74deb4e9d14553f1aa3408e"
+      },
+      "primaryAudit": {
+        "path": "jitendex-BA/primary-log-audit.json",
+        "bytes": 21787,
+        "sha256": "ee796fcb45fbf9e73940b7d728271846d3952a5cec8e0d39b35f5b2aecde959c"
+      },
+      "primaryRecords": {
+        "path": "jitendex-BA/primary-records.jsonl",
+        "bytes": 362884,
+        "sha256": "212d8844ccce5f56c6c454a21716788f54d8f7b4cd1e2a8db373b5cdd0c578b8"
+      },
+      "primaryJobLog": {
+        "path": "jitendex-BA/primary-job.log",
+        "bytes": 3545444,
+        "sha256": "84321bc93960a7f900c55d4eda2719a7af3b2b8324902d19d2d7ea614b3515e9"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 25472577,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 342,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.7354533041261944,
+            "maximumPairedChangePercent": -1.4773632861312724
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.7880653362565002,
+            "maximumPairedChangePercent": -1.7663744808611215
+          }
+        }
+      },
+      "commonSemanticSha256": "73d9e09a8c6060abc56d6d836f8f23ae5f87137cca4e4c3952d8efe4e484b996",
+      "packages": {
+        "A": {
+          "zipSha256": "769f3963ff91b3bfdfa2cf6d520584e1bb31589ffe588b2dd2e7086cf77eb130",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "3078011fe92ab41e5f34e6391ee58eec0a05b0520a618343b76234ffc7032bb6",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 85,
+          "maximumCoveredSampleGapMs": 91.903899,
+          "maxSampledPssKiB": 1057375,
+          "maxSampledPrivateKiB": 829748
+        },
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 85,
+          "maximumCoveredSampleGapMs": 99.136379,
+          "maxSampledPssKiB": 1078883,
+          "maxSampledPrivateKiB": 844668
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 85,
+          "maximumCoveredSampleGapMs": 99.406541,
+          "maxSampledPssKiB": 1060335,
+          "maxSampledPrivateKiB": 829504
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 87,
+          "maximumCoveredSampleGapMs": 106.877524,
+          "maxSampledPssKiB": 1044670,
+          "maxSampledPrivateKiB": 814492
+        }
+      ]
+    },
+    {
+      "cell": "vndb-AB",
+      "jobId": 140933489168,
+      "rawArchive": {
+        "path": "vndb-AB/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2341048,
+        "sha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+        "gitBlobSha1": "3bef9d10e9ffccee7513666407e7e7040ef24f69"
+      },
+      "recovery": {
+        "path": "vndb-AB/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 40687,
+        "sha256": "487f980daf8f76699bfbefe8c2d458864a50de71a4776111632e868ac4eb747e"
+      },
+      "rawAudit": {
+        "path": "vndb-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16259,
+        "sha256": "8fd8f758ccab7221b7edd6c4e5ee46bea3dd9f442d5b9f6428fabca54291f2e6"
+      },
+      "execution": {
+        "path": "vndb-AB/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2413,
+        "sha256": "a93eec085a5e37fe8c9d1dda2e636c0c263b9f5cf7c2a5ee0ff2c930159717a8"
+      },
+      "manifest": {
+        "path": "vndb-AB/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51220,
+        "sha256": "b5711a6a2623e394a50c15c1cd0b641e8eb6106317eb36dede4fda7e11d8eebd"
+      },
+      "memberHashes": {
+        "path": "vndb-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59868,
+        "sha256": "464f80b86e94d3be452dba24df560f384627bc1156760408562e18eb355f85ed"
+      },
+      "primaryAudit": {
+        "path": "vndb-AB/primary-log-audit.json",
+        "bytes": 20938,
+        "sha256": "eeefa683b5117d7096ba38708a4f539bc27215c971d0f2dcf87615ce29cb789c"
+      },
+      "primaryRecords": {
+        "path": "vndb-AB/primary-records.jsonl",
+        "bytes": 377102,
+        "sha256": "6e41f955a5ddbbffd63a1db650f79401fac7dd1b22bce7e8b0ac9bdd239ade3e"
+      },
+      "primaryJobLog": {
+        "path": "vndb-AB/primary-job.log",
+        "bytes": 3685118,
+        "sha256": "d2d625e90dc2d8fed275e571b21192533c5a6ae70937591eedd31fe4ac1011d2"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 27910146,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 421,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -4.987268621371821,
+            "maximumPairedChangePercent": -2.958422943663286
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -6.401637267349381,
+            "maximumPairedChangePercent": -4.367789165446556
+          }
+        }
+      },
+      "commonSemanticSha256": "f105d918d1f14f5ec6be70ee586c8c92fa6068a00e3b41a637ba7d8c552ef190",
+      "packages": {
+        "A": {
+          "zipSha256": "a6bf28067f8ae3837b02c46238c07797e62064dad8acde5aea63b6ae2e6b3b6c",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "5e9db5187b2c310133c0d434dcfa21f499540ced979b486f0ab5afaf4f50bcdc",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 107,
+          "maximumCoveredSampleGapMs": 161.585538,
+          "maxSampledPssKiB": 1308217,
+          "maxSampledPrivateKiB": 1076500
+        },
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 103,
+          "maximumCoveredSampleGapMs": 164.159202,
+          "maxSampledPssKiB": 1216431,
+          "maxSampledPrivateKiB": 985692
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 106,
+          "maximumCoveredSampleGapMs": 162.326182,
+          "maxSampledPssKiB": 1211075,
+          "maxSampledPrivateKiB": 979752
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 105,
+          "maximumCoveredSampleGapMs": 177.380524,
+          "maxSampledPssKiB": 1247996,
+          "maxSampledPrivateKiB": 1024500
+        }
+      ]
+    },
+    {
+      "cell": "vndb-BA",
+      "jobId": 140933489131,
+      "rawArchive": {
+        "path": "vndb-BA/raw-recovery-v2/raw-evidence.zip",
+        "bytes": 2374529,
+        "sha256": "0612d8aa9869534e84b37eb8eac0f5f878b77b262f69d8d74f81025e43b8b992",
+        "gitBlobSha1": "364e600c361b565db92e282b6f28eaee36a42ee2"
+      },
+      "recovery": {
+        "path": "vndb-BA/raw-recovery-v2/raw-archive-recovery.json",
+        "bytes": 40963,
+        "sha256": "434949eb82843afe470c6e1b501950ec3e313cd7d595194df0e37affafbdc72a"
+      },
+      "rawAudit": {
+        "path": "vndb-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+        "bytes": 16294,
+        "sha256": "b6b582c94a3f4471bc2072f49a5a36b6877dbc1a34d45eb31b43260e88814a6c"
+      },
+      "execution": {
+        "path": "vndb-BA/raw-recovery-v2/raw-audit-execution.json",
+        "bytes": 2413,
+        "sha256": "d1a764597ca2a780610ae9df5e86bf5d504b0139165bad7c8961c491930f2444"
+      },
+      "manifest": {
+        "path": "vndb-BA/raw-recovery-v2/raw-evidence-manifest.json",
+        "bytes": 51220,
+        "sha256": "31d8ecef6645f9bf1244d2545970f56135998409ef3924c4b4ea19e550fdcbcc"
+      },
+      "memberHashes": {
+        "path": "vndb-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+        "bytes": 59869,
+        "sha256": "8832396e6875bdb599cae157539472efb4775e2cda488411fdc6f5f312197d97"
+      },
+      "primaryAudit": {
+        "path": "vndb-BA/primary-log-audit.json",
+        "bytes": 21027,
+        "sha256": "f15aeb703a70eeedbde5b0907f37947c5aa6569503c653f62d9c58c6c8fd0c88"
+      },
+      "primaryRecords": {
+        "path": "vndb-BA/primary-records.jsonl",
+        "bytes": 375033,
+        "sha256": "17dc67664907843912995ce2f43bb3271afbc723bcf61336535a0590c076ff0c"
+      },
+      "primaryJobLog": {
+        "path": "vndb-BA/primary-job.log",
+        "bytes": 3728213,
+        "sha256": "78ce42513de8769131e06ad28d7beba15cf97f62ab7c3ae41f492cff92509ed6"
+      },
+      "rawReports": 42,
+      "primaryRecordsReconciled": 55,
+      "memberCount": 314,
+      "uncompressedBytes": 29180734,
+      "rawFileHashBindings": 126,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 455,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.4209083120147847,
+            "maximumPairedChangePercent": 2.891804329975267
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.3869865736228513,
+            "maximumPairedChangePercent": 3.662191056535491
+          }
+        }
+      },
+      "commonSemanticSha256": "f105d918d1f14f5ec6be70ee586c8c92fa6068a00e3b41a637ba7d8c552ef190",
+      "packages": {
+        "A": {
+          "zipSha256": "955b7bad841409728ac39cebc54dbfc5ab89672ca71c4b3ccae3d194d43bf6cc",
+          "zipBytes": 16806965,
+          "entries": 554,
+          "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+            "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        },
+        "B": {
+          "zipSha256": "140e27888629434ab8cc83260eb433430c5bef071d79a99474cd965fd11ac6dd",
+          "zipBytes": 16808230,
+          "entries": 554,
+          "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+          "changedEntryHashes": {
+            "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+            "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+          },
+          "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+        }
+      },
+      "memoryObservations": [
+        {
+          "name": "B1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 117,
+          "maximumCoveredSampleGapMs": 174.742968,
+          "maxSampledPssKiB": 1264317,
+          "maxSampledPrivateKiB": 1033624
+        },
+        {
+          "name": "A1",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 114,
+          "maximumCoveredSampleGapMs": 204.541482,
+          "maxSampledPssKiB": 1228783,
+          "maxSampledPrivateKiB": 997108
+        },
+        {
+          "name": "A2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 111,
+          "maximumCoveredSampleGapMs": 177.832993,
+          "maxSampledPssKiB": 1232303,
+          "maxSampledPrivateKiB": 1000196
+        },
+        {
+          "name": "B2",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "allObservedSampleCount": 113,
+          "maximumCoveredSampleGapMs": 190.812399,
+          "maxSampledPssKiB": 1231687,
+          "maxSampledPrivateKiB": 1011316
+        }
+      ]
+    }
+  ],
+  "pendingCells": [],
+  "totals": {
+    "reports": 252,
+    "primaryRecords": 330,
+    "rawFileHashBindings": 756,
+    "rawScans": 2204,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 24,
+    "members": 1884,
+    "archiveBytes": 13604514,
+    "uncompressedBytes": 156622152
+  },
+  "packageScope": "Original source/554-entry maps and separately logged excluded-package SHA/size. No outer-artifact or release-package ZIP re-download.",
+  "sameEntryMapsAcrossSixHosts": true,
+  "sameCommonSemanticsAcrossEachDictionaryHostPair": true,
+  "sourceReview": {
+    "path": "independent-raw-tooling-source-review.json",
+    "bytes": 1790,
+    "sha256": "64cb4622bfbeedad98ca2d60f28997273b79366cec81ede403f7818b7851cd9c"
+  },
+  "v2PrefixReview": {
+    "path": "independent-recovery-v2-prefix-review.json",
+    "bytes": 828,
+    "sha256": "08c34cae12bed4e97dfbfa8f3f176d7f58132868f7bba07e7ac3b5efa6b11226"
+  },
+  "originalPrefixFailurePreserved": {
+    "path": "recovery-v2-log-prefix-amendment.json",
+    "bytes": 3190,
+    "sha256": "d4807ab3664bd84c6ff49ecf761efc7ba9bda78bbf4f9e2c7d740638329b1096"
+  },
+  "firstFourSnapshotUnchanged": {
+    "path": "first-four-original-raw-evidence-index.json",
+    "bytes": 23885,
+    "sha256": "50f3dfd978415e28b66a9de4f15571f05423caf6b5b77241d2cc7445b3517b87"
+  },
+  "recoverySource": {
+    "path": "recover-raw-archive-v2.py",
+    "bytes": 12495,
+    "sha256": "827b3f106c131e6dc2b0c7614494997d058b6dc4102ec20a4fe2114ec9073eb8"
+  },
+  "rawAuditSource": {
+    "path": "raw-evidence-audit.py",
+    "bytes": 33738,
+    "sha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c"
+  },
+  "primaryStatisticsUnchanged": true,
+  "noMeasurementsChanged": true,
+  "performancePromotionNotInferredFromIntegrity": true
+}

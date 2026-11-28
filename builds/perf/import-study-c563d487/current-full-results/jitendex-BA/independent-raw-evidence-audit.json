@@ -1,0 +1,507 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T09:44:08.792477+00:00",
+  "scope": "Recovered original non-package archive, all raw reports and process-memory scans; no new acquisition, timing or selected reruns",
+  "auditIntegrityPassed": true,
+  "runId": 46130093248,
+  "dictionary": "jitendex",
+  "order": "BA",
+  "jobId": 140933489153,
+  "archive": {
+    "bytes": 2247702,
+    "sha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9",
+    "gitBlobSha1": "befd9225955103a7b267c699e428dc56ad72e557"
+  },
+  "zipSha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9",
+  "zipBytes": 2247702,
+  "recoveryReceiptSha256": "8ecdb92c2cb3ee9c3181972c897d9bca5acd5c06aa373891da42b5a47d8a5d5a",
+  "archiveManifestSha256": "04f16e2e60e3017ffc1f1c3e81036dc237c955b70a76f0bad0fbdd82db32f8b3",
+  "expectedSha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+  "memberCount": 314,
+  "memberManifestSha256": "503da4ee02582d1b428517bb9a001a7cb6787ba7d74deb4e9d14553f1aa3408e",
+  "primaryRecordsSha256": "212d8844ccce5f56c6c454a21716788f54d8f7b4cd1e2a8db373b5cdd0c578b8",
+  "frozenObserverSourceHashes": {
+    "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  "auditorSha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c",
+  "all55PrimaryRecordsReconciled": true,
+  "rawReports": 42,
+  "rawFileHashBindings": 126,
+  "allCanonicalReceiptsRecomputedWithUnchangedFrozenValidator": true,
+  "completeCommonSemanticSha256": "73d9e09a8c6060abc56d6d836f8f23ae5f87137cca4e4c3952d8efe4e484b996",
+  "releasePackages": {
+    "A": {
+      "zipSha256": "769f3963ff91b3bfdfa2cf6d520584e1bb31589ffe588b2dd2e7086cf77eb130",
+      "zipBytes": 16806965,
+      "entries": 554,
+      "entryMapSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+      "changedEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+    },
+    "B": {
+      "zipSha256": "3078011fe92ab41e5f34e6391ee58eec0a05b0520a618343b76234ffc7032bb6",
+      "zipBytes": 16808230,
+      "entries": 554,
+      "entryMapSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+      "changedEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+      },
+      "scope": "Retained original entry map and separately logged excluded-package byte hash/size; package ZIP bytes are not in the inner archive"
+    }
+  },
+  "onlyChangedReleaseEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "memoryOverlayExact": true,
+  "memory": {
+    "rawAudit": {
+      "schemaVersion": 1,
+      "observations": 4,
+      "rawScanCount": 342,
+      "everyObservationQualified": true,
+      "passesProspectiveMemoryScreen": true,
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -1.7354533041261944,
+          "maximumPairedChangePercent": -1.4773632861312724
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -1.7880653362565002,
+          "maximumPairedChangePercent": -1.7663744808611215
+        }
+      }
+    },
+    "observations": [
+      {
+        "name": "B1",
+        "arm": "B",
+        "pair": 1,
+        "rawMemorySha256": "6081a12d40247f1373ca6e36193906206d6f7dcfaf07dc40573a6b5ad3f03f98",
+        "rawMarkersSha256": "eb819930f62ea0baf45ecae6eee3cbc1cb1e10151d9083b300ae68d395702597",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 18,
+        "stableFullyReadTreeSampleCount": 18,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1335.582914,
+        "preImportBracketGapMs": 40.272618,
+        "postImportBracketGapMs": 58.716228,
+        "maximumCoveredSampleGapMs": 91.903899,
+        "allObservedSampleCount": 85,
+        "overlappingImportSampleCount": 18,
+        "fullyContainedImportSampleCount": 16,
+        "stableFullyReadImportSampleCount": 16,
+        "maxSampledPssKiB": 1057375,
+        "maxSampledPrivateKiB": 829748,
+        "rawProcessReadCount": 556,
+        "maximumGapProof": [
+          {
+            "leftNs": 393493669135,
+            "rightNs": 393585573034,
+            "gapMs": 91.903899
+          }
+        ]
+      },
+      {
+        "name": "A1",
+        "arm": "A",
+        "pair": 1,
+        "rawMemorySha256": "31e9c2a5518623aee1efd7ed77063e923601dc91d317ebaaeca0122270e37f31",
+        "rawMarkersSha256": "610b27fadf82d80a881b9a3f715b0abf23f66cf4bd4a67ea684fde2b03196b98",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 17,
+        "stableFullyReadTreeSampleCount": 17,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1326.9466,
+        "preImportBracketGapMs": 39.744537,
+        "postImportBracketGapMs": 21.444083,
+        "maximumCoveredSampleGapMs": 99.136379,
+        "allObservedSampleCount": 85,
+        "overlappingImportSampleCount": 17,
+        "fullyContainedImportSampleCount": 16,
+        "stableFullyReadImportSampleCount": 16,
+        "maxSampledPssKiB": 1078883,
+        "maxSampledPrivateKiB": 844668,
+        "rawProcessReadCount": 555,
+        "maximumGapProof": [
+          {
+            "leftNs": 401831551958,
+            "rightNs": 401930688337,
+            "gapMs": 99.136379
+          }
+        ]
+      },
+      {
+        "name": "A2",
+        "arm": "A",
+        "pair": 2,
+        "rawMemorySha256": "bbf0f4306df0fb14b6febdfeaa3b4de57ee78de49a83435e92cc899a6cb43fac",
+        "rawMarkersSha256": "4350454387e1a538d59c81ec9a5251d329c7262fed5a6e5dc89c1cbf369268c8",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 18,
+        "stableFullyReadTreeSampleCount": 18,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1326.295395,
+        "preImportBracketGapMs": 61.567814,
+        "postImportBracketGapMs": 31.647856,
+        "maximumCoveredSampleGapMs": 99.406541,
+        "allObservedSampleCount": 85,
+        "overlappingImportSampleCount": 18,
+        "fullyContainedImportSampleCount": 16,
+        "stableFullyReadImportSampleCount": 16,
+        "maxSampledPssKiB": 1060335,
+        "maxSampledPrivateKiB": 829504,
+        "rawProcessReadCount": 561,
+        "maximumGapProof": [
+          {
+            "leftNs": 409090009170,
+            "rightNs": 409189415711,
+            "gapMs": 99.406541
+          }
+        ]
+      },
+      {
+        "name": "B2",
+        "arm": "B",
+        "pair": 2,
+        "rawMemorySha256": "0fd900f06b288aad405a463e1ab9fbad3eaa92920b4aa6fba62c2764cf1147f6",
+        "rawMarkersSha256": "a1959be64155070454560f5d6e6d5822dda0285e23801dd2bf3828b02be0f635",
+        "schemaVersion": 3,
+        "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+        "authoritativeTiming": false,
+        "qualifiedForWholeTreePss": true,
+        "qualificationFailures": [],
+        "sampleCount": 17,
+        "stableFullyReadTreeSampleCount": 17,
+        "observedProcessCountRange": [
+          9,
+          9
+        ],
+        "samplesWithUnavailableSmaps": 0,
+        "samplesWithUnreadableAddressSpaces": 0,
+        "confirmedExitedZombieObservationCount": 0,
+        "confirmedExitedZombieIdentityCount": 0,
+        "windowDurationMs": 1382.421951,
+        "preImportBracketGapMs": 28.790951,
+        "postImportBracketGapMs": 9.092759,
+        "maximumCoveredSampleGapMs": 106.877524,
+        "allObservedSampleCount": 87,
+        "overlappingImportSampleCount": 17,
+        "fullyContainedImportSampleCount": 16,
+        "stableFullyReadImportSampleCount": 16,
+        "maxSampledPssKiB": 1044670,
+        "maxSampledPrivateKiB": 814492,
+        "rawProcessReadCount": 573,
+        "maximumGapProof": [
+          {
+            "leftNs": 417209839303,
+            "rightNs": 417316716827,
+            "gapMs": 106.877524
+          }
+        ]
+      }
+    ]
+  },
+  "rawMonotonicTimes": [
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1126.3999999999942
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1141.9000000000233
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1145.6000000000058
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1145.3999999999942
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1112.4000000000233
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1136.2999999999884
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "arm": "A",
+      "rawMonotonicImportMs": 1138.3000000000466
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "arm": "C",
+      "rawMonotonicImportMs": 1152.5999999999767
+    },
+    {
+      "id": "exhaustive-media-A",
+      "kind": "exhaustive-media",
+      "arm": "A",
+      "rawMonotonicImportMs": 1130.5
+    },
+    {
+      "id": "exhaustive-media-B",
+      "kind": "exhaustive-media",
+      "arm": "B",
+      "rawMonotonicImportMs": 1158.0999999999767
+    },
+    {
+      "id": "memory/A1",
+      "kind": "memory",
+      "arm": "A",
+      "rawMonotonicImportMs": 1299.0999999999767
+    },
+    {
+      "id": "memory/A2",
+      "kind": "memory",
+      "arm": "A",
+      "rawMonotonicImportMs": 1298.7999999999884
+    },
+    {
+      "id": "memory/B1",
+      "kind": "memory",
+      "arm": "B",
+      "rawMonotonicImportMs": 1297.2999999999884
+    },
+    {
+      "id": "memory/B2",
+      "kind": "memory",
+      "arm": "B",
+      "rawMonotonicImportMs": 1346.5999999999767
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1136.0
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1106.2999999999884
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1135.6999999999825
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1152.6000000000058
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1104.0
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1141.1999999999825
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1122.2000000000116
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1113.8999999999942
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1154.3999999999942
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1126.8999999999942
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1135.3000000000175
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1147.8999999999942
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1143.100000000035
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1146.2999999999884
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1162.2999999999884
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1130.7000000000116
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1119.5999999999767
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1121.2999999999884
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1156.4000000000233
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1133.9000000000233
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1146.7999999999884
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1158.0999999999767
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "arm": "A",
+      "rawMonotonicImportMs": 1147.9000000000233
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "arm": "B",
+      "rawMonotonicImportMs": 1143.7999999999884
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "arm": "A",
+      "rawMonotonicImportMs": 1368.5
+    },
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "arm": "B",
+      "rawMonotonicImportMs": 1125.300000000003
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "arm": "A",
+      "rawMonotonicImportMs": 1225.0999999999913
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "arm": "B",
+      "rawMonotonicImportMs": 1124.7000000000116
+    }
+  ],
+  "limits": [
+    "This independently reconstructs retained sampled process-tree data under the frozen a7f7 policy; it is not an exact peak measurement.",
+    "No missing read is assigned zero; failed coverage gates remain failed and unqualified maxima remain null.",
+    "Primary paired statistics and all exclusions remain unchanged; this artifact audit makes no new performance decision.",
+    "Release-package ZIP bytes were excluded by the unchanged post-acquisition producer. Their logged byte hashes/sizes and retained original 554-entry maps are checked; this is not a second download or decompression of those packages.",
+    "This cohort is bound to dcfc/4cd and is not pooled with the earlier 9e10 qualification."
+  ]
+}

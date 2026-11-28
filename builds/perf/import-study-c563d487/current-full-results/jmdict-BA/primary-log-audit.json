@@ -1,0 +1,669 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 09:41:55 UTC",
+  "runId": 46130093248,
+  "jobId": 140933489203,
+  "auditorSha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+  "expectedSha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+  "primaryLogSha256": "e579c0727e68e08f4d7b522f749b09ed3653867b58e9c9604e3eaadb3679f7be",
+  "rawTaggedRecordsSha256": "5703b9e4bd81bd25e6ac0e0297448dfac0bc3a9045410f2195e65db3a62f314d",
+  "dictionary": "jmdict",
+  "order": "BA",
+  "errors": [],
+  "allChecksPass": true,
+  "cohort": {
+    "attempt": "1",
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "dictionary": "jmdict",
+    "expectedObservationCount": 42,
+    "fixture": {
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "logExtractionPolicy": "Read-only after acquisition; every raw report discovered, no timing or semantic replacements",
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "order": "BA",
+    "runId": "46130093248",
+    "workflowCommit": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+    "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2"
+  },
+  "browser": {
+    "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "version": "153.0.8010.12",
+    "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+  },
+  "sourceIdentities": {
+    "A": {
+      "arm": "A",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "426821b30edd953dde8745489a056a4f2937c1a43aca2f5da80209a94f9971e3",
+      "packageEntryCount": 554,
+      "packageSha256": "dee1e07ad16bd853deccb59a253b3470352581042392d6bc011120e72f59b06e",
+      "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "dee1e07ad16bd853deccb59a253b3470352581042392d6bc011120e72f59b06e",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+    },
+    "B": {
+      "arm": "B",
+      "changedPackageEntryHashes": {
+        "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+      },
+      "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "packageEntriesSha256": "2993963b393fe975143a71b19e508efe650ecd041077a00a6f3cad4d4ca40cbd",
+      "packageEntryCount": 554,
+      "packageSha256": "9be8016b9b1ed14beff0ed26b3e3f047b24750a7601215a7284d43caf4768566",
+      "sha": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+      "sourceHashes": {
+        "builds/manabitan-chrome-dev.zip": null,
+        "builds/manabitan-chrome.zip": "9be8016b9b1ed14beff0ed26b3e3f047b24750a7601215a7284d43caf4768566",
+        "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+        "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+        "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      "tree": "c752bb176e652539e9dd11222d1337d7c8679cc7"
+    }
+  },
+  "originalCorrectnessMemoryStatus": {
+    "status": "correctness-memory-passed",
+    "memoryPassed": true
+  },
+  "observations": 42,
+  "rawTimes": [
+    {
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "arm": "A",
+      "position": 12,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 828.5,
+      "reportedImportMs": 828.5
+    },
+    {
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "arm": "C",
+      "position": 11,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 787.8999999999942,
+      "reportedImportMs": 787.8999999999942
+    },
+    {
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "arm": "A",
+      "position": 19,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 818.5,
+      "reportedImportMs": 818.5
+    },
+    {
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "arm": "C",
+      "position": 20,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 802.7999999999884,
+      "reportedImportMs": 802.7999999999884
+    },
+    {
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "arm": "A",
+      "position": 28,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 812.3000000000466,
+      "reportedImportMs": 812.3000000000466
+    },
+    {
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "arm": "C",
+      "position": 27,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 827.2999999999884,
+      "reportedImportMs": 827.2999999999884
+    },
+    {
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "arm": "A",
+      "position": 35,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 810.5,
+      "reportedImportMs": 810.5
+    },
+    {
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "arm": "C",
+      "position": 36,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 804.5,
+      "reportedImportMs": 804.5
+    },
+    {
+      "id": "exhaustive-media-A",
+      "kind": "exhaustive-media",
+      "arm": "A",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 799.7999999999884,
+      "reportedImportMs": 799.7999999999884
+    },
+    {
+      "id": "exhaustive-media-B",
+      "kind": "exhaustive-media",
+      "arm": "B",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 822.2000000000116,
+      "reportedImportMs": 822.2000000000116
+    },
+    {
+      "id": "memory/A1",
+      "index": 2,
+      "arm": "A",
+      "name": "A1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 964.1999999999534,
+      "reportedImportMs": 964.1999999999534
+    },
+    {
+      "id": "memory/A2",
+      "index": 3,
+      "arm": "A",
+      "name": "A2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 1001.9000000000233,
+      "reportedImportMs": 1001.9000000000233
+    },
+    {
+      "id": "memory/B1",
+      "index": 1,
+      "arm": "B",
+      "name": "B1",
+      "pair": 1,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 976.2000000000116,
+      "reportedImportMs": 976.2000000000116
+    },
+    {
+      "id": "memory/B2",
+      "index": 4,
+      "arm": "B",
+      "name": "B2",
+      "pair": 2,
+      "kind": "memory",
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 959.2000000000116,
+      "reportedImportMs": 959.2000000000116
+    },
+    {
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "A",
+      "position": 6,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 829.3999999999942,
+      "reportedImportMs": 829.3999999999942
+    },
+    {
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "arm": "B",
+      "position": 5,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 831.3999999999942,
+      "reportedImportMs": 831.3999999999942
+    },
+    {
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "A",
+      "position": 7,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 813.5,
+      "reportedImportMs": 813.5
+    },
+    {
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "arm": "B",
+      "position": 8,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 803.5999999999913,
+      "reportedImportMs": 803.5999999999913
+    },
+    {
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "A",
+      "position": 10,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 803.6000000000058,
+      "reportedImportMs": 803.6000000000058
+    },
+    {
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "arm": "B",
+      "position": 9,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 835.4000000000233,
+      "reportedImportMs": 835.4000000000233
+    },
+    {
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "A",
+      "position": 13,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 818,
+      "reportedImportMs": 818
+    },
+    {
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "arm": "B",
+      "position": 14,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 817.1999999999825,
+      "reportedImportMs": 817.1999999999825
+    },
+    {
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "A",
+      "position": 16,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 818.8999999999942,
+      "reportedImportMs": 818.8999999999942
+    },
+    {
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "arm": "B",
+      "position": 15,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 812.5,
+      "reportedImportMs": 812.5
+    },
+    {
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "A",
+      "position": 17,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 822.8000000000175,
+      "reportedImportMs": 822.8000000000175
+    },
+    {
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "arm": "B",
+      "position": 18,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 801.2000000000116,
+      "reportedImportMs": 801.2000000000116
+    },
+    {
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "A",
+      "position": 22,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 834.4000000000233,
+      "reportedImportMs": 834.4000000000233
+    },
+    {
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "arm": "B",
+      "position": 21,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 817.7000000000116,
+      "reportedImportMs": 817.7000000000116
+    },
+    {
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "A",
+      "position": 23,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 805.3999999999942,
+      "reportedImportMs": 805.3999999999942
+    },
+    {
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "arm": "B",
+      "position": 24,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 804.2000000000116,
+      "reportedImportMs": 804.2000000000116
+    },
+    {
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "A",
+      "position": 26,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 828.4000000000233,
+      "reportedImportMs": 828.4000000000233
+    },
+    {
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "arm": "B",
+      "position": 25,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 831.9000000000233,
+      "reportedImportMs": 831.9000000000233
+    },
+    {
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "A",
+      "position": 29,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 809.6000000000349,
+      "reportedImportMs": 809.6000000000349
+    },
+    {
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "arm": "B",
+      "position": 30,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 824.2999999999884,
+      "reportedImportMs": 824.2999999999884
+    },
+    {
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "A",
+      "position": 32,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 811.7000000000116,
+      "reportedImportMs": 811.7000000000116
+    },
+    {
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "arm": "B",
+      "position": 31,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 815,
+      "reportedImportMs": 815
+    },
+    {
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "A",
+      "position": 33,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 811.5,
+      "reportedImportMs": 811.5
+    },
+    {
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "arm": "B",
+      "position": 34,
+      "authoritativeCohort": true,
+      "rawMonotonicImportMs": 803.5,
+      "reportedImportMs": 803.5
+    },
+    {
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "A",
+      "position": 2,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 2020.3999999999942,
+      "reportedImportMs": 2020.3999999999942
+    },
+    {
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "arm": "B",
+      "position": 1,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 835.0999999999913,
+      "reportedImportMs": 835.0999999999913
+    },
+    {
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "A",
+      "position": 3,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 779.2999999999884,
+      "reportedImportMs": 779.2999999999884
+    },
+    {
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "arm": "B",
+      "position": 4,
+      "authoritativeCohort": false,
+      "rawMonotonicImportMs": 822,
+      "reportedImportMs": 822
+    }
+  ],
+  "candidateVsBaseline": {
+    "count": 12,
+    "ratios": [
+      1.0024113817217266,
+      0.9878303626305978,
+      1.0395719263315297,
+      0.9990220048899542,
+      0.9921846379289361,
+      0.9737481769567266,
+      0.9799856184084238,
+      0.9985100571144989,
+      1.0042250120714629,
+      1.0181571146244477,
+      1.0040655414561885,
+      0.9901417128773875
+    ],
+    "baselineMs": [
+      829.3999999999942,
+      813.5,
+      803.6000000000058,
+      818,
+      818.8999999999942,
+      822.8000000000175,
+      834.4000000000233,
+      805.3999999999942,
+      828.4000000000233,
+      809.6000000000349,
+      811.7000000000116,
+      811.5
+    ],
+    "candidateMs": [
+      831.3999999999942,
+      803.5999999999913,
+      835.4000000000233,
+      817.1999999999825,
+      812.5,
+      801.2000000000116,
+      817.7000000000116,
+      804.2000000000116,
+      831.9000000000233,
+      824.2999999999884,
+      815,
+      803.5
+    ],
+    "baselineMedianMs": 815.75,
+    "candidateMedianMs": 816.0999999999913,
+    "medianPairedChangeMs": -1,
+    "medianPairedChangePercent": -0.12339689977733936,
+    "equalWorkChangePercent": -0.09482828942064536,
+    "worstPairChangePercent": 3.9571926331529728,
+    "fasterPairs": 7,
+    "descriptiveBootstrap95Percent": [
+      -1.101396224600737,
+      0.41452767638257004
+    ]
+  },
+  "identicalCodeControl": {
+    "count": 4,
+    "ratios": [
+      0.9509957754978807,
+      0.9808185705558807,
+      1.0184660839590556,
+      0.9925971622455274
+    ],
+    "baselineMs": [
+      828.5,
+      818.5,
+      812.3000000000466,
+      810.5
+    ],
+    "candidateMs": [
+      787.8999999999942,
+      802.7999999999884,
+      827.2999999999884,
+      804.5
+    ],
+    "baselineMedianMs": 815.4000000000233,
+    "candidateMedianMs": 803.6499999999942,
+    "medianPairedChangeMs": -10.85000000000582,
+    "medianPairedChangePercent": -1.329213359929593,
+    "equalWorkChangePercent": -1.446571655761053,
+    "worstPairChangePercent": 1.846608395905558,
+    "fasterPairs": 3,
+    "descriptiveBootstrap95Percent": [
+      -4.900422450211927,
+      1.846608395905558
+    ]
+  },
+  "storageBytes": 43520477,
+  "lookupSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+  "memoryMetrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": 2.9006865131049775,
+      "medianPairedChangePercent": 1.883467909377179
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": 2.6314265227820544,
+      "medianPairedChangePercent": 1.6374597131591284
+    }
+  },
+  "memoryAudit": {
+    "everyObservationQualified": true,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": 2.9006865131049775,
+        "medianPairedChangePercent": 1.883467909377179
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": 2.6314265227820544,
+        "medianPairedChangePercent": 1.6374597131591284
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": true,
+    "rawScanCount": 274,
+    "schemaVersion": 1
+  },
+  "recomputedMemoryMetrics": {
+    "maxSampledPssKiB": {
+      "medianPairedChangePercent": 1.6374597131591284,
+      "maximumPairedChangePercent": 2.6314265227820544
+    },
+    "maxSampledPrivateKiB": {
+      "medianPairedChangePercent": 1.883467909377179,
+      "maximumPairedChangePercent": 2.9006865131049775
+    }
+  },
+  "recomputedMemoryPass": true,
+  "memoryAuditScope": "Four emitted observation summaries, coverage bounds and paired metric arithmetic independently checked. Per-process raw scan reconstruction remains the unchanged CI audit; originals retained in Actions artifacts.",
+  "mechanicalTargetThresholdPass": false,
+  "mechanicalNonTargetHoldSignal": false,
+  "identicalCodeChangePercentRange": [
+    -4.900422450211927,
+    1.846608395905558
+  ],
+  "promotionDecision": "No per-host automatic promotion; requires both independent hosts, controls review, all gates, and non-target review under frozen prospective criteria.",
+  "controlInterpretation": "Materially smaller identical-code variation requires explicit review; no control subtraction or host pooling."
+}

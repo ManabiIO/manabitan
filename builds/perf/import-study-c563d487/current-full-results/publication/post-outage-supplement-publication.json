@@ -1,0 +1,16 @@
+{
+  "branch": "perf/import-study-evidence-20261128-c563d487",
+  "commit": "74ca99b51983dd7a0b4ef5d5dea662b9caa9fc19",
+  "parent": "63c2e40049981460f524f6b36695239a265a430b",
+  "tree": "92d3bb8dd595852299758aeb99b956fb0085f52e",
+  "publishedAtUtc": "2026-11-28 09:45:10 UTC",
+  "fileCount": 80,
+  "totalBytes": 18201940,
+  "canonicalSha256": "a80aa6d3df7d065bb741031eed3d80e14891aa7466673ccb5f47021e41782c64",
+  "indexSha256": "3742e840b0b36a1b34a282e3bf99183e05bb967cd039d9c954ba4be9155ac687",
+  "manifestGitBlob": "97b59d295a53215f5f1955f7d50568fbe41779b7",
+  "verificationGitBlob": "c094f5532cbe05a7e12af87adde458ccd84bbb5c",
+  "snapshotCutoff": "2026-11-28T09:26:32Z",
+  "noRuntimeChange": true,
+  "noProductPr": true
+}

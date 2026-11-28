@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:01:12.044555+00:00",
+  "scope": "Read-only exact package-size accounting for the completed dcfc\u21924cd cohort; no download, rebuild or observation change.",
+  "runId": 46130093248,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "changedEntries": {
+    "js/dictionary/wasm/term-bank-parser.c": {
+      "A": {
+        "path": "numeric-suffix-972-build-evidence/reverse-patch-verification-final/ext/js/dictionary/wasm/term-bank-parser.c",
+        "bytes": 161067,
+        "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+      },
+      "B": {
+        "path": "numeric-suffix-972-build-evidence/product/ext/js/dictionary/wasm/term-bank-parser.c",
+        "bytes": 164449,
+        "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f"
+      },
+      "uncompressedDeltaBytes": 3382
+    },
+    "lib/term-bank-parser.wasm": {
+      "A": {
+        "path": "numeric-suffix-972-build-evidence/reverse-patch-verification-final/dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "bytes": 69068,
+        "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "B": {
+        "path": "numeric-suffix-972-build-evidence/product/dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "bytes": 69998,
+        "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+      },
+      "uncompressedDeltaBytes": 930
+    }
+  },
+  "uncompressedChangedEntryTotalDeltaBytes": 4312,
+  "cells": {
+    "jmdict-AB": {
+      "sourceIdentitiesMemberSha256": "6e2786798a6be227b12a5db58051e29ba1a8ff8b3b6a3b24773d16c5f8d14f62",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "2e13588ebd131a60438817e6efaf3aace8f72d4788e48bde11dc28b33ff04ec1"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "b97c501aeb5c5a2a7356db38b7221de34604140dc92dd586eab849442f50502a"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    },
+    "jmdict-BA": {
+      "sourceIdentitiesMemberSha256": "4cc54b19b8f128942569eb8ca030573d676fea75a00c55e7a3f97e65e811efd7",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "dee1e07ad16bd853deccb59a253b3470352581042392d6bc011120e72f59b06e"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "9be8016b9b1ed14beff0ed26b3e3f047b24750a7601215a7284d43caf4768566"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    },
+    "jitendex-AB": {
+      "sourceIdentitiesMemberSha256": "92c17d4b1993bd6f56d9f62bf0f5e92616741ee78788a24c48cfacebabcddf8c",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "4f37882ab0d4e7c28a9d4e0992399aece3b5751bfb44e713749d66707d7082d0"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "12e79d528c38eab90f8b888cc00690b8402e4a5c9355dc9ca8834a8eefad3f80"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    },
+    "jitendex-BA": {
+      "sourceIdentitiesMemberSha256": "9b894c5968c67ceb2c7505f277999d62dc1a1c2c23d29fe8701dbcb2bd51115b",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "769f3963ff91b3bfdfa2cf6d520584e1bb31589ffe588b2dd2e7086cf77eb130"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "3078011fe92ab41e5f34e6391ee58eec0a05b0520a618343b76234ffc7032bb6"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    },
+    "vndb-AB": {
+      "sourceIdentitiesMemberSha256": "782347735a6a603943a6dae9144d8fe0d858b4de03e071b8349ac57b2f8e826e",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "a6bf28067f8ae3837b02c46238c07797e62064dad8acde5aea63b6ae2e6b3b6c"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "5e9db5187b2c310133c0d434dcfa21f499540ced979b486f0ab5afaf4f50bcdc"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    },
+    "vndb-BA": {
+      "sourceIdentitiesMemberSha256": "e2014f9f5ae6d2dd96a71f445e0fe257903eec03a7746056ed9f82b5bebc805e",
+      "packageEntryCount": 554,
+      "changedEntryNames": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "excludedPackages": [
+        {
+          "bytes": 16806965,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "955b7bad841409728ac39cebc54dbfc5ab89672ca71c4b3ccae3d194d43bf6cc"
+        },
+        {
+          "bytes": 16808230,
+          "path": "package-B.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "140e27888629434ab8cc83260eb433430c5bef071d79a99474cd965fd11ac6dd"
+        }
+      ],
+      "compressedArchiveDeltaBytes": 1265
+    }
+  },
+  "commonCompressedArchiveSizes": {
+    "baselineBytes": 16806965,
+    "candidateBytes": 16808230,
+    "deltaBytes": 1265
+  },
+  "limits": [
+    "Exact total compressed release ZIP sizes come from frozen post-acquisition exclusion records tied to each original source identity; release ZIPs were not downloaded again.",
+    "Uncompressed total entry-byte delta is derived from both exact changed-file byte lengths; the other552 entry hashes and the entire entry set are identical.",
+    "Individual entry compressed sizes are not present in the hash-only entry maps and are not claimed.",
+    "Native code-file size changes are not process memory measurements."
+  ],
+  "noMeasurementsChanged": true
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "result": "pass",
+  "scope": "Independent source-only review before original raw-data replay; no native execution or acquisition",
+  "oldAuditorSha256": "3b38d328f7c0bc70c993ff19fe41a8f4f7dd14fbed260a401bad43e14d65e092",
+  "newAuditorSha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c",
+  "recovererSha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c",
+  "helperNames": [
+    "sha",
+    "digest",
+    "pick",
+    "module",
+    "compact_validation",
+    "tree_identity",
+    "exited_zombie",
+    "reconstruct_memory"
+  ],
+  "allEightHelpersByteIdentical": true,
+  "reportAndMemoryBlock": {
+    "bytes": 8685,
+    "sha256": "c56742d636584a03fe57ea367a7029e03f40420cc71f9dea1ab23bd08b6e80ef",
+    "byteIdentical": true
+  },
+  "findings": [
+    "Frozen current expected/source/run and exact provenance are bound; old cohorts are separate",
+    "Archive tags are ordered with exact chunk indexes/counts/base64 lengths and roundtrip; original manifest bytes, ZIP SHA/Gitblob and every member SHA/size/CRC must match",
+    "Exactly two root package copies excluded; retained complete entry maps and independently logged ZIP bytes/hash checked; no claim of a second package ZIP decompression",
+    "Original42 reports/55 records and coverage/memory gates unchanged",
+    "Failure and partial receipts preserved; existing outputs not overwritten"
+  ],
+  "limitations": [
+    "Source review does not execute observed data; owner will independently recover and replay each original archive",
+    "Package ZIP bytes intentionally omitted; archive retains original full package entry maps and separately emitted size/hash"
+  ],
+  "retainedReviewAttemptSha256": "64119381693e2af193d2844a88b518a013de4ac1b61155890d0ef7ff99b57ed3"
+}

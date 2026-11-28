@@ -1,0 +1,2196 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:03:33.724582+00:00",
+  "repository": "ManabiIO/manabitan",
+  "scope": "Closed dcfc-to-4cd full-browser qualification. All six terminal primary and original raw evidence layers are complete; no new acquisition or source modification.",
+  "previousCheckpoint": {
+    "commit": "74ca99b51983dd7a0b4ef5d5dea662b9caa9fc19",
+    "tree": "92d3bb8dd595852299758aeb99b956fb0085f52e",
+    "canonicalSha256": "a80aa6d3df7d065bb741031eed3d80e14891aa7466673ccb5f47021e41782c64",
+    "publicationReceipt": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/post-outage-supplement-publication.json",
+      "bytes": 723,
+      "sha256": "350b2131df3a2512a2a6e313b765292b36d8e106d4dd14cecefe0e8e59f560de"
+    }
+  },
+  "source": {
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+    "tooling": "faf6d9d9c282b2da46a7c8ee05835f4db0827039",
+    "workflowSha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+    "runId": 46130093248,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248",
+    "sourceTrees": {
+      "A": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+      "B": "c752bb176e652539e9dd11222d1337d7c8679cc7"
+    },
+    "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "browser": {
+      "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+      "version": "153.0.8010.12",
+      "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+    },
+    "nodeVersion": "v22.22.0",
+    "packageEntryHashes": {
+      "A": {
+        "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+        "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "B": {
+        "js/dictionary/wasm/term-bank-parser.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+        "lib/term-bank-parser.wasm": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968"
+      }
+    }
+  },
+  "registeredPlan": {
+    "perCell": {
+      "excludedWarmups": 4,
+      "candidatePairs": 12,
+      "identicalCodePairs": 4,
+      "mediaObservations": 2,
+      "separateMemoryObservations": 4,
+      "totalReports": 42
+    },
+    "cells": 6,
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "orders": [
+      "AB",
+      "BA"
+    ],
+    "productionDefaultRequestedFlags": {},
+    "timer": "File input through completion of required post-UI work; uninstrumented complete-import timing.",
+    "sourceOrScheduleChangesAfterLaunch": false,
+    "selectedRetriesOrDroppedObservations": false
+  },
+  "decision": {
+    "status": "not-qualified",
+    "productPerformancePr": null,
+    "reason": "Both separately provisioned VNDB hosts miss the frozen minimum 2% paired median reduction, 9-of-12 faster pairs and below-zero descriptive 95% interval. Identical-code control variation is larger than both candidate medians.",
+    "targetByHost": {
+      "vndb-AB": {
+        "medianPairedChangePercent": -1.3018588086683103,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Percent": [
+          -2.808624055797715,
+          0.5448784675896601
+        ],
+        "passed": false
+      },
+      "vndb-BA": {
+        "medianPairedChangePercent": -1.1083798421625102,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Percent": [
+          -3.54742914926206,
+          0.8988757835488137
+        ],
+        "passed": false
+      }
+    },
+    "nonTargetInterpretation": "All four non-target intervals cross zero. No replicated mechanical rejection signal is present; these inconclusive timings do not prove equivalence or non-regression.",
+    "allCorrectnessStorageAndPackageEntryChecksPassed": true,
+    "allProspectiveMemoryChecksPassed": true,
+    "oldBaselineResultsPooledOrTransferred": false,
+    "conditionalPrDraftIncludedAsDeliverable": false
+  },
+  "totals": {
+    "primaryRecords": 330,
+    "reports": 252,
+    "candidatePairs": 72,
+    "identicalCodePairs": 24,
+    "memoryObservations": 24,
+    "qualifiedMemoryObservations": 24,
+    "rawScans": 2204,
+    "rawFileHashBindings": 756,
+    "rawMembers": 1884,
+    "rawArchiveBytes": 13604514,
+    "rawUncompressedBytes": 156622152
+  },
+  "cells": {
+    "jmdict-AB": {
+      "jobId": 140933489138,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489138",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 842.0499999999884,
+        "candidateMedianMs": 849.9999999999927,
+        "medianPairedChangeMs": 10.949999999989814,
+        "medianPairedChangePercent": 1.3049366980532717,
+        "equalWorkChangePercent": 1.030306622413213,
+        "fasterPairs": 5,
+        "descriptiveBootstrap95Percent": [
+          -0.4510984929994244,
+          2.5129694414614434
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": 0.14361988572033635,
+        "rangePercent": [
+          -4.874511991077702,
+          2.9172644667652126
+        ],
+        "largestAbsoluteChangePercent": 4.874511991077702
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 375,
+      "storageBytes": 43520477,
+      "persistedSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/raw-evidence.zip",
+        "bytes": 2254309,
+        "sha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/primary-log-audit.json",
+        "bytes": 20904,
+        "sha256": "080f0563ff4f55b8e1c523f9192c6d565044f7f64a4d066980441095202ab07a"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/independent-raw-evidence-audit.json",
+        "bytes": 16258,
+        "sha256": "c103ea7c39deb95cabf3b389c58b21c462b63168743a0fad654cac168bf19414"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2339368,
+        "sha256": "bb56229340578ddb5786162ca03dbc7e43d0520e5fa5acf5f170434eeb121c90"
+      }
+    },
+    "jmdict-BA": {
+      "jobId": 140933489203,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489203",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 815.75,
+        "candidateMedianMs": 816.0999999999913,
+        "medianPairedChangeMs": -1,
+        "medianPairedChangePercent": -0.12339689977733936,
+        "equalWorkChangePercent": -0.09482828942064536,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Percent": [
+          -1.101396224600737,
+          0.41452767638257004
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": -1.329213359929593,
+        "rangePercent": [
+          -4.900422450211927,
+          1.846608395905558
+        ],
+        "largestAbsoluteChangePercent": 4.900422450211927
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 274,
+      "storageBytes": 43520477,
+      "persistedSemanticSha256": "23edafc63f9cd37205c85a44f82c006acbdd21dd61a862d142d6b869b5c9ca11",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/raw-evidence.zip",
+        "bytes": 2140209,
+        "sha256": "b209b91fcde954f03a7729fec7310270de9916370c4a474a4377d856bdd4654a"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/primary-log-audit.json",
+        "bytes": 20777,
+        "sha256": "ea0318287d52551042c59851167ef46bf66d40d264908cdac45a5bed50294c90"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/independent-raw-evidence-audit.json",
+        "bytes": 16213,
+        "sha256": "8b0527512c08a88e9b9eccb842e98554ae8e032cf5716d472ead38b53738e09d"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2243979,
+        "sha256": "55bdcfd647c8179ee182e8bad591a2e996b5a152a65d74f746d7d9ca4ec1ea51"
+      }
+    },
+    "jitendex-AB": {
+      "jobId": 140933489159,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489159",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 1175.100000000035,
+        "candidateMedianMs": 1176.3499999999767,
+        "medianPairedChangeMs": -3.4999999999417923,
+        "medianPairedChangePercent": -0.29169437148177657,
+        "equalWorkChangePercent": 0.15483614358433595,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -1.6682435833485831,
+          2.2201452549749146
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": 0.18166057871096264,
+        "rangePercent": [
+          -3.5819142689333283,
+          1.4641938060113047
+        ],
+        "largestAbsoluteChangePercent": 3.5819142689333283
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 337,
+      "storageBytes": 67466332,
+      "persistedSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/raw-evidence.zip",
+        "bytes": 2246717,
+        "sha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/primary-log-audit.json",
+        "bytes": 21580,
+        "sha256": "c197cfc84b253dd47996302623e19af3e368d0cd81ef290dfeaba60d027992af"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/independent-raw-evidence-audit.json",
+        "bytes": 16293,
+        "sha256": "506b2791d1a3fe5377bb7195a472a8c09590681b7c555aee9c4f7caed26edb75"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2344965,
+        "sha256": "a3e06f78902ed51f14029ae4a65896c05360e56510e223c58115a02e73d474bf"
+      }
+    },
+    "jitendex-BA": {
+      "jobId": 140933489153,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489153",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 1139.5500000000175,
+        "candidateMedianMs": 1137.550000000003,
+        "medianPairedChangeMs": -1.2000000000116415,
+        "medianPairedChangePercent": -0.10266701351163698,
+        "equalWorkChangePercent": -0.29860140372011124,
+        "fasterPairs": 6,
+        "descriptiveBootstrap95Percent": [
+          -2.163941706919892,
+          1.047594674878538
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": 1.316162337500093,
+        "rangePercent": [
+          -0.017458100559675227,
+          2.1485077310288148
+        ],
+        "largestAbsoluteChangePercent": 2.1485077310288148
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 342,
+      "storageBytes": 67466332,
+      "persistedSemanticSha256": "0688eedb5841ca5211aedfcb466cc85df62cfaf59bb9aec178668dc39c6ba29a",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/raw-evidence.zip",
+        "bytes": 2247702,
+        "sha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/primary-log-audit.json",
+        "bytes": 21787,
+        "sha256": "ee796fcb45fbf9e73940b7d728271846d3952a5cec8e0d39b35f5b2aecde959c"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/independent-raw-evidence-audit.json",
+        "bytes": 16356,
+        "sha256": "7b31e7922da930a828b497919421d531769367aab2f687a0e632eda81fd8c9bf"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2341420,
+        "sha256": "73555bfaf04129f0c0b123183fa54adb5092b43a96d519083bf8b7e7e8468c18"
+      }
+    },
+    "vndb-AB": {
+      "jobId": 140933489168,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489168",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 3933.0500000000466,
+        "candidateMedianMs": 3912.749999999971,
+        "medianPairedChangeMs": -54.24999999994179,
+        "medianPairedChangePercent": -1.3018588086683103,
+        "equalWorkChangePercent": -1.0380869959755068,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Percent": [
+          -2.808624055797715,
+          0.5448784675896601
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": 0.41084791238155116,
+        "rangePercent": [
+          -3.2063484215459237,
+          6.10641186299139
+        ],
+        "largestAbsoluteChangePercent": 6.10641186299139
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 421,
+      "storageBytes": 609176779,
+      "persistedSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/raw-evidence.zip",
+        "bytes": 2341048,
+        "sha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/primary-log-audit.json",
+        "bytes": 20938,
+        "sha256": "eeefa683b5117d7096ba38708a4f539bc27215c971d0f2dcf87615ce29cb789c"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/independent-raw-evidence-audit.json",
+        "bytes": 16259,
+        "sha256": "8fd8f758ccab7221b7edd6c4e5ee46bea3dd9f442d5b9f6428fabca54291f2e6"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2407463,
+        "sha256": "695f84f0af74ba58af3e83d577afc3af24077d61bf673f6a49b27b6663c80a28"
+      }
+    },
+    "vndb-BA": {
+      "jobId": 140933489131,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46130093248/job/140933489131",
+      "reports": 42,
+      "primaryRecords": 55,
+      "effect": {
+        "count": 12,
+        "baselineMedianMs": 4830.25,
+        "candidateMedianMs": 4744,
+        "medianPairedChangeMs": -52.649999999965075,
+        "medianPairedChangePercent": -1.1083798421625102,
+        "equalWorkChangePercent": -1.0709655307317045,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Percent": [
+          -3.54742914926206,
+          0.8988757835488137
+        ]
+      },
+      "controls": {
+        "pairs": 4,
+        "medianPairedChangePercent": 0.596404212650592,
+        "rangePercent": [
+          -3.6996756714765433,
+          4.533906182221337
+        ],
+        "largestAbsoluteChangePercent": 4.533906182221337
+      },
+      "targetThresholdPass": false,
+      "nonTargetHoldSignal": false,
+      "allPrimaryChecksPass": true,
+      "memoryPass": true,
+      "memoryObservations": 4,
+      "qualifiedMemoryObservations": 4,
+      "rawScans": 455,
+      "storageBytes": 609176779,
+      "persistedSemanticSha256": "8a7ed4f0968ac48e5e6825bdc4213aa65b373ea459c32d54de492a8a3bf7306c",
+      "rawMemberCount": 314,
+      "rawArchive": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/raw-evidence.zip",
+        "bytes": 2374529,
+        "sha256": "0612d8aa9869534e84b37eb8eac0f5f878b77b262f69d8d74f81025e43b8b992"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/primary-log-audit.json",
+        "bytes": 21027,
+        "sha256": "f15aeb703a70eeedbde5b0907f37947c5aa6569503c653f62d9c58c6c8fd0c88"
+      },
+      "rawAudit": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/independent-raw-evidence-audit.json",
+        "bytes": 16294,
+        "sha256": "b6b582c94a3f4471bc2072f49a5a36b6877dbc1a34d45eb31b43260e88814a6c"
+      },
+      "originalPrimaryAndRecoveryProvenance": {
+        "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/primary-and-recovery-provenance.tar.gz",
+        "bytes": 2433054,
+        "sha256": "07d2ab2955d2454b211a51488bf49da397e568cfc679c2871ae9f15d5b839032"
+      }
+    }
+  },
+  "combinedPrimaryIndex": {
+    "path": "builds/perf/import-study-c563d487/current-full-results/combined-primary-index.json",
+    "bytes": 44454,
+    "sha256": "55b8773b0de1ce4de5e52b04a14e453d5192b84796c418ed96f8b14c15c3d168"
+  },
+  "combinedOriginalRawIndex": {
+    "path": "builds/perf/import-study-c563d487/current-full-results/all-six-original-raw-evidence-index.json",
+    "bytes": 35088,
+    "sha256": "b53b7b0fec408017639489ffbd8df94c3d427969baf4fd105bf0ae511018f851"
+  },
+  "primaryAssembler": {
+    "path": "builds/perf/import-study-c563d487/current-full-results/assemble-primary-index.py",
+    "bytes": 11388,
+    "sha256": "016f06aec92e716517dfefea6e3fe487079a29e047aa63294975716661645187"
+  },
+  "assemblerIndependentReview": {
+    "path": "builds/perf/import-study-c563d487/current-full-results/assemble-primary-index-independent-review.json",
+    "bytes": 1605,
+    "sha256": "cb3ec6bedb85447563fdbccd9ed7a92dae889183ff49da605ccb3f5e43ccfd6d"
+  },
+  "packageByteDeltas": {
+    "path": "builds/perf/import-study-c563d487/current-full-results/package-byte-deltas.json",
+    "bytes": 7882,
+    "sha256": "644f6b9174a9e0039a2606880fa68e9903d53db2ea9530ca654ef9f302c77fe0"
+  },
+  "durableReferences": {
+    "launchReceipt": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/remote-continuation/current-full-launch.json",
+      "sha256": "bdfced5f5c914c62133396b79bd03b07081a8e7bca6c52fe58bb6ea82220415e",
+      "bytes": 870
+    },
+    "rootSourceGateReview": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/remote-continuation/current-full-correctness-reuse-root-review.json",
+      "sha256": "fc1f58df81a5ad08e80eae685744dbfed67314fce9f6695bf2e97358f02fcf12",
+      "bytes": 1225
+    },
+    "independentSourceGateAudit": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/current-full/validation/independent-primary-audit.json",
+      "sha256": "f1d74de65c4b5ca3b3167dee3373d816f1d92fba7a296b3ffa55e3cf4830ce70",
+      "bytes": 6059
+    },
+    "sourceGatePrimaryLog": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/current-full/validation/primary-job.log",
+      "sha256": "389ac1458ed3e0150bb8f3905097f8f5c1431e52dda0e5242cf5c10cdd61e77f",
+      "bytes": 41375
+    },
+    "sourceGatePrimaryRecords": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/current-full/validation/primary-records.jsonl",
+      "sha256": "c4229caae292ee43968cd1f1413142842503d6a129d9ed96fb44d262cd705e69",
+      "bytes": 17079
+    },
+    "independentAuditor": {
+      "alreadyDurable": true,
+      "path": "builds/perf/import-study-c563d487/numeric-full/independent-complete-import-audit.js",
+      "sha256": "0a90d65ebda54d584a120ba0a9d1f5780ad550481f3aa7a08666307b7bd82656",
+      "bytes": 34024,
+      "sourceIndexSha256": "f859b20a816d76c04cac89692984e3ef463eaebc40a436c14b7bdf4049ff2775"
+    },
+    "independentExpected": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/current-full/independent-complete-import-expected.json",
+      "sha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+      "bytes": 6386
+    },
+    "publishedToolingManifest": {
+      "path": "builds/perf/import-study-c563d487/post-outage-supplement/current-full/publication-manifest.json",
+      "sha256": "a368547fb4527466db29f6211e2b1e8bae7b131d76ab1523cf9ab8bf751149bb",
+      "bytes": 4018
+    },
+    "prospectiveCriteria": {
+      "path": "builds/perf/import-study-c563d487/outage-checkpoint/current-base/prospective-complete-import-criteria.json",
+      "sha256": "42364fda4ae7201e788e734a2ba49ccf0d7bfe178f56550b3046ba5935b861ee",
+      "bytes": 3193,
+      "sourceIndexSha256": "92a59535e12823f5baa6a5a13c56b585ba08c9092c391f34660d25ed3e2ed5e6"
+    },
+    "sourcePolicyFiles": {
+      "schemaVersion": 1,
+      "scope": "Read-only independent current-base source binding for the unchanged frozen audit policy",
+      "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "repository": "ManabiIO/manabitan",
+      "files": [
+        {
+          "path": "dev/perf/import-qualification-20261125-a7f7.py",
+          "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+          "blob": "964ab9c061b2490b65852344244f11dce62fa644",
+          "bytes": 19981
+        },
+        {
+          "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+          "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+          "blob": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+          "bytes": 5362
+        },
+        {
+          "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+          "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+          "blob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+          "bytes": 18389
+        },
+        {
+          "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+          "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+          "blob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+          "bytes": 4187
+        },
+        {
+          "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+          "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+          "blob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+          "bytes": 21897
+        }
+      ],
+      "noMeasurementsChanged": true
+    },
+    "note": "All listed files already exist in the parent evidence tree or the exact frozen source commit. Referenced hashes are preserved; copies are omitted from this new payload."
+  },
+  "correctnessScope": {
+    "originalBuildCommit": "d28d74f9c1047491670942ec6e0414cc9c823101",
+    "originalBuildRunId": 46126462448,
+    "originalBuildJobId": 140922033124,
+    "unitTestsPassed": 15180,
+    "unitTestsSkipped": 47,
+    "unitFiles": 671,
+    "optionsTestsPassed": 32,
+    "dryBuildVariants": 7,
+    "reuseGateJobId": 140933118058,
+    "exactProductFilesBound": 6,
+    "originalReceiptFilesBound": 17,
+    "originalArtifactMembersBound": 44,
+    "originalFullCiRanAtCandidateCommit": false,
+    "interpretation": "Original compiled-artifact CI passed; the subsequent exact-source reuse gate binds those tested six product bytes to 4cd. Exact-head actionlint is separately recorded."
+  },
+  "recoveryHistory": {
+    "scope": "Read-only post-acquisition log recovery; original bytes and failed first attempt retained.",
+    "leadingBomFailure": {
+      "cell": "jmdict-AB",
+      "codePoint": "U+FEFF",
+      "chunkIndex": 192,
+      "partialBytes": 1179648
+    },
+    "originalParserSha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c",
+    "correctedParserSha256": "827b3f106c131e6dc2b0c7614494997d058b6dc4102ec20a4fe2114ec9073eb8",
+    "oneAnchoredOptionalBomChange": true,
+    "payloadBytesChanged": false,
+    "newAcquisition": false,
+    "archive": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/history/recovery-preflight-and-bom-failure.tar.gz",
+      "bytes": 2483323,
+      "sha256": "36af0f9f44c731c3cdbf7f11686511d6deb941494a98deb9d10ffc4fbf06dd9a"
+    },
+    "amendment": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recovery-v2-log-prefix-amendment.json",
+      "bytes": 3190,
+      "sha256": "d4807ab3664bd84c6ff49ecf761efc7ba9bda78bbf4f9e2c7d740638329b1096"
+    },
+    "peerReview": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/independent-recovery-v2-prefix-review.json",
+      "bytes": 828,
+      "sha256": "08c34cae12bed4e97dfbfa8f3f176d7f58132868f7bba07e7ac3b5efa6b11226"
+    }
+  },
+  "laterDevelopBoundary": {
+    "observedAtUtc": "2026-11-28 09:59:17 UTC",
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "mergedPr": 981,
+    "changedPaths": 9,
+    "nativeParserCChanged": false,
+    "nativeWasmChanged": false,
+    "nativeManifestChanged": false,
+    "dependencyOrFixtureLockChanged": false,
+    "sourceBoundClosedStudyChanged": false,
+    "gainTransfer": false,
+    "receipt": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/develop-followup-boundary.json",
+      "bytes": 3870,
+      "sha256": "c522bbb98c474c0e09995e95428127da3b27cc2213791d2c9de77bb5c2821091"
+    },
+    "primaryResponses": {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/develop-followup-primary-snapshot.tar.gz",
+      "bytes": 17076,
+      "sha256": "92f1ed565aa61e6ac0c5ec03e2325ac3d0164f87c3761eedf902f466b5495f34"
+    }
+  },
+  "preservation": {
+    "sixOriginalInnerZipBytesUnchanged": true,
+    "allOriginalPrimaryJobLogsRetainedLosslessly": true,
+    "all330OriginalPrimaryRecordsRetainedLosslessly": true,
+    "all1884OriginalNonPackageMembersRetained": true,
+    "releasePackageCopiesIncluded": false,
+    "outerArtifactOrReleasePackageRedownload": false,
+    "omittedReleasePackages": "Only the original producer exclusions package-A.zip and package-B.zip per cell; their exact byte hashes/sizes and all 554 entry hashes remain retained.",
+    "newProvenanceTarArchives": "Deterministic lossless storage representations with original member SHA-256/byte lengths; no unavailable old archive identity is assigned.",
+    "priorPublishedEvidenceUnchanged": true,
+    "immutablePreparationStatesRetainedOutsideTree": true
+  },
+  "limits": [
+    "No host pooling, control subtraction, outlier removal, retry, or source/threshold changes.",
+    "Distinct Actions jobs establish separate provisioning, not independently verified physical hardware.",
+    "Memory is sampled whole-process-tree PSS/private usage, not an exact peak.",
+    "Inconclusive non-target timings are not equivalence or proof of no regression.",
+    "Exact source-tree reuse binds earlier correctness; it does not claim the old CI ran at the published product commit.",
+    "Package ZIP total compressed-size deltas and exact changed native-file uncompressed sizes are recorded; individual compressed-entry sizes are unavailable and not claimed.",
+    "Original outer Actions artifact archives were not re-downloaded; the producer-emitted inner archives and their full member inventories are independently verified."
+  ],
+  "replay": {
+    "scope": "Audit retained observations only, in a fresh scratch directory; these commands do not run a browser or acquire measurements.",
+    "commandsForVndbAB": [
+      "study_current_review=$(mktemp -d)",
+      "tar -xzf builds/perf/import-study-c563d487/current-full-results/vndb-AB/primary-and-recovery-provenance.tar.gz -C \"$study_current_review\"",
+      "node - \"$study_current_review/numeric-suffix-972-full-evidence/vndb-AB/primary-job.log\" <<'NODE'\nconst fs = require('node:fs');\nconst code = fs.readFileSync('builds/perf/import-study-c563d487/numeric-full/independent-complete-import-audit.js', 'utf8');\nconst {parseCompleteImportLog, auditCompleteImportCohort} = new Function(code + '; return {parseCompleteImportLog, auditCompleteImportCohort};')();\nconst expected = JSON.parse(fs.readFileSync('builds/perf/import-study-c563d487/post-outage-supplement/current-full/independent-complete-import-expected.json', 'utf8'));\nconst result = auditCompleteImportCohort(parseCompleteImportLog(fs.readFileSync(process.argv[2], 'utf8')), expected);\nconsole.log(JSON.stringify(result, null, 2));\nNODE",
+      "python builds/perf/import-study-c563d487/current-full-results/audit-tools/recover-raw-archive-v2.py --log \"$study_current_review/numeric-suffix-972-full-evidence/vndb-AB/primary-job.log\" --output \"$study_current_review/recovered-original-archive\" --dictionary vndb --order AB --job-id 140933489168"
+    ],
+    "otherCells": "Substitute the cell path, dictionary, order and fixed job ID from cells.",
+    "rawScanAudit": "The preserved raw-evidence-audit.py records its original workspace layout and binds all five frozen policy modules by SHA-256. Restore the original paths into a new scratch layout before executing it; retain the published completed audits unchanged.",
+    "publishedAcquisitionWorkflow": "https://github.com/ManabiIO/manabitan/blob/faf6d9d9c282b2da46a7c8ee05835f4db0827039/.github/workflows/import-numeric-suffix-972-qualification-c563d487.yml"
+  },
+  "evidenceFiles": [
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/history/first-four-original-raw-evidence-index.json",
+      "bytes": 23885,
+      "sha256": "50f3dfd978415e28b66a9de4f15571f05423caf6b5b77241d2cc7445b3517b87",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/first-four-original-raw-evidence-index.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recover-raw-archive.py",
+      "bytes": 12488,
+      "sha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recover-raw-archive.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recover-raw-archive-v2.py",
+      "bytes": 12495,
+      "sha256": "827b3f106c131e6dc2b0c7614494997d058b6dc4102ec20a4fe2114ec9073eb8",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recover-raw-archive-v2.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/raw-evidence-audit.py",
+      "bytes": 33738,
+      "sha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/raw-evidence-audit.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recovery-selfcheck.py",
+      "bytes": 6036,
+      "sha256": "6cfc9a133abba953f87e33469b259bd3251efdbb276835084033f8f77f6f940e",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recovery-v2-selfcheck.py",
+      "bytes": 3144,
+      "sha256": "e45d415e3d5dd9034b23066c451f14b20b2524d98817d286da59ddda8d436826",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-v2-selfcheck.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/current-policy-source-binding.json",
+      "bytes": 1504,
+      "sha256": "e71c6186e434a029f349f0a3c38452e8c9a237ea0710d23fac1a7129f828fbff",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/current-policy-source-binding.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/independent-raw-tooling-source-review.json",
+      "bytes": 1790,
+      "sha256": "64cb4622bfbeedad98ca2d60f28997273b79366cec81ede403f7818b7851cd9c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/independent-raw-tooling-source-review.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/independent-recovery-v2-prefix-review.json",
+      "bytes": 828,
+      "sha256": "08c34cae12bed4e97dfbfa8f3f176d7f58132868f7bba07e7ac3b5efa6b11226",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/independent-recovery-v2-prefix-review.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/recovery-v2-log-prefix-amendment.json",
+      "bytes": 3190,
+      "sha256": "d4807ab3664bd84c6ff49ecf761efc7ba9bda78bbf4f9e2c7d740638329b1096",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-v2-log-prefix-amendment.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/audit-tools/raw-auditor-source-preflight-final.json",
+      "bytes": 1640,
+      "sha256": "6f795bd084fa8667a9b87f0bdf3d39c3eb9d1f8a8b2ca0c2ed7dab6965988c8b",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/raw-auditor-source-preflight-final.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/history/recovery-preflight-and-bom-failure.tar.gz",
+      "bytes": 2483323,
+      "sha256": "36af0f9f44c731c3cdbf7f11686511d6deb941494a98deb9d10ffc4fbf06dd9a",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of original source-review history, synthetic-only checks and the failed original JMdict log-recovery attempt, including its partial bytes. No acquisition changed.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/independent-source-review-attempt-1.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/independent-source-review-attempt-1.json",
+          "bytes": 571,
+          "sha256": "64119381693e2af193d2844a88b518a013de4ac1b61155890d0ef7ff99b57ed3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-archive-recovery-failure-20261128T094107097096.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-archive-recovery-failure-20261128T094107097096.json",
+          "bytes": 864,
+          "sha256": "208585f30e4afb1c0d48ec29b174b1da60e36683c57aa7fed8e9bc38070c7662"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-audit-execution.json",
+          "bytes": 1436,
+          "sha256": "406ee4ca334d9f200f4a736fe138d8231162a52d167181d60fb1426a0d941480"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-evidence.zip.partial",
+          "bytes": 1179648,
+          "sha256": "7c70aea4e4e2ac1fdde4adde75869ade70f904664e85262d55b02f1d685a7639"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/recovery.stderr.log",
+          "bytes": 539,
+          "sha256": "64c72dcbbdd5bd1a8a074fde746893c01409c05ac4346dade5315a064ffe2d46"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/recovery.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/raw-auditor-adaptation-final.diff",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/raw-auditor-adaptation-final.diff",
+          "bytes": 17111,
+          "sha256": "d17b989141ad14655b8f27aae7ea1beef29319ee1bbfbe88714a2e56d595188a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/raw-auditor-adaptation.diff",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/raw-auditor-adaptation.diff",
+          "bytes": 17114,
+          "sha256": "50e5b9913d79e145c077dda5502632eebc0396642c9c5f9dc860ca19c74392b9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/raw-auditor-source-preflight.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/raw-auditor-source-preflight.json",
+          "bytes": 2000,
+          "sha256": "4c0fb4933e84ff579b7e313c43b610097204080cc6a9c2f2571bcbc13de0e03f"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/artificial-job.log",
+          "bytes": 45891,
+          "sha256": "faf93e072fcac1cc7d687d4a003289828c78732deb2553047a000bf3b269d7cf"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/recovered/raw-evidence.zip.partial",
+          "bytes": 6144,
+          "sha256": "ed31e0b7c2e9788a2b3bc8e269ed246314ea84e89e698790621cd32268fd3ff8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/duplicate-first-chunk/result.json",
+          "bytes": 305,
+          "sha256": "3ca3cc49edb1792b45ea92b646313edf49aed9a12d799e64e2fa024c806d9633"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/artificial-job.log",
+          "bytes": 45891,
+          "sha256": "3d313b130a65b30eb5c1271bf800fb3ab2cdce124a34c52f6642e8752dbbba08"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/extra-chunk-after-complete/result.json",
+          "bytes": 310,
+          "sha256": "4daca82394919c38b46b3c57207278d13036169f0d8afc5c5b441cfacd9d5a5a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/artificial-job.log",
+          "bytes": 37199,
+          "sha256": "8b3c0e4715624097193d9f5db88da409e70c8ae9fdb0b52a977e94f486dbf4cb"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-complete/result.json",
+          "bytes": 300,
+          "sha256": "a7ea3a89558c7948174bf24ffe5381efc14b66dba78ecf4902ef489ff53ed55c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/artificial-job.log",
+          "bytes": 29339,
+          "sha256": "0e31062af0a2cd18624e838679f09540b14be8533513fc89cc08f99afd9ae9ae"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-first-chunk/result.json",
+          "bytes": 303,
+          "sha256": "c6039d58862884dd48b990af00aac2cf4fb72adefb8b7dfe4b45f5c412ba9d8f"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/artificial-job.log",
+          "bytes": 37441,
+          "sha256": "77ade1633a5b561fdbfe99c32e905847e48d3261a9f277e19f923a54bda35b11"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/missing-member/result.json",
+          "bytes": 298,
+          "sha256": "b7f89cfc7e59cbfe73188911ac8ebf489dd430f5e095119be754358322e74cfe"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "483fd333c3719dc5fe365897b3ef59e0292ac13cf6a7cb48b2888cc3561cbfcf"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "a5d245e102dd13c2afcc7e85ee3c39c5588f9779807ffc21c0a9d40ee2f6187d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/one-changed-archive-byte/result.json",
+          "bytes": 308,
+          "sha256": "8d1f8c3894bad309818089134045006618a82346b9d7cf94151004bcb1ae5814"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/artificial-job.log",
+          "bytes": 37787,
+          "sha256": "23828192c952eda8f6d3eb18d64203afc6be424b835691d7851f6d47bf996117"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer-reported-failure/result.json",
+          "bytes": 476,
+          "sha256": "0b74612c70c7ce7803709c5cf84be650bd10a9b4818205ddfe7dc7d67b9da3f8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer.stderr",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer.stdout",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/producer.stdout",
+          "bytes": 37238,
+          "sha256": "44c1bfe2d4ddb6e895e4c24f5335070e83b48fbe2dbea2330aee2deedc641bc3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "e07437660c7e0d731f7892052fe950a6b977f5979ddf9277d2a8c2fbfd3eb76c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/reordered-chunks/result.json",
+          "bytes": 300,
+          "sha256": "d6184dd3696981caab89a3a225e342ed1d5eb969e29b8ce7a10ac5238688622d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/selfcheck-result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/selfcheck-result.json",
+          "bytes": 5159,
+          "sha256": "ef5dca410949ba8b19f21f7ad1c69c2f407e3fb5b9ec027b2a5d296365d33fdd"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB.raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB.raw-evidence-manifest.json",
+          "bytes": 1805,
+          "sha256": "599b09c7960183644d499750e6bfe4f9150b98456954f0ead4e7944945408ba5"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB.raw-evidence.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB.raw-evidence.zip",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/aa.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/aa.json",
+          "bytes": 19,
+          "sha256": "cb8daed7b30399a1c3c8b83b3b7bee4b774a30fc389afc1d375e4c23a3cc4ae8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/aa/inner.txt",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/aa/inner.txt",
+          "bytes": 56,
+          "sha256": "4a805f2dd6c80bfaa68d15c81240013393fec72c8047e856af37925354e30609"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/empty.txt",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/empty.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/package-A.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/package-A.zip",
+          "bytes": 26,
+          "sha256": "272d433a9a432e36f334ad2bd2dd376291e6582904e34e0d30eafea923813a49"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/package-B.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/package-B.zip",
+          "bytes": 26,
+          "sha256": "124f3454a77ea726532540a898c2648d47a17605a000d74ec870cfa40f4d650d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/payload.bin",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/synthetic-input/numeric-suffix-972-c563d487-jmdict-AB/payload.bin",
+          "bytes": 25600,
+          "sha256": "f2f783e4271b828ec62e8a26dcbaa56f437a1d2e05b0ca2e14260e73fef3f19d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/artificial-job.log",
+          "bytes": 37613,
+          "sha256": "f0b99f13e2b240f33eed6c438df12427db6d047d399ea567655b652ee777383c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/recovered/raw-evidence.zip.partial",
+          "bytes": 24576,
+          "sha256": "9c33f988a05cba61884d13551898e3fb34a4a9e95dbef6b83489627770c6e4e3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/truncated-base64/result.json",
+          "bytes": 308,
+          "sha256": "6cef51f6b5311f0adf7cb442dfec103e5d3325b2d7c21d6196d1e79764444033"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "fb93b10958dc35446d1faf74524b56ea4007ab0c171fed0e9c9077903df31921"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-archive-recovery.json",
+          "bytes": 2697,
+          "sha256": "8c215cfcc8321455c3908a4f5ad257a5e84cf9feb0ce306c94cd662c33457cbd"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence-manifest.json",
+          "bytes": 1805,
+          "sha256": "599b09c7960183644d499750e6bfe4f9150b98456954f0ead4e7944945408ba5"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence-member-hashes.json",
+          "bytes": 688,
+          "sha256": "66fa70a2245bd202b239213c15f2ba20f66be3c0de738f94c67016000327e67a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/recovered/raw-evidence.zip",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/valid-original-producer/result.json",
+          "bytes": 256,
+          "sha256": "c2d33775fbe687fcc44b753f6ce0e3bcde3419044f7d92e112569c0ca447c0c6"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "bbd31f9712ff9ad64bc706e4ec908c324954d2eb72fa73b744d2282ecd233489"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-git-blob-hash/result.json",
+          "bytes": 303,
+          "sha256": "b7e7e0378b7e7815275930274442cd0d0e233cbbc96fd8a73ae9f6324a16577b"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "92dea215ef00254c9eed39861de8c919bb3e0f2c824c9e6742fa460d268371c8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-manifest-hash/result.json",
+          "bytes": 303,
+          "sha256": "621cfa0635e9a7c45f9a397df81f4c2f4f3d82b590ef6870f3f7fc3197391a78"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "aef754dd586152b4638ba784e585538930a4de24e0ab0f442bc4b00ed1dbdf23"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-1/wrong-member-hash/result.json",
+          "bytes": 301,
+          "sha256": "70efd935bbd43475d6071e1c9e1830a88104ac98927f72bde437c23a556d446d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/artificial-job.log",
+          "bytes": 37618,
+          "sha256": "92272f3fda30c15dca2194874fc5609407305c0e5c2c1b3601be744294706e2b"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/recovered/raw-evidence.zip.partial",
+          "bytes": 12288,
+          "sha256": "a484dd3692a41a68b42d129693c6d2b16a964a6dbfba61c10dcea0b5146c8298"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/bom-inside-base64-rejected/result.json",
+          "bytes": 353,
+          "sha256": "32f5f72c1378e6185d27a501085aaa4fead9276a1de102f30822b613656fb890"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/artificial-job.log",
+          "bytes": 45891,
+          "sha256": "faf93e072fcac1cc7d687d4a003289828c78732deb2553047a000bf3b269d7cf"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/recovered/raw-evidence.zip.partial",
+          "bytes": 6144,
+          "sha256": "ed31e0b7c2e9788a2b3bc8e269ed246314ea84e89e698790621cd32268fd3ff8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/duplicate-first-chunk/result.json",
+          "bytes": 300,
+          "sha256": "2a0f558dc36b0453314687479789a886b1382117474396c9e0ac2ebc11a62cc9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/artificial-job.log",
+          "bytes": 45891,
+          "sha256": "3d313b130a65b30eb5c1271bf800fb3ab2cdce124a34c52f6642e8752dbbba08"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/extra-chunk-after-complete/result.json",
+          "bytes": 305,
+          "sha256": "9b7ac19a38a172ca6d0c82a6a366b9dff4e7725356e5c9c6f3172a1387ebfa2c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/artificial-job.log",
+          "bytes": 37199,
+          "sha256": "8b3c0e4715624097193d9f5db88da409e70c8ae9fdb0b52a977e94f486dbf4cb"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-complete/result.json",
+          "bytes": 295,
+          "sha256": "90df8034d04ca25c2bb05fbc81505d0ab0a8746494c0df3c1c94e98b56cff515"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/artificial-job.log",
+          "bytes": 29339,
+          "sha256": "0e31062af0a2cd18624e838679f09540b14be8533513fc89cc08f99afd9ae9ae"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-first-chunk/result.json",
+          "bytes": 298,
+          "sha256": "2ce5a07c8489be4738780b16ce078e0d81011ceb95ed14d1efdefde17a7740c9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/artificial-job.log",
+          "bytes": 37441,
+          "sha256": "77ade1633a5b561fdbfe99c32e905847e48d3261a9f277e19f923a54bda35b11"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/missing-member/result.json",
+          "bytes": 293,
+          "sha256": "aa9bbb053773bedde1a5085a42ecde1cb49d61e08d54af9e401a5c36014cf2ea"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "483fd333c3719dc5fe365897b3ef59e0292ac13cf6a7cb48b2888cc3561cbfcf"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "a5d245e102dd13c2afcc7e85ee3c39c5588f9779807ffc21c0a9d40ee2f6187d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-changed-archive-byte/result.json",
+          "bytes": 303,
+          "sha256": "d9775bd36579cba066cae56dd1158e2a1f28208c9d1dc465e8d36693807256d9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/artificial-job.log",
+          "bytes": 37618,
+          "sha256": "4d76db9e6957a8195eb2891cfb5f923aae8a07a5f343cc43bed5b1ce5e1ee68f"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-archive-recovery.json",
+          "bytes": 2689,
+          "sha256": "5796477574d4b6fd1a71de67cacdb87bd578929be1569211f0ab5492ca08c231"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence-manifest.json",
+          "bytes": 1805,
+          "sha256": "599b09c7960183644d499750e6bfe4f9150b98456954f0ead4e7944945408ba5"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence-member-hashes.json",
+          "bytes": 688,
+          "sha256": "66fa70a2245bd202b239213c15f2ba20f66be3c0de738f94c67016000327e67a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/recovered/raw-evidence.zip",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/one-leading-bom/result.json",
+          "bytes": 243,
+          "sha256": "a5293bff08bfd56bcec68c3daa0b33cfb857ec39d60f202ed984329ef5c17ced"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/artificial-job.log",
+          "bytes": 37787,
+          "sha256": "23828192c952eda8f6d3eb18d64203afc6be424b835691d7851f6d47bf996117"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/producer-reported-failure/result.json",
+          "bytes": 471,
+          "sha256": "b656a7f89fd0a5fe464d246aba7db79f3d88273bb1d433a2a026a1e7684c55c3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "e07437660c7e0d731f7892052fe950a6b977f5979ddf9277d2a8c2fbfd3eb76c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/recovered/raw-evidence.zip.partial",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/reordered-chunks/result.json",
+          "bytes": 295,
+          "sha256": "f32f37cfde4be274fbcd3082177889b1be32ef1a83dc38a741fe2ceab9673307"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/selfcheck-result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/selfcheck-result.json",
+          "bytes": 6177,
+          "sha256": "3ce655d3bd4fac996493eb1b6f1c40d164aebb69c762b371b8eecb22eb35b589"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/artificial-job.log",
+          "bytes": 37613,
+          "sha256": "f0b99f13e2b240f33eed6c438df12427db6d047d399ea567655b652ee777383c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/recovered/raw-evidence.zip.partial",
+          "bytes": 24576,
+          "sha256": "9c33f988a05cba61884d13551898e3fb34a4a9e95dbef6b83489627770c6e4e3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/truncated-base64/result.json",
+          "bytes": 303,
+          "sha256": "3aa8fc2dee2b7ae5d68cf90e6cedad55646148fe9076904575168ef6b43841e4"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/artificial-job.log",
+          "bytes": 37621,
+          "sha256": "b0d5ae9a16868e3de51da4347f27159b85bf6d51848abd88fe2aeaa27f7729d7"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/recovered/raw-evidence.zip.partial",
+          "bytes": 12288,
+          "sha256": "a484dd3692a41a68b42d129693c6d2b16a964a6dbfba61c10dcea0b5146c8298"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/two-leading-boms-rejected/result.json",
+          "bytes": 304,
+          "sha256": "282f79bd78c62e456a40f3b2ffb852d312afe9080340f805f8f218e56f031a2f"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "fb93b10958dc35446d1faf74524b56ea4007ab0c171fed0e9c9077903df31921"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-archive-recovery.json",
+          "bytes": 2697,
+          "sha256": "17932e18e7081eb6e1fa8b08df31850807aabccbc05e5ea40964ced75f1cb90c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence-manifest.json",
+          "bytes": 1805,
+          "sha256": "599b09c7960183644d499750e6bfe4f9150b98456954f0ead4e7944945408ba5"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence-member-hashes.json",
+          "bytes": 688,
+          "sha256": "66fa70a2245bd202b239213c15f2ba20f66be3c0de738f94c67016000327e67a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence.zip",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/recovered/raw-evidence.zip",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/valid-original-producer/result.json",
+          "bytes": 251,
+          "sha256": "7fd7641e57f6c4b081830b74e2673168def5716c9e29a417395c60a1015bc3a0"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "bbd31f9712ff9ad64bc706e4ec908c324954d2eb72fa73b744d2282ecd233489"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-git-blob-hash/result.json",
+          "bytes": 298,
+          "sha256": "d2b4f06123d1e39ca68fd3202ef15a3eea4ded8b57409d8d7255d24376fb1953"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "92dea215ef00254c9eed39861de8c919bb3e0f2c824c9e6742fa460d268371c8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-manifest-hash/result.json",
+          "bytes": 298,
+          "sha256": "cf55be004859591ec9b0a9c420607332ea6078efcd5178e0a9de8cb65e060b02"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/artificial-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/artificial-job.log",
+          "bytes": 37615,
+          "sha256": "aef754dd586152b4638ba784e585538930a4de24e0ab0f442bc4b00ed1dbdf23"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/recovered/raw-evidence.zip.partial",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/recovered/raw-evidence.zip.partial",
+          "bytes": 26087,
+          "sha256": "97aa36f5eb746759196ed3d2ffbe89f7f87f8c3998286bda2debf043aa7c747d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/result.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/recovery-selfcheck-2/wrong-member-hash/result.json",
+          "bytes": 296,
+          "sha256": "62ec57c6dff07f3390c637bdcdde3db405bfff96c660956383f21e68fa432c76"
+        }
+      ],
+      "memberCount": 117,
+      "uncompressedMemberBytes": 2929895,
+      "roundTripVerified": true
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/raw-evidence.zip",
+      "bytes": 2254309,
+      "sha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/primary-log-audit.json",
+      "bytes": 20904,
+      "sha256": "080f0563ff4f55b8e1c523f9192c6d565044f7f64a4d066980441095202ab07a",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/independent-raw-evidence-audit.json",
+      "bytes": 16258,
+      "sha256": "c103ea7c39deb95cabf3b389c58b21c462b63168743a0fad654cac168bf19414",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-AB/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2339368,
+      "sha256": "bb56229340578ddb5786162ca03dbc7e43d0520e5fa5acf5f170434eeb121c90",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of the exact original primary job log, tagged records and successful read-only recovery/audit receipts. Original inner ZIP is retained separately; duplicate tagged-record copy is referenced.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/primary-job.log",
+          "bytes": 3554555,
+          "sha256": "5e035b7430fbc4b732837f2f09a5629138b1c3bb54690ab4544717e03166c79f"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/primary-records.jsonl",
+          "bytes": 363344,
+          "sha256": "758c816bbc1b3c0260f0d2f5bd20f23009fbbdf3694c59614b7f1d0273a802f8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 39866,
+          "sha256": "48ed0ccfc99d62d17d3370cd56f91f61c877cc34771b4b1d4c526ae84df97483"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2423,
+          "sha256": "f40fdf82258bac6685789f1d03c3aa26fe4820312f69c471b2e4f42c1049628d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1452,
+          "sha256": "b6412a83ac5b1d4128296dcc48210f5455d578df377b46f6d2543829333f79f7"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51224,
+          "sha256": "ecdf323826fdd08c35a3a63c4a5d19653cd6e88de8d23ccda60da0585aa13b94"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59858,
+          "sha256": "b8c9afb7cbfeae29856284c3b54d3c0e9e7be5bfcf04cb5d44fbc8721e7af602"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "fec83db308c4214f650bead3d67e87a87f8a77f26babe359c5d8e2cabf1d2c10"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 4073049,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/jmdict-AB/primary-records.jsonl",
+          "bytes": 363344,
+          "sha256": "758c816bbc1b3c0260f0d2f5bd20f23009fbbdf3694c59614b7f1d0273a802f8"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/raw-evidence.zip",
+      "bytes": 2140209,
+      "sha256": "b209b91fcde954f03a7729fec7310270de9916370c4a474a4377d856bdd4654a",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/primary-log-audit.json",
+      "bytes": 20777,
+      "sha256": "ea0318287d52551042c59851167ef46bf66d40d264908cdac45a5bed50294c90",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/independent-raw-evidence-audit.json",
+      "bytes": 16213,
+      "sha256": "8b0527512c08a88e9b9eccb842e98554ae8e032cf5716d472ead38b53738e09d",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jmdict-BA/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2243979,
+      "sha256": "55bdcfd647c8179ee182e8bad591a2e996b5a152a65d74f746d7d9ca4ec1ea51",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of the exact original primary job log, tagged records and successful read-only recovery/audit receipts. Original inner ZIP is retained separately; duplicate tagged-record copy is referenced.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/primary-job.log",
+          "bytes": 3399265,
+          "sha256": "e579c0727e68e08f4d7b522f749b09ed3653867b58e9c9604e3eaadb3679f7be"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/primary-records.jsonl",
+          "bytes": 361826,
+          "sha256": "5703b9e4bd81bd25e6ac0e0297448dfac0bc3a9045410f2195e65db3a62f314d"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 38876,
+          "sha256": "d07f8a715a8cfbb9879d7d80f239f09eb9691d25ac6798bc488dd32052036964"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2423,
+          "sha256": "c50118eae66718a7d03b268ce64ec973245bed44f55c85ca4e536eefe3e78bbc"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1456,
+          "sha256": "5eb9aec6b9b08c53d56f1bb83751b0005805b46839ef75e38fe0a4176bd18c94"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51224,
+          "sha256": "8f60038e265eec51be3fe287dc7b9ce493f91bba9e145d0d7f46d05ee441012c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59850,
+          "sha256": "2b763666b0c5036230e78acde432a89819b4b8e088f08b43f4c562f52e98a989"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "acae6f87a3c2cb5e5831457f890018d53a307a6dc44de5fae94874c2c6f91fcd"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 3915247,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/jmdict-BA/primary-records.jsonl",
+          "bytes": 361826,
+          "sha256": "5703b9e4bd81bd25e6ac0e0297448dfac0bc3a9045410f2195e65db3a62f314d"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/raw-evidence.zip",
+      "bytes": 2246717,
+      "sha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/primary-log-audit.json",
+      "bytes": 21580,
+      "sha256": "c197cfc84b253dd47996302623e19af3e368d0cd81ef290dfeaba60d027992af",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/independent-raw-evidence-audit.json",
+      "bytes": 16293,
+      "sha256": "506b2791d1a3fe5377bb7195a472a8c09590681b7c555aee9c4f7caed26edb75",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-AB/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2344965,
+      "sha256": "a3e06f78902ed51f14029ae4a65896c05360e56510e223c58115a02e73d474bf",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of the exact original primary job log, tagged records and successful read-only recovery/audit receipts. Original inner ZIP is retained separately; duplicate tagged-record copy is referenced.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/primary-job.log",
+          "bytes": 3544186,
+          "sha256": "2cc20757fd3a9e7808f5f0859f7bbbd3af2683712cc0520558cd53730d085b86"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/primary-records.jsonl",
+          "bytes": 362688,
+          "sha256": "dc158f82c6b0d4d1f591ad83bbbe012fceffce028496f90a877bba60c94658f7"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 39820,
+          "sha256": "3c954835d836c919edd0c6f8a22da294fbda3d317c838122235f688e396c3d16"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2433,
+          "sha256": "59a105def81858484e88052e2e708df26cdbfb542144e987b3169a13bf5c28c8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1462,
+          "sha256": "314ac29551f4c04721a5aae4ad23045df57f6f2e087447bee05e7854ae0f1c44"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51228,
+          "sha256": "a8daf529fc8e0b84942d80d690938ee86ced68a9ad162412269adf2d3b1f0205"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59861,
+          "sha256": "f9f4ee11dd38ecb33a206925137f981464f600670f865bf122f78992f44eaab9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "86bf27bb6eb2e6a62b6db60ebb8a0aebd4ddc0c5ac25b4280d9589c7b14fc89e"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 4062005,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/jitendex-AB/primary-records.jsonl",
+          "bytes": 362688,
+          "sha256": "dc158f82c6b0d4d1f591ad83bbbe012fceffce028496f90a877bba60c94658f7"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/raw-evidence.zip",
+      "bytes": 2247702,
+      "sha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/primary-log-audit.json",
+      "bytes": 21787,
+      "sha256": "ee796fcb45fbf9e73940b7d728271846d3952a5cec8e0d39b35f5b2aecde959c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/independent-raw-evidence-audit.json",
+      "bytes": 16356,
+      "sha256": "7b31e7922da930a828b497919421d531769367aab2f687a0e632eda81fd8c9bf",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/jitendex-BA/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2341420,
+      "sha256": "73555bfaf04129f0c0b123183fa54adb5092b43a96d519083bf8b7e7e8468c18",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of the exact original primary job log, tagged records and successful read-only recovery/audit receipts. Original inner ZIP is retained separately; duplicate tagged-record copy is referenced.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/primary-job.log",
+          "bytes": 3545444,
+          "sha256": "84321bc93960a7f900c55d4eda2719a7af3b2b8324902d19d2d7ea614b3515e9"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/primary-records.jsonl",
+          "bytes": 362884,
+          "sha256": "212d8844ccce5f56c6c454a21716788f54d8f7b4cd1e2a8db373b5cdd0c578b8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 39816,
+          "sha256": "8ecdb92c2cb3ee9c3181972c897d9bca5acd5c06aa373891da42b5a47d8a5d5a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2433,
+          "sha256": "2066f5375029ea5359239859c0d65630d52197e80ff0269ac9236f1347de4f30"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1458,
+          "sha256": "fec946092fd832bad80476b6695a82ce06019cf12718426da3269ae918d0b769"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51228,
+          "sha256": "04f16e2e60e3017ffc1f1c3e81036dc237c955b70a76f0bad0fbdd82db32f8b3"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59866,
+          "sha256": "503da4ee02582d1b428517bb9a001a7cb6787ba7d74deb4e9d14553f1aa3408e"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "df93ebb96ba849bc1b645d5e611108721b9107e5f9e97d88077c2ef141bcdb59"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 4063456,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/jitendex-BA/primary-records.jsonl",
+          "bytes": 362884,
+          "sha256": "212d8844ccce5f56c6c454a21716788f54d8f7b4cd1e2a8db373b5cdd0c578b8"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/current-product-readonly-status-snapshot.json",
+      "bytes": 1096,
+      "sha256": "75eb49f83a7ed4509e7b16621e3adba3bae1e126392b0059b6a001ed0e723022",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/current-product-readonly-status-snapshot.json",
+      "preservation": "Exact root primary status/publication receipt bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/post-outage-supplement-publication.json",
+      "bytes": 723,
+      "sha256": "350b2131df3a2512a2a6e313b765292b36d8e106d4dd14cecefe0e8e59f560de",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "root-remote-continuation-20261128/post-outage-supplement-publication.json",
+      "preservation": "Exact root primary status/publication receipt bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/raw-evidence.zip",
+      "bytes": 2341048,
+      "sha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/primary-log-audit.json",
+      "bytes": 20938,
+      "sha256": "eeefa683b5117d7096ba38708a4f539bc27215c971d0f2dcf87615ce29cb789c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/independent-raw-evidence-audit.json",
+      "bytes": 16259,
+      "sha256": "8fd8f758ccab7221b7edd6c4e5ee46bea3dd9f442d5b9f6428fabca54291f2e6",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-AB/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2407463,
+      "sha256": "695f84f0af74ba58af3e83d577afc3af24077d61bf673f6a49b27b6663c80a28",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of exact original primary job log, tagged records and successful read-only recovery/audit receipts.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/primary-job.log",
+          "bytes": 3685118,
+          "sha256": "d2d625e90dc2d8fed275e571b21192533c5a6ae70937591eedd31fe4ac1011d2"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/primary-records.jsonl",
+          "bytes": 377102,
+          "sha256": "6e41f955a5ddbbffd63a1db650f79401fac7dd1b22bce7e8b0ac9bdd239ade3e"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 40687,
+          "sha256": "487f980daf8f76699bfbefe8c2d458864a50de71a4776111632e868ac4eb747e"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2413,
+          "sha256": "a93eec085a5e37fe8c9d1dda2e636c0c263b9f5cf7c2a5ee0ff2c930159717a8"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1461,
+          "sha256": "8d26c9d4d16039d80490a0e4d2abde863f1ce6b7273de65bb64cb8f39fb51118"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51220,
+          "sha256": "b5711a6a2623e394a50c15c1cd0b641e8eb6106317eb36dede4fda7e11d8eebd"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59868,
+          "sha256": "464f80b86e94d3be452dba24df560f384627bc1156760408562e18eb355f85ed"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "b5622588107c590d1882a708509b9559b52ccaec9962458f703e7a2facf47384"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 4218196,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/vndb-AB/primary-records.jsonl",
+          "bytes": 377102,
+          "sha256": "6e41f955a5ddbbffd63a1db650f79401fac7dd1b22bce7e8b0ac9bdd239ade3e"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/raw-evidence.zip",
+      "bytes": 2374529,
+      "sha256": "0612d8aa9869534e84b37eb8eac0f5f878b77b262f69d8d74f81025e43b8b992",
+      "encoding": "base64",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence.zip",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/primary-log-audit.json",
+      "bytes": 21027,
+      "sha256": "f15aeb703a70eeedbde5b0907f37947c5aa6569503c653f62d9c58c6c8fd0c88",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/primary-log-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/independent-raw-evidence-audit.json",
+      "bytes": 16294,
+      "sha256": "b6b582c94a3f4471bc2072f49a5a36b6877dbc1a34d45eb31b43260e88814a6c",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/independent-raw-evidence-audit.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/vndb-BA/primary-and-recovery-provenance.tar.gz",
+      "bytes": 2433054,
+      "sha256": "07d2ab2955d2454b211a51488bf49da397e568cfc679c2871ae9f15d5b839032",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of the exact original primary job log, tagged records and successful read-only recovery/audit receipts.",
+      "members": [
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/primary-job.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/primary-job.log",
+          "bytes": 3728213,
+          "sha256": "78ce42513de8769131e06ad28d7beba15cf97f62ab7c3ae41f492cff92509ed6"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/primary-records.jsonl",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/primary-records.jsonl",
+          "bytes": 375033,
+          "sha256": "17dc67664907843912995ce2f43bb3271afbc723bcf61336535a0590c076ff0c"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-archive-recovery.json",
+          "bytes": 40963,
+          "sha256": "434949eb82843afe470c6e1b501950ec3e313cd7d595194df0e37affafbdc72a"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-audit-execution.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-audit-execution.json",
+          "bytes": 2413,
+          "sha256": "d1a764597ca2a780610ae9df5e86bf5d504b0139165bad7c8961c491930f2444"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-audit.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-audit.stdout.log",
+          "bytes": 1459,
+          "sha256": "7d4a77866050d67d49561b136e752e6e5295d993fd8fe12a5ce8ec9b87174d28"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-manifest.json",
+          "bytes": 51220,
+          "sha256": "31d8ecef6645f9bf1244d2545970f56135998409ef3924c4b4ea19e550fdcbcc"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence-member-hashes.json",
+          "bytes": 59869,
+          "sha256": "8832396e6875bdb599cae157539472efb4775e2cda488411fdc6f5f312197d97"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/recovery.stderr.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/recovery.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "member": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/recovery.stdout.log",
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/recovery.stdout.log",
+          "bytes": 327,
+          "sha256": "0d1bd24d3fc9fc7669eaea6dbce5092e21f2c7e64e7f08f47039f4a1db99b7aa"
+        }
+      ],
+      "memberCount": 10,
+      "uncompressedMemberBytes": 4259497,
+      "roundTripVerified": true,
+      "omittedExactDuplicateMembers": [
+        {
+          "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/primary-records.jsonl",
+          "sameBytesAsArchiveMember": "numeric-suffix-972-full-evidence/vndb-BA/primary-records.jsonl",
+          "bytes": 375033,
+          "sha256": "17dc67664907843912995ce2f43bb3271afbc723bcf61336535a0590c076ff0c"
+        }
+      ]
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/all-six-original-raw-evidence-index.json",
+      "bytes": 35088,
+      "sha256": "b53b7b0fec408017639489ffbd8df94c3d427969baf4fd105bf0ae511018f851",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/all-six-original-raw-evidence-index.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/combined-primary-index.json",
+      "bytes": 44454,
+      "sha256": "55b8773b0de1ce4de5e52b04a14e453d5192b84796c418ed96f8b14c15c3d168",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/combined-primary-index.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/assemble-primary-index.py",
+      "bytes": 11388,
+      "sha256": "016f06aec92e716517dfefea6e3fe487079a29e047aa63294975716661645187",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/assemble-primary-index.py",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/assemble-primary-index-independent-review.json",
+      "bytes": 1605,
+      "sha256": "cb3ec6bedb85447563fdbccd9ed7a92dae889183ff49da605ccb3f5e43ccfd6d",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/assemble-primary-index-independent-review.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/develop-followup-boundary.json",
+      "bytes": 3870,
+      "sha256": "c522bbb98c474c0e09995e95428127da3b27cc2213791d2c9de77bb5c2821091",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-hosted/baseline-receipt.json",
+      "preservation": "Exact original source bytes."
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/publication/develop-followup-primary-snapshot.tar.gz",
+      "bytes": 17076,
+      "sha256": "92f1ed565aa61e6ac0c5ec03e2325ac3d0164f87c3761eedf902f466b5495f34",
+      "encoding": "base64",
+      "preservation": "New deterministic lossless archive of exact primary develop/compare responses. The closed dcfc-to-4cd cohort is unchanged; no newer-source measurements are included.",
+      "members": [
+        {
+          "member": "numeric-suffix-proof-consumer-hosted/baseline-compare.json",
+          "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-hosted/baseline-compare.json",
+          "bytes": 93120,
+          "sha256": "b758126ecf7e6bc6875460a9f55cbe89f924d7b902a964ebb13831d9bfed6404"
+        },
+        {
+          "member": "numeric-suffix-proof-consumer-hosted/baseline-develop-snapshot.json",
+          "sourceRelativeToExperiments": "numeric-suffix-proof-consumer-hosted/baseline-develop-snapshot.json",
+          "bytes": 5986,
+          "sha256": "d9ca48d4a88804475f02669075d60c0e7736f683aa22a78c0a6181717d35d3ca"
+        }
+      ],
+      "memberCount": 2,
+      "uncompressedMemberBytes": 99106,
+      "roundTripVerified": true
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/current-full-results/package-byte-deltas.json",
+      "bytes": 7882,
+      "sha256": "644f6b9174a9e0039a2606880fa68e9903d53db2ea9530ca654ef9f302c77fe0",
+      "encoding": "utf-8",
+      "sourceRelativeToExperiments": "numeric-suffix-972-full-evidence/package-byte-deltas.json",
+      "preservation": "Exact source-bound package/native byte-size receipt; no package download."
+    }
+  ]
+}

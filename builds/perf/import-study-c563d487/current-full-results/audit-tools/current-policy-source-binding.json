@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only independent current-base source binding for the unchanged frozen audit policy",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "repository": "ManabiIO/manabitan",
+  "files": [
+    {
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+      "blob": "964ab9c061b2490b65852344244f11dce62fa644",
+      "bytes": 19981
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "blob": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+      "bytes": 5362
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "blob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "bytes": 18389
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "blob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+      "bytes": 4187
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "blob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "bytes": 21897
+    }
+  ],
+  "noMeasurementsChanged": true
+}

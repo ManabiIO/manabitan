@@ -1,0 +1,15 @@
+{
+  "result": "pass",
+  "scope": "Narrow original-log formatting correction only; no actual archive replay or acquisition by reviewer",
+  "oldRecovererSha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c",
+  "newRecovererSha256": "827b3f106c131e6dc2b0c7614494997d058b6dc4102ec20a4fe2114ec9073eb8",
+  "exactOneLineOptionalLeadingBomChange": true,
+  "originalLogSha256": "5e035b7430fbc4b732837f2f09a5629138b1c3bb54690ab4544717e03166c79f",
+  "originalLine": 1388,
+  "originalChunk": 192,
+  "originalLineSha256": "1a1aacf2037a3589078045eb3298a97e97fcb2a5d4e249f657e18d79e5746f86",
+  "doubleBomRejected": true,
+  "amendmentSha256": "d4807ab3664bd84c6ff49ecf761efc7ba9bda78bbf4f9e2c7d740638329b1096",
+  "allPayloadChunkHashManifestSizeAndMemoryGatesUnchanged": true,
+  "originalRecovererFailureRetained": true
+}

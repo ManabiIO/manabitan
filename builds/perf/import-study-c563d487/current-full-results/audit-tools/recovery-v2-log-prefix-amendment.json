@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "A separate read-only log syntax correction; no source, observer, criteria, input, or measurement changes",
+  "originalRecovery": {
+    "path": "experiments/numeric-suffix-972-full-evidence/recover-raw-archive.py",
+    "bytes": 12488,
+    "sha256": "308a183dfe1a78ddb4c414cf52e0f42052c9dde5479f7bb5b47f057d648f819c"
+  },
+  "correctedRecovery": {
+    "path": "experiments/numeric-suffix-972-full-evidence/recover-raw-archive-v2.py",
+    "bytes": 12495,
+    "sha256": "827b3f106c131e6dc2b0c7614494997d058b6dc4102ec20a4fe2114ec9073eb8"
+  },
+  "exactOneLineDifference": true,
+  "difference": "--- recover-raw-archive.py\n+++ recover-raw-archive-v2.py\n@@ -13,7 +13,7 @@\n \n \n PREFIX = 'MANABITAN_EVIDENCE_ARCHIVE_'\n-TAG = re.compile(r'^(?:\\d{4}-\\d{2}-\\d{2}T\\S+Z\\s+)?' + PREFIX + r'([A-Z]+) (.*)$')\n+TAG = re.compile(r'^\\ufeff?(?:\\d{4}-\\d{2}-\\d{2}T\\S+Z\\s+)?' + PREFIX + r'([A-Z]+) (.*)$')\n SCOPE = ('Lossless post-acquisition archive. Every original regular evidence member is included '\n          'except exactly the two root release-package copies.')\n REASON = 'Reproducible release-package copy; complete source/package-entry maps remain included'\n",
+  "demonstratedOriginalLog": {
+    "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/primary-job.log",
+    "bytes": 3554555,
+    "sha256": "5e035b7430fbc4b732837f2f09a5629138b1c3bb54690ab4544717e03166c79f"
+  },
+  "lineNumber": 1388,
+  "leadingCodePoint": "U+FEFF",
+  "chunkIndex": 192,
+  "payloadBytesChanged": false,
+  "retainedFailedAttempt": {
+    "raw-audit-execution.json": {
+      "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/raw-audit-execution.json",
+      "bytes": 1436,
+      "sha256": "406ee4ca334d9f200f4a736fe138d8231162a52d167181d60fb1426a0d941480"
+    },
+    "recovery.stdout.log": {
+      "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/recovery.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "recovery.stderr.log": {
+      "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/recovery.stderr.log",
+      "bytes": 539,
+      "sha256": "64c72dcbbdd5bd1a8a074fde746893c01409c05ac4346dade5315a064ffe2d46"
+    },
+    "raw-evidence.zip.partial": {
+      "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/raw-evidence.zip.partial",
+      "bytes": 1179648,
+      "sha256": "7c70aea4e4e2ac1fdde4adde75869ade70f904664e85262d55b02f1d685a7639"
+    }
+  },
+  "failureReceipt": {
+    "path": "experiments/numeric-suffix-972-full-evidence/jmdict-AB/raw-archive-recovery-failure-20261128T094107097096.json",
+    "bytes": 864,
+    "sha256": "208585f30e4afb1c0d48ec29b174b1da60e36683c57aa7fed8e9bc38070c7662"
+  },
+  "syntheticTest": {
+    "path": "experiments/numeric-suffix-972-full-evidence/recovery-selfcheck-2/selfcheck-result.json",
+    "bytes": 6177,
+    "sha256": "3ce655d3bd4fac996493eb1b6f1c40d164aebb69c762b371b8eecb22eb35b589"
+  },
+  "syntheticAccepted": 2,
+  "syntheticRejected": 14,
+  "outputStrategy": "New raw-recovery-v2 subdirectory; original attempt and primary files stay untouched",
+  "noMeasurementsChanged": true
+}

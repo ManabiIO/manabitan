@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T09:57:26.592974+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent read-only source review of the combined primary evidence assembler; no assembler execution or new acquisition by this reviewer.",
+  "assembler": {
+    "path": "assemble-primary-index.py",
+    "bytes": 11388,
+    "sha256": "016f06aec92e716517dfefea6e3fe487079a29e047aa63294975716661645187"
+  },
+  "decision": "PASS",
+  "checks": [
+    "Requires all six terminal primary audit files and refuses to overwrite an existing final index.",
+    "Binds the fixed independent auditor and expected-input source hashes; validates exact original log and tagged-record byte identities.",
+    "Checks each job/run, dictionary/order, source tree and commit, native package entry hashes, fixture, browser, production-default requested flags and storage total.",
+    "Preserves every per-host candidate/control ratio, uncertainty interval, memory coverage failure and gate result.",
+    "Compares same-arm package entry maps and same-corpus persisted semantic digests across the six jobs.",
+    "Reports registered count completeness explicitly and never computes a pooled effect or an automatic promotion."
+  ],
+  "limits": [
+    "This assembler indexes source-bound, already-audited statistics; it is not a second independent recomputation of browser timers.",
+    "A failed count or performance gate remains visible; the parent still reviews both original raw-archive audits and non-target uncertainty."
+  ],
+  "sourceEdits": false,
+  "newBuildsTestsParserRunsOrMeasurements": false
+}
