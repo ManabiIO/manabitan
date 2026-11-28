@@ -1,0 +1,340 @@
+{
+  "originalProfileArchive": {
+    "path": "profile-metadata-evidence-0119.tar.gz",
+    "bytes": 11303949,
+    "sha256": "0bc192e15efdc5ae4b2e9e354855d677b24abf40df8cf11272a1600d1f9e4621"
+  },
+  "outputs": [
+    {
+      "path": "README.md",
+      "bytes": 8441,
+      "sha256": "507e8d2e2510c38069b774b520fb14294e3fbe5e2e481de19d5ef9ef594ccb08"
+    },
+    {
+      "path": "additional-investigations.tar.gz",
+      "bytes": 27623,
+      "sha256": "cde0d535cc89710b005baecb09310ffc46a475efab841477e0f5414d1d800b87"
+    },
+    {
+      "path": "cache-native-overlap-evidence-0119.tar.gz",
+      "bytes": 2808737,
+      "sha256": "4187906d86a72d5a9bdd7ef0cda94c5e97541e573bced03c03c57f98038827f9"
+    },
+    {
+      "path": "profile-metadata-review-subset.tar.gz",
+      "bytes": 1730721,
+      "sha256": "24ba10f449e8aa2d53e38b0865e96b22d5acd9eec1ec7c48f9d1c72bbb193be6"
+    }
+  ],
+  "profileReviewMembers": [
+    {
+      "path": "analyze-compression-attribution.py",
+      "bytes": 8033,
+      "sha256": "d17a322fb3b73b83e3b758a743a77f48bf433911c48fbf38ca4e291034a9d433"
+    },
+    {
+      "path": "analyze-import-trace.py",
+      "bytes": 6775,
+      "sha256": "8369b8a3d62c36a53dfd3c09034b4f27261d73f3bf2056a559937050e4b1bcc1"
+    },
+    {
+      "path": "capture-fidelity-correction.json",
+      "bytes": 2638,
+      "sha256": "9bf8cccdcb9aefe2f36efe0cecae4dd34ab4e07e1310ad2dbbd1426eeb222574"
+    },
+    {
+      "path": "compression-attribution.json",
+      "bytes": 26682,
+      "sha256": "0b5496623ed695d3374280fdc1cee81123c556f570adaef672635442f38e9c47"
+    },
+    {
+      "path": "evidence-manifest.json",
+      "bytes": 8072,
+      "sha256": "757ec759222c54a5914ddad27d31be8db383532f306b49dac5182c682b946dc8"
+    },
+    {
+      "path": "import-score-profile-0119.yml",
+      "bytes": 3156,
+      "sha256": "2bdfdc773a02bd0f72b6ae2160642c2ef6dfa2d64e656b9bc437cfe2621f3ea5"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/hotspots.json",
+      "bytes": 350715,
+      "sha256": "7732f6408852c93f534ad1353f4dc3096fd6e16e786c6c0e49b0c069ee816a49"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/identity.json",
+      "bytes": 763,
+      "sha256": "47164c7ba090df8e5a87d1bd2cc6f82ea7825bebf9d19344ff0bf5fcbc062936"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/ordinary-baseline-phase-medians.json",
+      "bytes": 12782,
+      "sha256": "eefc0bb3011f8de85f6975bdb5eaad0a4008eeda1baad8b7943fffa12b9b1832"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/profile-findings.json",
+      "bytes": 33194,
+      "sha256": "46e94a638010f67ccae96e78986028e90b79cc191a6505d8dc61eb28d7ac281b"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/run-1.json",
+      "bytes": 151521,
+      "sha256": "68e186e05524fa6ef09919e9b4fe7d0ff25bae69eda579d296ce0130e7fffd92"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/run-1.trace.json",
+      "bytes": 5320527,
+      "sha256": "fc0a204a0ed43b4279e7e5d2b7dda1d7f3b5e0051741228d689d1b82f5a4c653"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/sample-time-distribution.json",
+      "bytes": 1331,
+      "sha256": "f756baea5f15ab326cb3049ac510fb1b62023817625df0a254abed8bfc9e8d83"
+    },
+    {
+      "path": "jmdict-profile-9e10d3b3/summary.json",
+      "bytes": 59056,
+      "sha256": "1b5021267aecb5d57709d32891ebfca6d4c98440fcece84257005ba6350144ad"
+    },
+    {
+      "path": "map-parser-symbols.py",
+      "bytes": 3615,
+      "sha256": "8fe2f8ce436bb3f53d17190dea8ed75cc7ed8c0c4e5d412731b8807e681ebbd8"
+    },
+    {
+      "path": "metadata/capture-publication.mjs",
+      "bytes": 8767,
+      "sha256": "afba648898110083114a8e316b452c707070bf47c40f3b2ac1591fd5cd2fdc72"
+    },
+    {
+      "path": "metadata/fusion-screen.json",
+      "bytes": 93364,
+      "sha256": "2d4cf486e1fde6f4f11d9e7d609ded23073c7bc5cf59e5c6f4ed3a066222035e"
+    },
+    {
+      "path": "metadata/fusion-screen.mjs",
+      "bytes": 10490,
+      "sha256": "aa2fbf6895739960f93a453bd9d8542e7fb9efb89361503c74b8ff18275babc0"
+    },
+    {
+      "path": "metadata/jmdict-publication.v8.json",
+      "bytes": 45661,
+      "sha256": "f96dc8ad5d7ff8f9f2a0bcff65a029cfb1789ad85a39edadb8c69b28104aad47"
+    },
+    {
+      "path": "parser-replay.mjs",
+      "bytes": 14088,
+      "sha256": "34a1a1894c10442c40e62a9c4d89bb30132d43d884428e496c5de7ffe1854ef6"
+    },
+    {
+      "path": "profile-metadata-evidence-index.md",
+      "bytes": 10495,
+      "sha256": "36f96899eb83ed6ee319198052601db607b48bc1fc397fe1514a3feb10583b1e"
+    },
+    {
+      "path": "profile-package-entry-receipts.json",
+      "bytes": 270489,
+      "sha256": "3b1d4634b9e47c5f93c38bf6a15aade8474dc38a8d19cd571ffce19e578f2e4d"
+    },
+    {
+      "path": "score-v3-candidate-profile/hotspots.json",
+      "bytes": 348047,
+      "sha256": "bb4ef58a1db80971cadba10046acf4907eab6fec40e7f90e18b26f08cd2c6bac"
+    },
+    {
+      "path": "score-v3-candidate-profile/identity.json",
+      "bytes": 747,
+      "sha256": "7fd99d8d8cd6761238ed3f25c4e2c78c77880bcdc7a8404f366e31c0eea9785b"
+    },
+    {
+      "path": "score-v3-candidate-profile/profile-findings.json",
+      "bytes": 5542,
+      "sha256": "d7a717f449f3e5ce8d7d6ca0c5921b5601b97e0f8b6154db5adff6b2c7f677f8"
+    },
+    {
+      "path": "score-v3-candidate-profile/run-1.json",
+      "bytes": 151887,
+      "sha256": "0009201f3555fef963ff879143b380bd45e51c4a602e12eeb0ccb3f9be44842e"
+    },
+    {
+      "path": "score-v3-candidate-profile/run-1.trace.json",
+      "bytes": 5120322,
+      "sha256": "2a162e4241b44d67ac171e3e0113a4196571c34dcd956283346c5bf08bff5c0a"
+    },
+    {
+      "path": "score-v3-candidate-profile/selected-sample-intervals.json",
+      "bytes": 945,
+      "sha256": "5b6a56135886cba56c0e0fe71dee602b8c0dda2cf7d8b47c546a2c6a8ed5a1c7"
+    },
+    {
+      "path": "score-v3-candidate-profile/summary.json",
+      "bytes": 59176,
+      "sha256": "6f3d6b15595aada9c4687e1055452369be7d7ed3ad9e944153a4675a34a07200"
+    },
+    {
+      "path": "sources/baseline/dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "bytes": 1624,
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "path": "sources/baseline/dev/data/zstd-wasm.PROVENANCE.md",
+      "bytes": 731,
+      "sha256": "879eefb07ff40a13026f2e84033eec290bee2f77adbb59e21c4946d88818ec3e"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/dictionary-database.js",
+      "bytes": 613153,
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/raw-term-content.js",
+      "bytes": 26429,
+      "sha256": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/term-content-block-store.js",
+      "bytes": 70348,
+      "sha256": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/term-content-canonical-layout.js",
+      "bytes": 1827,
+      "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/term-content-canonical-scan.js",
+      "bytes": 19536,
+      "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/term-content-metadata-arena.js",
+      "bytes": 5580,
+      "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/term-content-ownership.js",
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    {
+      "path": "sources/baseline/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "bytes": 6853,
+      "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+    },
+    {
+      "path": "sources/baseline/ext/lib/zstd-wasm.js",
+      "bytes": 26084,
+      "sha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e"
+    },
+    {
+      "path": "sources/baseline/test/fixtures/parser-settlement/worker-node.mjs",
+      "bytes": 803,
+      "sha256": "cc04b9bf7b875c7b49b4047823b6fb638598352620994c78dd88776b0752ad5c"
+    },
+    {
+      "path": "sources/baseline/test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "path": "v3-cohort-baseline-profile/hotspots.json",
+      "bytes": 351338,
+      "sha256": "8e1301185619f77e1e418101d2ee82af35296765b9874793d7a176146fcec697"
+    },
+    {
+      "path": "v3-cohort-baseline-profile/identity.json",
+      "bytes": 331,
+      "sha256": "5d5818196c8c0c53ca407e586953bcd3bdae6942986e1daba216a4b40f2e1623"
+    },
+    {
+      "path": "v3-cohort-baseline-profile/run-1.json",
+      "bytes": 150910,
+      "sha256": "afe32c23402e9e53149e7631cc5e95efbcba52df42b1d39e392cbd0fc6adfd89"
+    },
+    {
+      "path": "v3-cohort-baseline-profile/run-1.trace.json",
+      "bytes": 4568050,
+      "sha256": "e53d02ed7f88b1bb035815a28b7a96587eee7c5d72d9a93e0b8ae397fb8bbdf0"
+    },
+    {
+      "path": "v3-cohort-baseline-profile/summary.json",
+      "bytes": 58848,
+      "sha256": "f8e767da631d3c986be6d2b1415a4f4e0ed021e57138ce7a729435ca98ba7137"
+    },
+    {
+      "path": "wasm-function-names.json",
+      "bytes": 3836,
+      "sha256": "a125a7469d3afe6d99c582693fcdbfc05bb458668274eb267802894a2bef228b"
+    }
+  ],
+  "omittedRegenerableInputs": [
+    {
+      "path": "metadata/jmdict-publication.v8",
+      "bytes": 14876086,
+      "sha256": "3dbb2d74160290d359119149ab5f026132e3848cf010505cb01a840e6c0cf765"
+    }
+  ],
+  "additionalInvestigationMembers": [
+    {
+      "path": "cache-native-overlap-evidence-0119.json",
+      "bytes": 580,
+      "sha256": "8f7074a03a73c0df38ec7dade05a30636730b2b9e268b0c790e081f25b386953"
+    },
+    {
+      "path": "cache-native-overlap-evidence-index.md",
+      "bytes": 9641,
+      "sha256": "8522f4083acd90db1000d9d255419ed1bb41a5b8cbd5c6957af35366d406083a"
+    },
+    {
+      "path": "cdict-investigation/README.md",
+      "bytes": 10919,
+      "sha256": "de35198ba5a394a629382ecfeb8901748b6d3a243dbcbd0ed190a383026fb9cf"
+    },
+    {
+      "path": "cdict-investigation/pr771-metadata.json",
+      "bytes": 7793,
+      "sha256": "bd92677593ed684251f190a384c5794adbbb653cd001bb535a12c6877474de36"
+    },
+    {
+      "path": "cdict-investigation/read-only-audit.json",
+      "bytes": 7564,
+      "sha256": "e82b4ea1df752bc1d581c0900f1681a020d80dc9dbb7d81b3c09974943460b23"
+    },
+    {
+      "path": "cdict-investigation/read-only-audit.py",
+      "bytes": 6110,
+      "sha256": "f01cee5cae0878da24865a78a6993d2f027ffd88daf0ddf08ac0fd714f299886"
+    },
+    {
+      "path": "crc-init-upper-bound/README.md",
+      "bytes": 3809,
+      "sha256": "5b0b45b0f4434d7b1dd20cff935258314dbcebd77504c366f69c3d0aa4b147b5"
+    },
+    {
+      "path": "crc-init-upper-bound/first-use.mjs",
+      "bytes": 2570,
+      "sha256": "67156b8c1799e03dbdcdeb780dd61c454d5dd8db3eb099e81b60d179fc7ac884"
+    },
+    {
+      "path": "crc-init-upper-bound/fresh-process-node22.json",
+      "bytes": 22262,
+      "sha256": "153d9dba5629ec7456204a65a42d2f4c17d7cb65d0c76454fbf32110102a7876"
+    },
+    {
+      "path": "crc-init-upper-bound/run.mjs",
+      "bytes": 4530,
+      "sha256": "25d55dea2a3ee264850cbb19c5992a1d6335da7292e039b97f599c55908f541e"
+    },
+    {
+      "path": "package-pipeline-evidence.py",
+      "bytes": 11068,
+      "sha256": "e2887c271a134a9971beda42eca26edf0ff9410eec6eab1c145be548260c55c3"
+    },
+    {
+      "path": "profile-metadata-evidence-0119.json",
+      "bytes": 319,
+      "sha256": "2de8b424ca9275d6a097a08438dd7961ad4e9f60c2a05674fff69cf221a9ba8b"
+    }
+  ]
+}
