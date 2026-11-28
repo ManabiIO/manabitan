@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "records-only-current-source-original-correctness-audit",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "files": {
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/audit.py": {
+      "gitBlob": "7890ebe21b4bf7d6b694771d7417e2c27c0b2fd6",
+      "bytes": 70155,
+      "sha256": "92a45e0feaca13425d6b9cf8124f63931aadc1f2f761a92e6fabe94e0ffab2ba"
+    },
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/manifest.json": {
+      "gitBlob": "1153ad3a761c671ddd3b62dbf85d41dcb207d889",
+      "bytes": 3671,
+      "sha256": "715b4d04d9682ca6c2bdb56ccebdd220769351bc182600b9564bf8be84291e59"
+    },
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/README.md": {
+      "gitBlob": "13ed1122f12782ff6092e427329ea7db3af12005",
+      "bytes": 6846,
+      "sha256": "8458bc89ed1545dab772fde7f41fd78cd177a3b8135c8e1d659b7b185498ee98"
+    },
+    ".github/workflows/native-fields-current-correctness-audit-1c413.yml": {
+      "gitBlob": "297b738944e10872414c196741c547bb03d4ced6",
+      "bytes": 6731,
+      "sha256": "12a1aa8c0f3188b6083df5c86222671942aabe18310b903cef7ff7fc3615b257"
+    },
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/test-audit.py": {
+      "gitBlob": "bd8c689b6d2a5eea49ed6e7390fdd24afff13eff",
+      "bytes": 46380,
+      "sha256": "b8dfa43cc137ce1b7a9eec196e3d5d6f5dd3fb903af8905c3613a8b70f7d8d57"
+    },
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/transport.py": {
+      "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+      "bytes": 9875,
+      "sha256": "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
+    },
+    "dev/perf/native-record-fields-current-correctness-audit-20261128-1c413/field_activation.py": {
+      "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+      "bytes": 25222,
+      "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+    }
+  },
+  "readerLineage": {
+    "historicalCrcRepair": "2e03deeba0de1be5bb48110ae789226ee1e8dbc4",
+    "sameFunctionsAndTests": true,
+    "readerOnlyChanges": "Nine frozen source/run/job identity constants; original current-source artifacts and their precise metadata",
+    "priorReaderFailures": [
+      46133246828,
+      46133974806
+    ],
+    "productExecution": false
+  }
+}

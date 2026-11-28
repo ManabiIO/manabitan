@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "publication": {
+    "runId": 46133913032,
+    "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "headBranch": "test/native-record-fields-current-20261128-1c413",
+    "attempt": 1
+  },
+  "source": {
+    "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "productTree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d",
+    "candidate": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "candidateTree": "71bb7a59810ebdfcd2ee896d8d269ed83e92ebaf"
+  },
+  "jobs": {
+    "validation": {
+      "id": 140944881152,
+      "name": "Rebuild, complete units, types, lint and all-target builds",
+      "conclusion": "success"
+    },
+    "corpus": {
+      "id": 140944880913,
+      "name": "Untimed original baseline and candidate importer parity",
+      "conclusion": "success"
+    }
+  },
+  "artifacts": {
+    "validation": {
+      "id": 15259375276,
+      "name": "native-record-fields-correctness-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "sizeBytes": 344007,
+      "sha256": "88dc4436039992f3819f186357e1736701a0a0a15a60e37b2bbf9dde0ed01433"
+    },
+    "corpus": {
+      "id": 15259500068,
+      "name": "native-record-fields-corpus-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "sizeBytes": 1043287,
+      "sha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c"
+    }
+  },
+  "scope": {
+    "readOnly": true,
+    "performanceMeasurements": false,
+    "replacementAcquisition": false,
+    "originalSuccessfulRawSinksRetired": true,
+    "originalCorpusContainsCompleteHashReceipts": true,
+    "noBrowserPersistenceOrFullMediaQualification": true
+  },
+  "priorFailurePreservation": [
+    {
+      "runId": 46125649822,
+      "description": "Original source-mode guard rejected tracked executable; no corpus imports."
+    },
+    {
+      "runId": 46127174624,
+      "description": "Original generated-runtime mismatch and filename upload failure; internal corpus receipts unavailable."
+    },
+    {
+      "runId": 46129727075,
+      "description": "All original corpus pairs passed, but archive rejected intentional smoke symlink; validation had concrete lint/type failures. Full console evidence separately preserved; no passing original corpus artifact."
+    }
+  ],
+  "originalJobLogs": {
+    "corpus": {
+      "gitBlob": "64edb1d821edd20dfad5010491d3caffa1b5b816",
+      "bytes": 684561,
+      "sha256": "7aafc2e48de8fd4818a7010c47ca9735b6bcc575f80ca576413c8e0ef642bf1b"
+    },
+    "validation": {
+      "gitBlob": "a8b61df444377a501906638f5d3a5b226a2aa44c",
+      "bytes": 1100318,
+      "sha256": "af2cdc7c71bb36ec833a3611cfa3e91d8cef4f84c454b7a400471558e8601183"
+    }
+  },
+  "historicalCorrectness": {
+    "runId": 46132025311,
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "product": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+    "candidate": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+    "artifacts": {
+      "validation": 15258022480,
+      "corpus": 15257853500
+    },
+    "resultTransferToCurrentSource": false,
+    "reason": "PR #981 changed current production source before browser timing; this reader independently audits the new exact original correctness run"
+  },
+  "readerLineage": {
+    "historicalCrcRepair": "2e03deeba0de1be5bb48110ae789226ee1e8dbc4",
+    "sameFunctionsAndTests": true,
+    "readerOnlyChanges": "Nine frozen source/run/job identity constants; original current-source artifacts and their precise metadata",
+    "priorReaderFailures": [
+      46133246828,
+      46133974806
+    ],
+    "productExecution": false
+  }
+}
