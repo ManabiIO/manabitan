@@ -19,6 +19,8 @@ class MockCompressionWorker {
         this.listeners = new Map();
         /** @type {Array<{message: Record<string, unknown>, transfer: Transferable[]}>} */
         this.calls = [];
+        /** @type {Array<{message: Record<string, unknown>, transfer: Transferable[]}>} */
+        this.jobs = [];
         this.terminateCount = 0;
     }
 
@@ -36,6 +38,35 @@ class MockCompressionWorker {
      */
     postMessage(message, transfer = []) {
         this.calls.push({message, transfer});
+        if (message.type === 'compress-spans-batch') {
+            queueMicrotask(() => {
+                const nextBlock = /** @type {Uint32Array} */ (message.nextBlock);
+                const jobIds = /** @type {number[]} */ (message.jobIds);
+                const starts = /** @type {Uint32Array} */ (message.blockStartIndexes);
+                const lengths = /** @type {Uint32Array} */ (message.blockLengths);
+                for (;;) {
+                    const block = Atomics.add(nextBlock, 0, 1);
+                    if (block >= jobIds.length) { break; }
+                    this.respondJob({
+                        ...message,
+                        id: jobIds[block],
+                        sourceOffsets: /** @type {Uint32Array} */ (message.sourceOffsets).subarray(starts[block], starts[block + 1]),
+                        sourceLengths: /** @type {Uint32Array} */ (message.sourceLengths).subarray(starts[block], starts[block + 1]),
+                        contentBytes: lengths[block],
+                    }, []);
+                }
+            });
+            return;
+        }
+        this.respondJob(message, transfer);
+    }
+
+    /**
+     * @param {Record<string, unknown>} message
+     * @param {Transferable[]} transfer
+     */
+    respondJob(message, transfer) {
+        this.jobs.push({message, transfer});
         const response = this.respond(message, transfer);
         queueMicrotask(() => {
             if (response.sourceConsumed === true) {
@@ -105,11 +136,12 @@ describe('TermContentCompressionPool', () => {
         const result = await operation.completion;
 
         expect(result.chunks.map((bytes) => bytes[0])).toStrictEqual([...blockLengths]);
-        expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 2]);
+        expect(workers.map(({calls}) => calls.length)).toStrictEqual([1, 1]);
+        const jobs = workers.flatMap((worker) => worker.jobs).sort((a, b) => Number(a.message.id) - Number(b.message.id));
         const metadata = /** @type {Uint32Array} */ (workers[0].calls[0].message.sourceOffsets).buffer;
         expect(metadata).toBeInstanceOf(SharedArrayBuffer);
         for (let block = 0; block < blockLengths.length; ++block) {
-            const {message, transfer} = workers[block % workers.length].calls[Math.floor(block / workers.length)];
+            const {message, transfer} = jobs[block];
             const offsets = /** @type {Uint32Array} */ (message.sourceOffsets);
             const lengths = /** @type {Uint32Array} */ (message.sourceLengths);
             expect(message.source).toBe(source);

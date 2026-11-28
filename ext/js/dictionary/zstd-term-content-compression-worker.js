@@ -22,19 +22,80 @@ const modulePromise = /** @type {Promise<typeof import('./zstd-term-content.js')
 );
 const initialization = modulePromise.then(({initializeTermContentZstd}) => initializeTermContentZstd());
 
+/** @typedef {{type?: unknown, id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments, blockStartIndexes?: unknown, blockLengths?: unknown, nextBlock?: unknown, jobIds?: unknown}} CompressionMessage */
+
 void initialization.then(
     () => { self.postMessage({type: 'ready'}); },
     (error) => { self.postMessage({type: 'initialization-error', error: `${error}`}); },
 );
 
 self.addEventListener('message', (event) => {
-    void compressContent(event);
+    const rawData = /** @type {unknown} */ (event.data);
+    const data = /** @type {CompressionMessage} */ (rawData);
+    if (data?.type === 'compress-spans-batch') {
+        void compressSpanBatch(data);
+    } else {
+        void compressContent(data);
+    }
 });
 
-/** @param {MessageEvent} event */
-async function compressContent(event) {
-    const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
+/* eslint-disable @stylistic/semi */
+/** @param {CompressionMessage} data */
+async function compressSpanBatch(data) {
+    try {
+        const {source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, nextBlock, jobIds} = data
+        if (
+            !(source instanceof Uint8Array) || !(source.buffer instanceof SharedArrayBuffer) ||
+            !(sourceOffsets instanceof Uint32Array) || !(sourceLengths instanceof Uint32Array) ||
+            !(blockStartIndexes instanceof Uint32Array) || !(blockLengths instanceof Uint32Array) ||
+            !(nextBlock instanceof Uint32Array) || !(nextBlock.buffer instanceof SharedArrayBuffer) || nextBlock.length !== 1 ||
+            !Array.isArray(jobIds) || jobIds.length !== blockLengths.length || jobIds.length === 0 ||
+            blockStartIndexes.length !== blockLengths.length + 1 || sourceOffsets.length !== sourceLengths.length ||
+            blockStartIndexes[0] !== 0 || blockStartIndexes[blockLengths.length] !== sourceOffsets.length || data.wrap !== true
+        ) {
+            throw new TypeError('Compression worker batch input is invalid')
+        }
+        await initialization
+        for (;;) {
+            // The counter saturates at the block count, so even an exhausted
+            // queue can be shared safely without an overflowing claim index.
+            let block = Atomics.load(nextBlock, 0)
+            for (;;) {
+                if (block > jobIds.length) { throw new RangeError('Compression worker batch claim is invalid') }
+                if (block === jobIds.length) { return }
+                const observed = Atomics.compareExchange(nextBlock, 0, block, block + 1)
+                if (observed === block) { break }
+                block = observed
+            }
+            const start = blockStartIndexes[block]
+            const end = blockStartIndexes[block + 1]
+            if (end < start || end > sourceOffsets.length || !Number.isSafeInteger(jobIds[block])) {
+                throw new RangeError('Compression worker batch block is invalid')
+            }
+            // Each block keeps its own source-consumed and completion replies.
+            // A block error is drained like an ordinary job; later claimed
+            // blocks still release their own borrowed source before rejection.
+            await compressContent({
+                id: jobIds[block],
+                source,
+                sourceOffsets: sourceOffsets.subarray(start, end),
+                sourceLengths: sourceLengths.subarray(start, end),
+                contentBytes: blockLengths[block],
+                dictName: data.dictName,
+                wrap: true,
+                compressionExperiments: data.compressionExperiments,
+            })
+        }
+    } catch (error) {
+        // A malformed batch or failed initialization leaves unclaimed jobs.
+        // The coordinator terminates every reader before settling those jobs.
+        self.postMessage({type: 'batch-error', error: `${error}`})
+    }
+}
+/* eslint-enable @stylistic/semi */
+
+/** @param {CompressionMessage} data */
+async function compressContent(data) {
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;

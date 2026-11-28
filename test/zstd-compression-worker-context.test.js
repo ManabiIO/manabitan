@@ -92,11 +92,12 @@ async function loadWorker(failFirstContext = false) {
      */
     const send = async (message, transfer = []) => {
         if (bridge.listener === null) { throw new Error('Worker listener was not installed') }
+        const responseStart = bridge.messages.length
         bridge.listener(/** @type {MessageEvent} */ ({data: structuredClone(message, {transfer})}))
         await vi.waitFor(() => {
-            expect(bridge.messages.some((response) => response.id === message.id && (response.compressed || response.error))).toBe(true)
+            expect(bridge.messages.slice(responseStart).some((response) => response.type === 'batch-error' || (response.id === message.id && (response.compressed || response.error)))).toBe(true)
         })
-        const response = bridge.messages.find((entry) => entry.id === message.id && (entry.compressed || entry.error))
+        const response = bridge.messages.slice(responseStart).find((entry) => entry.type === 'batch-error' || (entry.id === message.id && (entry.compressed || entry.error)))
         if (typeof response?.error === 'string') { throw new Error(response.error) }
         if (!(response?.compressed instanceof ArrayBuffer)) { throw new Error('Worker did not return owned compressed bytes') }
         return new Uint8Array(response.compressed)
@@ -105,6 +106,88 @@ async function loadWorker(failFirstContext = false) {
 }
 
 describe('compression worker native contexts', {timeout: 10_000}, () => {
+    test('continues claiming a shared batch after first or middle source-copy failures', async () => {
+        const {api, send, bridge} = await loadWorker()
+        const source = new Uint8Array(new SharedArrayBuffer(12))
+        source.set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        for (const failedBlock of [0, 1]) {
+            const responseStart = bridge.messages.length
+            const nextBlock = new Uint32Array(new SharedArrayBuffer(4))
+            const sourceOffsets = Uint32Array.of(0, 4, 8)
+            sourceOffsets[failedBlock] = source.length
+            await expect(send({
+                type: 'compress-spans-batch',
+                id: 10 + failedBlock,
+                jobIds: [10, 11, 12],
+                source,
+                sourceOffsets,
+                sourceLengths: Uint32Array.of(4, 4, 4),
+                blockStartIndexes: Uint32Array.of(0, 1, 2, 3),
+                blockLengths: Uint32Array.of(4, 4, 4),
+                nextBlock,
+                wrap: true,
+                dictName: 'jmdict',
+            })).rejects.toThrow()
+            await vi.waitFor(() => {
+                expect(bridge.messages.slice(responseStart).filter(({compressed}) => compressed instanceof ArrayBuffer)).toHaveLength(2)
+            })
+            const responses = bridge.messages.slice(responseStart)
+            expect(Atomics.load(nextBlock, 0)).toBe(3)
+            const successful = [0, 1, 2].filter((block) => block !== failedBlock)
+            expect(responses.filter(({type}) => type === 'source-consumed').map(({id}) => id)).toEqual(successful.map((block) => block + 10))
+            expect(responses.some(({type}) => type === 'batch-error')).toBe(false)
+            for (const block of successful) {
+                const result = responses.find((message) => message.id === block + 10 && message.compressed)
+                if (!(result?.compressed instanceof ArrayBuffer)) { throw new Error('Expected a successful block') }
+                expect(api.decompressTermContentZstd(new Uint8Array(result.compressed).subarray(12), 'jmdict')).toEqual(source.subarray(block * 4, (block + 1) * 4))
+            }
+        }
+    })
+
+    test('reports malformed shared batches as pool-fatal before reading source bytes', async () => {
+        const {send, bridge} = await loadWorker()
+        for (const malformed of ['unshared-counter', 'invalid-counter', 'invalid-job-id', 'invalid-span-partition']) {
+            const responseStart = bridge.messages.length
+            const nextBlock = new Uint32Array(malformed === 'unshared-counter' ? new ArrayBuffer(4) : new SharedArrayBuffer(4))
+            if (malformed === 'invalid-counter') { nextBlock[0] = 2 }
+            await expect(send({
+                type: 'compress-spans-batch',
+                id: 10,
+                jobIds: [malformed === 'invalid-job-id' ? Number.NaN : 10],
+                source: new Uint8Array(new SharedArrayBuffer(4)),
+                sourceOffsets: Uint32Array.of(0),
+                sourceLengths: Uint32Array.of(4),
+                blockStartIndexes: Uint32Array.of(0, malformed === 'invalid-span-partition' ? 2 : 1),
+                blockLengths: Uint32Array.of(4),
+                nextBlock,
+                wrap: true,
+            })).rejects.toThrow(/batch (input|claim|block) is invalid/)
+            const responses = bridge.messages.slice(responseStart)
+            expect(responses.filter(({type}) => type === 'batch-error')).toHaveLength(1)
+            expect(responses.some(({type}) => type === 'source-consumed')).toBe(false)
+        }
+    })
+
+    test('reports initialization failure for a batch with unclaimed blocks', async () => {
+        const {send, bridge} = await loadWorker(true)
+        const nextBlock = new Uint32Array(new SharedArrayBuffer(4))
+        await expect(send({
+            type: 'compress-spans-batch',
+            id: 10,
+            jobIds: [10, 11],
+            source: new Uint8Array(new SharedArrayBuffer(8)),
+            sourceOffsets: Uint32Array.of(0, 4),
+            sourceLengths: Uint32Array.of(4, 4),
+            blockStartIndexes: Uint32Array.of(0, 1, 2),
+            blockLengths: Uint32Array.of(4, 4),
+            nextBlock,
+            wrap: true,
+        })).rejects.toThrow('compression context')
+        expect(bridge.messages.filter(({type}) => type === 'batch-error')).toHaveLength(1)
+        expect(bridge.messages.some(({type}) => type === 'source-consumed')).toBe(false)
+        expect(Atomics.load(nextBlock, 0)).toBe(0)
+    })
+
     test.each(['owned', 'shared'])('does not allocate a decoder while compressing %s input, then supports later decoding', async (route) => {
         const {api, native, dictionary, createDecoder, createEncoder, send, bridge} = await loadWorker()
         expect(createEncoder).toHaveBeenCalledOnce()
