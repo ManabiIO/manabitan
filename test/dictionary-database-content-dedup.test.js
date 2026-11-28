@@ -2440,6 +2440,147 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('observes a terminal record append before content completion without changing its join', async () => {
+        const harness = createArtifactOverlapHarness()
+        Reflect.set(harness.database, '_bulkImportState', 'active')
+        const store = Reflect.get(harness.database, '_termRecordStore')
+        const endImportSession = vi.fn(async () => {})
+        Reflect.set(store, '_nextId', 1)
+        Reflect.set(store, 'endImportSession', endImportSession)
+        let finished = false
+        const importing = harness.database.bulkAddArtifactTermsChunk(harness.chunk, {
+            sourceFileIndex: 5, sourceFileBatchCount: 2, sourceFileCount: 7, chunkIndex: 2, chunkCount: 2,
+        }).then(() => { finished = true })
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        Reflect.set(store, '_nextId', 2)
+        harness.resolveRecords()
+        await vi.waitFor(() => {
+            expect(harness.database._getTermRecordTerminalOverlapDiagnostics().lastEligible?.recordAppendCompletedAtMs).toEqual(expect.any(Number))
+        })
+        const pending = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(pending.lastEligible?.contentCompletedAtMs).toBeNull()
+        expect(pending.lastEligible?.joinFinishedAtMs).toBeNull()
+        expect(finished).toBe(false)
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled()
+        expect(endImportSession).not.toHaveBeenCalled()
+
+        harness.resolveContent()
+        await importing
+        const result = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(result.artifactCallCount).toBe(1)
+        expect(result.artifactRowCount).toBe(1)
+        expect(result.lastEligible?.call).toMatchObject({
+            ordinal: 1, dictionary: 'JMdict', rowCount: 1, artifactRowStart: 0, artifactRowEnd: 1, activeBulkImport: true,
+        })
+        expect(result.lastEligible).toMatchObject({
+            nextRecordIdAtAppendStart: 1, nextRecordIdAfterAppend: 2, recordStatus: 'fulfilled', contentStatus: 'fulfilled',
+        })
+        expect(result.contentCompletionMinusRecordAppendMs).toBeGreaterThanOrEqual(0)
+        expect(result.availableContentWaitMs).toBe(result.contentCompletionMinusRecordAppendMs)
+        expect(result.lastEligibleWasFinalAppend).toBe(true)
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+        expect(endImportSession).not.toHaveBeenCalled()
+
+        // A later record append invalidates the final-record identity even if
+        // it did not use the artifact API or replace the bounded observation.
+        Reflect.set(store, '_nextId', 3)
+        expect(harness.database._getTermRecordTerminalOverlapDiagnostics().lastEligibleWasFinalAppend).toBe(false)
+    })
+
+    test('reports zero available content wait when content completes before records', async () => {
+        const harness = createArtifactOverlapHarness()
+        Reflect.set(harness.database, '_bulkImportState', 'active')
+        const importing = harness.database.bulkAddArtifactTermsChunk(harness.chunk, {
+            sourceFileIndex: 0, sourceFileBatchCount: 1, sourceFileCount: 1, chunkIndex: 1, chunkCount: 1,
+        })
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.resolveContent()
+        await vi.waitFor(() => {
+            expect(harness.database._getTermRecordTerminalOverlapDiagnostics().lastEligible?.contentCompletedAtMs).toEqual(expect.any(Number))
+        })
+        expect(harness.database._getTermRecordTerminalOverlapDiagnostics().lastEligible?.recordAppendCompletedAtMs).toBeNull()
+        harness.resolveRecords()
+        await importing
+        const result = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(result.contentCompletionMinusRecordAppendMs).toBeLessThanOrEqual(0)
+        expect(result.availableContentWaitMs).toBe(0)
+    })
+
+    test.each([
+        {source: null},
+        {source: {sourceFileIndex: 0, sourceFileBatchCount: 2, sourceFileCount: 4, chunkIndex: 2, chunkCount: 2}},
+        {source: {sourceFileIndex: 2, sourceFileBatchCount: 2, sourceFileCount: 4, chunkIndex: 1, chunkCount: 2}},
+        {source: {sourceFileIndex: 2, sourceFileBatchCount: 2, sourceFileCount: 4, chunkIndex: 0, chunkCount: 0}},
+    ])('does not infer a terminal append from estimated rows or incomplete source progress: $source', async ({source}) => {
+        const harness = createArtifactOverlapHarness()
+        Reflect.set(harness.database, '_bulkImportState', 'active')
+        Reflect.set(Reflect.get(harness.database, '_termRecordStore'), '_nextId', 2)
+        const importing = harness.database.bulkAddArtifactTermsChunk(harness.chunk, source)
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.resolveContent()
+        harness.resolveRecords()
+        await importing
+        const result = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(result.lastEligibleWasFinalArtifactCall).toBe(true)
+        expect(result.lastEligibleMatchesFinalRecordId).toBe(true)
+        expect(result.lastEligibleWasTerminalSourceChunk).toBe(false)
+        expect(result.lastEligibleWasFinalAppend).toBe(false)
+    })
+
+    test('retains the last eligible observation while counting later ineligible artifact calls', async () => {
+        const harness = createArtifactOverlapHarness()
+        Reflect.set(harness.database, '_bulkImportState', 'active')
+        Reflect.set(Reflect.get(harness.database, '_termRecordStore'), '_nextId', 2)
+        const importing = harness.database.bulkAddArtifactTermsChunk(harness.chunk, {
+            sourceFileIndex: 0, sourceFileBatchCount: 1, sourceFileCount: 1, chunkIndex: 1, chunkCount: 1,
+        })
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        harness.resolveContent()
+        harness.resolveRecords()
+        await importing
+        await harness.database.bulkAddArtifactTermsChunk({...harness.chunk, rowCount: 0})
+        const result = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(result.artifactCallCount).toBe(2)
+        expect(result.artifactRowCount).toBe(1)
+        expect(result.lastArtifactCall?.ordinal).toBe(2)
+        expect(result.lastArtifactCall?.rowCount).toBe(0)
+        expect(result.lastEligible?.call.ordinal).toBe(1)
+        expect(result.lastEligibleWasFinalArtifactCall).toBe(false)
+        expect(result.lastEligibleWasFinalAppend).toBe(false)
+    })
+
+    test('keeps both persistence failures and the original source drain with diagnostics', async () => {
+        const harness = createArtifactOverlapHarness()
+        Reflect.set(harness.database, '_bulkImportState', 'active')
+        const importing = harness.database.bulkAddArtifactTermsChunk(harness.chunk, {
+            sourceFileIndex: 0, sourceFileBatchCount: 1, sourceFileCount: 1, chunkIndex: 1, chunkCount: 1,
+        })
+        let finished = false
+        void importing.then(() => { finished = true }, () => { finished = true })
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        const recordError = new Error('record diagnostic failure')
+        const contentError = new Error('content diagnostic failure')
+        harness.rejectRecords(recordError)
+        await Promise.resolve()
+        expect(finished).toBe(false)
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled()
+        harness.rejectContent(contentError)
+        await expect(importing).rejects.toMatchObject({
+            message: 'Term content and record persistence both failed', errors: [contentError, recordError],
+        })
+        const result = harness.database._getTermRecordTerminalOverlapDiagnostics()
+        expect(result.lastEligible).toMatchObject({recordStatus: 'rejected', contentStatus: 'rejected'})
+        expect(result.lastEligible?.recordAppendCompletedAtMs).toBeNull()
+        expect(result.lastEligible?.contentCompletedAtMs).toBeNull()
+        expect(result.lastEligible?.joinFinishedAtMs).toEqual(expect.any(Number))
+        expect(result.availableContentWaitMs).toBeNull()
+        expect(result.lastEligibleWasFinalAppend).toBe(false)
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('does not release parser content on source consumption before metadata publication', async () => {
         const harness = createArtifactOverlapHarness();
         /** @type {(value: Record<string, unknown>) => void} */

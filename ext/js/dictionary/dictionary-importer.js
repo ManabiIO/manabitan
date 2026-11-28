@@ -1958,9 +1958,10 @@ export class DictionaryImporter {
                  * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
                  * @param {number} streamedProgressStartIndex
                  * @param {number} [streamedProgressAllowance]
+                 * @param {import('./dictionary-database.js').TermRecordTerminalSourceDiagnostics|null} [terminalSourceDiagnostics=null]
                  * @returns {Promise<Record<string, number>>}
                  */
-            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
+            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance, terminalSourceDiagnostics = null) => {
                 if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 const trackProgress = streamedProgress === null;
                 /** @type {DirectTermChunk|null} */
@@ -2104,7 +2105,7 @@ export class DictionaryImporter {
                 }
                 const tTermsWriteStart = Date.now();
                 await (directArtifactChunk !== null ?
-                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
+                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk, terminalSourceDiagnostics) :
                     bulkAdd('terms', termList, {trackProgress}));
                 const tTermsWriteEnd = Date.now();
                 importMetrics.bulkAddTermsMs += Math.max(0, tTermsWriteEnd - tTermsWriteStart);
@@ -2334,7 +2335,13 @@ export class DictionaryImporter {
                             async (termListChunk, requirementsChunk, streamProgress) => {
                                 ++streamedFastPathChunkCount;
                                 const tChunkWorkStart = Date.now();
-                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance);
+                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance, {
+                                    sourceFileIndex: termFileIndex,
+                                    sourceFileBatchCount: sourceTermFileBatchCount,
+                                    sourceFileCount: activeTermFiles.length,
+                                    chunkIndex: streamProgress.chunkIndex,
+                                    chunkCount: streamProgress.chunkCount,
+                                });
                                 addTermImportMetrics(artifactMetrics, chunkMetrics);
                                 streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
                                 termListChunk.length = 0;

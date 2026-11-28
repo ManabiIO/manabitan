@@ -233,6 +233,71 @@ function expandUniformContentDictNames(names, count, fillUntil) {
     return values;
 }
 
+/**
+ * Research-only source position supplied by the native importer callback.
+ * It is observed, never used to authorize or initiate finalization.
+ * @typedef {object} TermRecordTerminalSourceDiagnostics
+ * @property {number} sourceFileIndex
+ * @property {number} sourceFileBatchCount
+ * @property {number} sourceFileCount
+ * @property {number} chunkIndex
+ * @property {number} chunkCount
+ */
+
+/**
+ * @typedef {object} TermRecordTerminalArtifactCallDiagnostics
+ * @property {number} ordinal
+ * @property {string} dictionary
+ * @property {number} rowCount
+ * @property {number} artifactRowStart
+ * @property {number} artifactRowEnd
+ * @property {boolean} activeBulkImport
+ * @property {TermRecordTerminalSourceDiagnostics|null} source
+ */
+
+/**
+ * Bounded last-observation probe; no chunks, bytes or worker leases are retained.
+ * Timestamps share the dictionary worker's performance clock. Positive content
+ * wait includes callback delivery/storage work and does not prove worker CPU use.
+ * @typedef {object} TermRecordTerminalOverlapObservation
+ * @property {TermRecordTerminalArtifactCallDiagnostics} call
+ * @property {number} metadataPublishedAtMs
+ * @property {number|null} recordAppendCompletedAtMs
+ * @property {number|null} contentCompletedAtMs
+ * @property {number|null} joinFinishedAtMs
+ * @property {number|null} nextRecordIdAtAppendStart
+ * @property {number|null} nextRecordIdAfterAppend
+ * @property {'pending'|'fulfilled'|'rejected'} recordStatus
+ * @property {'pending'|'fulfilled'|'rejected'} contentStatus
+ */
+
+/**
+ * @typedef {object} TermRecordTerminalOverlapState
+ * @property {number} artifactCallCount
+ * @property {number} artifactRowCount
+ * @property {TermRecordTerminalArtifactCallDiagnostics|null} lastArtifactCall
+ * @property {TermRecordTerminalOverlapObservation|null} lastEligible
+ */
+
+/**
+ * @typedef {TermRecordTerminalOverlapState & {
+ *   finalNextRecordId: number|null,
+ *   lastEligibleWasFinalArtifactCall: boolean,
+ *   lastEligibleWasTerminalSourceChunk: boolean,
+ *   lastEligibleMatchesFinalRecordId: boolean,
+ *   lastEligibleWasFinalAppend: boolean,
+ *   contentCompletionMinusRecordAppendMs: number|null,
+ *   availableContentWaitMs: number|null,
+ * }} TermRecordTerminalOverlapDiagnostics
+ */
+
+/* eslint-disable @stylistic/semi */
+/** @returns {TermRecordTerminalOverlapState} */
+function createTermRecordTerminalOverlapState() {
+    return {artifactCallCount: 0, artifactRowCount: 0, lastArtifactCall: null, lastEligible: null}
+}
+/* eslint-enable @stylistic/semi */
+
 class TermContentLookupReadError extends Error {
     /**
      * @param {'temporarilyUnavailable'|'corrupt'} status
@@ -755,6 +820,9 @@ export class DictionaryDatabase {
         this._termRecordRowAppendFastPath = true;
         /** @type {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number}|null} */
         this._lastBulkAddTermsMetrics = null;
+        /** @type {TermRecordTerminalOverlapState} */
+        // eslint-disable-next-line @stylistic/semi
+        this._termRecordTerminalOverlapState = createTermRecordTerminalOverlapState()
         /** @type {TermContentOpfsStore} */
         this._termContentStore = new TermContentOpfsStore();
         /** @type {TermContentBlockStore} */
@@ -1346,6 +1414,8 @@ export class DictionaryDatabase {
         // Reserve ownership before the first await so two import requests cannot
         // initialize overlapping journals and OPFS sessions.
         this._beginBulkImportLifecycle();
+        // eslint-disable-next-line @stylistic/semi
+        this._termRecordTerminalOverlapState = createTermRecordTerminalOverlapState()
         const setupPromise = this._startBulkImportSetup(db);
         this._bulkImportSetupPromise = setupPromise;
         try {
@@ -1473,7 +1543,7 @@ export class DictionaryDatabase {
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
+     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number, termRecordTerminalOverlapDiagnostics: TermRecordTerminalOverlapDiagnostics}|{published: true, housekeepingErrors: Error[]}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
@@ -1768,6 +1838,7 @@ export class DictionaryDatabase {
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termRecordLookupIndexWorkerFileCount,
+                    termRecordTerminalOverlapDiagnostics: this._getTermRecordTerminalOverlapDiagnostics(),
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
@@ -5071,9 +5142,24 @@ void 0 :
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {TermRecordTerminalSourceDiagnostics|null} [terminalSourceDiagnostics=null]
      * @returns {Promise<void>}
      */
-    async bulkAddArtifactTermsChunk(chunk) {
+    async bulkAddArtifactTermsChunk(chunk, terminalSourceDiagnostics = null) {
+        /* eslint-disable @stylistic/semi */
+        const terminalState = this._termRecordTerminalOverlapState
+        const terminalCall = {
+            ordinal: ++terminalState.artifactCallCount,
+            dictionary: chunk.dictionary,
+            rowCount: chunk.rowCount,
+            artifactRowStart: terminalState.artifactRowCount,
+            artifactRowEnd: terminalState.artifactRowCount + chunk.rowCount,
+            activeBulkImport: this._bulkImportState === BULK_IMPORT_STATE_ACTIVE && this._bulkImportTransactionOpen,
+            source: terminalSourceDiagnostics === null ? null : {...terminalSourceDiagnostics},
+        }
+        terminalState.artifactRowCount = terminalCall.artifactRowEnd
+        terminalState.lastArtifactCall = terminalCall
+        /* eslint-enable @stylistic/semi */
         this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
@@ -5092,7 +5178,7 @@ void 0 :
                 (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
             );
             if (hasHashArrays || hasContentSlab) {
-                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
+                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk, terminalCall);
                 return;
             }
             const rows = this._materializeArtifactChunkTermEntries(chunk);
@@ -5108,6 +5194,57 @@ void 0 :
     getLastBulkAddTermsMetrics() {
         return this._lastBulkAddTermsMetrics;
     }
+
+    /* eslint-disable @stylistic/semi */
+    /** @returns {number|null} */
+    _getNextRecordIdForTerminalDiagnostics() {
+        const nextId = Reflect.get(this._termRecordStore, '_nextId')
+        return typeof nextId === 'number' && Number.isSafeInteger(nextId) ? nextId : null
+    }
+
+    /** @returns {TermRecordTerminalOverlapDiagnostics} */
+    _getTermRecordTerminalOverlapDiagnostics() {
+        const state = this._termRecordTerminalOverlapState
+        const observation = state.lastEligible
+        const finalNextRecordId = this._getNextRecordIdForTerminalDiagnostics()
+        const lastEligibleWasFinalArtifactCall = observation !== null &&
+            observation.call.ordinal === state.artifactCallCount
+        const source = observation?.call.source ?? null
+        const lastEligibleWasTerminalSourceChunk = source !== null &&
+            Number.isSafeInteger(source.sourceFileIndex) && source.sourceFileIndex >= 0 &&
+            Number.isSafeInteger(source.sourceFileBatchCount) && source.sourceFileBatchCount > 0 &&
+            Number.isSafeInteger(source.sourceFileCount) && source.sourceFileCount > 0 &&
+            source.sourceFileIndex + source.sourceFileBatchCount === source.sourceFileCount &&
+            Number.isSafeInteger(source.chunkIndex) && source.chunkIndex > 0 &&
+            source.chunkIndex === source.chunkCount
+        const lastEligibleMatchesFinalRecordId = observation !== null &&
+            observation.recordStatus === 'fulfilled' && finalNextRecordId !== null &&
+            observation.nextRecordIdAfterAppend === finalNextRecordId
+        const contentCompletionMinusRecordAppendMs = observation !== null &&
+            observation.recordAppendCompletedAtMs !== null && observation.contentCompletedAtMs !== null ?
+            observation.contentCompletedAtMs - observation.recordAppendCompletedAtMs : null
+        return {
+            ...state,
+            lastArtifactCall: state.lastArtifactCall === null ? null : {
+                ...state.lastArtifactCall,
+                source: state.lastArtifactCall.source === null ? null : {...state.lastArtifactCall.source},
+            },
+            lastEligible: observation === null ? null : {
+                ...observation,
+                call: {...observation.call, source: source === null ? null : {...source}},
+            },
+            finalNextRecordId,
+            lastEligibleWasFinalArtifactCall,
+            lastEligibleWasTerminalSourceChunk,
+            lastEligibleMatchesFinalRecordId,
+            lastEligibleWasFinalAppend: observation?.call.activeBulkImport === true && lastEligibleWasFinalArtifactCall &&
+                lastEligibleWasTerminalSourceChunk && lastEligibleMatchesFinalRecordId,
+            contentCompletionMinusRecordAppendMs,
+            availableContentWaitMs: contentCompletionMinusRecordAppendMs === null ? null :
+                Math.max(0, contentCompletionMinusRecordAppendMs),
+        }
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null)}} chunk
@@ -8370,9 +8507,10 @@ this._readTermContentSignature(
 
     /**
      * @param {ArtifactTermRecordChunk} chunk
+     * @param {TermRecordTerminalArtifactCallDiagnostics|null} [terminalCall=null]
      * @returns {Promise<void>}
      */
-    async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
+    async _bulkAddArtifactTermsChunkWithContentDedup(chunk, terminalCall = null) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
@@ -8578,6 +8716,23 @@ this._readTermContentSignature(
                     if (earlyContentPersistence !== null) {
                         const metadataPublishedAt = safePerformance.now();
                         let contentCompletedAt = metadataPublishedAt;
+                        /* eslint-disable @stylistic/semi */
+                        /** @type {TermRecordTerminalOverlapObservation|null} */
+                        const terminalObservation = terminalCall === null ? null : {
+                            call: terminalCall,
+                            metadataPublishedAtMs: metadataPublishedAt,
+                            recordAppendCompletedAtMs: null,
+                            contentCompletedAtMs: null,
+                            joinFinishedAtMs: null,
+                            nextRecordIdAtAppendStart: this._getNextRecordIdForTerminalDiagnostics(),
+                            nextRecordIdAfterAppend: null,
+                            recordStatus: 'pending',
+                            contentStatus: 'pending',
+                        }
+                        if (terminalObservation !== null) {
+                            this._termRecordTerminalOverlapState.lastEligible = terminalObservation
+                        }
+                        /* eslint-enable @stylistic/semi */
                         const recordChunk = this._createResolvedArtifactTermRecordChunk(
                             chunk,
                             preparedLookupIndexes,
@@ -8591,12 +8746,19 @@ this._readTermContentSignature(
                             contentLengths,
                             resolvedContentDictNames,
                             importMetrics,
+                            terminalObservation,
                         );
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
                         const measuredContentCompletion = earlyContentPersistence.completion
                             .then((blockProfile) => {
                                 contentCompletedAt = safePerformance.now();
+                                /* eslint-disable @stylistic/semi */
+                                if (terminalObservation !== null) {
+                                    terminalObservation.contentCompletedAtMs = contentCompletedAt
+                                    terminalObservation.contentStatus = 'fulfilled'
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 return blockProfile;
                             })
                             .finally(releaseInFlightContentSources);
@@ -8604,6 +8766,13 @@ this._readTermContentSignature(
                             measuredContentCompletion,
                             pendingRecordAppend,
                         ]);
+                        /* eslint-disable @stylistic/semi */
+                        if (terminalObservation !== null) {
+                            terminalObservation.joinFinishedAtMs = safePerformance.now()
+                            terminalObservation.contentStatus = concurrentResults[0].status
+                            terminalObservation.recordStatus = concurrentResults[1].status
+                        }
+                        /* eslint-enable @stylistic/semi */
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
                             .map((result) => toError(result.reason));
@@ -10126,9 +10295,10 @@ null :
      * @param {Uint32Array} contentLengths
      * @param {string|(string|null)[]} resolvedContentDictNames
      * @param {Record<string, number>} importMetrics
+     * @param {TermRecordTerminalOverlapObservation|null} [terminalObservation=null]
      * @returns {Promise<void>}
      */
-    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics) {
+    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics, terminalObservation = null) {
         const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
             chunk,
             contentOffsets,
@@ -10146,6 +10316,15 @@ null :
         importMetrics.termLookupIndexEncodeMs += metrics.lookupIndexEncodeMs ?? 0;
         if (this._deferTermsVirtualTableSync || this._isBulkImportInProgress()) {
             this._termsVirtualTableDirty = true;
+            /* eslint-disable @stylistic/semi */
+            if (terminalObservation !== null) {
+                // This is the proposed trigger boundary immediately before the
+                // existing append promise fulfills. No new reaction is added.
+                terminalObservation.recordAppendCompletedAtMs = safePerformance.now()
+                terminalObservation.nextRecordIdAfterAppend = this._getNextRecordIdForTerminalDiagnostics()
+                terminalObservation.recordStatus = 'fulfilled'
+            }
+            /* eslint-enable @stylistic/semi */
             return;
         }
         const tTermsVtabInsertStart = safePerformance.now();

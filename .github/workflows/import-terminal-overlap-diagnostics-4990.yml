@@ -1,0 +1,71 @@
+name: Terminal record overlap diagnostics (4990)
+
+on:
+  push:
+    branches: [test/import-terminal-overlap-diagnostics-20261128-4990]
+
+permissions:
+  contents: read
+
+jobs:
+  correctness:
+    if: contains(github.event.head_commit.message, '[run-terminal-overlap-study]')
+    name: Diagnostic instrumentation correctness
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Diagnostic evidence classifier tests
+        run: python3 dev/perf/import-terminal-overlap-diagnostics-20261128-4990/test_protocol.py
+      - name: Scoped diagnostic lint
+        run: >-
+          node_modules/.bin/eslint
+          ext/js/dictionary/dictionary-database.js
+          ext/js/dictionary/dictionary-importer.js
+          test/dictionary-database-content-dedup.test.js
+          test/dictionary-importer-source-row-contract.test.js
+      - name: Unit suite, main/test types, and dry builds
+        run: npm run test:unit && npm run test:ts:main && npm run test:ts:test && npm run test:build
+  diagnose:
+    if: contains(github.event.head_commit.message, '[run-terminal-overlap-study]')
+    name: ${{ matrix.dictionary }} terminal overlap / host ${{ matrix.host }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [1, 2]
+        dictionary: [jmdict, jitendex]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}-jmdict-jitendex
+      - name: Acquire ordinary context and diagnostic operation splits
+        env:
+          STUDY_HOST: ${{ matrix.host }}
+          STUDY_DICTIONARY: ${{ matrix.dictionary }}
+          STUDY_EVIDENCE: ${{ runner.temp }}/terminal-overlap-evidence
+        run: >-
+          python3 dev/perf/import-terminal-overlap-diagnostics-20261128-4990/run.py
+          --host "$STUDY_HOST" --dictionary "$STUDY_DICTIONARY" --evidence "$STUDY_EVIDENCE"
+      - name: Retain complete evidence and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: terminal-overlap-${{ matrix.dictionary }}-host-${{ matrix.host }}
+          path: ${{ runner.temp }}/terminal-overlap-evidence
+          if-no-files-found: warn
+          retention-days: 14

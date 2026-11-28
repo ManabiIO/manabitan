@@ -1,0 +1,24 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "browserVersion": "153.0.8010.12",
+  "comparativePerformanceClaim": false,
+  "diagnosticSourceSha256": {
+    "ext/js/dictionary/dictionary-database.js": "5c1186a83c3a65874a593ffe57a11b66d945026af7a525422a7eeaecc4499bb0",
+    "ext/js/dictionary/dictionary-importer.js": "ab00b5d1ce3a0612a976147d253464cdedbfbee5d2ee0280f427eaa5bc62537a"
+  },
+  "dictionaries": [
+    "jmdict",
+    "jitendex"
+  ],
+  "expectedPackageChanges": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-importer.js"
+  ],
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "hosts": 2,
+  "memoryObserver": false,
+  "nodeVersion": "v22.22.0",
+  "observationsPerHost": 6,
+  "purpose": "Research-only same-worker terminal record append/content completion opportunity bound",
+  "trace": false
+}

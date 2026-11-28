@@ -33,8 +33,12 @@ async function archive(format, banks, imageFile) {
 function database() {
     /** @type {Array<{bytes: Uint8Array, dictName: string}>} */
     const payloads = [];
+    /** @type {Array<import('../ext/js/dictionary/dictionary-database.js').TermRecordTerminalSourceDiagnostics|null>} */
+    // eslint-disable-next-line @stylistic/semi
+    const sourceDiagnostics = []
     return {
         payloads,
+        sourceDiagnostics,
         isPrepared: () => true,
         setImportOptimizationFlags() {},
         setTermEntryContentDedupEnabled() {},
@@ -54,7 +58,9 @@ function database() {
                 payloads.push({bytes: Uint8Array.from(/** @type {Uint8Array} */ (row.termEntryContentBytes)), dictName: 'raw'});
             }
         }),
-        bulkAddArtifactTermsChunk: vi.fn(async (/** @type {Parameters<DictionaryDatabase['bulkAddArtifactTermsChunk']>[0]} */ chunk) => {
+        bulkAddArtifactTermsChunk: vi.fn(async (/** @type {Parameters<DictionaryDatabase['bulkAddArtifactTermsChunk']>[0]} */ chunk, /** @type {Parameters<DictionaryDatabase['bulkAddArtifactTermsChunk']>[1]} */ diagnostics = null) => {
+            // eslint-disable-next-line @stylistic/semi
+            sourceDiagnostics.push(diagnostics)
             for (let i = 0; i < chunk.rowCount; ++i) {
                 let bytes = chunk.contentBytesList[i];
                 if (chunk.contentBytesBuffer instanceof Uint8Array && chunk.contentMetaList instanceof Uint32Array) {
@@ -106,6 +112,31 @@ const malformedRows = [
 ];
 
 describe('source ZIP term-row contract', () => {
+    /* eslint-disable @stylistic/semi */
+    test('passes structural native source and chunk positions only as diagnostic API context', async () => {
+        const db = database()
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        const banks = Array.from({length: 3}, (_, index) => [[`term-${index}`, '', '', '', 0, ['definition'], index, '']])
+        const result = await importer.importDictionary(
+            /** @type {DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            new Blob([await archive(3, banks, false)]),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({skipImageMetadata: true, zipUseWebWorkers: false, termContentStorageMode: 'raw-bytes'}),
+        )
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.terms.total).toBe(3)
+        expect(db.sourceDiagnostics.length).toBeGreaterThan(0)
+        const last = db.sourceDiagnostics.at(-1)
+        expect(last).toBeDefined()
+        if (!last) { throw new Error('Expected native source diagnostics') }
+        expect(last.sourceFileCount).toBe(3)
+        expect(last.sourceFileIndex + last.sourceFileBatchCount).toBe(3)
+        expect(last.chunkIndex).toBeGreaterThan(0)
+        expect(last.chunkIndex).toBe(last.chunkCount)
+        expect(db.finishBulkImport).toHaveBeenCalledOnce()
+        expect(db.abortBulkImport).not.toHaveBeenCalled()
+    })
+    /* eslint-enable @stylistic/semi */
+
     for (const slow of [false, true]) {
         for (const imageFile of [false, true]) {
             test(`keeps format 1 glossaries readable (slow=${slow}, images=${imageFile})`, async () => {
