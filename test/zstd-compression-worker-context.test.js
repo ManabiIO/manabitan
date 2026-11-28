@@ -113,7 +113,7 @@ describe('compression worker native contexts', {timeout: 10_000}, () => {
         const reference = native.createCCtx()
         let expected
         try {
-            expected = native.compressUsingDictWithPrefix(reference, content, dictionary, 12, -1, true)
+            expected = native.compressUsingDictWithPrefix(reference, content, dictionary, 12, -2, true)
         } finally { native.freeCCtx(reference) }
         let compressed
         if (route === 'owned') {
