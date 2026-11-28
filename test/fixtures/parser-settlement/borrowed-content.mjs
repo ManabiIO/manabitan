@@ -16,6 +16,7 @@ assert.ok(process.argv[2], 'A fresh output file path is required')
 const output = resolve(process.argv[2])
 assert.equal(await realpath(dirname(output)), dirname(output))
 const terminations = []
+const workers = []
 const unhandled = []
 let disableSharedArrayBuffer = false
 let forceOwnedWithoutProjection = false
@@ -26,8 +27,9 @@ class BrowserWorker extends EventTarget {
     constructor(url) {
         super()
         this.worker = new ThreadWorker(new URL('worker-node.mjs', import.meta.url), {
-            workerData: {url: url.href, disableSharedArrayBuffer},
+            workerData: {url: url.href, disableSharedArrayBuffer, observeRequests: true},
         })
+        workers.push(this)
         this.worker.on('message', (data) => receive(data, (value) => this.dispatchEvent(new MessageEvent('message', {data: value}))))
         this.worker.on('error', (error) => {
             const event = new Event('error')
@@ -110,6 +112,7 @@ async function runCase(name, run) {
         forceOwnedWithoutProjection = false
         await parser.disposeParallelTermBankParser()
         await Promise.all(terminations.splice(0))
+        workers.length = 0
     }
 }
 
@@ -130,14 +133,19 @@ for (const config of [
         const firstSink = defer()
         const finishSink = defer()
         const initialReady = defer()
+        const wrongAcknowledgements = defer()
         const expectedLead = config.borrowed ? workerCount : workerCount * 3
         const results = []
         const retained = []
         let calls = 0
         let cancelled = false
+        let observedWrongAcknowledgements = 0
         const original = new Error('Borrowed content sink failure witness')
         parseRequests = 0
         receive = (data, deliver) => {
+            if (data.type === 'request-observed' && data.requestType === 'consume' && data.id === -1 && ++observedWrongAcknowledgements === workerCount) {
+                wrongAcknowledgements.resolve()
+            }
             if (data.type === 'result') {
                 results.push(data)
                 if (results.length === expectedLead) { initialReady.resolve() }
@@ -172,7 +180,14 @@ for (const config of [
             await waitFor(firstSink.promise)
             await waitFor(initialReady.promise)
             await turn()
-            assert.equal(parseRequests, expectedLead)
+            // Queued source requests stay behind the borrowed heap lease.
+            // Their bytes were already inside the original source window.
+            assert.equal(parseRequests, expectedLead + (config.borrowed ? workerCount : 0))
+            if (config.borrowed) {
+                for (const worker of workers) { worker.postMessage({type: 'consume', id: -1}) }
+                await waitFor(wrongAcknowledgements.promise)
+                assert.equal(results.length, workerCount, 'An unrelated acknowledgement must not reuse any borrowed heap')
+            }
             for (const result of results) {
                 assert.equal(result.borrowsWorkerMemory, config.borrowed)
                 assert.equal(result.ownsContentBytes, !config.borrowed)
@@ -185,10 +200,12 @@ for (const config of [
         if (config.cancel) {
             assert.equal(error?.name, 'AbortError')
             assert.equal(calls, 1)
+            assert.equal(results.length, workerCount, 'Cancellation must not start queued borrowed successors')
         } else if (config.fail) {
             assert.equal(error?.message, original.message)
             assert.equal(error?.stack, original.stack)
             assert.equal(calls, 1)
+            assert.equal(results.length, workerCount, 'Sink failure must not start queued borrowed successors')
         } else {
             assert.equal(error, null)
             assert.ok(calls > workerCount)
@@ -198,6 +215,78 @@ for (const config of [
         }
     })
 }
+
+await runCase('owned parser jobs advance before the owner receives their preceding results', async () => {
+    const sources = compressedSources(Array.from({length: 24}, (_, index) => bank(index, false, true)))
+    const held = []
+    const twoPerWorker = defer()
+    const scores = []
+    parseRequests = 0
+    receive = (data, deliver) => {
+        if (data.type === 'result') {
+            assert.equal(data.borrowsWorkerMemory, false)
+            held.push({data, deliver, snapshot: structuredClone(data.chunk)})
+            if (held.length === workerCount * 2) { twoPerWorker.resolve() }
+        } else { deliver(data) }
+    }
+    const outcome = parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+        sources.map((source) => async () => source),
+        sources.map((source) => source.uncompressedSize),
+        3,
+        (chunk) => { scores.push(...chunk.scoreList) },
+        options,
+    )
+    try {
+        await waitFor(twoPerWorker.promise)
+        assert.equal(parseRequests, workerCount * 2, 'Each worker is limited to one unreceived successor')
+        assert.equal(scores.length, 0, 'The owner has not received any result')
+        for (const {data, snapshot} of held) { assert.deepEqual(data.chunk, snapshot) }
+    } finally {
+        receive = (data, deliver) => deliver(data)
+        for (const {data, deliver} of [...held].reverse()) { deliver(data) }
+        await outcome
+    }
+    assert.deepEqual(scores, Array.from({length: 24}, (_, index) => index))
+    for (const {data, snapshot} of held) { assert.deepEqual(data.chunk, snapshot) }
+})
+
+await runCase('a queued parse failure drains withheld peers and late replies cannot enter the next import', async () => {
+    const sources = compressedSources(Array.from({length: 24}, (_, index) => (index === workerCount ? '[,]' : bank(index, false, true))))
+    const held = []
+    const scores = []
+    receive = (data, deliver) => {
+        if (data.type === 'result') {
+            held.push(() => deliver(data))
+        } else {
+            deliver(data)
+        }
+    }
+    const outcome = parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+        sources.map((source) => async () => source),
+        sources.map(() => 24 * 1024 * 1024),
+        3,
+        (chunk) => { scores.push(...chunk.scoreList) },
+        options,
+    ).then(() => null, (error) => error)
+    const error = await waitFor(outcome)
+    assert.ok(error instanceof Error)
+    assert.match(error.message, /parse|JSON/i)
+    assert.deepEqual(scores, [])
+    await parser.disposeParallelTermBankParser()
+    await Promise.all(terminations.splice(0))
+    receive = (data, deliver) => deliver(data)
+    const next = compressedSources(Array.from({length: 8}, (_, index) => bank(index, false, true)))
+    const successor = parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+        next.map((source) => async () => source),
+        next.map((source) => source.uncompressedSize),
+        3,
+        (chunk) => { scores.push(...chunk.scoreList) },
+        options,
+    )
+    for (const deliver of held) { deliver() }
+    await waitFor(successor)
+    assert.deepEqual(scores, Array.from({length: 8}, (_, index) => index))
+})
 
 await runCase('peer parser failure releases waits without reusing active content', async () => {
     const sources = compressedSources(Array.from({length: 24}, (_, index) => (index === 1 ? '[,]' : bank(index))))
