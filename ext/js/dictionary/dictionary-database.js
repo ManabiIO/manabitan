@@ -21,7 +21,7 @@
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
 import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
-import {TermContentMetadataArena} from './term-content-metadata-arena.js';
+import {TermContentMetadataArena, TERM_CONTENT_SIGNATURE1_MBR6} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -664,12 +664,16 @@ export class DictionaryDatabase {
         this._termEntryContentMetaOffsetTable = new Float64Array(0);
         /** @type {Uint32Array} */
         this._termEntryContentMetaLengthTable = new Uint32Array(0);
-        /** @type {Uint32Array} */
-        this._termEntryContentMetaDictNameIdTable = new Uint32Array(0);
+        /** @type {Uint32Array|null} */
+        this._termEntryContentMetaDictNameIdTable = null;
+        /** @type {number} */
+        this._termEntryContentMetaDictNameIdPrefixValue = 0;
+        /** @type {number} */
+        this._termEntryContentMetaDictNameIdPrefixEnd = 0;
         /** @type {Uint8Array} */
         this._termEntryContentMetaSignaturePresentTable = new Uint8Array(0);
-        /** @type {Uint32Array} */
-        this._termEntryContentMetaSignature1Table = new Uint32Array(0);
+        /** @type {Uint32Array|null} */
+        this._termEntryContentMetaSignature1Table = null;
         /** @type {Uint32Array} */
         this._termEntryContentMetaSignature2Table = new Uint32Array(0);
         /** @type {Uint32Array} */
@@ -9106,9 +9110,11 @@ db.selectObjects(`
         this._termEntryContentMetaIdTable = new Float64Array(0);
         this._termEntryContentMetaOffsetTable = new Float64Array(0);
         this._termEntryContentMetaLengthTable = new Uint32Array(0);
-        this._termEntryContentMetaDictNameIdTable = new Uint32Array(0);
+        this._termEntryContentMetaDictNameIdTable = null;
+        this._termEntryContentMetaDictNameIdPrefixValue = 0;
+        this._termEntryContentMetaDictNameIdPrefixEnd = 0;
         this._termEntryContentMetaSignaturePresentTable = new Uint8Array(0);
-        this._termEntryContentMetaSignature1Table = new Uint32Array(0);
+        this._termEntryContentMetaSignature1Table = null;
         this._termEntryContentMetaSignature2Table = new Uint32Array(0);
         this._termEntryContentMetaSignature3Table = new Uint32Array(0);
         this._termEntryContentMetaRecentSourceBatchIdTable = new Uint32Array(0);
@@ -9144,23 +9150,71 @@ db.selectObjects(`
     }
 
     /**
+     * @param {number} index
+     * @returns {number|undefined}
+     */
+    _readTermContentSignature1(index) {
+        return this._termContentMetadataArena?.getSignature1(index);
+    }
+
+    /**
+     * Allocates before a writer changes indexes, hashes or published metadata.
+     * @returns {Uint32Array}
+     * @throws {Error} If metadata storage is unavailable.
+     */
+    _materializeTermContentSignature1() {
+        const arena = this._termContentMetadataArena;
+        if (arena === null) { throw new Error('Missing term content metadata arena'); }
+        const table = arena.materializeSignature1();
+        this._termEntryContentMetaSignature1Table = table;
+        return table;
+    }
+
+    /**
+     * @param {number} signature1
+     */
+    _prepareTermContentSignature1(signature1) {
+        if (this._termEntryContentMetaSignature1Table === null && (signature1 >>> 0) !== TERM_CONTENT_SIGNATURE1_MBR6) {
+            this._materializeTermContentSignature1();
+        }
+    }
+
+    /**
+     * The caller has prepared any required allocation before its first write.
+     * @param {number} index
+     * @param {number} signature1
+     */
+    _writeTermContentSignature1(index, signature1) {
+        const table = this._termEntryContentMetaSignature1Table;
+        if (table === null) {
+            this._termEntryContentMetaSignaturePresentTable[index] = 2;
+        } else {
+            table[index] = signature1;
+            this._termEntryContentMetaSignaturePresentTable[index] = 1;
+        }
+    }
+
+    /**
      * @param {{signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}} meta
      * @param {Uint8Array} contentBytes
      */
     _setTermContentSignatures(meta, contentBytes) {
         const lastOffset = Math.max(0, contentBytes.byteLength - 4);
-        meta.signature1 = this._readTermContentSignature(contentBytes, 0);
-        meta.signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
-        meta.signature3 = this._readTermContentSignature(contentBytes, lastOffset);
+        const signature1 = this._readTermContentSignature(contentBytes, 0);
+        const signature2 = this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2));
+        const signature3 = this._readTermContentSignature(contentBytes, lastOffset);
+        meta.signature1 = signature1;
+        meta.signature2 = signature2;
+        meta.signature3 = signature3;
         const index = meta.tableIndex;
         if (
             typeof index === 'number' &&
             this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED
         ) {
-            this._termEntryContentMetaSignaturePresentTable[index] = 1;
-            this._termEntryContentMetaSignature1Table[index] = meta.signature1;
-            this._termEntryContentMetaSignature2Table[index] = meta.signature2;
-            this._termEntryContentMetaSignature3Table[index] = meta.signature3;
+            this._prepareTermContentSignature1(signature1);
+            this._writeTermContentSignature1(index, signature1);
+            this._termEntryContentMetaSignature2Table[index] = signature2;
+            this._termEntryContentMetaSignature3Table[index] = signature3;
         }
     }
 
@@ -10013,6 +10067,79 @@ db.selectObjects(`
         return id;
     }
 
+    /**
+     * @param {number} index
+     * @returns {number|undefined}
+     */
+    _readTermEntryContentMetaDictNameId(index) {
+        const table = this._termEntryContentMetaDictNameIdTable;
+        if (table !== null) { return table[index]; }
+        if (!Number.isInteger(index) || index < 0 || index >= this._termEntryContentMetaStateTable.length) { return void 0; }
+        return index < this._termEntryContentMetaDictNameIdPrefixEnd ? this._termEntryContentMetaDictNameIdPrefixValue : 0;
+    }
+
+    /**
+     * Materialize once, before exposing any physical view or changing metadata.
+     * Empty/free entries retain their old logical values, including the prefix.
+     * @returns {Uint32Array}
+     */
+    _materializeTermEntryContentMetaDictNameIds() {
+        let table = this._termEntryContentMetaDictNameIdTable;
+        if (table !== null) { return table; }
+        table = new Uint32Array(this._termEntryContentMetaStateTable.length);
+        table.fill(this._termEntryContentMetaDictNameIdPrefixValue, 0, this._termEntryContentMetaDictNameIdPrefixEnd);
+        this._termEntryContentMetaDictNameIdTable = table;
+        return table;
+    }
+
+    /**
+     * Prepare any allocation before the caller's first metadata write. A next
+     * dense ID can equal current capacity; its ordinary allocator grows next.
+     * @param {number} firstIndex
+     * @param {number} endIndex
+     * @param {number} dictNameId
+     */
+    _prepareTermEntryContentMetaDictNameIds(firstIndex, endIndex, dictNameId) {
+        if (this._termEntryContentMetaDictNameIdTable !== null || endIndex <= firstIndex) { return; }
+        const value = dictNameId >>> 0;
+        const prefixEnd = this._termEntryContentMetaDictNameIdPrefixEnd;
+        if (value === 0 && firstIndex >= prefixEnd) { return; }
+        if (firstIndex <= prefixEnd && (prefixEnd === 0 || value === this._termEntryContentMetaDictNameIdPrefixValue)) { return; }
+        this._materializeTermEntryContentMetaDictNameIds();
+    }
+
+    /**
+     * The caller has validated the range and prepared any required allocation.
+     * @param {number} firstIndex
+     * @param {number} endIndex
+     * @param {number} dictNameId
+     */
+    _fillTermEntryContentMetaDictNameIds(firstIndex, endIndex, dictNameId) {
+        const table = this._termEntryContentMetaDictNameIdTable;
+        if (table !== null) {
+            table.fill(dictNameId, firstIndex, endIndex);
+            return;
+        }
+        if (endIndex <= firstIndex) { return; }
+        const value = dictNameId >>> 0;
+        if (value === 0 && firstIndex >= this._termEntryContentMetaDictNameIdPrefixEnd) { return; }
+        if (this._termEntryContentMetaDictNameIdPrefixEnd === 0) { this._termEntryContentMetaDictNameIdPrefixValue = value; }
+        this._termEntryContentMetaDictNameIdPrefixEnd = Math.max(this._termEntryContentMetaDictNameIdPrefixEnd, endIndex);
+    }
+
+    /**
+     * @param {number} index
+     * @param {number} dictNameId
+     */
+    _writeTermEntryContentMetaDictNameId(index, dictNameId) {
+        const table = this._termEntryContentMetaDictNameIdTable;
+        if (table !== null) {
+            table[index] = dictNameId;
+        } else if (Number.isInteger(index) && index >= 0 && index < this._termEntryContentMetaStateTable.length) {
+            this._fillTermEntryContentMetaDictNameIds(index, index + 1, dictNameId);
+        }
+    }
+
     /* eslint-disable @stylistic/semi */
     /**
      * @param {number} index
@@ -10027,12 +10154,13 @@ db.selectObjects(`
             length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?
                 -1 :
                 this._termEntryContentMetaLengthTable[index],
-            dictName: this._termEntryContentMetaDictNames[this._termEntryContentMetaDictNameIdTable[index]] ?? 'raw',
+            dictName: this._termEntryContentMetaDictNames[this._readTermEntryContentMetaDictNameId(index) ?? -1] ?? 'raw',
             hash2: this._termEntryContentMetaHash2Table[index],
             tableIndex: index,
         };
-        if (this._termEntryContentMetaSignaturePresentTable[index] === 1) {
-            meta.signature1 = this._termEntryContentMetaSignature1Table[index];
+        const signaturePresent = this._termEntryContentMetaSignaturePresentTable[index];
+        if (signaturePresent === 1 || signaturePresent === 2) {
+            meta.signature1 = this._readTermContentSignature1(index);
             meta.signature2 = this._termEntryContentMetaSignature2Table[index];
             meta.signature3 = this._termEntryContentMetaSignature3Table[index];
         }
@@ -10058,29 +10186,38 @@ db.selectObjects(`
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
-        // Normal import IDs are implicitly zero. Allocate the legacy column
-        // only for a distinct value, including signed zero, and publish it only
-        // after interning succeeds so either allocation failure remains atomic.
+        const {signature1, signature2, signature3} = meta;
+        const hasSignatures = (
+            typeof signature1 === 'number' &&
+            typeof signature2 === 'number' &&
+            typeof signature3 === 'number'
+        );
+        // Keep a new ID column private until all optional allocations and
+        // interning succeed. Signed zero still requires physical storage.
         let idTable = this._termEntryContentMetaIdTable
         if (idTable.length === 0 && !Object.is(id, 0)) {
             idTable = new Float64Array(this._termEntryContentMetaStateTable.length)
         }
+        if (hasSignatures) {
+            this._prepareTermContentSignature1(signature1);
+        } else if (this._termEntryContentMetaSignaturePresentTable[index] === 2) {
+            // Unsigned replacement retains the old words, including a free ID.
+            this._materializeTermContentSignature1();
+        }
+        // Allocation and interning must finish before changing the entry.
         const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);
+        this._prepareTermEntryContentMetaDictNameIds(index, index + 1, dictNameId);
         this._termEntryContentMetaIdTable = idTable
         idTable[index] = id
         this._termEntryContentMetaOffsetTable[index] = meta.offset;
         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
-        this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
-        const hasSignatures = (
-            typeof meta.signature1 === 'number' &&
-            typeof meta.signature2 === 'number' &&
-            typeof meta.signature3 === 'number'
-        );
-        this._termEntryContentMetaSignaturePresentTable[index] = hasSignatures ? 1 : 0;
+        this._writeTermEntryContentMetaDictNameId(index, dictNameId);
         if (hasSignatures) {
-            this._termEntryContentMetaSignature1Table[index] = meta.signature1;
-            this._termEntryContentMetaSignature2Table[index] = meta.signature2;
-            this._termEntryContentMetaSignature3Table[index] = meta.signature3;
+            this._writeTermContentSignature1(index, signature1);
+            this._termEntryContentMetaSignature2Table[index] = signature2;
+            this._termEntryContentMetaSignature3Table[index] = signature3;
+        } else {
+            this._termEntryContentMetaSignaturePresentTable[index] = 0;
         }
     }
     /* eslint-enable @stylistic/semi */
@@ -10119,14 +10256,20 @@ db.selectObjects(`
         // eslint-disable-next-line @stylistic/semi
         const idTable = growDense && this._termEntryContentMetaIdTable.length > 0 ? new Float64Array(capacity) : this._termEntryContentMetaIdTable
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
-        const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
+        const oldDictNameIdTable = this._termEntryContentMetaDictNameIdTable;
+        const dictNameIdTable = growDense && oldDictNameIdTable !== null ? new Uint32Array(capacity) : oldDictNameIdTable;
+        const dictNameIdPrefixEnd = growDense ?
+            Math.min(this._termEntryContentMetaDictNameIdPrefixEnd, denseCount) :
+            this._termEntryContentMetaDictNameIdPrefixEnd;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
         const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
         /* eslint-disable @stylistic/semi */
         if (growDense) {
             idTable.set(this._termEntryContentMetaIdTable.subarray(0, denseCount))
             offsetTable.set(this._termEntryContentMetaOffsetTable.subarray(0, denseCount))
-            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable.subarray(0, denseCount))
+            if (dictNameIdTable !== null && oldDictNameIdTable !== null) {
+                dictNameIdTable.set(oldDictNameIdTable.subarray(0, denseCount))
+            }
             recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable.subarray(0, denseCount))
             recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable.subarray(0, denseCount))
         }
@@ -10160,6 +10303,7 @@ db.selectObjects(`
         this._termEntryContentMetaIdTable = idTable;
         this._termEntryContentMetaOffsetTable = offsetTable;
         this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
+        this._termEntryContentMetaDictNameIdPrefixEnd = dictNameIdPrefixEnd;
         this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
@@ -10272,8 +10416,6 @@ db.selectObjects(`
         const slotTable = this._termEntryContentMetaHashPairTable;
         const stateTable = this._termEntryContentMetaStateTable;
         const lengthTable = this._termEntryContentMetaLengthTable;
-        const signaturePresentTable = this._termEntryContentMetaSignaturePresentTable;
-        const signature1Table = this._termEntryContentMetaSignature1Table;
         const signature2Table = this._termEntryContentMetaSignature2Table;
         const signature3Table = this._termEntryContentMetaSignature3Table;
         const freeIndexes = this._termEntryContentMetaFreeIndexes;
@@ -10315,20 +10457,20 @@ db.selectObjects(`
                     contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
                     contentByteOffset = 0;
                 }
+                const lastOffset = Math.max(0, contentLength - 4);
+                const signature1 = this._readTermContentSignature(contentBytes, contentByteOffset);
+                const signature2 = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
+                const signature3 = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+                this._prepareTermContentSignature1(signature1);
                 const index = freeIndexes.length === 0 ?
                     this._termEntryContentMetaDenseCount++ :
                     /** @type {number} */ (freeIndexes.pop());
-                const lastOffset = Math.max(0, contentLength - 4);
                 hash1Table[index] = hash1;
                 hash2Table[index] = hash2;
                 lengthTable[index] = contentLength;
-                signaturePresentTable[index] = 1;
-                signature1Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset);
-                signature2Table[index] = this._readTermContentSignature(
-                    contentBytes,
-                    contentByteOffset + Math.floor(lastOffset / 2),
-                );
-                signature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+                this._writeTermContentSignature1(index, signature1);
+                signature2Table[index] = signature2;
+                signature3Table[index] = signature3;
                 stateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
                 slotTable[slot] = index + 1;
                 indexes[i] = index;
@@ -10451,12 +10593,12 @@ this._readTermContentSignature(
             }
             slot = (slot + 1) & mask;
         }
+        this._prepareTermContentSignature1(signature1);
         const index = this._allocateTermEntryContentMetaIndex();
         hash1Table[index] = hash1;
         hash2Table[index] = hash2;
         this._termEntryContentMetaLengthTable[index] = contentLength;
-        this._termEntryContentMetaSignaturePresentTable[index] = 1;
-        this._termEntryContentMetaSignature1Table[index] = signature1;
+        this._writeTermContentSignature1(index, signature1);
         this._termEntryContentMetaSignature2Table[index] = signature2;
         this._termEntryContentMetaSignature3Table[index] = signature3;
         this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
@@ -10581,7 +10723,7 @@ this._readTermContentSignature(
     /**
      * @param {number} hash1
      * @param {number} hash2
-     * @returns {{id: number, offset: number, length: number, dictName: string, hash2?: number}|undefined}
+     * @returns {(TermContentMeta & {hash2?: number})|undefined}
      */
     _getTermEntryContentMetaByHashPair(hash1, hash2) {
         const index = this._findTermEntryContentMetaHashPairIndex(hash1, hash2);
@@ -10729,6 +10871,12 @@ this._readTermContentSignature(
             contentByteOffset = 0;
         }
         const lastOffset = Math.max(0, length - 4);
+        const signature1 = this._readTermContentSignature(contentBytes, contentByteOffset);
+        const signature2 = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
+        const signature3 = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+        this._prepareTermContentSignature1(signature1);
+        const nextIndex = this._termEntryContentMetaFreeIndexes.at(-1) ?? this._termEntryContentMetaDenseCount;
+        this._prepareTermEntryContentMetaDictNameIds(nextIndex, nextIndex + 1, dictNameId);
         const index = this._allocateTermEntryContentMetaIndex();
         hash1Table[index] = hash1;
         hash2Table[index] = hash2;
@@ -10737,11 +10885,10 @@ this._readTermContentSignature(
         this._termEntryContentMetaIdTable[index] = 0;
         this._termEntryContentMetaOffsetTable[index] = offset;
         this._termEntryContentMetaLengthTable[index] = length;
-        this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
-        this._termEntryContentMetaSignaturePresentTable[index] = 1;
-        this._termEntryContentMetaSignature1Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset);
-        this._termEntryContentMetaSignature2Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + Math.floor(lastOffset / 2));
-        this._termEntryContentMetaSignature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
+        this._writeTermEntryContentMetaDictNameId(index, dictNameId);
+        this._writeTermContentSignature1(index, signature1);
+        this._termEntryContentMetaSignature2Table[index] = signature2;
+        this._termEntryContentMetaSignature3Table[index] = signature3;
         ++this._termEntryContentMetaHashPairCount;
     }
 
@@ -12678,7 +12825,7 @@ null :
             endIndex > this._termEntryContentMetaLengthTable.length ||
             (this._termEntryContentMetaIdTable.length > 0 && endIndex > this._termEntryContentMetaIdTable.length) ||
             endIndex > this._termEntryContentMetaOffsetTable.length ||
-            endIndex > this._termEntryContentMetaDictNameIdTable.length
+            (this._termEntryContentMetaDictNameIdTable !== null && endIndex > this._termEntryContentMetaDictNameIdTable.length)
         ) {
             return false
         }
@@ -12706,7 +12853,7 @@ null :
             this._termEntryContentMetaOffsetTable,
             this._termEntryContentMetaDictNameIdTable,
             stateTable,
-        ]
+        ].filter((table) => table !== null)
         for (let i = 0; i < writes.length; ++i) {
             const target = writes[i]
             if (target.length === 0) { continue }
@@ -12742,9 +12889,10 @@ null :
                 return false
             }
         }
+        this._prepareTermEntryContentMetaDictNameIds(firstIndex, endIndex, dictNameId)
         this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
         this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
-        this._termEntryContentMetaDictNameIdTable.fill(dictNameId, firstIndex, endIndex)
+        this._fillTermEntryContentMetaDictNameIds(firstIndex, endIndex, dictNameId)
         stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
         this._termEntryContentMetaHashPairPendingCount -= count
         this._termEntryContentMetaHashPairCount += count
@@ -12883,9 +13031,10 @@ null :
                 ) {
                     throw new RangeError(`Invalid staged term content metadata length: ${length}`);
                 }
+                this._prepareTermEntryContentMetaDictNameIds(stagedIndex, stagedIndex + 1, dictNameId);
                 this._termEntryContentMetaIdTable[stagedIndex] = 0;
                 this._termEntryContentMetaOffsetTable[stagedIndex] = offset;
-                this._termEntryContentMetaDictNameIdTable[stagedIndex] = dictNameId;
+                this._writeTermEntryContentMetaDictNameId(stagedIndex, dictNameId);
                 this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
                 --this._termEntryContentMetaHashPairPendingCount;
                 ++this._termEntryContentMetaHashPairCount;

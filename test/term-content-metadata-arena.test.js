@@ -30,7 +30,8 @@ describe('term content metadata arena ownership', () => {
     test('uses disjoint aligned columns in one fixed-capacity memory', () => {
         const arena = new TermContentMetadataArena(17, 64);
         expect(arena.slots.byteOffset).toBe(8 * 1024 * 1024);
-        const columns = [arena.slots, arena.hash1, arena.hash2, arena.state, arena.length, arena.signaturePresent, arena.signature1, arena.signature2, arena.signature3];
+        const columns = [arena.slots, arena.hash1, arena.hash2, arena.state, arena.length, arena.signaturePresent, arena.signature2, arena.signature3];
+        expect(arena.signature1).toBeNull();
         for (let i = 0; i < columns.length; ++i) {
             const column = columns[i];
             expect(column.buffer).toBe(arena.memory.buffer);
@@ -42,6 +43,7 @@ describe('term content metadata arena ownership', () => {
         }
         expect(() => arena.memory.grow(1)).toThrow(RangeError);
         expect(arena.hash1.byteLength).toBe(17 * 4);
+        expect(arena.materializeSignature1().buffer).not.toBe(arena.memory.buffer);
     });
 
     test.each([-1, 0.5, Number.MAX_SAFE_INTEGER, Infinity])('rejects invalid or oversized capacity %s before publishing memory', (capacity) => {
