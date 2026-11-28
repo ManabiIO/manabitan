@@ -174,7 +174,16 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         'RecentSourceOffsetTable',
     ];
     function metadata(f) {
-        return Object.fromEntries(fields.map((k) => [k, [...(f.db['_termEntryContentMeta' + k] ?? [])]]));
+        return Object.fromEntries(fields.map((k) => {
+            if (k === 'Signature1Table') {
+                return [k, Array.from({length: f.db._termEntryContentMetaStateTable.length}, (_, i) => f.db._readTermContentSignature1(i))];
+            }
+            if (k === 'DictNameIdTable') {
+                return [k, Array.from({length: f.db._termEntryContentMetaStateTable.length}, (_, i) => f.db._readTermEntryContentMetaDictNameId(i))];
+            }
+            const values = [...(f.db['_termEntryContentMeta' + k] ?? [])];
+            return [k, k === 'SignaturePresentTable' ? values.map((value) => (value === 2 ? 1 : value)) : values];
+        }));
     }
     function same(a, b, ar, br) {
         assert.deepEqual(metadata(b), metadata(a));

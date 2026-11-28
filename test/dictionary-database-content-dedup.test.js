@@ -412,6 +412,9 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
             const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
             const pending = stage([30], [40], [source], null);
+            // Exercise every materialized column allocation; virtual growth has
+            // dedicated prefix/failure coverage in the dictionary-name suite.
+            database._materializeTermEntryContentMetaDictNameIds();
             const tableNames = [
                 '_termEntryContentMetaHash1Table',
                 '_termEntryContentMetaHash2Table',
@@ -647,7 +650,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
         expect(index).toBe(0);
         expect(readSignature).not.toHaveBeenCalled();
-        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')?.[index]).toBe(101);
         expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
         expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
     });
@@ -695,7 +698,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const index = result.stagedContentMetadata?.indexes[0];
         if (typeof index !== 'number') { throw new Error('Expected staged metadata index'); }
         expect(index).toBe(0);
-        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')[index]).toBe(101);
+        expect(Reflect.get(database, '_termEntryContentMetaSignature1Table')?.[index]).toBe(101);
         expect(Reflect.get(database, '_termEntryContentMetaSignature2Table')[index]).toBe(202);
         expect(Reflect.get(database, '_termEntryContentMetaSignature3Table')[index]).toBe(303);
     });

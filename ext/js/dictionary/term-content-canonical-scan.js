@@ -57,6 +57,7 @@ export function compileCanonicalScanModule() {
  * @property {number} _termEntryContentMetaHashPairCount
  * @property {(count: number) => void} _ensureTermEntryContentMetaHashPairCapacity
  * @property {(index: number) => TermContentMeta|undefined} _readTermEntryContentMetaHashPairIndex
+ * @property {() => Uint32Array} _materializeTermContentSignature1
  * @typedef {object} ScanContext
  * @property {import('./dictionary-database.js').ArtifactTermContentChunk & {contentMetaList: Uint32Array, contentRowStart: number, contentBytesBaseOffset: number, contentBytesBuffer: Uint8Array}} chunk
  * @property {DedupPlan} contentDedupPlan
@@ -243,7 +244,7 @@ export class NativeCanonicalScanner {
                 if (typeof cached === 'undefined' || cached.module !== module) {
                     const exports = new WebAssembly.Instance(module, {env: {memory: a.memory}}).exports;
                     if (
-                        typeof exports.scan_canonical !== 'function' ||
+                        typeof exports.scan_canonical_implicit_signature1 !== 'function' ||
                         typeof exports.canonical_abi_version !== 'function' ||
                         exports.canonical_abi_version() !== CANONICAL_SCAN_ABI_VERSION ||
                         typeof exports.canonical_layout_end !== 'function' ||
@@ -255,7 +256,7 @@ export class NativeCanonicalScanner {
                     ) {
                         throw new Error('Canonical scan WASM ABI/layout mismatch');
                     }
-                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical)};
+                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical_implicit_signature1)};
                     instances.set(a.memory, cached);
                     ++stats.instances;
                 }
@@ -308,7 +309,7 @@ export class NativeCanonicalScanner {
                 a.state.byteOffset,
                 a.length.byteOffset,
                 a.signaturePresent.byteOffset,
-                a.signature1.byteOffset,
+                0, // The compact entry keeps its optional first-word column outside WASM.
                 a.signature2.byteOffset,
                 a.signature3.byteOffset,
                 a.state.length,
@@ -331,6 +332,20 @@ export class NativeCanonicalScanner {
                 const stop = native();
                 if (stop < 0) {
                     throw new Error(`Native canonical scan error ${stop}`);
+                }
+                // Restore every physical first word before hooks, adoption or await.
+                // Ordinary MBR6-only generations need no output scan or allocation.
+                if (header[6] !== 0 || a.signature1 !== null) {
+                    const signature1 = db._materializeTermContentSignature1();
+                    const inputSignatures = new Uint32Array(buffer, SIGS, n * 3);
+                    const uniqueIndexes = new Uint32Array(buffer, OUT + 4 * MAX * 4, header[2]);
+                    const stagedIndexes = new Uint32Array(buffer, OUT + 5 * MAX * 4, header[2]);
+                    for (let i = 0; i < stagedIndexes.length; ++i) {
+                        const index = stagedIndexes[i];
+                        if (index === 0xffffffff) { continue; }
+                        signature1[index] = inputSignatures[(uniqueIndexes[i] - first) * 3];
+                        a.signaturePresent[index] = 1;
+                    }
                 }
                 // The pending owner copies these views before we await exact matching
                 // or let another scan reuse the native scratch.
@@ -389,7 +404,8 @@ export class NativeCanonicalScanner {
                     a.slots[slot] = previous;
                     a.state[index] = 0;
                     a.hash1[index] = a.hash2[index] = a.length[index] = 0;
-                    a.signaturePresent[index] = a.signature1[index] = a.signature2[index] = a.signature3[index] = 0;
+                    a.signaturePresent[index] = a.signature2[index] = a.signature3[index] = 0;
+                    if (a.signature1 !== null) { a.signature1[index] = 0; }
                 }
                 exactCandidates.length = exactBase;
                 db._termEntryContentMetaDenseCount = beforeDense;
