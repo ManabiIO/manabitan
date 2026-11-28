@@ -1,0 +1,20 @@
+{
+  "archive": "verified-evidence.tar.xz",
+  "archiveBytes": 25740,
+  "archiveSha256": "94b931742f5996dfa7ef192bf8c1e36445c0938d54f739dff1554ecf083f6ca8",
+  "artifact": {
+    "id": 15257243757,
+    "name": "import-native-checksum-jitendex-BA-4d9f",
+    "runId": 46124815073,
+    "sha256": "612e45ae3696774115d798d3a032622290f156c0a222e4c0dafe3aa312993264",
+    "size": 33516482,
+    "workflowHead": "d84ea2942d62e3321e4799638aee0d608af5e53e"
+  },
+  "deterministicTarMetadata": true,
+  "everyPreservedMemberVerified": true,
+  "excludedVerifiedProductZipCount": 2,
+  "qualification": "Preservation only; semantic audit status is recorded separately.",
+  "schemaVersion": 1,
+  "verifiedFileBytes": 130522,
+  "verifiedFileCount": 11
+}

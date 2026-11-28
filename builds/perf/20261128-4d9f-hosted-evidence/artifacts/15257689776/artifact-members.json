@@ -1,0 +1,32 @@
+[
+  {
+    "bytes": 151081,
+    "kind": "file",
+    "name": "import/run-1.json",
+    "sha256": "e132eaf60a78cbe26080bc401f9353785df9b63cc00c6b5cd5c0cfda4dbc5ee4"
+  },
+  {
+    "bytes": 5374409,
+    "kind": "file",
+    "name": "import/run-1.trace.json",
+    "sha256": "b36bc5909f39d09cfed99fa3e83193447e9e78e863c4ef42dd1d1bb858cbd9b5"
+  },
+  {
+    "bytes": 83629,
+    "kind": "file",
+    "name": "import/run-1.html",
+    "sha256": "a91aa64dab7a39c9a1713d54dfe462fdeedbabfcecb2ac3df190e594dc2766f9"
+  },
+  {
+    "bytes": 58921,
+    "kind": "file",
+    "name": "import/summary.json",
+    "sha256": "0303c2221bcb0bec2f8a1e850b071e61f4546f0ab645e08d20b029a2deb5a6ef"
+  },
+  {
+    "bytes": 1205,
+    "kind": "file",
+    "name": "scope.json",
+    "sha256": "cb8d079eba0490cfaa28fb06527b7116a9b0d67bba0514cbf4eb932095f95870"
+  }
+]

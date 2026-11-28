@@ -1,0 +1,82 @@
+[
+  {
+    "bytes": 264,
+    "kind": "file",
+    "name": "browser-identity.json",
+    "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+  },
+  {
+    "bytes": 128,
+    "kind": "file",
+    "name": "build-A.log",
+    "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+  },
+  {
+    "bytes": 128,
+    "kind": "file",
+    "name": "build-B.log",
+    "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+  },
+  {
+    "bytes": 157,
+    "kind": "file",
+    "name": "fixtures.log",
+    "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+  },
+  {
+    "bytes": 60,
+    "kind": "file",
+    "name": "libs-A.log",
+    "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+  },
+  {
+    "bytes": 60,
+    "kind": "file",
+    "name": "libs-B.log",
+    "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+  },
+  {
+    "bytes": 215,
+    "kind": "file",
+    "name": "license-A.log",
+    "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+  },
+  {
+    "bytes": 215,
+    "kind": "file",
+    "name": "license-B.log",
+    "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+  },
+  {
+    "bytes": 16805714,
+    "excludedVerifiedProductZip": true,
+    "kind": "file",
+    "name": "package-A.zip",
+    "sha256": "12cab03291d9c1addc8524cef4a34d7105841a637d85086f1d4f41c02e144ae6"
+  },
+  {
+    "bytes": 16807033,
+    "excludedVerifiedProductZip": true,
+    "kind": "file",
+    "name": "package-B.zip",
+    "sha256": "82505849039fb7dfbfd1099e7d48389f030c1f9fd26b8c794a752e130d255249"
+  },
+  {
+    "bytes": 128990,
+    "kind": "file",
+    "name": "source-identities.json",
+    "sha256": "8d1e9a02a091f7a26178bcd3f75cd1d9f45df9e261c6e2f8f3e055d0d5e06c13"
+  },
+  {
+    "bytes": 158,
+    "kind": "file",
+    "name": "worktree-A.log",
+    "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+  },
+  {
+    "bytes": 135,
+    "kind": "file",
+    "name": "worktree-B.log",
+    "sha256": "19cab0e12c55cba196b5493fac155d06980130f3c9b92cccd8e0f651168a77ed"
+  }
+]

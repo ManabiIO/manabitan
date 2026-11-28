@@ -1,0 +1,20 @@
+{
+  "archive": "verified-evidence.tar.xz",
+  "archiveBytes": 343772,
+  "archiveSha256": "e2b5ce71ad220bc1ec5e85f0bb1a5555f0bad07f5f6cadfd014a67f041603e52",
+  "artifact": {
+    "id": 15258637132,
+    "name": "import-native-checksum-jmdict-BA-manifest2-4d9f",
+    "runId": 46131958592,
+    "sha256": "ab43a8d7377d652df201d6fa1e7c53253b27ed65be4dc40bac824ca6ad1d1123",
+    "size": 35561377,
+    "workflowHead": "b129dfb0380771e4cf1346e5b68aca242196466f"
+  },
+  "deterministicTarMetadata": true,
+  "everyPreservedMemberVerified": true,
+  "excludedVerifiedProductZipCount": 2,
+  "qualification": "Preservation only; semantic audit status is recorded separately.",
+  "schemaVersion": 1,
+  "verifiedFileBytes": 22456154,
+  "verifiedFileCount": 311
+}

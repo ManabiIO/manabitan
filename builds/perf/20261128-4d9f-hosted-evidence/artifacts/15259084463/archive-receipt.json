@@ -1,0 +1,20 @@
+{
+  "archive": "verified-evidence.tar.xz",
+  "archiveBytes": 109292,
+  "archiveSha256": "e4157b7183e65443cc45d7ed18243b8067128d9f2026d20e40660471ce773a60",
+  "artifact": {
+    "id": 15259084463,
+    "name": "reference-browser-jitendex-off-on-4d9f",
+    "runId": 46136881596,
+    "sha256": "c87ab07799cab7bdb59cddb27e407c6392cf3c39d9b4e5209ecf584303ca558f",
+    "size": 16948000,
+    "workflowHead": "4d990e5f8ab90a13b1b0b9dedac207c939d88eef"
+  },
+  "deterministicTarMetadata": true,
+  "everyPreservedMemberVerified": true,
+  "excludedVerifiedProductZipCount": 1,
+  "qualification": "Preservation only; semantic audit status is recorded separately.",
+  "schemaVersion": 1,
+  "verifiedFileBytes": 1104378,
+  "verifiedFileCount": 26
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "bytes": 694,
+    "kind": "file",
+    "name": "changed-javascript.log",
+    "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+  },
+  {
+    "bytes": 479,
+    "kind": "file",
+    "name": "identity.json",
+    "sha256": "8e5e7fb4b4e64901fc4eef53b009823b086b35c3b48fb3b5976e0746cf9dd1a3"
+  },
+  {
+    "bytes": 280,
+    "kind": "file",
+    "name": "dry-build.log",
+    "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+  },
+  {
+    "bytes": 500,
+    "kind": "file",
+    "name": "native-assets.log",
+    "sha256": "6a94a90f17b197601a6ca556c22a83bf8be1498cdcfd9dfa95e1c8bc8dee406d"
+  },
+  {
+    "bytes": 1441,
+    "kind": "file",
+    "name": "results.json",
+    "sha256": "f914940b465482443d8726b060a90cfc3505e9d6aba3fd1ef22c28e5cdddd58a"
+  },
+  {
+    "bytes": 444,
+    "kind": "file",
+    "name": "types.log",
+    "sha256": "493d95206d825009022843ae583d9cebbfd9d664d812523227e48c71d733d454"
+  },
+  {
+    "bytes": 5554011,
+    "kind": "file",
+    "name": "unit-results.json",
+    "sha256": "0cf14bb474f0adf9348032d8bf6ae7f4f4d099fd0b7210aebcf9845f815de457"
+  },
+  {
+    "bytes": 599406,
+    "kind": "file",
+    "name": "units.log",
+    "sha256": "8986bb2ccad90be98fb40e58f99af82c324fa060886977ee8dd7eb9639361f37"
+  }
+]

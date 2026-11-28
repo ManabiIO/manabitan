@@ -1,0 +1,20 @@
+{
+  "archive": "verified-evidence.tar.xz",
+  "archiveBytes": 363452,
+  "archiveSha256": "23b1aba7621d78cc6ec896419fabadb982c857cb0816e2d0a6e7f442a3dc3616",
+  "artifact": {
+    "id": 15260224001,
+    "name": "import-current-implicit-metadata-vndb-BA-currentbase1-4d9f",
+    "runId": 46135718522,
+    "sha256": "20f711e110286812c9e877e04a2665d2e1ad4bbfd35dcf5c8e5601179b78477d",
+    "size": 35737679,
+    "workflowHead": "9a3921fe0ae127873604bf8e5e5430d6b55501eb"
+  },
+  "deterministicTarMetadata": true,
+  "everyPreservedMemberVerified": true,
+  "excludedVerifiedProductZipCount": 2,
+  "qualification": "Preservation only; semantic audit status is recorded separately.",
+  "schemaVersion": 1,
+  "verifiedFileBytes": 27172106,
+  "verifiedFileCount": 311
+}

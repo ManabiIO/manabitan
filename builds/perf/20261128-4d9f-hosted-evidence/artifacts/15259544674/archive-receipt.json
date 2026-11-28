@@ -1,0 +1,20 @@
+{
+  "archive": "verified-evidence.tar.xz",
+  "archiveBytes": 415176,
+  "archiveSha256": "b90d087b9c249ed86e052a7343cd075cbfabf25d2fc9b4820466d4be89540c74",
+  "artifact": {
+    "id": 15259544674,
+    "name": "current-candidate-validation-reference-fields-4d9f",
+    "runId": 46136278240,
+    "sha256": "214599d5a9f2ccd4a0d4f12d98d006be2aa4036ba9ba66ce32eaaa87bff76f10",
+    "size": 529493,
+    "workflowHead": "7830559cc0fa7cd1cb2fa9bec4b5d385ff4af03d"
+  },
+  "deterministicTarMetadata": true,
+  "everyPreservedMemberVerified": true,
+  "excludedVerifiedProductZipCount": 0,
+  "qualification": "Preservation only; semantic audit status is recorded separately.",
+  "schemaVersion": 1,
+  "verifiedFileBytes": 5920662,
+  "verifiedFileCount": 7
+}

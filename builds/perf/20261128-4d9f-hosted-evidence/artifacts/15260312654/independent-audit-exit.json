@@ -1,0 +1,105 @@
+{
+  "command": [
+    "/usr/bin/python",
+    "/home/runner/work/manabitan/manabitan/tooling/dev/perf/evidence-preservation-4d9f/audit-hosted-imports-4d9f.py",
+    "--source-root",
+    "/home/runner/work/manabitan/manabitan/frozen-source",
+    "--artifacts",
+    "/home/runner/work/manabitan/manabitan/download-scratch",
+    "--artifact-manifest",
+    "/home/runner/work/manabitan/manabitan/preserved-evidence/artifacts/15260312654/independent-audit-input.json",
+    "--baseline",
+    "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "--candidate",
+    "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+    "--output",
+    "/home/runner/work/manabitan/manabitan/download-scratch/audit-15260312654"
+  ],
+  "helperSha256": "83f6c2eabcd31232dade45596c5df833fe87879e095267cda250aa44780347ee",
+  "memoryScreenFailedCells": [],
+  "results": [
+    {
+      "artifact": {
+        "digest": "sha256:9e2827f50e58a49d9cf6d262b9ac13c51c986b0688f5bdeb619c7c62779b4046",
+        "id": 15260312654,
+        "name": "import-current-implicit-metadata-vndb-AB-currentbase1-4d9f",
+        "size_in_bytes": 35763370
+      },
+      "browserVersion": "153.0.8010.12",
+      "candidateVsBaseline": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -2.089937367129624,
+          -0.06937924307907073
+        ],
+        "equalWorkChangePercent": -0.5922282478735941,
+        "fasterPairs": 9,
+        "medianPairedChangePercent": -0.9548380719639038,
+        "ratios": [
+          1.0007343530349762,
+          0.9845130506863983,
+          0.9963901878743237,
+          0.9842752673627329,
+          0.9978780621034424,
+          0.9964690150850435,
+          0.9679453280722496,
+          0.9726606997558944,
+          0.9798743206521642,
+          1.0395502471890294,
+          0.9783269320052433,
+          1.035309036052385
+        ],
+        "worstPairChangePercent": 3.955024718902944
+      },
+      "changedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-content-metadata-arena.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "identicalCodeControl": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -4.340330595274311,
+          4.052844662263189
+        ],
+        "equalWorkChangePercent": 0.3494969042295626,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 0.9861675696827499,
+        "ratios": [
+          0.9565966940472569,
+          1.0405284466226319,
+          1.0260458633680996,
+          0.9936774880255554
+        ],
+        "worstPairChangePercent": 4.052844662263189
+      },
+      "mediaBytes": 188131284,
+      "mediaFiles": 146570,
+      "memory": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.0926190979296164,
+            "medianPairedChangePercent": 1.6779493823805836
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.8847452277486196,
+            "medianPairedChangePercent": 1.3891113548332723
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 433,
+        "schemaVersion": 1
+      },
+      "observations": 36,
+      "rawProductZipPolicy": "Original CI artifacts retain both ZIPs. This extracted audit pack retains their verified archive hashes and complete entry inventories, not duplicate ZIP bytes.",
+      "semanticChecks": 42,
+      "status": "audit-passed"
+    }
+  ],
+  "returncode": 0,
+  "status": "audit-passed"
+}

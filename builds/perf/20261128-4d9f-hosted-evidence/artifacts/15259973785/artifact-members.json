@@ -1,0 +1,165 @@
+[
+  {
+    "bytes": 7947,
+    "kind": "file",
+    "name": "activation-overlay.py",
+    "sha256": "94c3f9bc90da8b07476d070adf90bc006efcc4cd3c0ad94b0f6f4d6381e7639a"
+  },
+  {
+    "bytes": 116,
+    "kind": "file",
+    "name": "build-exit.json",
+    "sha256": "9ad05c2cc1d71365c154452d8251f884b0f117244936d63e9ff6ea5159362a5f"
+  },
+  {
+    "bytes": 185,
+    "kind": "file",
+    "name": "browser-identity.json",
+    "sha256": "b8a96f3759f77eaac11ce9698faa3a3f75e71c14d5b08429b83a19f2496cc104"
+  },
+  {
+    "bytes": 128,
+    "kind": "file",
+    "name": "build.log",
+    "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+  },
+  {
+    "bytes": 105,
+    "kind": "file",
+    "name": "fixtures-exit.json",
+    "sha256": "ae26c2e1fc7afd914c2171a778c923be181b930df846fdebdc718f32aa97bb40"
+  },
+  {
+    "bytes": 342797,
+    "kind": "file",
+    "name": "harness-instrumented.js",
+    "sha256": "88dc6f2e702f429d75efc0d8f8da5e30765fd7e81e7ebb9c9d8c7f2def588bfe"
+  },
+  {
+    "bytes": 171,
+    "kind": "file",
+    "name": "fixtures.log",
+    "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+  },
+  {
+    "bytes": 325917,
+    "kind": "file",
+    "name": "harness-original.js",
+    "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+  },
+  {
+    "bytes": 389,
+    "kind": "file",
+    "name": "import-off-exit.json",
+    "sha256": "21485476188196b9710c3382327ac4a682109c566f12c6ba98f68fba1484d75d"
+  },
+  {
+    "bytes": 1717,
+    "kind": "file",
+    "name": "import-off.log",
+    "sha256": "9bbe64f6f1214f04ef11f1948d2ba4b96fdce9fc794b0abd1465e94c46c6ccf1"
+  },
+  {
+    "bytes": 81,
+    "kind": "file",
+    "name": "libs-exit.json",
+    "sha256": "e931a6dbe90f77ffd869768605dc672f49e5afb4bb34051ddb74e0ef7d80e964"
+  },
+  {
+    "bytes": 60,
+    "kind": "file",
+    "name": "libs.log",
+    "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+  },
+  {
+    "bytes": 90,
+    "kind": "file",
+    "name": "license-exit.json",
+    "sha256": "c039ecb5431fa59ab9962a253a9551390152508d8cbc618f7288031b094cfdaa"
+  },
+  {
+    "bytes": 215,
+    "kind": "file",
+    "name": "license.log",
+    "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+  },
+  {
+    "bytes": 85227,
+    "kind": "file",
+    "name": "off/run-1.html",
+    "sha256": "b7a192631fa85a25ab2e263003d98d634a890252b42fc05a9228977b8e049088"
+  },
+  {
+    "bytes": 154546,
+    "kind": "file",
+    "name": "off/run-1.json",
+    "sha256": "28803d28f35d60966d635602ff1609c1b7e30a35d060beb4ee766edf98711413"
+  },
+  {
+    "bytes": 60431,
+    "kind": "file",
+    "name": "off/summary.json",
+    "sha256": "052186d71710ccef07a37b84f7ba7ba8cda21ae5d2e76cdba287a4c4688ae359"
+  },
+  {
+    "bytes": 16809454,
+    "excludedVerifiedProductZip": true,
+    "kind": "file",
+    "name": "package.zip",
+    "sha256": "a46d6dd5db101ca68ebd60a7efc60529bb4dad07ef5de17e13a5ba2163352f77"
+  },
+  {
+    "bytes": 21897,
+    "kind": "file",
+    "name": "qualification_receipts.py",
+    "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  {
+    "bytes": 7414,
+    "kind": "file",
+    "name": "registered-plan.json",
+    "sha256": "8537189322a6f10dd791fe402300fe2990fcaf3ec25286826aa93fa24e162c86"
+  },
+  {
+    "bytes": 12186,
+    "kind": "file",
+    "name": "run-reference-format-browser.py",
+    "sha256": "fc209f778a4c5433175fd844be7808e4b022c4bce9fef343c1bc534a0da43cdb"
+  },
+  {
+    "bytes": 62713,
+    "kind": "file",
+    "name": "source-identity.json",
+    "sha256": "1ccf0b30b5f284fc6225a3a5e088668c762194d5d2379f1991871e71f9c7b17a"
+  },
+  {
+    "bytes": 5536,
+    "kind": "file",
+    "name": "storage-contract.json",
+    "sha256": "ee063fabc31313285d361d06871e2847bfbfaf059a7e49268ca1b19540b27c91"
+  },
+  {
+    "bytes": 16066,
+    "kind": "file",
+    "name": "storage-activation.mjs",
+    "sha256": "69a75bf1d7c7dfd15eb3b556fd42f23286ec9cf0750062e636509e950cd0fde4"
+  },
+  {
+    "bytes": 1765,
+    "kind": "file",
+    "name": "storage_contract.py",
+    "sha256": "e7f398707fa0b5200c07d4e1ec08fdcdcd5a2cd6c1671ff4f14eadfa348dd991"
+  },
+  {
+    "bytes": 242,
+    "kind": "file",
+    "name": "worktree-exit.json",
+    "sha256": "399239dacd560c704810424513c5ef647991d77ca738ce70084c54096a4ad6e7"
+  },
+  {
+    "bytes": 139,
+    "kind": "file",
+    "name": "worktree.log",
+    "sha256": "9e5ac0ed9506b9d905825961a512f305ba7febad7ffc0e04531a35f32b5c45ca"
+  }
+]

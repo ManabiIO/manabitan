@@ -1,0 +1,14 @@
+{
+  "auditHelperSha256": "83f6c2eabcd31232dade45596c5df833fe87879e095267cda250aa44780347ee",
+  "driverSha256": "e420f66b90105529313412433a0a031223e3d90edb56a5a2c354b2f88a95053d",
+  "freshIndependentAuditScope": "Completed current f28/68b VN AB/BA artifacts only.",
+  "manifestSha256": "4e8ad7613257e5a4c698d119614ea9d7235c721b621c9a7352d3c8ed5e84b267",
+  "newAcquisitions": false,
+  "priorAudits": "Other source-bound prior audits are not replaced or relabeled by this preservation job.",
+  "qualificationHelperHashes": {
+    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  "validatorCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+}
