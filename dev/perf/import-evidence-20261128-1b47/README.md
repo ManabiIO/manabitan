@@ -188,6 +188,38 @@ The archive, member manifest and checksum are stored here as
 `compression-original-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `bf0ea30f7c8faa7e3ff30b4207fc777ddc99b07c084830889add6bbeae56086a`.
 
+## Corrected compression study: prospective registration
+
+The [corrected-study registration packet](compression-proof-registration-README.md)
+preserves the complete preparation history and exact sixteen-file study source.
+Its source freeze is 08:48:58 UTC; a separately labeled 08:49:43 publication
+snapshot records only a queued validation job. This packet contains no corrected
+browser result, import observation, memory scan or hosted validation outcome.
+
+The fixed study is commit
+`3256036ff8534ba6de7bc9ecd74ec74d3c705603`, with current common baseline
+`dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`. The original compression product
+blobs are unchanged. Superseded preparation on `9e10`, fixture failures, design
+corrections, all source reviews and the final 45 synthetic fixture checks remain
+visible. The failed original study above stays failed.
+
+Only JMdict and Jitendex are registered, with 26 planned reports each. The new
+symmetric proof retains physical digest preimages and full decoded JSON for the
+original twelve-term sample, with exact restart and cross-arm checks. It is not
+exhaustive equality of all definitions. Historical storage deltas remain fixed
+fail-closed predicates; parser-worker, timing and memory gates are unchanged.
+
+The prospective rule requires both corpora to qualify and a useful candidate
+signal stronger than its identical-code controls without the declared adverse
+signal in the other corpus. No replacement cohort, retry, expanded sample or
+VNDB rerun is authorized by this registration. Preparation alone supports no
+compression product PR or import-speed claim.
+
+The archive, member manifest and checksum are stored here as
+`compression-proof-registration-20261128-1b47.*`: 115 members, 1,698,895 payload
+bytes. Archive SHA-256:
+`fd35ffbb2eb9ddb07e8f497f99982037bdceb2882491811d7b760225bc8a65e9`.
+
 ## Why JMdict gains stayed small
 
 The [technical assessment](jmdict-technical-assessment.md) explains the measured

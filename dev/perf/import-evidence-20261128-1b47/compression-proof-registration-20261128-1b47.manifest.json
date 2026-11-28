@@ -1,0 +1,656 @@
+{
+  "format": 1,
+  "study": "Corrected compression study registration and complete preparation history; source freeze 2026-11-28T08:48:58Z",
+  "scope": "All frozen preparation/source history and one separately labeled 08:49:43 queued-registration note. No corrected browser observations, memory scans, hosted validation outcome or performance result. Original failed evidence remains immutable and separately linked.",
+  "sourceBindings": {
+    "studyCommit": "3256036ff8534ba6de7bc9ecd74ec74d3c705603",
+    "studyTree": "42c3ac97086544bc35aa4895c30ba72e717bd33e",
+    "commonBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "compressionProductOrigin": "f7980e638ea1808701ac28339987663fd8b3dc4e",
+    "historicalStoragePredictionBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "sourceFreezeUtc": "2026-11-28T08:48:58Z",
+    "registrationMetadataUtc": "2026-11-28T08:49:43Z",
+    "registeredRunId": 46127578128,
+    "newObservationCount": 0,
+    "details": "evidence/compression-proof-registration-20261128-1b47/snapshot-receipt.json"
+  },
+  "memberPathBase": "Original workspace-relative path; contents are byte-for-byte unchanged",
+  "archiveMetadata": "gzip timestamp, tar ownership and file timestamps normalized; payload paths and contents preserved",
+  "symlinkPolicy": "All payload files and their directory components must be regular, non-symlink paths; symlink targets are never read",
+  "manifestPlacement": "External to archive so every archive member, without a self-hash exception, has a digest",
+  "spec": {
+    "path": "evidence/compression-proof-registration-20261128-1b47/bundle-spec.json",
+    "sha256": "3fc328b96d1819cdf4cdfe871dd176508588e0239301584358e9b3d5fd2cb0ff"
+  },
+  "archive": {
+    "file": "compression-proof-registration-20261128-1b47.tar.gz",
+    "bytes": 379568,
+    "sha256": "fd35ffbb2eb9ddb07e8f497f99982037bdceb2882491811d7b760225bc8a65e9"
+  },
+  "totalPayloadBytes": 1698895,
+  "members": [
+    {
+      "path": "compression-proof-experiment/.github/workflows/compression-proof-screen-1b47.yml",
+      "bytes": 10796,
+      "sha256": "6d2320a98083c3824d4a59008acfed99a9505cbcb68fc1c62cb3624b689d5aee"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-level-20261128-1b47.py",
+      "bytes": 23455,
+      "sha256": "7fe216453d56094cb94a2504915efcbc64e08b5a3c99be25ca206b435b094d98"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-level-20261128-1b47/compression_receipts.py",
+      "bytes": 7953,
+      "sha256": "7512dd8f4422fc01fe094eb49dcccc4a3f8a80cb9dbf8fc2e37b8b00e1f68bb8"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-level-20261128-1b47/test_compression_receipts.py",
+      "bytes": 12177,
+      "sha256": "ffc48b76a565eccb100fc0fa1a9f7d5f355b087bc6c6199ad2a58639ca47789d"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47.py",
+      "bytes": 34083,
+      "sha256": "e32203337e9b8d5d5bc4387cab667279d9f2807905998d0d69d782abf29559fe"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/README.md",
+      "bytes": 7637,
+      "sha256": "8a520a54e1350aeb957e21f3142670962065d77604437c8cb4724159ff118958"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/audit_artifact.py",
+      "bytes": 31101,
+      "sha256": "7e9dd7a9992652e73c0e07417b4b5824f077944af6506b8468353a52be076121"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/compression_harness_overlay.py",
+      "bytes": 9951,
+      "sha256": "b5a0f28083fe77943b06ee6bb9bd26783c122fbea0d7abe1167239a6d119544e"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/compression_proof_receipts.py",
+      "bytes": 19736,
+      "sha256": "e64f7d2f428b1114800df1ffda985c6a0110e9fd7811f14b002206e5fbf963ce"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/test_audit_artifact.py",
+      "bytes": 11087,
+      "sha256": "963f215f5e7334dc9a532c9701a92d4c02afd554ff464f67327483577a7a0fca"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/test_compression_harness_overlay.py",
+      "bytes": 10730,
+      "sha256": "bd97f02bbab2ea407cba52ef77dbd5f33789e5220e011f6b8defe7a741423736"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/test_compression_proof_receipts.py",
+      "bytes": 18982,
+      "sha256": "2a83c2517454f4078b800cc8c4326c3a2baa37c0109f92e55aa3250af2a2f093"
+    },
+    {
+      "path": "compression-proof-experiment/dev/perf/import-compression-proof-20261128-1b47/test_driver_boundaries.py",
+      "bytes": 11116,
+      "sha256": "a232856fbade7747ac1221a51186e5b64ade452fc3c300757736ceb739370ffd"
+    },
+    {
+      "path": "compression-proof-experiment/ext/js/dictionary/zstd-term-content.js",
+      "bytes": 41823,
+      "sha256": "e4f3858167076d76c6ad4729afb26ba637530fe9edd6c966fe2a86f6fa856de5"
+    },
+    {
+      "path": "compression-proof-experiment/test/zstd-compression-worker-context.test.js",
+      "bytes": 9464,
+      "sha256": "9bf1937e7ee4862bb62cb28cfaa2ab634472dbdc1acc26bc6dd844454e3b6ab7"
+    },
+    {
+      "path": "compression-proof-experiment/test/zstd-term-content-startup-overlap.test.js",
+      "bytes": 5571,
+      "sha256": "f38c19b24951c2f6968d46a29c62004592de91f0d4fd3cfeb93ca537d311ad10"
+    },
+    {
+      "path": "evidence/audit-hosted-compression-artifact-1b47.py",
+      "bytes": 14134,
+      "sha256": "cabb2ce37ebd2eb1b5d78f5e38703b4083647ad05f572095a25dc16a028b8eb6"
+    },
+    {
+      "path": "evidence/compression-artifact-auditor-independent-review-1b47.json",
+      "bytes": 4720,
+      "sha256": "b805d82e141515f8a42e2db11ff670de2a1ac8b0b471b14efee4402b0efa864f"
+    },
+    {
+      "path": "evidence/compression-followup-validation-design-1b47.md",
+      "bytes": 7218,
+      "sha256": "6cd8285522283803a3947dd3627b2d7dcb1093c8f5065202cd332223db86d91a"
+    },
+    {
+      "path": "evidence/compression-jitendex-independent-failure-review-1b47.json",
+      "bytes": 3830,
+      "sha256": "0e66ab1ebe592ef56ea4dd3e1f18c5b05bde1222a0ca56489c4ecfece1828fd9"
+    },
+    {
+      "path": "evidence/compression-jmdict-independent-failure-review-1b47.json",
+      "bytes": 8127,
+      "sha256": "4a673fccc313db2ca02158f52d5789c7011b88f352fc9659e04673635e9950cd"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-derivation.json",
+      "bytes": 3633,
+      "sha256": "8d688807286a1dee08794433168c7330eb9ecadef04c8870dc28dedb11486612"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-derivation.patch",
+      "bytes": 44310,
+      "sha256": "e1d3c3e629a19b82a34e3c834824b695bf7d7a4b45c3ae9c8c5194e65760e244"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-independent-review-benchmark.json",
+      "bytes": 2416,
+      "sha256": "d675c6e4044b8ade816473a587aeb0969543434a28a70b2aec0ab5870fe13be5"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-plan-1b47.json",
+      "bytes": 2859,
+      "sha256": "dbce30e297c6fd9401afcd837e4ff0653f35207263d7f577e8252315606a93fa"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-reconstruction.md",
+      "bytes": 1324,
+      "sha256": "0ee454dd9e2637cf2d02d25e02388b8c3fe4c0cf3e1783badfe02eebe817c7b6"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-source-bound-v2.json",
+      "bytes": 2054,
+      "sha256": "d503f71da74039b4619510096e90394292aa5b8412c7c5c4e104f7cb3cb15899"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-source-bound-v2.patch",
+      "bytes": 45566,
+      "sha256": "1fdf3245c8727fdc7b174f3c48b51ecdb35e8af35dac5685a3ebd368a5c1bae1"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-tests-before-canonical-media-fixture-fix.py",
+      "bytes": 9905,
+      "sha256": "d6bb806078487fff58e6fe2c805eb262f02647e0564ea138309c0d2847c7f42e"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-tests-canonical-media-fixed.log",
+      "bytes": 2084,
+      "sha256": "5bb707f24b4ee25ecbdd8402fdece7c78639be52891720983abbe3ce4ad64eaf"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-tests-first.log",
+      "bytes": 2823,
+      "sha256": "65836032f0c3ef3e68d3604843897146de6095d516068fd6c2d7a052f718ba81"
+    },
+    {
+      "path": "evidence/compression-proof-followup/artifact-reader-tests-report-path-binding.log",
+      "bytes": 2271,
+      "sha256": "ce1b51fd3bb79afc07540dd1b3e7b99ffabdb98f139592ab4339b0b5935bb6d6"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-domain-clarification-compression_proof_receipts.py",
+      "bytes": 18860,
+      "sha256": "3d00a50d42b8a00181686a918f51b1994319cc7b135fb0c77b5ad406c9a24783"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-domain-clarification-test_compression_proof_receipts.py",
+      "bytes": 17549,
+      "sha256": "8c60f09bf4ce8c1eca2f68ce2df5fad7cb08feb37d53a78ce8836c9cb497b9c3"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/.github/workflows/compression-proof-screen-1b47.yml",
+      "bytes": 10761,
+      "sha256": "fc7bf2dcc993d7f8d80fb7d6eb7adfa7d5a6d68372fddd83ca7dab4d2748a0d4"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47.py",
+      "bytes": 33949,
+      "sha256": "b7f81e94019cb22268f3239dffd0ac255749e041cae08782e6b1d67cc03cc546"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/README.md",
+      "bytes": 7447,
+      "sha256": "0130727b227e5fdf5a4bb098017e15e17a1bdea01189eaaa099a5071605ef675"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/compression_harness_overlay.py",
+      "bytes": 9951,
+      "sha256": "b5a0f28083fe77943b06ee6bb9bd26783c122fbea0d7abe1167239a6d119544e"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/compression_proof_receipts.py",
+      "bytes": 19736,
+      "sha256": "e64f7d2f428b1114800df1ffda985c6a0110e9fd7811f14b002206e5fbf963ce"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/test_compression_harness_overlay.py",
+      "bytes": 10730,
+      "sha256": "bd97f02bbab2ea407cba52ef77dbd5f33789e5220e011f6b8defe7a741423736"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/test_compression_proof_receipts.py",
+      "bytes": 18982,
+      "sha256": "2a83c2517454f4078b800cc8c4326c3a2baa37c0109f92e55aa3250af2a2f093"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/dev/perf/import-compression-proof-20261128-1b47/test_driver_boundaries.py",
+      "bytes": 10254,
+      "sha256": "4ad12d37d07f0ddde675585b403e4dd8c392b3a51d36ed95ce239cf30f5cedac"
+    },
+    {
+      "path": "evidence/compression-proof-followup/before-required-workers/source-map.json",
+      "bytes": 2308,
+      "sha256": "d14defe4c7f4b3084e62ef63b7bea4634f80437ffd778a83995ca8e1a8c99d73"
+    },
+    {
+      "path": "evidence/compression-proof-followup/corrected-driver-derivation.patch",
+      "bytes": 43157,
+      "sha256": "35b89049bafa2fd243d2f5b6ee2d59cd9c17269fddac84e678e04765e0283164"
+    },
+    {
+      "path": "evidence/compression-proof-followup/corrected-workflow-derivation.patch",
+      "bytes": 9028,
+      "sha256": "4fc0bad6b2a29f41ddae9452d23137ebd4b3ee0fd2d90c0c1f0642d219d7dbee"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-actionlint.log",
+      "bytes": 43,
+      "sha256": "49c63c4777aa7a234028be877f70a9991c05cf7263b576fa1b2d7b60f7176e85"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-fixture-tests-final.log",
+      "bytes": 8439,
+      "sha256": "ad7b48110ddbd6ccdf440bf6b44851e9355d4c09ea5cfcf876e76fef0274196b"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-fixture-tests-initial.log",
+      "bytes": 6262,
+      "sha256": "d08838b93cb072752e6a77cd61283d6d6c413503ed0303e629e3fee0c55e2dd2"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-fixture-tests-pointer-guard.log",
+      "bytes": 98,
+      "sha256": "d0600e9c8e9eda3ba816dc278c7a8ce3101a6e1a442199979077cbe45f9816f9"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-format-check-final.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-base-format-check.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-baseline-preparation.patch",
+      "bytes": 10276,
+      "sha256": "dd3483812666752921017352cabc536abe5d0832210835c3c037c6db67d4f9ae"
+    },
+    {
+      "path": "evidence/compression-proof-followup/current-baseline-setup.json",
+      "bytes": 1865,
+      "sha256": "410b879c6dbef8b083135ee0b374da9467a8f2fac18c5de05d567d6ee8b00e84"
+    },
+    {
+      "path": "evidence/compression-proof-followup/develop-972-readonly-integration-assessment.json",
+      "bytes": 4306,
+      "sha256": "5afa1ecfb3664da530f3a8f676abf158212c5bd9784b96828e5b628087232372"
+    },
+    {
+      "path": "evidence/compression-proof-followup/driver-workflow-independent-review-1b47.json",
+      "bytes": 5806,
+      "sha256": "177c6ee33580ca542818e46456ff13c525f9485651e2e59b4ac26da30b01d12d"
+    },
+    {
+      "path": "evidence/compression-proof-followup/eight-source-unreferenced-upload.json",
+      "bytes": 2974,
+      "sha256": "0ceadc139fe7c92dfefe5c85324211fe3da4b21e087613bc38f4af0a63efbd18"
+    },
+    {
+      "path": "evidence/compression-proof-followup/local-validation-summary.json",
+      "bytes": 2270,
+      "sha256": "0e32943bdf623ed115c9f148c91d89f019bb762b13604466739647cc801c36e4"
+    },
+    {
+      "path": "evidence/compression-proof-followup/logical-domain-clarification.patch",
+      "bytes": 4578,
+      "sha256": "e9576b7359daa9870f7fea0c3af52989e7c9e4086a39518beeb26c24971613ad"
+    },
+    {
+      "path": "evidence/compression-proof-followup/markdown-json-format-check.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-independent-review-1b47.json",
+      "bytes": 2588,
+      "sha256": "2014b4e481a7e782131c845e5a0aec69c29a825cbe307c75f31c08f2c84832c5"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-preview.js",
+      "bytes": 331602,
+      "sha256": "d4c0869d9a88ea477b852c57fe7ecb46ac47adde503fb8fc2c4f588eb399c912"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-preview.patch",
+      "bytes": 9427,
+      "sha256": "69067c48f08f8c5662b05971f98215150be5cac022a2bdfc230134b88c904c6c"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-review-manifest.json",
+      "bytes": 1447,
+      "sha256": "c9c42debc50a2ed266ddd370782809cc9a6cc66a1c31019e37f236d4a314ee24"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-tests-first.log",
+      "bytes": 2924,
+      "sha256": "86224e1ba0044ab47e38c78190d8c93bce9a93fd8fc07d980f5e9afec11c5c71"
+    },
+    {
+      "path": "evidence/compression-proof-followup/overlay-tests-node-crypto-fixed.log",
+      "bytes": 1281,
+      "sha256": "354423f19ea42701d54e41bc9707e6f34b53caf409494fe470a2d85720fbd4a5"
+    },
+    {
+      "path": "evidence/compression-proof-followup/policy-current-context-independent-review-1b47.json",
+      "bytes": 1662,
+      "sha256": "2e6b61cbf7a277e21ce6e6a748f3ed08155fa30f5a56a485aafc0113a56bbb34"
+    },
+    {
+      "path": "evidence/compression-proof-followup/policy-independent-review.json",
+      "bytes": 2658,
+      "sha256": "e7769c546797520f0dcf1cdb6d86036e460399f8328a986a7e73403d68fd6213"
+    },
+    {
+      "path": "evidence/compression-proof-followup/policy-tests-domain.log",
+      "bytes": 3600,
+      "sha256": "0b87f2c84f801fb38ca4877562817987168caf3faf7e83341308787f4040fb40"
+    },
+    {
+      "path": "evidence/compression-proof-followup/policy-tests-initial.log",
+      "bytes": 3600,
+      "sha256": "12377763b143b2cd64a73022b94810c73b783d0017ac25d4f385e8a6d247591f"
+    },
+    {
+      "path": "evidence/compression-proof-followup/prepared-driver-source-map-final-v2.json",
+      "bytes": 2977,
+      "sha256": "f0ed974da8c9e0569840394fe9b81f5612b179e3652e313b81a72190666a1d6f"
+    },
+    {
+      "path": "evidence/compression-proof-followup/prepared-driver-source-map-final.json",
+      "bytes": 2885,
+      "sha256": "1b9556bbd7f86678d589282a3d2cd546e6ebd6f98e27937a6c0b3fb17743c5b7"
+    },
+    {
+      "path": "evidence/compression-proof-followup/prepared-driver-source-map.json",
+      "bytes": 2308,
+      "sha256": "d14defe4c7f4b3084e62ef63b7bea4634f80437ffd778a83995ca8e1a8c99d73"
+    },
+    {
+      "path": "evidence/compression-proof-followup/reference-invariant-and-schema.md",
+      "bytes": 5875,
+      "sha256": "2147150b21e58e6b1c56344a1c315b4c3664c0373333bdbd9258eb70c31d548c"
+    },
+    {
+      "path": "evidence/compression-proof-followup/reference-source-identities.json",
+      "bytes": 1310,
+      "sha256": "4d20aab1b5608965288dd05c96cc1fe5bfe993ab9f4ee179779c6427f49ca110"
+    },
+    {
+      "path": "evidence/compression-proof-followup/required-worker-assertion.patch",
+      "bytes": 4984,
+      "sha256": "6448a47a5f3089c050bd9f7a1dd9665cfcff2d65ba18dda5ad9a95bcfdf30585"
+    },
+    {
+      "path": "evidence/compression-proof-followup/root-freeze-3256036.json",
+      "bytes": 3955,
+      "sha256": "a14567db53ae88f0cc6e45680804f2775d46af8818dd9b57854c1879bb40f087"
+    },
+    {
+      "path": "evidence/compression-proof-followup/root-policy-and-overlay-review.json",
+      "bytes": 2522,
+      "sha256": "ba043dabb2f1d819fb9f66d3355b0292b3f4c87cd9754fba4e60fae2c64246fc"
+    },
+    {
+      "path": "evidence/compression-proof-followup/setup-manifest.json",
+      "bytes": 1606,
+      "sha256": "15464a539bb1f83cf99e262602ef60b744afa68345ec29a9f10342271836c4df"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/manifest.json",
+      "bytes": 9464,
+      "sha256": "b6c206d16690f75377949598def2ef90bf454898bd71d9bd40832b9015bf71e6"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/artifact-reader-plan-1b47.json",
+      "bytes": 2859,
+      "sha256": "dbce30e297c6fd9401afcd837e4ff0653f35207263d7f577e8252315606a93fa"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/before-domain-clarification-compression_proof_receipts.py",
+      "bytes": 18860,
+      "sha256": "3d00a50d42b8a00181686a918f51b1994319cc7b135fb0c77b5ad406c9a24783"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/before-domain-clarification-test_compression_proof_receipts.py",
+      "bytes": 17549,
+      "sha256": "8c60f09bf4ce8c1eca2f68ce2df5fad7cb08feb37d53a78ce8836c9cb497b9c3"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/develop-972-readonly-integration-assessment.json",
+      "bytes": 4306,
+      "sha256": "5afa1ecfb3664da530f3a8f676abf158212c5bd9784b96828e5b628087232372"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/logical-domain-clarification.patch",
+      "bytes": 4578,
+      "sha256": "e9576b7359daa9870f7fea0c3af52989e7c9e4086a39518beeb26c24971613ad"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/markdown-json-format-check.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-independent-review-1b47.json",
+      "bytes": 2588,
+      "sha256": "2014b4e481a7e782131c845e5a0aec69c29a825cbe307c75f31c08f2c84832c5"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-preview.js",
+      "bytes": 331602,
+      "sha256": "d4c0869d9a88ea477b852c57fe7ecb46ac47adde503fb8fc2c4f588eb399c912"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-preview.patch",
+      "bytes": 9427,
+      "sha256": "69067c48f08f8c5662b05971f98215150be5cac022a2bdfc230134b88c904c6c"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-review-manifest.json",
+      "bytes": 1447,
+      "sha256": "c9c42debc50a2ed266ddd370782809cc9a6cc66a1c31019e37f236d4a314ee24"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-tests-first.log",
+      "bytes": 2924,
+      "sha256": "86224e1ba0044ab47e38c78190d8c93bce9a93fd8fc07d980f5e9afec11c5c71"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/overlay-tests-node-crypto-fixed.log",
+      "bytes": 1281,
+      "sha256": "354423f19ea42701d54e41bc9707e6f34b53caf409494fe470a2d85720fbd4a5"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/policy-independent-review.json",
+      "bytes": 2658,
+      "sha256": "e7769c546797520f0dcf1cdb6d86036e460399f8328a986a7e73403d68fd6213"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/policy-tests-domain.log",
+      "bytes": 3600,
+      "sha256": "0b87f2c84f801fb38ca4877562817987168caf3faf7e83341308787f4040fb40"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/policy-tests-initial.log",
+      "bytes": 3600,
+      "sha256": "12377763b143b2cd64a73022b94810c73b783d0017ac25d4f385e8a6d247591f"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/reference-invariant-and-schema.md",
+      "bytes": 5875,
+      "sha256": "2147150b21e58e6b1c56344a1c315b4c3664c0373333bdbd9258eb70c31d548c"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/reference-source-identities.json",
+      "bytes": 1310,
+      "sha256": "4d20aab1b5608965288dd05c96cc1fe5bfe993ab9f4ee179779c6427f49ca110"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/root-policy-and-overlay-review.json",
+      "bytes": 2522,
+      "sha256": "ba043dabb2f1d819fb9f66d3355b0292b3f4c87cd9754fba4e60fae2c64246fc"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/preparation-evidence/setup-manifest.json",
+      "bytes": 1606,
+      "sha256": "15464a539bb1f83cf99e262602ef60b744afa68345ec29a9f10342271836c4df"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/prepared-source/dev/perf/import-compression-proof-20261128-1b47.py",
+      "bytes": 32354,
+      "sha256": "a4fe6786c982bc95bb49331208187be1123d82c602a1fadd0547fa2442f2d38a"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/prepared-source/dev/perf/import-compression-proof-20261128-1b47/compression_harness_overlay.py",
+      "bytes": 9951,
+      "sha256": "b5a0f28083fe77943b06ee6bb9bd26783c122fbea0d7abe1167239a6d119544e"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/prepared-source/dev/perf/import-compression-proof-20261128-1b47/compression_proof_receipts.py",
+      "bytes": 19279,
+      "sha256": "89b30def237b50e21c5f65c1c18ff7ce3052300064fafc50919e7d49daa8134b"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/prepared-source/dev/perf/import-compression-proof-20261128-1b47/test_compression_harness_overlay.py",
+      "bytes": 10730,
+      "sha256": "bd97f02bbab2ea407cba52ef77dbd5f33789e5220e011f6b8defe7a741423736"
+    },
+    {
+      "path": "evidence/compression-proof-followup/superseded-9e10-preparation/prepared-source/dev/perf/import-compression-proof-20261128-1b47/test_compression_proof_receipts.py",
+      "bytes": 17965,
+      "sha256": "66bf08abc028341d03fdd31f83a703aad25c2ac43616ac5fde3e4b3547c19d13"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/README.md",
+      "bytes": 20010,
+      "sha256": "9df182c8b95b4e28bb6c9c5f03297da736080ee7cdeddfdcd8d5429fea7aafa0"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/bundle-spec.json",
+      "bytes": 33211,
+      "sha256": "3fc328b96d1819cdf4cdfe871dd176508588e0239301584358e9b3d5fd2cb0ff"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/parent-scope-review.json",
+      "bytes": 884,
+      "sha256": "44d86d1b34d785cda1e357a405d3921982b649ac91a0551af2bd61ef2d2e56e8"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/publication-plan.json",
+      "bytes": 928,
+      "sha256": "c732e192f310530fbcc5ca360709a766a542df33a6602d0c1583152f5367147b"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/readme-format-check.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/compression-proof-registration-20261128-1b47/snapshot-receipt.json",
+      "bytes": 25822,
+      "sha256": "0d306a31865e5792068b2c22582dbb277e25dd83f71c1b048a74f8f6fade0c56"
+    },
+    {
+      "path": "evidence/durable-bundles/closed-staging-relocation-20261128T084823Z.json",
+      "bytes": 4074,
+      "sha256": "95a01117f05d2b0c9c79472c4667943b14065628e2f3e8cbed0057084cb91e1f"
+    },
+    {
+      "path": "evidence/durable-bundles/package-evidence-v2.py",
+      "bytes": 6789,
+      "sha256": "68b0f97d8e5b40fb5485420419739d95af0e6c47e02a577a09b790ff75f60684"
+    },
+    {
+      "path": "evidence/durable-bundles/relocate-closed-evidence-20261128-1b47.py",
+      "bytes": 7173,
+      "sha256": "78a777e1c2d9aa78d22eafb1b283ac1f474708e98ebe08aa5822f4321d41f31a"
+    },
+    {
+      "path": "evidence/durable-bundles/scan-evidence-archives.py",
+      "bytes": 2416,
+      "sha256": "7dc85d50b904fb7c31cc87159c1af7e04f1793385974aa430ce653f03c02c54f"
+    },
+    {
+      "path": "evidence/durable-bundles/stage-compression-proof-preparation-20261128-1b47.py",
+      "bytes": 5591,
+      "sha256": "63b60e0b82911b59c86ef0ac7a2050ac063d2fe9996a2524237558a1465335b0"
+    },
+    {
+      "path": "evidence/hosted-compression-proof-status-20261128084943.json",
+      "bytes": 806,
+      "sha256": "29c661a2dad0f302603e5221f10b355f3f617b451efd68c584ae91ebc81ed480"
+    }
+  ],
+  "omissions": [
+    {
+      "kind": "already-durable-original-trial",
+      "included": false,
+      "repository": "ManabiIO/manabitan",
+      "commit": "128b8f8bb69c1801f52242a9907b0b8f0bc3660c",
+      "path": "dev/perf/import-evidence-20261128-1b47/compression-original-browser-addendum-20261128-1b47.tar.gz",
+      "bytes": 2523478,
+      "sha256": "bf0ea30f7c8faa7e3ff30b4207fc777ddc99b07c084830889add6bbeae56086a",
+      "manifestSha256": "5acc2c7af207664adfa09483068cb02089b8f0a486b30950865139c4ad7329b6",
+      "reconstruction": "Retrieve exact immutable archive and manifest; all original failure/control raw members remain there, with original omitted-package identities."
+    },
+    {
+      "kind": "complete-source-checkout",
+      "included": false,
+      "repository": "ManabiIO/manabitan",
+      "commit": "3256036ff8534ba6de7bc9ecd74ec74d3c705603",
+      "tree": "42c3ac97086544bc35aa4895c30ba72e717bd33e",
+      "reconstruction": "Use the exact full Git checkout and its locked dependencies; sixteen changed files are snapshotted here, not the entire repository."
+    },
+    {
+      "kind": "pinned-dictionary-archive",
+      "included": false,
+      "dictionary": "jmdict",
+      "bytes": 15645766,
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "reconstruction": "Use the registered source commit test/perf/dictionaries.lock.json and unchanged prepare-dictionaries helper."
+    },
+    {
+      "kind": "pinned-dictionary-archive",
+      "included": false,
+      "dictionary": "jitendex",
+      "bytes": 38831822,
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "reconstruction": "Use the registered source commit test/perf/dictionaries.lock.json and unchanged prepare-dictionaries helper."
+    },
+    {
+      "kind": "duplicate-post-freeze-status-copy",
+      "included": false,
+      "path": "evidence/compression-proof-followup/initial-hosted-status.json",
+      "retainedAs": "evidence/hosted-compression-proof-status-20261128084943.json",
+      "reconstruction": "The retained top-level copy is byte-identical and explicitly separate from the source-freeze history."
+    }
+  ],
+  "verification": {
+    "verifiedMembers": 115,
+    "allMemberBytesAndHashesMatch": true
+  }
+}
