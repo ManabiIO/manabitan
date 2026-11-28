@@ -124,4 +124,61 @@ describe('first special byte scanning', () => {
             }
         }
     })
+
+    test('preserves consecutive short strings and escaped markers in each classified window', () => {
+        const tokens = ['""', '"a"', String.raw`"\""`, String.raw`"\\"`, String.raw`"\u0022"`, String.raw`"\u005c"`, String.raw`"\u001f"`, '"é日🙂"']
+        for (let alignment = 0; alignment < 16; ++alignment) {
+            for (let width = 0; width < 32; ++width) {
+                const glossary = `["${'a'.repeat(width)}",${tokens.join(',')},"tail"]`
+                const source = `[["head","","","",0,${glossary},1,""]]`
+                const result = parse([source], alignment)
+                expect(result.count).toBe(1)
+                expect(read(result, 9)).toEqual(JSON.parse(glossary))
+            }
+        }
+    })
+
+    test('retains exact scanning after common structured keys and nested containers bypass strings', () => {
+        for (let width = 0; width < 32; ++width) {
+            const glossary = [{
+                type: 'structured-content',
+                content: {
+                    tag: 'span',
+                    content: [
+                        'x'.repeat(width),
+                        {tag: 'li', content: ['a', '"', '\\', '']},
+                        {first: 'x', second: '\\"', content: ['日🙂', 'tail'], tag: 'span'},
+                    ],
+                },
+            }]
+            const source = JSON.stringify([['head', '', '', '', 0, glossary, 1, '']])
+            const result = parse([source], width % 16)
+            expect(result.count).toBe(1)
+            expect(read(result, 9)).toEqual(glossary)
+        }
+    })
+
+    test('rejects controls and malformed escapes in later strings of the same composite', () => {
+        for (let width = 0; width < 32; ++width) {
+            const prefix = `[["head","","","",0,["${'a'.repeat(width)}","`
+            for (let control = 0; control < 32; ++control) {
+                expect(parse([`${prefix}${String.fromCharCode(control)} tail","z"],1,""]]`], width % 16).count).toBe(-1)
+            }
+            for (const escape of ['\\q', '\\U0001', '\\u00xz', '\\u-001', '\\u 000']) {
+                expect(parse([`${prefix}${escape}","z"],1,""]]`], width % 16).count).toBe(-1)
+            }
+        }
+    })
+
+    test('bounds later composite strings by logical, physical, and independent bank ends', () => {
+        const source = String.raw`[["head","","","",0,["a","","\"","\\","\u0041",{"tag":"span","content":"z"}],1,""]]`
+        for (let length = 1; length < source.length; ++length) {
+            expect(parse([source.slice(0, length)], length % 16).count).toBe(-1)
+            expect(parse([source.slice(0, length)], 0, true).count).toBe(-1)
+            expect(parse([source.slice(0, length), source.slice(length)]).count).toBe(-1)
+        }
+        const result = parse([source], 0, true)
+        expect(result.count).toBe(1)
+        expect(read(result, 9)).toEqual(JSON.parse(source)[0][5])
+    })
 })

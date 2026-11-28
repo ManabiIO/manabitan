@@ -768,6 +768,98 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
     return parse_string_span_with_escape(src, len, start, out_end, 0);
 }
 
+typedef struct {
+    uint32_t start;
+    uint32_t end;
+    uint32_t special;
+} CompositeStringWindow;
+
+/* A composite walks one immutable, logically bounded source forwards. Retain
+ * the exact special-byte classification after a short string so the next
+ * string can consume the rest of that window without loading it again.
+ * Scalar subtraction masks cannot be retained: borrows may mark later bytes. */
+static __attribute__((always_inline)) inline int parse_composite_string_span(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
+    CompositeStringWindow* window
+) {
+#if defined(__wasm_simd128__)
+    if (start >= len || src[start] != '"') { return 0; }
+    uint32_t i = start + 1u;
+    while (i < len) {
+        if (i >= window->start && i < window->end) {
+            const uint32_t special = window->special >> (i - window->start);
+            if (special == 0u) {
+                i = window->end;
+                continue;
+            }
+            i += (uint32_t)__builtin_ctz(special);
+        } else if (len - i >= 16u) {
+            const v128_t bytes = wasm_v128_load(src + i);
+            const uint32_t special = (uint32_t)wasm_i8x16_bitmask(wasm_v128_or(
+                wasm_v128_or(
+                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('"')),
+                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('\\'))
+                ),
+                wasm_u8x16_lt(bytes, wasm_i8x16_splat(0x20))
+            ));
+            window->start = i;
+            window->end = i + 16u;
+            window->special = special;
+            if (special == 0u) {
+                i += 16u;
+                continue;
+            }
+            i += (uint32_t)__builtin_ctz(special);
+        } else {
+            while (len - i >= 8u) {
+                uint64_t word;
+                __builtin_memcpy(&word, src + i, sizeof(word));
+                const uint64_t special =
+                    has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) |
+                    has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) |
+                    has_control_byte64(word);
+                if (special != 0u) {
+                    i += (uint32_t)__builtin_ctzll(special) / 8u;
+                    break;
+                }
+                i += 8u;
+            }
+            if (i >= len) { break; }
+        }
+        const uint8_t c = src[i];
+        if (c == '\\') {
+            if (len - i < 2u) { return 0; }
+            const uint8_t escape = src[i + 1u];
+            if (escape == 'u') {
+                if (len - i < 6u) { return 0; }
+                for (uint32_t j = i + 2u; j < i + 6u; ++j) {
+                    if (!is_hex_digit(src[j])) { return 0; }
+                }
+                i += 6u;
+                continue;
+            }
+            if (
+                escape != '"' && escape != '\\' && escape != '/' &&
+                escape != 'b' && escape != 'f' && escape != 'n' &&
+                escape != 'r' && escape != 't'
+            ) { return 0; }
+            i += 2u;
+            continue;
+        }
+        if (c < 0x20u) { return 0; }
+        if (c == '"') {
+            *out_end = i + 1u;
+            return 1;
+        }
+        ++i;
+    }
+    return 0;
+#else
+    (void)window;
+    return parse_string_span(src, len, start, out_end);
+#endif
+}
+
 static uint32_t key_hex4(const uint8_t* p);
 
 /* Compare a short ASCII keyword without allocating or decoding an arbitrary
@@ -939,6 +1031,7 @@ static int parse_composite_span_impl(
     uint32_t glossary_key = 0u;
     uint32_t glossary_object_type = 0u;
     uint32_t glossary_valid_fields = 0u;
+    CompositeStringWindow string_window = {0u, 0u, 0u};
     uint32_t i = start + 1u;
     while (i < len) {
         const uint8_t c = src[i];
@@ -955,7 +1048,7 @@ static int parse_composite_span_impl(
             const int common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
-                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+                if (!parse_composite_string_span(src, len, i, &s_end, &string_window)) { return 0; }
                 // A validated token can match these markers only with a literal or escaped i.
                 const uint8_t first = src[i + 1u];
                 if ((first == 'i' || first == '\\') && media_hint != 0 && *media_hint == 0u &&

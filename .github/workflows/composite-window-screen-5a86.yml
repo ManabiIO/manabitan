@@ -1,0 +1,115 @@
+name: Composite string-window screen 5a86
+
+on:
+  push:
+    branches: ['perf/composite-window-screen-20261128-5a86']
+    paths:
+      - '.github/workflows/composite-window-screen-5a86.yml'
+      - 'dev/perf/composite-window-screen-5a86.py'
+      - 'ext/js/dictionary/wasm/term-bank-parser.c'
+      - 'dev/data/dictionary-wasm/manifest.json'
+      - 'dev/data/dictionary-wasm/term-bank-parser.wasm'
+      - 'test/term-bank-first-special.test.js'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: composite-window-screen-5a86-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  PERF_CANDIDATE: ${{ github.sha }}
+
+jobs:
+  validate:
+    name: Validate exact native candidate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact source and unchanged qualification guards
+        run: |
+          python dev/perf/composite-window-screen-5a86.py check --candidate "$PERF_CANDIDATE"
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned dictionary WASM toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Reproduce the checked-in native artifacts
+        run: |
+          mkdir -p builds/perf/composite-window-validation
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/composite-window-validation/native-rebuild.log
+      - name: Check changed test source
+        run: npx eslint test/term-bank-first-special.test.js
+      - name: Run the complete unit suite
+        run: npm run test:unit 2>&1 | tee builds/perf/composite-window-validation/unit.log
+      - name: Validate generated JSON and all build targets
+        run: |
+          npm run test:json:format 2>&1 | tee builds/perf/composite-window-validation/json-format.log
+          npm run test:build 2>&1 | tee builds/perf/composite-window-validation/build.log
+      - name: Retain validation receipts, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: composite-window-validation-5a86
+          path: builds/perf/composite-window-validation
+          if-no-files-found: warn
+          retention-days: 14
+
+  screen:
+    name: ${{ matrix.dictionary }} complete import (${{ matrix.order }})
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install lockfile Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run all registered timing, media, and memory observations
+        run: |
+          python dev/perf/composite-window-screen-5a86.py run \
+            --candidate "$PERF_CANDIDATE" --dictionary "$PERF_DICTIONARY" --order "$PERF_ORDER" \
+            --evidence "builds/perf/composite-window-5a86/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Print complete or partial evidence for independent review
+        if: always()
+        run: |
+          python dev/perf/composite-window-screen-5a86.py summary \
+            --evidence "builds/perf/composite-window-5a86/$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: composite-window-${{ matrix.dictionary }}-${{ matrix.order }}-5a86
+          path: |
+            builds/perf/composite-window-5a86/${{ matrix.dictionary }}-${{ matrix.order }}
+            builds/perf/composite-window-5a86/${{ matrix.dictionary }}-${{ matrix.order }}-driver
+          if-no-files-found: error
+          retention-days: 14
