@@ -1,0 +1,155 @@
+{
+  "verifiedAt": "2026-11-28 07:40:31 UTC",
+  "commit": "9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207",
+  "tree": "f757c9838d372ae310342655750f794564abf229",
+  "branch": "research/zstd-sequence64-20261128-7c02",
+  "checks": [
+    {
+      "directory": "dev/perf/zstd-sequence64-capacity-dispatch-7c02",
+      "count": 21,
+      "files": [
+        {
+          "name": "README.md",
+          "size": 3298,
+          "sha": "d1bfe747f5da8ffe9a72c3f66d3f015d1fdbfe20"
+        },
+        {
+          "name": "RESULT.md",
+          "size": 6176,
+          "sha": "8e505c1d9a3f9893f0705867caca8a2bdf03ce88"
+        },
+        {
+          "name": "build-archive.py",
+          "size": 10071,
+          "sha": "8cb9f0b262b0d2ef3e1961c934678b088dfb5087"
+        },
+        {
+          "name": "index.json",
+          "size": 67337,
+          "sha": "869946adc4854d6738f7eb31ad108cae7b1da5e1"
+        },
+        {
+          "name": "investigation-ledger-snapshot.json",
+          "size": 19989,
+          "sha": "cc3e5f5f13cafba6692653d35f8578052dbe2a2f"
+        },
+        {
+          "name": "privacy-scan.json",
+          "size": 37607,
+          "sha": "4bdb8ce5e71fd873d21ffc9ffb50eb51cd779dd7"
+        },
+        {
+          "name": "reconstruction-build.log",
+          "size": 341,
+          "sha": "246c1cd79895f27b76ad079822c2a8481c4ea011"
+        },
+        {
+          "name": "reconstruction-identity.json",
+          "size": 1062,
+          "sha": "04625e0848aa20ab23cae46bb8eb488ee571b377"
+        },
+        {
+          "name": "reconstruction-start.json",
+          "size": 2145,
+          "sha": "5d8bae7f0d956830375754148f6980ee1113153a"
+        },
+        {
+          "name": "reconstruction.json",
+          "size": 2222,
+          "sha": "ade9f35bf6ba8cc2ff852d8195d6d23abd30603b"
+        },
+        {
+          "name": "sequence64-design-b.part-001",
+          "size": 262144,
+          "sha": "521201636c3a61d0fb808cd10251602dd90d03b1"
+        },
+        {
+          "name": "sequence64-design-b.part-002",
+          "size": 262144,
+          "sha": "58df27f1dae7d869eccd3a7853b79037311be1ee"
+        },
+        {
+          "name": "sequence64-design-b.part-003",
+          "size": 262144,
+          "sha": "3ec9bc5f1f139e41b453c10f90bb01ce2aa16192"
+        },
+        {
+          "name": "sequence64-design-b.part-004",
+          "size": 262144,
+          "sha": "40f69020bc2edccf47b07fc06ec82e3ddd0e6d2f"
+        },
+        {
+          "name": "sequence64-design-b.part-005",
+          "size": 262144,
+          "sha": "3e11512eb1080fc6b8b9c3b7fcf7dbdd7c7aa9d0"
+        },
+        {
+          "name": "sequence64-design-b.part-006",
+          "size": 262144,
+          "sha": "173d2d9d00dd60768af0a4fff911be0d0a6e3b5a"
+        },
+        {
+          "name": "sequence64-design-b.part-007",
+          "size": 262144,
+          "sha": "6b41b6f8319d59fdd040f5e6e3bfdf7d271a6247"
+        },
+        {
+          "name": "sequence64-design-b.part-008",
+          "size": 31831,
+          "sha": "729bfd95e5992d3f2f4d1d4188ee7fcb1cad7d79"
+        },
+        {
+          "name": "verification.json",
+          "size": 1565,
+          "sha": "72171a1a218d2b94ef2f8a54ab296a2f61645a5d"
+        },
+        {
+          "name": "verification.log",
+          "size": 591,
+          "sha": "a5f524a895f19a2d1a86b34bff240eb936811a70"
+        },
+        {
+          "name": "verify.py",
+          "size": 19717,
+          "sha": "00bacf1e97df2951d26adf35d0be0b7e6d90d2fd"
+        }
+      ]
+    },
+    {
+      "directory": "dev/perf/parser-path-hosted-validation-7c02",
+      "count": 6,
+      "files": [
+        {
+          "name": "README.md",
+          "size": 2182,
+          "sha": "939768db228c36f4cd2f324ce30021c32a6e1f16"
+        },
+        {
+          "name": "hosted-validation-evidence.zip",
+          "size": 182679,
+          "sha": "a01253f873f23d6f01a2d293aa41a80d729fb64b"
+        },
+        {
+          "name": "index.json",
+          "size": 251,
+          "sha": "57024d2b17cb775ed5771b4651922f88dde1487b"
+        },
+        {
+          "name": "manifest.json",
+          "size": 1333,
+          "sha": "f27a1d07a814c32cfb8d281a6aa8064cfbabc973"
+        },
+        {
+          "name": "reconstruction.json",
+          "size": 852,
+          "sha": "f12478566920bd8fa9ecbdf2b2bd48889d317b61"
+        },
+        {
+          "name": "verify.py",
+          "size": 3681,
+          "sha": "9df9e11f4f3dd110f0df489085bc20a026b2e0a9"
+        }
+      ]
+    }
+  ]
+}

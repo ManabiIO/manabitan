@@ -1,0 +1,490 @@
+{
+  "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "startedAtUtc": "2026-11-28T02:49:00Z",
+  "updatedAtUtc": "2026-11-28T07:41:28.671323+00:00",
+  "optimizationPrs": [],
+  "policy": "Only gains worth reviewing may become PRs; no Work mode; failed observations retained; sources and protocols frozen before acquisition.",
+  "experiments": [
+    {
+      "id": "composite-inline",
+      "decision": "rejected",
+      "scope": "local JMdict parser screen",
+      "reason": "Median wall regression12.99%,2/4wins; original raw receipt lost in executor tmp reset, so retained numbers are limited evidence."
+    },
+    {
+      "id": "simd16-string-scan",
+      "decision": "rejected",
+      "scope": "local JMdict parser screen",
+      "reason": "Median wall regression5.83%,1/4wins; original raw receipt lost in executor tmp reset."
+    },
+    {
+      "id": "schema-key-classifier",
+      "decision": "inconclusive-held",
+      "scope": "local parser",
+      "reason": "JMdict median\u22124.495% but2/4wins and large variance."
+    },
+    {
+      "id": "swar-mask-factor",
+      "decision": "no-change",
+      "reason": "Compiler already emits equivalent instruction inventory."
+    },
+    {
+      "id": "four-distinct-cache",
+      "decision": "no-implementation",
+      "reason": "Only433 extra JMdict hits among528299rows in opportunity census."
+    },
+    {
+      "id": "adjacent-tail-reuse",
+      "decision": "no-implementation",
+      "reason": "Zero complete adjacent row[2:] matches in JMdict/Jitendex."
+    },
+    {
+      "id": "raw-cctx-template",
+      "decision": "rejected",
+      "scope": "Complete canonical JMdict native compression component with the earlier31-block/4MiB standalone-store geometry; not production1MiB database geometry.",
+      "reason": "Gain versus A did not survive identical C; unchanged controls drifted6.39%; extra retained memory."
+    },
+    {
+      "id": "reading-expression-proof",
+      "decision": "held",
+      "reason": "JMdict\u22124.924% wall,4/6wins; failed prospective consistency gate."
+    },
+    {
+      "id": "deferred-type-text-hint",
+      "decision": "rejected",
+      "reason": "JMdict+15.159% wall,+17.512%CPU."
+    },
+    {
+      "id": "strict-local-v1",
+      "decision": "rejected",
+      "reason": "JMdict+17.503% wall; Jitendex cohort incomplete after killed baseline; no replacement."
+    },
+    {
+      "id": "strict-local-v2",
+      "decision": "rejected",
+      "reason": "After restoring baseline helper inlining, JMdict+3.230% wall/+4.083%CPU; Jitendex+1.521%wall."
+    },
+    {
+      "id": "paired-score-validation",
+      "decision": "not-worth-pr",
+      "reason": "Strong isolated validator gain but only about0.4ms additional CPU saving over existing indexed-loop proposal; enclosing constructor control drift exceeded gate."
+    },
+    {
+      "id": "aligned-word-hash",
+      "decision": "rejected",
+      "reason": "Full actual JMdict sections: checksum CPU+105%vsA/+128.93%vsC; constructor also regressed."
+    },
+    {
+      "id": "worker-ascii-image-paths",
+      "decision": "hosted-qualification-pending",
+      "component": {
+        "cpuMedianVsAPercent": -25.47,
+        "cpuMedianVsCPercent": -24.46,
+        "cpuSavingsPerCorpusMs": [
+          83.1,
+          77.94
+        ],
+        "wins": 6,
+        "pairs": 6,
+        "controlCpuPercent": 1.92,
+        "controlWallPercent": 2.28,
+        "rows": 6648310,
+        "groups": 170,
+        "mediaRows": 146725,
+        "pathBytes": 2391178
+      },
+      "candidate": "e90c4c04172b691985858609094887f9541541dd",
+      "researchCommit": "d36ee85feb1513af31f769175affa33b3696a307",
+      "runId": 46113567719,
+      "limits": "Qualified projection CPU component and complete untimed Node24 plus hosted Node22 correctness passes. Browser/nonregression/memory qualification remains queued. Prior incomplete/killed copy oracles remain separate and were not combined. Hosted maximum process RSS is diagnostic only.",
+      "completeCopyOracle": {
+        "passed": true,
+        "node": "24.22.3",
+        "groups": 170,
+        "rows": 6648310,
+        "mediaRows": 146725,
+        "routes": 170,
+        "manifestSha256": "3332a215bafffe09f0402fcabeb498bc0ce7cb45245de8e3ff78943eb122339f",
+        "timed": false
+      },
+      "localValidation": {
+        "unitTestsPassedAcrossOriginalAndSetupRepairs": 15159,
+        "suites": 669,
+        "inheritedSkips": 47,
+        "dryBuildTargets": 7,
+        "node": "24.22.3",
+        "singleCleanFullSuiteClaim": false
+      },
+      "supersededRunId": 46108777430,
+      "separateHostedCopyRunId": 46111017640,
+      "preservedEvidence": {
+        "projectionManifestSha256": "21d5317a244aea49b36aca7152206c7fce62afff1700f8f9b23dec6e55343a93",
+        "localValidationManifestSha256": "64fdf891512732056f734b396b3c1cad9d25d5f011f4ce49c9bc00b66139e154",
+        "completeCopyManifestSha256": "9fe1f1df8bb50de18925f9f2bc5409d9f13111887f6d5eaba694e64a86bf61fe",
+        "hostedCopyCommit": "61506e8b8b5da634f36efcaa8cd82b8006f8e1e4",
+        "hostedCopyBundleSha256": "00f089c752b132362f1debd0f4dfd0ee6f04f49f7f2e2fbfca8eee57f0a34ea2"
+      },
+      "hostedCopyRunStatus": {
+        "runId": 46111017640,
+        "jobId": 140874338644,
+        "status": "completed",
+        "conclusion": "success",
+        "observedAtUtc": "2026-11-28T06:52:41.707001+00:00",
+        "artifactAudit": "passed"
+      },
+      "hostedCompleteCopyOracle": {
+        "passed": true,
+        "node": "22.22.0",
+        "nodeExecutableDigestRecorded": false,
+        "runnerImage": "ubuntu-26.04/20261122.9",
+        "groups": 170,
+        "sourceBanks": 665,
+        "rows": 6648310,
+        "mediaRows": 146725,
+        "preparedIndexes": 170,
+        "preparedRoutes": 170,
+        "fallbackReads": 0,
+        "failures": 0,
+        "allStandaloneGroupReceiptsVerified": true,
+        "manifestSha256": "b6c209428c2e706cb5da75e9d14ae702b7ac8023c5d1fc1d58b642136c4ae6fd",
+        "artifactId": 15252561775,
+        "artifactSha256": "9d075f92fd94b7b5fc7af462bcef783aba342c85380afde349f32f493cba119f",
+        "independentAuditSha256": "2b4a43c5cca524f6a52b8c918a5244791282a51b82d14840de87c206e02ac78c",
+        "timed": false,
+        "memoryClaim": false
+      },
+      "hostedValidation": {
+        "runId": 46113567719,
+        "jobId": 140882253628,
+        "status": "completed",
+        "conclusion": "success",
+        "node": "22.22.0",
+        "singleCleanFullSuiteClaim": true,
+        "unitTestsPassed": 15159,
+        "unitFiles": 669,
+        "inheritedSkips": 47,
+        "scopedEslint": true,
+        "mainAndTestTypeScript": true,
+        "dryBuildTargets": 7,
+        "pinnedNativeRebuild": true,
+        "artifactId": 15253361929,
+        "artifactSha256": "9df4dd5b1b7ffc14277ed149e9c705084f365a0e4f8df6844506d7bfb705a5e5",
+        "evidenceCommit": "9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207",
+        "evidenceDirectory": "dev/perf/parser-path-hosted-validation-7c02",
+        "bundleSha256": "364e03b474968a9d3f51109b6f3cf6245ad26f68b5ab889b6e84fbcbd1cd06bc"
+      },
+      "browserQualification": {
+        "status": "queued",
+        "observedAtUtc": "2026-11-28T07:41:05Z",
+        "runId": 46113567719,
+        "head": "d36ee85feb1513af31f769175affa33b3696a307",
+        "jobs": {
+          "jmdict-BA": 140904689347,
+          "jmdict-AB": 140904689380,
+          "jitendex-AB": 140904689410,
+          "jitendex-BA": 140904689455,
+          "vndb-AB": 140904689385,
+          "vndb-BA": 140904689425
+        },
+        "startedBrowserCohorts": 0,
+        "allSixHostGatesRequired": true,
+        "wholeImportSpeedClaim": false,
+        "memoryClaim": false
+      }
+    },
+    {
+      "id": "reserved-contiguous-lookup-envelope",
+      "decision": "rejected-ownership-contract",
+      "reason": "42 semantic/known-alias unit cases pass, but later typed-view expando aliases are outside the receipt scan. Adoption can detach a still-observable buffer; revoking getter also needs an explicit consumed/future-read contract. No candidate timing or publication. Complexity not justified before a sound smaller ownership boundary."
+    },
+    {
+      "id": "zstd-count64",
+      "decision": "hosted-build-and-parity-passed-no-timing-duplicate",
+      "researchCommit": "b0ba810064fa0b923d7f636ebbf0394780c1bf96",
+      "runId": 46108552155,
+      "reason": "All31 canonical frames per P/A/B/C arm succeed and match exactly; named full200-function P/A mapping preserves operations but binaries differ by reference ordering. Independent same-mechanism concurrent branch already exists; no duplicate optimization PR.",
+      "concurrentDuplicate": {
+        "commit": "b150866ac6ce80e4b164f1b90ef2f03658791705",
+        "branch": "perf/zstd-count64-20261128-0f1f",
+        "scope": "Same wasm32 U64 match-count mechanism; independent research retained, avoid duplicate optimization PR."
+      },
+      "artifactId": 15249229369,
+      "productionIdentityManifestSha256": "880520254c200a56356ba27911b18d4cb705082eb75df8b76bde6d9c653a4358"
+    },
+    {
+      "id": "zstd-private-sequence64",
+      "decision": "rejected-fixed-corrected-corpus-screen",
+      "reason": "All correctness/provenance gates passed, but sole32-observation cohort failed the unchanged percentage, consistency and absolute CPU-saving gates against all three comparators. No replacement, repeat, product reproduction or optimization PR.",
+      "directOracle": {
+        "primitiveCases": 337,
+        "sequenceCases": 340,
+        "checkedCalls": 808798,
+        "status": "passed",
+        "productionSdk": false,
+        "timed": false,
+        "manifestSha256": "a8e0b2cc90030a592bd4675c0bbe15bafa4bdeab37f71ec6c69cd601c5aa7a14"
+      },
+      "fullSdkFirstFailure": {
+        "stage": "pre-build provenance",
+        "commandsRun": 0,
+        "reason": "All14987 pinned SDK original files matched but earlier emcc --version generated48 extra Python cache files; retained before narrow explicit-B launcher repair.",
+        "path": "zstd-sequence64/production-result"
+      },
+      "productionSymbolAttribution": {
+        "productionIndex": 106,
+        "rebuiltIndex": 109,
+        "emittedName": "ZSTD_encodeSequences",
+        "bodyBytes": 1705,
+        "bodySha256": "b0af8e5a4a12467ed9475cfee10255c349e5d779e70d10b5f9cf249af061f5aa"
+      },
+      "diagnosticFullSdk": {
+        "manifestSha256": "081868e799737d591655b3b255ab50c637c2c4fa64218d7a285d4371e696fdee",
+        "primitiveAndSequenceCases": 677,
+        "directCheckedCalls": 808798,
+        "capacityApiCases": 55,
+        "capacityApiCheckedCalls": 163772,
+        "canonicalSuccessfulFramesPerArm": 31,
+        "canonicalRows": 528299,
+        "canonicalUniqueRecords": 362032,
+        "canonicalInputBytes": 100300626,
+        "compressedBytesPerArm": 12253360,
+        "allFramesAndEnvelopesExact": true,
+        "allPostIdentitiesPassed": true,
+        "usesDiagnosticSymbolFlag": true,
+        "timed": false
+      },
+      "exactProductBuildReason": "Added --emit-symbol-map changes Binaryen intermediate name retention, so exact production-command A0/B0 modules without that flag must be frozen and qualified before timing.",
+      "exactProduct": {
+        "manifestSha256": "8c5fabfe74e3e782231d70bd0eb00388e9ecd82c60535fa34509be7de87f15bf",
+        "sourceManifestSha256": "912bb3c970e8099857d985370f17b7e666b3225b4d89a24bed13db38c846efb7",
+        "baselineLoaderAndWasmEqualProduction": true,
+        "candidateWasmSha256": "b17fa89fd8b1b32281f987cd33bbdc5da868ac5e030feb5c47070a0891ec38bc",
+        "candidateWasmBytes": 433771,
+        "candidateWasmGrowthBytes": 140,
+        "same31BlockFrameAndCapacityGates": "passed",
+        "timed": false
+      },
+      "geometryCorrection": {
+        "timingObservationsBeforeDiscovery": 0,
+        "oldCorpusBlockTargetBytes": 4194304,
+        "oldCorpusBlocks": 31,
+        "actualDatabaseBlockTargetBytes": 1048576,
+        "authority": "Frozen9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 dictionary-database.js constructor; standalone store default differs.",
+        "discoveryLead": "PR977 superseded its similarly packed4MiB fixture; independently verified source before any screen launch.",
+        "newBlockCount": 103,
+        "oldEvidenceDisposition": "Preserved codec correctness for those bytes; not relabeled as exact production block geometry. Prepared31-block screen was never executed.",
+        "next": "Corrected103-block qualification and sole fixed screen completed; old31-block screen remains unexecuted."
+      },
+      "correctedCorpus": {
+        "manifestSha256": "5ff31df0d8c069c0da248198a399879524d5bc4dff3ab48d96c5227afa578de0",
+        "groups": 12,
+        "blocks": 103,
+        "groupBlockCounts": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          7,
+          8,
+          8,
+          8,
+          8,
+          10
+        ],
+        "canonicalRecords": 362032,
+        "inputBytes": 100300626,
+        "blockTargetBytes": 1048576,
+        "dictionaryBytes": 16384,
+        "contextMapping": "Group-local block index modulo four; persistent contexts; fixed per-context logical destination-capacity high-water map.",
+        "fullHashPairCollisions": 0,
+        "qualificationManifestSha256": "b1c8a1db33ec9a724eb6f79350951eca287fb39f34bf0e94991be7d2cd39509e",
+        "successfulFramesPerArm": 103,
+        "compressedBytesPerArm": 12324804,
+        "allFramesEnvelopesAndDecodesExact": true
+      },
+      "componentScreen": {
+        "status": "completed",
+        "observations": 32,
+        "failedOrReplacedObservations": 0,
+        "sourceResultSha256": "12c5a6907079b795b23db9f28ca4c87e158e51b02951d9e69d05ca8a12ce1564",
+        "independentAuditSha256": "edc6c84cf89dd18d38d72e106c499d3094659c9d8d0894db0323e294d909d4b6",
+        "medianPairedCpuPercent": {
+          "B/P": -2.762,
+          "B/A": -1.525,
+          "B/C": -2.165
+        },
+        "medianCpuSavingsMs": {
+          "B/P": 4.848,
+          "B/A": 2.652,
+          "B/C": 3.7345
+        },
+        "cpuAndWallWins": {
+          "B/P": 5,
+          "B/A": 6,
+          "B/C": 5
+        },
+        "pairs": 8,
+        "gainGatePassed": false,
+        "controlsPassed": true,
+        "exactOraclesPassed": true,
+        "wholeImportClaim": false
+      },
+      "researchCommit": "aefc3ef11c00f4a87911b97757a7001fe75b2645",
+      "researchBranch": "research/zstd-sequence64-20261128-7c02",
+      "rejectedEvidenceArchiveSha256": "77f3de74192a095a91ca49f7ecb639758e2b4cf12284db1ef8ca83cd1c6890e7"
+    },
+    {
+      "id": "zstd-capacity-dispatch-sequence64",
+      "decision": "held-incomplete-zero-recorded-observation-screen",
+      "distinctMechanism": "One conservative upfront sequence-output bound admits an unchecked64 writer; nonadmitted calls use verbatim original32 before any output writes. Rejected checked64 arm is not rerun.",
+      "predicate": "n > 0 && capacity >= 8 && n <= (capacity - 8) / 12",
+      "preimplementationGate": "Exact integer sequence-weighted eligibility >=90% over all attempted encoder calls; no timing.",
+      "censusSourceManifestSha256": "25505b903774c5d4675e10e910fc2dd19707216e952212c872046ecd89b7bcef",
+      "independentCensusReviewSha256": "defefa239247b68b236bc045d5eb4625419b8ab7104a08388e6a7c8d6ad06a15",
+      "candidateImplemented": true,
+      "census": {
+        "calls": 772,
+        "aggregate": {
+          "calls": 772,
+          "eligibleCalls": 772,
+          "sequences": 2574603,
+          "eligibleSequences": 2574603,
+          "sequencesPerCall": 3334.9779792746112,
+          "callWeightedEligibilityPercent": 100,
+          "sequenceWeightedEligibilityPercent": 100
+        },
+        "eligibilityGate": {
+          "minimumPercent": 90,
+          "exactIntegerExpression": "100 * eligibleSequences >= 90 * sequences",
+          "passed": true
+        },
+        "all103FramesAndEnvelopesExact": true,
+        "manifestSha256": "682d84a6ca6f8416e405dbe78c6a6d33ce2d8ccf4d6079a9c1f1c44a5d25c8f3",
+        "resultSha256": "3ca95d4946fab1d5141691a3c9ee165fee19540335d693ce50a3334b1434f4b7",
+        "timed": false
+      },
+      "candidateSourceSha256": "6fbe3958c6f450e3e21eaf7f0c5efdf7761fa70a37ac72212fa4d1d9a6d17bd1",
+      "candidatePatchSha256": "1d45a59fb8fff037f199c5e676d4fa42d36da39339f24989b26530e3438a542c",
+      "timed": false,
+      "reviews": {
+        "independent-capacity-census-result-audit.json": "4ac1cf0d618f1e6e8a93f228c6700720dfe4a9007d012a9d506a25726b3cd024",
+        "independent-design-b-code-test-review.json": "1dc4fc36db1b3c58782c0604878788370b23185002e4179da80d8bacd132d3a6",
+        "independent-design-b-timer-draft-review.json": "059f1eaad697860761e0261a82552526e3c65c2f3d59d990f5ff025175bb88ed",
+        "design-b-publication-validation-scope.json": "559d58587f1fd72e33348867835d5b52e919e8a67b73a44f6decbd69e87ddb53"
+      },
+      "downstreamValidation": "If component qualifies, integrate frozen source/artifact into normal builder, reproduce exact candidate bytes, run fresh full units/all-target dry build/pinned native parser verification, and actual browser correctness for unchanged JMdict/Jitendex/VNDB routes. VNDB default is retained span/compressUsingDict level1 with empty dictionary; plain compress is disabled-experiment fallback.",
+      "sourceManifestSha256": "e75ec7c6773427690abcfcd29d38cdf726438618d8e956652d486f3f9ccd42aa",
+      "correctness": {
+        "firstAcquisitionPassed": true,
+        "manifestSha256": "60fe61a338106d9fbb529fc2cd5322887d19c5400f0db0b9e4cae9146750cd98",
+        "sequenceProbeManifestSha256": "2aa7062f94a4c4ca9db582fdcf8ffe5a87af1d28b99121882f61d6d67fc967fc",
+        "primitiveFixtures": 337,
+        "sequenceFixtures": 340,
+        "directChecks": 818274,
+        "purePredicateCases": 22,
+        "invalidDispatchCases": 2,
+        "testProbeRouting": {
+          "A": {
+            "0": 2,
+            "32": 409135,
+            "64": 0
+          },
+          "B": {
+            "0": 2,
+            "32": 373941,
+            "64": 35194
+          }
+        },
+        "routingMeaning": "Capacity/primitive/sequence test invocation distribution only; not actual corpus distribution.",
+        "apiCapacityCases": 55,
+        "apiCapacityChecks": 163772,
+        "canonicalFrames": 103,
+        "syntheticCases": 79,
+        "allFramesEnvelopesAndDecodesExact": true,
+        "postIdentity": "passed",
+        "candidateWasm": {
+          "bytes": 435074,
+          "sha256": "f2656e2f6d575847ca93d5a981e3c569986bbfc048809173beb3c77f5308d4e1"
+        },
+        "candidateWasmGrowthBytes": 1443,
+        "loaderIdentical": true,
+        "P_A0_C0ExplicitlyReused": true
+      },
+      "reason": "The sole frozen process returned exit137/Killed before any timing observation was saved. Exact phase and kill cause are unknown. Correctness/codegen pass but no performance or memory-regression conclusion; no retry, observation replacement, product integration or optimization PR.",
+      "componentScreen": {
+        "status": "incomplete",
+        "recordedObservations": 0,
+        "requiredObservations": 32,
+        "exitCode": 137,
+        "partialSha256": "dcfab744040a3f66619e20ef3757103aca96e1b9d819d97d6049042b2cd6dbf7",
+        "terminationSha256": "5b53396035ddc3f5b310407493be68689f4aca17432d0877c2d13042f9b6213c",
+        "executionFreezeSha256": "61d55a8e1007d4ed67205c1db2b96322d89d485c2778596f3245538f737bd9dc",
+        "sourceManifestSha256": "37ea35dd153f1e281d1eb8932fb20fcc640df3deb63b0bbda7e35551cd9a4e2c",
+        "timerSha256": "d189511250857f6d123b0a8eda3f183df08565d4d144430160d2a29d37ba6b02",
+        "independentAuditSha256": "95bbd4da9a42dcc9c5299e8ca418f1c252208812be7dc958aea4a36d5c0a4b1e",
+        "phase": "Unknown. Initial report was saved before setup; oracle/warmup progress was not persisted until first observation.",
+        "gatePassed": false,
+        "gateMeaning": "Incomplete acquisition cannot qualify; no gain/control statistics exist.",
+        "retryPerformed": false,
+        "speedClaim": false,
+        "memoryRegressionClaim": false
+      },
+      "codegen": {
+        "reviewSha256": "dc393a1c6d64a8a93970f8b3a422e7504055a534b4b1c3a7aafcd6ab8b0afc18",
+        "exactProductStructureSha256": "57beda8bbccba7137726b93156d498502942bf5418a71d288290ade49898275b",
+        "changedWasmFunctionIndex": 106,
+        "unchangedOtherFunctionBodies": 199,
+        "nonCodeSectionsIdentical": true,
+        "growthBytesEntirelyInChangedFunction": 1443,
+        "admittedLoopHasRoomChecksShortStoresOrClamps": false,
+        "extraLoopCalls": 0
+      },
+      "finalReportSha256": "e46aedde822d32f3cb40a3f1ebf02778744e291e2ae13a0d8c15e2b4e9f47623",
+      "integrationPlanSha256": "4c84e7344e38399683396a690794348e402b19d2a0385de2ab0dee26cf6dd6ed",
+      "integrationPlanOnly": true,
+      "performanceProcessInvoked": true,
+      "researchCommit": "9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207",
+      "researchBranch": "research/zstd-sequence64-20261128-7c02",
+      "preservedEvidence": {
+        "directory": "dev/perf/zstd-sequence64-capacity-dispatch-7c02",
+        "archiveSha256": "0432eb579ce8de8f6d17dd7d3fb264250e566bf15d383e451fb109b62ecb0ea2",
+        "archiveBytes": 1866839,
+        "logicalFiles": 199,
+        "uniqueBlobs": 130,
+        "indexSha256": "b3073a68708603e87dd9ba9b5b40b92497b7b6dc5d24c39ec91caaf45e3ee9fc",
+        "reconstructionReceiptSha256": "ae2ff476cc905e7fd5592c4a925126ff8f5c447ac853a92399f7c2f6afcbad0e",
+        "freshVerificationSha256": "a6a40809d7a6f41f28146c4ef0dbeed17a081f92b22c564412a1e707a6a0e8b2",
+        "nativeOrTimingRerun": false,
+        "remoteGitBlobIdentitiesVerified": true
+      }
+    }
+  ],
+  "infrastructure": {
+    "lastRecoveryUtc": "2026-11-28T07:35:34Z",
+    "workspaceCheckpointsVerified": true,
+    "temporaryDirectoryReset": true,
+    "localCompilerAndSourceZipCacheLost": true,
+    "hostedQueuedRuns": [
+      46113567719
+    ],
+    "noWorkModeUsed": true,
+    "queueObservedAtUtc": "2026-11-28T07:41:05Z",
+    "localBrowserPreflight": "Blocked before install/launch: one AF_UNIX socket constructor returned EPERM; no security workaround or retry",
+    "localSocketReceiptSha256": "bf74d9fb06de347b136d9e925c94a9885703ce4d31156eeac202efa697a0125d",
+    "thirdTemporaryDirectoryReset": {
+      "approximatelyAtUtc": "2026-11-28T07:30:00Z",
+      "workspacePreserved": true,
+      "temporarySdkValidationWorktreeAndCachesLost": true,
+      "designBArchiveAndIndexRecreatedByteExactly": true,
+      "hostedValidationBundleRecreatedByteExactly": true,
+      "recoveryEvidenceCommit": "9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207",
+      "noNativeExecutionOrTimingRepeated": true,
+      "wrapperSidecarsReplacedWithActualRecoveryTimestamps": [
+        "Design B external verification.json (old hash retained)",
+        "Hosted validation wrapper manifest.json (old hash retained)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "auditedAtUtc": "2026-11-28T07:42:06Z",
+  "scope": "Publication-link readiness only; no native execution, tests, benchmarks, workflow changes or remote mutations.",
+  "overview": {
+    "path": "study-overview.md",
+    "bytes": 9267,
+    "words": 1085,
+    "sha256": "c545b34cb8e5e7d38d9821bcc66156b29da5d24847af55ff37d0fbfa474ce12b",
+    "avenues": 18,
+    "links": 14,
+    "localRelativeLinks": 0
+  },
+  "publication": {
+    "commit": "9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207",
+    "tree": "f757c9838d372ae310342655750f794564abf229",
+    "sourceReceipt": "evidence-packages/design-b-and-validation-publication.json"
+  },
+  "independentlyFetchedImmutableEntryPoints": [
+    {
+      "key": "component",
+      "url": "https://github.com/ManabiIO/manabitan/blob/d36ee85feb1513af31f769175affa33b3696a307/dev/perf/path-qualification-7c02/component-evidence/README.md",
+      "gitBlobSha1": "a8d34fe0a05df0763ee322e53d40653595f7e8d2"
+    },
+    {
+      "key": "policy",
+      "url": "https://github.com/ManabiIO/manabitan/blob/d36ee85feb1513af31f769175affa33b3696a307/dev/perf/path-qualification-7c02/README.md",
+      "gitBlobSha1": "48b6ec29a385a54a59360373d2f64b146fccf690"
+    },
+    {
+      "key": "fullcopy",
+      "url": "https://github.com/ManabiIO/manabitan/blob/61506e8b8b5da634f36efcaa8cd82b8006f8e1e4/dev/perf/parser-path-hosted-copy-7c02/README.md",
+      "gitBlobSha1": "07cc475a0d815d9016111635dda54db3fccdbb17"
+    },
+    {
+      "key": "checked64",
+      "url": "https://github.com/ManabiIO/manabitan/blob/aefc3ef11c00f4a87911b97757a7001fe75b2645/dev/perf/zstd-sequence64-rejected-7c02/README.md",
+      "gitBlobSha1": "c03b54aaf34d94aa229a1e100210d90e6c6dfbb4"
+    },
+    {
+      "key": "designb",
+      "url": "https://github.com/ManabiIO/manabitan/blob/9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207/dev/perf/zstd-sequence64-capacity-dispatch-7c02/RESULT.md",
+      "gitBlobSha1": "8e505c1d9a3f9893f0705867caca8a2bdf03ce88"
+    },
+    {
+      "key": "validation",
+      "url": "https://github.com/ManabiIO/manabitan/blob/9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207/dev/perf/parser-path-hosted-validation-7c02/README.md",
+      "gitBlobSha1": "939768db228c36f4cd2f324ce30021c32a6e1f16"
+    },
+    {
+      "key": "ledger",
+      "url": "https://github.com/ManabiIO/manabitan/blob/9ae4c4d09ec4b9ae1755f55032f9de6dd2abd207/dev/perf/zstd-sequence64-capacity-dispatch-7c02/investigation-ledger-snapshot.json",
+      "gitBlobSha1": "cc3e5f5f13cafba6692653d35f8578052dbe2a2f"
+    },
+    {
+      "key": "localvalidation",
+      "url": "https://github.com/ManabiIO/manabitan/blob/d36ee85feb1513af31f769175affa33b3696a307/dev/perf/path-qualification-7c02/validation-evidence/README.md",
+      "gitBlobSha1": "9131c22932d42cfbd580293e258c87ba211a4547"
+    },
+    {
+      "key": "localfullcopy",
+      "url": "https://github.com/ManabiIO/manabitan/blob/d36ee85feb1513af31f769175affa33b3696a307/dev/perf/path-qualification-7c02/complete-copy-evidence/RESULT.md",
+      "gitBlobSha1": "52f41f57ff2bb72a84b86f6f64e291e3c5cece97"
+    },
+    {
+      "key": "checkedresult",
+      "url": "https://github.com/ManabiIO/manabitan/blob/aefc3ef11c00f4a87911b97757a7001fe75b2645/dev/perf/zstd-sequence64-rejected-7c02/RESULT.md",
+      "gitBlobSha1": "949f5ccd5658528cdcc49f53f0a3047b229b63eb"
+    }
+  ],
+  "evidenceScope": {
+    "earlyAvenues": "The published ledger is an explicitly identified summary, not a complete raw-data archive for every early experiment. The two lost early receipts remain limited historical rejection notes.",
+    "archivedLogicalPaths": "Detailed checked64 and Design B receipts are reached through the linked saved-evidence archives and their documented extraction procedures, not misleading repository-relative links.",
+    "browser": "Six-host browser correctness, memory and nonregression gates and any whole-import claim remain pending. This review does not refresh or infer browser job outcomes.",
+    "prDraft": "The separate pending PR draft and readiness receipt remain unchanged and are not represented as a published optimization proposal."
+  },
+  "unchangedDrafts": [
+    {
+      "path": "path-publication-review/PR_BODY_DRAFT.txt",
+      "sha256": "5426e0c26b44e98777606c66b7fcba59cc0590b0a3e62e003c4cc21949e5af8d"
+    },
+    {
+      "path": "path-publication-review/readiness-review.json",
+      "sha256": "b9dfa36ca4b306d1d9eb71326eb4e93269bd6e853dc6211188c0f293970d8395"
+    }
+  ],
+  "additionalUnpublishedEvidenceRequiredForOverview": [],
+  "followup": "Update the browser outcome and PR decision before describing the campaign as complete."
+}
