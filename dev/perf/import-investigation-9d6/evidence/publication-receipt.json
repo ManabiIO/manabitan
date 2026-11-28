@@ -1,0 +1,156 @@
+{
+  "complete": true,
+  "createdAt": "2026-11-28T05:09:04.585952+00:00",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "scope": "Saved completed component-study observations, failures, identities and correctness evidence. Complete-import qualification remains pending; no new measurement or performance claim.",
+  "inventorySha256": "31d20caac16acbcd0c435c36b709362a5c92ab6837bee5a2899754bbe6709de8",
+  "materializerSha256": "28819565443932ccb21f5ae668da2b82cbde20ce189d45653db07069dd94cbbb",
+  "sourceEntriesVerified": 955,
+  "totalArchiveBytes": 1157093,
+  "checks": [
+    "Every source size and SHA256 checked before inclusion",
+    "Each generated archive size and SHA256 equals the frozen in-memory estimate",
+    "Each saved archive reread and every regular member byte hash checked",
+    "Original inventory bytes unchanged",
+    "No original source receipt modified; no original ZIP, fixture, column capture, generated binary or SDK duplicated"
+  ],
+  "originalArtifacts": [
+    {
+      "artifactId": 15247978251,
+      "name": "import-metadata-cold-AB-9d6-46104605338-1",
+      "runId": 46104605338,
+      "runAttempt": 1,
+      "headSha": "8ce17bb15c5593889a528e91c753684b641a1afe",
+      "zipBytes": 163573,
+      "zipSha256": "635aafba91b7f2a58584d606bc3e1450a44d3e5ace2567c08987a07d84a958b1",
+      "verifiedMembers": 118
+    },
+    {
+      "artifactId": 15247608252,
+      "name": "import-metadata-cold-BA-9d6-46104605338-1",
+      "runId": 46104605338,
+      "runAttempt": 1,
+      "headSha": "8ce17bb15c5593889a528e91c753684b641a1afe",
+      "zipBytes": 162684,
+      "zipSha256": "d74891a62def38dcb8f7c9c63e167be1555bad387082c16169c34e0e115bf570",
+      "verifiedMembers": 116
+    },
+    {
+      "artifactId": 15247313223,
+      "name": "import-component-codec-BA-9d6-1",
+      "runId": 46103338197,
+      "runAttempt": 1,
+      "headSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+      "zipBytes": 484951,
+      "zipSha256": "a114993a0dd3f9cbc4e001a57168835ca8036e1a75597d8edad979eb7ebc62ea",
+      "verifiedMembers": 56
+    },
+    {
+      "artifactId": 15247901694,
+      "name": "import-component-codec-AB-9d6-1",
+      "runId": 46103338197,
+      "runAttempt": 1,
+      "headSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+      "zipBytes": 485041,
+      "zipSha256": "ef3dac09d8049e329fecf616f1a43cf4d5d93282b5fca4d8aeddf484c03474d3",
+      "verifiedMembers": 56
+    },
+    {
+      "artifactId": 15248416986,
+      "name": "codec-width-v2-AB-9d6-46104781415-1",
+      "runId": 46104781415,
+      "runAttempt": 1,
+      "headSha": "03aaef1730788c59ecdb5d8bb45f3c87fe90cb40",
+      "zipBytes": 486970,
+      "zipSha256": "5a927ef6115ba8cf5dcce90fdf43f46d185fcc0e5f5603fb0435f2790c7d9187",
+      "verifiedMembers": 59
+    },
+    {
+      "artifactId": 15248447120,
+      "name": "codec-width-v2-BA-9d6-46104781415-1",
+      "runId": 46104781415,
+      "runAttempt": 1,
+      "headSha": "03aaef1730788c59ecdb5d8bb45f3c87fe90cb40",
+      "zipBytes": 487072,
+      "zipSha256": "87411bd3734071d0857ec38ae5e3924921c65d4337f08a5fcfbe786818cbe9dc",
+      "verifiedMembers": 59
+    },
+    {
+      "artifactId": 15245899188,
+      "name": "jmdict-source-capture-9d6-46103338197-1",
+      "runId": 46103338197,
+      "runAttempt": 1,
+      "headSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+      "zipBytes": 16506090,
+      "zipSha256": "c3ab42f8714af1c21053e258c5caa7b8fa3c98a6f2eace8cf3c29f69da9f0ffe",
+      "verifiedMembers": 15
+    }
+  ],
+  "archives": [
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/metadata.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/metadata.tar.gz",
+      "bytes": 397037,
+      "sha256": "b98c79e927659f49dbe6216c485466d1ff247b70579b8aed64eac8b60f6a0aeb",
+      "gitBlobSha1": "af99ef98fbb515837841d543123fab23a44fa2ac",
+      "files": 411,
+      "uncompressedBytes": 2488110,
+      "disposition": "Fusion prototype rejected (~0.6 ms warmed corpus saving for 96 added lines). Narrow cache-loop extraction has two-host cold component gains, with a warm AB regression and mixed BA warm outcome; complete-import run 46107460816 is pending. Local controls are noisy. No complete-import gain is established."
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/codec-v1.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/codec-v1.tar.gz",
+      "bytes": 180016,
+      "sha256": "71fe990c46d0645e212c499230ad57a1a282c4e1b45c5f041dc03888a7af4fd2",
+      "gitBlobSha1": "a67bee1c0121685ac29da0011b7785fa1a7f6357",
+      "files": 135,
+      "uncompressedBytes": 1235283,
+      "disposition": "count8ctz/count8unroll closed: small warm wins do not establish consistent cold gains and binaries grow. Later source review identifies the same missing reversed-limit guard in both old unsigned-length specializations. Old timings are ineligible for production qualification. Native-context snapshot saving is negligible; early 4 MiB screens are explicitly nonproduction surrogates."
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/codec-v2-and-guarded-proof.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/codec-v2-and-guarded-proof.tar.gz",
+      "bytes": 247023,
+      "sha256": "19daffeaa033adef237c3a24d96998b3d0595510934137e0bfe2fb949470293d",
+      "gitBlobSha1": "a13c370240e1fd4a4b505d19f0c4efc5856073fc",
+      "files": 139,
+      "uncompressedBytes": 1382441,
+      "disposition": "Original count16 is invalid: direct-header regression probes expose 768 traps and one wrong result for reversed limits; its ~3% warm component results cannot qualify the corrected binary. CStream64 is rejected with 72 tight-destination status regressions. New guarded binary passes correctness and awaits prospective complete-import run 46109596112; no guarded performance claim."
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/direct-record-lengths.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/direct-record-lengths.tar.gz",
+      "bytes": 156246,
+      "sha256": "3a3491910191aaa6f136be73429cb0dd38d7fcb7520d93c3911b3468941a9d53",
+      "gitBlobSha1": "240fba6598924a86297fb9f94531860bef6bbd6a",
+      "files": 121,
+      "uncompressedBytes": 741261,
+      "disposition": "Rejected; runtime restored. 108 child observations show no consistent JMdict or VNDB gain against both source-identical controls. Jitendex warm saving is only about 0.24 ms. All measured child receipts are retained; no failed measured child was discarded."
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/inflater-local.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/inflater-local.tar.gz",
+      "bytes": 165454,
+      "sha256": "b7312cb75461cfa89afee5522e5074e93a82302b2be4e1efea34799db0a7522c",
+      "gitBlobSha1": "958b2639f65c6fe764f993eaaa37c52dfd382f0b",
+      "files": 144,
+      "uncompressedBytes": 1370256,
+      "disposition": "Local 36-child cohort is inconclusive: cold candidate medians lose against both baselines, warmed medians are small/noisy, and identical-code controls drift substantially. All losses and tails retained. Correctness/reach are promising but hosted replication run 46106878218 is still pending; no PR or complete-import gain."
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/shared-identity-and-dispositions.tar.gz",
+      "localPath": "/workspace/scratch/9d6dcf05cf8f/metadata-experiments/builds/perf/evidence-inventory-9d6/archives/shared-identity-and-dispositions.tar.gz",
+      "bytes": 11317,
+      "sha256": "8e2c89d852d87b19ce985a33493ad5663dbec738eba5d121a6d051c999b91749",
+      "gitBlobSha1": "16e416df4f1fb2333db26c310cee05281c0c96d1",
+      "files": 5,
+      "uncompressedBytes": 38188,
+      "disposition": "Input and provenance only; no timing conclusion. One shared immutable source-capture identity supports the component studies. Cross-study dispositions retain rejected and duplicate directions."
+    }
+  ],
+  "pendingRuns": {
+    "metadataWholeImport": 46107460816,
+    "guardedCodecWholeImport": 46109596112,
+    "inflaterComponentReplication": 46106878218
+  }
+}
