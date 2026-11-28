@@ -67,7 +67,10 @@ def run_observation(case_id, label, root, diagnostic=False, verify_only=False):
     assert data['flags'] == {} and data['validateGlossaryTypes'] is True
     assert data['perPassRows'] == 20000 and data['rows'] == 20000 * len(data['repetitions'])
     for key in ['elapsedMs', 'cpuMs', 'inflateMs', 'inflateCpuMs', 'parseMs', 'lookupMs', 'nativeParseMs', 'rows', 'indexBytes']:
-        assert data[key] == sum(item[key] for item in data['repetitions']), key
+        sequential_total = 0.0
+        for item in data['repetitions']:
+            sequential_total += item[key]
+        assert data[key] == sequential_total, key
     for item in data['repetitions'] + data['warmups']:
         assert item['rows'] == 20000 and item['fusedAttempts'] == 1 and item['fusedFallbacks'] == 0
         assert item['glossaryReuseCount'] == item['recentContentDedupHitCount'] == item['crcReusedBytes'] == 0

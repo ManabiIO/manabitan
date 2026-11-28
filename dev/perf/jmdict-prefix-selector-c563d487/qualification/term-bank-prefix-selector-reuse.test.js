@@ -60,9 +60,11 @@ async function parse(banks, experiments = {}, chunks = [], corruptLastSignature 
     };
     const preloadedSource = await inflateCompressedTermBankSourcesWasm(sources, options, true);
     await parseTermBankWithWasmColumnChunks(
-        new Uint8Array(0), 3,
+        new Uint8Array(0),
+        3,
         (chunk) => { chunks.push(copyWasmBackedColumnChunk(chunk)); },
-        2048, {...options, preloadedSource},
+        2048,
+        {...options, preloadedSource},
     );
     const profile = consumeLastTermBankWasmParseProfile();
     if (profile === null) { throw new Error('Missing public parser profile'); }

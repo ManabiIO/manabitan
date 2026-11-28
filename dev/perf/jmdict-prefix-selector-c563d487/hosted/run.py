@@ -42,7 +42,12 @@ def run_observation(label, root, diagnostic=False):
     assert data['node'] == runtime['node'] and data['runnerSha256'] == tooling['hashes']['screen.mjs']
     assert data['diagnosticFieldsSha256'] == tooling['hashes']['diagnostic-fields.json']
     assert data['wasmSha256'] == (sha(args.output / 'diagnostic.wasm') if diagnostic else selected['wasmSha256'])
-    assert data['fusedFallbacks'] == 0 and data['fusedAttempts'] == len(data['groupReceipts'])
+    expected_fused_attempts = 0
+    for group in data['groupReceipts']:
+        expected = 1 if len(group['banks']) > 1 else 0
+        assert group['fusedAttempts'] == expected and group['fusedFallbacks'] == 0, group['group']
+        expected_fused_attempts += expected
+    assert data['fusedFallbacks'] == 0 and data['fusedAttempts'] == expected_fused_attempts
     assert data['warmupPasses'] == (0 if diagnostic else 2)
     return data
 save()

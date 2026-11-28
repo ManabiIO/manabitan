@@ -1,0 +1,322 @@
+{
+  "scope": "Untimed read-only receipt arithmetic/route assertion replay; no parser execution, new observations or changed original bytes",
+  "route": [
+    {
+      "dictionary": "jitendex",
+      "rawSha256": "b28ffa36b05e82d0a85c506c495fcb4d2a0813e34a464507241987e177fe1b8c",
+      "groups": 22,
+      "fusedAttempts": 22,
+      "passes": true,
+      "rejectedPerturbations": [
+        "aggregate",
+        "group-attempt",
+        "group-fallback"
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "rawSha256": "2fda72e0f7b3625e1a5aa210f08786d51b8b536f73672c1d90e4595f06720118",
+      "groups": 167,
+      "fusedAttempts": 166,
+      "passes": true,
+      "rejectedPerturbations": [
+        "aggregate",
+        "group-attempt",
+        "group-fallback"
+      ]
+    }
+  ],
+  "sequentialSum": [
+    {
+      "child": "baseline-verification",
+      "rawSha256": "5ddedf319767859270c9a05e6e46d3a54f5ce68c3ee0a55900adfbeac4b2ed84",
+      "metrics": [
+        {
+          "metric": "elapsedMs",
+          "reported": 42.65422,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "cpuMs",
+          "reported": 92.718,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateMs",
+          "reported": 5.514622000000003,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateCpuMs",
+          "reported": 8.913,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "parseMs",
+          "reported": 37.123645,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "lookupMs",
+          "reported": 1.1919680000000028,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "nativeParseMs",
+          "reported": 31,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "rows",
+          "reported": 20000,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "indexBytes",
+          "reported": 516480,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        }
+      ]
+    },
+    {
+      "child": "diagnostic",
+      "rawSha256": "629d7f176e59de5bbb8fd1dfa8073c7d51d219145af54f82a44f8528813784e7",
+      "metrics": [
+        {
+          "metric": "elapsedMs",
+          "reported": 43.410924,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "cpuMs",
+          "reported": 104.214,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateMs",
+          "reported": 5.035851999999998,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateCpuMs",
+          "reported": 7.671,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "parseMs",
+          "reported": 38.355622,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "lookupMs",
+          "reported": 1.2864689999999968,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "nativeParseMs",
+          "reported": 32,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "rows",
+          "reported": 20000,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "indexBytes",
+          "reported": 516480,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        }
+      ]
+    },
+    {
+      "child": "pair-0-A",
+      "rawSha256": "f90aaaea230a8b3cfd503d69d4111e3c4f40fb0edb66169ecf7b2c092bb2bafb",
+      "metrics": [
+        {
+          "metric": "elapsedMs",
+          "reported": 187.41467700000007,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "cpuMs",
+          "reported": 193.11800000000002,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateMs",
+          "reported": 11.308126999999985,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "inflateCpuMs",
+          "reported": 13.525,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "parseMs",
+          "reported": 176.00523000000015,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "lookupMs",
+          "reported": 7.390495999999985,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "nativeParseMs",
+          "reported": 161,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "rows",
+          "reported": 320000,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        },
+        {
+          "metric": "indexBytes",
+          "reported": 8263680,
+          "passesExactSequentialSum": true,
+          "rejectedPerturbations": [
+            "one-ULP aggregate",
+            "last repetition +1",
+            "numeric-string repetition"
+          ]
+        }
+      ]
+    }
+  ],
+  "aggregateTolerance": 0,
+  "sourceSyntaxParsed": true,
+  "inputTypes": "No coercion; Python numeric-string addition remains rejected."
+}

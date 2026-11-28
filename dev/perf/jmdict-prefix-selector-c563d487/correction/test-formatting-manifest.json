@@ -1,0 +1,48 @@
+{
+  "scope": "Separate regression-file formatting correction only; original cohort and product source remain frozen",
+  "originalToolingCommit": "268296d7",
+  "originalHostedLintReportSha256": "1f504d204d141762def0f5a0659963a47b6bc62ed69c0ac04745caa8416c85f7",
+  "patchSha256": "dfdaa86f24bec58c4252f26fbd9cd41cee2072d5cde7f1dd4fe7642e66fb2892",
+  "patchAppliesToExactOriginals": true,
+  "files": {
+    "term-bank-prefix-selector-fixtures.js": {
+      "originalSha256": "e9ba39733ee4008812434056087641bf338e33b9dfcd758aaeca0d751e93d36a",
+      "correctedSha256": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b",
+      "originalBytes": 20654,
+      "correctedBytes": 21049
+    },
+    "term-bank-prefix-selector-reuse.test.js": {
+      "originalSha256": "1f3b9c64f75bf1f22fe9ecdb44da111edf22e7ab30d9074fd2965f79cfb7e0eb",
+      "correctedSha256": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a",
+      "originalBytes": 13827,
+      "correctedBytes": 13843
+    }
+  },
+  "changes": "52 demonstrated ESLint formatting/doc-layout findings only; no runtime expressions, test expectations, fixture values or type annotations changed",
+  "validation": {
+    "originalTargetedMessagesExactlyMatchHosted": true,
+    "originalTargetedErrors": 52,
+    "correctedTargetedErrors": 0,
+    "correctedTargetedWarnings": 0,
+    "nonPositionalJavaScriptAstEqual": true,
+    "completeFixtureExportsEqual": true,
+    "node": "v22.22.0",
+    "fullScopedEslintExecuted": true,
+    "typecheckExecuted": true,
+    "productionTestsExecuted": true,
+    "benchmarksExecuted": false,
+    "originalLocalExit137RemainsFailure": true,
+    "frozenFilesUnchanged": true,
+    "fullScopedEslintPassed": true,
+    "targetedStrictTypecheckExecuted": true,
+    "targetedStrictTypecheckPassed": true,
+    "typecheckScope": "Original strict test compilerOptions; two corrected entries, ambient types and transitive dependencies. Full CI lane not executed.",
+    "productionTestsScope": "Only corrected term-bank-prefix-selector-reuse.test.js against exact recovered candidate WASM b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+    "productionTestResult": "passed"
+  },
+  "pending": [
+    "Full CI test type lane (all tests/ext)",
+    "Remaining six focused suites and full native/corpus/browser gates in separate corrected hosted acquisition"
+  ],
+  "localPreflightReport": "reports/local-corrected-preflight.json"
+}

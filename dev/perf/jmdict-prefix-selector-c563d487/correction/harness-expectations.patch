@@ -1,0 +1,30 @@
+--- a/dev/perf/jmdict-prefix-selector-c563d487/hosted/run.py
++++ b/dev/perf/jmdict-prefix-selector-c563d487/hosted/run.py
+@@ -42,7 +42,12 @@
+     assert data['node'] == runtime['node'] and data['runnerSha256'] == tooling['hashes']['screen.mjs']
+     assert data['diagnosticFieldsSha256'] == tooling['hashes']['diagnostic-fields.json']
+     assert data['wasmSha256'] == (sha(args.output / 'diagnostic.wasm') if diagnostic else selected['wasmSha256'])
+-    assert data['fusedFallbacks'] == 0 and data['fusedAttempts'] == len(data['groupReceipts'])
++    expected_fused_attempts = 0
++    for group in data['groupReceipts']:
++        expected = 1 if len(group['banks']) > 1 else 0
++        assert group['fusedAttempts'] == expected and group['fusedFallbacks'] == 0, group['group']
++        expected_fused_attempts += expected
++    assert data['fusedFallbacks'] == 0 and data['fusedAttempts'] == expected_fused_attempts
+     assert data['warmupPasses'] == (0 if diagnostic else 2)
+     return data
+ save()
+--- a/dev/perf/jmdict-prefix-selector-c563d487/hosted/negative-run.py
++++ b/dev/perf/jmdict-prefix-selector-c563d487/hosted/negative-run.py
+@@ -67,7 +67,10 @@
+     assert data['flags'] == {} and data['validateGlossaryTypes'] is True
+     assert data['perPassRows'] == 20000 and data['rows'] == 20000 * len(data['repetitions'])
+     for key in ['elapsedMs', 'cpuMs', 'inflateMs', 'inflateCpuMs', 'parseMs', 'lookupMs', 'nativeParseMs', 'rows', 'indexBytes']:
+-        assert data[key] == sum(item[key] for item in data['repetitions']), key
++        sequential_total = 0.0
++        for item in data['repetitions']:
++            sequential_total += item[key]
++        assert data[key] == sequential_total, key
+     for item in data['repetitions'] + data['warmups']:
+         assert item['rows'] == 20000 and item['fusedAttempts'] == 1 and item['fusedFallbacks'] == 0
+         assert item['glossaryReuseCount'] == item['recentContentDedupHitCount'] == item['crcReusedBytes'] == 0

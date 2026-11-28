@@ -1,8 +1,8 @@
-name: JMdict prefix selector fixed component screen c563d487
+name: JMdict prefix selector corrected component screen c563d487
 
 on:
   push:
-    branches: [perf/jmdict-prefix-selector-screen-20261128-c563d487]
+    branches: [perf/jmdict-prefix-selector-corrected-20261128-c563d487]
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
+        dictionary: [jmdict, vndb]
     env:
       DICTIONARY: ${{ matrix.dictionary }}
       BASE_ROOT: ${{ github.workspace }}/../prefix-selector-baseline
@@ -86,7 +86,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: jmdict-prefix-selector-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          name: jmdict-prefix-selector-corrected-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
           path: builds/jmdict-prefix-selector
           if-no-files-found: warn
           retention-days: 14
@@ -146,7 +146,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: jmdict-prefix-selector-negative-${{ github.run_attempt }}
+          name: jmdict-prefix-selector-corrected-negative-${{ github.run_attempt }}
           path: builds/jmdict-prefix-negative
           if-no-files-found: warn
           retention-days: 14

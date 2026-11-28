@@ -1,0 +1,26 @@
+{
+  "complete": true,
+  "scope": "Non-positional JavaScript ASTs and complete exported fixture data are equal; no product code executed",
+  "node": "v22.22.0",
+  "acorn": "8.19.0",
+  "files": [
+    {
+      "name": "term-bank-prefix-selector-fixtures.js",
+      "originalSha256": "e9ba39733ee4008812434056087641bf338e33b9dfcd758aaeca0d751e93d36a",
+      "correctedSha256": "181c7b9ac922735b67ac962d019298f43320514d7e6bfacef6eddccdd5556f7b",
+      "astSha256": "f561bd15a62861f46b01870d345acd10eef1982edbb94d0e4db8781351b4ec43"
+    },
+    {
+      "name": "term-bank-prefix-selector-reuse.test.js",
+      "originalSha256": "1f3b9c64f75bf1f22fe9ecdb44da111edf22e7ab30d9074fd2965f79cfb7e0eb",
+      "correctedSha256": "22d047c5c9903869f2536bef5f3b173644aff2a37ee1b79766c031877934eb6a",
+      "astSha256": "77bd581918072794086657bd4040286c867bad67e942db620b0ef9d060e11200"
+    }
+  ],
+  "exportHashes": {
+    "validCases": "a7ef57fe458d75eb45bc30d01b80dc4d9e08b59fc15387115f6385ab6b9e36c1",
+    "malformedCases": "552457846f9627b5ebcc87b197191b84874acb286a08621f322d0eb47a0f60e7",
+    "fallbackCases": "c271fe7a649a6d57770d0edf064d8c96014889dc9b18dc2ce693ae498afc53b2",
+    "selectorDiagnostics": "6c4396288111b4b50380cc414aaa0e4d4548b2ef1cad23af82aabd4ac438897d"
+  }
+}

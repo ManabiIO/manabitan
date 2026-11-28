@@ -1,0 +1,76 @@
+{
+  "scope": "Separate corrected regression preflight; all original product/cohort files remain unchanged",
+  "gates": {
+    "full-scoped-eslint": {
+      "status": "passed",
+      "receiptSha256": "4375dca996db5d276f21fcc56aaf29877bd05cbdd648a689db9f0295ebaa4016",
+      "logSha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "command": [
+        "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=256",
+        "/workspace/scratch/c563d487c718/manabitan/node_modules/eslint/bin/eslint.js",
+        "test/term-bank-prefix-selector-fixtures.js",
+        "test/term-bank-prefix-selector-reuse.test.js",
+        "--format",
+        "json",
+        "--output-file",
+        "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-regression-correction/reports/full-scoped-eslint.json"
+      ],
+      "scopeLimit": null
+    },
+    "targeted-types": {
+      "status": "passed",
+      "receiptSha256": "794f85b9215d596580915edc71127efedc214886407eeb55d16ad0f10ea500e6",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": [
+        "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=384",
+        "/workspace/scratch/c563d487c718/manabitan/node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.prefix-selector.json"
+      ],
+      "scopeLimit": "Same strict test compilerOptions; two corrected JS entry files, ambient types and transitive dependencies. Full CI test type lane remains separate."
+    },
+    "focused-regression": {
+      "status": "passed",
+      "receiptSha256": "1406974d9af2bc944bba821e9b7a3d1942d95b09c69ef2e3796b89f364474e9e",
+      "logSha256": "65a17262a0dbf5deb9c7bcb2d9c2c412d987eebaa1b0f3e0f1c90b079d874641",
+      "command": [
+        "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=256",
+        "/workspace/scratch/c563d487c718/manabitan/node_modules/vitest/vitest.mjs",
+        "run",
+        "test/term-bank-prefix-selector-reuse.test.js",
+        "--maxWorkers=1"
+      ],
+      "scopeLimit": null
+    }
+  },
+  "baselineGitStatus": "clean",
+  "originalFailuresPreserved": true,
+  "frozenHashesVerified": {
+    "experiments/jmdict-prefix-selector/term-bank-parser.c": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+    "experiments/jmdict-prefix-selector/candidate.patch": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117",
+    "experiments/jmdict-prefix-selector/qualification/term-bank-prefix-selector-fixtures.js": "e9ba39733ee4008812434056087641bf338e33b9dfcd758aaeca0d751e93d36a",
+    "experiments/jmdict-prefix-selector/qualification/term-bank-prefix-selector-reuse.test.js": "1f3b9c64f75bf1f22fe9ecdb44da111edf22e7ab30d9074fd2965f79cfb7e0eb",
+    "manabitan/ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "manabitan/ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "scopedEslintCounts": [
+    {
+      "name": "term-bank-prefix-selector-fixtures.js",
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "name": "term-bank-prefix-selector-reuse.test.js",
+      "errors": 0,
+      "warnings": 0
+    }
+  ],
+  "pending": [
+    "Full CI test type lane (all tests/ext)",
+    "Remaining six focused suites and full native/corpus/browser gates in separate corrected hosted acquisition"
+  ]
+}
