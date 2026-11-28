@@ -1,4 +1,4 @@
-import {mkdtemp, mkdir, readFile, symlink, writeFile} from 'node:fs/promises';
+import {mkdtemp, mkdir, readFile, symlink, unlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {expect, test} from 'vitest';
@@ -19,7 +19,7 @@ async function fixture() {
         sourceDigest: identity.digest,
         sourceFileCount: identity.count,
         toolchain: {compilerVersion: '21.1.8', linkerVersion: '21.1.8'},
-        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
+        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm', 'term-record-fields.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
     for (const {name} of manifest.targets) { await writeFile(join(artifacts, name), module); }
     const saveManifest = () => writeFile(join(artifacts, 'manifest.json'), JSON.stringify(manifest));
     await saveManifest();
@@ -77,6 +77,23 @@ test('corruption of the second module preserves both previous output modules', a
     for (const {name} of value.manifest.targets) { expect(await readFile(join(value.output, name), 'utf8')).toBe('previous output'); }
 });
 
+/* eslint-disable @stylistic/semi */
+test.each(['missing', 'corrupt'])('a %s record-field module preserves every previous generated asset', async (mode) => {
+    const value = await fixture()
+    for (const {name} of value.manifest.targets) {
+        await writeFile(join(value.output, name), 'previous output')
+    }
+    const fields = join(value.artifacts, 'term-record-fields.wasm')
+    await (mode === 'missing' ? unlink(fields) : writeFile(fields, 'corrupted field module'))
+    expect(() => copyDictionaryWasm(value.output, value.root)).toThrow(
+        mode === 'missing' ? /ENOENT/u : /Invalid dictionary WASM artifact/u,
+    )
+    for (const {name} of value.manifest.targets) {
+        expect(await readFile(join(value.output, name), 'utf8')).toBe('previous output')
+    }
+})
+/* eslint-enable @stylistic/semi */
+
 test('matching a digest cannot make malformed WASM acceptable', async () => {
     const value = await fixture();
     const corrupt = Buffer.from('not a WASM module');
@@ -98,7 +115,7 @@ test.each(['format', 'duplicate', 'path'])('rejects invalid manifest %s', async 
 test('checked-in artifacts match the current native inputs and are valid modules', () => {
     const manifest = getDictionaryWasmManifest();
     const modules = loadDictionaryWasm();
-    expect(modules.size).toBe(2);
+    expect([...modules.keys()].sort()).toEqual(['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm', 'term-record-fields.wasm']);
     for (const target of manifest.targets) {
         const bytes = /** @type {Buffer} */ (modules.get(target.name));
         expect(dictionaryWasmHash(bytes)).toBe(target.sha256);

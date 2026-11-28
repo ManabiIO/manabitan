@@ -34,6 +34,7 @@ const requiredNativeAssets = new Set([
     'lib/zstd.wasm',
     'lib/term-content-canonical-scan-v1.wasm',
     'js/dictionary/zstd-trainer.wasm',
+    'lib/term-record-fields.wasm',
 ]);
 const requiredLicenseAssets = new Set(['js/dictionary/zstd-trainer.LICENSE']);
 const manifestUtil = new ManifestUtil();
