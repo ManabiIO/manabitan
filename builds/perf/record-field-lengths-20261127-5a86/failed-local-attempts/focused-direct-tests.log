@@ -1,0 +1,34 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/5a86d1e7822a/record-field-lengths
+
+(node:22) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Worker forks emitted error.
+ ❯ EventEmitter.onTaskError ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3526:21
+ ❯ EventEmitter.emit node:events:519:28
+ ❯ ChildProcess.emitUnexpectedExit ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3092:22
+ ❯ ChildProcess.emit node:events:519:28
+ ❯ Process.ChildProcess._handle.onexit node:internal/child_process:293:12
+
+Caused by: Error: Worker exited unexpectedly
+ ❯ ChildProcess.emitUnexpectedExit ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3090:33
+ ❯ ChildProcess.emit node:events:519:28
+ ❯ Process.ChildProcess._handle.onexit node:internal/child_process:293:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files   (1)
+      Tests  7 passed (17)
+     Errors  1 error
+   Start at  22:03:57
+   Duration  4.08s (transform 227ms, setup 21ms, import 273ms, tests 0ms, environment 0ms)
+

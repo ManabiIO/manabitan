@@ -1,0 +1,1724 @@
+{
+  "complete": true,
+  "roots": {
+    "A": "/workspace/scratch/5a86d1e7822a/manabitan",
+    "B": "/workspace/scratch/5a86d1e7822a/record-field-lengths"
+  },
+  "pairs": 6,
+  "repeats": 25,
+  "observations": [
+    {
+      "pair": 0,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 451.39928699999996,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 334.089075,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 239.31598599999995,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 12.169239000000061,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126185472,
+          "heapTotal": 18300928,
+          "heapUsed": 7941384,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123332,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 0,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 301.01322899999997,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 262.10013899999996,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 245.57527400000004,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 12.063791000000037,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 127217664,
+          "heapTotal": 18300928,
+          "heapUsed": 7940040,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 124580,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 1,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 356.173563,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 299.94989899999996,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 251.12116200000003,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 13.64401399999997,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 130039808,
+          "heapTotal": 18300928,
+          "heapUsed": 7940160,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 127328,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 1,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 273.684417,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 248.33425000000005,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 240.93260799999996,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 14.274937000000023,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126656512,
+          "heapTotal": 18038784,
+          "heapUsed": 7943456,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123976,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 2,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 287.73826,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 381.248558,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 395.837581,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 12.152319999999918,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 124497920,
+          "heapTotal": 18038784,
+          "heapUsed": 7941824,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123160,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 2,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 313.957074,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 267.116127,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 244.13343699999996,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 14.091264000000024,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 127504384,
+          "heapTotal": 18038784,
+          "heapUsed": 7943216,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 124792,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 3,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 343.902693,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 257.475805,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 575.406093,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 15.280218999999988,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126394368,
+          "heapTotal": 18038784,
+          "heapUsed": 7943168,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 123776,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 3,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 279.40386,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 244.688537,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 238.692408,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 13.877909999999929,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126640128,
+          "heapTotal": 18038784,
+          "heapUsed": 7941712,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123972,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 4,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 285.31947499999995,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 239.20071499999995,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 356.9158699999999,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 29.7263539999999,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126672896,
+          "heapTotal": 18038784,
+          "heapUsed": 7941792,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123792,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 4,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 316.90017,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 295.0832029999999,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 248.61109399999998,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 12.552740000000085,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 126844928,
+          "heapTotal": 18038784,
+          "heapUsed": 7940104,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 124196,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 5,
+      "arm": "B",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/record-field-lengths",
+        "sourceHash": "2fa6297d446182fdc5855dc50cc723e81d4f023a53d3878c71cbc4cb26edffca",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 282.019236,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 258.039527,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 245.375763,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 12.234843999999953,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 125640704,
+          "heapTotal": 17776640,
+          "heapUsed": 7940136,
+          "external": 24880438,
+          "arrayBuffers": 21260464
+        },
+        "lifetimeMaxRssKiB": 123532,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    },
+    {
+      "pair": 5,
+      "arm": "A",
+      "result": {
+        "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+        "sourceHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+        "snapshotHash": "9acd2db08a64899e1f3aa89b143c3c44abd57d2652145247a3f4decc5a947a31",
+        "provenance": {
+          "dictionary": "jmdict",
+          "rows": 528299,
+          "groups": [
+            {
+              "rows": 70000,
+              "uniqueCount": 51455,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 56932,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 48824,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 46841,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 43366,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 44744,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 70000,
+              "uniqueCount": 45285,
+              "runs": [
+                30000,
+                30000,
+                10000
+              ]
+            },
+            {
+              "rows": 38299,
+              "uniqueCount": 28332,
+              "runs": [
+                38299
+              ]
+            }
+          ],
+          "filesPerGroup": 7,
+          "options": {
+            "singleChunk": true,
+            "emitTermByteLists": false,
+            "computeContentHashes": true,
+            "emitContentSlab": true,
+            "emitTokenBinaryContent": true,
+            "mediaHintFastScan": false,
+            "validateGlossaryTypes": true,
+            "prepareLookupIndexes": true
+          },
+          "sourceRoot": "/workspace/scratch/5a86d1e7822a/manabitan",
+          "sourceHash": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+          "sourceRecordHash": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+          "lockHash": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "archiveHash": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "wasmHash": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+          "inputDigest": "4293e2a21288d0dbd160ef7b00942da460d7ec78343d9c90f0ed2cdbb1974288",
+          "node": "v22.22.0",
+          "boundary": "Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser."
+        },
+        "repeats": 25,
+        "warmups": [
+          {
+            "elapsedMs": 319.35263599999996,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          },
+          {
+            "elapsedMs": 257.161521,
+            "consumed": 362868,
+            "outputBytes": 106138100,
+            "digest": null
+          }
+        ],
+        "observation": {
+          "elapsedMs": 247.04066699999998,
+          "consumed": 362868,
+          "outputBytes": 106138100,
+          "digest": null
+        },
+        "verification": {
+          "elapsedMs": 13.980244000000084,
+          "consumed": 362868,
+          "outputBytes": 4245524,
+          "digest": "cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac"
+        },
+        "node": "v22.22.0",
+        "afterVerificationMemory": {
+          "rss": 125919232,
+          "heapTotal": 18038784,
+          "heapUsed": 7941768,
+          "external": 24879757,
+          "arrayBuffers": 21259783
+        },
+        "lifetimeMaxRssKiB": 123552,
+        "runnerHash": "be9e48454baf3db4792c54756ed3d960fcf0214642263860712eeb2362c35b12"
+      }
+    }
+  ],
+  "initialOrder": "AB",
+  "scope": "Record-field encoding component; 25 fixed full-corpus replays per observation; two excluded warmups; fresh Node22 process for each arm; byte verification outside time.",
+  "summary": {
+    "pairedMedianPercent": 0.97077586296761,
+    "equalWorkTotalPercent": 5.322966985162925,
+    "fasterPairs": 3,
+    "baselineMeanFullCorpusMs": 11.458234133333331,
+    "candidateMeanFullCorpusMs": 12.068152153333333
+  }
+}

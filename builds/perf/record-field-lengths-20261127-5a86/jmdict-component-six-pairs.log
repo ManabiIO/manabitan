@@ -1,0 +1,15 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+1/6 A: 239.316ms
+1/6 B: 245.575ms
+2/6 B: 251.121ms
+2/6 A: 240.933ms
+3/6 A: 395.838ms
+3/6 B: 244.133ms
+4/6 B: 575.406ms
+4/6 A: 238.692ms
+5/6 A: 356.916ms
+5/6 B: 248.611ms
+6/6 B: 245.376ms
+6/6 A: 247.041ms
+{"pairedMedianPercent":0.97077586296761,"equalWorkTotalPercent":5.322966985162925,"fasterPairs":3,"baselineMeanFullCorpusMs":11.458234133333331,"candidateMeanFullCorpusMs":12.068152153333333}

@@ -778,3 +778,39 @@ stopped at scoped ESLint because the new direct throw needed an explicit
 `@throws` declaration. No browser observation started. The follow-up adds that
 declaration without changing runtime logic and preserves early validation logs
 as artifacts. That failed attempt remains separate from the corrected cohort.
+
+### Completed record-field component screen
+
+The corrected runtime at `ab116fa90777cd64b067d4858318923f0f4e3ee7` was then
+screened against the same frozen baseline with Node 22.22.0. Six fresh-process
+pairs alternated AB/BA; each arm had two excluded warmup traversals of the fixed
+25-replay workload, an explicit GC, then 25 timed complete-corpus field encodes.
+This boundary excludes parsing, compression, workers, OPFS, and browser import.
+
+The paired median change was **+0.971% slower**, with 3/6 faster pairs and
+**+5.323% slower** equal-work total. Mean time per complete 528,299-row encode was
+11.458 ms for baseline and 12.068 ms for candidate. Large observations in both
+arms remain included. This component screen provides no positive gain and does
+not justify Jitendex/VNDB expansion or a runtime PR.
+
+All 4,245,524 emitted field bytes matched in every pair, with SHA-256
+`cdaa6c6e3d7e9f2bfc51397c2d8dc22b5febc99ca90e85bfccdf223470d63bac`.
+[The paired receipt](../../builds/perf/record-field-lengths-20261127-5a86/jmdict-component-six-pairs.json),
+all child logs, the runnable source, original snapshot provenance, successful
+focused tests, and failed local attempts are retained together. The snapshot's
+eight fixed parser groups and 22 field segments are a component workload; they
+are not a claim about the production browser's group boundaries.
+
+For reproduction, copy the archived `field-replay.mjs.txt` to an `.mjs` file
+inside a checkout with the locked dependencies, then use:
+
+```sh
+node field-replay.mjs prepare jmdict BASELINE_ROOT FIXTURE_CACHE jmdict.snapshot
+node field-replay.mjs pairs BASELINE_ROOT CANDIDATE_ROOT jmdict.snapshot result.json 6 25
+```
+
+The separately registered hosted full-import cohort remains frozen at
+`ab116fa90777cd64b067d4858318923f0f4e3ee7` in
+[run 46102823858](https://github.com/ManabiIO/manabitan/actions/runs/46102823858).
+It was still queued when this component evidence was recorded. This evidence-only
+follow-up changes no runtime bytes and does not reacquire that cohort.

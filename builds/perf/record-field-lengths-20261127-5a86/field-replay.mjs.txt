@@ -1,0 +1,214 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {readFile, writeFile, mkdir} from 'node:fs/promises'
+import {spawnSync} from 'node:child_process'
+import {resolve, join, dirname} from 'node:path'
+import {pathToFileURL, fileURLToPath} from 'node:url'
+import {serialize, deserialize} from 'node:v8'
+import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'
+
+// A diagnostic field-encoder replay, not a database or import benchmark.
+// Preparation parses every pinned row and copies native scores/references.
+// Component groups match import-lookup-screen.js, not the browser planner.
+// Deterministic content offsets replace compression/OPFS and remain outside time.
+const [mode, ...args] = process.argv.slice(2)
+const script = fileURLToPath(import.meta.url)
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const moduleAt = (root, file) => import(pathToFileURL(join(root, file)).href)
+const recordFile = 'ext/js/dictionary/term-record-opfs-store.js'
+const parserFile = 'ext/js/dictionary/term-bank-wasm-parser.js'
+const lockFile = 'test/perf/dictionaries.lock.json'
+const wasmFile = 'ext/lib/term-bank-parser.wasm'
+
+if (mode === 'prepare') {
+    const [dictionary, sourcePath, cachePath, snapshotPath] = args
+    const root = resolve(sourcePath)
+    const lockBytes = await readFile(join(root, lockFile))
+    const spec = JSON.parse(lockBytes).dictionaries[dictionary]
+    assert(spec)
+    const archive = await readFile(join(cachePath, spec.cacheFile))
+    assert.equal(hash(archive), spec.sha256)
+    assert.equal(archive.byteLength, spec.sizeBytes)
+    const parser = await moduleAt(root, parserFile)
+    const prep = await moduleAt(root, 'ext/js/dictionary/term-lookup-index-preparation.js')
+    const wasm = await readFile(join(root, wasmFile))
+    parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+    const filesPerGroup = {jmdict: 7, jitendex: 10, vndb: 7}[dictionary]
+    assert(filesPerGroup)
+    const reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)))
+    const groups = []
+    const segments = []
+    let rows = 0
+    let contentBase = 2 ** 40
+    const options = {
+        singleChunk: true,
+        emitTermByteLists: false,
+        computeContentHashes: true,
+        emitContentSlab: true,
+        emitTokenBinaryContent: true,
+        mediaHintFastScan: spec.mediaFiles > 0,
+        validateGlossaryTypes: true,
+        prepareLookupIndexes: true,
+    }
+    try {
+        const files = (await reader.getEntries()).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename))
+            .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+        for (let start = 0; start < files.length; start += filesPerGroup) {
+            const inputs = []
+            for (const file of files.slice(start, start + filesPerGroup)) {
+                inputs.push(await file.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}))
+            }
+            await parser.parseTermBankWithWasmColumnChunks(inputs, 3, (chunk) => {
+                const plan = chunk.contentDedupPlan
+                assert(plan && chunk.contentUniqueIndexList && chunk.contentMetaList)
+                assert(chunk.scoreList instanceof Int32Array)
+                const offsets = new Float64Array(plan.uniqueCount)
+                const lengths = new Uint32Array(plan.uniqueCount)
+                for (let index = 0; index < plan.uniqueCount; ++index) {
+                    const meta = (chunk.contentMetaByUniqueIndex ? index : plan.uniqueRowIndexes[index]) * 4
+                    offsets[index] = contentBase + chunk.contentMetaList[meta]
+                    lengths[index] = chunk.contentMetaList[meta + 1]
+                }
+                const indexes = chunk.preparedLookupIndexes ?? prep.prepareTermLookupIndexesFromPreinternedPlan(chunk, null)?.indexes
+                assert(indexes && prep.hasCompletePreparedTermLookupIndexes(indexes, chunk.rowCount))
+                // Same run limit as the production record append method: a
+                // complete single prepared index can retain its whole group.
+                const runRows = indexes.has(`0:${chunk.rowCount}`) ? chunk.rowCount : prep.MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS
+                assert(runRows > 0)
+                const group = {rows: chunk.rowCount, uniqueCount: plan.uniqueCount, runs: []}
+                for (let row = 0; row < chunk.rowCount; row += runRows) {
+                    const count = Math.min(runRows, chunk.rowCount - row)
+                    const uniqueIndexList = chunk.contentUniqueIndexList.slice(row, row + count)
+                    let contentOffsetBase = Infinity
+                    let maximumOffset = -Infinity
+                    for (const unique of uniqueIndexList) {
+                        assert(unique < offsets.length)
+                        contentOffsetBase = Math.min(contentOffsetBase, offsets[unique])
+                        maximumOffset = Math.max(maximumOffset, offsets[unique])
+                    }
+                    // Deterministic spans cannot trigger additional delta splits.
+                    assert(maximumOffset - contentOffsetBase < 0xffffffff)
+                    segments.push({rowCount: count, scoreList: chunk.scoreList.slice(row, row + count), uniqueIndexList, offsets, lengths, contentOffsetBase})
+                    group.runs.push(count)
+                }
+                groups.push(group)
+                rows += chunk.rowCount
+                contentBase += chunk.contentBytesLength ?? chunk.contentBytesBuffer.byteLength
+            }, 2048, options)
+            process.stderr.write(`${dictionary}: ${rows}/${spec.termRows}\n`)
+        }
+    } finally { await reader.close() }
+    assert.equal(rows, spec.termRows)
+    const inputDigest = createHash('sha256')
+    for (const segment of segments) {
+        for (const column of [segment.scoreList, segment.uniqueIndexList, segment.offsets, segment.lengths]) {
+            inputDigest.update(new Uint8Array(column.buffer, column.byteOffset, column.byteLength))
+        }
+    }
+    const provenance = {
+        dictionary, rows, groups, filesPerGroup, options,
+        sourceRoot: root,
+        sourceHash: hash(await readFile(join(root, parserFile))),
+        sourceRecordHash: hash(await readFile(join(root, recordFile))),
+        lockHash: hash(lockBytes), archiveHash: spec.sha256, wasmHash: hash(wasm),
+        inputDigest: inputDigest.digest('hex'), node: process.version,
+        boundary: 'Actual full native parser corpus; fixed screen groups; production run-row limit; synthetic absolute content offsets. No persisted dedup, compression, OPFS, worker IPC or browser.',
+    }
+    const bytes = serialize({provenance, segments})
+    await writeFile(snapshotPath, bytes)
+    await writeFile(`${snapshotPath}.json`, JSON.stringify({...provenance, snapshotHash: hash(bytes), snapshotBytes: bytes.byteLength}, null, 2))
+    console.log(JSON.stringify({rows, groups: groups.length, segments: segments.length, snapshotBytes: bytes.byteLength}))
+} else if (mode === 'child') {
+    const [sourcePath, snapshotPath, repeatsText] = args
+    const sourceRoot = resolve(sourcePath)
+    const repeats = Number(repeatsText)
+    assert(Number.isInteger(repeats) && repeats > 0)
+    const sourceHash = hash(await readFile(join(sourceRoot, recordFile)))
+    const snapshotBytes = await readFile(snapshotPath)
+    const {provenance, segments} = deserialize(snapshotBytes)
+    const records = await moduleAt(sourceRoot, recordFile)
+    const chunks = segments.map((segment) => records.createArtifactTermRecordChunkWithResolvedContent(
+        {rowCount: segment.rowCount, scoreList: segment.scoreList},
+        segment.uniqueIndexList, segment.offsets, segment.lengths,
+    ))
+    const store = new records.TermRecordOpfsStore()
+    const emptyOffsets = new Float64Array(0)
+    const emptyLengths = new Uint32Array(0)
+    function execute(count, verify = false) {
+        const digest = verify ? createHash('sha256') : null
+        let consumed = 0
+        let outputBytes = 0
+        const start = performance.now()
+        for (let iteration = 0; iteration < count; ++iteration) {
+            for (let index = 0; index < chunks.length; ++index) {
+                const output = store._encodeArtifactRecordFields(chunks[index], emptyOffsets, emptyLengths, segments[index].contentOffsetBase)
+                consumed ^= output.byteLength ^ output[output.byteLength - 1]
+                outputBytes += output.byteLength
+                if (digest !== null) { digest.update(output) }
+            }
+        }
+        return {elapsedMs: performance.now() - start, consumed, outputBytes, digest: digest?.digest('hex') ?? null}
+    }
+    const warmups = [execute(repeats), execute(repeats)]
+    globalThis.gc?.()
+    const observation = execute(repeats)
+    const verification = execute(1, true)
+    assert.equal(hash(await readFile(join(sourceRoot, recordFile))), sourceHash)
+    console.log(JSON.stringify({sourceRoot, sourceHash, snapshotHash: hash(snapshotBytes), provenance,
+        repeats, warmups, observation, verification, node: process.version,
+        afterVerificationMemory: process.memoryUsage(), lifetimeMaxRssKiB: process.resourceUsage().maxRSS,
+        runnerHash: hash(await readFile(script))}))
+} else if (mode === 'pairs') {
+    const [parentPath, candidatePath, snapshotPath, outputPath, pairsText = '6', repeatsText = '25'] = args
+    const roots = {A: resolve(parentPath), B: resolve(candidatePath)}
+    const pairs = Number(pairsText)
+    const observations = []
+    await mkdir(dirname(outputPath), {recursive: true})
+    const receipt = {complete: false, roots, pairs, repeats: Number(repeatsText), observations,
+        initialOrder: 'AB', scope: 'Record-field encoding component; 25 fixed full-corpus replays per observation; two excluded warmups; fresh Node22 process for each arm; byte verification outside time.'}
+    const save = () => writeFile(outputPath, JSON.stringify(receipt, null, 2))
+    try {
+        for (let pair = 0; pair < pairs; ++pair) {
+            for (const arm of pair % 2 === 0 ? 'AB' : 'BA') {
+                const child = spawnSync(process.execPath, ['--expose-gc', script, 'child', roots[arm], snapshotPath, repeatsText], {encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: 180000})
+                await writeFile(`${outputPath}.${pair + 1}-${arm}.log`, `${child.stdout}\n${child.stderr}`)
+                assert.equal(child.status, 0, `Child failed ${pair + 1}-${arm}: ${child.error ?? child.stderr}`)
+                const result = JSON.parse(child.stdout)
+                assert.equal(result.sourceRoot, roots[arm])
+                observations.push({pair, arm, result})
+                await save()
+                console.log(`${pair + 1}/${pairs} ${arm}: ${result.observation.elapsedMs.toFixed(3)}ms`)
+            }
+        }
+        const ratios = []
+        for (let pair = 0; pair < pairs; ++pair) {
+            const a = observations.find((row) => row.pair === pair && row.arm === 'A').result
+            const b = observations.find((row) => row.pair === pair && row.arm === 'B').result
+            assert.equal(a.snapshotHash, b.snapshotHash)
+            assert.equal(a.verification.digest, b.verification.digest)
+            assert.equal(a.verification.outputBytes, b.verification.outputBytes)
+            ratios.push(b.observation.elapsedMs / a.observation.elapsedMs)
+        }
+        for (const arm of 'AB') {
+            const values = observations.filter((row) => row.arm === arm).map((row) => row.result)
+            for (const row of values) {
+                for (const key of ['sourceHash', 'snapshotHash', 'runnerHash', 'node']) { assert.equal(row[key], values[0][key]) }
+            }
+        }
+        ratios.sort((a, b) => a - b)
+        const total = (arm) => observations.filter((row) => row.arm === arm).reduce((sum, row) => sum + row.result.observation.elapsedMs, 0)
+        receipt.summary = {pairedMedianPercent: 100 * ((ratios[Math.floor((pairs - 1) / 2)] + ratios[Math.floor(pairs / 2)]) / 2 - 1),
+            equalWorkTotalPercent: 100 * (total('B') / total('A') - 1), fasterPairs: ratios.filter((ratio) => ratio < 1).length,
+            baselineMeanFullCorpusMs: total('A') / pairs / Number(repeatsText),
+            candidateMeanFullCorpusMs: total('B') / pairs / Number(repeatsText)}
+        receipt.complete = true
+        await save()
+        console.log(JSON.stringify(receipt.summary))
+    } catch (error) {
+        receipt.error = String(error)
+        await save()
+        throw error
+    }
+} else {
+    throw new Error('Use prepare, child, or pairs')
+}

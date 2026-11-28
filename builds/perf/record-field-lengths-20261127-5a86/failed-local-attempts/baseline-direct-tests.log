@@ -1,0 +1,29 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/5a86d1e7822a/manabitan
+
+(node:22) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/term-record-direct-field-columns.test.js (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-record-direct-field-columns.test.js [ test/term-record-direct-field-columns.test.js ]
+Error: ENOSPC: no space left on device, write
+ ❯ test/term-record-direct-field-columns.test.js:19:1
+     17| /* eslint @stylistic/semi: ["error", "never"] */
+     18|
+     19| import {afterEach, describe, expect, test, vi} from 'vitest'
+       | ^
+     20| import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOp…
+     21|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  22:04:34
+   Duration  332ms (transform 31ms, setup 22ms, import 0ms, tests 0ms, environment 0ms)
+

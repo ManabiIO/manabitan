@@ -1,0 +1,11 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict: 70000/528299
+jmdict: 140000/528299
+jmdict: 210000/528299
+jmdict: 280000/528299
+jmdict: 350000/528299
+jmdict: 420000/528299
+jmdict: 490000/528299
+jmdict: 528299/528299
+{"rows":528299,"groups":8,"segments":22,"snapshotBytes":8619522}
