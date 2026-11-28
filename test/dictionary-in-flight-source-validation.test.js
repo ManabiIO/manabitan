@@ -63,23 +63,17 @@ describe('in-flight term source validation', () => {
     test('preserves unordered and repeated-offset fallback semantics', () => {
         const database = new DictionaryDatabase();
         const source = sourceSpans();
-        const release = database._registerInFlightTermContentSources(
-            new Float64Array([300, 100, 200]), source.lengths, 'raw', [], source,
-        );
+        const release = database._registerInFlightTermContentSources(new Float64Array([300, 100, 200]), source.lengths, 'raw', [], source);
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toEqual({buffer: source.buffer, offset: 2, length: 2});
         release();
-        expect(() => database._registerInFlightTermContentSources(
-            new Float64Array([100, 200, 100]), source.lengths, 'raw', [], source,
-        )).toThrow('Duplicate in-flight term content storage reference');
+        expect(() => database._registerInFlightTermContentSources(new Float64Array([100, 200, 100]), source.lengths, 'raw', [], source)).toThrow('Duplicate in-flight term content storage reference');
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toBeUndefined();
     });
 
-    test.each([-1, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rejects invalid persisted offset %s without registering a partial batch', (offset) => {
+    test.each([-1, 0.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rejects invalid persisted offset %s without registering a partial batch', (offset) => {
         const database = new DictionaryDatabase();
         const source = sourceSpans();
-        expect(() => database._registerInFlightTermContentSources(
-            new Float64Array([100, 200, offset]), source.lengths, 'raw', [], source,
-        )).toThrow('Invalid in-flight term content source at index 2');
+        expect(() => database._registerInFlightTermContentSources(new Float64Array([100, 200, offset]), source.lengths, 'raw', [], source)).toThrow('Invalid in-flight term content source at index 2');
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toBeUndefined();
     });
 
@@ -92,9 +86,7 @@ describe('in-flight term source validation', () => {
         if (kind === 'length-mismatch') { persistedLengths[2] = 1; }
         if (kind === 'short-offsets') { source.offsets = source.offsets.subarray(0, 2); }
         if (kind === 'short-lengths') { source.lengths = source.lengths.subarray(0, 2); }
-        expect(() => database._registerInFlightTermContentSources(
-            new Float64Array([100, 200, 300]), persistedLengths, 'raw', [], source,
-        )).toThrow('Invalid in-flight term content source at index 2');
+        expect(() => database._registerInFlightTermContentSources(new Float64Array([100, 200, 300]), persistedLengths, 'raw', [], source)).toThrow('Invalid in-flight term content source at index 2');
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toBeUndefined();
     });
 
@@ -102,9 +94,7 @@ describe('in-flight term source validation', () => {
         const database = new DictionaryDatabase();
         const source = sourceSpans();
         source.lengths[0] = 0;
-        const release = database._registerInFlightTermContentSources(
-            new Float64Array([100, 100, 200]), source.lengths, 'raw', [], source,
-        );
+        const release = database._registerInFlightTermContentSources(new Float64Array([100, 100, 200]), source.lengths, 'raw', [], source);
         expect(database._findInFlightTermContentSource(100, 0, 'raw')).toEqual({buffer: source.buffer, offset: 0, length: 0});
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toEqual({buffer: source.buffer, offset: 2, length: 2});
         release();
@@ -125,9 +115,7 @@ describe('in-flight term source validation', () => {
                 Object.defineProperty(persistedLengths, 'length', {value: 3});
             }
         }
-        expect(() => database._registerInFlightTermContentSources(
-            new Float64Array([100, 200, 300]), persistedLengths, 'raw', [], source,
-        )).toThrow('Invalid in-flight term content source at index 2');
+        expect(() => database._registerInFlightTermContentSources(new Float64Array([100, 200, 300]), persistedLengths, 'raw', [], source)).toThrow('Invalid in-flight term content source at index 2');
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toBeUndefined();
     });
 
@@ -136,9 +124,15 @@ describe('in-flight term source validation', () => {
         const source = sourceSpans();
         const persistedOffsets = new Float64Array([100, 200, 300]);
         const persistedLengths = new Uint32Array([2, 2, 2]);
-        const view = kind.startsWith('persisted-offset') ? persistedOffsets :
-            kind.startsWith('persisted-length') ? persistedLengths :
-            kind.startsWith('source-offset') ? source.offsets : source.lengths;
+        /** @type {Float64Array|Uint32Array} */
+        let view = source.lengths;
+        if (kind.startsWith('persisted-offset')) {
+            view = persistedOffsets;
+        } else if (kind.startsWith('persisted-length')) {
+            view = persistedLengths;
+        } else if (kind.startsWith('source-offset')) {
+            view = source.offsets;
+        }
         const property = kind.endsWith('-buffer') ? 'buffer' : 'length';
         Object.defineProperty(view, property, {get: () => { throw new Error('Unexpected metadata getter'); }});
         const release = database._registerInFlightTermContentSources(persistedOffsets, persistedLengths, 'raw', [], source);
@@ -153,9 +147,7 @@ describe('in-flight term source validation', () => {
         }
         const database = new DictionaryDatabase();
         const source = sourceSpans();
-        const release = database._registerInFlightTermContentSources(
-            new Offsets([100, 200, 300]), source.lengths, 'raw', [], source,
-        );
+        const release = database._registerInFlightTermContentSources(new Offsets([100, 200, 300]), source.lengths, 'raw', [], source);
         expect(database._findInFlightTermContentSource(200, 2, 'raw')).toEqual({buffer: source.buffer, offset: 2, length: 2});
         release();
     });

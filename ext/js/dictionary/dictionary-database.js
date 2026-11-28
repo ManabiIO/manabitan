@@ -540,9 +540,11 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
  * @returns {value is T}
  */
 function hasPlainTypedArrayProperties(value, prototype) {
-    return ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
+    return (
+        ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
         !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'length') &&
-        !Object.hasOwn(value, 'byteLength');
+        !Object.hasOwn(value, 'byteLength')
+    );
 }
 
 export class DictionaryDatabase {
