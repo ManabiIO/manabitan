@@ -95,6 +95,7 @@ jobs:
           BENCH_RUNNER_SHA256="$(sha256sum test/qualification/hoshidicts-jmdict/run-glossary.mjs | cut -d' ' -f1)"
           export BENCH_PACKAGE_SHA256 BENCH_RUNNER_SHA256
           mkdir -p "${BENCH_EXTENSION_DIR}"
+          mkdir -p "${BENCH_RUN_DIR}"
           unzip -q "${package}" -d "${BENCH_EXTENSION_DIR}"
           sha256sum \
             test/qualification/hoshidicts-jmdict/run-glossary.mjs \
