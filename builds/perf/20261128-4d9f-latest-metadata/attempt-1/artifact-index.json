@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "runId": 46140311762,
+  "toolingCommit": "92467bf27b8ed0661085d65eaad8f134dc2f04cc",
+  "runtimeA": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "runtimeB": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
+  "timingEligible": false,
+  "workflowStatusAloneAuthoritative": false,
+  "workflowLimitation": "Original implicit Linux shell allowed tee to mask producer failures. Original raw receipts were independently verified and the unchanged comparator re-executed strictly without rerunning imports.",
+  "artifacts": [
+    {
+      "id": 15261647327,
+      "name": "latest-metadata-corpus-vndb-46140311762",
+      "bytes": 110151,
+      "sha256": "e49c76b552e40e78e405cb63204a7b5797be93e93c2b58dafc6791f1647b238d"
+    },
+    {
+      "id": 15261002925,
+      "name": "latest-metadata-corpus-jitendex-46140311762",
+      "bytes": 77746,
+      "sha256": "14095036a5fbf3e0a984c193b9ca950b47ce000271ff452ec56959df5d19d633"
+    },
+    {
+      "id": 15260863324,
+      "name": "latest-metadata-corpus-jmdict-46140311762",
+      "bytes": 128612,
+      "sha256": "a56da68461df59c342ae6c95a2723e58d0f697a22fe6662afca37dbffebf7756"
+    }
+  ],
+  "files": [
+    {
+      "path": "jmdict.zip",
+      "gitBlob": "9102912bf59d100f41bab9c8a1be594eab543619",
+      "bytes": 128612,
+      "sha256": "a56da68461df59c342ae6c95a2723e58d0f697a22fe6662afca37dbffebf7756"
+    },
+    {
+      "path": "jitendex.zip",
+      "gitBlob": "6f039e092d4970091437b8d0a4103b71cbfcf16f",
+      "bytes": 77746,
+      "sha256": "14095036a5fbf3e0a984c193b9ca950b47ce000271ff452ec56959df5d19d633"
+    },
+    {
+      "path": "vndb.zip",
+      "gitBlob": "1ccf976339bc8fcd1a6ca0afd92542e770a0c77e",
+      "bytes": 110151,
+      "sha256": "e49c76b552e40e78e405cb63204a7b5797be93e93c2b58dafc6791f1647b238d"
+    },
+    {
+      "path": "strict-readonly-audit.py",
+      "gitBlob": "05e4cdaeddda33b5e649b8747e5d8d7a1a600fae",
+      "bytes": 8181,
+      "sha256": "f9e4a1916ba354046222aeb36cbfcf7863160d8c79c46463db96f778c57986dc"
+    },
+    {
+      "path": "strict-readonly-audit.json",
+      "gitBlob": "5ccaaec98fa2fde02708c85d424089d3cb0d78ad",
+      "bytes": 3424,
+      "sha256": "b058561a2a20bba5bb516db2f2185b88e30081e045f9015d3ff877f3b63b6f0d"
+    },
+    {
+      "path": "strict-jmdict-comparison.json",
+      "gitBlob": "a4b089f348b4b0d6ca3a80170dd52e2fb826ca09",
+      "bytes": 27864,
+      "sha256": "3f1a884db3b87d1d633b1a0b4aa94418964cfbd728d049ce7bfeff66d96da2b4"
+    },
+    {
+      "path": "negative-pipeline.log",
+      "gitBlob": "932d4b2e281c4c442ce4d06cf55d07de7f624ed5",
+      "bytes": 507,
+      "sha256": "9293b6011a7840f3bd4bcc1a13bc67281e6ae81033b418af672c815733a335ab"
+    }
+  ],
+  "outcomes": {
+    "jmdict": {
+      "rawArmExits": [
+        0,
+        0
+      ],
+      "strictReadOnlyAudit": "passed",
+      "rows": 528299,
+      "groups": 12,
+      "retainedBackingBytesAvoided": 4194304,
+      "outputOracle": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    "jitendex": {
+      "rawArmExits": [
+        1,
+        1
+      ],
+      "failureGroup": 4,
+      "kind": "Real symmetric scoped-harness failure: #982 now requires an open SQLite legacy-root state for a cold persisted exact comparison"
+    },
+    "vndb": {
+      "rawArmExits": [
+        1,
+        1
+      ],
+      "failureGroup": 11,
+      "kind": "Same real symmetric scoped-harness boundary failure"
+    }
+  },
+  "strictAudit": {
+    "importReexecution": false,
+    "sourceHashesPerArm": 42,
+    "helperContractsPerHost": 26,
+    "originalImportNode": "v22.22.0",
+    "readOnlyAuditNode": "v24.22.3",
+    "negativeInvalidReceiptPipelineExit": 1
+  },
+  "futureWorkflowCorrection": {
+    "gitBlob": "b16dcbeeb7cca92d24c1475af1cd380aadba6178",
+    "sha256": "78cdcf4c749b2e2b219959e1979828cb4a91eb98815f4bebb8dcea55b26e5f9b",
+    "sourceReviewed": true,
+    "newCorpusAcquisitionExecuted": false
+  }
+}

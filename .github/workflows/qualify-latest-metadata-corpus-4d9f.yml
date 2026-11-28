@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   corpus:
     name: Latest metadata ${{ matrix.corpus }}
@@ -55,6 +59,15 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22.22.0
+      - name: Verify pipeline failures remain failures
+        run: |
+          mkdir -p "$META_REPORTS"
+          set +e
+          python3 -c 'raise SystemExit(37)' 2>&1 | tee "$META_REPORTS/pipeline-negative-control.log"
+          meta_negative_exit=$?
+          set -e
+          test "$meta_negative_exit" -eq 37
+          python3 -c 'import json, pathlib; pathlib.Path("reports/pipeline-negative-control.json").write_text(json.dumps({"expectedExit": 37, "actualExit": 37, "passed": True}) + "\n")'
       - name: Verify sources, helper bytes, oracle members and locked archive
         env:
           META_TOOLING_COMMIT: ${{ github.sha }}
