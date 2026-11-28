@@ -1,0 +1,212 @@
+{
+  "candidateCommit": "037240588ec022765b6501ab2f6441ab79f16fd2",
+  "candidateParent": "56be875d6635c6bcbb44d41ea9420b709cc06869",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceIdentities": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "35e15eac60be8d71d73afb7850b44dca9a2ade1184c72e934754ebff10913f38",
+      "gitBlob": "77679e717248fb44b8cba0702f32c287cea1cd3b"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+      "sha256": "5850fe2fc86d815d8f9d87f72ddac77e0447d638082e4462a6a0e8d286aabd72",
+      "gitBlob": "6ffd257a56cd5e802089ec6a92bc55d8be9c0ebc"
+    },
+    "test/term-bank-experiments.test.js": {
+      "sha256": "41a714d6deaf327c96a5c1d8806c2c195a2b719c31f52c262f07f69be24312ca",
+      "gitBlob": "702ceafc05ad899cd4a4d194128ae8d7c04674f9"
+    }
+  },
+  "focusedTests": {
+    "passed": 436,
+    "files": 5,
+    "log": "early-native-focused-r3.log",
+    "retainedEarlierFailures": [
+      "early-native-focused-r1.log",
+      "early-native-focused-r2.log"
+    ],
+    "earlierFailureClassification": "New test expected an optional lookup timing to exist for an empty expression; correction then wrongly assumed an empty expression declines fused columns. Both expectations corrected; no product failure or source change between these runs."
+  },
+  "lint": {
+    "status": "resource-blocked",
+    "exitCode": 134,
+    "heapLimitMiB": 512,
+    "log": "early-native-lint-r1.log",
+    "reason": "V8 heap exhausted in repository ESLint setup; no larger local retry."
+  },
+  "typesAndFullValidation": {
+    "status": "not-run-locally",
+    "reason": "Root requested hosted gates and no local heavyweight TypeScript/full-unit validation."
+  },
+  "corpusOracle": {
+    "jmdict": {
+      "receipt": "early-native-oracle-jmdict.json",
+      "receiptSha256": "0849d1867ad703e41af5f787d9de1fb65e3214132fc943767942bf1335e623ef",
+      "complete": true,
+      "interruptions": [],
+      "rows": 528299,
+      "groups": 8,
+      "native": {
+        "calls": 0,
+        "spans": 0,
+        "fallbacks": 0
+      },
+      "fused": {
+        "fusedParseAttempts": 8,
+        "fusedParseFallbacks": 0
+      },
+      "totals": {
+        "rows": 528299,
+        "projectedRows": 0,
+        "fallbackRows": 0,
+        "paths": 0,
+        "diagnosticBytes": 0,
+        "diagnosticSpanBytes": 0,
+        "transmittedMediaRowObjects": 0,
+        "transmittedPerRowPathArrays": 0,
+        "transmittedProjectedRowColumnBytes": 0
+      },
+      "comparisons": [
+        {
+          "groupsEqual": true,
+          "allUnchangedColumnsEqual": true,
+          "exactNormalizedMediaEqual": true,
+          "nativeProjectionCountsEqual": true,
+          "ownershipFlagsEqual": true,
+          "transferCanariesPassed": true
+        }
+      ],
+      "groupConfiguration": {
+        "hardwareConcurrency": 2,
+        "deviceMemory": 8
+      }
+    },
+    "jitendex": {
+      "receipt": "early-native-oracle-jitendex.json",
+      "receiptSha256": "6a536233f7ecaefb28800d81b467aad73b3d93536ac42d9fb57ea9868f40ad77",
+      "complete": true,
+      "interruptions": [],
+      "rows": 436555,
+      "groups": 22,
+      "native": {
+        "calls": 339,
+        "spans": 312,
+        "fallbacks": 27
+      },
+      "fused": {
+        "fusedParseAttempts": 22,
+        "fusedParseFallbacks": 0
+      },
+      "totals": {
+        "rows": 436555,
+        "projectedRows": 324,
+        "fallbackRows": 15,
+        "paths": 336,
+        "diagnosticBytes": 6694,
+        "diagnosticSpanBytes": 5184,
+        "transmittedMediaRowObjects": 30,
+        "transmittedPerRowPathArrays": 0,
+        "transmittedProjectedRowColumnBytes": 2592
+      },
+      "comparisons": [
+        {
+          "groupsEqual": true,
+          "allUnchangedColumnsEqual": true,
+          "exactNormalizedMediaEqual": true,
+          "nativeProjectionCountsEqual": true,
+          "ownershipFlagsEqual": true,
+          "transferCanariesPassed": true
+        }
+      ],
+      "groupConfiguration": {
+        "hardwareConcurrency": 2,
+        "deviceMemory": 8
+      }
+    },
+    "vndb": {
+      "receipt": "early-native-oracle-vndb.json",
+      "receiptSha256": "5320071841f84fd6623ca147030bccf03c4802ac24508d2f60cae88c752be6c2",
+      "complete": false,
+      "interruptions": [
+        {
+          "arm": "candidate",
+          "exitCode": 137,
+          "stage": "Fresh candidate-only process before first ten-group progress output; no semantic mismatch reported",
+          "sourceCommit": "037240588ec022765b6501ab2f6441ab79f16fd2",
+          "log": "early-native-oracle-vndb.log",
+          "initialAvailableMemoryMiB": 2304,
+          "retainedControlOnly": true
+        }
+      ],
+      "attemptedCandidate": {
+        "root": "/tmp/manabitan-columnar-media-63aba8",
+        "sourceCommit": "037240588ec022765b6501ab2f6441ab79f16fd2",
+        "sourceIdentity": {
+          "ext/js/dictionary/dictionary-importer.js": "0fba9359f36996aa893b6d2e242f05d129af7ea895dfe670c2b8bcda4ee4d735",
+          "ext/js/dictionary/term-bank-wasm-parser.js": "35e15eac60be8d71d73afb7850b44dca9a2ade1184c72e934754ebff10913f38",
+          "ext/js/dictionary/term-bank-wasm-parser-worker.js": "5850fe2fc86d815d8f9d87f72ddac77e0447d638082e4462a6a0e8d286aabd72",
+          "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+          "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+          "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+          "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+          "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543",
+          "ext/js/dictionary/dictionary-media-diagnostics.js": "8cc5fc6749e402424671a1bccd7be2fc5dcddd87582c31f556b8c8363c9b4606"
+        },
+        "parentCommit": "56be875d6635c6bcbb44d41ea9420b709cc06869",
+        "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "argv": [
+          "node",
+          "test/perf/columnar-media-20261128/replay.mjs",
+          "/workspace/scratch/63aba8f8e231/baseline",
+          "/tmp/manabitan-columnar-media-63aba8",
+          "/workspace/scratch/63aba8f8e231/baseline/builds/e2e-dictionary-cache",
+          "/workspace/scratch/63aba8f8e231/experiments/early-native-oracle-vndb.json",
+          "vndb",
+          "candidate"
+        ],
+        "cwd": "/tmp/manabitan-columnar-media-63aba8",
+        "environment": {
+          "NODE_OPTIONS": "--max-old-space-size=512"
+        },
+        "stdoutAndStderr": "/workspace/scratch/63aba8f8e231/experiments/early-native-oracle-vndb.log",
+        "exitCode": 137,
+        "completedGroups": null,
+        "completedGroupsNote": "No ten-group progress output or candidate checkpoint survived; no partial result count is asserted.",
+        "continuationPolicy": "No further local retry. Root may run a separately identified hosted full-corpus oracle and gates."
+      },
+      "groupConfiguration": {
+        "hardwareConcurrency": 2,
+        "deviceMemory": 8
+      }
+    }
+  },
+  "scope": "Correctness through the actual source planner and workers with a fixed two-CPU/eight-GiB navigator hint, plus gross allocation hypothesis only. No complete-import speed or peak-memory claim; current four-CPU production JMdict has 12 groups, this oracle has 8.",
+  "allocationScope": {
+    "counts": "Gross source-level operations for eligible native-accepted representatives, not net heap bytes, peak memory, or complete-import time.",
+    "columnar56be": "Avoids copied/transported projected row+wrapper pairs and retention/transport of per-row path arrays. The native helper still constructs a temporary one-element path array before flattening.",
+    "early037": "Additionally avoids the earlier compatibility row and its wrapper (2 plain objects), glossary/content subarray views (2 view objects), and construction of native [path] (1 tiny array). Original key decoding/views, owned diagnostic bytes, path strings and per-group builders remain.",
+    "noDoubleCounting": "The earlier raw objects and later copied/transported objects are distinct phases. The same native path array is counted once as a newly avoided construction, not as another #907 allocation removal."
+  },
+  "independentReview": {
+    "reviewer": "/root/native_hotspots",
+    "sourceCommit": "037240588ec022765b6501ab2f6441ab79f16fd2",
+    "mode": "Read-only source and focused regression inspection; no additional heavy validators",
+    "result": "No correctness blocker found",
+    "points": [
+      "Original source token diagnostics preserve escaped and lone-surrogate strings and empty-reading aliases.",
+      "Native image projection reads only the bounded live source and stack locals.",
+      "Diagnostic bytes are owned before metadata scratch reuse.",
+      "Accepted native and rejected/raw rows form disjoint ordered streams; merge restores source order and within-row byte aliases.",
+      "nativeProjectionAttempted is stripped at the worker copying boundary.",
+      "Number decoding is skipped only after final fused validated columns exist."
+    ]
+  },
+  "oraclePlannerConfiguration": {
+    "hardwareConcurrency": 2,
+    "deviceMemory": 8,
+    "meaning": "Actual production source-planner and worker code under an explicitly fixed two-CPU, eight-GiB navigator hint. These group counts do not describe the current four-CPU production configuration.",
+    "jmdictGroups": 8,
+    "currentFourCpuProductionJmdictGroups": 12,
+    "jitendexGroups": 22,
+    "vndbControlGroups": 170
+  }
+}

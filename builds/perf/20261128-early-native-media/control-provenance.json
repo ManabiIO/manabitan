@@ -1,0 +1,53 @@
+{
+  "jmdict": {
+    "originalReceipt": "/workspace/scratch/63aba8f8e231/experiments/columnar-oracle-jmdict.json",
+    "originalSha256": "223cfc94cd1e5bb6133e9b7444acd590303529baaa4c5b33d03d40d86331514c",
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "controlAlsoMatchedColumnarProduct": "56be875d6635c6bcbb44d41ea9420b709cc06869",
+    "seededTarget": "/workspace/scratch/63aba8f8e231/experiments/early-native-oracle-jmdict.json",
+    "baselineSourceIdentity": {
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    }
+  },
+  "jitendex": {
+    "originalReceipt": "/workspace/scratch/63aba8f8e231/experiments/columnar-oracle-jitendex.json",
+    "originalSha256": "9c01ed2400f5e2575ce5ed660f5cba84520347f0dc260e7d322ba924b4d68bb3",
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "controlAlsoMatchedColumnarProduct": "56be875d6635c6bcbb44d41ea9420b709cc06869",
+    "seededTarget": "/workspace/scratch/63aba8f8e231/experiments/early-native-oracle-jitendex.json",
+    "baselineSourceIdentity": {
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    }
+  },
+  "vndb": {
+    "originalReceipt": "/workspace/scratch/63aba8f8e231/experiments/columnar-oracle-vndb.json",
+    "originalSha256": "699c243afa387df9065a829d0b7937ed2983e81e36f63b36928109375996e4c3",
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "controlAlsoMatchedColumnarProduct": "56be875d6635c6bcbb44d41ea9420b709cc06869",
+    "seededTarget": "/workspace/scratch/63aba8f8e231/experiments/early-native-oracle-vndb.json",
+    "baselineSourceIdentity": {
+      "ext/js/dictionary/dictionary-importer.js": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "ext/js/dictionary/term-lookup-route.js": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    }
+  }
+}
