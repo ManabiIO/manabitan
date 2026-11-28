@@ -1,0 +1,69 @@
+{
+  "status": "UNPUBLISHED_SOURCE_REGISTERED",
+  "candidate": "de5cd1ec48b37fa737ad05280186d3ab57544dd3",
+  "noAcquisitionLaunched": true,
+  "noPublicationPerformed": "No study publication by template author; source-only publication by root is recorded separately.",
+  "pythonSyntaxPassed": [
+    "dev/perf/bda85f3c7e15/copied_envelope_qualification.py",
+    "dev/perf/bda85f3c7e15/test_copied_envelope_qualification.py",
+    "dev/perf/import-qualification-bda85f3c7e15.py",
+    "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+    "dev/perf/bda85f3c7e15/test_import_qualification_controls.py"
+  ],
+  "yamlSelectionPassed": true,
+  "bashSyntaxPassed": [
+    {
+      "job": "validation",
+      "name": "Require exact source, package and counter registration",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "validation",
+      "name": "Check the small wrapper and unchanged observer protocol",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "validation",
+      "name": "Validate the exact candidate source before any import",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Verify the same frozen registration and tooling",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Fetch the registered source objects",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Install the locked Playwright Chromium",
+      "bashSyntaxExit": 0
+    },
+    {
+      "job": "qualification",
+      "name": "Run the fixed cell and its separate participation audit",
+      "bashSyntaxExit": 0
+    }
+  ],
+  "pureExistingWrapperTests": {
+    "count": 8,
+    "exitCode": 0,
+    "elapsedSeconds": 0.014,
+    "scope": "Existing synthetic wrapper-only fixtures; no source gate or browser imports"
+  },
+  "pendingRegistrationFailsClosed": "Verified while candidate SHA was PENDING; final ready registration is separately validated before publication.",
+  "wrapperAstIdenticalAfterBaselineAndNamingReversal": true,
+  "plannedHosts": 6,
+  "plannedImports": 188,
+  "sourceAndWorkflowAncestryVerification": "Remote candidate direct dcfc parent and reviewed tree verified. Prospective workflow direct parent remains root publication check.",
+  "reviewedLocalSource": "38057ec8f182c75909dcd78cd566d19e7186ff8c",
+  "reviewedLocalTree": "0ff3c4a2a8fe08fe60eff129657f478e5465fb86",
+  "registeredPackageMembers": 6,
+  "registeredAddedPackageMembers": 1,
+  "registeredLintPaths": 14,
+  "registeredFocusedSuites": 5,
+  "finalReadyRegistrationPassed": true
+}

@@ -1,0 +1,99 @@
+{
+  "status": "UNPUBLISHED_SOURCE_REGISTERED_NO_ACQUISITION",
+  "variant": "copied-envelopes",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "requiredPublicationParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sourceStudyReused": {
+    "workflowSha": "e5933998d27c8dec3e7b2cd1ad72a4ac8ed7028b",
+    "originalWorkflowSha": "33248c7258ffcfd1af7ad76fef65e66031c36c59",
+    "wrapperSha256": "f1b9a3382ee44030584ab7f1e433b8a22120180718f6786e1bf1d97f4fbabe03",
+    "workflowSha256": "24c6fb0278a22be0a4676c3029117c4e858583d5c8a8c8462ed1541bcaef2741"
+  },
+  "wrapperChanges": [
+    "Replace the hard-coded baseline with frozen dcfc.",
+    "Rename only variant-specific descriptive strings and frozen plan output filename.",
+    "Preserve all source-gate commands, owned dependency-link cleanup, before/after status retention, strict clean-tree assertion, acquisition command construction and participation checks."
+  ],
+  "wrapperExecutableAstEqualAfterReversingBaselineAndTerminology": true,
+  "unchangedCopiedFiles": [
+    {
+      "path": "dev/perf/import-qualification-bda85f3c7e15.py",
+      "sha256": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22"
+    },
+    {
+      "path": "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+      "sha256": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43"
+    },
+    {
+      "path": "dev/perf/bda85f3c7e15/test_import_qualification_controls.py",
+      "sha256": "4eb52b18b61c4b18ca60d03bfdb632f9cebf8f6b94caaedc3cb62101b001a4fd"
+    }
+  ],
+  "unchangedInheritedMemoryHelpers": [
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "sameBytesAtOldAndNewBaseline": true
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "sameBytesAtOldAndNewBaseline": true
+    }
+  ],
+  "unchangedStudySections": [
+    "matrix",
+    "totalHosts",
+    "totalPlannedImports",
+    "flagsByArm",
+    "vndbSahAllocationUnits",
+    "lockedToolingSha256",
+    "memory",
+    "timing",
+    "failurePolicy",
+    "participationAuditBoundary"
+  ],
+  "candidateSourceAndPackageBinding": "Reviewed remote source de5cd1ec48b37fa737ad05280186d3ab57544dd3/tree 0ff3c4a2a8fe08fe60eff129657f478e5465fb86, direct dcfc parent; exact tree matches local 38057ec8f182c75909dcd78cd566d19e7186ff8c. Six package members (one added), fourteen lint paths, five focused suites and ACK counter event are registered. Root verified all fourteen changed remote blob IDs; independent source reviewers found no remaining blocker. Full hosted gate and prospective workflow identity remain required before acquisition.",
+  "publicationAndCandidateAncestry": "Remote candidate direct parent dcfc and reviewed tree were verified through GitHub commit metadata. Root must publish the prospective workflow as a direct child of dcfc and retain its final commit/tree receipt; no assertion that these unpublished study files already have Git ancestry.",
+  "noRuntimeOrOldStudyChanged": true,
+  "noPublicationOrCI": true,
+  "priorC321ReplicationHistory": {
+    "source": "c32168f66de7407592d048b7cb2459b92573abc4",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "vndbAB": {
+      "pairedMedianChangePercent": 25.0083,
+      "pairedMedianDeltaMs": 1079.75,
+      "fasterPairs": 0,
+      "pairCount": 12,
+      "memoryAllFourQualified": true,
+      "privatePairedIncreasesPercent": [
+        6.1098,
+        5.0427
+      ],
+      "privateMedianIncreasePercent": 5.5762,
+      "privateMedianLimitPercent": 5,
+      "pssMedianIncreasePercent": 3.7056,
+      "outcome": "timing regression and measured private-memory threshold breach"
+    },
+    "vndbBA": {
+      "pairedMedianChangePercent": 26.822,
+      "pairedMedianDeltaMs": 1107.5,
+      "fasterPairs": 0,
+      "pairCount": 12
+    },
+    "sourceOfRoundedValues": "Parent/source_io completed raw-qualification review; original observations remain retained; no pooling or reinterpretation."
+  },
+  "sourceReviewReceiptSha256": "32c61dd5d34de42c5f804ac7208c4f8aed113a3fb74a3d0e0d3a4c6325611cb6",
+  "remoteCandidate": "de5cd1ec48b37fa737ad05280186d3ab57544dd3",
+  "remoteCandidateTree": "0ff3c4a2a8fe08fe60eff129657f478e5465fb86"
+}
