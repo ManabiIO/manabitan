@@ -775,6 +775,7 @@ bash metadata-evidence/builds/perf/20261128-4d9f-latest-metadata-legacy-context/
 ```
 
 The wrapper passed Bash syntax checking and mirrors the successful hosted commands; it was not separately executed locally. It verifies the pinned Node binary, source/oracle/fixture hashes, normal library builds, scoped lint, all controls, both complete arm exits and full comparisons, and refuses to overwrite prior output. The earlier original helper remains available for its frozen source scope.
+
 ### JMdict timing investigation and unpromoted candidate
 
 The native-checksum reuse candidate `7cda9a3a39f3c2626873d414a741433058f9ff16` was compared with `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` in [run 46131958592](https://github.com/ManabiIO/manabitan/actions/runs/46131958592). All six dictionary/order cells completed their checks, but every descriptive timing interval includes zero and identical-code controls show comparable drift. It did not establish a repeatable elapsed-time gain, so no PR promotes it. The first acquisition's package-preflight failures in run46124815073 remain retained; corrected source identities do not reclassify those failures.
