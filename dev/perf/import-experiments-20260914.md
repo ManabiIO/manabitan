@@ -733,3 +733,56 @@ The existing `dev/perf/import-lookup-screen.js` in the expression candidate inde
 [The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
 
 All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
+
+
+## 2026-11-28 — frozen 5a86 complete-corpus proofs (correctness only)
+
+Study `7657938904308d6b08d5ffda78124ee7695f3e14`, run
+[46105432915](https://github.com/ManabiIO/manabitan/actions/runs/46105432915),
+compares frozen baseline `9e10d3b3`, composite-window `2cdcc902` and complete
+format-3 suffix reuse `38031a752`. JMdict and VNDB completed successfully;
+Jitendex remains pending at this evidence checkpoint. No source/workflow
+change or new acquisition is included here.
+
+The original artifact ZIPs are preserved byte-for-byte in
+`dev/perf/import-corpus-5a86/hosted-jmdict-vndb.json.txt`, together with original
+job logs, the first reviewer failure, its corrected audit and exact command
+receipts. The companion manifest lists every payload length/SHA-256. Both
+ZIPs match GitHub's original artifact sizes and SHA-256 values. The separate
+`dev/perf/import-corpus-artifacts-5a86.py` requires the frozen Git objects and
+independently checks each recorded source file, archived observer/plan, group receipt,
+complete output digest, counter total, contiguous bank coverage and original
+artifact identity; it rejects Python `-O` and seven mutated report cases.
+After extracting the pack, run it with `--repo <repository>
+--archives <extraction>/original --out <new-review.json>`. It performs no import.
+
+JMdict: all 528,299 rows, 53 banks and 171,617,523 decoded source bytes,
+12 groups per arm. Complete output and ordinary work/allocation counters
+match. Validated glossary reuse is 54,641 for baseline/window and 161,292
+for suffix (+106,651). Recent content hits remain 154,416; canonical content
+remains 101,143,985 bytes. JMdict uses immediate CRC, so this is a grammar
+reuse improvement, with no deferred-CRC savings claimed.
+
+VNDB: all 6,648,310 rows, 665 banks and 4,267,992,967 source bytes,
+170 groups per arm. Output/ordinary counters match. Suffix adds 156 validated
+and CRC-reused glossaries; 73,796 additional CRC bytes reused exactly equal
+the reduction in scanned bytes. Every group's scanned+reused bytes cover its
+full source. All arms have 170 fused attempts, zero fallbacks and the same
+45,219,840-byte maximum WASM heap. This is not a process-memory measurement.
+
+A review-only mistake was caught and retained: the sum of projected media
+rows is 146,725 across parser groups, whereas the installed unique media-row
+fixture count is 146,570. Per-group content deduplication can repeat references
+across groups. The frozen proof never equated these counts; the corrected
+review preserves exact per-group output equality and leaves installed and
+exhaustive media verification to the existing browser qualifier. No measured
+report, frozen guard or observation was changed.
+
+Limits: the replay hashes every canonical row byte range, typed column,
+complete prepared lookup/route byte range, dedup plan and media-row
+serialization live; it compares complete-group SHA-256 digests and counters.
+It does not retain or directly compare A/B row byte arrays. It does not rehash retained
+owned outputs after later heap reuse, directly compare zlib and native
+preloaded-source buffers, or compare all raw metadata flag bits. It provides
+no browser, storage, exhaustive image-byte, peak-process-memory or speed
+claim. Browser qualification for the two native candidates remains required.

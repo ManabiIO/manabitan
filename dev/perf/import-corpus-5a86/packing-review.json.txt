@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "noAcquisition": true,
+  "auditorSha256": "8245f5e0ff2bc2d2ff058b6b0d519337a4b8bbef0cece5d672e7ca343d37b25d",
+  "recomputedExactlyEqualsArchivedIndependentAudit": true,
+  "recomputedSha256": "f5dc11df11266882d233ae1a54f9d211978395b5502b72972786ea349971383e",
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "groupsPerArm": 12,
+      "banksPerArm": 53,
+      "sourceHashesPerArm": {
+        "baseline": 19,
+        "mask": 19,
+        "suffix": 19
+      },
+      "studyCodeCopies": 17,
+      "negativeGuards": 7,
+      "baselineAdditionalTotals": {
+        "encodedContentBytes": 101143985,
+        "keys": 488011,
+        "mediaRows": 0,
+        "preparedBufferBytes": 32056536,
+        "recentContentDedupHitCount": 154416,
+        "rows": 528299,
+        "stringBytes": 7345650
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "groupsPerArm": 170,
+      "banksPerArm": 665,
+      "sourceHashesPerArm": {
+        "baseline": 19,
+        "mask": 19,
+        "suffix": 19
+      },
+      "studyCodeCopies": 17,
+      "negativeGuards": 7,
+      "baselineAdditionalTotals": {
+        "encodedContentBytes": 91670244,
+        "keys": 10172856,
+        "mediaRows": 146725,
+        "preparedBufferBytes": 604048538,
+        "recentContentDedupHitCount": 6490301,
+        "rows": 6648310,
+        "stringBytes": 182245874
+      }
+    }
+  ],
+  "originalReviewerFailure": {
+    "scope": "Post-acquisition independent archive audit, no measurement",
+    "status": "FAIL before correction",
+    "reason": "Reviewer mistakenly equated the sum of per-group projected mediaRows with installed unique media rows. All three arms contain146725 projected media rows; fixture installed media row count is146570. The frozen hosted verifier never asserted their equality. Preserve exact per-group output/digest equality and leave installed/exhaustive media to browser qualification.",
+    "oldAuditorSha256": "eb9a8aafc2be5e3d50a5fe95a1750a272189054ad0ea519e037e924959c09b70",
+    "returnCode": 1
+  },
+  "optimizedPythonRejected": {
+    "exitCode": 1,
+    "stderr": "Refusing Python -O: evidence checks must remain enabled\n"
+  },
+  "scope": "Original artifact and all source/study-code bindings verified; complete-group digest/counter parity only, with the preserved declared limitations. No direct retained-byte claim or timing claim."
+}

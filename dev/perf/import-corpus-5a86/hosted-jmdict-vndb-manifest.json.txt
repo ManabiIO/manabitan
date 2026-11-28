@@ -1,0 +1,77 @@
+{
+  "archiveBytes": 214458,
+  "archiveSha256": "ab9c8e7d58b98a18b80478cd0f96779acd2abc9003b7a213336447b2a1d49f1d",
+  "format": "tar+gzip+base64",
+  "limitations": [
+    "Every canonical row byte range is hashed live and complete-group SHA-256 digests/counters compared; this does not retain or directly compare A/B row byte arrays.",
+    "No retained-after-heap-reuse comparison, direct zlib/native preloaded-byte equality, or direct comparison of all raw metadata bits.",
+    "No browser performance, storage correctness, exhaustive media-payload or process peak-memory claim."
+  ],
+  "members": [
+    {
+      "bytes": 1701,
+      "path": "original/artifacts-metadata.json",
+      "sha256": "63a02a492350360d01dec1208bc310e6b88b5d6a6b1a337dde1ad2ac01757bde"
+    },
+    {
+      "bytes": 284241,
+      "path": "original/jmdict-job.log",
+      "sha256": "3237baab270c513675c98d58891cf5932d1b6edad9a08f706665227a4fa7822b"
+    },
+    {
+      "bytes": 73578,
+      "path": "original/jmdict.zip",
+      "sha256": "41ce6fd460bdd21a7dabb045969020eeafe35c11faa0888b725f39f4fb39d06a"
+    },
+    {
+      "bytes": 285974,
+      "path": "original/vndb-job.log",
+      "sha256": "f70e9ca787aa3a14786ba844bffa8a3df2e3d3018583d99019e73b42e33280c8"
+    },
+    {
+      "bytes": 101294,
+      "path": "original/vndb.zip",
+      "sha256": "b9bb54dbd64f0bdcf097c19977c3f6ef28cf0f8abedcc5a2a9ae0e46729585eb"
+    },
+    {
+      "bytes": 15021,
+      "path": "review/audit-corpus-artifacts.py",
+      "sha256": "8245f5e0ff2bc2d2ff058b6b0d519337a4b8bbef0cece5d672e7ca343d37b25d"
+    },
+    {
+      "bytes": 37248,
+      "path": "review/before-scope-clarification.json",
+      "sha256": "294ca2297a5314588dd22f4216aab13bd5be8ed439cfca0a255a36e20cc4a61e"
+    },
+    {
+      "bytes": 5781,
+      "path": "review/command-receipts.json",
+      "sha256": "b95bf353335c00a78086b403e27c07936010cb2633300ff620e58bb9c63c5a1b"
+    },
+    {
+      "bytes": 37338,
+      "path": "review/independent-audit.json",
+      "sha256": "f5dc11df11266882d233ae1a54f9d211978395b5502b72972786ea349971383e"
+    },
+    {
+      "bytes": 605,
+      "path": "review/initial-audit-failure.json",
+      "sha256": "7acc5dd37d582375dca03210651acf4d0c85181370370a5d1b1ef293b0ec8ab8"
+    },
+    {
+      "bytes": 14971,
+      "path": "review/initial-auditor.py.txt",
+      "sha256": "eb9a8aafc2be5e3d50a5fe95a1750a272189054ad0ea519e037e924959c09b70"
+    },
+    {
+      "bytes": 4400,
+      "path": "review/scope-clarified-command.json",
+      "sha256": "711ef0291e8dae4f2207b7402b64a438a67ba75809956eda6262f14062688585"
+    }
+  ],
+  "reviewCorrection": "The first independent review mistakenly equated per-group projected media rows with installed unique media rows. Its source, failure and corrected audit are retained. Frozen observation/verification code was not changed.",
+  "schema": 1,
+  "scope": "Original hosted artifact ZIPs and job logs, plus separately identified review code/results; no acquisition or timing estimate",
+  "status": "JMdict and VNDB complete hosted correctness proofs; Jitendex still queued at publication preparation",
+  "studyCommit": "7657938904308d6b08d5ffda78124ee7695f3e14"
+}
