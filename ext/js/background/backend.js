@@ -188,7 +188,9 @@ export class Backend {
         /** @type {ClipboardReader|ClipboardReaderProxy} */
         let clipboardReader;
         if (!chrome.offscreen) {
-            localDictionaryRuntime = new DictionaryRuntimeWorkerProxy('/js/background/offscreen-dictionary-worker.js');
+            // SAH-pool owns persistence; do not start SQLite's unused OPFS proxy.
+            // eslint-disable-next-line @stylistic/semi
+            localDictionaryRuntime = new DictionaryRuntimeWorkerProxy('/js/background/offscreen-dictionary-worker.js?opfs-disable')
             dictionaryDatabase = new DictionaryDatabaseProxy(localDictionaryRuntime);
             translator = new TranslatorProxy(localDictionaryRuntime);
             clipboardReader = new ClipboardReader(

@@ -1,0 +1,192 @@
+name: Import worker diagnostics and CPU profile
+
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - .github/workflows/import-sahpool-diagnostics-779cf.yml
+      - dev/perf/sqlite-sahpool-worker-diagnostics.py
+      - dev/perf/test_sqlite_sahpool_diagnostics.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'perf/sqlite-sahpool-only-20261127' && github.event.pull_request.head.repo.full_name == github.repository
+    name: ${{ matrix.task == 'profile' && 'JMdict baseline CPU trace' || format('{0} ({1})', matrix.dictionary, matrix.order) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+        task: [workers]
+        include:
+          - dictionary: jmdict
+            order: AB
+            task: profile
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ef0fadf1c04799f3f91f4693a74ab27fe4ae4d3a
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_TASK: ${{ matrix.task }}
+      PERF_FROZEN: builds/perf/frozen-import-cohort
+      PERF_EVIDENCE: builds/perf/sqlite-sahpool-worker-diagnostics-v2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify observer checks
+        run: python -m unittest discover -s dev/perf -p 'test_sqlite_sahpool_diagnostics.py'
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Download exact packages from the frozen timing cohort
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 46100971535
+          name: sqlite-sahpool-only-${{ matrix.dictionary }}-${{ matrix.order }}-779cf
+          path: builds/perf/frozen-import-cohort
+      - name: Bind diagnostic inputs to frozen sources and packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" > "$PERF_EVIDENCE/fixtures.log" 2>&1
+          python - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess
+          root = pathlib.Path.cwd()
+          frozen = root / os.environ['PERF_FROZEN']
+          evidence = root / os.environ['PERF_EVIDENCE']
+          evidence.mkdir(parents=True, exist_ok=True)
+          sources = evidence.parent / (evidence.name + '-sources')
+          sources.mkdir()
+          identities = json.loads((frozen / 'source-identities.json').read_text())
+          plan = json.loads((frozen / 'registered-plan.json').read_text())
+          assert plan['baseline'] == os.environ['PERF_BASELINE']
+          assert plan['candidate'] == os.environ['PERF_CANDIDATE']
+          assert plan['dictionary'] == os.environ['PERF_DICTIONARY'] and plan['initialOrder'] == os.environ['PERF_ORDER']
+          assert set(identities['changedPackageEntries']) == {
+              'js/background/backend.js', 'js/background/offscreen.js',
+              'js/dictionary/dictionary-database.js', 'js/dictionary/dictionary-worker.js',
+          }
+          def digest(path):
+              with path.open('rb') as file:
+                  return hashlib.file_digest(file, 'sha256').hexdigest()
+          def git(*args, cwd=root):
+              return subprocess.check_output(['git', *args], cwd=cwd, text=True).strip()
+          browser = json.loads((frozen / 'browser-identity.json').read_text())
+          browser_path = pathlib.Path(subprocess.check_output([
+              'node', '--input-type=module', '-e', "import {chromium} from 'playwright'; process.stdout.write(chromium.executablePath())",
+          ], text=True))
+          assert digest(browser_path) == browser['sha256']
+          assert subprocess.check_output([str(browser_path), '--version'], text=True).strip() == browser['versionOutput']
+          assert subprocess.check_output(['node', '-p', 'process.version'], text=True).strip() == 'v22.22.0'
+          for arm, expected in [('A', os.environ['PERF_BASELINE']), ('B', os.environ['PERF_CANDIDATE'])]:
+              identity = identities['arms'][arm]
+              assert identity['sha'] == expected
+              package = frozen / f'package-{arm}.zip'
+              assert digest(package) == identity['packageSha256']
+              target = sources / arm
+              subprocess.run(['git', 'worktree', 'add', '--detach', str(target), expected], check=True)
+              assert git('rev-parse', 'HEAD^{tree}', cwd=target) == identity['tree']
+              for name in ['package-lock.json', 'test/perf/dictionaries.lock.json', 'test/chromium/extension-two-dictionary-import.e2e.js']:
+                  assert digest(target / name) == digest(root / name) == identity['sourceHashes'][name]
+              shutil.copytree(root / 'node_modules', target / 'node_modules', copy_function=os.link, symlinks=True)
+              (target / 'builds').mkdir(exist_ok=True)
+              (target / 'builds/e2e-dictionary-cache').symlink_to(root / 'builds/e2e-dictionary-cache', target_is_directory=True)
+              shutil.copyfile(package, target / 'builds/manabitan-chrome.zip')
+              shutil.copyfile(package, evidence / f'package-{arm}.zip')
+          for name in ['source-identities.json', 'registered-plan.json', 'browser-identity.json']:
+              shutil.copyfile(frozen / name, evidence / ('frozen-' + name))
+          observer = {
+              'authoritativeTiming': False, 'frozenTimingRun': 46100971535,
+              'sourceSha': git('rev-parse', 'HEAD'), 'sourceTree': git('rev-parse', 'HEAD^{tree}'),
+              'helperSha256': digest(root / 'dev/perf/sqlite-sahpool-worker-diagnostics.py'),
+              'productPackages': {arm: identities['arms'][arm]['packageSha256'] for arm in 'AB'},
+              'scope': ('Separate baseline-only browser-wide CPU trace using the original package; no timing or memory qualification'
+                        if os.environ['PERF_TASK'] == 'profile' else
+                        'Separate worker identity and first-query diagnostic using the original timing packages; no timing rerun'),
+          }
+          (evidence / 'observer-source.json').write_text(json.dumps(observer, indent=2) + '\n')
+          PY
+      - name: Resolve every observed worker and verify the first lookup
+        if: matrix.task == 'workers'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/sqlite-sahpool-worker-diagnostics.py \
+            --baseline-root "$PERF_EVIDENCE-sources/A" \
+            --candidate-root "$PERF_EVIDENCE-sources/B" \
+            --dictionary "$PERF_DICTIONARY" --order "$PERF_ORDER" \
+            --output "$PERF_EVIDENCE/worker-diagnostics"
+      - name: Capture the frozen baseline JMdict import CPU trace separately
+        if: matrix.task == 'profile'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          evidence = root / os.environ['PERF_EVIDENCE']
+          baseline = evidence.parent / (evidence.name + '-sources') / 'A'
+          command = ['node', 'dev/perf/import-benchmark.js', 'jmdict', '--trace', '--runs', '1',
+                     '--no-build', '--build-target', 'chrome', '--media-check', 'all',
+                     '--output', str(evidence / 'baseline-profile')]
+          manifest = {
+              'authoritativeTiming': False, 'memoryQualification': False, 'baselineOnly': True,
+              'frozenTimingRun': 46100971535, 'sourceSha': os.environ['PERF_BASELINE'],
+              'packageSha256': hashlib.sha256((baseline / 'builds/manabitan-chrome.zip').read_bytes()).hexdigest(),
+              'command': command, 'cwd': str(baseline), 'harnessOverlay': None,
+              'instrumentation': 'Existing browser-wide CDP Tracing with V8 CPU profiler and high-resolution samples',
+              'captureBoundary': 'Existing harness: immediately before file-input import through worker completion signal (post-UI timeout fallback); before integrity/restart lookups',
+              'categories': ['devtools.timeline', 'v8.execute', 'blink.user_timing',
+                             'disabled-by-default-v8.cpu_profiler', 'disabled-by-default-v8.cpu_profiler.hires',
+                             'disabled-by-default-devtools.timeline', 'disabled-by-default-devtools.timeline.stack'],
+              'requestedWorkerCoverage': ['primary dictionary import worker', 'term-bank parser workers', 'Zstd compression workers'],
+              'coverageCaveat': 'Actual sampled thread and source coverage must be checked in the retained trace; absent samples do not establish zero cost.',
+              'sourceHashes': {name: hashlib.sha256((baseline / name).read_bytes()).hexdigest() for name in [
+                  'dev/perf/import-benchmark.js', 'test/chromium/extension-two-dictionary-import.e2e.js',
+                  'package-lock.json', 'test/perf/dictionaries.lock.json']},
+          }
+          (evidence / 'cpu-profile-instrumentation.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          with (evidence / 'cpu-profile.log').open('w') as log:
+              subprocess.run(command, cwd=baseline, stdout=log, stderr=subprocess.STDOUT, check=True)
+          summary = json.loads((evidence / 'baseline-profile/summary.json').read_text())
+          assert summary['authoritativeTiming'] is False and summary['traceEnabled'] is True
+          assert summary['source']['gitSha'] == os.environ['PERF_BASELINE']
+          trace_path = evidence / 'baseline-profile/run-1.trace.json'
+          events = json.loads(trace_path.read_text())['traceEvents']
+          profiles = [event for event in events if isinstance((event.get('args') or {}).get('data', {}).get('cpuProfile'), dict)]
+          sample_count = sum(len(event['args']['data']['cpuProfile'].get('samples', [])) for event in profiles)
+          assert sample_count > 0, 'Browser trace contains no CPU samples'
+          urls = sorted({node.get('callFrame', {}).get('url', '') for event in profiles
+                         for node in event['args']['data']['cpuProfile'].get('nodes', [])} - {''})
+          manifest['captureCompleted'] = True
+          manifest['traceSha256'] = hashlib.sha256(trace_path.read_bytes()).hexdigest()
+          manifest['cpuProfileEventCount'] = len(profiles)
+          manifest['cpuSampleCount'] = sample_count
+          manifest['sampledThreads'] = sorted({(event['pid'], event['tid']) for event in profiles})
+          manifest['profileFrameUrls'] = urls
+          (evidence / 'cpu-profile-instrumentation.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          PY
+      - name: Preserve diagnostic inputs, observations, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sahpool-worker-diagnostics-v2-${{ matrix.task }}-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.event.pull_request.head.sha }}
+          path: builds/perf/sqlite-sahpool-worker-diagnostics-v2
+          if-no-files-found: error
+          retention-days: 14

@@ -976,7 +976,9 @@ export class DictionaryDatabase {
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
                 if (!isWorker && this._worker === null) {
-                    this._worker = new Worker(new URL('dictionary-database-worker-main.js', import.meta.url), {type: 'module'});
+                    // SAH-pool owns persistence; do not start SQLite's unused OPFS proxy.
+                    // eslint-disable-next-line @stylistic/semi
+                    this._worker = new Worker(new URL('dictionary-database-worker-main.js?opfs-disable', import.meta.url), {type: 'module'})
                     this._worker.addEventListener('error', (event) => {
                         log.log('Worker terminated with error:', event);
                     });
