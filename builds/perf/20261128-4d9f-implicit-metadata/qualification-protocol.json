@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sourceTree": "dffcaebec8348865266875264ffc7c6ee7e4da3b",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "6a05b649de2bf220b21f5365902c76d78d1cde29",
+  "localEquivalent": "55e87bc64c9b043a91f1d075f0324d3176c18c9a",
+  "scope": "Qualify complete release-browser correctness, process-memory non-regression and descriptive timing for the combined implicit metadata representation. The independently demonstrated claim is avoided typed-array backing; no elapsed or whole-process gain is assumed.",
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "independentHostInitialOrders": [
+    "AB",
+    "BA"
+  ],
+  "pairsPerHost": 12,
+  "warmups": "Two per arm, excluded prospectively",
+  "controls": "Four interleaved identical-source A/C pairs per host",
+  "timingBoundary": "File input change through post-UI completion; fresh profiles, no profiling/memory/screenshot instrumentation",
+  "memory": "Separate existing covered ABBA/BAAB acquisition after timing; every observation must qualify, median PSS/private<=+5%, each pair<=+10%",
+  "persistence": "Current native restart,72 lookup receipts,deterministic media samples per timed import; separate exhaustive media; unchanged exact non-SAH sizes; VNDB37 aligned4096-byte allocation units",
+  "package": "Local complete inventory already verified against frozen runtime; exactly3JS+canonicalC+canonicalWASM entries differ,ZIP+2398B,WASM+458B. Hosted ZIP hashes/sizes remain independently recorded.",
+  "failurePolicy": "Retain all observations/tails/failures; no replacement run of an unchanged candidate to recover an adverse or incomplete result.",
+  "promotion": "A successful correctness/memory acquisition is not a speed claim. Publish only the demonstrated allocation reduction unless timing benefits independently replicate beyond identical-control variability."
+}
