@@ -8540,6 +8540,7 @@ this._readTermContentSignature(
                             pendingOffsets,
                             pendingLengths,
                             pendingResolvedDictNames,
+                            importMetrics,
                         )
                         /* eslint-enable @stylistic/semi */
                     }
@@ -9708,8 +9709,9 @@ null :
      * @param {number[]|Float64Array} pendingOffsets
      * @param {number[]|Uint32Array} pendingLengths
      * @param {string|string[]} pendingDictNames
+     * @param {Record<string, number>|null} [diagnostics]
      */
-    _publishResolvedArtifactTermContentPlan(plan, pendingStart, pendingIndexes, pendingOffsets, pendingLengths, pendingDictNames) {
+    _publishResolvedArtifactTermContentPlan(plan, pendingStart, pendingIndexes, pendingOffsets, pendingLengths, pendingDictNames, diagnostics = null) {
         const {resolvedFlags, resolvedOffsets, resolvedLengths} = plan
         const count = pendingStart === null ? pendingIndexes.length : pendingOffsets.length
         if (count === 0) { return }
@@ -9736,6 +9738,28 @@ null :
                 pendingIndexes.buffer !== offsetBuffer && pendingIndexes.buffer !== lengthBuffer && pendingIndexes.buffer !== flagBuffer
             ))
         )
+        if (diagnostics !== null) {
+            /**
+             * @param {string} name
+             * @param {number} [value]
+             */
+            const add = (name, value = 1) => { diagnostics[`diagnosticPlanPublication${name}`] = (diagnostics[`diagnosticPlanPublication${name}`] ?? 0) + value }
+            add('Calls')
+            add('Rows', count)
+            if (typeof pendingDictNames !== 'string') { add('NameType') }
+            if (Array.isArray(plan.resolvedDictNames)) { add('ResolvedNamesArray') }
+            if (typeof plan.resolvedUniformDictName === 'string' && plan.resolvedUniformDictName !== pendingDictNames) { add('UniformNameMismatch') }
+            if (!(pendingOffsets instanceof Float64Array) || pendingOffsets.length < count || !(pendingLengths instanceof Uint32Array) || pendingLengths.length < count) { add('SourceColumns') }
+            if (!(resolvedOffsets instanceof Float64Array) || !(resolvedLengths instanceof Uint32Array) || !(resolvedFlags instanceof Uint8Array)) { add('TargetColumns') }
+            if (!hasCompatibleIndexes) { add('Indexes') }
+            const targets = [offsetBuffer, lengthBuffer, flagBuffer]
+            if (
+                new Set(targets).size !== targets.length ||
+                (pendingOffsets instanceof Float64Array && targets.includes(pendingOffsets.buffer)) ||
+                (pendingLengths instanceof Uint32Array && targets.includes(pendingLengths.buffer)) ||
+                (pendingStart === null && pendingIndexes instanceof Uint32Array && targets.includes(pendingIndexes.buffer))
+            ) { add('AliasedBuffers') }
+        }
         let i = 0
         if (canCopyRuns) {
             const capacity = Math.min(resolvedOffsets.length, resolvedLengths.length, resolvedFlags.length)
@@ -9747,7 +9771,10 @@ null :
                 const length = end - i
                 // Keep malformed/private callers on the original scalar path;
                 // typed-array set must not introduce a new out-of-range throw.
-                if (uniqueIndex + length > capacity) { break }
+                if (uniqueIndex + length > capacity) {
+                    if (diagnostics !== null) { diagnostics.diagnosticPlanPublicationCapacityFallback += 1 }
+                    break
+                }
                 if (length === 1) {
                     resolvedOffsets[uniqueIndex] = pendingOffsets[i]
                     resolvedLengths[uniqueIndex] = pendingLengths[i]
@@ -9759,6 +9786,10 @@ null :
                 }
                 i = end
             }
+        }
+        if (diagnostics !== null) {
+            diagnostics.diagnosticPlanPublicationFastPathRows += i
+            diagnostics.diagnosticPlanPublicationScalarRows += count - i
         }
         for (; i < count; ++i) {
             const uniqueIndex = pendingStart === null ? pendingIndexes[i] : pendingStart + i

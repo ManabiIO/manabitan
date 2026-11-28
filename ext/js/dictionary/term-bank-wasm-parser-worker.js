@@ -122,6 +122,7 @@ async function parse(data) {
         let resultChunk = null;
         let resultRowCount = 0;
         let resultCopyMs = 0;
+        const ownedContentDiagnostics = Object.fromEntries(["diagnosticOwnedContentGroups", "diagnosticOwnedContentBytes", "diagnosticOwnedContentSourceOffsetSum", "diagnosticOwnedContentAligned8Groups", "diagnosticOwnedContentAligned8Bytes", "diagnosticOwnedContentAllocationMs", "diagnosticOwnedContentSetMs"].map((name) => [name, 0]));
         let borrowsWorkerMemory = false;
         let ownsContentBytes = false;
         await parseTermBankWithWasmColumnChunks(
@@ -167,8 +168,19 @@ async function parse(data) {
                     // Compression workers retain the shared-span path. This slab
                     // is independent of the reusable parser heap and is never
                     // written again after the result is posted.
-                    const owned = new Uint8Array(new SharedArrayBuffer(resultChunk.contentBytesBuffer.byteLength));
-                    owned.set(resultChunk.contentBytesBuffer);
+                    const ownedSource = resultChunk.contentBytesBuffer;
+                    ownedContentDiagnostics.diagnosticOwnedContentGroups = 1;
+                    ownedContentDiagnostics.diagnosticOwnedContentBytes = ownedSource.byteLength;
+                    ownedContentDiagnostics.diagnosticOwnedContentSourceOffsetSum = ownedSource.byteOffset;
+                    ownedContentDiagnostics.diagnosticOwnedContentAligned8Groups = (ownedSource.byteOffset & 7) === 0 ? 1 : 0;
+                    ownedContentDiagnostics.diagnosticOwnedContentAligned8Bytes = (ownedSource.byteOffset & 7) === 0 ? ownedSource.byteLength : 0;
+                    const allocationStart = safePerformance.now();
+                    const owned = new Uint8Array(new SharedArrayBuffer(ownedSource.byteLength));
+                    const copyStart = safePerformance.now();
+                    owned.set(ownedSource);
+                    const copyEnd = safePerformance.now();
+                    ownedContentDiagnostics.diagnosticOwnedContentAllocationMs = copyStart - allocationStart;
+                    ownedContentDiagnostics.diagnosticOwnedContentSetMs = copyEnd - copyStart;
                     resultChunk.contentBytesBuffer = owned;
                 }
                 ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
@@ -192,6 +204,7 @@ async function parse(data) {
         const stableResultChunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */ (resultChunk);
         if (profile !== null) {
             profile.resultCopyMs = resultCopyMs;
+            Object.assign(profile, ownedContentDiagnostics);
             profile.sourceDeliveryMs = sourceDeliveryMs ?? 0;
             profile.borrowedContentResultCount = borrowsWorkerMemory ? 1 : 0;
             if (typeof preloadedSource !== 'undefined') {
