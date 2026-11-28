@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "baseTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "purpose": "Prospective actual-corpus verification tooling and original oracles; no runtime changes or completed acquisitions",
+  "files": [
+    {
+      "path": ".github/workflows/reference-field-corpus-qualification-4d9f.yml",
+      "blob": "e22704ebc8e017c1f796ee6b268e8227e77e1d65",
+      "sha256": "f3b40e62010994a20bf1ca8942efcafa5b1ad9c798a14ce26177f102c31cb99a",
+      "bytes": 4634
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/README.md",
+      "blob": "d0e4def76579b7224a33c5cb8426f7c226a0026c",
+      "sha256": "0b7d6666cc0c1ad29323c444e53dc7f722ab2b3007a661415127848ae58f7374",
+      "bytes": 6201
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/protocol.json",
+      "blob": "039f8a2678c6e31db608f4e819f7f155e8673d08",
+      "sha256": "53e805446ae9fe7aaa2bf550fe4f6785e7a17a4504bcbcadeb43c80956d5ed1f",
+      "bytes": 4537
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/source-preparation.json",
+      "blob": "7c4e7112924677af36cf03d786b9caa2de6095e2",
+      "sha256": "fcd8fedf7e11a63ed4a0bb24990279e1a981641c0b5d510a4e448444b0c3796d",
+      "bytes": 11557
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/verification-manifest.json",
+      "blob": "9c07f68ca98b5e15977f700d85b87c66df2a4568",
+      "sha256": "3aacedb9ba8298ba2132cae3af5625ff2a10f54a9cf98b836b676de0d6f34744",
+      "bytes": 19054
+    },
+    {
+      "path": "builds/perf/20261128-4d9f-reference-fields-latest/verification-oracles.tar.gz",
+      "blob": "b9400b426b5177795b1fe51160671b9837b0eb55",
+      "sha256": "7959bf4736e64ca55e2ee7176774f2c62d2802a7df968f226818f969bb642e78",
+      "bytes": 95475
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/activation_overlay.py",
+      "blob": "3d3c7039f9b9a0fba4e3880e325350866ed4352c",
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27",
+      "bytes": 8363
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/actual-fields.contract.mjs",
+      "blob": "8e39882f88f9c72e16f8558e62755bba0f919b47",
+      "sha256": "f196cec9ad2e9b1789e8b168cfa95c5516c1229d9d4ee291baff46d0909a0ac2",
+      "bytes": 5972
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/actual-fields.mjs",
+      "blob": "b4ca611fd643bfc31a0784356dc6fa38d0a32075",
+      "sha256": "6cc328a14fc9f497559effcbf5bc4d27646eb4fa7a16677b32595da7388a5507",
+      "bytes": 8380
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/archive-catalog.mjs",
+      "blob": "ea1267f1c5cc6be84ce22c27e4441590e2d0fd7e",
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302",
+      "bytes": 1994
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/common.mjs",
+      "blob": "3e15b69d05ee084bd7e9fbff5d68fd8b49317507",
+      "sha256": "aae08ad9ef9e7cc7ac148de1fb6686f54540ef622afdc8fe9b85964ac4972a24",
+      "bytes": 9877
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/compare-results.mjs",
+      "blob": "c1d03c132f51719c2f73babcd50d03fe19b2f365",
+      "sha256": "5a9060531d5dd2595de1e55d04f5b62478259251233e424b1787988c7102b75e",
+      "bytes": 7898
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/expanded-file-oracle.mjs",
+      "blob": "5f7f464266217cf8fa6db7e785ba370ff8ab2d1b",
+      "sha256": "d7db2fa0e4e279208b42c17d26f08c2240d11c8f1b590fc4f58022ae22bddbc2",
+      "bytes": 6774
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/file-oracle.mjs",
+      "blob": "1589b4b7c56e7f0763873542ad914ed1a012dda6",
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e",
+      "bytes": 3213
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/hosted-qualification.py",
+      "blob": "2273292ce88fc5e5ae7a13fd5bf1664965631c74",
+      "sha256": "ce6e25a35049e8751d6799de7eeab360647eb1246ef8f1e808cfd9ee6b21b993",
+      "bytes": 7374
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/launch.py",
+      "blob": "20a33abd0eeb019aa67480fee8b7b95d82fe25ea",
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef",
+      "bytes": 3245
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/legacy-field-analysis.mjs",
+      "blob": "e23832e2a02797baab44896b086434123850f361",
+      "sha256": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67",
+      "bytes": 6689
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/logical-record-ids.contract.mjs",
+      "blob": "b980f3132c884f33323403cc8947f39b7f33a7c0",
+      "sha256": "2e79d4909f4eab78459703ce0f1e762763f8510988da53171a3d2ee3b106965d",
+      "bytes": 3046
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/logical-record-ids.mjs",
+      "blob": "2633ad1b193b1eeafaa39c389d0a92b460d03cc8",
+      "sha256": "a7900f780f101d32a0d1526983cb9aca9050790de8e0b3b847228acaa9a2baac",
+      "bytes": 1515
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/metadata-oracle.mjs",
+      "blob": "83a7f5b736577767dfc1f0c8fa889ce9d7c8ac13",
+      "sha256": "66ce1e26952a9cf686869d89b10e4965cd6991b049b01646b928c54c7b95f95a",
+      "bytes": 6374
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/node-opfs-bounded.contract.mjs",
+      "blob": "29c3e2d0046013fb6e22318f6cd18fe602ca8c56",
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2",
+      "bytes": 5023
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/node-opfs-bounded.mjs",
+      "blob": "60044cb9e814b873410d1dcdeffc088fd9ab0730",
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8",
+      "bytes": 9955
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/previous-reader.fixture.mjs",
+      "blob": "093e4b032f02835d0aa6687e948f89214e293bea",
+      "sha256": "c35310b5fac5237447601628987b16463377e3e282e99ee6d102e0e58a52794f",
+      "bytes": 7977
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/run-old-reader-check.mjs",
+      "blob": "0fb76af15549e873dc9b6f7f742acd294210bdbc",
+      "sha256": "337d12fdb4ea64e871141bae0e8dc44c31f20f334ecbc55a14593dfc0d0533f8",
+      "bytes": 5237
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/run.mjs",
+      "blob": "ba28a59ad53a35c134862942977f707396c70d78",
+      "sha256": "30b725b94a078d04e48a88319bdbb72a8b23228383dd032e363cacd4b431e6f7",
+      "bytes": 43880
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.contract.mjs",
+      "blob": "b528451127b29c28370460b6eced025d7d673c9a",
+      "sha256": "feea0cd1b2b52594570c4615c47768bf273c205ac1821cfe8f78735eee06f54e",
+      "bytes": 11561
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.mjs",
+      "blob": "b20a22dd097a8f551e890120851e2a7e0cdc0852",
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d",
+      "bytes": 16066
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/test_activation_overlay.py",
+      "blob": "eabdcd09be181acdd09b845669e98c6dbc5823e1",
+      "sha256": "ae52d3a38984bf0ffdaf98c064732e65e3f3694fb90b551e153bb3cbb1b03db4",
+      "bytes": 6334
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/vndb-media-oracle.py",
+      "blob": "a41300f989f72f417e80ea4d9cd6116fa1c0cb2e",
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9",
+      "bytes": 2740
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+name: Reference field contracts and previous-reader qualification 4d9f
+
+on:
+  push:
+    branches: [experiment/reference-field-contracts-latest-20261128-4d9f]
+    paths: [.github/workflows/reference-field-corpus-qualification-4d9f.yml]
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: '0'
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  contracts-and-previous-reader:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: tooling
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: 85a8aa49f76fbabd2dc494aad247f74774ff2573
+          persist-credentials: false
+          path: runtime
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          persist-credentials: false
+          path: previous-reader
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: runtime/package-lock.json
+      - name: Install exact dependencies and prepare normal bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/setup
+          npm ci --prefix runtime > reports/setup/npm-ci.stdout.log 2> reports/setup/npm-ci.stderr.log
+          ln -s "$GITHUB_WORKSPACE/runtime/node_modules" tooling/node_modules
+          ln -s "$GITHUB_WORKSPACE/runtime/node_modules" previous-reader/node_modules
+          npm run build:libs --prefix runtime > reports/setup/runtime-libs.stdout.log 2> reports/setup/runtime-libs.stderr.log
+          npm run build:libs --prefix previous-reader > reports/setup/reader-libs.stdout.log 2> reports/setup/reader-libs.stderr.log
+      - name: Portable helper contracts and scoped lint
+        shell: bash
+        run: |
+          python3 tooling/test/perf/record-reference-table-verification/hosted-qualification.py \
+            --phase contracts --source-root runtime --node "$(command -v node)" --output reports/contracts
+      - name: Actual a300 reader rejects candidate schema13 without mutation
+        shell: bash
+        run: |
+          python3 tooling/test/perf/record-reference-table-verification/hosted-qualification.py \
+            --phase old-reader --source-root runtime --reader-root previous-reader \
+            --node "$(command -v node)" --output reports/previous-reader
+      - name: Preserve all contract outcomes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reference-fields85a8-contracts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports
+          if-no-files-found: error
+          retention-days: 30
+

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Prospective complete a300-based format13 reference-field off/on actual writer qualification; no timing claim",
+  "candidateCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "runtimeCommit": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "timingEligible": false,
+  "arms": {
+    "A": "Same frozen candidate with experimentalReferenceTableFields=false (default-off control)",
+    "B": "Same frozen candidate with experimentalReferenceTableFields=true"
+  },
+  "sequence": [
+    "Each separate corpus job: helper contracts and exact source preflight, then A/default-off, then B/enabled, then complete comparison. One additional source-only old-reader contract job."
+  ],
+  "runs": "One full fresh process per arm/corpus; retain every failed attempt; source and protocol frozen before first acquisition. No unchanged retries.",
+  "runtime": {
+    "version": "v22.22.0",
+    "sha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+    "heapMiB": 512
+  },
+  "source": "Exact343 portable corpus/helper/oracles and independent original lazy-ID decoder recovered from persistent Git; only source manifest, evidence-root location, and previous-reader floor13/a300 assertions change. The runtime remains exact85a8 for both corpus arms.",
+  "oracles": [
+    "Every original pinned archive, CRC/size, group/order/row/lookup input remains unchanged.",
+    "Every actual field row independently decodes to its original resolved/fixed source values and independent score.",
+    "Every format4 table entry including unused entries and every original row ID is retained exactly. Full-U admission/fallback counts are recorded.",
+    "Every actual final MBTI chunk is reread in bounded ranges and checked against source-field, lookup-payload and full-envelope SHA256 receipts plus stored checksums.",
+    "Actual format4 final fields are expanded independently to format2 and checksums updated; complete expanded final files and all logical metadata must match the pinned original corpus oracle exactly.",
+    "A/default-off actual files must match the original corpus oracle with only independently linked random generation IDs normalized.",
+    "Complete parser-output hashes must match between A/B; every preserved exact JMdict12-group section and all independent VNDB media paths/groups remain checked.",
+    "Byte reduction is measured from actual written/drained files and must equal exact changed field bytes, not reservations or hypothetical tables."
+  ],
+  "excluded": [
+    "Whole-browser elapsed import speed",
+    "Browser peak/settled memory",
+    "Separate media persistence or formatting work",
+    "SQLite transaction/recovery/restart/lookup outside the focused compatibility tests"
+  ],
+  "resources": {
+    "minimumTempBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallMs": 1200000,
+    "firstExecYieldMs": 30000
+  },
+  "upstreamHelper": "de8d30b5bffa804dc742e28c5cc24b7416468ec2",
+  "revision": {
+    "number": 2,
+    "reason": "Distinct prospective a300 integration after upstream online-content floor12; previous dcfc/f28 observations and every failed acquisition are preserved and are not relabeled. Before any new acquisition, candidate pin advanced from16c to85a8 for the reviewed lint-only rowBytes spelling/call formatting follow-up; no prior observation is relabeled."
+  },
+  "corpusRunSource": "Exact later helper/evidence-only HEAD accepted only when all manifest runtime trees and canonical source/assets match the pinned current profile.",
+  "independentRecordIdDecoder": {
+    "commit": "be24f89e72ffc3b0bca0b38a62fbdf93697de8b1",
+    "mode": "implicit-positive-zero-or-full-float64",
+    "boundary": "Decode the upstream empty Float64Array sentinel to full-capacity positive zero without invoking product getters or attributing upstream allocation saving to format4."
+  },
+  "oldReader": {
+    "readerCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "maximumSupportedVersion": 12,
+    "candidateWrittenVersion": 13,
+    "requiredUnreachedHooks": [
+      "recovery",
+      "contentPrepare",
+      "contentActivateRoot",
+      "persistentPurge",
+      "recordPrepare",
+      "schema",
+      "runtimePragma",
+      "healthRestore"
+    ]
+  },
+  "scopeNote": "The term-sink replay does not run the online optimizer or SQLite publication. Floor13/legacy and online compatibility are separate focused/old-reader/browser gates."
+}
