@@ -125,6 +125,23 @@ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
 const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
 
 /**
+ * @typedef {object} PublishedTermContentCacheEnvelope
+ * @property {boolean} valid
+ * @property {number} count
+ * @property {number} minimumOffset
+ * @property {number} maximumEnd
+ * @property {number} contentBytes
+ */
+
+/**
+ * @typedef {object} TermContentPublicationCache
+ * @property {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
+ * @property {Record<string, number>|null} importMetrics
+ * @property {number} bytes
+ * @property {number} elapsedMs
+ */
+
+/**
  * @typedef {object} InFlightTermContentSourceBatch
  * @property {number[]|Float64Array} offsets
  * @property {number[]|Uint32Array} lengths
@@ -6790,9 +6807,10 @@ void 0 :
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
+     * @param {PublishedTermContentCacheEnvelope|null} [envelope] Consumed synchronously by contiguous publication before its call returns.
      * @returns {number} Number of owned source bytes retained.
      */
-    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null) {
+    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null, envelope = null) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
         if (
             !(spans.buffer instanceof Uint8Array) ||
@@ -6848,17 +6866,28 @@ void 0 :
         let publishedCount = 0;
         let publishedContentBytes = 0;
         let lastPublishedSource = -1
-        for (let i = sourceStart; i < sourceEnd; ++i) {
-            const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-            const offset = spans.offsets[i];
-            const length = spans.lengths[i];
-            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
-            minimumOffset = Math.min(minimumOffset, offset);
-            maximumEnd = Math.max(maximumEnd, offset + length);
-            ++publishedCount;
-            publishedContentBytes += length;
-            lastPublishedSource = i
+        if (envelope !== null && !retainBoundaryOnly) {
+            if (!envelope.valid) { return 0 }
+            minimumOffset = envelope.minimumOffset
+            maximumEnd = envelope.maximumEnd
+            publishedCount = envelope.count
+            publishedContentBytes = envelope.contentBytes
+            lastPublishedSource = sourceEnd - 1
+        } else {
+            // Sample-selected boundary caching intentionally checks only the
+            // final published span, even if an earlier source span is invalid.
+            for (let i = sourceStart; i < sourceEnd; ++i) {
+                const index = staged.indexes[i]
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue }
+                const offset = spans.offsets[i]
+                const length = spans.lengths[i]
+                if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0 }
+                minimumOffset = Math.min(minimumOffset, offset)
+                maximumEnd = Math.max(maximumEnd, offset + length)
+                ++publishedCount
+                publishedContentBytes += length
+                lastPublishedSource = i
+            }
         }
         if (!retainBoundaryOnly && publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
             retainBoundaryOnly = true
@@ -6924,7 +6953,7 @@ void 0 :
             endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
             endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
         );
-        if (contiguousPublished) {
+        if (contiguousPublished && envelope === null) {
             for (let i = 1; i < staged.indexes.length; ++i) {
                 if (staged.indexes[i] !== firstIndex + i) {
                     contiguousPublished = false;
@@ -9787,9 +9816,10 @@ null :
      * @param {number[]|Uint32Array} lengths
      * @param {number} dictNameId
      * @param {boolean} metadataValidated
+     * @param {TermContentPublicationCache|null} [cache]
      * @returns {boolean} Whether the complete range was published.
      */
-    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated, cache = null) {
         if (
             staged === null ||
             !(staged.indexes instanceof Int32Array) ||
@@ -9828,6 +9858,26 @@ null :
         const hash1Table = this._termEntryContentMetaHash1Table
         const hash2Table = this._termEntryContentMetaHash2Table
         const lengthTable = this._termEntryContentMetaLengthTable
+        const spans = cache?.spans ?? null
+        const sourceOffsets = spans?.offsets ?? null
+        const sourceByteLength = spans?.buffer instanceof Uint8Array ? spans.buffer.byteLength : 0
+        const cacheEnvelopeByteLimit = count * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
+        // The same private length column feeds persistence and caching. Fold
+        // its source envelope into this validation pass, but publish no proof
+        // until every reservation succeeds. Shared source-offset columns retain
+        // the original cache scan because another agent could change them.
+        let validateCacheEnvelope = (
+            spans !== null && spans.buffer instanceof Uint8Array &&
+            spans.lengths === lengths && sourceOffsets instanceof Uint32Array &&
+            sourceOffsets.length >= count && sourceOffsets.buffer instanceof ArrayBuffer &&
+            // Large slabs normally retain only one boundary span. Keep their
+            // bounded cache scan instead of adding source checks for every row.
+            Number.isSafeInteger(cacheEnvelopeByteLimit) && sourceByteLength <= cacheEnvelopeByteLimit
+        )
+        let cacheEnvelopeValid = true
+        let cacheMinimumOffset = Infinity
+        let cacheMaximumEnd = 0
+        let cacheContentBytes = 0
         // Caller-owned columns may be views into metadata storage. Scalar
         // publication interleaves its reads and writes; bulk operations require
         // every input to remain unchanged until all writes finish. Native arena
@@ -9852,6 +9902,13 @@ null :
             const target = writes[i]
             const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
             const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
+            if (validateCacheEnvelope && sourceOffsets !== null && sourceOffsets.buffer === target.buffer) {
+                const sourceStart = sourceOffsets.byteOffset
+                const sourceEnd = sourceStart + count * sourceOffsets.BYTES_PER_ELEMENT
+                // Publication is still eligible; only the envelope proof is
+                // unavailable when publication itself changes source offsets.
+                if (sourceStart < targetEnd && targetStart < sourceEnd) { validateCacheEnvelope = false }
+            }
             for (const {values, start} of reads) {
                 if (values.buffer !== target.buffer) { continue }
                 const inputStart = values.byteOffset + start * values.BYTES_PER_ELEMENT
@@ -9881,6 +9938,15 @@ null :
             ) {
                 return false
             }
+            if (validateCacheEnvelope && sourceOffsets !== null) {
+                const sourceOffset = sourceOffsets[i]
+                if (sourceOffset > sourceByteLength || length > sourceByteLength - sourceOffset) {
+                    cacheEnvelopeValid = false
+                }
+                cacheMinimumOffset = Math.min(cacheMinimumOffset, sourceOffset)
+                cacheMaximumEnd = Math.max(cacheMaximumEnd, sourceOffset + length)
+                cacheContentBytes += length
+            }
         }
         this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
         this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
@@ -9888,6 +9954,20 @@ null :
         stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
         this._termEntryContentMetaHashPairPendingCount -= count
         this._termEntryContentMetaHashPairCount += count
+        if (cache !== null) {
+            // Consume the proof before this synchronous publication returns.
+            // It is never stored on the plan or carried across an await.
+            const cacheEnvelope = validateCacheEnvelope ? {
+                valid: cacheEnvelopeValid,
+                count,
+                minimumOffset: cacheMinimumOffset,
+                maximumEnd: cacheMaximumEnd,
+                contentBytes: cacheContentBytes,
+            } : null
+            const cacheStart = cache.importMetrics === null ? 0 : safePerformance.now()
+            cache.bytes = this._cacheRecentPublishedTermContentSources(staged, spans, cache.importMetrics, cacheEnvelope)
+            cache.elapsedMs = cache.importMetrics === null ? 0 : safePerformance.now() - cacheStart
+        }
         return true
     }
 
@@ -9983,6 +10063,7 @@ null :
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
         /* eslint-disable @stylistic/semi */
+        const publicationCache = {spans: pendingContentSpans, importMetrics, bytes: 0, elapsedMs: 0}
         const publishedContiguous = typeof uniformPendingDictName === 'string' && this._tryPublishContiguousArtifactTermContentMetadata(
             stagedContentMetadata,
             pendingContentHash1s,
@@ -9991,6 +10072,7 @@ null :
             pendingLengths,
             uniformPendingDictNameId,
             metadataValidated,
+            publicationCache,
         )
         /* eslint-enable @stylistic/semi */
         for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
@@ -10062,13 +10144,15 @@ null :
             );
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
-            stagedContentMetadata,
-            pendingContentSpans,
-            importMetrics,
-        );
+        const recentSourceCacheBytes = publishedContiguous ? publicationCache.bytes :
+            this._cacheRecentPublishedTermContentSources(
+                stagedContentMetadata,
+                pendingContentSpans,
+                importMetrics,
+            );
         if (importMetrics !== null) {
-            importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
+            importMetrics.dedupRecentSourceCacheMs += publishedContiguous ?
+                publicationCache.elapsedMs : safePerformance.now() - recentSourceCacheStart;
             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
             importMetrics.contentMetadataIndexPublishMs += safePerformance.now() - indexPublishStart;
         }
