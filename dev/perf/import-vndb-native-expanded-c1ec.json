@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Prospective VNDB-only screen for native validation of formerly deferred CRC groups; keep pairwise results separate and require exact hosted source/canary validation before promotion",
+  "wrapperBase": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+  "comparisonBaselines": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "conservative": "20c8ecf87964ce2a24033474865b8241e1ec2eaa"
+  },
+  "candidate": "33936000588d976a1162631f78cfe7a0751de78b",
+  "pairs": 6,
+  "orders": [
+    "AB"
+  ],
+  "dictionaries": [
+    "vndb"
+  ],
+  "expectedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ]
+}
