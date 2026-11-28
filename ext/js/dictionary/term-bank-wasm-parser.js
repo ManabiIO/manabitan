@@ -80,7 +80,12 @@ const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
-/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, supportsQueuedParse?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {{groupIndex: number, sourceBytes: number, result: ReturnType<typeof runParallelParserJob>, released: Promise<void>, release: () => void}} QueuedParallelParserJob */
+/* eslint-disable @stylistic/semi */
+/** @type {WeakSet<Worker>} */
+const queuedParseWorkers = new WeakSet()
+/* eslint-enable @stylistic/semi */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
@@ -3021,6 +3026,13 @@ class ParallelTermBankPipelineRun {
                             chunkIndex: i + 1,
                             chunkCount: this._resultSlots.length,
                         });
+                    /* eslint-disable @stylistic/semi */
+                    } catch (error) {
+                        // Do not release an already queued borrowed successor
+                        // between sink rejection and the outer pipeline catch.
+                        this._fail(error)
+                        throw error
+                    /* eslint-enable @stylistic/semi */
                     } finally {
                         consume?.();
                         delete chunk.releaseBorrowedContent;
@@ -3074,45 +3086,33 @@ class ParallelTermBankPipelineRun {
      * @param {Worker} worker
      */
     async _runWorkerLoop(worker) {
+        /* eslint-disable @stylistic/semi */
+        const canQueue = queuedParseWorkers.has(worker)
+        /** @type {Promise<QueuedParallelParserJob>[]} */
+        const jobs = []
+        /** @param {Promise<void>|null} [after] */
+        const queueNext = (after = null) => {
+            if (this._failed || this._nextWorkerGroupIndex >= this._groups.length) { return }
+            const groupIndex = this._nextWorkerGroupIndex++
+            const job = this._startWorkerJob(worker, groupIndex, after)
+            // Source failures and out-of-order parse failures must stop every
+            // producer even while this loop awaits an earlier borrowed sink.
+            void job.catch((error) => this._fail(error))
+            jobs.push(job)
+        }
         try {
-            while (this._nextWorkerGroupIndex < this._groups.length) {
-                const groupIndex = this._nextWorkerGroupIndex++;
-                if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
-                await this._waitForLead(groupIndex);
-                const sourceGroup = this._groups[groupIndex];
-                const group = await waitForParallelWork(
-                    sourceGroup.map((source) => loadParallelTermBankSource(source)),
-                    () => this._pipelineShouldCancel(),
-                );
-                if (!group.every((source) => (
-                    source instanceof Uint8Array ?
-                        getJsonArrayContentSpan(source) !== null :
-                        isCompressedTermBankSource(source)
-                ))) {
-                    throw new Error('Expected every deferred term-bank source to contain a JSON array');
-                }
-                // Capture this before postMessage transfers and detaches the
-                // source buffers. The byte ratio estimates total rows until
-                // every parallel group has reported its exact row count.
-                const sourceBytes = sumParallelSourceByteLengths(group);
-                const result = await runParallelParserJob(
-                    worker,
-                    groupIndex + 1,
-                    group,
-                    this._version,
-                    this._options,
-                    () => this._pipelineShouldCancel(),
-                );
-                if (result.error !== null) { throw createParallelParserError(result.error); }
-                if (
-                    result.profile === null ||
-                    (result.chunk === null && (result.rowCount !== 0 || result.profile.rowCount !== 0 || result.borrowsWorkerMemory))
-                ) {
-                    throw new Error('Parallel term-bank parser returned an incomplete result');
-                }
-                if (result.chunk !== null && result.chunk.rowCount !== result.rowCount) {
-                    throw new Error('Parallel term-bank parser row count changed during result transfer');
-                }
+            queueNext()
+            while (jobs.length > 0) {
+                const {groupIndex, sourceBytes, result: pendingResult, released, release} = await jobs[0]
+                this._throwIfStopped()
+                // Only one additional request may be waiting at this worker.
+                // Its own source-window admission remains in _startWorkerJob.
+                // Unreceived owned results can transiently occupy one extra
+                // slot per worker, within the unchanged global group bound.
+                if (canQueue && jobs.length < 2) { queueNext(released) }
+                const result = await pendingResult
+                this._throwIfStopped()
+                /* eslint-enable @stylistic/semi */
                 /** @type {(() => void)|null} */
                 let consume = null;
                 /** @type {Promise<void>|null} */
@@ -3126,6 +3126,17 @@ class ParallelTermBankPipelineRun {
                         if (!pending) { return; }
                         pending = false;
                         this._pendingResultConsumers.delete(consumeResult);
+                        /* eslint-disable @stylistic/semi */
+                        if (canQueue && !this._failed) {
+                            try {
+                                this._throwIfStopped()
+                                worker.postMessage({type: 'consume', id: groupIndex + 1})
+                            } catch (error) {
+                                this._fail(error)
+                            }
+                        }
+                        release()
+                        /* eslint-enable @stylistic/semi */
                         resolveConsumed();
                     };
                     consume = consumeResult;
@@ -3138,11 +3149,66 @@ class ParallelTermBankPipelineRun {
                 this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
                 if (consumed !== null) { await consumed; }
+                /* eslint-disable @stylistic/semi */
+                release()
+                void jobs.shift()
+                if (jobs.length === 0) { queueNext() }
+                /* eslint-enable @stylistic/semi */
             }
         } catch (error) {
             this._fail(error);
+            /* eslint-disable @stylistic/semi */
+            // Each admitted request owns its own waiter. A rejected producer
+            // must settle queued peers before this worker's pool lease ends.
+            await Promise.allSettled(jobs.map(async (job) => (await job).result))
+            /* eslint-enable @stylistic/semi */
         }
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * @param {Worker} worker
+     * @param {number} groupIndex
+     * @param {Promise<void>|null} after
+     * @returns {Promise<QueuedParallelParserJob>}
+     */
+    async _startWorkerJob(worker, groupIndex, after) {
+        this._throwIfStopped()
+        await this._waitForLead(groupIndex)
+        this._throwIfStopped()
+        const group = await waitForParallelWork(
+            this._groups[groupIndex].map((source) => loadParallelTermBankSource(source)),
+            () => this._pipelineShouldCancel(),
+        )
+        this._throwIfStopped()
+        if (!group.every((source) => (
+            source instanceof Uint8Array ? getJsonArrayContentSpan(source) !== null : isCompressedTermBankSource(source)
+        ))) {
+            throw new Error('Expected every deferred term-bank source to contain a JSON array')
+        }
+        // Capture the original byte estimate before transferring source buffers.
+        const sourceBytes = sumParallelSourceByteLengths(group)
+        const result = runParallelParserJob(worker, groupIndex + 1, group, this._version, this._options, () => this._pipelineShouldCancel(), after).then((value) => {
+            if (value.error !== null) { throw createParallelParserError(value.error) }
+            if (
+                value.profile === null ||
+                (value.chunk === null && (value.rowCount !== 0 || value.profile.rowCount !== 0 || value.borrowsWorkerMemory))
+            ) {
+                throw new Error('Parallel term-bank parser returned an incomplete result')
+            }
+            if (value.chunk !== null && value.chunk.rowCount !== value.rowCount) {
+                throw new Error('Parallel term-bank parser row count changed during result transfer')
+            }
+            return value
+        })
+        void result.catch((error) => this._fail(error))
+        /** @type {() => void} */
+        let release = () => {}
+        /** @type {Promise<void>} */
+        const released = new Promise((resolve) => { release = resolve })
+        return {groupIndex, sourceBytes, result, released, release}
+    }
+    /* eslint-enable @stylistic/semi */
 
     /** @returns {boolean} */
     _pipelineShouldCancel() {
@@ -3598,6 +3664,9 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             if (data?.type !== 'ready' && data?.type !== 'initialization-error') { return; }
             cleanup();
             if (data.type === 'ready') {
+                /* eslint-disable @stylistic/semi */
+                if (data.supportsQueuedParse === true) { queuedParseWorkers.add(worker) }
+                /* eslint-enable @stylistic/semi */
                 resolve();
             } else {
                 reject(createParallelParserError(data.error));
@@ -3647,9 +3716,10 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
+ * @param {Promise<void>|null} after
  * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
  */
-function runParallelParserJob(worker, id, sources, version, options, shouldCancel) {
+function runParallelParserJob(worker, id, sources, version, options, shouldCancel, after) {
     return new Promise((resolve, reject) => {
         const sourcePreparationStart = safePerformance.now();
         const sourceBuffers = [];
@@ -3691,12 +3761,27 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
             }
         }
         const sourcePreparationMs = Math.max(0, safePerformance.now() - sourcePreparationStart);
-        const timeoutId = setTimeout(() => {
-            cleanup();
-            worker.terminate();
-            const error = new Error(`Term-bank parser worker timed out after ${PARALLEL_WORKER_PARSE_TIMEOUT_MS}ms`);
-            reject(error);
-        }, PARALLEL_WORKER_PARSE_TIMEOUT_MS);
+        /* eslint-disable @stylistic/semi */
+        let settled = false
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        let timeoutId = null
+        const startDeadline = () => {
+            if (settled) { return }
+            timeoutId = setTimeout(() => {
+                cleanup()
+                worker.terminate()
+                reject(new Error(`Term-bank parser worker timed out after ${PARALLEL_WORKER_PARSE_TIMEOUT_MS}ms`))
+            }, PARALLEL_WORKER_PARSE_TIMEOUT_MS)
+        }
+        // A borrowed predecessor may retain its heap through a long storage
+        // wait. Start the parse deadline when the old scheduler would dispatch
+        // this job; cancellation observation remains live during queue wait.
+        if (after === null) {
+            startDeadline()
+        } else {
+            void after.then(startDeadline)
+        }
+        /* eslint-enable @stylistic/semi */
         const cancellationIntervalId = setInterval(() => {
             let cancelled;
             try {
@@ -3777,7 +3862,10 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
             reject(error);
         };
         const cleanup = () => {
-            clearTimeout(timeoutId);
+            /* eslint-disable @stylistic/semi */
+            settled = true
+            if (timeoutId !== null) { clearTimeout(timeoutId) }
+            /* eslint-enable @stylistic/semi */
             clearInterval(cancellationIntervalId);
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
@@ -3796,6 +3884,9 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
             }
             worker.postMessage({
                 type: 'parse',
+
+                queueMode: queuedParseWorkers.has(worker),
+
                 id,
                 sourceBuffers,
                 ...(hasCompressedSources ? {sourceMetadata} : {}),

@@ -10,7 +10,14 @@ if (workerData.disableSharedArrayBuffer === true) { Reflect.set(globalThis, 'Sha
 // Adapt only transport; the production worker and compiled parser run intact.
 globalThis.self = globalThis
 globalThis.addEventListener = (type, listener) => {
-    if (type === 'message') { parentPort.on('message', (data) => listener({data})) }
+    if (type === 'message') {
+        parentPort.on('message', (data) => {
+            listener({data})
+            if (workerData.observeRequests === true) {
+                parentPort.postMessage({type: 'request-observed', requestType: data.type, id: data.id})
+            }
+        })
+    }
 }
 globalThis.postMessage = (message, transfer) => parentPort.postMessage(message, transfer)
 // The URL comes exclusively from the production parser's new Worker call.

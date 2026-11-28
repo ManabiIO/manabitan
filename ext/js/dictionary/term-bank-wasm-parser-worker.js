@@ -32,26 +32,99 @@ import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes} from './ter
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
-/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
+/** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown, queueMode?: unknown}} ParseRequest */
+/** @typedef {{type: 'consume', id: unknown}} ConsumeRequest */
+/** @typedef {{name: string, message: string, stack?: string}} SerializedError */
 
 Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
 /** @type {Promise<void>|null} */
 let initialization = null;
 
+/* eslint-disable @stylistic/semi */
+/** @type {ParseRequest|null} */
+let queuedRequest = null
+let queueRunning = false
+/** @type {number|null} */
+let activeRequestId = null
+/** @type {number|null} */
+let borrowedResultId = null
+/** @type {SerializedError|null} */
+let queueFailure = null
+/* eslint-enable @stylistic/semi */
+
 self.addEventListener('message', onMessage);
 
 /** @param {MessageEvent<unknown>} event */
 function onMessage(event) {
-    const data = /** @type {InitializeRequest|ParseRequest|null} */ (
+    const data = /** @type {InitializeRequest|ParseRequest|ConsumeRequest|null} */ (
         typeof event.data === 'object' ? event.data : null
     );
     if (data?.type === 'initialize') {
         void initialize(data);
     } else if (data?.type === 'parse') {
-        void parse(data);
+        /* eslint-disable @stylistic/semi */
+        if (data.queueMode === true) {
+            enqueueParse(data)
+        } else if (queueRunning || queuedRequest !== null || borrowedResultId !== null || queueFailure !== null) {
+            self.postMessage({type: 'parse-error', id: data.id, error: queueFailure ?? serializeError(new Error('Term-bank parser queue is busy'))})
+        } else {
+            void parse(data)
+        }
+    } else if (data?.type === 'consume' && data.id === borrowedResultId && borrowedResultId !== null) {
+        borrowedResultId = null
+        void drainParseQueue()
+        /* eslint-enable @stylistic/semi */
     }
 }
+
+/* eslint-disable @stylistic/semi */
+/** @param {ParseRequest} data */
+function enqueueParse(data) {
+    if (queueFailure !== null) {
+        self.postMessage({type: 'parse-error', id: data.id, error: queueFailure})
+        return
+    }
+    if (!Number.isSafeInteger(data.id) || /** @type {number} */ (data.id) <= 0 || queuedRequest !== null || data.id === borrowedResultId || data.id === activeRequestId) {
+        failParseQueue(serializeError(new Error('Term-bank parser queued request is invalid')))
+        self.postMessage({type: 'parse-error', id: data.id, error: queueFailure})
+        return
+    }
+    queuedRequest = data
+    void drainParseQueue()
+}
+
+/** Serializes native heap reuse; a borrowed result blocks even already queued work. */
+async function drainParseQueue() {
+    if (queueRunning || borrowedResultId !== null || queueFailure !== null || queuedRequest === null) { return }
+    const data = queuedRequest
+    queuedRequest = null
+    queueRunning = true
+    activeRequestId = /** @type {number} */ (data.id)
+    try {
+        const result = await parse(data)
+        if (result.error !== null) {
+            failParseQueue(result.error)
+        } else if (result.borrowsWorkerMemory) {
+            borrowedResultId = /** @type {number} */ (data.id)
+        }
+    } catch (error) {
+        failParseQueue(serializeError(error))
+    } finally {
+        queueRunning = false
+        activeRequestId = null
+    }
+    void drainParseQueue()
+}
+
+/** @param {SerializedError} error */
+function failParseQueue(error) {
+    queueFailure ??= error
+    const pending = queuedRequest
+    queuedRequest = null
+    if (pending !== null) { self.postMessage({type: 'parse-error', id: pending.id, error: queueFailure}) }
+}
+/* eslint-enable @stylistic/semi */
 
 /** @param {InitializeRequest} data */
 async function initialize(data) {
@@ -62,13 +135,18 @@ async function initialize(data) {
         setTermBankWasmModule(data.module);
         initialization = initializeTermBankWasmParser();
         await initialization;
-        self.postMessage({type: 'ready'});
+        /* eslint-disable @stylistic/semi */
+        self.postMessage({type: 'ready', supportsQueuedParse: true})
+        /* eslint-enable @stylistic/semi */
     } catch (error) {
         self.postMessage({type: 'initialization-error', error: serializeError(error)});
     }
 }
 
-/** @param {ParseRequest} data */
+/**
+ * @param {ParseRequest} data
+ * @returns {Promise<{borrowsWorkerMemory: boolean, error: SerializedError|null}>}
+ */
 async function parse(data) {
     const id = typeof data.id === 'number' && Number.isSafeInteger(data.id) ? data.id : -1;
     const sourceDeliveryMs = Number.isSafeInteger(data.sourceSentEpochMs) && /** @type {number} */ (data.sourceSentEpochMs) >= 0 ?
@@ -237,8 +315,13 @@ async function parse(data) {
             chunk: stableResultChunk,
             profile,
         }, transfer);
+        /* eslint-disable @stylistic/semi */
+        return {borrowsWorkerMemory, error: null}
     } catch (error) {
-        self.postMessage({type: 'parse-error', id, error: serializeError(error)});
+        const serialized = serializeError(error)
+        self.postMessage({type: 'parse-error', id, error: serialized})
+        return {borrowsWorkerMemory: false, error: serialized}
+        /* eslint-enable @stylistic/semi */
     }
 }
 
