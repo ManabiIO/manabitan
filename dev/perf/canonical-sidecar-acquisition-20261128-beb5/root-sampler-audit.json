@@ -1,0 +1,9 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineSamplerSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+  "candidateSamplerSha256": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+  "allOtherModuleStatementsAstIdentical": true,
+  "originalScanStartAndBeforeInventoryByteIdentical": true,
+  "afterInventoryQualificationAndRemainingModuleByteIdentical": true,
+  "review": "All futures are submitted after before-inventory and joined inside the context manager before after-inventory. Ordered future consumption preserves sorted input order. Known read errors retain the original error construction; unexpected exceptions join the pool and still fail acquisition. No temporal, process-coverage, eligibility, interval or comparison threshold changes."
+}

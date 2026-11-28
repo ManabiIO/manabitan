@@ -1,0 +1,186 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "branch": "perf/native-sidecar-canonical-20261128-beb5",
+  "localCommit": "42764bc3b0ac3fe5100a648304e7d58cb1a88e53",
+  "tree": "f68db2831a11dc0b733287f109f08c5ec0a34fde",
+  "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baseTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "status": "",
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "size": 2588,
+      "sha256": "df73d965c63348cf649b032db2fe7aca07a75ba9eb2d5830eb6231bdd87bd65c",
+      "blobSha": "780ffa8a2b336694d7a8649e5b22d7e01b396752",
+      "mode": "100644"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "size": 6206,
+      "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+      "blobSha": "44ec5ff2b33c23b8bf31460c9933e9e66f63f273",
+      "mode": "100644"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "size": 613435,
+      "sha256": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb",
+      "blobSha": "722f0a0056aec03fa2eec9f8cedc4843afcfc3ea",
+      "mode": "100644"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-layout.js",
+      "size": 2346,
+      "sha256": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80",
+      "blobSha": "f3e1299fa99117950dd72fad5e5d1fd8784e3fdb",
+      "mode": "100644"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "size": 28877,
+      "sha256": "785a50f357cae1671e81787cf5f0140d316c01b0f0a9a72fafe0932a814f28d6",
+      "blobSha": "743eb745d0de53b37c1feb6025acb183b436f20c",
+      "mode": "100644"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "size": 366499,
+      "sha256": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59",
+      "blobSha": "205311563fc991a76388d600b817e6b883a91ceb",
+      "mode": "100644"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "size": 13861,
+      "sha256": "d485531b3796491c7cc22657decff9f9a19e5096ed29e2823911a990699d0f97",
+      "blobSha": "49789ee1ce89102e4ca9ef143cc5131b8b37dd32",
+      "mode": "100644"
+    },
+    {
+      "path": "test/term-lookup-native-checksum.test.js",
+      "size": 16877,
+      "sha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53",
+      "blobSha": "de4174b63a1a5e0b64d502a5b1bd4bba33aca8de",
+      "mode": "100644"
+    }
+  ],
+  "remoteCommit": "570ccc3968046269cb00d2053e49d3c32367031a",
+  "remoteBranchReadbackVerified": true,
+  "allBlobShasVerified": true,
+  "remoteTreeEqualsLocalTree": true,
+  "remoteSoleParentVerified": true,
+  "pullRequestCreated": false,
+  "scope": "Frozen production candidate pending hosted source gates and whole-import qualification; component evidence is not a whole-import gain.",
+  "packagedChangedPaths": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-content-canonical-layout.js",
+    "js/dictionary/term-content-canonical-scan.js",
+    "js/dictionary/term-record-opfs-store.js",
+    "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "lib/term-content-canonical-scan-v1.wasm"
+  ],
+  "design": {
+    "checksumStateOffset": 8263840,
+    "checksumScratchOffset": 8263984,
+    "checksumScratchBytes": 61440,
+    "checksumScratchEnd": 8325424,
+    "existingPrefixBytes": 8388608,
+    "newMemoryOrInstanceForChecksum": false,
+    "oldCanonicalFunctionBodiesIdentical": true,
+    "nativeDataOrStartSection": false,
+    "nativeStackGlobalSets": 0,
+    "writerOnly": true,
+    "repairAndReadUseJs": true,
+    "wasmBytesBefore": 1624,
+    "wasmBytesAfter": 6206,
+    "moduleOptionalForOldAbi": true
+  },
+  "localValidation": {
+    "pinnedClangRebuild": "passed, Clang/LLD 21.1.8; manifest compiler/linker flags unchanged",
+    "focusedFiveSuites": {
+      "passed": 192,
+      "failed": 1,
+      "failure": "Existing loader timeout during shared-host memory pressure, retained in original log; isolated sequential rerun passed in 19 ms"
+    },
+    "loaderSequentialRerun": {
+      "passed": 1,
+      "skipped": 3
+    },
+    "writerAndCleanupSuites": {
+      "filesPassed": 4,
+      "testsPassed": 319
+    },
+    "finalNewChecksumTests": {
+      "testsPassed": 12
+    },
+    "newTestLint": "passed, exit 0",
+    "runtimeTypedLint": "resource-blocked, exit 137 in sequential and scoped attempts; not counted as passing",
+    "fullTypesUnitsBuilds": "pending hosted qualification",
+    "unresolvedCorrectnessAssertionFailures": 0,
+    "gitDiffCheck": "passed"
+  },
+  "localLogs": {
+    "canonical-sidecar-focused-tests.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-focused-tests.log",
+      "sha256": "0299db289fe3af1b9b4e27b5df19fabc3516d0b795dfb90f73fdcb9f59c85e86"
+    },
+    "canonical-sidecar-loader-recheck.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-loader-recheck.log",
+      "sha256": "530edb7b9707a9014571a847fdeb2749684530aa2e43efdf17a6440a95e44bf0"
+    },
+    "canonical-sidecar-writer-tests.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-writer-tests.log",
+      "sha256": "61fb5310953a48ce54b9a2020cf0313f3e4f0dfb3be6d008c5bdce05306a4bee"
+    },
+    "canonical-sidecar-new-test-final.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-new-test-final.log",
+      "sha256": "ec9b8234659f2a90e3fdc8901713c659d2034c68bc3454eb236aa37a18aa9060"
+    },
+    "canonical-sidecar-test-lint-final.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-test-lint-final.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "canonical-sidecar-lint.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-lint.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "canonical-sidecar-runtime-lint.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-runtime-lint.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "canonical-sidecar-runtime-lint-scoped.log": {
+      "path": "/workspace/scratch/beb5caac0497/results/canonical-sidecar-runtime-lint-scoped.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    }
+  },
+  "independentAudits": {
+    "canonical-checksum-native-independent.json": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/canonical-checksum-native-independent.json",
+      "sha256": "6b9d8e57a2f8a67b30590e3113aec392063467281d1134df136bfa85299104a3"
+    },
+    "canonical-checksum-js-independent.json": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/canonical-checksum-js-independent.json",
+      "sha256": "2f547e5c64306d5f47911991e9b126db7c09f3c639ddf79ae5f1f0fd178dfbd9"
+    },
+    "canonical-checksum-wasm-trap-independent.json": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/canonical-checksum-wasm-trap-independent.json",
+      "sha256": "d7e7977e43294188b25a6624b0a591c68ceb896865ab2ae753f87fc81dfe2147"
+    },
+    "verify-canonical-checksum-native.mjs": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/verify-canonical-checksum-native.mjs",
+      "sha256": "2bc1b6181839750ce0cc40f11f37684f11953eb41ef771c8988c069300d459dc"
+    },
+    "verify-canonical-checksum-js.mjs": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/verify-canonical-checksum-js.mjs",
+      "sha256": "258bd065bb62d61cfab30ff6c097a5b0732ea6601c20ea46870fd5968380d868"
+    },
+    "verify-canonical-checksum-wasm-trap.mjs": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/verify-canonical-checksum-wasm-trap.mjs",
+      "sha256": "a57e44dfbf95f7572f3c0035205fe3118743a464a1484e392580865170f645b0"
+    },
+    "canonical-checksum-631a.s": {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/canonical-checksum-631a.s",
+      "sha256": "d1b79c1454dc8e776a483b535ccec2d82952bb51c7682719249a4de21049346b"
+    }
+  }
+}

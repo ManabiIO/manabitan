@@ -7,6 +7,7 @@ These are diagnostic, non-atomic observations, never authoritative timings or
 complete peak-memory measurements. No privilege escalation is attempted.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import errno
 import json
 import os
@@ -162,12 +163,19 @@ def sample_memory(root_pid, proc=Path("/proc")):
     before = discover_tree(root_pid, process_inventory(proc))
     values = []
     unavailable = []
-    for process in before["processes"]:
-        pid = process["pid"]
-        try:
-            values.append({**process, **read_smaps(pid, proc)})
-        except (OSError, ValueError, KeyError, IndexError) as error:
-            unavailable.append({**process, "smapsReadError": read_error(error, "smaps_rollup", pid)})
+    if before["processes"]:
+        # Every read stays inside the complete discovery bracket. Consume in
+        # PID order, and join even exceptional tasks before another inventory
+        # or scan can begin. This changes acquisition, not coverage rules.
+        with ThreadPoolExecutor(max_workers=min(4, len(before["processes"]))) as readers:
+            pending = [(process, readers.submit(read_smaps, process["pid"], proc))
+                       for process in before["processes"]]
+            for process, future in pending:
+                pid = process["pid"]
+                try:
+                    values.append({**process, **future.result()})
+                except (OSError, ValueError, KeyError, IndexError) as error:
+                    unavailable.append({**process, "smapsReadError": read_error(error, "smaps_rollup", pid)})
     after = discover_tree(root_pid, process_inventory(proc))
     stable = tree_signature(before) == tree_signature(after)
     after_by_pid = {process["pid"]: process for process in after["processes"]}

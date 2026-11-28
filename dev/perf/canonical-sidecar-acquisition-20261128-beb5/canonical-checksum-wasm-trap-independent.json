@@ -1,0 +1,16 @@
+{
+  "complete": true,
+  "nativeSha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+  "exportOnlyFaultModuleSha256": "4af0c7a1eb5dd1e21221b765e6842e58fbacc7adb226b51142dc7e30113dee0b",
+  "assemblySha256": "d1b79c1454dc8e776a483b535ccec2d82952bb51c7682719249a4de21049346b",
+  "assemblyRebuildIsExact": true,
+  "originalCanonicalFunctionsStackless": true,
+  "stackGlobalReadCount": 1,
+  "stackGlobalWriteCount": 0,
+  "initialStackPointer": 66560,
+  "actualWasmTrap": true,
+  "sourcesUnchanged": true,
+  "helperDisabledAfterTrap": true,
+  "canonicalScanAfterTrapSucceeded": true,
+  "notes": "Only the export section was changed to expose a private global. Setting that global to zero forces a real out-of-bounds WASM store in the unchanged update body. The production module does not export this fault surface. Correctness only."
+}

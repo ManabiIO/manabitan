@@ -1,0 +1,126 @@
+name: Canonical sidecar checksum browser qualification 20261128 beb5
+
+on:
+  push:
+    branches: ['test/canonical-sidecar-browser-20261128-beb5']
+    paths:
+      - '.github/workflows/canonical-sidecar-browser-beb5.yml'
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_COMMIT: 570ccc3968046269cb00d2053e49d3c32367031a
+
+jobs:
+  browser:
+    name: Canonical checksum imports (${{ matrix.dictionary }}, 12 pairs)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check memory acquisition, unchanged eligibility and receipt protocol
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Execute frozen whole-import, semantic and memory protocol
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = Path.cwd()
+          config_path = root / 'dev/perf/canonical-sidecar-qualification-20261128-beb5.json'
+          config = json.loads(config_path.read_text())
+          assert config['candidate'] == os.environ['CANDIDATE_COMMIT']
+          assert config['pairs'] == 12 and config['expectedWorkers'] == 3
+          dictionary = os.environ['PERF_DICTIONARY']
+          evidence = root / 'builds/perf/canonical-sidecar-browser-beb5' / dictionary
+          sources = {}
+          for filename, expected in config['qualificationSourceHashes'].items():
+              actual = hashlib.sha256((root / filename).read_bytes()).hexdigest()
+              assert actual == expected, f'Qualification source changed: {filename}'
+              sources[filename] = actual
+          provenance = {
+              'studyCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'studyTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'configSha256': hashlib.sha256(config_path.read_bytes()).hexdigest(),
+              'qualificationSourceHashes': sources,
+              'memoryAcquisition': config['memoryAcquisition'],
+          }
+          command = [
+              'python', 'dev/perf/import-qualification-20261128-beb5.py',
+              '--baseline', config['baseline'], '--candidate', config['candidate'],
+              '--dictionary', dictionary, '--initial-order', 'AB', '--pairs', '12',
+              '--expected-workers', '3', '--evidence', str(evidence),
+          ]
+          for filename in config['expectedPackageEntries']:
+              command.extend(['--expected-package-entry', filename])
+          for filename in config['expectedAddedPackageEntries']:
+              command.extend(['--expected-added-package-entry', filename])
+          if dictionary == 'vndb':
+              command.extend(['--vndb-sah-allocation-units', '37', '37'])
+          try:
+              subprocess.run(command, check=True)
+          finally:
+              evidence.mkdir(parents=True, exist_ok=True)
+              (evidence / 'qualification-source-identities.json').write_text(json.dumps(provenance, indent=2) + '\n')
+              (evidence / 'qualification-config.json').write_bytes(config_path.read_bytes())
+          PY
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: canonical-sidecar-browser-beb5-${{ matrix.dictionary }}-AB
+          path: builds/perf/canonical-sidecar-browser-beb5/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
+
+  units:
+    name: Canonical checksum complete unit suite
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: npm run test:unit
+
+  source-checks:
+    name: Canonical checksum lint, types, native reproduction and builds
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: npm run test:js
+      - run: npm run test:ts
+      - name: Install pinned compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - run: npm run build:dictionary-wasm -- --check
+      - run: npm run test:build
+      - run: npm run test:json:format

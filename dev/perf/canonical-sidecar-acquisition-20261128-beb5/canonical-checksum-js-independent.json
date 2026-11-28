@@ -1,0 +1,27 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "sourceHashes": {
+    "ext/js/dictionary/term-content-canonical-scan.js": "785a50f357cae1671e81787cf5f0140d316c01b0f0a9a72fafe0932a814f28d6",
+    "ext/js/dictionary/term-content-canonical-layout.js": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80",
+    "ext/js/dictionary/term-record-opfs-store.js": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59",
+    "ext/js/dictionary/dictionary-database.js": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896"
+  },
+  "nativeComparisons": 16,
+  "nativeProviderSuccesses": 1,
+  "nativeProviderFallbacks": 3,
+  "checks": [
+    "uneven streams, empty input, unaligned views and scratch boundaries",
+    "no newly introduced Array iterator callback",
+    "no newly introduced WeakMap method callback",
+    "proxy, subclass, foreign realm, shared/resizable and own-metadata fallback without callbacks",
+    "source constructor/species/method shadows never invoked",
+    "all current native-memory aliases rejected before state or scratch writes",
+    "absent arena, uncached memory and original module safely decline",
+    "current arena replacement; old arena source remains read-only; owner release falls back",
+    "full sidecar parity with current native hashes and order-sensitive length/Math/header-setter fallbacks",
+    "session begin idempotence; end, rollback, failed end and failed prepare release callback"
+  ],
+  "notes": "Correctness and source review only; no timing claim. Native trap injection is covered separately by the owner tests."
+}
