@@ -917,8 +917,11 @@ function isPlainPrivateRecordFieldColumn(value, prototype) {
 function tryEncodeCompactRecordFieldsWithContentBounds(chunk, count) {
     if (!Number.isSafeInteger(count) || count <= 0) { return null; }
     const origin = resolvedContentReferenceOrigins.get(chunk);
+    if (typeof origin === 'undefined') { return null; }
+    const fixedBaseDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentOffsetBase');
     if (
-        typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype ||
+        Object.getPrototypeOf(chunk) !== Object.prototype ||
+        (typeof fixedBaseDescriptor === 'undefined' ? 'fixedContentOffsetBase' in chunk : !('value' in fixedBaseDescriptor)) ||
         Object.getOwnPropertyDescriptor(chunk, 'rowCount')?.value !== count ||
         Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value !== origin ||
         Object.getPrototypeOf(origin) !== Object.prototype ||

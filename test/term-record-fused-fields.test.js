@@ -253,6 +253,58 @@ describe('fused whole-run content bounds and compact record fields', () => {
         expect(actual.fusedRows).toBe(128);
     });
 
+    test.each(['throwing-fixed-base', 'changing-fixed-base', 'map-get', 'entry-plan', 'offset-proxy', 'score-proxy', 'buffer-prototype'])('preserves reads and errors for the %s fallback', async (kind) => {
+        const baseline = fixture(false);
+        const candidate = fixture(true);
+        const reads = [0, 0];
+        for (const [position, value] of [baseline, candidate].entries()) {
+            if (kind === 'throwing-fixed-base' || kind === 'changing-fixed-base') {
+                Object.defineProperty(value.chunk, 'fixedContentOffsetBase', {get() {
+                    ++reads[position];
+                    if (kind === 'throwing-fixed-base') { throw new Error('Fixed base getter'); }
+                    if (reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
+                    return void 0;
+                }});
+            } else if (kind === 'map-get') {
+                const original = value.prepared.get.bind(value.prepared);
+                value.prepared.get = (key) => {
+                    ++reads[position];
+                    if (reads[position] === 2) { value.references.offsets[0] = 27; }
+                    return original(key);
+                };
+            } else if (kind === 'entry-plan') {
+                const entry = value.prepared.get(`0:${value.chunk.rowCount}`);
+                if (typeof entry === 'undefined') { throw new Error('Missing oracle entry'); }
+                const plan = entry.preinternedPlan;
+                Object.defineProperty(entry, 'preinternedPlan', {get() {
+                    ++reads[position];
+                    if (reads[position] === 3) { value.references.offsets[0] = 27; }
+                    return plan;
+                }});
+            } else if (kind === 'offset-proxy') {
+                value.references.offsets = new Proxy(value.references.offsets, {
+                    get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
+                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                });
+            } else if (kind === 'score-proxy') {
+                value.chunk.scoreList = new Proxy(value.chunk.scoreList, {
+                    get(target, key) { ++reads[position]; return Reflect.get(target, key, target); },
+                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                });
+            } else {
+                Object.setPrototypeOf(value.references.offsets.buffer, new Proxy(ArrayBuffer.prototype, {
+                    getPrototypeOf(target) { ++reads[position]; return Reflect.getPrototypeOf(target); },
+                }));
+            }
+        }
+        const expected = await capture(baseline);
+        const actual = await capture(candidate);
+        expect(actual.error).toEqual(expected.error);
+        expect(actual.appends).toEqual(expected.appends);
+        expect(actual.fusedRows).toBe(0);
+        expect(reads[1]).toBe(reads[0]);
+    });
+
     test('requires original entry identity and data bindings without invoking proxy traps', () => {
         const value = fixture(true);
         const key = `0:${value.chunk.rowCount}`;

@@ -63,6 +63,8 @@ export function getSynchronousWholePreparedTermLookupIndex(indexes, count) {
     const origin = preparedOrigins.get(prepared);
     if (
         typeof origin === 'undefined' || Object.getPrototypeOf(prepared) !== Object.prototype ||
+        !ArrayBuffer.isView(origin.bytes) || Object.getPrototypeOf(origin.bytes) !== Uint8Array.prototype ||
+        typeof origin.preinternedPlan !== 'object' || origin.preinternedPlan === null ||
         Object.getOwnPropertyDescriptor(prepared, 'bytes')?.value !== origin.bytes ||
         Object.getOwnPropertyDescriptor(prepared, 'preinternedPlan')?.value !== origin.preinternedPlan
     ) { return null; }
