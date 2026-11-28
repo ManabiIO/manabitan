@@ -320,7 +320,7 @@ describe('whole owner integration and fallbacks', () => {
         const {store} = storeFixture(native)
         const whole = vi.spyOn(native, 'tryEncodeWhole')
         Object.defineProperty(value.indexes, 'has', {configurable: true,
-            value(key) {
+            value(/** @type {string} */ key) {
                 delete /** @type {{has?: unknown}} */ (value.indexes).has
                 value.chunk.rowCount = 63
                 return Map.prototype.has.call(this, key)
@@ -339,7 +339,7 @@ describe('whole owner integration and fallbacks', () => {
         const whole = vi.spyOn(native, 'tryEncodeWhole')
         const original = value.entry
         Object.defineProperty(value.indexes, 'has', {configurable: true,
-            value(key) {
+            value(/** @type {string} */ key) {
                 delete /** @type {{has?: unknown}} */ (value.indexes).has
                 value.indexes.set('0:64', {...original})
                 value.chunk.resolvedContentReferences.offsets.set([901, 900])
@@ -380,17 +380,24 @@ describe('whole owner integration and fallbacks', () => {
         const typedPrototype = Object.getPrototypeOf(Int32Array.prototype)
         const intrinsic = Object.getOwnPropertyDescriptor(typedPrototype, 'length')?.get
         if (typeof intrinsic !== 'function') { throw new Error('Missing intrinsic length') }
+        /** @type {string[]} */
         const events = []
         const lateGet = vi.fn((key) => {
             events.push('late-get')
             return Map.prototype.get.call(value.indexes, key)
         })
-        const getter = vi.fn(function readInheritedLength() {
-            events.push('score-length')
-            delete /** @type {{length?: unknown}} */ (Int32Array.prototype).length
-            Object.defineProperty(value.indexes, 'get', {value: lateGet, configurable: true})
-            return intrinsic.call(this)
-        })
+        const getter = vi.fn(
+            /**
+             * @this {Int32Array}
+             * @returns {number}
+             */
+            function readInheritedLength() {
+                events.push('score-length')
+                delete /** @type {{length?: unknown}} */ (Int32Array.prototype).length
+                Object.defineProperty(value.indexes, 'get', {value: lateGet, configurable: true})
+                return intrinsic.call(this)
+            },
+        )
         // eslint-disable-next-line no-extend-native -- One-shot adversarial getter is removed by the getter and in finally.
         Object.defineProperty(Int32Array.prototype, 'length', {get: getter, configurable: true})
         try {
@@ -414,6 +421,7 @@ describe('whole owner integration and fallbacks', () => {
         for (const owned of [false, true]) {
             const value = fixture()
             if (!owned) { value.indexes = new Map(value.indexes) }
+            /** @type {string[]} */
             const events = []
             const column = value.chunk.resolvedContentReferences.uniqueIndexList
             if (kind === 'column-proxy') {
