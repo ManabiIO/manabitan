@@ -8,9 +8,9 @@
     "sourceFileCount": 14,
     "targets": [
         {
-            "name": "term-content-canonical-scan-v2.wasm",
+            "name": "term-content-canonical-scan-v1.wasm",
             "sources": [
-                "ext/js/dictionary/wasm/term-content-canonical-scan-v2.c"
+                "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
             ],
             "arguments": [
                 "--target=wasm32",

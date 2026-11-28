@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// The module filename is a stable build asset; the exported ABI governs compatibility.
 // Private ABI v2 packs a hash fingerprint beside each dense slot identity.
 // The kernel owns only the reserved prefix, never table copies.
 export const CANONICAL_SCAN_ABI_VERSION = 2;

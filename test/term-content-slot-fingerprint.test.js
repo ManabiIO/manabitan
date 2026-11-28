@@ -12,7 +12,7 @@ import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonica
 import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metadata-arena.js';
 import {CANONICAL_SCAN_ABI_VERSION, TERM_CONTENT_METADATA_SLOT_INDEX_MASK} from '../ext/js/dictionary/term-content-canonical-layout.js';
 
-const nativeModule = await WebAssembly.compile(await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)));
+const nativeModule = await WebAssembly.compile(await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)));
 const previousModule = await WebAssembly.compile(await fs.readFile(new URL('./data/term-content-canonical-scan-v1.wasm', import.meta.url)));
 
 /**

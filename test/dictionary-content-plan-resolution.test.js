@@ -20,7 +20,7 @@ let canonicalModule
 let parserModule
 
 beforeAll(async () => {
-    canonicalModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)))
+    canonicalModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)))
     parserModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
 })
 

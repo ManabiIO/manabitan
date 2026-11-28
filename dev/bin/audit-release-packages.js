@@ -32,7 +32,7 @@ const hash = (/** @type {Uint8Array|string} */ bytes) => createHash('sha256').up
 const requiredNativeAssets = new Set([
     'lib/term-bank-parser.wasm',
     'lib/zstd.wasm',
-    'lib/term-content-canonical-scan-v2.wasm',
+    'lib/term-content-canonical-scan-v1.wasm',
 ]);
 const manifestUtil = new ManifestUtil();
 /** @type {Map<string, string>} */
