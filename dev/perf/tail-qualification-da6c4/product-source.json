@@ -1,0 +1,119 @@
+{
+  "base": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baseTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "candidateTree": "c89d9747a4e1836913e98497d7c3613d0f115eee",
+  "files": [
+    {
+      "path": "eslint.config.js",
+      "blob": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8",
+      "bytes": 39413,
+      "sha256": "f500c76774bb51ddfbe7b8c307a53ac4186bab1630e2860d98ff8017b2b7d287",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+      "blob": "6655bd36acb4b56c2a288f40314eaaaebe6433c9",
+      "bytes": 9395,
+      "sha256": "1e81a2767b83cde9afba7cfda38f47bda094f4c5396b01e76563c54dfc490645",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "blob": "4b66a584d56fb49fc39701afac5d524d9c836ab9",
+      "bytes": 627247,
+      "sha256": "ea758c00848af5bce809bd2059532aa948c34387adbe84b0f7efb153b2e2bba5",
+      "matchesOwnedHead": false
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-import-session.js",
+      "blob": "32574553d57b302880f1235a59000a3bb9dbef4c",
+      "bytes": 11294,
+      "sha256": "ac9567eb0f013a28f4cb298a90126fb0e1c009fdcf81cb71bf29525913fcfd78",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "blob": "9ed45bf106b1e81712776fda5a716236ad5b3a17",
+      "bytes": 350786,
+      "sha256": "a095e327f36ad531dcee5b4f80706d6093cafc2af190c0a9a6ba4ab7abd7d409",
+      "matchesOwnedHead": false
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "blob": "2c78d2313a6622c3f146dc0f6a79ad6585856bb7",
+      "bytes": 215524,
+      "sha256": "a46b314a0a6f4a7365cac84993d1bbdef50ad1b42f1f8f9fef050ee6a1daaba2",
+      "matchesOwnedHead": false
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "blob": "84326a4b654bb0485b82a3cce557b2cb5571e09a",
+      "bytes": 6389,
+      "sha256": "8a92dc086f7614483a3539b21892ea22fec320c00235563838b5be1d8ea9f157",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "blob": "1310d598e4e230eed12c415eb4fbf9be60c8c5a4",
+      "bytes": 42332,
+      "sha256": "4454ba014404a67a4e8c833538792131f18e5c27dd619678f98749a9191384d8",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/artifact-term-chunk-pipeline.test.js",
+      "blob": "ce42be05f52afb26da5f0bf3eeb0dbbdd8251ba9",
+      "bytes": 20174,
+      "sha256": "8d48c8c8e86790b784e8ba6f2e4972a64fa59b726826b485c79429c597a30776",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/dictionary-database-chunk-pipeline.test.js",
+      "blob": "c3800ccc9d91f03143447e430203f3165d726a3c",
+      "bytes": 27651,
+      "sha256": "616ed3822b49858c68d63abbc41acdc5540a7da2ba568dc2a7b75dd42f51d0ec",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/dictionary-database-content-dedup.test.js",
+      "blob": "050293ad0a130fcb7b2dfbdcd14a146c844556e2",
+      "bytes": 169002,
+      "sha256": "0fb86ef4f72cb9e3623c7e49d282a92cb0ecec88363d9faced6f47519a0203f7",
+      "matchesOwnedHead": false
+    },
+    {
+      "path": "test/dictionary-import-ownership.test.js",
+      "blob": "fe94582d3b6714afeee4d85f42b6ce78ce2cb0bc",
+      "bytes": 43369,
+      "sha256": "2b5d290d8e09514e3261d77479dab6f951c1fc997796c3638782b48682137548",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/dictionary-importer-chunk-completion.test.js",
+      "blob": "71b51c6cccf7e0d0bb775fc935d25a1e1c6822fa",
+      "bytes": 10596,
+      "sha256": "5d8985b02fa3551c2d0391cfa5a0c5843d69e4a109717a5cfdb8aeb9d9aff4ae",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/term-bank-pipeline-completion.test.js",
+      "blob": "1b248431410a9d35ae16db8e7869f89f545d84e1",
+      "bytes": 27521,
+      "sha256": "07a008a77a8cafa83009c82415120654dbc22cb57f4c258338d9a0a8f180a0e7",
+      "matchesOwnedHead": false
+    },
+    {
+      "path": "test/zstd-term-content-initialization.test.js",
+      "blob": "2271f2744adda13d0e902281aadbae80c2f2dd3d",
+      "bytes": 17873,
+      "sha256": "af52bd08e04b6de29a2759ad3d9cd7c43c0f896622d321887d0699450d7e761b",
+      "matchesOwnedHead": true
+    },
+    {
+      "path": "test/zstd-term-content-overlap.test.js",
+      "blob": "b152488474601d4a1ee2156803635cfbe3e22a6c",
+      "bytes": 7478,
+      "sha256": "60a6e1fe5b535c76eb0dccbf57281f13e18e875ac112e0e4330468169774decc",
+      "matchesOwnedHead": true
+    }
+  ]
+}

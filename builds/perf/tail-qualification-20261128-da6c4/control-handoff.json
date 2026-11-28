@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "kind": "owned-tail-qualification-control-handoff",
+  "status": "Source reviewed; local executor unavailable; hosted35-method control and full candidate repository gates required before acquisition.",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "tree": "c89d9747a4e1836913e98497d7c3613d0f115eee"
+  },
+  "publication": {
+    "baseCommit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "branch": "perf/jmdict-tail-qualification-20261128-da6c4",
+    "sourceFiles": [
+      {
+        "name": "common-runner.py",
+        "path": "dev/perf/tail-qualification-da6c4/common-runner.py",
+        "bytes": 20035,
+        "sha256": "18a3dcf5a10c506b71a60e6ab33416a7338dc3dd66ca927a301ce4ed5aca5a00",
+        "blob": "6667622563c7fbeb35b9e5381685db2474d2789f"
+      },
+      {
+        "name": "tail_package_identity.py",
+        "path": "dev/perf/tail-qualification-da6c4/tail_package_identity.py",
+        "bytes": 2040,
+        "sha256": "1609480fd269c7236b666593299eed07b05e6695d556d0f226da6e3f54fb2acb",
+        "blob": "596192018784611557117156a15c6401e52846e0"
+      },
+      {
+        "name": "tail_stats.py",
+        "path": "dev/perf/tail-qualification-da6c4/tail_stats.py",
+        "bytes": 10064,
+        "sha256": "0712756d4475723555d892e35a3423025a2df81f26ddbab0d5691f6ed8ca2eee",
+        "blob": "24acf1090893710bc85cdfa89edc2edd7ca39b1c"
+      },
+      {
+        "name": "test_tail_stats.py",
+        "path": "dev/perf/tail-qualification-da6c4/test_tail_stats.py",
+        "bytes": 15487,
+        "sha256": "29c3e9364cda5c80755645d488fafb7a94ed297ea335d31174e773073c1e5305",
+        "blob": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9"
+      },
+      {
+        "name": "run.py",
+        "path": "dev/perf/tail-qualification-da6c4/run.py",
+        "bytes": 27506,
+        "sha256": "bafcc1f3fc903895971558833da69d32e9db6bb910834424f029eec9c25cb3d4",
+        "blob": "47d9d205482a10e516af2e2ba907256316a27375"
+      },
+      {
+        "name": "product-source.json",
+        "path": "dev/perf/tail-qualification-da6c4/product-source.json",
+        "bytes": 4479,
+        "sha256": "e95db630ce5123d5550dd7d1d6a24fd8b5ac24c571ae531ffe8aac3d8897c643",
+        "blob": "60f6411bf9f9d6d53e681f236494405aadd41a43"
+      },
+      {
+        "name": "pack_artifacts.py",
+        "path": "dev/perf/tail-qualification-da6c4/pack_artifacts.py",
+        "bytes": 5212,
+        "sha256": "edcf87e9d8863c4ddc1bff9313e7571aadc53cc8704b655756766aaa17b3a030",
+        "blob": "183440f60df74d79c6a2c449a53c4e97320af358"
+      },
+      {
+        "name": "report_results.py",
+        "path": "dev/perf/tail-qualification-da6c4/report_results.py",
+        "bytes": 3608,
+        "sha256": "b1c6eef66b56479b120120515d4bf7e01022d6c93adb2568f5418432444e24d4",
+        "blob": "ba7c8b078d74a1ef6f04f4c3f382ef72871cf9b1"
+      },
+      {
+        "name": "plan.json",
+        "path": "dev/perf/tail-qualification-da6c4/plan.json",
+        "bytes": 46361,
+        "sha256": "23fafee81b4bb03ed31e85041d1087047ddbe5d5c909c958933df0bd0da76a11",
+        "blob": "aa406b9d9f1cd91bf6a315784edab4d0b9de23b5"
+      },
+      {
+        "name": "test_controls.py",
+        "path": "dev/perf/tail-qualification-da6c4/test_controls.py",
+        "bytes": 13401,
+        "sha256": "f088f1d69da61147564615d24c3b6db48405639d75ff1083c1a23c112198e686",
+        "blob": "959b00addf9a7f09e5a925e625b08635d875cbaa"
+      },
+      {
+        "name": "test_pack_artifacts.py",
+        "path": "dev/perf/tail-qualification-da6c4/test_pack_artifacts.py",
+        "bytes": 4741,
+        "sha256": "3e58ffe63336f32e4f6f23d236afdaddc72e631a424fd445d1a89ff06cc5958f",
+        "blob": "2b133adce7faace16641ea72f4d6a9ecbd45ab1b"
+      },
+      {
+        "name": "workflow.yml",
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "bytes": 16202,
+        "sha256": "d628dbb9dbf34b36f0ee79c804dfdb712d90d9e8d7a7b6b33d8855c226d024d4",
+        "blob": "3164e7632cf487896b2d0679ba6e9530e76f3b2b"
+      },
+      {
+        "name": "source-manifest.json",
+        "path": "dev/perf/tail-qualification-da6c4/source-manifest.json",
+        "bytes": 6402,
+        "sha256": "b25b8370ee61093dd36a9c908e71557749af3eea9b1c5ec3d259e3a4afa34531",
+        "blob": "de910bafbd130c520cc84168b6f101150c2486c8"
+      }
+    ],
+    "additionalEvidencePrefix": "builds/perf/tail-qualification-20261128-da6c4/",
+    "important": "Create this new qualification branch from cb77; do not base it on the older research/alias branch. The wrapper requires candidate ancestry and permits only these controls/workflow and this evidence prefix."
+  },
+  "planBlob": "aa406b9d9f1cd91bf6a315784edab4d0b9de23b5",
+  "manifestBlob": "de910bafbd130c520cc84168b6f101150c2486c8",
+  "workflowBlob": "3164e7632cf487896b2d0679ba6e9530e76f3b2b",
+  "sourceOnlyValidation": {
+    "blob": "ec547e0edbc1421c35aee704629fed3e9d0d1eb8",
+    "bytes": 5562,
+    "sha256": "2dcf2e5a6a4f6ee27986287463d5cfb5380912f5f37fe46216d167daaf4b30e5"
+  },
+  "reviews": {
+    "statistics": "84d852e1cdc54b2c67610c847744e1680a729598",
+    "statisticsHandoff": "28f819b2ee665d3ebc55f56c93fb95e570c22d76",
+    "rootWrapperWorkflowReview": "Root read47d9wrapper/3164workflow and found no blocker; final manifest/artifact/test review remains a publication prerequisite.",
+    "peerWrapperReview": "Peer found final-state capture gap; repaired and covered by the unexecuted regression tests. Subsequent full source review can bind this exact final set."
+  },
+  "stages": [
+    "Complete clean cb77 repository and control gates.",
+    "Independent JMdict AB and BA:24candidatepairs+8identicalcontrols+4warmups each, unchanged complete semantic/media/memory checks; both must pass.",
+    "Only then Jitendex and VNDB AB/BA:12pairs+4controls+4warmups each, unchanged nonregression and memory checks.",
+    "Final aggregate re-evaluates each complete gate; no pooling or exclusions."
+  ],
+  "observationsAcquired": 0,
+  "unchangedReruns": false,
+  "productSourcesChangedByControls": false,
+  "existingCohortsChanged": false,
+  "refsOrPRsChanged": false,
+  "exactOrdinaryCodeStatement": "Copied c981 common-runner differs only repository-root depth and unique helper module import; all ordinary observation, strict receipt, exhaustive media and memory acquisition code is byte-identical.",
+  "diagnostic": "Raw parserParallelOwnedTailLookaheadCount and mirror paths are recorded after acquisition. No observation is excluded or selected by their value; mirrors are never summed and the count is not a CPU-overlap measure.",
+  "artifactTransport": "Always-run compact stdout and exact complete-evidence.tar.gz with artifact-preservation.json. Only reproducible duplicated runtime worktrees are excluded, explicitly; packages and every original result/failure remain in the archive.",
+  "limitations": [
+    "No local Python/source gate execution while the executor is unavailable.",
+    "No browser measurement or claim before the prescribed hosted gates.",
+    "This f28/cb77 study is independent of older dcfc alias and rejected548 content-overlap evidence."
+  ]
+}

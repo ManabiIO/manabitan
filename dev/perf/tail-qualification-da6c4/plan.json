@@ -1,0 +1,2052 @@
+{
+  "schema": "manabitan-owned-tail-qualification-v1",
+  "status": "prospective-no-observations-acquired",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "tree": "c89d9747a4e1836913e98497d7c3613d0f115eee"
+  },
+  "productSourceManifestBlob": "60f6411bf9f9d6d53e681f236494405aadd41a43",
+  "productReview": "Root19-scenario focused tests and independent source review precede this complete hosted gate; they do not replace it.",
+  "distinction": "This late parser-tail admission product is different from the rejected whole-pipeline548/#977 candidate. No older timing is carried forward.",
+  "publication": {
+    "baseCommit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "controlDirectory": "dev/perf/tail-qualification-da6c4",
+    "workflowPath": ".github/workflows/tail-qualification-da6c4.yml",
+    "qualificationBranch": "perf/jmdict-tail-qualification-20261128-da6c4",
+    "productBranch": "perf/jmdict-tail-overlap-20261128-da6c4",
+    "onlyAdditionalEvidencePrefix": "builds/perf/tail-qualification-20261128-da6c4/"
+  },
+  "sourcePolicy": "Both source commits/trees, the complete16-file product inventory, every control and every imported stock helper are checked before acquisition and afterward. Research checkout must equal GITHUB_SHA and remain clean. Each runtime builds independently with exact hardlinked dependencies in a real ignored node_modules directory; no symlink-ignore exception.",
+  "commonRunner": {
+    "ref": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "blob": "7bfac83eedfbae61590b849c0934060c30ff4cef",
+    "sha256": "01b41fcc5f4589f77637acfa21de374d705d32cefaa8673807501cdfeb05e15b",
+    "adaptations": [
+      "Repository root parents[2] becomes parents[3] for the nested control directory.",
+      "Import package_identity is renamed tail_package_identity; its function source is an unchanged exact copy of blob596192018784611557117156a15c6401e52846e0."
+    ],
+    "ordinaryAcquisitionCodeChanged": false
+  },
+  "verification": {
+    "runsOn": "ubuntu-26.04",
+    "nodeVersion": "22.22.0",
+    "compilerPackages": [
+      "clang-21",
+      "lld-21"
+    ],
+    "scope": "Clean exact candidate worktree; complete repository inventory. The maxWorkers2 cap limits concurrency without excluding tests or changing timeouts.",
+    "commands": [
+      {
+        "id": "control-tests",
+        "scope": "controls",
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "dev/perf/tail-qualification-da6c4",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "original-receipt-tests",
+        "scope": "controls",
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "dev/perf/import-memory-20261125-a7f7",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "libraries",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ]
+      },
+      {
+        "id": "licenses",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ]
+      },
+      {
+        "id": "javascript",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:js"
+        ]
+      },
+      {
+        "id": "types",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:ts"
+        ]
+      },
+      {
+        "id": "css",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:css"
+        ]
+      },
+      {
+        "id": "html",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:html"
+        ]
+      },
+      {
+        "id": "markdown",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:md"
+        ]
+      },
+      {
+        "id": "json-format",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:json:format"
+        ]
+      },
+      {
+        "id": "json-types",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:json:types",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "all-units",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "options-units",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:unit:options",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "native-byte-check",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "build:dictionary-wasm",
+          "--",
+          "--check"
+        ]
+      },
+      {
+        "id": "all-targets",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:build"
+        ]
+      }
+    ]
+  },
+  "stages": [
+    {
+      "name": "repository-verification",
+      "prerequisites": [],
+      "success": "Every control test, original receipt test and complete candidate repository gate passes."
+    },
+    {
+      "name": "jmdict",
+      "prerequisites": [
+        "repository-verification"
+      ],
+      "cells": [
+        [
+          "jmdict",
+          "AB"
+        ],
+        [
+          "jmdict",
+          "BA"
+        ]
+      ],
+      "success": "Both independent hosts pass their timing, original complete semantic/media, and separate strict memory gates."
+    },
+    {
+      "name": "nonregression",
+      "prerequisites": [
+        "repository-verification",
+        "jmdict"
+      ],
+      "cells": [
+        [
+          "jitendex",
+          "AB"
+        ],
+        [
+          "jitendex",
+          "BA"
+        ],
+        [
+          "vndb",
+          "AB"
+        ],
+        [
+          "vndb",
+          "BA"
+        ]
+      ],
+      "success": "All four independent hosts pass their nonregression, original complete semantic/media, and separate strict memory gates."
+    }
+  ],
+  "schedules": {
+    "jmdict": {
+      "AB": [
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-13-A",
+          "kind": "candidate",
+          "pair": 13,
+          "arm": "A"
+        },
+        {
+          "id": "pair-13-B",
+          "kind": "candidate",
+          "pair": 13,
+          "arm": "B"
+        },
+        {
+          "id": "pair-14-B",
+          "kind": "candidate",
+          "pair": 14,
+          "arm": "B"
+        },
+        {
+          "id": "pair-14-A",
+          "kind": "candidate",
+          "pair": 14,
+          "arm": "A"
+        },
+        {
+          "id": "pair-15-A",
+          "kind": "candidate",
+          "pair": 15,
+          "arm": "A"
+        },
+        {
+          "id": "pair-15-B",
+          "kind": "candidate",
+          "pair": 15,
+          "arm": "B"
+        },
+        {
+          "id": "control-05-A",
+          "kind": "control",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "control-05-C",
+          "kind": "control",
+          "pair": 5,
+          "arm": "C"
+        },
+        {
+          "id": "pair-16-B",
+          "kind": "candidate",
+          "pair": 16,
+          "arm": "B"
+        },
+        {
+          "id": "pair-16-A",
+          "kind": "candidate",
+          "pair": 16,
+          "arm": "A"
+        },
+        {
+          "id": "pair-17-A",
+          "kind": "candidate",
+          "pair": 17,
+          "arm": "A"
+        },
+        {
+          "id": "pair-17-B",
+          "kind": "candidate",
+          "pair": 17,
+          "arm": "B"
+        },
+        {
+          "id": "pair-18-B",
+          "kind": "candidate",
+          "pair": 18,
+          "arm": "B"
+        },
+        {
+          "id": "pair-18-A",
+          "kind": "candidate",
+          "pair": 18,
+          "arm": "A"
+        },
+        {
+          "id": "control-06-C",
+          "kind": "control",
+          "pair": 6,
+          "arm": "C"
+        },
+        {
+          "id": "control-06-A",
+          "kind": "control",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "pair-19-A",
+          "kind": "candidate",
+          "pair": 19,
+          "arm": "A"
+        },
+        {
+          "id": "pair-19-B",
+          "kind": "candidate",
+          "pair": 19,
+          "arm": "B"
+        },
+        {
+          "id": "pair-20-B",
+          "kind": "candidate",
+          "pair": 20,
+          "arm": "B"
+        },
+        {
+          "id": "pair-20-A",
+          "kind": "candidate",
+          "pair": 20,
+          "arm": "A"
+        },
+        {
+          "id": "pair-21-A",
+          "kind": "candidate",
+          "pair": 21,
+          "arm": "A"
+        },
+        {
+          "id": "pair-21-B",
+          "kind": "candidate",
+          "pair": 21,
+          "arm": "B"
+        },
+        {
+          "id": "control-07-A",
+          "kind": "control",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "control-07-C",
+          "kind": "control",
+          "pair": 7,
+          "arm": "C"
+        },
+        {
+          "id": "pair-22-B",
+          "kind": "candidate",
+          "pair": 22,
+          "arm": "B"
+        },
+        {
+          "id": "pair-22-A",
+          "kind": "candidate",
+          "pair": 22,
+          "arm": "A"
+        },
+        {
+          "id": "pair-23-A",
+          "kind": "candidate",
+          "pair": 23,
+          "arm": "A"
+        },
+        {
+          "id": "pair-23-B",
+          "kind": "candidate",
+          "pair": 23,
+          "arm": "B"
+        },
+        {
+          "id": "pair-24-B",
+          "kind": "candidate",
+          "pair": 24,
+          "arm": "B"
+        },
+        {
+          "id": "pair-24-A",
+          "kind": "candidate",
+          "pair": 24,
+          "arm": "A"
+        },
+        {
+          "id": "control-08-C",
+          "kind": "control",
+          "pair": 8,
+          "arm": "C"
+        },
+        {
+          "id": "control-08-A",
+          "kind": "control",
+          "pair": 8,
+          "arm": "A"
+        }
+      ],
+      "BA": [
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        },
+        {
+          "id": "pair-13-B",
+          "kind": "candidate",
+          "pair": 13,
+          "arm": "B"
+        },
+        {
+          "id": "pair-13-A",
+          "kind": "candidate",
+          "pair": 13,
+          "arm": "A"
+        },
+        {
+          "id": "pair-14-A",
+          "kind": "candidate",
+          "pair": 14,
+          "arm": "A"
+        },
+        {
+          "id": "pair-14-B",
+          "kind": "candidate",
+          "pair": 14,
+          "arm": "B"
+        },
+        {
+          "id": "pair-15-B",
+          "kind": "candidate",
+          "pair": 15,
+          "arm": "B"
+        },
+        {
+          "id": "pair-15-A",
+          "kind": "candidate",
+          "pair": 15,
+          "arm": "A"
+        },
+        {
+          "id": "control-05-C",
+          "kind": "control",
+          "pair": 5,
+          "arm": "C"
+        },
+        {
+          "id": "control-05-A",
+          "kind": "control",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-16-A",
+          "kind": "candidate",
+          "pair": 16,
+          "arm": "A"
+        },
+        {
+          "id": "pair-16-B",
+          "kind": "candidate",
+          "pair": 16,
+          "arm": "B"
+        },
+        {
+          "id": "pair-17-B",
+          "kind": "candidate",
+          "pair": 17,
+          "arm": "B"
+        },
+        {
+          "id": "pair-17-A",
+          "kind": "candidate",
+          "pair": 17,
+          "arm": "A"
+        },
+        {
+          "id": "pair-18-A",
+          "kind": "candidate",
+          "pair": 18,
+          "arm": "A"
+        },
+        {
+          "id": "pair-18-B",
+          "kind": "candidate",
+          "pair": 18,
+          "arm": "B"
+        },
+        {
+          "id": "control-06-A",
+          "kind": "control",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "control-06-C",
+          "kind": "control",
+          "pair": 6,
+          "arm": "C"
+        },
+        {
+          "id": "pair-19-B",
+          "kind": "candidate",
+          "pair": 19,
+          "arm": "B"
+        },
+        {
+          "id": "pair-19-A",
+          "kind": "candidate",
+          "pair": 19,
+          "arm": "A"
+        },
+        {
+          "id": "pair-20-A",
+          "kind": "candidate",
+          "pair": 20,
+          "arm": "A"
+        },
+        {
+          "id": "pair-20-B",
+          "kind": "candidate",
+          "pair": 20,
+          "arm": "B"
+        },
+        {
+          "id": "pair-21-B",
+          "kind": "candidate",
+          "pair": 21,
+          "arm": "B"
+        },
+        {
+          "id": "pair-21-A",
+          "kind": "candidate",
+          "pair": 21,
+          "arm": "A"
+        },
+        {
+          "id": "control-07-C",
+          "kind": "control",
+          "pair": 7,
+          "arm": "C"
+        },
+        {
+          "id": "control-07-A",
+          "kind": "control",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-22-A",
+          "kind": "candidate",
+          "pair": 22,
+          "arm": "A"
+        },
+        {
+          "id": "pair-22-B",
+          "kind": "candidate",
+          "pair": 22,
+          "arm": "B"
+        },
+        {
+          "id": "pair-23-B",
+          "kind": "candidate",
+          "pair": 23,
+          "arm": "B"
+        },
+        {
+          "id": "pair-23-A",
+          "kind": "candidate",
+          "pair": 23,
+          "arm": "A"
+        },
+        {
+          "id": "pair-24-A",
+          "kind": "candidate",
+          "pair": 24,
+          "arm": "A"
+        },
+        {
+          "id": "pair-24-B",
+          "kind": "candidate",
+          "pair": 24,
+          "arm": "B"
+        },
+        {
+          "id": "control-08-A",
+          "kind": "control",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "control-08-C",
+          "kind": "control",
+          "pair": 8,
+          "arm": "C"
+        }
+      ]
+    },
+    "jitendex": {
+      "AB": [
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        }
+      ],
+      "BA": [
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        }
+      ]
+    },
+    "vndb": {
+      "AB": [
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        }
+      ],
+      "BA": [
+        {
+          "id": "warmup-1-B",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "warmup-1-A",
+          "kind": "warmup",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-A",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "warmup-2-B",
+          "kind": "warmup",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-B",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "B"
+        },
+        {
+          "id": "pair-01-A",
+          "kind": "candidate",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-A",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "pair-02-B",
+          "kind": "candidate",
+          "pair": 2,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-B",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "B"
+        },
+        {
+          "id": "pair-03-A",
+          "kind": "candidate",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "control-01-C",
+          "kind": "control",
+          "pair": 1,
+          "arm": "C"
+        },
+        {
+          "id": "control-01-A",
+          "kind": "control",
+          "pair": 1,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-A",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "pair-04-B",
+          "kind": "candidate",
+          "pair": 4,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-B",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "B"
+        },
+        {
+          "id": "pair-05-A",
+          "kind": "candidate",
+          "pair": 5,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-A",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "A"
+        },
+        {
+          "id": "pair-06-B",
+          "kind": "candidate",
+          "pair": 6,
+          "arm": "B"
+        },
+        {
+          "id": "control-02-A",
+          "kind": "control",
+          "pair": 2,
+          "arm": "A"
+        },
+        {
+          "id": "control-02-C",
+          "kind": "control",
+          "pair": 2,
+          "arm": "C"
+        },
+        {
+          "id": "pair-07-B",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "B"
+        },
+        {
+          "id": "pair-07-A",
+          "kind": "candidate",
+          "pair": 7,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-A",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "A"
+        },
+        {
+          "id": "pair-08-B",
+          "kind": "candidate",
+          "pair": 8,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-B",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "B"
+        },
+        {
+          "id": "pair-09-A",
+          "kind": "candidate",
+          "pair": 9,
+          "arm": "A"
+        },
+        {
+          "id": "control-03-C",
+          "kind": "control",
+          "pair": 3,
+          "arm": "C"
+        },
+        {
+          "id": "control-03-A",
+          "kind": "control",
+          "pair": 3,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-A",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "A"
+        },
+        {
+          "id": "pair-10-B",
+          "kind": "candidate",
+          "pair": 10,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-B",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "B"
+        },
+        {
+          "id": "pair-11-A",
+          "kind": "candidate",
+          "pair": 11,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-A",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "A"
+        },
+        {
+          "id": "pair-12-B",
+          "kind": "candidate",
+          "pair": 12,
+          "arm": "B"
+        },
+        {
+          "id": "control-04-A",
+          "kind": "control",
+          "pair": 4,
+          "arm": "A"
+        },
+        {
+          "id": "control-04-C",
+          "kind": "control",
+          "pair": 4,
+          "arm": "C"
+        }
+      ]
+    }
+  },
+  "ordinary": {
+    "runsOn": "ubuntu-24.04",
+    "nodeVersion": "22.22.0",
+    "flags": {},
+    "expectedParserWorkers": 3,
+    "vndbSahAllocationUnits": [
+      37,
+      37
+    ],
+    "sahAllocationUnitBytes": 4096,
+    "headedFallback": false,
+    "strictRuntime": true,
+    "freshBrowserProfilePerObservation": true,
+    "mediaCheck": "sample",
+    "endpoint": "Page file-input change through post-UI import-complete; browser monotonic clock.",
+    "warmupsPerHost": 4,
+    "jmdictPairsPerHost": 24,
+    "jmdictIdenticalControlPairsPerHost": 8,
+    "otherPairsPerHost": 12,
+    "otherIdenticalControlPairsPerHost": 4,
+    "identicalControl": "C is exactly A source, release package, settings, flags and browser under a different observation label."
+  },
+  "expectedPackageChanges": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-import-session.js",
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-ownership.js",
+    "js/dictionary/zstd-term-content.js"
+  ],
+  "expectedPackageAdditions": [
+    "js/dictionary/artifact-term-chunk-pipeline.js"
+  ],
+  "expectedPackageRemovals": [],
+  "statistics": {
+    "bootstrapReplications": 10000,
+    "seed": 897,
+    "randomStream": "Python random.Random(897).choices(range(pairCount), k=pairCount); each comparison resets seed897; identical sampled indices serve both ms and ratios.",
+    "interval": "Sort bootstrap medians and choose exact zero-based indices249 and9749; no type7 interpolation.",
+    "originalFields": "Every original common-runner comparison field must match exactly.",
+    "warmupPolicy": "All four warmup observations retained and checked, excluded only by fixed schedule.",
+    "pooling": "No pooling across hosts, dictionaries, sources, ordinary/media/memory observations or prior studies.",
+    "jmdict": {
+      "minimumPairedMedianSavingsMs": 10,
+      "minimumPairedMedianSavingsPercent": 1,
+      "minimumFasterPairs": 18,
+      "equalWorkChangePercentExclusiveMaximum": 0,
+      "bootstrapMsUpperExclusiveMaximum": 0,
+      "bootstrapPercentUpperExclusiveMaximum": 0,
+      "controls": "Absolute median and equal-work C/A percentages are each strictly less than0.5*min(-candidate median percentage,-candidate equal-work percentage)."
+    },
+    "other": {
+      "medianChangePercentInclusiveMaximum": 1,
+      "equalWorkChangePercentInclusiveMaximum": 1,
+      "bootstrapPercentUpperInclusiveMaximum": 3,
+      "absoluteControlMedianPercentInclusiveMaximum": 1,
+      "absoluteControlEqualWorkPercentInclusiveMaximum": 1
+    }
+  },
+  "semanticPolicy": "Unchanged canonical validate_import_summary plus require_matching_receipts for every observation, complete post-restart output/lookup/storage witnesses and original random-name-only normalizations. No physical-layout exception. All-media A/B observations follow ordinary timing on each host.",
+  "memory": {
+    "authoritativeTiming": false,
+    "observationsPerHost": 4,
+    "initialAB": "ABBA",
+    "initialBA": "BAAB",
+    "sampler": "Unchanged original chromium_memory.py, protocol.py and audit_memory.py. Same two test-only marker insertions in both arms; runtime packages unchanged.",
+    "minimumContainedQualifiedSamples": 5,
+    "maximumCoverageGapMs": 250,
+    "medianPairedGrowthPercentInclusiveMaximum": 5,
+    "maximumPairGrowthPercentInclusiveMaximum": 10,
+    "metrics": [
+      "maxSampledPssKiB",
+      "maxSampledPrivateKiB"
+    ],
+    "everyObservationQualified": true,
+    "completeProcessTreeAndOriginalRawScanAudit": true,
+    "noExclusionsOrRetries": true
+  },
+  "diagnostic": {
+    "field": "parserParallelOwnedTailLookaheadCount",
+    "mirror": "fastPathParserParallelOwnedTailLookaheadCount",
+    "expectedJmdictRange": [
+      0,
+      11
+    ],
+    "scope": "Admission count only; no CPU simultaneity claim. Retain every discovered raw-report path/value and raw-report SHA. Do not sum mirrors.",
+    "selectionOrExclusionRule": null,
+    "numericalGate": false
+  },
+  "failures": {
+    "ordinary": "Stop on the first failed observation and retain every completed or failed original receipt/log.",
+    "memory": "Unchanged common runner retains all four prescribed attempts and fails on any unqualified or semantic failure.",
+    "infrastructure": "A new source-bound setup correction may be reviewed after a concrete failure. No unchanged rerun for luck and no dynamic sample count.",
+    "workflowRunAttemptMustBeOne": true,
+    "artifacts": "Exact evidence bytes archived and every member verified. Only reproducible cohort-sources worktrees/dependencies are excluded; released packages, source identities/diffs, all original reports and failures remain retained."
+  },
+  "evidenceReviews": {
+    "stats": "84d852e1cdc54b2c67610c847744e1680a729598",
+    "statsHandoff": "28f819b2ee665d3ebc55f56c93fb95e570c22d76"
+  },
+  "advancement": "No PR or gain claim until every staged source, repository, correctness, replicated timing, control and memory gate passes. Root owns refs and any publication decision."
+}

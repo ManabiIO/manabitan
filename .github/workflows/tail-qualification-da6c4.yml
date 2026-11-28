@@ -1,0 +1,331 @@
+name: Owned parser tail qualification
+
+on:
+  push:
+    branches: ['perf/jmdict-tail-qualification-20261128-da6c4']
+    paths:
+      - 'dev/perf/tail-qualification-da6c4/**'
+      - '.github/workflows/tail-qualification-da6c4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CONTROL: dev/perf/tail-qualification-da6c4
+  PYTHONDONTWRITEBYTECODE: '1'
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  verify:
+    name: Complete exact candidate repository gates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    env:
+      TAIL_JOB_NAME: verify-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Resolve runtime evidence paths
+        run: |
+          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned native compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Execute every control and candidate gate once
+        run: |
+          python3 "$CONTROL/run.py" --mode verify --repository "$GITHUB_WORKSPACE" --evidence "$EVIDENCE"
+      - name: Report all available original results and failure tails
+        if: always()
+        run: python3 "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive and verify every evidence byte
+        if: always()
+        run: python3 "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Preserve complete evidence or original failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-verify-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish only the successful prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-verification-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE }}/verification-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  jmdict:
+    name: JMdict ${{ matrix.order }} complete independent host
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      TAIL_JOB_NAME: jmdict-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Resolve runtime evidence paths
+        run: |
+          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore immutable dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: tail-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Read frozen prerequisite verification
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-verification-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/verification
+      - name: Run the fixed JMdict ordinary, media and memory plan
+        run: |
+          python3 "$CONTROL/run.py" --mode cell --repository "$GITHUB_WORKSPACE" --evidence "$EVIDENCE" \
+            --dictionary jmdict --initial-order "${{ matrix.order }}" \
+            --prerequisite "$PREREQUISITES/verification/verification-gate.json"
+      - name: Report all available original results and failure tails
+        if: always()
+        run: python3 "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive and verify every evidence byte
+        if: always()
+        run: python3 "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Preserve complete evidence or original failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-jmdict-${{ matrix.order }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish only the successful prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-cell-gate-jmdict-${{ matrix.order }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE }}/cell-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  jmdict-gate:
+    name: Require both JMdict hosts to qualify
+    needs: [verify, jmdict]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TAIL_JOB_NAME: jmdict-gate-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Resolve runtime evidence paths
+        run: |
+          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read frozen prerequisite verification
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-verification-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/verification
+      - name: Read frozen prerequisite cells
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: tail-cell-gate-jmdict-*-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/cells
+          merge-multiple: false
+      - name: Recompute and require the complete two-host advancement gate
+        run: |
+          python3 "$CONTROL/run.py" --mode aggregate --stage jmdict --repository "$GITHUB_WORKSPACE" \
+            --evidence "$EVIDENCE" --gate-directory "$PREREQUISITES/cells" \
+            --prerequisite "$PREREQUISITES/verification/verification-gate.json"
+      - name: Report all available original results and failure tails
+        if: always()
+        run: python3 "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive and verify every evidence byte
+        if: always()
+        run: python3 "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Preserve complete evidence or original failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-jmdict-stage-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish only the successful prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-jmdict-stage-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE }}/stage-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  nonregression:
+    name: ${{ matrix.dictionary }} ${{ matrix.order }} complete independent host
+    needs: [verify, jmdict-gate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex, vndb]
+        order: [AB, BA]
+    env:
+      TAIL_JOB_NAME: ${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Resolve runtime evidence paths
+        run: |
+          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore immutable dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: tail-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Read frozen prerequisite verification
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-verification-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/verification
+      - name: Read frozen prerequisite jmdict
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-jmdict-stage-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/jmdict
+      - name: Run the fixed nonregression, media and memory plan
+        run: |
+          python3 "$CONTROL/run.py" --mode cell --repository "$GITHUB_WORKSPACE" --evidence "$EVIDENCE" \
+            --dictionary "${{ matrix.dictionary }}" --initial-order "${{ matrix.order }}" \
+            --prerequisite "$PREREQUISITES/verification/verification-gate.json" \
+            --prerequisite "$PREREQUISITES/jmdict/stage-gate.json"
+      - name: Report all available original results and failure tails
+        if: always()
+        run: python3 "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive and verify every evidence byte
+        if: always()
+        run: python3 "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Preserve complete evidence or original failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish only the successful prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-cell-gate-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE }}/cell-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  complete-gate:
+    name: Require every staged source, timing and memory gate
+    needs: [verify, jmdict-gate, nonregression]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TAIL_JOB_NAME: complete-gate-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Resolve runtime evidence paths
+        run: |
+          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read frozen prerequisite verification
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-verification-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/verification
+      - name: Read frozen prerequisite jmdict
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tail-jmdict-stage-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/jmdict
+      - name: Read frozen prerequisite cells
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: tail-cell-gate-jitendex-*-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/cells
+          merge-multiple: false
+      - name: Read frozen prerequisite cells
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: tail-cell-gate-vndb-*-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.PREREQUISITES }}/cells
+          merge-multiple: false
+      - name: Recompute and require all nonregression hosts
+        run: |
+          python3 "$CONTROL/run.py" --mode aggregate --stage nonregression --repository "$GITHUB_WORKSPACE" \
+            --evidence "$EVIDENCE" --gate-directory "$PREREQUISITES/cells" \
+            --prerequisite "$PREREQUISITES/verification/verification-gate.json" \
+            --prerequisite "$PREREQUISITES/jmdict/stage-gate.json"
+      - name: Report all available original results and failure tails
+        if: always()
+        run: python3 "$CONTROL/report_results.py" --evidence "$EVIDENCE"
+      - name: Archive and verify every evidence byte
+        if: always()
+        run: python3 "$CONTROL/pack_artifacts.py" --evidence "$EVIDENCE" --destination "$UPLOAD"
+      - name: Preserve complete evidence or original failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-complete-stage-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.UPLOAD }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Publish only the successful prerequisite receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tail-complete-study-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE }}/stage-gate.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-root-source-only-tail-qualification-review",
+  "handoffBlob": "5fcb4e11d9ecd5c63d16ee23c5db5e065fab7479",
+  "manifestBlob": "de910bafbd130c520cc84168b6f101150c2486c8",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidate": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+  "exactSourceValidation": [
+    {
+      "path": "dev/perf/tail-qualification-da6c4/common-runner.py",
+      "bytes": 20035,
+      "sha256": "18a3dcf5a10c506b71a60e6ab33416a7338dc3dd66ca927a301ce4ed5aca5a00",
+      "blob": "6667622563c7fbeb35b9e5381685db2474d2789f"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/tail_package_identity.py",
+      "bytes": 2040,
+      "sha256": "1609480fd269c7236b666593299eed07b05e6695d556d0f226da6e3f54fb2acb",
+      "blob": "596192018784611557117156a15c6401e52846e0"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/tail_stats.py",
+      "bytes": 10064,
+      "sha256": "0712756d4475723555d892e35a3423025a2df81f26ddbab0d5691f6ed8ca2eee",
+      "blob": "24acf1090893710bc85cdfa89edc2edd7ca39b1c"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/test_tail_stats.py",
+      "bytes": 15487,
+      "sha256": "29c3e9364cda5c80755645d488fafb7a94ed297ea335d31174e773073c1e5305",
+      "blob": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/run.py",
+      "bytes": 27506,
+      "sha256": "bafcc1f3fc903895971558833da69d32e9db6bb910834424f029eec9c25cb3d4",
+      "blob": "47d9d205482a10e516af2e2ba907256316a27375"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/product-source.json",
+      "bytes": 4479,
+      "sha256": "e95db630ce5123d5550dd7d1d6a24fd8b5ac24c571ae531ffe8aac3d8897c643",
+      "blob": "60f6411bf9f9d6d53e681f236494405aadd41a43"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/pack_artifacts.py",
+      "bytes": 5212,
+      "sha256": "edcf87e9d8863c4ddc1bff9313e7571aadc53cc8704b655756766aaa17b3a030",
+      "blob": "183440f60df74d79c6a2c449a53c4e97320af358"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/report_results.py",
+      "bytes": 3608,
+      "sha256": "b1c6eef66b56479b120120515d4bf7e01022d6c93adb2568f5418432444e24d4",
+      "blob": "ba7c8b078d74a1ef6f04f4c3f382ef72871cf9b1"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/plan.json",
+      "bytes": 46361,
+      "sha256": "23fafee81b4bb03ed31e85041d1087047ddbe5d5c909c958933df0bd0da76a11",
+      "blob": "aa406b9d9f1cd91bf6a315784edab4d0b9de23b5"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/test_controls.py",
+      "bytes": 13401,
+      "sha256": "f088f1d69da61147564615d24c3b6db48405639d75ff1083c1a23c112198e686",
+      "blob": "959b00addf9a7f09e5a925e625b08635d875cbaa"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/test_pack_artifacts.py",
+      "bytes": 4741,
+      "sha256": "3e58ffe63336f32e4f6f23d236afdaddc72e631a424fd445d1a89ff06cc5958f",
+      "blob": "2b133adce7faace16641ea72f4d6a9ecbd45ab1b"
+    },
+    {
+      "path": ".github/workflows/tail-qualification-da6c4.yml",
+      "bytes": 16202,
+      "sha256": "d628dbb9dbf34b36f0ee79c804dfdb712d90d9e8d7a7b6b33d8855c226d024d4",
+      "blob": "3164e7632cf487896b2d0679ba6e9530e76f3b2b"
+    },
+    {
+      "path": "dev/perf/tail-qualification-da6c4/source-manifest.json",
+      "bytes": 6402,
+      "sha256": "b25b8370ee61093dd36a9c908e71557749af3eea9b1c5ec3d259e3a4afa34531",
+      "blob": "de910bafbd130c520cc84168b6f101150c2486c8"
+    }
+  ],
+  "hashCheckerBlob": "eb00e450c244155f22ee4680adae994f6405d82d",
+  "hashCheckerValidation": "Five SHA256/SHA1/Git-empty-blob known vectors plus exact independent byte-count/SHA256/Git-blob matches for all13 final sources, including Unicode-aware UTF8 counts.",
+  "reviews": [
+    "Read complete final wrapper, workflow, pure statistics module, artifact packer/reporter and relevant failure-revocation/archive tests. No source-level publication blocker found.",
+    "Independently reconstructed common-runner.py by exactly two changes to frozen c981: nested root parents[2] to[3] and package_identity import renamed to unchanged local helper. Full resulting text is identical; observation acquisition, semantics, media and memory routines are unchanged.",
+    "Final plan differs from reviewed draft by one prose space only. All numerical thresholds, schedules, flags, source IDs and staged prerequisites remain unchanged.",
+    "The frozen setup action explicitly defaults Node22.22.0. Workflow runtime evidence paths are assigned in a step, avoiding unavailable runner.temp job-level context.",
+    "Full control and clean candidate repository gates precede any acquisition. JMdict AB and BA must each pass24pairs/eight controls/four warmups plus semantics/media/memory before the four non-target hosts are admitted.",
+    "Final source capture errors propagate and revoke previously written publishable gate filenames. The regression is covered by a test which must execute in the hosted prerequisite.",
+    "Actual Chrome packages are retained outside the explicitly excluded reproducible cohort-sources directory. Every original observation, failure, log, source-state diff and package remains inventoried and archive-verified.",
+    "Tail-admission diagnostics retain original paths/values and raw report hashes, do not sum mirrors, and never select or exclude observations.",
+    "Study still requires independent completed-artifact audit and all staged gates before any product PR or performance claim."
+  ],
+  "decision": "Publish the separate source-bound qualification branch from cb77. No PR. Hosted35 control methods, original receipt suite and complete exact candidate repository gates must succeed before ordinary timing.",
+  "executedLocalPythonTests": 0,
+  "newBrowserObservations": 0,
+  "executorUnavailable": true
+}

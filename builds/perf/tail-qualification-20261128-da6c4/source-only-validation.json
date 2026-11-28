@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "kind": "source-only-tail-control-preparation",
+  "complete": true,
+  "executedBrowserObservations": 0,
+  "executedLocalPythonTests": 0,
+  "reasonUnexecuted": "The first narrow local read failed with exec-server transport disconnected and recovery timeout. The environment then explicitly became unavailable; no further shell probes or acquisition were attempted.",
+  "retainedFailure": "exec_command failed: CreateProcess { message: Rejected(Failed to create unified exec process: exec-server transport disconnected; failed to resume exec-server session: recovery timed out after45s) }",
+  "sourceChecks": {
+    "originalCommonRunnerSha256": "01b41fcc5f4589f77637acfa21de374d705d32cefaa8673807501cdfeb05e15b",
+    "adaptedCommonRunnerSha256": "18a3dcf5a10c506b71a60e6ab33416a7338dc3dd66ca927a301ce4ed5aca5a00",
+    "inverseTwoDeclaredChangesByteIdentical": true,
+    "allPublishedControlContentMatchesManifest": true,
+    "sourceFileCount": 13,
+    "baseCommitAndTreeConfirmedViaGitHub": true,
+    "candidateSoleParentAndTreeConfirmedViaGitHub": true,
+    "stockMemoryAndReceiptHelperBlobsIdenticalBetweenC981AndF28": true,
+    "workflowJobLevelRunnerTempContextAbsent": true,
+    "workflowUsesPinnedSetupActionFromFrozenSource": true,
+    "manifestSelfHashRecordedAtAcquisition": true
+  },
+  "hostedRequiredBeforeAnyObservation": {
+    "controlTestMethods": 35,
+    "statisticsTestMethods": 18,
+    "orchestrationTestMethods": 12,
+    "artifactTestMethods": 5,
+    "originalReceiptSuite": "All existing test_*.py in dev/perf/import-memory-20261125-a7f7",
+    "fullCandidateCommands": [
+      {
+        "id": "control-tests",
+        "scope": "controls",
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "dev/perf/tail-qualification-da6c4",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "original-receipt-tests",
+        "scope": "controls",
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "dev/perf/import-memory-20261125-a7f7",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "libraries",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ]
+      },
+      {
+        "id": "licenses",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ]
+      },
+      {
+        "id": "javascript",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:js"
+        ]
+      },
+      {
+        "id": "types",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:ts"
+        ]
+      },
+      {
+        "id": "css",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:css"
+        ]
+      },
+      {
+        "id": "html",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:html"
+        ]
+      },
+      {
+        "id": "markdown",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:md"
+        ]
+      },
+      {
+        "id": "json-format",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:json:format"
+        ]
+      },
+      {
+        "id": "json-types",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:json:types",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "all-units",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "options-units",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:unit:options",
+          "--",
+          "--maxWorkers=2"
+        ]
+      },
+      {
+        "id": "native-byte-check",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "build:dictionary-wasm",
+          "--",
+          "--check"
+        ]
+      },
+      {
+        "id": "all-targets",
+        "scope": "candidate",
+        "command": [
+          "npm",
+          "run",
+          "test:build"
+        ]
+      }
+    ],
+    "localExecutionClaim": false
+  },
+  "failureHandlingFix": {
+    "origin": "Peer source review",
+    "issue": "Per-worktree capture failures or missing worktrees were initially swallowed by diagnostic capture.",
+    "repair": "Record every error first, then raise; final failure renames any publishable gate to failed-*. Covered by deterministic source tests awaiting hosted execution.",
+    "memoryFailureReporting": "Original completed observations and stock analysis are printed and archived even if the common runner's final memory gate fails."
+  },
+  "artifactScope": "The exact evidence tree is tarred, every member hash verified, and originals rehashed. Only cohort-sources duplicated runtime worktrees/dependencies are pruned; actual packages, all raw observations, receipts, logs and source-state diagnostics remain retained.",
+  "checksAreNot": "This receipt is source review and deterministic content hashing, not a Python syntax/test pass, repository gate pass, browser qualification, or performance gain."
+}

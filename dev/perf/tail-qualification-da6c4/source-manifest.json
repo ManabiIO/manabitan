@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "kind": "frozen-owned-tail-qualification-controls",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "tree": "c89d9747a4e1836913e98497d7c3613d0f115eee"
+  },
+  "files": {
+    "dev/perf/tail-qualification-da6c4/common-runner.py": {
+      "bytes": 20035,
+      "sha256": "18a3dcf5a10c506b71a60e6ab33416a7338dc3dd66ca927a301ce4ed5aca5a00",
+      "blob": "6667622563c7fbeb35b9e5381685db2474d2789f"
+    },
+    "dev/perf/tail-qualification-da6c4/tail_package_identity.py": {
+      "bytes": 2040,
+      "sha256": "1609480fd269c7236b666593299eed07b05e6695d556d0f226da6e3f54fb2acb",
+      "blob": "596192018784611557117156a15c6401e52846e0"
+    },
+    "dev/perf/tail-qualification-da6c4/tail_stats.py": {
+      "bytes": 10064,
+      "sha256": "0712756d4475723555d892e35a3423025a2df81f26ddbab0d5691f6ed8ca2eee",
+      "blob": "24acf1090893710bc85cdfa89edc2edd7ca39b1c"
+    },
+    "dev/perf/tail-qualification-da6c4/test_tail_stats.py": {
+      "bytes": 15487,
+      "sha256": "29c3e9364cda5c80755645d488fafb7a94ed297ea335d31174e773073c1e5305",
+      "blob": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9"
+    },
+    "dev/perf/tail-qualification-da6c4/run.py": {
+      "bytes": 27506,
+      "sha256": "bafcc1f3fc903895971558833da69d32e9db6bb910834424f029eec9c25cb3d4",
+      "blob": "47d9d205482a10e516af2e2ba907256316a27375"
+    },
+    "dev/perf/tail-qualification-da6c4/product-source.json": {
+      "bytes": 4479,
+      "sha256": "e95db630ce5123d5550dd7d1d6a24fd8b5ac24c571ae531ffe8aac3d8897c643",
+      "blob": "60f6411bf9f9d6d53e681f236494405aadd41a43"
+    },
+    "dev/perf/tail-qualification-da6c4/pack_artifacts.py": {
+      "bytes": 5212,
+      "sha256": "edcf87e9d8863c4ddc1bff9313e7571aadc53cc8704b655756766aaa17b3a030",
+      "blob": "183440f60df74d79c6a2c449a53c4e97320af358"
+    },
+    "dev/perf/tail-qualification-da6c4/report_results.py": {
+      "bytes": 3608,
+      "sha256": "b1c6eef66b56479b120120515d4bf7e01022d6c93adb2568f5418432444e24d4",
+      "blob": "ba7c8b078d74a1ef6f04f4c3f382ef72871cf9b1"
+    },
+    "dev/perf/tail-qualification-da6c4/plan.json": {
+      "bytes": 46361,
+      "sha256": "23fafee81b4bb03ed31e85041d1087047ddbe5d5c909c958933df0bd0da76a11",
+      "blob": "aa406b9d9f1cd91bf6a315784edab4d0b9de23b5"
+    },
+    "dev/perf/tail-qualification-da6c4/test_controls.py": {
+      "bytes": 13401,
+      "sha256": "f088f1d69da61147564615d24c3b6db48405639d75ff1083c1a23c112198e686",
+      "blob": "959b00addf9a7f09e5a925e625b08635d875cbaa"
+    },
+    "dev/perf/tail-qualification-da6c4/test_pack_artifacts.py": {
+      "bytes": 4741,
+      "sha256": "3e58ffe63336f32e4f6f23d236afdaddc72e631a424fd445d1a89ff06cc5958f",
+      "blob": "2b133adce7faace16641ea72f4d6a9ecbd45ab1b"
+    },
+    ".github/workflows/tail-qualification-da6c4.yml": {
+      "bytes": 16202,
+      "sha256": "d628dbb9dbf34b36f0ee79c804dfdb712d90d9e8d7a7b6b33d8855c226d024d4",
+      "blob": "3164e7632cf487896b2d0679ba6e9530e76f3b2b"
+    }
+  },
+  "stockHelpers": {
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "blob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "bytes": 18389,
+      "originRef": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+      "currentBaseIdentical": true
+    },
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": {
+      "blob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "bytes": 4187,
+      "originRef": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+      "currentBaseIdentical": true
+    },
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": {
+      "blob": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "bytes": 5362,
+      "originRef": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+      "currentBaseIdentical": true
+    },
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": {
+      "blob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "bytes": 21897,
+      "originRef": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+      "currentBaseIdentical": true
+    },
+    ".github/actions/setup/action.yml": {
+      "blob": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+      "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+      "bytes": 930,
+      "originRef": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "currentBaseIdentical": true
+    }
+  },
+  "productSourceManifestBlob": "60f6411bf9f9d6d53e681f236494405aadd41a43",
+  "commonRunnerOrigin": {
+    "ref": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "blob": "7bfac83eedfbae61590b849c0934060c30ff4cef",
+    "sha256": "01b41fcc5f4589f77637acfa21de374d705d32cefaa8673807501cdfeb05e15b",
+    "adaptations": [
+      "Repository root parents[2] becomes parents[3] for the nested control directory.",
+      "Import package_identity is renamed tail_package_identity; its function source is an unchanged exact copy of blob596192018784611557117156a15c6401e52846e0."
+    ],
+    "ordinaryAcquisitionCodeChanged": false
+  },
+  "actionPins": {
+    "checkout": "d23441a48e516b6c34aea4fa41551a30e30af803",
+    "node": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+    "cache": "caa296126883cff596d87d8935842f9db880ef25",
+    "upload": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+    "download": "d3f86a106a0bac45b974a628896c90dbdf5c8093"
+  },
+  "statisticsReviewBlob": "84d852e1cdc54b2c67610c847744e1680a729598",
+  "statisticsHandoffBlob": "28f819b2ee665d3ebc55f56c93fb95e570c22d76",
+  "selfBinding": "This manifest is excluded from its own file list; its exact SHA256 is recorded before acquisition, the immutable research commit/tree binds its Git blob, and GITHUB_SHA plus zero-dirty source is required before and after.",
+  "executionStatusAtPreparation": "Source-only while the local executor is unavailable. All35 control test methods and full exact candidate repository gates must execute successfully on the hosted verification job before any browser observation."
+}

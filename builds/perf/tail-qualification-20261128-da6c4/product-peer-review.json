@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent source-only tail-admission review",
+  "base": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "integratedClosedCandidate": "54844293b8ea82350531b8da92336b325d5ab7ec",
+  "reviewedFiles": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "bytes": 215524,
+      "sha256": "a46b314a0a6f4a7365cac84993d1bbdef50ad1b42f1f8f9fef050ee6a1daaba2",
+      "gitBlob": "2c78d2313a6622c3f146dc0f6a79ad6585856bb7"
+    },
+    "ext/js/dictionary/dictionary-importer.js": {
+      "bytes": 350786,
+      "sha256": "a095e327f36ad531dcee5b4f80706d6093cafc2af190c0a9a6ba4ab7abd7d409",
+      "gitBlob": "9ed45bf106b1e81712776fda5a716236ad5b3a17"
+    },
+    "test/term-bank-pipeline-completion.test.js": {
+      "bytes": 27521,
+      "sha256": "07a008a77a8cafa83009c82415120654dbc22cb57f4c258338d9a0a8f180a0e7",
+      "gitBlob": "1b248431410a9d35ae16db8e7869f89f545d84e1"
+    }
+  },
+  "decision": "No concrete new correctness or lifetime blocker found in the bounded tail delta.",
+  "findings": [
+    "The new validated-result counter increments after existing result error/profile/row-count checks, immediately before ordered slot publication. Assigned jobs and synthetic _fail slots do not satisfy it.",
+    "The all-results predicate gates only retaining an authentic completion ticket as pending. It introduces no wait for all workers/results, so source/byte lead budgets and borrowed-worker consume barriers cannot deadlock on the predicate.",
+    "The previous owner must retire before a borrowed/non-owned successor; pending owned work remains bounded to the same predecessor/current pair.",
+    "The lookahead counter increments on a nonempty current callback with a prior pending owner after the borrowed/nonowned barrier. A pending promise can already be settled, so this is admission-before-retirement evidence, not simultaneous CPU or proof of latency savings.",
+    "The counter is initialized per run, emitted in the final parser profile, and copied to both existing importer diagnostic paths. No timing clock or extra asynchronous task is added.",
+    "Final-arrival, assigned-but-unreceived final job, lead/byte windows, invalid final profile/count, borrowed queued result and exact2-admission assertions in the fixtures match the stated policy."
+  ],
+  "validationScope": "Read exact final local source/test bytes only; did not edit, execute tests, acquire imports, inspect new timing observations, or mutate refs. Root's19-scenario pass remains separately attributed.",
+  "limits": [
+    "Whole-import activation and remaining tail cost must be measured on the new current-base candidate; old component/full-overlap results do not establish its gain.",
+    "This review does not turn the f28 integration of the closed548 candidate into a qualified product; current full gates and new prospective source-bound observations remain required.",
+    "The local object database lacks an ancestor needed by git log traversal; git rev-parse and direct source/blob hashes succeeded. No fetch or repository repair was performed."
+  ]
+}
