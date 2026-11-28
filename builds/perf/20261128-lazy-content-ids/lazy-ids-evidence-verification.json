@@ -1,0 +1,23 @@
+{
+  "allArchivesVerified": true,
+  "archives": [
+    {
+      "archive": "lazy-ids-initial-evidence.tar.gz",
+      "sha256": "1a758f3f6a015a3e77adba4652184e65d6d42a824f603d62579496b5c99151c0",
+      "verifiedReceipts": 1081,
+      "rawBytes": 108891660
+    },
+    {
+      "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+      "sha256": "5789f4bff4e3438b9cfef5079c7039812e71270b4b3041527d1c054531438661",
+      "verifiedReceipts": 851,
+      "rawBytes": 72657832
+    },
+    {
+      "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+      "sha256": "61761ed4ff8bc51a8d4a016122352856f1c1da619c22b83e82742253d7fbfddd",
+      "verifiedReceipts": 839,
+      "rawBytes": 60824348
+    }
+  ]
+}
