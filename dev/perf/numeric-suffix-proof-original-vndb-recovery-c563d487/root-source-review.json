@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 11:11:09 UTC",
+  "reviewer": "root",
+  "scope": "Source-only review of a distinct read-only artifact transport/export workflow during executor outage; no original frozen 6e00 audit execution claimed.",
+  "baselineToolingCommit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+  "baselineToolingTree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+  "script": {
+    "gitBlobSha1": "c5c97fae0609b0398205d96702c62afcb52d2720",
+    "sha256": "71abc32cb48ec9259c6bb186f05aed13c98c724e4956b79a9918f81ec43f03ed",
+    "bytes": 16145
+  },
+  "workflow": {
+    "gitBlobSha1": "69484a8b0c260f536bbbd1179bb2130c5776111c",
+    "sha256": "246f94868b9955e1fc1a46ad31d3540a9fafc957f010a5875d38a0109acebcdd",
+    "bytes": 1300
+  },
+  "original": {
+    "runId": 46136965050,
+    "attempt": 1,
+    "jobId": 140955527816,
+    "head": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+    "artifactId": 15260432499,
+    "artifactBytes": 281122,
+    "artifactSha256": "6630e77afbb10681aee5faef58bd0b4aad47cd52b94715e93b346041ff18b3f5",
+    "primaryLogBytes": 136612,
+    "primaryLogSha256": "13372cf23c1684c9f35eb55a31caf30e074bc57d0b46e5e2a25958056c18a86b"
+  },
+  "checks": {
+    "readOnlyGithubPermissions": true,
+    "noProductCodeOrNativeOrTimingExecution": true,
+    "originalWholeZipIdentityBeforeInspection": true,
+    "boundedSafe61RegularMemberInventory": true,
+    "producerLabelAndSourceArtifactFieldShapesChecked": true,
+    "all17OriginalChildStdoutStderrHashesCrosslinked": true,
+    "rawPrimaryBytesPreservedBeforeRepresentationMismatchFailure": true,
+    "authorizationRemovedOnCrossHostRedirect": true,
+    "everyFailureRetained": true,
+    "noFrozenAuditorExecutionClaim": true
+  },
+  "limitations": [
+    "Source reviewed while executor is unavailable; no local syntax or script execution occurred.",
+    "This export is a separate byte transport and identity layer. Independent semantic/raw-observation reconciliation remains required.",
+    "The original frozen 6e00/core26ae VNDB replay is not relabeled as executed."
+  ]
+}

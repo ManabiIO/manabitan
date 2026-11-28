@@ -1,0 +1,40 @@
+name: Recover original proof-consumer VNDB evidence c563d487
+
+on:
+  push:
+    branches: [perf/numeric-suffix-proof-consumer-original-vndb-recovery-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recover:
+    name: Verify and export existing original bytes
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Read the isolated recovery tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify and export original artifact and job log
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RECOVERY_SCRIPT_SHA256: 71abc32cb48ec9259c6bb186f05aed13c98c724e4956b79a9918f81ec43f03ed
+        run: python3 dev/perf/numeric-suffix-proof-original-vndb-recovery-c563d487/recover.py
+
+      - name: Retain transport receipts and every failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: original-vndb-artifact-recovery-${{ github.run_attempt }}
+          path: builds/suffix-proof-original-vndb-recovery
+          if-no-files-found: error
+          retention-days: 14
