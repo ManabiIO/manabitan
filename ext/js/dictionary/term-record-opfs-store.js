@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+// eslint-disable-next-line @stylistic/semi
+import {createImportLookupChecksum} from './term-record-checksum.js'
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -825,6 +827,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {{nativeCalls: number, nativeBytes: number, javascriptCalls: number}} lookupChecksum
  */
 
 /**
@@ -905,6 +908,9 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {{checksum: Awaited<ReturnType<typeof createImportLookupChecksum>>, nativeCalls: number, nativeBytes: number, javascriptCalls: number}|null} */
+        // eslint-disable-next-line @stylistic/semi
+        this._importLookupChecksumSession = null
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1185,6 +1191,8 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _prepare() {
+        // eslint-disable-next-line @stylistic/semi
+        this._retireImportLookupChecksum()
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1235,6 +1243,8 @@ export class TermRecordOpfsStore {
                 return;
             }
             this._importSessionActive = true;
+            // eslint-disable-next-line @stylistic/semi
+            this._beginImportLookupChecksum()
             this._exactLookupRoute = null;
             this._exactLookupRouteAbandoned = false;
             this._deferIndexBuild = true;
@@ -1269,6 +1279,30 @@ export class TermRecordOpfsStore {
             }
         }, true);
     }
+
+    /* eslint-disable @stylistic/semi */
+    /** @returns {void} */
+    _beginImportLookupChecksum() {
+        /** @type {{checksum: Awaited<ReturnType<typeof createImportLookupChecksum>>, nativeCalls: number, nativeBytes: number, javascriptCalls: number}} */
+        const session = {checksum: null, nativeCalls: 0, nativeBytes: 0, javascriptCalls: 0}
+        this._importLookupChecksumSession = session
+        // Early chunks use JS while the optional module initializes. A retired
+        // import must never install its instance into a later import session.
+        void createImportLookupChecksum().then((checksum) => {
+            if (this._importLookupChecksumSession === session) {
+                session.checksum = checksum
+            } else {
+                checksum?.dispose()
+            }
+        }, () => { /* Optional acceleration cannot fail an import. */ })
+    }
+
+    /** @returns {void} */
+    _retireImportLookupChecksum() {
+        this._importLookupChecksumSession?.checksum?.dispose()
+        this._importLookupChecksumSession = null
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @returns {Promise<import('dictionary-import-journal').TermRecordCheckpoint>}
@@ -1406,6 +1440,8 @@ export class TermRecordOpfsStore {
      */
     async _abandonImportWritesForRollback() {
         this._importSessionActive = false;
+        // eslint-disable-next-line @stylistic/semi
+        this._retireImportLookupChecksum()
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
         this._indexDirty = false;
@@ -1487,6 +1523,8 @@ export class TermRecordOpfsStore {
         try {
             await this._endImportSession();
         } finally {
+            // eslint-disable-next-line @stylistic/semi
+            this._retireImportLookupChecksum()
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
         }
@@ -1529,6 +1567,11 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            lookupChecksum: {
+                nativeCalls: this._importLookupChecksumSession?.nativeCalls ?? 0,
+                nativeBytes: this._importLookupChecksumSession?.nativeBytes ?? 0,
+                javascriptCalls: this._importLookupChecksumSession?.javascriptCalls ?? 0,
+            },
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -6270,14 +6313,34 @@ view.chunks :
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        /* eslint-disable @stylistic/semi */
+        view.setUint32(24, this._hashImportLookupBytes(base), true)
+        view.setUint32(28, this._hashImportLookupBytes(derived), true)
+        view.setUint32(32, this._hashImportLookupBytes(recordFields), true)
+        /* eslint-enable @stylistic/semi */
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
         return output;
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * @param {Uint8Array} bytes
+     * @returns {number}
+     */
+    _hashImportLookupBytes(bytes) {
+        const session = this._importLookupChecksumSession
+        const hash = session?.checksum?.hash(bytes)
+        if (typeof hash === 'number' && session !== null) {
+            ++session.nativeCalls
+            session.nativeBytes += bytes.byteLength
+            return hash
+        }
+        if (session !== null) { ++session.javascriptCalls }
+        return hashLookupIndexBytes(bytes)
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {TermRecordShardState} state
