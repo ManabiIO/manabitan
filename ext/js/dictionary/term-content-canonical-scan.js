@@ -19,13 +19,159 @@
 /* eslint-disable no-underscore-dangle -- Typed private metadata-owner ABI shared with DictionaryDatabase. */
 /* eslint-disable unicorn/prefer-spread -- TypedArray.slice must return owned typed columns, never number arrays. */
 
-import {CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './term-content-canonical-layout.js';
+import {CANONICAL_CHECKSUM_LAYOUT as checksumLayout, CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './term-content-canonical-layout.js';
 
 const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT} = layout;
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null;
-/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number}>} */
+/** @typedef {(base: Uint8Array, derived: Uint8Array, records: Uint8Array) => [number, number, number]|null} LookupChecksumProvider */
+/** @typedef {{module: WebAssembly.Module, scan: () => number, checksum: LookupChecksumProvider|null}} CanonicalInstance */
+/** @type {WeakMap<WebAssembly.Memory, CanonicalInstance>} */
 const instances = new WeakMap();
+
+/* eslint-disable @stylistic/semi */
+/* eslint-disable @typescript-eslint/unbound-method -- Captured intrinsics are applied explicitly or compared by identity. */
+const ChecksumUint8 = Uint8Array
+const checksumUint8Prototype = ChecksumUint8.prototype
+const checksumTypedPrototype = /** @type {object} */ (Object.getPrototypeOf(checksumUint8Prototype))
+const checksumGetPrototypeOf = Object.getPrototypeOf
+const checksumHasOwn = Object.hasOwn
+const checksumDescriptor = Object.getOwnPropertyDescriptor
+const checksumApply = Reflect.apply
+const checksumWeakMapGet = WeakMap.prototype.get
+const checksumIsView = ArrayBuffer.isView
+const checksumGetBuffer = /** @type {() => ArrayBufferLike} */ (checksumDescriptor(checksumTypedPrototype, 'buffer')?.get)
+const checksumGetOffset = /** @type {() => number} */ (checksumDescriptor(checksumTypedPrototype, 'byteOffset')?.get)
+const checksumGetLength = /** @type {() => number} */ (checksumDescriptor(checksumTypedPrototype, 'byteLength')?.get)
+const checksumGetBufferLength = /** @type {() => number} */ (checksumDescriptor(ArrayBuffer.prototype, 'byteLength')?.get)
+const checksumGetResizable = checksumDescriptor(ArrayBuffer.prototype, 'resizable')?.get
+const checksumSetBytes = checksumUint8Prototype.set
+const checksumGetMemoryBuffer = /** @type {() => ArrayBuffer} */ (checksumDescriptor(WebAssembly.Memory.prototype, 'buffer')?.get)
+// The JS path observes these intrinsics between its three hashes/header writes.
+// Do not reorder those observable operations when a realm has replaced them.
+const checksumValueIntrinsics = [
+    [globalThis, 'Uint8Array', ChecksumUint8],
+    [globalThis, 'DataView', DataView],
+    [globalThis, 'Math', Math],
+    [globalThis, 'Number', Number],
+    [Math, 'imul', Math.imul],
+    [Number, 'isInteger', Number.isInteger],
+    [DataView.prototype, 'getUint32', DataView.prototype.getUint32],
+    [DataView.prototype, 'setUint32', DataView.prototype.setUint32],
+]
+/* eslint-enable @typescript-eslint/unbound-method */
+
+/** @returns {boolean} */
+function checksumIntrinsicsUnchanged() {
+    for (let i = 0; i < checksumValueIntrinsics.length; ++i) {
+        const entry = checksumValueIntrinsics[i]
+        if (checksumDescriptor(entry[0], /** @type {string} */ (entry[1]))?.value !== entry[2]) { return false }
+    }
+    return (
+        checksumGetPrototypeOf(checksumUint8Prototype) === checksumTypedPrototype &&
+        !checksumHasOwn(checksumUint8Prototype, 'buffer') &&
+        !checksumHasOwn(checksumUint8Prototype, 'byteOffset') &&
+        !checksumHasOwn(checksumUint8Prototype, 'byteLength') &&
+        checksumDescriptor(checksumTypedPrototype, 'buffer')?.get === checksumGetBuffer &&
+        checksumDescriptor(checksumTypedPrototype, 'byteOffset')?.get === checksumGetOffset &&
+        checksumDescriptor(checksumTypedPrototype, 'byteLength')?.get === checksumGetLength
+    )
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {ArrayBuffer} nativeBuffer
+ * @returns {{buffer: ArrayBuffer, offset: number, length: number}|null}
+ */
+function admitChecksumBytes(bytes, nativeBuffer) {
+    // isView rejects proxies without invoking their prototype/metadata traps.
+    if (
+        !checksumIsView(bytes) || checksumGetPrototypeOf(bytes) !== checksumUint8Prototype ||
+        checksumHasOwn(bytes, 'buffer') || checksumHasOwn(bytes, 'byteOffset') || checksumHasOwn(bytes, 'byteLength')
+    ) { return null }
+    const buffer = checksumApply(checksumGetBuffer, bytes, [])
+    if (buffer === nativeBuffer) { return null }
+    try {
+        // This intrinsic rejects shared buffers. Resizable buffers keep JS too.
+        checksumApply(checksumGetBufferLength, buffer, [])
+        if (checksumGetResizable && checksumApply(checksumGetResizable, buffer, [])) { return null }
+    } catch { return null }
+    const length = checksumApply(checksumGetLength, bytes, [])
+    if (length > 0xffffffff) { return null }
+    return {
+        buffer: /** @type {ArrayBuffer} */ (buffer),
+        offset: checksumApply(checksumGetOffset, bytes, []),
+        length,
+    }
+}
+
+/**
+ * Optional exports use only a disjoint tail of an already-owned fixed arena.
+ * The helper stays in the memory-keyed WeakMap, never in the record store.
+ * @param {WebAssembly.Exports} exports
+ * @param {WebAssembly.Memory} memory
+ * @returns {LookupChecksumProvider|null}
+ */
+function createLookupChecksum(exports, memory) {
+    const names = ['xxh32_abi_version', 'xxh32_layout_end', 'xxh32_scratch_ptr', 'xxh32_scratch_capacity', 'xxh32_init', 'xxh32_update', 'xxh32_finish']
+    for (let i = 0; i < names.length; ++i) {
+        if (typeof exports[names[i]] !== 'function') { return null }
+    }
+    const native = /** @type {{xxh32_abi_version: () => number, xxh32_layout_end: () => number, xxh32_scratch_ptr: () => number, xxh32_scratch_capacity: () => number, xxh32_init: (seed: number) => void, xxh32_update: (a: number, b: number, c: number) => number, xxh32_finish: (index: number) => number}} */ (exports)
+    try {
+        const buffer = checksumApply(checksumGetMemoryBuffer, memory, [])
+        const {SCRATCH, CAPACITY, END} = checksumLayout
+        if (
+            native.xxh32_abi_version() !== 1 || native.xxh32_layout_end() !== END ||
+            native.xxh32_scratch_ptr() !== SCRATCH || native.xxh32_scratch_capacity() !== CAPACITY ||
+            checksumApply(checksumGetBufferLength, buffer, []) < PREFIX
+        ) { return null }
+        const scratch0 = new ChecksumUint8(buffer, SCRATCH, CAPACITY)
+        const scratch1 = new ChecksumUint8(buffer, SCRATCH + CAPACITY, CAPACITY)
+        const scratch2 = new ChecksumUint8(buffer, SCRATCH + CAPACITY * 2, CAPACITY)
+        let disabled = false
+        return (a, b, c) => {
+            if (disabled || checksumApply(checksumGetMemoryBuffer, memory, []) !== buffer || !checksumIntrinsicsUnchanged()) { return null }
+            const x = admitChecksumBytes(a, buffer)
+            const y = admitChecksumBytes(b, buffer)
+            const z = admitChecksumBytes(c, buffer)
+            if (x === null || y === null || z === null || x.length + y.length + z.length < 3072) { return null }
+            try {
+                // All admissions precede state mutation. No callback, await or
+                // species-sensitive operation can run until all hashes finish.
+                native.xxh32_init(0x811c9dc5)
+                let xOffset = 0
+                let yOffset = 0
+                let zOffset = 0
+                while (xOffset < x.length || yOffset < y.length || zOffset < z.length) {
+                    const xRemaining = x.length - xOffset
+                    const yRemaining = y.length - yOffset
+                    const zRemaining = z.length - zOffset
+                    const xCount = xRemaining < CAPACITY ? xRemaining : CAPACITY
+                    const yCount = yRemaining < CAPACITY ? yRemaining : CAPACITY
+                    const zCount = zRemaining < CAPACITY ? zRemaining : CAPACITY
+                    if (xCount > 0) { checksumApply(checksumSetBytes, scratch0, [new ChecksumUint8(x.buffer, x.offset + xOffset, xCount)]) }
+                    if (yCount > 0) { checksumApply(checksumSetBytes, scratch1, [new ChecksumUint8(y.buffer, y.offset + yOffset, yCount)]) }
+                    if (zCount > 0) { checksumApply(checksumSetBytes, scratch2, [new ChecksumUint8(z.buffer, z.offset + zOffset, zCount)]) }
+                    if (native.xxh32_update(xCount, yCount, zCount) !== 1) {
+                        disabled = true
+                        return null
+                    }
+                    xOffset += xCount
+                    yOffset += yCount
+                    zOffset += zCount
+                }
+                return [native.xxh32_finish(0) >>> 0, native.xxh32_finish(1) >>> 0, native.xxh32_finish(2) >>> 0]
+            } catch {
+                // Only private native scratch was writable. The caller can
+                // safely hash the same current input through its original JS.
+                disabled = true
+                return null
+            }
+        }
+    } catch { return null }
+}
+/* eslint-enable @stylistic/semi */
 
 /** @returns {Promise<WebAssembly.Module>} */
 export function compileCanonicalScanModule() {
@@ -131,6 +277,24 @@ export class NativeCanonicalScanner {
             fallbackReason: '',
         };
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Resolve the current owner at the call site; never retain an arena across
+     * growth, teardown or an await. Checksumming cannot allocate an arena,
+     * acquire a module, or instantiate code solely for this optional path.
+     * @param {Arena|null} arena
+     * @param {Uint8Array} base
+     * @param {Uint8Array} derived
+     * @param {Uint8Array} records
+     * @returns {[number, number, number]|null}
+     */
+    tryHashLookupIndex(arena, base, derived, records) {
+        if (arena === null) { return null }
+        const cached = /** @type {CanonicalInstance|undefined} */ (checksumApply(checksumWeakMapGet, instances, [arena.memory]))
+        return cached?.checksum?.(base, derived, records) ?? null
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {ScanOwner} db
@@ -255,7 +419,11 @@ export class NativeCanonicalScanner {
                     ) {
                         throw new Error('Canonical scan WASM ABI/layout mismatch');
                     }
-                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical)};
+                    cached = {
+                        module,
+                        scan: /** @type {() => number} */ (exports.scan_canonical),
+                        checksum: createLookupChecksum(exports, a.memory),
+                    };
                     instances.set(a.memory, cached);
                     ++stats.instances;
                 }

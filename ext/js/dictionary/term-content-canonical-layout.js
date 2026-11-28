@@ -51,3 +51,17 @@ export const CANONICAL_SCAN_LAYOUT = Object.freeze({
     INDEXES,
     usedBytes: INDEXES + CANONICAL_SCAN_MAX_ROWS * 4,
 });
+
+/* eslint-disable @stylistic/semi */
+// Checksum scratch occupies only the unused tail of the existing reservation.
+// The canonical v1 endpoint stays unchanged for older module compatibility.
+const CHECKSUM_STATE = INDEXES + CANONICAL_SCAN_MAX_ROWS * 4
+const CHECKSUM_SCRATCH = CHECKSUM_STATE + 3 * 48
+
+export const CANONICAL_CHECKSUM_LAYOUT = Object.freeze({
+    STATE: CHECKSUM_STATE,
+    SCRATCH: CHECKSUM_SCRATCH,
+    CAPACITY: 20480,
+    END: CHECKSUM_SCRATCH + 3 * 20480,
+})
+/* eslint-enable @stylistic/semi */

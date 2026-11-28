@@ -1398,7 +1398,11 @@ export class DictionaryDatabase {
                 termContentSessionStartAttempted = true;
                 await this._termContentStore.beginImportSession();
                 termRecordSessionStartAttempted = true;
-                await this._termRecordStore.beginImportSession();
+                /* eslint-disable @stylistic/semi */
+                await this._termRecordStore.beginImportSession((base, derived, records) => {
+                    return this._nativeCanonicalScanner.tryHashLookupIndex(this._termContentMetadataArena, base, derived, records)
+                })
+                /* eslint-enable @stylistic/semi */
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
