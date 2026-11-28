@@ -1,0 +1,13 @@
+--- captured-packer-202973a3.py
++++ pack-records.py
+@@ -1,8 +1,7 @@
+ import pathlib,json,gzip,hashlib,struct,sqlite3,sys
+-source=pathlib.Path(sys.argv[1]);target=pathlib.Path(sys.argv[2]);scratch=pathlib.Path('/tmp/manabitan-cctx-spill')
+-target.mkdir(parents=True,exist_ok=True);scratch.mkdir(parents=True,exist_ok=True)
++source=pathlib.Path(sys.argv[1]);target=pathlib.Path(sys.argv[2]);scratch=pathlib.Path(sys.argv[3])
++target.mkdir(parents=True,exist_ok=False);scratch.mkdir(parents=True,exist_ok=False)
+ manifest=json.loads((source/'manifest.json').read_bytes());database=scratch/'dedup.sqlite3';content=scratch/'dedup.bin'
+-if database.exists():database.unlink()
+ con=sqlite3.connect(database);con.execute('PRAGMA journal_mode=OFF');con.execute('PRAGMA synchronous=OFF');con.execute('PRAGMA cache_size=-1024')
+ con.execute('CREATE TABLE content (h1 INTEGER,h2 INTEGER,length INTEGER,offset INTEGER)');con.execute('CREATE INDEX keys ON content (h1,h2,length)')
+ backing=open(content,'w+b');blocks=[];groups=[];unique=0;persisted=0;duplicates=0;hashCollisions=0;position=0;targetBytes=4*1024*1024

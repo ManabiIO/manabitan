@@ -1,0 +1,41 @@
+name: Zstd count64 build and parity research
+
+on:
+  push:
+    branches: [research/zstd-count64-20261128-7c02]
+    paths:
+      - .github/workflows/zstd-count64-build-7c02.yml
+      - dev/perf/zstd-count64-7c02/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-qualify:
+    if: github.ref == 'refs/heads/research/zstd-count64-20261128-7c02'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Install frozen capture dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build pinned production and candidate WASM; verify all canonical frames
+        run: >-
+          python3 dev/perf/zstd-count64-7c02/build-qualify.py
+          --output builds/perf/zstd-count64-7c02
+          --work "$RUNNER_TEMP/zstd-count64-7c02"
+      - name: Retain all artifacts and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: zstd-count64-build-7c02
+          path: builds/perf/zstd-count64-7c02
+          if-no-files-found: error
+          retention-days: 14

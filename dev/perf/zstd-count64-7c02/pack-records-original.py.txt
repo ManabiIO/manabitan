@@ -1,0 +1,34 @@
+import pathlib,json,gzip,hashlib,struct,sqlite3,sys
+source=pathlib.Path(sys.argv[1]);target=pathlib.Path(sys.argv[2]);scratch=pathlib.Path('/tmp/manabitan-cctx-spill')
+target.mkdir(parents=True,exist_ok=True);scratch.mkdir(parents=True,exist_ok=True)
+manifest=json.loads((source/'manifest.json').read_bytes());database=scratch/'dedup.sqlite3';content=scratch/'dedup.bin'
+if database.exists():database.unlink()
+con=sqlite3.connect(database);con.execute('PRAGMA journal_mode=OFF');con.execute('PRAGMA synchronous=OFF');con.execute('PRAGMA cache_size=-1024')
+con.execute('CREATE TABLE content (h1 INTEGER,h2 INTEGER,length INTEGER,offset INTEGER)');con.execute('CREATE INDEX keys ON content (h1,h2,length)')
+backing=open(content,'w+b');blocks=[];groups=[];unique=0;persisted=0;duplicates=0;hashCollisions=0;position=0;targetBytes=4*1024*1024
+for entry in manifest['records']:
+ data=gzip.decompress((source/entry['name']).read_bytes());assert hashlib.sha256(data).hexdigest()==entry['sha256'];at=0;parts=[];packedBytes=0;groupUnique=0;groupBytes=0
+ def flush():
+  global parts,packedBytes
+  if not parts:return
+  block=b''.join(parts);name=f'block-{len(blocks):03}.gz';(target/name).write_bytes(gzip.compress(block,compresslevel=1,mtime=0))
+  blocks.append({'name':name,'group':entry['group'],'bytes':len(block),'entries':len(parts),'sha256':hashlib.sha256(block).hexdigest()});parts=[];packedBytes=0
+ while at<len(data):
+  n,h1,h2=struct.unpack_from('<III',data,at);at+=12;value=data[at:at+n];at+=n;assert len(value)==n
+  matches=list(con.execute('SELECT offset FROM content WHERE h1=? AND h2=? AND length=?',(h1,h2,n)))
+  found=False
+  for (offset,) in matches:
+   backing.seek(offset)
+   if backing.read(n)==value:found=True;break
+  if found:duplicates+=1;continue
+  if matches:hashCollisions+=1
+  backing.seek(position);backing.write(value);con.execute('INSERT INTO content VALUES (?,?,?,?)',(h1,h2,n,position));position+=n
+  if packedBytes>0 and packedBytes+n>targetBytes and n>0:flush()
+  parts.append(value);packedBytes+=n;unique+=1;persisted+=n;groupUnique+=1;groupBytes+=n
+ flush();con.commit();groups.append({'group':entry['group'],'unique':groupUnique,'persistedBytes':groupBytes})
+ print(f'packed group {entry["group"]+1}/{len(manifest["records"])} unique={unique} bytes={persisted}',file=sys.stderr)
+report={k:v for k,v in manifest.items() if k!='records'}
+report.update({'boundary':'Canonical compression corpus: frozen parser per-group unique bytes, disk-backed exact cross-group bytewise dedup, unchanged 4MiB logical-entry block packing. Existing medium-capability grouping. Not a browser full-import capture or timing.', 'unique':unique,'persistedBytes':persisted,'crossGroupDuplicates':duplicates,'hashCollisions':hashCollisions,'blocks':blocks,'groupStats':groups,'recordManifestSha256':hashlib.sha256((source/'manifest.json').read_bytes()).hexdigest(),'packerSha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()})
+(target/'manifest.json').write_text(json.dumps(report,indent=2)+'\n')
+backing.close();con.close();content.unlink();database.unlink()
+print(json.dumps({**report,'blocks':len(blocks),'groupStats':None,'sourceGroups':None},indent=2))

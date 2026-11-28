@@ -1,0 +1,382 @@
+{
+  "boundary": "Canonical compression corpus: frozen parser per-group unique bytes, disk-backed exact cross-group bytewise dedup, unchanged 4MiB logical-entry block packing. Existing medium-capability grouping. Not a browser full-import capture or timing.",
+  "dictionary": "jmdict",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "captureSha256": "f77b13e95bcb237d232f5c316fbd26dab03c4882e96b804ad40e725d2d495111",
+  "rows": 528299,
+  "perGroupUnique": 366030,
+  "logicalBytes": 145957292,
+  "perGroupUniqueBytes": 101143985,
+  "logicalDigest": "7dd16413a3775b36008a3b14bef7bd14272674a9edc1cc83eaf23ddd697d396b",
+  "sourceBytes": 171617523,
+  "sourceGroups": [
+    [
+      "term_bank_1.json",
+      "term_bank_2.json",
+      "term_bank_3.json",
+      "term_bank_4.json",
+      "term_bank_5.json"
+    ],
+    [
+      "term_bank_6.json",
+      "term_bank_7.json",
+      "term_bank_8.json",
+      "term_bank_9.json"
+    ],
+    [
+      "term_bank_10.json",
+      "term_bank_11.json",
+      "term_bank_12.json",
+      "term_bank_13.json"
+    ],
+    [
+      "term_bank_14.json",
+      "term_bank_15.json",
+      "term_bank_16.json",
+      "term_bank_17.json"
+    ],
+    [
+      "term_bank_18.json",
+      "term_bank_19.json",
+      "term_bank_20.json",
+      "term_bank_21.json",
+      "term_bank_22.json"
+    ],
+    [
+      "term_bank_23.json",
+      "term_bank_24.json",
+      "term_bank_25.json",
+      "term_bank_26.json",
+      "term_bank_27.json"
+    ],
+    [
+      "term_bank_28.json",
+      "term_bank_29.json",
+      "term_bank_30.json",
+      "term_bank_31.json"
+    ],
+    [
+      "term_bank_32.json",
+      "term_bank_33.json",
+      "term_bank_34.json",
+      "term_bank_35.json",
+      "term_bank_36.json"
+    ],
+    [
+      "term_bank_37.json",
+      "term_bank_38.json",
+      "term_bank_39.json",
+      "term_bank_40.json"
+    ],
+    [
+      "term_bank_41.json",
+      "term_bank_42.json",
+      "term_bank_43.json",
+      "term_bank_44.json"
+    ],
+    [
+      "term_bank_45.json",
+      "term_bank_46.json",
+      "term_bank_47.json",
+      "term_bank_48.json"
+    ],
+    [
+      "term_bank_49.json",
+      "term_bank_50.json",
+      "term_bank_51.json",
+      "term_bank_52.json",
+      "term_bank_53.json"
+    ]
+  ],
+  "node": "v24.22.3",
+  "maxRssKiB": 192372,
+  "unique": 362032,
+  "persistedBytes": 100300626,
+  "crossGroupDuplicates": 3998,
+  "hashCollisions": 0,
+  "blocks": [
+    {
+      "name": "block-000.gz",
+      "group": 0,
+      "bytes": 4194301,
+      "entries": 17295,
+      "sha256": "dae2b7c38ef2595e68dd9de3b3d599704e2f709987f591cb9c97a7e2fa8450cb"
+    },
+    {
+      "name": "block-001.gz",
+      "group": 0,
+      "bytes": 4193525,
+      "entries": 17299,
+      "sha256": "f235117fa0e4424cf4cc38cf3b871cbac9219f3043b64d4d75cfa2341f01aaff"
+    },
+    {
+      "name": "block-002.gz",
+      "group": 0,
+      "bytes": 99156,
+      "entries": 357,
+      "sha256": "f0266c62757b18e57cb5e27cc5ca5e67891a3436570ce4445bf86de38d6f8b1a"
+    },
+    {
+      "name": "block-003.gz",
+      "group": 1,
+      "bytes": 4193987,
+      "entries": 14537,
+      "sha256": "c4893a551eb4397aaf76e05076a9ddeacfc8c052f1ae722f5b9b530a203e854f"
+    },
+    {
+      "name": "block-004.gz",
+      "group": 1,
+      "bytes": 4194084,
+      "entries": 14809,
+      "sha256": "b682b633968ee01d7483660955ea476a60e503e9e16031bb94904a1e6976ef32"
+    },
+    {
+      "name": "block-005.gz",
+      "group": 1,
+      "bytes": 1016404,
+      "entries": 3393,
+      "sha256": "143c1815eaadbf1788a91d0b2ba32654258fd55b06e3bd6a2005ba9dfed24eda"
+    },
+    {
+      "name": "block-006.gz",
+      "group": 2,
+      "bytes": 4193824,
+      "entries": 14592,
+      "sha256": "de19e6b78bdb2645f6fb789dd4639e56c037bc98370a45ebf9240b29cdfbee53"
+    },
+    {
+      "name": "block-007.gz",
+      "group": 2,
+      "bytes": 4194201,
+      "entries": 14621,
+      "sha256": "4d7a99c3922167f0a42783b5cccf58f9f993f214bdc4b3d7d5698e9b8f65f188"
+    },
+    {
+      "name": "block-008.gz",
+      "group": 2,
+      "bytes": 852424,
+      "entries": 3043,
+      "sha256": "4a083f82826375e24fdc31a338ee36c31ff26460390e07f4cf692151fba11e54"
+    },
+    {
+      "name": "block-009.gz",
+      "group": 3,
+      "bytes": 4194139,
+      "entries": 13328,
+      "sha256": "692b9c8e6375afdf6caf0810bdb0fb2b0d803a26a3b1bc318fa2c6aa8798122c"
+    },
+    {
+      "name": "block-010.gz",
+      "group": 3,
+      "bytes": 4194159,
+      "entries": 14679,
+      "sha256": "9d1ea53371278f5f612930752d3ceed8999ad920b3f2e63b3767249a9dca0f2c"
+    },
+    {
+      "name": "block-011.gz",
+      "group": 3,
+      "bytes": 200930,
+      "entries": 751,
+      "sha256": "a6105a39f84436154e3ba30a6e617de54a2d1a5416676b6a884f0b41f3211c74"
+    },
+    {
+      "name": "block-012.gz",
+      "group": 4,
+      "bytes": 4194238,
+      "entries": 15933,
+      "sha256": "27cfa5393f2f95fc2618887c2ee1a4ff7e0e9fa7e87bb26be59633934f3cd727"
+    },
+    {
+      "name": "block-013.gz",
+      "group": 4,
+      "bytes": 4194216,
+      "entries": 17098,
+      "sha256": "2e30affd931a4891d83cfc213efed0ef0e675244ecab5ffe41b50cc55de8702b"
+    },
+    {
+      "name": "block-014.gz",
+      "group": 4,
+      "bytes": 290994,
+      "entries": 1128,
+      "sha256": "3b6d9fd4450f34b7a0515e9d3fa8e1a34f93c383d5d83fdb30b4f45306268ab2"
+    },
+    {
+      "name": "block-015.gz",
+      "group": 5,
+      "bytes": 4193739,
+      "entries": 16890,
+      "sha256": "54e54f1a236f763b28288211a1c52eb92dea3882592d2c9f6cd56ed50fa064e9"
+    },
+    {
+      "name": "block-016.gz",
+      "group": 5,
+      "bytes": 4194187,
+      "entries": 14806,
+      "sha256": "71d5df3d6521668c91050f906b1661d81362462b159bc95333c75d7e1c24ce67"
+    },
+    {
+      "name": "block-017.gz",
+      "group": 5,
+      "bytes": 527260,
+      "entries": 1847,
+      "sha256": "2befeb4588cba5e3978bf9d581904e078237f01f14c0de358d0a2a59193ee40d"
+    },
+    {
+      "name": "block-018.gz",
+      "group": 6,
+      "bytes": 4193956,
+      "entries": 14423,
+      "sha256": "e6d0b628ee358d24fcd733e43936a9d1bded7f8ca29f5c05998f21310f6181af"
+    },
+    {
+      "name": "block-019.gz",
+      "group": 6,
+      "bytes": 2831068,
+      "entries": 9607,
+      "sha256": "1b793917d59afe06f0c9d5e4281236c5982234d12cfc223611df855d8181a875"
+    },
+    {
+      "name": "block-020.gz",
+      "group": 7,
+      "bytes": 4194088,
+      "entries": 17656,
+      "sha256": "e3d310bd241809e4af3fbf6d1c86434ff8d8f5155aea3a564965b6add0b74554"
+    },
+    {
+      "name": "block-021.gz",
+      "group": 7,
+      "bytes": 3190675,
+      "entries": 13674,
+      "sha256": "901bea0505768ca3f4e067b3e2163cb2f3383089abb8446b9c9a676dcf6c402a"
+    },
+    {
+      "name": "block-022.gz",
+      "group": 8,
+      "bytes": 4194013,
+      "entries": 13366,
+      "sha256": "f1801c2e76301f4d5cc1709566ce9d5d6112f2f72dc536b853f80c407010ee91"
+    },
+    {
+      "name": "block-023.gz",
+      "group": 8,
+      "bytes": 3578800,
+      "entries": 12076,
+      "sha256": "ebb8f7f3317d66b7144e122378f2eeeb1d9cfac3ae0e585761075e9c13cd1d48"
+    },
+    {
+      "name": "block-024.gz",
+      "group": 9,
+      "bytes": 4194263,
+      "entries": 13721,
+      "sha256": "9b1ebdd5ec72c1803b4509c937cb16d1cf22c5e49605f9ce05439f369910ae17"
+    },
+    {
+      "name": "block-025.gz",
+      "group": 9,
+      "bytes": 3326628,
+      "entries": 11085,
+      "sha256": "304db334244cb8e6b065d8ac0659a90d4138c366cf2b5b34f49f860302480e3c"
+    },
+    {
+      "name": "block-026.gz",
+      "group": 10,
+      "bytes": 4194275,
+      "entries": 13504,
+      "sha256": "47df3a22f6eda0e90287ed8cc83b5eb7d098306af3489a87140a869bc6e2f7bd"
+    },
+    {
+      "name": "block-027.gz",
+      "group": 10,
+      "bytes": 3580620,
+      "entries": 12147,
+      "sha256": "c154528b97a261ed272f86baec20256296b87731f071b227cd44f3d9295f2179"
+    },
+    {
+      "name": "block-028.gz",
+      "group": 11,
+      "bytes": 4194041,
+      "entries": 14678,
+      "sha256": "ea843c03c4a9d78ca52c97b675f566057398f77934fc1a2abad738c24b5e79f5"
+    },
+    {
+      "name": "block-029.gz",
+      "group": 11,
+      "bytes": 4194252,
+      "entries": 14681,
+      "sha256": "c069f4135d8874b4fd6bd2e41ad52e5001aeda57a39418f4ae0362fac6c69c73"
+    },
+    {
+      "name": "block-030.gz",
+      "group": 11,
+      "bytes": 1118179,
+      "entries": 5008,
+      "sha256": "3dba95b796e563551d370504e4cac74e38e781053f1ea6860742062977fea86a"
+    }
+  ],
+  "groupStats": [
+    {
+      "group": 0,
+      "unique": 34951,
+      "persistedBytes": 8486982
+    },
+    {
+      "group": 1,
+      "unique": 32739,
+      "persistedBytes": 9404475
+    },
+    {
+      "group": 2,
+      "unique": 32256,
+      "persistedBytes": 9240449
+    },
+    {
+      "group": 3,
+      "unique": 28758,
+      "persistedBytes": 8589228
+    },
+    {
+      "group": 4,
+      "unique": 34159,
+      "persistedBytes": 8679448
+    },
+    {
+      "group": 5,
+      "unique": 33543,
+      "persistedBytes": 8915186
+    },
+    {
+      "group": 6,
+      "unique": 24030,
+      "persistedBytes": 7025024
+    },
+    {
+      "group": 7,
+      "unique": 31330,
+      "persistedBytes": 7384763
+    },
+    {
+      "group": 8,
+      "unique": 25442,
+      "persistedBytes": 7772813
+    },
+    {
+      "group": 9,
+      "unique": 24806,
+      "persistedBytes": 7520891
+    },
+    {
+      "group": 10,
+      "unique": 25651,
+      "persistedBytes": 7774895
+    },
+    {
+      "group": 11,
+      "unique": 34367,
+      "persistedBytes": 9506472
+    }
+  ],
+  "recordManifestSha256": "aba28cdd9b81397273245f319255fc5ece19cc6debf90362314f6096f4e5164e",
+  "packerSha256": "202973a3f805605227cf6507c704d8f7e919881edb5dcfab73cc697cbfa09825"
+}

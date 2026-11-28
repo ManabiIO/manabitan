@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "manabitanBase": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+  "productionWasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+  "emsdkCommit": "14c18b569f55138fe4963924162244251f454fb0",
+  "emscriptenRelease": "5.0.1",
+  "emscriptenCommit": "8c5f43157a3f069ade75876e23061330521eabde",
+  "releasesBuild": "bf32ae8b61ac8efeb7eca01b54c8307f992724f7",
+  "sdkArchiveUrl": "https://storage.googleapis.com/webassembly/emscripten-releases-builds/linux/bf32ae8b61ac8efeb7eca01b54c8307f992724f7/wasm-binaries.tar.xz",
+  "sdkArchiveSha256": "bda6917b630fcc604cca39af433180adfd7195e378075331ceac926553684249",
+  "metadata": [
+    {
+      "url": "https://github.com/emscripten-core/emsdk/blob/14c18b569f55138fe4963924162244251f454fb0/bazel/revisions.bzl",
+      "gitBlobSha": "69b2109b974aa62534a76043eb21fb2ab4a74cb8",
+      "evidence": "Official Linux x86_64 archive SHA-256 for Emscripten 5.0.1"
+    },
+    {
+      "url": "https://github.com/emscripten-core/emsdk/blob/14c18b569f55138fe4963924162244251f454fb0/emscripten-releases-tags.json",
+      "gitBlobSha": "46b756fb0d7c8115e57f2b186abc1da776514e59",
+      "evidence": "5.0.1 release maps to the immutable releasesBuild"
+    },
+    {
+      "url": "https://github.com/emscripten-core/emscripten/blob/8c5f43157a3f069ade75876e23061330521eabde/emscripten-version.txt",
+      "gitBlobSha": "05f88aeaaa991190e07ce4f4e60f9542cb5917f6",
+      "evidence": "The tagged release version file says 5.0.1-git, matching the production label, but exact baseline reproduction is still checked"
+    }
+  ],
+  "constraint": "Build-only plus byte-parity qualification. No timing. The original generated asset's complete SDK revision was not retained; P must remain separate unless rebuilt A is proven identical."
+}

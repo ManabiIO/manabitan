@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "researchBranch": "research/zstd-count64-20261128-7c02",
+  "scope": "Research-only build/correctness preparation; no runtime files changed; no timing collected",
+  "sourceFiles": {
+    ".github/workflows/zstd-count64-build-7c02.yml": {
+      "bytes": 1393,
+      "sha256": "783e72d2d503b2faf3e7e5eb1308c3215126120c1a52ef9ad666180033e09ba1"
+    },
+    "dev/perf/zstd-count64-7c02/README.md": {
+      "bytes": 11242,
+      "sha256": "cff4d978ab11a43aabc88643fe8047bc839658545b40e162bc6a752924451513"
+    },
+    "dev/perf/zstd-count64-7c02/benchmark-wasm.mjs": {
+      "bytes": 8984,
+      "sha256": "e4fe5b01c59e907101dc530441d77b04c04ed5b0d185ac3ff94640956e0c2015"
+    },
+    "dev/perf/zstd-count64-7c02/build-qualify.py": {
+      "bytes": 15622,
+      "sha256": "65ab2ac7bfd91b940d591b59d47ac83b3141a58ad2b7c0ec294077341fca3b4f"
+    },
+    "dev/perf/zstd-count64-7c02/capture-portability.patch": {
+      "bytes": 1880,
+      "sha256": "32df834cf90e152007d044d1aac9b6e5d597e3c67184f40696110721b87ab849"
+    },
+    "dev/perf/zstd-count64-7c02/capture-records-original.mjs.txt": {
+      "bytes": 6582,
+      "sha256": "f77b13e95bcb237d232f5c316fbd26dab03c4882e96b804ad40e725d2d495111"
+    },
+    "dev/perf/zstd-count64-7c02/capture-records.mjs": {
+      "bytes": 6558,
+      "sha256": "e02b1d531adcd00e3c5123ad336b90245135174ae318e5e92af1191fa5e70b4d"
+    },
+    "dev/perf/zstd-count64-7c02/corpus-manifest.json": {
+      "bytes": 9790,
+      "sha256": "2401251afd5a5525df50652d4820bd93a2fc95137fa71a0fb058331b1f90da45"
+    },
+    "dev/perf/zstd-count64-7c02/count64.patch": {
+      "bytes": 1248,
+      "sha256": "53266441e5456a8a551a5e61528f473224bf6138874beb7d1d684e319ec2392b"
+    },
+    "dev/perf/zstd-count64-7c02/native-boundary-oracle.c": {
+      "bytes": 4618,
+      "sha256": "7cfba088033149bb9a00bfe10cbb9be47849f7ae2d735a3bb35434c951de405e"
+    },
+    "dev/perf/zstd-count64-7c02/pack-portability.patch": {
+      "bytes": 1102,
+      "sha256": "6d740238ef2564bb94013ea31c29336b28af2881c22a49a6e6ede5fe81d5abb4"
+    },
+    "dev/perf/zstd-count64-7c02/pack-records-original.py.txt": {
+      "bytes": 3181,
+      "sha256": "202973a3f805605227cf6507c704d8f7e919881edb5dcfab73cc697cbfa09825"
+    },
+    "dev/perf/zstd-count64-7c02/pack-records.py": {
+      "bytes": 3128,
+      "sha256": "ca38f75f7f97e258eccd22ded0b709289cc03c09086d9bacf0b8522edad44d79"
+    },
+    "dev/perf/zstd-count64-7c02/qualify-wasm.mjs": {
+      "bytes": 11124,
+      "sha256": "2500e2ee0b2d919391b07438d59f9d283791b2432fefdd242d0c468a8f7c6c72"
+    },
+    "dev/perf/zstd-count64-7c02/source-pins.json": {
+      "bytes": 568,
+      "sha256": "ba9ec8ca0ca3ceb39393c8b6f7b43301d363cdbf9a3b6a9a7ceb159bd1e5a078"
+    },
+    "dev/perf/zstd-count64-7c02/toolchain.json": {
+      "bytes": 1854,
+      "sha256": "89b5370d2f7baf7d4b89080ad3ab1a1350d30abac313f29aaa01c0b05a59fd8f"
+    },
+    "dev/perf/zstd-count64-7c02/wasm-arm.mjs": {
+      "bytes": 3151,
+      "sha256": "9fb5edcbefb98bbe6668011ea939061302eae2a2a9ec85c4d9aabab68ae607e3"
+    },
+    "dev/perf/zstd-count64-7c02/wasm-boundary-probe.c": {
+      "bytes": 699,
+      "sha256": "df953a43155226ae363400c23d81f2f8ea712a2f36638d6ae3db5463c54c8345"
+    }
+  },
+  "selfExcluded": true,
+  "staticChecks": {
+    "nodeCheck": [
+      "benchmark-wasm.mjs",
+      "capture-records.mjs",
+      "qualify-wasm.mjs",
+      "wasm-arm.mjs"
+    ],
+    "pythonAst": [
+      "build-qualify.py",
+      "pack-records.py"
+    ],
+    "json": "all experiment JSON files",
+    "workflowYaml": "PyYAML BaseLoader parse"
+  },
+  "pending": [
+    "hosted SDK download/build",
+    "native guard-page oracle",
+    "actual-WASM boundary and full canonical frame/envelope parity",
+    "artifact identity review before separately authorized timing"
+  ]
+}
