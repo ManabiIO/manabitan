@@ -2,7 +2,7 @@ name: Reference field contracts and previous-reader qualification 4d9f
 
 on:
   push:
-    branches: [experiment/reference-field-contracts-latest-20261128-4d9f]
+    branches: [experiment/reference-field-contracts-setup2-20261128-4d9f]
     paths: [.github/workflows/reference-field-corpus-qualification-4d9f.yml]
 
 permissions:
@@ -48,6 +48,7 @@ jobs:
           ln -s "$GITHUB_WORKSPACE/runtime/node_modules" previous-reader/node_modules
           npm run build:libs --prefix runtime > reports/setup/runtime-libs.stdout.log 2> reports/setup/runtime-libs.stderr.log
           npm run build:libs --prefix previous-reader > reports/setup/reader-libs.stdout.log 2> reports/setup/reader-libs.stderr.log
+          npm run build:libs --prefix tooling > reports/setup/tooling-libs.stdout.log 2> reports/setup/tooling-libs.stderr.log
       - name: Portable helper contracts and scoped lint
         shell: bash
         run: |
