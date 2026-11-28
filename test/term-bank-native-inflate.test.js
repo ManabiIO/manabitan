@@ -16,7 +16,7 @@
  */
 
 import {readFile} from 'node:fs/promises';
-import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
+import {constants, crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
 import {inflateCompressedTermBankSourcesWasm, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 
@@ -80,6 +80,20 @@ function snapshot(result) {
         bytes: Uint8Array.from(new Uint8Array(result.wasm.memory.buffer, result.jsonPtr, result.jsonLength)),
         spans: [...new Uint32Array(result.wasm.memory.buffer, result.bankSpansPtr, (result.bankSpanCount ?? 0) * 2)],
         count: result.sourceCount,
+    };
+}
+
+/**
+ * Checks large arenas without retaining or deeply comparing a decoded copy.
+ * @param {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>} result
+ * @returns {{length: number, spans: number[], count: number, crc: number}}
+ */
+function fingerprint(result) {
+    return {
+        length: result.jsonLength,
+        spans: [...new Uint32Array(result.wasm.memory.buffer, result.bankSpansPtr, (result.bankSpanCount ?? 0) * 2)],
+        count: result.sourceCount,
+        crc: crc32(new Uint8Array(result.wasm.memory.buffer, result.jsonPtr, result.jsonLength)),
     };
 }
 
@@ -229,6 +243,229 @@ describe('native gzip validation of raw ZIP term banks', () => {
         expect(snapshot(await inflateCompressedTermBankSourcesWasm(sources))).toEqual(expected);
         expect(wasmInflate).toHaveBeenCalledOnce();
         expect(constructors).toHaveBeenCalledTimes(kind === 'unsupported' ? 1 : 0);
+    });
+});
+
+describe('native group burst policy', () => {
+    test('uses the decoded group budget for differently sized banks', async () => {
+        const sources = [
+            source(JSON.stringify([['small', '', '', '', 0, ['abc'.repeat(700)], 1, '']])),
+            source(JSON.stringify([['large', '', '', '', 0, ['xyz'.repeat(5000)], 2, '']])),
+        ];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = snapshot(baseline);
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        /** @type {number[][]} */
+        const chunks = sources.map(() => []);
+        let instances = 0;
+        vi.stubGlobal('DecompressionStream', function strictStream(/** @type {CompressionFormat} */ format) {
+            const bank = instances++ - 2;
+            return strictGzipStream(format, bank >= 0 ? (chunk) => { chunks[bank].push(chunk.byteLength); } : null);
+        });
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        expect(snapshot(await inflateCompressedTermBankSourcesWasm(sources))).toEqual(expected);
+        const chunkSize = Math.floor(sources.reduce((sum, item) => sum + item.uncompressedSize, 0) / 1032);
+        for (let bank = 0; bank < sources.length; ++bank) {
+            expect(chunks[bank][0]).toBe(10);
+            expect(chunks[bank].at(-1)).toBe(8);
+            const payload = chunks[bank].slice(1, -1);
+            expect(payload.length).toBe(Math.ceil(sources[bank].compressedSize / chunkSize));
+            expect(payload.reduce((sum, length) => sum + length, 0)).toBe(sources[bank].compressedSize);
+            expect(payload.every((length) => length <= chunkSize)).toBe(true);
+            expect(payload[0]).toBe(Math.min(chunkSize, sources[bank].compressedSize));
+        }
+        expect(chunks[0][1]).toBeGreaterThan(Math.floor(sources[0].uncompressedSize / 1032));
+        expect(instances).toBe(sources.length + 2);
+        expect(wasmInflate).not.toHaveBeenCalled();
+    });
+
+    test.each([0, 1])('applies the 16 MiB bank admission boundary (extra bytes: %i)', async (extra) => {
+        const limit = 16 * 1024 * 1024;
+        const sources = [source(paddedEmptyBank), source(' '.repeat(limit + extra - 2) + '[]')];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = fingerprint(baseline);
+        expect(expected.length).toBe(sources[0].uncompressedSize + limit + extra);
+        expect(expected.spans).toEqual([0, sources[0].uncompressedSize, sources[0].uncompressedSize, limit + extra]);
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        /** @type {number[][]} */
+        const chunks = sources.map(() => []);
+        let instances = 0;
+        const constructors = vi.fn(function strictStream(/** @type {CompressionFormat} */ format) {
+            const bank = instances++ - 2;
+            return strictGzipStream(format, bank >= 0 ? (chunk) => { chunks[bank].push(chunk.byteLength); } : null);
+        });
+        vi.stubGlobal('DecompressionStream', constructors);
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const result = await inflateCompressedTermBankSourcesWasm(sources);
+        expect(fingerprint(result)).toEqual(expected);
+        const arena = new Uint8Array(result.wasm.memory.buffer, result.jsonPtr, result.jsonLength);
+        let offset = 0;
+        for (const item of sources) {
+            expect(crc32(arena.subarray(offset, offset + item.uncompressedSize))).toBe(item.signature);
+            offset += item.uncompressedSize;
+        }
+        if (extra === 0) {
+            expect(constructors).toHaveBeenCalledTimes(sources.length + 2);
+            expect(wasmInflate).not.toHaveBeenCalled();
+            const chunkSize = Math.floor(limit / 1032);
+            for (let bank = 0; bank < sources.length; ++bank) {
+                const payload = chunks[bank].slice(1, -1);
+                expect(payload.length).toBe(Math.ceil(sources[bank].compressedSize / chunkSize));
+                expect(payload.every((length) => length <= chunkSize)).toBe(true);
+                expect(payload[0]).toBe(Math.min(chunkSize, sources[bank].compressedSize));
+            }
+        } else {
+            // The later oversized bank rejects the entire group before even
+            // the constructor capability check or the first bank's input.
+            expect(constructors).not.toHaveBeenCalled();
+            expect(wasmInflate).toHaveBeenCalledOnce();
+        }
+    });
+
+    test('keeps eligible deferred-CRC groups on the existing WASM route', async () => {
+        const sources = [source(' '.repeat(2 * 1024 * 1024) + '[]'), source(' '.repeat(2 * 1024 * 1024) + '[]')];
+        const options = {experimentalValidatedGlossaryReuse: true};
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources, options, true);
+        const expected = fingerprint(baseline);
+        expect(baseline.crcSignaturesPtr).toBeGreaterThan(0);
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        const constructors = vi.fn(() => { throw new Error('Deferred CRC must not use native inflation'); });
+        vi.stubGlobal('DecompressionStream', constructors);
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const result = await inflateCompressedTermBankSourcesWasm(sources, options, true);
+        expect(fingerprint(result)).toEqual(expected);
+        expect(result.crcSignaturesPtr).toBeGreaterThan(0);
+        expect(constructors).not.toHaveBeenCalled();
+        expect(wasmInflate).toHaveBeenCalledOnce();
+    });
+
+    test('preserves first-error order when an oversized bank disables native inflation', async () => {
+        const badCrc = source(paddedEmptyBank);
+        badCrc.signature = (badCrc.signature ^ 1) >>> 0;
+        const badDeflate = source(paddedEmptyBank);
+        badDeflate.bytes = badDeflate.bytes.slice(0, -2);
+        badDeflate.compressedSize = badDeflate.bytes.length;
+        const oversized = {...source(paddedEmptyBank), uncompressedSize: 16 * 1024 * 1024 + 1};
+        const constructors = vi.fn(() => { throw new Error('Oversized group must not use native inflation'); });
+        vi.stubGlobal('DecompressionStream', constructors);
+        for (const sources of [[badCrc, oversized, badDeflate], [oversized, badCrc, badDeflate], [badDeflate, oversized, badCrc]]) {
+            vi.stubGlobal('__manabitanTermBankParserWorker', false);
+            const expected = await failure(sources);
+            vi.stubGlobal('__manabitanTermBankParserWorker', true);
+            expect(await failure(sources)).toEqual(expected);
+        }
+        expect(constructors).not.toHaveBeenCalled();
+    });
+
+    test('settles a larger small-bank overrun before original-WASM fallback', async () => {
+        const malformed = source(' '.repeat(64 * 1024) + '[]');
+        malformed.uncompressedSize = 128;
+        const sources = [malformed, source(' '.repeat(64 * 1024) + '[]')];
+        const chunkSize = Math.floor(sources.reduce((sum, item) => sum + item.uncompressedSize, 0) / 1032);
+        expect(malformed.compressedSize).toBeLessThanOrEqual(malformed.uncompressedSize);
+        expect(malformed.compressedSize).toBeGreaterThan(chunkSize);
+        expect(chunkSize).toBeGreaterThan(Math.max(1, Math.floor(malformed.uncompressedSize / 1032)));
+        const expected = await failure(sources);
+        const baseline = await inflateCompressedTermBankSourcesWasm([source(paddedEmptyBank)]);
+        const wasmReset = vi.spyOn(baseline.wasm, 'wasm_reset_heap');
+        const writeGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const cancelEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const cancelGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortRequested = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        let writeSettled = false;
+        let cancelSettled = false;
+        let abortSettled = false;
+        let writes = 0;
+        /** @type {(bytes: Uint8Array) => void} */
+        let emit = () => {};
+        const readable = new ReadableStream({
+            start(controller) { emit = (bytes) => { controller.enqueue(bytes); }; },
+            async cancel(reason) {
+                expect(reason).toBeInstanceOf(Error);
+                expect(reason).toMatchObject({message: 'Native term-bank output exceeds its declared length'});
+                cancelEntered.resolve();
+                await cancelGate.promise;
+                cancelSettled = true;
+            },
+        });
+        const writable = new WritableStream({
+            async write(chunk) {
+                if (++writes !== 2) { return; }
+                expect(chunk.byteLength).toBe(chunkSize);
+                // Decode the actual first larger payload chunk. It already
+                // exceeds the small declared length before the next write.
+                const decoded = new Uint8Array(inflateRawSync(chunk, {finishFlush: constants.Z_SYNC_FLUSH}));
+                expect(decoded.byteLength).toBeGreaterThan(malformed.uncompressedSize);
+                emit(decoded);
+                await writeGate.promise;
+                writeSettled = true;
+            },
+            async abort(reason) {
+                expect(reason).toBeInstanceOf(Error);
+                expect(reason).toMatchObject({message: 'Native term-bank output exceeds its declared length'});
+                abortEntered.resolve();
+                await abortGate.promise;
+                abortSettled = true;
+            },
+        });
+        const getWriter = writable.getWriter.bind(writable);
+        vi.spyOn(writable, 'getWriter').mockImplementation(() => {
+            const writer = getWriter();
+            const abort = writer.abort.bind(writer);
+            vi.spyOn(writer, 'abort').mockImplementation((reason) => {
+                abortRequested.resolve();
+                return abort(reason);
+            });
+            return writer;
+        });
+        const originalInflate = baseline.wasm.inflate_and_join_term_banks;
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks').mockImplementation((...args) => {
+            expect(writeSettled && cancelSettled && abortSettled).toBe(true);
+            expect(readable.locked).toBe(false);
+            expect(writable.locked).toBe(false);
+            return originalInflate(...args);
+        });
+        let instances = 0;
+        vi.stubGlobal('DecompressionStream', function strictThenControlled(/** @type {CompressionFormat} */ format) {
+            return ++instances <= 2 ? strictGzipStream(format) : {readable, writable};
+        });
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const operation = failure(sources);
+        let settled = false;
+        void operation.then(
+            () => { settled = true; },
+            () => { settled = true; },
+        );
+        try {
+            await Promise.all([cancelEntered.promise, abortRequested.promise]);
+            expect(writeSettled).toBe(false);
+            expect(settled).toBe(false);
+            expect(wasmReset).toHaveBeenCalledOnce();
+            expect(wasmInflate).not.toHaveBeenCalled();
+            writeGate.resolve();
+            await abortEntered.promise;
+            expect(writeSettled).toBe(true);
+            expect(cancelSettled).toBe(false);
+            expect(abortSettled).toBe(false);
+            expect(wasmInflate).not.toHaveBeenCalled();
+            cancelGate.resolve();
+            await new Promise((resolve) => { setImmediate(resolve); });
+            expect(cancelSettled).toBe(true);
+            expect(abortSettled).toBe(false);
+            expect(settled).toBe(false);
+            expect(wasmInflate).not.toHaveBeenCalled();
+        } finally {
+            writeGate.resolve();
+            cancelGate.resolve();
+            abortGate.resolve();
+        }
+        expect(await operation).toEqual(expected);
+        expect(instances).toBe(3);
+        expect(writes).toBe(2);
+        expect(wasmReset).toHaveBeenCalledTimes(2);
+        expect(wasmInflate).toHaveBeenCalledOnce();
     });
 });
 

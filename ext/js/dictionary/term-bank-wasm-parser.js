@@ -75,6 +75,8 @@ const CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024;
 const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
 // DEFLATE can emit a 258-byte match from two one-bit Huffman symbols.
 const MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE = 258 * 4;
+// A nominal decoded burst budget, not a browser allocation ceiling.
+const MAX_NATIVE_INFLATE_BURST_BYTES = 16 * 1024 * 1024;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -273,7 +275,8 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     if (
         !deferCrc && Reflect.get(globalThis, '__manabitanTermBankParserWorker') === true &&
         typeof DecompressionStream === 'function' && sources.every((source) => (
-            source.compressionMethod === 8 && source.compressedSize <= source.uncompressedSize
+            source.compressionMethod === 8 && source.compressedSize <= source.uncompressedSize &&
+            source.uncompressedSize <= MAX_NATIVE_INFLATE_BURST_BYTES
         ))
     ) {
         const Stream = DecompressionStream;
@@ -451,6 +454,14 @@ async function inflateTermBankSourcesNative(sources, wasm, compressedBytes, unco
     const output = new Uint8Array(wasm.memory.buffer, outputPtr, uncompressedBytes + 2);
     const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, preserveBankBoundaries ? sources.length * 2 : 0);
     const gzipHeader = new Uint8Array([0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 0, 255]);
+    // Native transforms may collect their output before yielding. Use the group
+    // size, capped at 16 MiB, as a nominal decoded burst budget. Native temporary
+    // buffers are additional to this arena; decoder state can cross input chunks.
+    // Every admitted bank fits this budget, so compressed <= decoded still
+    // bounds payload writes without making chunks smaller than the per-bank rule.
+    // Worker-owned input views also avoid a Blob copy.
+    const nominalBurstBytes = Math.min(uncompressedBytes, MAX_NATIVE_INFLATE_BURST_BYTES);
+    const inputChunkSize = Math.max(1, Math.floor(nominalBurstBytes / MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE));
     let cursor = 0;
     const startedAt = safePerformance.now();
     for (let i = 0; i < sources.length; ++i) {
@@ -459,13 +470,6 @@ async function inflateTermBankSourcesNative(sources, wasm, compressedBytes, unco
         const trailerView = new DataView(trailer.buffer);
         trailerView.setUint32(0, source.signature, true);
         trailerView.setUint32(4, source.uncompressedSize, true);
-        // Native transforms may collect all output for one input chunk before
-        // yielding. Limit compressed input bursts using DEFLATE's maximum
-        // expansion, rather than handing an entire Blob chunk to the decoder.
-        // The input is worker-owned, so these views also avoid a Blob copy.
-        // Admission requires compressed <= decoded size, bounding the number
-        // of payload writes even for a tiny declared output with empty blocks.
-        const inputChunkSize = Math.max(1, Math.floor(source.uncompressedSize / MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE));
         const stream = new Stream('gzip');
         const reader = stream.readable.getReader();
         let writer;
