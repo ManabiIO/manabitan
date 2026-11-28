@@ -1,0 +1,35 @@
+name: Corrected import source validation 20261127 6b4c
+
+on:
+  push:
+    branches: ['perf/import-study-20261127-6b4c']
+    paths: ['.github/workflows/import-validation-6b4c.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ff5878e7fc07b0611e8b7c05d154155a33975b64
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Establish unchanged measured product
+        run: |
+          git diff --exit-code 4e7429dc2ac81e1dbda60c2898ad9bdc2aa1219a HEAD -- ext dev/data dev/bin package.json package-lock.json
+          git diff --stat 4e7429dc2ac81e1dbda60c2898ad9bdc2aa1219a HEAD
+      - uses: ./.github/actions/setup
+      - name: Recheck the corrected test lint
+        run: npx eslint test/dictionary-database-content-dedup.test.js
+      - name: Run full unit tests
+        run: npm run test:unit -- --maxWorkers=2 --no-file-parallelism
+      - name: Run options upgrade tests
+        run: npm run test:unit:options -- --maxWorkers=1 --no-file-parallelism
+      - name: Check every build target
+        run: npm run test:build
