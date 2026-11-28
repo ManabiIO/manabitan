@@ -1,0 +1,214 @@
+name: Import baseline attribution 20261127 63aba8
+
+on:
+  push:
+    branches: [study/import-20261127-63aba8]
+    paths:
+      - '.github/workflows/import-baseline-20261127-63aba8.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-baseline-20261127-63aba8
+  cancel-in-progress: false
+
+jobs:
+  baseline:
+    name: Frozen baseline (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_BASELINE_TREE: d99ea4d04658f7ec1c76acdc5f3684594212a471
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: builds/perf/import-baseline-20261127-63aba8
+      PERF_WORKFLOW: .github/workflows/import-baseline-20261127-63aba8.yml
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Preserve the frozen study and source identities
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$PERF_BASELINE_TREE"
+          git show "$GITHUB_SHA:$PERF_WORKFLOW" > "$PERF_EVIDENCE/workflow.yml"
+          git status --porcelain=v1 > "$PERF_EVIDENCE/initial-status.txt"
+          test ! -s "$PERF_EVIDENCE/initial-status.txt"
+          python3 - <<'PY'
+          import datetime, json, os, pathlib, platform
+          root = pathlib.Path(os.environ['PERF_EVIDENCE'])
+          receipt = {
+              'source': os.environ['PERF_BASELINE'],
+              'sourceTree': os.environ['PERF_BASELINE_TREE'],
+              'tooling': os.environ['GITHUB_SHA'],
+              'dictionary': os.environ['PERF_DICTIONARY'],
+              'runId': os.environ['GITHUB_RUN_ID'],
+              'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'startedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'host': platform.uname()._asdict(),
+              'bootId': pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
+              'purpose': 'One ordinary baseline observation and one separate diagnostic trace; no comparative speedup claim.',
+          }
+          (root / 'acquisition.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+
+      - name: Install locked dependencies and build pinned libraries
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_EVIDENCE/npm-ci.log"
+          npm run build:libs 2>&1 | tee "$PERF_EVIDENCE/build-libs.log"
+          npm run license-report:html 2>&1 | tee "$PERF_EVIDENCE/license-report.log"
+
+      - name: Install the lockfile Chromium runtime
+        run: |
+          set -euo pipefail
+          node node_modules/playwright/cli.js install --with-deps chromium 2>&1 | tee "$PERF_EVIDENCE/browser-install.log"
+
+      - name: Restore checksum-pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Verify the requested archive and build the release package
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" 2>&1 | tee "$PERF_EVIDENCE/fixtures.log"
+          node dev/bin/build.js --target chrome 2>&1 | tee "$PERF_EVIDENCE/build-chrome.log"
+
+      - name: Bind source, fixture, runtime and complete package contents
+        id: identity
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, zipfile
+          root = pathlib.Path.cwd()
+          evidence = root / os.environ['PERF_EVIDENCE']
+          def digest(path):
+              result = hashlib.sha256()
+              with path.open('rb') as stream:
+                  while chunk := stream.read(1024 * 1024):
+                      result.update(chunk)
+              return result.hexdigest()
+          def command(*args):
+              return subprocess.check_output(args, text=True).strip()
+          dependency_lock = root / 'package-lock.json'
+          fixture_lock = root / 'test/perf/dictionaries.lock.json'
+          assert digest(dependency_lock) == '01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96'
+          assert digest(fixture_lock) == '60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89'
+          fixture = json.loads(fixture_lock.read_text())['dictionaries'][os.environ['PERF_DICTIONARY']]
+          archive = root / 'builds/e2e-dictionary-cache' / fixture['cacheFile']
+          assert archive.stat().st_size == fixture['sizeBytes']
+          assert digest(archive) == fixture['sha256']
+          node_version = command('node', '--version')
+          assert node_version == 'v22.22.0', node_version
+          browser = pathlib.Path(command('node', '--input-type=module', '-e', "import {chromium} from 'playwright'; process.stdout.write(chromium.executablePath())"))
+          browser_version = command(str(browser), '--version')
+          assert browser_version == 'Google Chrome for Testing 153.0.8010.12', browser_version
+          assert 'chromium-1243' in browser.parts, browser
+          package = root / 'builds/manabitan-chrome.zip'
+          with zipfile.ZipFile(package) as release:
+              members = {
+                  info.filename: {'bytes': info.file_size, 'sha256': hashlib.sha256(release.read(info)).hexdigest()}
+                  for info in release.infolist() if not info.is_dir()
+              }
+          changed = command('git', 'diff', '--name-only').splitlines()
+          assert set(changed) <= {'ext/legal-npm.html'}, changed
+          source_files = [
+              'package-lock.json', 'test/perf/dictionaries.lock.json',
+              'dev/perf/import-benchmark.js', 'dev/perf/benchmark-support.js',
+              'dev/perf/dictionary-fixtures.js', 'dev/perf/host-environment.js',
+              'test/chromium/extension-two-dictionary-import.e2e.js',
+              'test/e2e/import-timing.js', 'test/e2e/chromium-launch-options.js',
+              'dev/data/dictionary-wasm/manifest.json',
+          ]
+          identity = {
+              'source': command('git', 'rev-parse', 'HEAD'),
+              'sourceTree': command('git', 'rev-parse', 'HEAD^{tree}'),
+              'generatedTrackedChanges': changed,
+              'node': node_version,
+              'v8': command('node', '-p', 'process.versions.v8'),
+              'playwright': command('node', '-p', "require('playwright/package.json').version"),
+              'browser': {'version': browser_version, 'sha256': digest(browser)},
+              'fixture': fixture,
+              'package': {'bytes': package.stat().st_size, 'sha256': digest(package), 'members': members},
+              'sourceFileSha256': {name: digest(root / name) for name in source_files},
+              'workflowSha256': digest(evidence / 'workflow.yml'),
+          }
+          assert identity['source'] == os.environ['PERF_BASELINE']
+          assert identity['sourceTree'] == os.environ['PERF_BASELINE_TREE']
+          (evidence / 'identity.json').write_text(json.dumps(identity, indent=2) + '\n')
+          with zipfile.ZipFile(evidence / 'harness-source.zip', 'w', zipfile.ZIP_DEFLATED) as retained:
+              for name in source_files:
+                  retained.write(root / name, name)
+          (evidence / 'baseline-chrome.zip').write_bytes(package.read_bytes())
+          PY
+
+      - name: Capture host state before the ordinary observation
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {getHostEnvironment} from './dev/perf/host-environment.js'; process.stdout.write(JSON.stringify(getHostEnvironment(), null, 2))" > "$PERF_EVIDENCE/host-before.json"
+
+      - name: Observe one complete baseline import without tracing
+        id: ordinary
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --build-target chrome --no-build --media-check sample --output "$PERF_EVIDENCE/ordinary" 2>&1 | tee "$PERF_EVIDENCE/ordinary.log"
+
+      - name: Capture a separate diagnostic CPU trace
+        id: trace
+        if: ${{ !cancelled() && steps.identity.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --trace --build-target chrome --no-build --media-check sample --output "$PERF_EVIDENCE/trace" 2>&1 | tee "$PERF_EVIDENCE/trace.log"
+
+      - name: Preserve final outcomes and host state
+        if: always()
+        env:
+          PERF_IDENTITY_OUTCOME: ${{ steps.identity.outcome }}
+          PERF_ORDINARY_OUTCOME: ${{ steps.ordinary.outcome }}
+          PERF_TRACE_OUTCOME: ${{ steps.trace.outcome }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE"
+          python3 - <<'PY'
+          import datetime, json, os, pathlib
+          root = pathlib.Path(os.environ['PERF_EVIDENCE'])
+          receipt = {
+              'finishedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'identity': os.environ['PERF_IDENTITY_OUTCOME'],
+              'ordinary': os.environ['PERF_ORDINARY_OUTCOME'],
+              'trace': os.environ['PERF_TRACE_OUTCOME'],
+              'loadAverage': os.getloadavg(),
+              'memoryInfo': pathlib.Path('/proc/meminfo').read_text(),
+          }
+          (root / 'completion.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+
+      - name: Retain reports, traces, exact package and all failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: import-baseline-63aba8-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-baseline-20261127-63aba8
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
