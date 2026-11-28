@@ -1,0 +1,127 @@
+# UNPUBLISHED STUDY. Exact copied-envelope source is registered; the full source gate precedes every import.
+name: Fresh private envelope copies qualification bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-copied-envelope-qualification-bda85f3c7e15-r1
+    paths:
+      - .github/workflows/import-copied-envelope-qualification-bda85f3c7e15.yml
+      - dev/perf/import-qualification-bda85f3c7e15.py
+      - dev/perf/bda85f3c7e15/copied-envelope-plan.json
+      - dev/perf/bda85f3c7e15/copied_envelope_qualification.py
+      - dev/perf/bda85f3c7e15/test_copied_envelope_qualification.py
+      - dev/perf/bda85f3c7e15/import_qualification_controls.py
+      - dev/perf/bda85f3c7e15/test_import_qualification_controls.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-copied-envelope-qualification-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  COPIED_PLAN: dev/perf/bda85f3c7e15/copied-envelope-plan.json
+  COPIED_WRAPPER: dev/perf/bda85f3c7e15/copied_envelope_qualification.py
+  COPIED_EVIDENCE: builds/perf/import-copied-envelope-bda85f3c7e15
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Require exact source, package and counter registration
+        run: |
+          set -euo pipefail
+          mkdir -p "$COPIED_EVIDENCE/source-validation"
+          cp "$COPIED_PLAN" "$COPIED_EVIDENCE/source-validation/frozen-copied-envelope-plan.json"
+          python3 "$COPIED_WRAPPER" check --plan "$COPIED_PLAN" --repo-root "$GITHUB_WORKSPACE" \
+            2>&1 | tee "$COPIED_EVIDENCE/source-validation/registration.log"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check the small wrapper and unchanged observer protocol
+        run: |
+          python3 -m unittest discover -s dev/perf/bda85f3c7e15 -p 'test_copied_envelope_qualification.py' -v
+          python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v
+      - name: Validate the exact candidate source before any import
+        run: |
+          python3 "$COPIED_WRAPPER" validate-source \
+            --plan "$COPIED_PLAN" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --worktree "$RUNNER_TEMP/copied-envelope-source-validation" \
+            --output "$COPIED_EVIDENCE/source-validation"
+      - name: Retain source-gate receipts and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: copied-envelope-source-validation-bda85f3c7e15
+          path: builds/perf/import-copied-envelope-bda85f3c7e15/source-validation
+          if-no-files-found: error
+          retention-days: 90
+
+  qualification:
+    needs: validation
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-copied-envelope-qualification-bda85f3c7e15-r1'
+    name: Copied envelopes / ${{ matrix.dictionary }} / ${{ matrix.initial_order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        dictionary: [vndb, jmdict, jitendex]
+        initial_order: [AB, BA]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify the same frozen registration and tooling
+        run: python3 "$COPIED_WRAPPER" check --plan "$COPIED_PLAN" --repo-root "$GITHUB_WORKSPACE"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Fetch the registered source objects
+        run: |
+          set -euo pipefail
+          mapfile -t copied_sources < <(python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); print(p["baseline"]); print(p["candidate"]["sha"])' "$COPIED_PLAN")
+          test "${#copied_sources[@]}" -eq 2
+          git fetch --no-tags --depth=1 origin "${copied_sources[@]}"
+      - name: Install the locked Playwright Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore the pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed cell and its separate participation audit
+        env:
+          COPIED_DICTIONARY: ${{ matrix.dictionary }}
+          COPIED_ORDER: ${{ matrix.initial_order }}
+        run: |
+          python3 "$COPIED_WRAPPER" run \
+            --plan "$COPIED_PLAN" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --dictionary "$COPIED_DICTIONARY" \
+            --initial-order "$COPIED_ORDER" \
+            --output "$COPIED_EVIDENCE/$COPIED_DICTIONARY-$COPIED_ORDER"
+      - name: Retain every completed or failed receipt and original package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: copied-envelope-bda85f3c7e15-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+          # Explicit paths exclude the sibling acquisition-sources worktrees/dependencies.
+          path: |
+            builds/perf/import-copied-envelope-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/acquisition
+            builds/perf/import-copied-envelope-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/*.json
+            builds/perf/import-copied-envelope-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/driver.log
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,72 @@
+{
+  "status": "SOURCE_REGISTERED_PENDING_FULL_HOSTED_GATE",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": {
+    "sha": "de5cd1ec48b37fa737ad05280186d3ab57544dd3",
+    "tree": "0ff3c4a2a8fe08fe60eff129657f478e5465fb86",
+    "expectedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/term-record-import-index-chunk.js",
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "expectedAddedPackageEntries": [
+      "js/dictionary/term-record-import-index-chunk.js"
+    ],
+    "lintPaths": [
+      "eslint.config.js",
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-import-index-chunk.js",
+      "ext/js/dictionary/term-record-import-index-worker-client.js",
+      "ext/js/dictionary/term-record-import-index-worker.js",
+      "ext/js/dictionary/term-record-import-index-writer.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/term-record-import-index-private-copy.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js",
+      "test/util/import-index-chunk-fixture.js",
+      "test/util/import-index-protocol-fixture.js"
+    ],
+    "focusedTests": [
+      "test/term-record-import-index-private-copy.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js"
+    ]
+  },
+  "participationStatus": "CONFIRMED_SOURCE_BOUND",
+  "requiredChecks": [
+    "Root and source_io final narrow publication delta review",
+    "Workflow direct parent dcfc before publication",
+    "Hosted full source gate before any import"
+  ],
+  "acquisitionAllowed": false,
+  "runtimePaths": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-import-index-chunk.js",
+    "ext/js/dictionary/term-record-import-index-worker-client.js",
+    "ext/js/dictionary/term-record-import-index-worker.js",
+    "ext/js/dictionary/term-record-import-index-writer.js",
+    "ext/js/dictionary/term-record-opfs-store.js"
+  ],
+  "reviewedLocalSource": "38057ec8f182c75909dcd78cd566d19e7186ff8c",
+  "reviewedLocalTree": "0ff3c4a2a8fe08fe60eff129657f478e5465fb86",
+  "reviewedLocalParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "independentReview": {
+    "reviewer": "/root/import_architecture",
+    "sha256": "32c61dd5d34de42c5f804ac7208c4f8aed113a3fb74a3d0e0d3a4c6325611cb6",
+    "scope": "Source/test-design review; no performance claim or hosted full gate"
+  },
+  "remoteSource": "de5cd1ec48b37fa737ad05280186d3ab57544dd3",
+  "remoteTree": "0ff3c4a2a8fe08fe60eff129657f478e5465fb86",
+  "remoteParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "remoteSourceBranch": "perf/import-copied-envelope-worker-bda85f3c7e15",
+  "remoteSourceMatchesReviewedLocalTree": true,
+  "registrationReady": true,
+  "acquisitionAllowedAfter": "Exact full hosted source gate succeeds; no import is authorized by registration status alone"
+}
