@@ -18,6 +18,7 @@
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
+import {getSynchronousWholePreparedTermLookupIndex} from './term-record-field-preparation.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -859,8 +860,156 @@ class DenseIdRecordStore {
  * @property {File} indexFile
  */
 
+/** @type {WeakSet<TermRecordOpfsStore>} */
+const originalArtifactRecordStores = new WeakSet();
+
+/**
+ * Preserve the established encoder hooks, including prototype overrides.
+ * @param {TermRecordOpfsStore} store
+ * @returns {boolean}
+ */
+function hasOriginalArtifactRecordEncoders(store) {
+    return (
+        originalArtifactRecordStores.has(store) &&
+        Object.getPrototypeOf(store) === TermRecordOpfsStore.prototype &&
+        !Object.hasOwn(store, '_encodeArtifactChunkRecords') &&
+        !Object.hasOwn(store, '_encodeArtifactRecordFields') &&
+        Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, '_encodeArtifactChunkRecords')?.value === originalArtifactChunkEncoder &&
+        Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, '_encodeArtifactRecordFields')?.value === originalArtifactFieldEncoder
+    );
+}
+
+/**
+ * Keep the asynchronous boundary introduced by the normal chunk encoder.
+ * Only newly encoded output crosses it; no validated input witness does.
+ * @param {{recordFields: Uint8Array, contentOffsetBase: number}} encoded
+ * @returns {Promise<{recordFields: Uint8Array, contentOffsetBase: number}>}
+ */
+async function settleEncodedArtifactRecordFields(encoded) {
+    return encoded;
+}
+
+/**
+ * Check native view identity before any instanceof walk can visit a proxy
+ * prototype. Generic, shared, shadowed or subclass columns stay on the
+ * established validator and retain its property-read ordering.
+ * @param {unknown} value
+ * @param {object} prototype
+ * @returns {boolean}
+ */
+function isPlainPrivateRecordFieldColumn(value, prototype) {
+    return (
+        ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
+        !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'length') &&
+        Object.getPrototypeOf(value.buffer) === ArrayBuffer.prototype
+    );
+}
+
+/**
+ * Validate a whole compact run while assigning its score keys. Only factory
+ * chunks with private, ordinary columns are admitted; no input is retained.
+ * A null result leaves the original split/legacy path responsible for the run.
+ * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: ResolvedContentReferences}} chunk
+ * @param {number} count
+ * @returns {{recordFields: Uint8Array, contentOffsetBase: number}|null}
+ * @throws {RangeError} If a selected content reference is invalid.
+ */
+function tryEncodeCompactRecordFieldsWithContentBounds(chunk, count) {
+    if (!Number.isSafeInteger(count) || count <= 0) { return null; }
+    const origin = resolvedContentReferenceOrigins.get(chunk);
+    if (
+        typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype ||
+        Object.getOwnPropertyDescriptor(chunk, 'rowCount')?.value !== count ||
+        Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value !== origin ||
+        Object.getPrototypeOf(origin) !== Object.prototype ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'uniqueIndexList')?.value, Uint32Array.prototype) ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'offsets')?.value, Float64Array.prototype) ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'lengths')?.value, Uint32Array.prototype) ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value, Int32Array.prototype)
+    ) { return null; }
+    const references = getSynchronousRecordFieldReferences(chunk, count);
+    if (references === null) { return null; }
+    const {uniqueIndexList, offsets, lengths} = references;
+    const scoreList = /** @type {Int32Array} */ (chunk.scoreList);
+    const scoreKeys = new Uint16Array(count);
+    /** @type {number[]} */
+    const scores = [];
+    /** @type {Map<number, number>} */
+    const scoreIndexes = new Map();
+    const inlineScoreIndexes = count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+        new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
+        null;
+    let minimumOffset = Number.POSITIVE_INFINITY;
+    let maximumOffset = Number.NEGATIVE_INFINITY;
+    let previousUnique = -1;
+    for (let i = 0; i < count; ++i) {
+        const unique = uniqueIndexList[i];
+        if (unique !== previousUnique) {
+            if (unique >= offsets.length) {
+                throw new RangeError(`Invalid resolved term content reference index: ${unique}`);
+            }
+            const offset = offsets[unique];
+            const length = lengths[unique];
+            validateContentOffset(offset);
+            validateContentLength(length);
+            if (offset >= 0) {
+                minimumOffset = Math.min(minimumOffset, offset);
+                maximumOffset = Math.max(maximumOffset, offset);
+            }
+            if (maximumOffset - minimumOffset > MAX_CONTENT_OFFSET_DELTA || length >= U16_NULL) {
+                return null;
+            }
+            previousUnique = unique;
+        }
+        const score = scoreList[i];
+        const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+        const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+        let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+        if (scoreIndex < 0) {
+            scoreIndex = scores.length;
+            if (scoreIndex >= U16_NULL) { return null; }
+            if (useInlineScore) {
+                inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+            } else {
+                scoreIndexes.set(score, scoreIndex);
+            }
+            scores.push(score);
+        }
+        scoreKeys[i] = scoreIndex;
+    }
+    const byteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+    (scores.length * 4) +
+    (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+    if (scores.length === 0 || scores.length >= U16_NULL || byteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES) {
+        return null;
+    }
+    const contentOffsetBase = minimumOffset === Number.POSITIVE_INFINITY ? 0 : minimumOffset;
+    const recordFields = new Uint8Array(byteLength);
+    const header = new Uint32Array(recordFields.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
+    header[0] = COMPACT_RECORD_FIELDS_MAGIC;
+    header[1] = count;
+    header[2] = scores.length;
+    header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
+    let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+    new Int32Array(recordFields.buffer, cursor, scores.length).set(scores);
+    cursor += scores.length * 4;
+    const outputOffsets = new Uint32Array(recordFields.buffer, cursor, count);
+    cursor += count * 4;
+    const outputLengths = new Uint16Array(recordFields.buffer, cursor, count);
+    for (let i = 0; i < count; ++i) {
+        const unique = uniqueIndexList[i];
+        const offset = offsets[unique];
+        outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase;
+        outputLengths[i] = lengths[unique];
+    }
+    cursor += count * 2;
+    new Uint16Array(recordFields.buffer, cursor, count).set(scoreKeys);
+    return {recordFields, contentOffsetBase};
+}
+
 export class TermRecordOpfsStore {
     constructor() {
+        originalArtifactRecordStores.add(this);
         /** @type {FileSystemDirectoryHandle|null} */
         this._rootDirectoryHandle = null;
         /** @type {FileSystemDirectoryHandle|null} */
@@ -2451,7 +2600,7 @@ export class TermRecordOpfsStore {
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
      * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} [preparedLookupIndexes=null]
-     * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
+     * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number, fusedRecordFieldRows?: number}>}
      */
     async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
         let encodeMs = 0;
@@ -2465,6 +2614,40 @@ export class TermRecordOpfsStore {
             hasCompletePreparedTermLookupIndexes(preparedLookupIndexes, count)
         );
         const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;
+        if (hasWholeChunkPreparedIndex && hasOriginalArtifactRecordEncoders(this)) {
+            const prepared = getSynchronousWholePreparedTermLookupIndex(preparedLookupIndexes, count);
+            if (prepared !== null) {
+                const tEncodeStart = safePerformance.now();
+                const fused = tryEncodeCompactRecordFieldsWithContentBounds(chunk, count);
+                if (fused !== null) {
+                    const fusedEncodeMs = safePerformance.now() - tEncodeStart;
+                    const encoded = await settleEncodedArtifactRecordFields(fused);
+                    const totalEncodeMs = safePerformance.now() - tEncodeStart;
+                    const tAppendStart = safePerformance.now();
+                    await this._appendEncodedChunk(
+                        state,
+                        firstId,
+                        count,
+                        contentDictName,
+                        encoded.contentOffsetBase,
+                        prepared.bytes,
+                        encoded.recordFields,
+                        LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT,
+                        (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES ?
+                            prepared.prepared.routeFilter ?? buildTermLookupFilter(prepared.preinternedPlan.stringHashes) :
+                            null,
+                    );
+                    return {
+                        encodeMs: totalEncodeMs,
+                        appendWriteMs: safePerformance.now() - tAppendStart,
+                        validationMs: 0,
+                        recordFieldEncodeMs: fusedEncodeMs,
+                        lookupIndexEncodeMs: 0,
+                        fusedRecordFieldRows: count,
+                    };
+                }
+            }
+        }
         for (let runStart = 0; runStart < count;) {
             // Recompute after every awaited append; no validity is cached
             // across runs. The row loop itself is synchronous.
@@ -7891,3 +8074,6 @@ view.chunks :
         }
     }
 }
+
+const originalArtifactChunkEncoder = TermRecordOpfsStore.prototype._encodeArtifactChunkRecords;
+const originalArtifactFieldEncoder = TermRecordOpfsStore.prototype._encodeArtifactRecordFields;
