@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "frozenBeforePublication": true,
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateParserSha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+  "referenceManifestSha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2",
+  "node": "22.22.0",
+  "timed": false,
+  "files": [
+    {
+      "path": "oracle.mjs",
+      "bytes": 16730,
+      "sha256": "578a6ab02734d031a806c38d8f5148dfb6cd9ed9f98719be94ae79f8dc84b660",
+      "sizeBytes": 16730
+    },
+    {
+      "path": "worker.mjs",
+      "bytes": 7668,
+      "sha256": "88153533e411e480e566b241797f4ec7f456756422769731c46468ffbb451401",
+      "sizeBytes": 7668
+    },
+    {
+      "path": "reference-manifest.json",
+      "bytes": 258368,
+      "sha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2",
+      "sizeBytes": 258368
+    },
+    {
+      "path": "public-false-branch-proof.json",
+      "bytes": 991,
+      "sha256": "3375a6468cc7c8c3eed94295b05730cd3e2160e9999ae00a969302adb7fbac9c",
+      "sizeBytes": 991
+    },
+    {
+      "path": "zero-alias-diagnostic.json",
+      "bytes": 1749,
+      "sha256": "c0c16cde36c96eaac38a1659c6ec61a38ef1906e3fa948951df60b1469082c40",
+      "sizeBytes": 1749
+    },
+    {
+      "path": "download-fixture.py",
+      "bytes": 1345,
+      "sha256": "a2353d406dd19ada7109a43221d8691a7b91197bdd116bcbe791cedf95dd4263",
+      "sizeBytes": 1345
+    },
+    {
+      "path": "workflow.yml",
+      "bytes": 2672,
+      "sha256": "7d3ad0743e9659b92ab19cf7549e50bc36bf0b70f28ff21f1ba9826134879956",
+      "sizeBytes": 2672
+    },
+    {
+      "path": "PLAN.md",
+      "bytes": 5926,
+      "sha256": "c4936b0d8aa5506579e586ef99af23c90b79bac7894b45b827d6e824e19dac8e",
+      "sizeBytes": 5926
+    }
+  ],
+  "reviewRevision": "Preserve original root/view aliases and metadata while hashing live content bytes only; require exactly one prepared index and route per group and 170 aggregate."
+}

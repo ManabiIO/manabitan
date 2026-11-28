@@ -1,0 +1,66 @@
+name: Complete parser path copy oracle 7c02
+
+on:
+  push:
+    branches: [research/parser-path-copy-oracle-20261128-7c02]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: parser-path-copy-oracle-7c02-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  complete-copy-oracle:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare evidence
+        run: mkdir -p builds/path-copy-oracle-7c02
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Prepare exact baseline and verified native modules
+        run: |
+          set -euo pipefail
+          {
+            npm ci
+            git worktree add --detach "$RUNNER_TEMP/manabitan-path-copy-baseline" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/manabitan-path-copy-baseline/node_modules"
+            cd "$RUNNER_TEMP/manabitan-path-copy-baseline"
+            npm run build:libs
+          } 2>&1 | tee builds/path-copy-oracle-7c02/setup.log
+      - name: Restore locked source archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ${{ runner.temp }}/manabitan-path-copy-baseline/builds/e2e-dictionary-cache
+          key: path-copy-vndb-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify locked VNDB source
+        run: |
+          set -euo pipefail
+          python3 dev/perf/path-copy-oracle-7c02/download-fixture.py "$RUNNER_TEMP/manabitan-path-copy-baseline" \
+            2>&1 | tee builds/path-copy-oracle-7c02/fixture.log
+      - name: Compare every complete copied group with ordinary persistent workers
+        env:
+          CANDIDATE_SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node --max-old-space-size=1024 dev/perf/path-copy-oracle-7c02/oracle.mjs \
+            "$RUNNER_TEMP/manabitan-path-copy-baseline" "$GITHUB_WORKSPACE" \
+            "$GITHUB_WORKSPACE/builds/path-copy-oracle-7c02/result" \
+            2>&1 | tee builds/path-copy-oracle-7c02/oracle.log
+      - name: Retain complete or partial receipts and all failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: path-copy-oracle-7c02
+          path: builds/path-copy-oracle-7c02
+          if-no-files-found: error
+          retention-days: 14

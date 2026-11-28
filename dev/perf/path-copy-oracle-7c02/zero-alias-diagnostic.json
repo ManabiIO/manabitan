@@ -1,0 +1,56 @@
+{
+  "complete": true,
+  "node": "v24.22.3",
+  "cases": [
+    {
+      "label": "baseline-produced",
+      "completeValueAndByteEquality": true,
+      "baseline": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": true,
+        "rawAndProjectedShareBacking": true
+      },
+      "candidatePublic": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": false,
+        "rawAndProjectedShareBacking": false
+      },
+      "candidateBatch": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": false,
+        "rawAndProjectedShareBacking": false
+      }
+    },
+    {
+      "label": "candidate-produced",
+      "completeValueAndByteEquality": true,
+      "baseline": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": false,
+        "rawAndProjectedShareBacking": false
+      },
+      "candidatePublic": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": true,
+        "rawAndProjectedShareBacking": true
+      },
+      "candidateBatch": {
+        "projectedRows": 2,
+        "allProjectedShareOneObject": true,
+        "rawAndProjectedShareObject": true,
+        "rawAndProjectedShareBacking": true
+      }
+    }
+  ],
+  "paths": {
+    "raw": "contentDedupPlan.resolvedFlags",
+    "projected": "mediaRows[i].row.termEntryContentBytes"
+  },
+  "scope": "Two-row real-WASM diagnostic of module-local empty singleton identity. No corpus timing or performance comparison.",
+  "scriptSha256": "21a269f0c8dc2348efeaa6c5c9833fdacbaf552a5974ebd5545238e647f27f10"
+}

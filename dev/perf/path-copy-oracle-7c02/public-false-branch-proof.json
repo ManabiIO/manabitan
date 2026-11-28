@@ -1,0 +1,16 @@
+{
+  "complete": true,
+  "baselineParserSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+  "candidateParserSha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+  "baselineFunctionSha256": "6b47202b58854ee2cfbfc1844acab36038212275bd4262ee1323a4e767356740",
+  "normalizedPublicFalseBranchSha256": "6b47202b58854ee2cfbfc1844acab36038212275bd4262ee1323a4e767356740",
+  "exactTextEqual": true,
+  "publicWrapperPassesLiteralFalse": true,
+  "transformations": [
+    "Replace only internal core declaration with unchanged public declaration/defaults",
+    "Constant-fold batchNativeImagePaths=false so nativeImagePaths=null and remove the dead batch call",
+    "Fold nativeImagePaths===null to the unchanged per-row native projector",
+    "Remove the now-unused map index parameter"
+  ],
+  "scope": "Static exact-text proof of candidate public false-branch behavior. Runtime source is unchanged; no aliases or bytes are normalized in execution."
+}
