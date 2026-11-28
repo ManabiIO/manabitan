@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 /** @typedef {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex} PreparedIndex */
 /** @typedef {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} PreinternedPlan */
 /** @type {WeakMap<object, {bytes: Uint8Array, preinternedPlan: PreinternedPlan}>} */

@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {createPreparedTermLookupIndexForRecordFields, getSynchronousWholePreparedTermLookupIndex} from '../ext/js/dictionary/term-record-field-preparation.js';
