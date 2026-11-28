@@ -231,6 +231,7 @@ export class DenseZipEntryCatalog {
      * @param {0|8} compressionMethod
      * @param {number} signature
      */
+    // eslint-disable-next-line sonarjs/no-identical-functions -- Separate catalogs share the validated layout without a per-row adapter.
     addDirectoryMetadata(row, filenameOffset, offset, compressedSize, uncompressedSize, compressionMethod, signature) {
         const base = row * METADATA_WORDS
         this._metadata[base] = offset
