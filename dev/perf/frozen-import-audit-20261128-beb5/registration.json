@@ -2,13 +2,13 @@
   "schema": 2,
   "purpose": "Audit and retain ORIGINAL fixed observations only; no parser/import/timing replay.",
   "workflow": ".github/workflows/frozen-import-artifact-audit-beb5.yml",
-  "workflowSha256": "f300370a907bf76844f81d8b13811c9188cf138d29c3151f09d5165e94dc46ad",
+  "workflowSha256": "7c93221f6914c3b40d9b2d800a5ddf7afd6a85021a5af7d89c351dc3028bef3f",
   "auditFileSha256": {
     "acquire-and-audit.py": "389a5f23447a72b85f334cb9b598ed2499795052d2c6347585c3fb4d8720ff97",
-    "audit-recent-first.py": "be9161739f695316b5e26a2815642718e20439b0df9ad8f8a760a2893c2d34f6",
-    "verify-prefix-known-answer.py": "62dbe1176f7c577f156419a82b0a8dc7a42f4eafd2f2d02c70e74f012d49532f",
+    "audit-recent-first.py": "2a1b2de64ba3b493a177fcc99e269e713500c8c01f60218e48cbf22754c9ab58",
+    "verify-prefix-known-answer.py": "60c34bcd9c099327a03123e8b401f55a2a0e236ef654587785a0aac7e9e86730",
     "original-prefix-independent-audit.json": "322abe8336a6ba137a6dbcf2cfa9dd9f03429884d8447fb24340c88369619e0c",
-    "README.md": "09d844a75441254cd119da8aa41641f1052d0f2e6ef4f399208cc186ba7cbd23"
+    "README.md": "51c3937a0760c0aacf38aada80817a52963821db2c37dc7fae461f3829d10ccc"
   },
   "studies": {
     "canonical": {
@@ -84,7 +84,10 @@
       "maxArtifactBytes": 67108864,
       "artifactName": "canonical-sidecar-browser-beb5-vndb-AB",
       "jobId": 140877908947,
-      "jobName": "Canonical checksum imports (vndb, 12 pairs)"
+      "jobName": "Canonical checksum imports (vndb, 12 pairs)",
+      "artifactId": 15253333819,
+      "artifactBytes": 35892376,
+      "artifactSha256": "3c67c9b0dd9f2d359ec1e82c6a9d5ecd6788e7f6f4224f26499bea4206ffa742"
     },
     "prefix-jmdict": {
       "study": "prefix",

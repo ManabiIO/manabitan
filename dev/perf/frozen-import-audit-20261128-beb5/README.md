@@ -18,10 +18,11 @@ artifact without claiming an independent correctness or performance audit.
 | Recent-first prefix | 46114428610, attempt 1 | 633761548509a77b43b414b83a80033e17ed7399 | 1a935bddf29c4d87606d2facd4b168af7e1a40f1 |
 | CRC preservation only | 46120623371, attempt 1 | 887884769ad1b7d54872975920fc0f8fd43a56ee | Exact production modules recorded by that original component study |
 
-Canonical JMdict and Jitendex artifact IDs 15252673899 and 15252164797, and
-recent-first IDs 15252998358, 15254136620 and 15254106199, are prelocked with
-their sizes and API SHA256 digests in registration.json. The canonical VNDB and
-CRC entries use the same fixed selection rule before an ID is available: one
+Canonical artifact IDs 15252673899 (JMdict), 15252164797 (Jitendex) and
+15253333819 (VNDB), and recent-first IDs 15252998358, 15254136620 and
+15254106199, are prelocked with their sizes and API SHA256 digests in
+registration.json. The optional CRC entry uses the same fixed selection rule
+before an ID is available: one
 unique exact artifact name under the registered run, source head, attempt 1 and
 completed registered job. The resolver records the resulting API ID, size and
 digest and rejects ambiguity, expiry or any disagreement with a prelocked

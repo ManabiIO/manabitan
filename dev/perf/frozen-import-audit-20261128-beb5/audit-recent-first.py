@@ -58,6 +58,8 @@ def audit_identities(location, source, baseline):
     assert git(source, "rev-parse", "HEAD") == SOURCE
     assert git(source, "rev-parse", "HEAD^{tree}") == TREE
     assert git(baseline, "rev-parse", "HEAD") == BASELINE
+    assert not git(source, "status", "--porcelain", "--untracked-files=no"), "Tracked source changed"
+    assert not git(baseline, "status", "--porcelain", "--untracked-files=no"), "Tracked baseline changed"
     if PROFILE == "recent-first":
         registration_bytes = (source / STUDY / "registration.json").read_bytes()
         assert sha(registration_bytes) == REGISTRATION_SHA
@@ -184,7 +186,8 @@ def audit_report(path, dictionary, mode, registration, source, baseline, fixture
         assert item["banks"] > 0
         if mode == "synthetic":
             assert isinstance(item["syntheticSourceSha256"], str) and len(item["syntheticSourceSha256"]) == 64
-            assert isinstance(item["syntheticSpec"], dict) and item["groupsPerWorker"] is None
+            assert item["syntheticSpec"] == "Fixed two-bank source, 5000 rows per bank. Enabled-reuse negatives with unique prefixes, shared prefixes and tails, or short unique glossaries; nonlocal positive uses 17 distinct native prefix slots. Not a real dictionary or production group-policy claim."
+            assert item["groupsPerWorker"] is None
         else:
             assert item["archiveSha256"] == fixture["sha256"]
             assert item["groupsPerWorker"] == (3 if item["mediaHintFastScan"] else 4)
@@ -264,25 +267,108 @@ def audit_report(path, dictionary, mode, registration, source, baseline, fixture
     return {"file": path.name, "sha256": sha(path.read_bytes()), "journalSha256": sha(journal_path.read_bytes()),
             "exactJournalEntries": len(journal), "dictionaries": results}
 
-def audit(location, source, baseline, dictionary):
+def oracle_projection(oracle):
+    return [{key: row[key] for key in ("case", "variant", "rows", "error", "digest")}
+            for row in oracle["observations"]]
+
+def validate_oracle(oracle, source, baseline, candidate_wasm):
+    lengths = [4, 5, 19, 63, 64, 65, 66, 67, 68, 69, 131, 512, 513, 515, 516, 517, 4101]
+    cases = [f"raw-glossary-length-{length}" for length in lengths] + [
+        "media-and-normalization-hints", "common-prefix-unique-negative-control",
+        "all-unique-negative-control", "bounded-slot-overwrite-and-repeats",
+        "generic-object-glossary", "same-raw-different-metadata",
+        "nonlocal-identical-content-witness", "common-prefix-and-tail-distinct-middle",
+        "distinct-prefix-hash-collision",
+    ] + [f"malformed-tail-{i}" for i in range(26, 32)] + [
+        f"truncated-bank-{i}" for i in range(32, 37)
+    ] + ["invalid-row-delimiter-after-reuse", "escaped-equivalent-raw-different",
+         "deep-valid-structured-content"]
+    variants = ["default", "preload-crc", "reuse-disabled", "global-raw-reuse", "media-hints-off", "split-chunks"]
+    deferred = ["actual-deferred-crc-nonlocal-witnesses", "actual-deferred-crc-invalid-signature"]
+    expected = [(case, variant) for case in cases for variant in variants] + [(case, "preload-crc") for case in deferred]
+    assert len(cases) == 40 and len(expected) == 242
+    assert oracle["complete"] is True and oracle["node"] == "v22.22.0"
+    assert oracle["cases"] == 42 and oracle["comparisons"] == 242
+    assert oracle["passedSuccesses"] == 175 and oracle["passedErrors"] == 67
+    observations = oracle["observations"]
+    assert [(row["case"], row["variant"]) for row in observations] == expected, "Exact frozen oracle matrix and order"
+    assert sum(row["error"] is None for row in observations) == 175
+    assert len(oracle["sources"]) == 2
+    for index, root in enumerate((baseline, source)):
+        value = oracle["sources"][index]
+        assert value["wasmSha256"] == (WASM["baseline"] if index == 0 else candidate_wasm)
+        assert value["cSha256"] == hash_file(root, "ext/js/dictionary/wasm/term-bank-parser.c")
+    assert oracle["parserJavascriptSha256"] == hash_file(source, "ext/js/dictionary/term-bank-wasm-parser.js")
+    numeric_diagnostics = {"fusedAttempts", "fusedFallbacks", "glossaryReuseHits", "maxWasmHeapBytes", "crcReusedGlossaryCount"}
+    for row in observations:
+        assert set(row) == {"case", "variant", "rows", "error", "digest", "baseline", "candidate"}
+        assert type(row["rows"]) is int and row["rows"] >= 0
+        assert isinstance(row["digest"], str) and re.fullmatch(r"[0-9a-f]{64}", row["digest"])
+        error = row["error"]
+        assert error is None or (isinstance(error, dict) and set(error) == {"name", "message"}
+                                 and all(isinstance(error[key], str) for key in ("name", "message")))
+        for arm in ("baseline", "candidate"):
+            diagnostic = row[arm]
+            assert isinstance(diagnostic, dict)
+            assert set(diagnostic) <= numeric_diagnostics | {"crcVerified", "crcDeferred"}
+            assert type(diagnostic.get("crcDeferred")) is bool
+            assert diagnostic["crcDeferred"] is (row["case"] in deferred)
+            for key in numeric_diagnostics & set(diagnostic):
+                value = diagnostic[key]
+                assert (error is not None and value is None) or (type(value) is int and value >= 0), f"Oracle diagnostic: {key}"
+            if "crcVerified" in diagnostic:
+                value = diagnostic["crcVerified"]
+                assert type(value) is bool or (error is not None and value is None)
+            if row["case"] == deferred[0]:
+                assert diagnostic.get("crcVerified") is True
+            elif row["case"] == deferred[1]:
+                assert diagnostic.get("crcVerified") is not True
+        if row["case"] == deferred[0]:
+            assert error is None and row["rows"] == 24000
+        elif row["case"] == deferred[1]:
+            assert error is not None and error["name"] == "DictionarySourceIntegrityError" and row["rows"] == 0
+    return oracle_projection(oracle)
+
+def bind_reference_oracle(oracle, reference_path, reference_source, source, baseline):
+    assert reference_path is not None and reference_source is not None, "Recent-first needs verified old baseline oracle"
+    assert git(reference_source, "rev-parse", "HEAD") == "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0"
+    assert git(reference_source, "rev-parse", "HEAD^{tree}") == "023368b2731c17c91f16cd740d868ae2ebafa27b"
+    assert not git(reference_source, "status", "--porcelain", "--untracked-files=no"), "Tracked reference source changed"
+    old_helper = reference_source / "dev/perf/whole-glossary-prefix-20261128/verify.mjs"
+    new_helper = source / STUDY / "verify.mjs"
+    assert old_helper.read_bytes() == new_helper.read_bytes(), "Oracle helper byte identity"
+    maps = []
+    for root in (baseline, reference_source, source):
+        maps.append({str(path.relative_to(root)): sha(path.read_bytes()) for path in (root / "ext/js").rglob("*.js")})
+    same(maps[0], maps[1], "Old oracle baseline JavaScript identity")
+    same(maps[0], maps[2], "Recent oracle baseline JavaScript identity")
+    reference = read(reference_path)
+    projection = validate_oracle(reference, reference_source, baseline,
+                                 "9972fb2df890f77fe43b3401b464c0ff1c36c4b89784b47268e3888bd7979d23")
+    same(oracle_projection(oracle), projection, "Exact baseline oracle projection; candidate diagnostics intentionally excluded")
+    return {"referenceOracleSha256": sha(reference_path.read_bytes()),
+            "referenceSourceCommit": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+            "oracleHelperSha256": sha(new_helper.read_bytes()),
+            "baselineProjectionSha256": sha(json.dumps(projection, sort_keys=True, allow_nan=False, separators=(",", ":")).encode())}
+
+def audit(location, source, baseline, dictionary, reference_oracle=None, reference_source=None):
     registration, identities = audit_identities(location, source, baseline)
     fixture = read(source / "test/perf/dictionaries.lock.json")["dictionaries"][dictionary]
     oracle = read(location / "oracle.json")
-    assert oracle["complete"] is True and oracle["cases"] == 42 and oracle["comparisons"] == 242
-    assert oracle["passedSuccesses"] == 175 and oracle["passedErrors"] == 67
-    assert len(oracle["observations"]) == 242
-    assert sum(row["error"] is None for row in oracle["observations"]) == 175
-    assert len({(row["case"], row["variant"]) for row in oracle["observations"]}) == 242
-    assert len(oracle["sources"]) == 2
-    for arm, value in zip(("baseline", "candidate"), oracle["sources"]):
-        root = baseline if arm == "baseline" else source
-        assert value["wasmSha256"] == WASM[arm]
-        assert value["cSha256"] == hash_file(root, "ext/js/dictionary/wasm/term-bank-parser.c")
-    assert oracle["parserJavascriptSha256"] == hash_file(source, "ext/js/dictionary/term-bank-wasm-parser.js")
+    validate_oracle(oracle, source, baseline, WASM["candidate"])
+    reference = None
+    if PROFILE == "recent-first":
+        reference = bind_reference_oracle(oracle, reference_oracle, reference_source, source, baseline)
     reports = [
         audit_report(location / "screen.json", dictionary, "main", registration, source, baseline, fixture),
         audit_report(location / "reuse-disabled.json", dictionary, "disabled", registration, source, baseline, fixture),
     ]
+    main_first = read(location / "screen.json")["dictionaries"][0]["groups"][0]
+    disabled_first = read(location / "reuse-disabled.json")["dictionaries"][0]["groups"][0]
+    for key in ("firstBank", "lastBank", "sourceBytes", "compressedBytes"):
+        same(main_first[key], disabled_first[key], f"Disabled first-group input: {key}")
+    same(main_first["verification"]["baseline"]["rows"], disabled_first["verification"]["baseline"]["rows"],
+         "Disabled first-group row count")
     if dictionary == "jmdict":
         reports.append(audit_report(location / "enabled-probe-negatives.json", dictionary, "synthetic", registration, source, baseline, fixture))
     else:
@@ -293,7 +379,8 @@ def audit(location, source, baseline, dictionary):
             "sourceAndPackageMemberMapsVerified": True, "originalReleaseZipBytesRehashed": False,
             "packageEntryCount": len(identities["arms"]["baseline"]["entries"]), "oracleComparisons": 242,
             "exactJournalEntries": sum(row["exactJournalEntries"] for row in reports),
-            "reports": reports, "scope": SCOPE}
+            "reports": reports, "referenceOracle": reference, "scope": SCOPE,
+            "diagnosticLimit": "Complete means receipt/source/protocol integrity; cross-arm heap and fallback equality is not asserted."}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -302,6 +389,8 @@ if __name__ == "__main__":
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--baseline-root", type=Path, required=True)
     parser.add_argument("--dictionary", choices=tuple(GROUPS), required=True)
+    parser.add_argument("--reference-oracle", type=Path)
+    parser.add_argument("--reference-source-root", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     PROFILE = args.profile
@@ -313,7 +402,8 @@ if __name__ == "__main__":
         WASM["candidate"] = "9972fb2df890f77fe43b3401b464c0ff1c36c4b89784b47268e3888bd7979d23"
         STUDY = "dev/perf/whole-glossary-prefix-20261128"
     try:
-        result = audit(args.artifact_directory, args.source_root, args.baseline_root, args.dictionary)
+        result = audit(args.artifact_directory, args.source_root, args.baseline_root, args.dictionary,
+                       args.reference_oracle, args.reference_source_root)
     except Exception as error:
         result = {"complete": False, "dictionary": args.dictionary, "type": type(error).__name__, "error": str(error), "scope": SCOPE}
         args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")

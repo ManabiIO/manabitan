@@ -60,7 +60,7 @@ jobs:
           sparse-checkout: |
             ext/js
             dev/data/dictionary-wasm
-            dev/perf/whole-glossary-prefix-20261128
+            dev/perf/whole-glossary-prefix-followup-20261128
             test/perf
             .github/workflows
       - name: Check audit syntax

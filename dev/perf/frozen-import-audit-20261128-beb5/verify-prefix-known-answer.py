@@ -68,6 +68,8 @@ def verify(source, baseline, evidence, output):
     output.mkdir(parents=True)
     cases = []
     total_journal_entries = 0
+    reference_projection = None
+    reference_oracles = {}
     for old in known["reports"]:
         dictionary = old["dictionary"]
         folder = output / dictionary
@@ -90,10 +92,25 @@ def verify(source, baseline, evidence, output):
             run = subprocess.run(command, capture_output=True, text=True, check=False)
             (folder / "audit.stdout.log").write_text(run.stdout)
             (folder / "audit.stderr.log").write_text(run.stderr)
+            if run.returncode != 0:
+                helper.print_diagnostic(dictionary, "known-answer", run.stderr, run.stdout)
             assert run.returncode == 0, "New auditor rejected a retained original corpus"
             new = helper.read(destination)
             assert new["complete"] is True and new["profile"] == "prefix-first-known-answer"
             assert new["oracleComparisons"] == 242
+            oracle_path = location / "oracle.json"
+            oracle = helper.read(oracle_path)
+            projection = [{key: row[key] for key in ("case", "variant", "rows", "error", "digest")}
+                          for row in oracle["observations"]]
+            if reference_projection is None:
+                reference_projection = projection
+            else:
+                same(projection, reference_projection, "Original baseline oracle projections agree across all three corpora")
+            reference_oracles[dictionary] = {
+                "path": str(oracle_path.relative_to(output)),
+                "sha256": helper.file_sha(oracle_path),
+                "baselineProjectionSha256": helper.sha(helper.encoded(projection).encode()),
+            }
             assert new["packageEntryCount"] == old["packageEntryCount"]
             assert [row["file"] for row in new["reports"]] == [row["file"] for row in old["reports"]]
             comparisons = []
@@ -125,6 +142,8 @@ def verify(source, baseline, evidence, output):
         "originalIndependentAuditSha256": helper.sha(known_bytes),
         "newAuditorSha256": helper.file_sha(HERE / "audit-recent-first.py"),
         "exactJournalEntries": total_journal_entries,
+        "referenceOracles": reference_oracles,
+        "baselineOracleProjectionSha256": helper.sha(helper.encoded(reference_projection).encode()) if reference_projection is not None else None,
         "cases": cases,
         "derivedArithmeticTolerance": registration["knownAnswerDerivedTolerances"],
         "schemaDifferences": "New reports add explicit source/profile/origin, diagnostics and journal digests. Raw receipt values, source/output identities, counts and protocol gates remain exact. Only derived pair sums allow absolute 1e-9 ms and derived percentages absolute 1e-10 percentage points for Python-version rounding. The new auditor is not represented as recovered original code.",
