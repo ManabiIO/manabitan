@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "kind": "first-executed-browser-prerequisite-setup-failure",
+  "sourceCommit": "1b65be131a92d1843bc47ba091bf81b3c9d757ea",
+  "sourceTree": "a590a8f9401f5bc039c2600f79d90d215b84ed2a",
+  "run": 46130307914,
+  "job": 140933764149,
+  "attempt": 1,
+  "complete": false,
+  "importsAcquired": 0,
+  "timedObservations": 0,
+  "runnerBlob": "63c959d6e4ff95fdeb111a277958726a36bfafe1",
+  "observedFailure": "Runtime changed during release build",
+  "observedStage": "Baseline A source-and-release-package-setup, after build:libs/license-report:html/release Chrome build all exited0",
+  "completedSetup": [
+    "Node22.22.0 and locked Chromium installed",
+    "Python AST parsing",
+    "Node --check browser-verify.mjs"
+  ],
+  "notRun": [
+    "native/browser import",
+    "helper tests inside prepare_browser",
+    "ordinary acquisition",
+    "memory acquisition"
+  ],
+  "exactFullJobLog": {
+    "blob": "bc7d5ba36e4ba2e831acc2dd62b69e451579b961",
+    "bytes": 318343,
+    "sha256": "90bbed8191752c752026891f9416c06b16d884d580a21ce5bf32546c7210983b"
+  },
+  "artifact": {
+    "id": 15257343396,
+    "name": "alias-native-preflight-1b65be131a92d1843bc47ba091bf81b3c9d757ea-46130307914-1",
+    "bytes": 364926,
+    "sha256": "1c24d7f6875ad360ccb2169057878dcc0fc54483d6a0b37af9869778aaa7f45e",
+    "uploaded": true,
+    "decodedLocally": false
+  },
+  "originalArchiveReceiptPrinted": {
+    "schemaVersion": 1,
+    "complete": true,
+    "source": "/home/runner/work/_temp/alias-native-preflight-46130307914-1",
+    "destination": "/home/runner/work/_temp/alias-native-preflight-upload-46130307914-1",
+    "originalsDeleted": false,
+    "failures": [],
+    "totalOriginalBytes": 2221553,
+    "archiveSha256": "76a40f924352ffc184ed81ee519a9b4ab37c4ac8be0453bfe49aba93e10358ff",
+    "archiveBytes": 357893,
+    "archivePath": "complete-evidence.tar.gz",
+    "verifiedEveryMember": true,
+    "verifiedOriginalsAfterArchive": true
+  },
+  "originalStructuredReceiptsPrinted": [
+    {
+      "data": {
+        "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+        "cleanupFailures": [],
+        "commands": [
+          {
+            "command": [
+              "git",
+              "worktree",
+              "add",
+              "--detach",
+              "--no-checkout",
+              "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+              "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+            ],
+            "cwd": "/home/runner/work/manabitan/manabitan",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858061974,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/worktree-A.log",
+            "startedUnixMs": 1795858061971
+          },
+          {
+            "command": [
+              "git",
+              "sparse-checkout",
+              "set",
+              "--no-cone",
+              "/*",
+              "!/builds/perf/"
+            ],
+            "cwd": "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858061999,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/sparse-A.log",
+            "startedUnixMs": 1795858061977
+          },
+          {
+            "command": [
+              "git",
+              "checkout",
+              "--detach",
+              "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+            ],
+            "cwd": "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858062342,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/checkout-A.log",
+            "startedUnixMs": 1795858062006
+          },
+          {
+            "command": [
+              "npm",
+              "run",
+              "build:libs"
+            ],
+            "cwd": "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858063338,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/libs-A.log",
+            "startedUnixMs": 1795858062720
+          },
+          {
+            "command": [
+              "npm",
+              "run",
+              "license-report:html"
+            ],
+            "cwd": "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858063711,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/license-A.log",
+            "startedUnixMs": 1795858063339
+          },
+          {
+            "command": [
+              "npm",
+              "run",
+              "build",
+              "--",
+              "--target",
+              "chrome"
+            ],
+            "cwd": "/home/runner/work/_temp/alias-native-preflight-46130307914-1-sources/A",
+            "exitCode": 0,
+            "finishedUnixMs": 1795858066156,
+            "log": "/home/runner/work/_temp/alias-native-preflight-46130307914-1/build-A.log",
+            "startedUnixMs": 1795858063711
+          }
+        ],
+        "complete": false,
+        "dictionary": "vndb",
+        "failures": [
+          {
+            "message": "Runtime changed during release build",
+            "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 555, in main\n    study.setup_sources()\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 200, in setup_sources\n    same(git(target, 'status', '--porcelain'), '', 'Runtime changed during release build')\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 55, in same\n    require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False), message)\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 51, in require\n    raise RuntimeError(message)\nRuntimeError: Runtime changed during release build\n",
+            "type": "RuntimeError"
+          }
+        ],
+        "initialOrder": "AB",
+        "mode": "preflight",
+        "observations": [],
+        "phase": "source-and-release-package-setup"
+      },
+      "path": "run-state.json",
+      "sha256": "6cc794811d55b004f747e03d29d924e3caaf3080328ecee751e9fc10bc0ba246"
+    }
+  ],
+  "originalGitPorcelainCaptured": false,
+  "sourceDiagnosis": {
+    "observed": "The original assertion did not retain its actual porcelain. No claim is made about the complete dirty-path set.",
+    "independentDefect": "The new runner symlinked node_modules, while baseline .gitignore's node_modules/ entry is directory-only. The stock current qualifier uses a real directory via shutil.copytree(..., copy_function=os.link, symlinks=True).",
+    "sourceRefs": {
+      "gitignore": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16:.gitignore",
+      "stockQualifier": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16:dev/perf/import-qualification-20261125-a7f7.py"
+    },
+    "prospectiveTest": "A focused temporary Git repository will test the ignored-directory/symlink distinction and actual stock copy helper before new setup.",
+    "repair": "Use the exact stock hardlink-copy tree. Preserve raw porcelain, binary diff, staged diff, ignored generated-file hashes and untracked path kinds at each setup checkpoint. Keep the zero-dirty source guard unchanged; no restore/ignore exceptions."
+  },
+  "scope": "This is setup failure evidence, not an import/product performance result. Original output archive and job log are retained; no unchanged rerun."
+}

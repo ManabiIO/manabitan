@@ -59,6 +59,11 @@ def git(root, *args):
     return subprocess.check_output(['git', *args], cwd=root, text=True).strip()
 
 
+def copy_dependency_tree(source, destination):
+    """Use the stock qualifier's real ignored directory and shared immutable files."""
+    shutil.copytree(source, destination, copy_function=os.link, symlinks=True)
+
+
 def package_entries(filename):
     with zipfile.ZipFile(filename) as archive:
         names = archive.namelist()
@@ -169,8 +174,48 @@ class Study:
             result[name] = destination
         return result
 
+    def capture_setup_state(self, target, arm, stage):
+        """Keep original status/diffs and generated hashes before enforcing cleanliness."""
+        prefix = self.evidence / f'source-{arm}-{stage}'
+        status = subprocess.check_output(['git', 'status', '--porcelain=v1', '--untracked-files=all'],
+                                         cwd=target, text=True)
+        (prefix.with_suffix('.porcelain.txt')).write_text(status)
+        diff_paths = {}
+        for name, extra in (('working', []), ('staged', ['--cached'])):
+            data = subprocess.check_output(['git', 'diff', '--no-ext-diff', '--binary', *extra], cwd=target)
+            filename = prefix.with_name(prefix.name + '-' + name + '.diff')
+            filename.write_bytes(data)
+            diff_paths[name] = {'path': filename.name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+        generated = [target / 'ext/manifest.json', target / 'ext/legal-npm.html',
+                     target / 'builds/manabitan-chrome.zip']
+        library = target / 'ext/lib'
+        if library.is_dir():
+            generated.extend(path for path in library.rglob('*') if path.is_file())
+        hashes = [{'path': path.relative_to(target).as_posix(),
+                   'bytes': path.stat().st_size if path.is_file() else None,
+                   'sha256': digest(path) if path.is_file() else None} for path in sorted(set(generated))]
+        untracked_names = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '-z'], cwd=target).decode().split('\0')
+        untracked = []
+        for relative in filter(None, untracked_names):
+            path = target / relative
+            if path.is_symlink():
+                details = {'kind': 'symlink', 'target': os.readlink(path)}
+            elif path.is_file():
+                details = {'kind': 'file', 'bytes': path.stat().st_size, 'sha256': digest(path)}
+            else:
+                details = {'kind': 'other'}
+            untracked.append({'path': relative, **details})
+        receipt = {'arm': arm, 'stage': stage, 'gitHead': git(target, 'rev-parse', 'HEAD'),
+                   'gitTree': git(target, 'rev-parse', 'HEAD^{tree}'), 'rawPorcelain': status,
+                   'diffs': diff_paths, 'generated': hashes, 'untracked': untracked}
+        write_json(prefix.with_suffix('.json'), receipt)
+        print(json.dumps({'kind': 'source-setup-state', **receipt}), flush=True)
+        return status.strip()
+
     def setup_sources(self):
         self.phase('source-and-release-package-setup')
+        self.run(['python', '-m', 'unittest', '-v', 'test_setup_sources.py'], HERE,
+                 self.evidence / 'dependency-setup-test.log')
         tooling = {}
         tree_output = git(self.root, 'ls-tree', '-r', BASELINE, '--', 'dev/perf', 'test/chromium', 'test/e2e', '.github/actions/setup')
         for line in tree_output.splitlines():
@@ -191,13 +236,18 @@ class Study:
                 require((target / relative).read_bytes() == (self.root / relative).read_bytes(), 'Research/dependency/fixture mismatch: ' + relative)
             for relative, blob in tooling.items():
                 same(git(target, 'hash-object', relative), blob, 'Runtime benchmark tooling differs: ' + relative)
-            (target / 'node_modules').symlink_to(self.root / 'node_modules', target_is_directory=True)
+            before_dependencies = self.capture_setup_state(target, arm, 'before-dependencies')
+            same(before_dependencies, '', 'Runtime changed before dependency setup: ' + repr(before_dependencies))
+            copy_dependency_tree(self.root / 'node_modules', target / 'node_modules')
             (target / 'builds').mkdir(exist_ok=True)
             (target / 'builds/e2e-dictionary-cache').symlink_to(self.root / 'builds/e2e-dictionary-cache', target_is_directory=True)
+            after_dependencies = self.capture_setup_state(target, arm, 'after-dependencies')
+            same(after_dependencies, '', 'Runtime changed during dependency setup: ' + repr(after_dependencies))
             self.run(['npm', 'run', 'build:libs'], target, self.evidence / f'libs-{arm}.log')
             self.run(['npm', 'run', 'license-report:html'], target, self.evidence / f'license-{arm}.log')
             self.run(['npm', 'run', 'build', '--', '--target', 'chrome'], target, self.evidence / f'build-{arm}.log')
-            same(git(target, 'status', '--porcelain'), '', 'Runtime changed during release build')
+            after_build = self.capture_setup_state(target, arm, 'after-build')
+            same(after_build, '', 'Runtime changed during release build: ' + repr(after_build))
             original = (target / HARNESS).read_text()
             if self.original_harness is None:
                 self.original_harness = original

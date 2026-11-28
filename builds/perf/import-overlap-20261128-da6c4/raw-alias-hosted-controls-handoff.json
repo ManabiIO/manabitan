@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "kind": "current-native-record-alias-hosted-qualification-controls",
-  "status": "Prospective corrected workflow after first zero-job validation failure; no browser observations acquired",
+  "status": "Prospective dependency-setup repair after first executed preflight stopped at source guard; zero imports acquired",
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
   "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
   "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
   "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
   "suggestedResearchBranch": "perf/native-record-alias-qualification-20261128-da6c4",
-  "sourceManifestBlob": "140615c8905cb3bc38453382e5a29f542237e41e",
-  "sourceManifestSha256": "53d013c5debf24c67677b8b4de5015ea07f41164d00cba296bb5046cdd95084b",
+  "sourceManifestBlob": "bb966fc57ea4fba91104c2c281d6eb9a8c6756f3",
+  "sourceManifestSha256": "c682df189312ee849bcacbd07c1b16a726487752b6f01b7cc010340c3e51e803",
   "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
-  "planBlob": "6fd65982dbd17c04845921d9b4770031a14b1b25",
+  "planBlob": "0a1b30ecd61e795d4e2a0c688218b383bad6fb6a",
   "files": [
     {
       "path": "dev/perf/native-record-alias-qualification-da6c4/run.py",
-      "blob": "63c959d6e4ff95fdeb111a277958726a36bfafe1",
-      "bytes": 38138,
-      "sha256": "283f97cdffa6fb2e1ef8b471947854b487dda2d8f4ad808348a31f730e72113e"
+      "blob": "870e1ed48d95202f582c77b99041bf96e3693fd3",
+      "bytes": 41452,
+      "sha256": "3e770f60135f59935d14c191980ed69df66c59d06c6ca891c0a60d49d916f5bb"
     },
     {
       "path": "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
@@ -128,9 +128,9 @@
     },
     {
       "path": "dev/perf/native-record-alias-qualification-da6c4/plan.json",
-      "blob": "6fd65982dbd17c04845921d9b4770031a14b1b25",
-      "bytes": 11955,
-      "sha256": "8d903dc73b9b38324e800e3c573755622d3d12b328abe03fbe68ddbb04e1c48e"
+      "blob": "0a1b30ecd61e795d4e2a0c688218b383bad6fb6a",
+      "bytes": 12317,
+      "sha256": "d852eb8c3c9187ed01996082f8636c5b60f4c5c4e94d6581d1c19ec85109d2ba"
     },
     {
       "path": "dev/perf/native-record-alias-qualification-da6c4/oracles/core.json",
@@ -176,9 +176,15 @@
     },
     {
       "path": "dev/perf/native-record-alias-qualification-da6c4/source-manifest.json",
-      "blob": "140615c8905cb3bc38453382e5a29f542237e41e",
-      "bytes": 7033,
-      "sha256": "53d013c5debf24c67677b8b4de5015ea07f41164d00cba296bb5046cdd95084b"
+      "blob": "bb966fc57ea4fba91104c2c281d6eb9a8c6756f3",
+      "bytes": 7179,
+      "sha256": "c682df189312ee849bcacbd07c1b16a726487752b6f01b7cc010340c3e51e803"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test_setup_sources.py",
+      "blob": "fa0bb6ccde072758cb71545279df841e9d75d83e",
+      "bytes": 2808,
+      "sha256": "153ecf913c556a6f51acb6442a18f9851d6cf96f58cd914b987bd81fc1183939"
     }
   ],
   "predecessorResearchCheckpoint": "bf26d0371a10edeaf19a31d9d246b1f5f83b411d",
@@ -189,7 +195,8 @@
     "Global verification and full browser proof are independent prerequisite jobs; all six ordinary cells need both successful results. Each VNDB cell retains its own required per-host full preflight.",
     "Actual clean research HEAD/tree/GITHUB_SHA, manifest/workflow/protocol/plan/source hashes and exact current runtime/package identities are guarded before and after acquisition.",
     "Five synthetic proof-chain/closure negatives and four artifact-transport tests join the previously reviewed receipt/stats gates before browser acquisition.",
-    "After first run failed before dispatch, replace unsupported runner context in job-level env with an initial shell resolution of RUNNER_TEMP/GITHUB_ENV. No import observations existed and no acquisition schedule changed."
+    "After first run failed before dispatch, replace unsupported runner context in job-level env with an initial shell resolution of RUNNER_TEMP/GITHUB_ENV. No import observations existed and no acquisition schedule changed.",
+    "Use stock hardlink-copy dependency directory instead of an unignored top-level symlink. Preserve actual raw status/diffs and generated hashes at every setup checkpoint; fail on any dirty path without restoring or broadening ignore rules."
   ],
   "sourceReview": {
     "root": "Reviewed earlier72aae5 runner and4d726 verifier without a remaining blocker. Latest runner changes only add new source/proof/transport helper gates and repeated clean research status checks.",
@@ -208,10 +215,11 @@
     "historicalStatsTests": {
       "passed": 7,
       "scope": "Earlier local source with same logic passed; reconstructed current source has minor wrapping changes and must pass its hosted test gate."
-    }
+    },
+    "executedSyntaxGate": "Previous exact source63c959 and browser verifier4d726 passed hosted Python AST / Node --check in job140933764149. Latest setup-only runner870e1ed and new focused temporary-Git test remain unexecuted; required hosted gates enforce them before any import."
   },
   "pending": [
-    "Root final review and publication of exact28 files; no ref/PR changes by this subagent.",
+    "Root review/publication of exact29 controls including the narrow stock dependency setup repair and original failure evidence.",
     "Hosted control syntax, Python/Node deterministic tests and complete exact candidate repository gates.",
     "Full current-browser all-media A/B exports, native-byte reproduction and complete row/cold-reader proof.",
     "All six fixed ordinary/media/memory cells and independent raw result arithmetic; no product/browser gain claim yet."
@@ -362,5 +370,17 @@
     "productOrMeasuredCodeChanged": false,
     "protocolOrAcceptanceGateChanged": false,
     "retry": "A new source-bound workflow commit is required; no unchanged rerun."
+  },
+  "previousCorrectedControlHandoffBlob": "b388de968aff622288c108267b87e08826219e3c",
+  "executedSetupFailure": {
+    "receiptBlob": "2820a301c2f13caf0e7c40c1b628b8c6db907a37",
+    "fullJobLogBlob": "bc7d5ba36e4ba2e831acc2dd62b69e451579b961",
+    "run": 46130307914,
+    "job": 140933764149,
+    "commit": "1b65be131a92d1843bc47ba091bf81b3c9d757ea",
+    "artifactId": 15257343396,
+    "artifactSha256": "1c24d7f6875ad360ccb2169057878dcc0fc54483d6a0b37af9869778aaa7f45e",
+    "originalGitPorcelainWasNotCaptured": true,
+    "importsAcquired": 0
   }
 }

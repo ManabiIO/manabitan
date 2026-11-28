@@ -165,7 +165,8 @@
     "authoritativeStockSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
     "strategy": "Compare all selected A/B stock dev/perf/test/chromium/test/e2e tooling directly against exact baseline Git blobs; import and run stock validator/memory/fixture/host commands from A. Research checkout tooling is not assumed equal.",
     "researchControlBinding": "Actual clean research HEAD/tree and GITHUB_SHA plus the exact manifest/workflow/protocol/plan/control hashes before and after acquisition.",
-    "explicitOverlay": "Only the identical checked post-endpoint layout hook, plus the existing identical memory markers during the separate memory phase. No product overrides or PR977 composition."
+    "explicitOverlay": "Only the identical checked post-endpoint layout hook, plus the existing identical memory markers during the separate memory phase. No product overrides or PR977 composition.",
+    "dependencyTree": "Exact stock qualifier setup: shutil.copytree(..., copy_function=os.link, symlinks=True) creates a real top-level ignored node_modules directory. A focused temporary-Git test gates this setup; raw porcelain, diffs and generated-file hashes are retained before/after dependencies and release build. No source-ignore or restore exceptions."
   },
   "artifactTransport": {
     "safeDirectNamesOnly": true,
