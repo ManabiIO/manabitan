@@ -1,0 +1,251 @@
+name: Repeated JMdict diagnostic c563d487
+
+on:
+  push:
+    branches: ['perf/repeated-jmdict-diagnostic-20261128-c563d487']
+    paths: ['.github/workflows/repeated-jmdict-diagnostic-c563d487.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: repeated-jmdict-diagnostic-c563d487
+  cancel-in-progress: false
+
+jobs:
+  repeated-jmdict-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      DIAGNOSTIC_TOOLING_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare pinned JMdict
+        run: |
+          mkdir -p builds/perf/repeated-jmdict-profile-c563d487
+          node dev/perf/prepare-dictionaries.js jmdict 2>&1 | tee builds/perf/repeated-jmdict-profile-c563d487/prepare-dictionary.log
+      - name: Install locked Chromium
+        run: |
+          npx playwright install --with-deps chromium 2>&1 | tee builds/perf/repeated-jmdict-profile-c563d487/install-chromium.log
+      - name: Run three unchanged fresh-profile diagnostics sequentially
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          import zipfile
+
+          root = Path.cwd()
+          out = root / 'builds/perf/repeated-jmdict-profile-c563d487'
+          out.mkdir(parents=True, exist_ok=True)
+          baseline = '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+          original_tooling = '32d37370d8f0b9db7345437f660b8df065c6ae09'
+          browser_version = '153.0.8010.12'
+          original_package = '6a51c7666a1aaeaa7231eb058fcb71589498c75701fe1cff23faf2be97ab03d7'
+          parser_wasm_sha = '8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee'
+          expected_hashes = {
+              'package-lock.json': '01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96',
+              'test/perf/dictionaries.lock.json': '60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89',
+              'dev/perf/benchmark-support.js': 'eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0',
+              'dev/perf/dictionary-fixtures.js': '269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b',
+              'dev/perf/import-benchmark.js': 'aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6',
+              'test/chromium/extension-two-dictionary-import.e2e.js': 'd0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf',
+              'test/e2e/import-timing.js': '20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c',
+              'builds/e2e-dictionary-cache/JMdict.zip': '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f',
+          }
+
+          def now():
+              return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+          def command(*args):
+              return subprocess.check_output(args, text=True).strip()
+
+          def digest(path):
+              with path.open('rb') as stream:
+                  return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+          def write_json(path, value):
+              path.write_text(json.dumps(value, indent=2) + '\n')
+
+          def package_entries():
+              entries = {}
+              with zipfile.ZipFile(root / 'builds/manabitan-chrome.zip') as archive:
+                  for info in archive.infolist():
+                      if info.filename in entries:
+                          raise RuntimeError(f'Duplicate package entry: {info.filename}')
+                      entries[info.filename] = {
+                          'sizeBytes': info.file_size,
+                          'sha256': hashlib.sha256(archive.read(info)).hexdigest(),
+                          'isDirectory': info.is_dir(),
+                      }
+              return entries
+
+          def snapshot():
+              return {
+                  'capturedAt': now(),
+                  'gitSha': command('git', 'rev-parse', 'HEAD'),
+                  'gitTree': command('git', 'rev-parse', 'HEAD^{tree}'),
+                  'gitStatus': command('git', 'status', '--short'),
+                  'node': command('node', '--version'),
+                  'bootId': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
+                  'loadAverage': Path('/proc/loadavg').read_text().strip(),
+                  'memoryInfo': Path('/proc/meminfo').read_text(),
+                  'sha256': {name: digest(root / name) for name in expected_hashes},
+                  'parserWasmSha256': digest(root / 'ext/lib/term-bank-parser.wasm'),
+                  'canonicalScanWasmSha256': digest(root / 'ext/lib/term-content-canonical-scan-v1.wasm'),
+                  'compressionWasmSha256': digest(root / 'ext/lib/zstd.wasm'),
+                  'packageSha256': digest(root / 'builds/manabitan-chrome.zip') if (root / 'builds/manabitan-chrome.zip').exists() else None,
+              }
+
+          protocol = {
+              'schemaVersion': 1,
+              'purpose': 'Repeated unchanged-baseline attribution; diagnostic only, no gain or qualification claim',
+              'authoritativeTiming': False,
+              'source': baseline,
+              'originalTooling': original_tooling,
+              'originalReferenceRun': '46100619667',
+              'workflowSha': os.environ['DIAGNOSTIC_TOOLING_SHA'],
+              'githubRunId': os.environ['GITHUB_RUN_ID'],
+              'githubRunAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'runnerName': os.environ.get('RUNNER_NAME'),
+              'runnerOs': os.environ.get('RUNNER_OS'),
+              'node': 'v22.22.0',
+              'chromium': browser_version,
+              'fixture': 'jmdict',
+              'observations': 3,
+              'order': [1, 2, 3],
+              'freshBrowserProfiles': True,
+              'warmupExclusions': 0,
+              'automaticRetries': 0,
+              'build': 'release chrome; first invocation builds, later invocations reuse identical ZIP',
+              'importFlags': None,
+              'productionImportDefaults': True,
+              'traceEnabled': True,
+              'phaseProfiling': False,
+              'phaseScreenshots': False,
+              'processSampling': False,
+              'mediaCheck': 'sample; pinned JMdict has no media',
+              'traceBoundary': 'Existing harness: tracing starts before file input and stops at worker importDictionary console marker; visible-completion fallback is retained',
+              'reportTimingBoundary': 'Existing browser monotonic file-input change to post-UI import-complete event; non-authoritative because tracing is enabled',
+              'counterPolicy': 'Retain each term-file-fast-path report once; retain bulk and local phases separately; never add worker sums to elapsed time or to their aggregate rollups',
+              'cpuAttributionPolicy': 'Preserve every raw sample; identify the first timeDelta of each Profile separately because it can include profiler startup delay, not repeated function execution',
+              'failurePolicy': 'Attempt each prespecified observation once; preserve failed and incomplete output; fail the job if any observation or identity check fails',
+              'originalReferencePackageSha256': original_package,
+              'originalReferencePackagePolicy': 'Provenance only; archive timestamps are not normalized by both build routes, so its ZIP hash is not an equality gate',
+              'originalReferenceEntryMap': None,
+              'originalReferenceEntryMapAvailability': 'Original run artifact retains reports and trace, but no release ZIP or uncompressed member map; no cross-acquisition package-byte equality is asserted',
+              'packagePolicy': 'Record complete uncompressed entry names, lengths and SHA-256 after the first build; require identical ZIP SHA-256 and complete entry maps throughout this cohort',
+              'expectedParserWasmSha256': parser_wasm_sha,
+              'expectedSha256': expected_hashes,
+          }
+          write_json(out / 'protocol.json', protocol)
+          first = snapshot()
+          write_json(out / 'initial-identity.json', first)
+          if first['gitSha'] != baseline or first['gitStatus'] or first['node'] != 'v22.22.0' or first['sha256'] != expected_hashes:
+              raise RuntimeError('Frozen source, clean tracked checkout, Node, harness or fixture identity mismatch')
+          if first['parserWasmSha256'] != parser_wasm_sha:
+              raise RuntimeError('Frozen baseline parser WASM identity mismatch')
+          browsers = json.loads((root / 'node_modules/playwright-core/browsers.json').read_text())['browsers']
+          chromium = next(item for item in browsers if item['name'] == 'chromium')
+          write_json(out / 'locked-browser.json', chromium)
+          if chromium['browserVersion'] != browser_version:
+              raise RuntimeError('Locked Chromium version mismatch')
+
+          records = []
+          package_sha = None
+          first_package_entries = None
+          for ordinal in protocol['order']:
+              observation = out / f'observation-{ordinal}'
+              observation.mkdir()
+              before = snapshot()
+              write_json(observation / 'identity-before.json', before)
+              args = ['node', 'dev/perf/import-benchmark.js', 'jmdict', '--trace', '--runs', '1', '--build-target', 'chrome', '--media-check', 'sample', '--output', str(observation)]
+              if ordinal > 1:
+                  args.append('--no-build')
+              record = {'ordinal': ordinal, 'argv': args, 'startedAt': now(), 'status': 'running', 'authoritativeTiming': False}
+              write_json(observation / 'acquisition.json', record)
+              print(f'[repeated-diagnostic] starting observation {ordinal}/3', flush=True)
+              with (observation / 'console.log').open('w') as log:
+                  process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                  for line in process.stdout:
+                      log.write(line)
+                      log.flush()
+                      sys.stdout.write(line)
+                      sys.stdout.flush()
+                  record['exitCode'] = process.wait()
+              record['finishedAt'] = now()
+              try:
+                  after = snapshot()
+                  write_json(observation / 'identity-after.json', after)
+                  entries = package_entries()
+                  write_json(observation / 'package-entries.json', entries)
+                  package_sha = after['packageSha256'] if package_sha is None else package_sha
+                  first_package_entries = entries if first_package_entries is None else first_package_entries
+                  if entries != first_package_entries or after['packageSha256'] != package_sha:
+                      raise RuntimeError('Release ZIP or uncompressed entry map changed between diagnostics')
+                  if entries.get('lib/term-bank-parser.wasm', {}).get('sha256') != parser_wasm_sha:
+                      raise RuntimeError('Packaged parser WASM identity mismatch')
+                  if record['exitCode'] != 0:
+                      raise RuntimeError(f"Benchmark exited {record['exitCode']}")
+                  summary = json.loads((observation / 'summary.json').read_text())
+                  report = json.loads((observation / 'run-1.json').read_text())
+                  if summary['source']['gitSha'] != baseline or summary['source']['dirty'] or summary['authoritativeTiming'] is not False or summary['traceEnabled'] is not True or len(summary['runs']) != 1:
+                      raise RuntimeError('Summary identity, diagnostic mode or observation-count mismatch')
+                  if report['browserVersion'] != browser_version or report['status'] != 'success' or report['skippedVerification'] is not False:
+                      raise RuntimeError('Browser version or verification mismatch')
+                  current_package = summary['runs'][0]['packageSha256']
+                  if current_package != package_sha or current_package != after['packageSha256'] or report['packageSha256'] != current_package:
+                      raise RuntimeError('Release package changed between diagnostics')
+                  if after['gitSha'] != baseline or after['gitStatus'] or after['sha256'] != expected_hashes or after['node'] != first['node'] or before['bootId'] != first['bootId'] or after['bootId'] != first['bootId']:
+                      raise RuntimeError('Source, fixture or runner identity changed')
+                  if any(before[key] != first[key] or after[key] != first[key] for key in ('parserWasmSha256', 'canonicalScanWasmSha256', 'compressionWasmSha256')):
+                      raise RuntimeError('Generated native module identity changed')
+                  debug = summary['runs'][0]['importDebug']
+                  worker_phases = debug['importerPhaseTimings']
+                  write_json(observation / 'diagnostic-counters.json', {
+                      'authoritativeTiming': False,
+                      'rawReport': 'run-1.json',
+                      'rawTrace': 'run-1.trace.json',
+                      'disjointTermFileFastPaths': [phase for phase in worker_phases if phase['phase'].startswith('term-file-fast-path:')],
+                      'bulkFinalization': [phase for phase in worker_phases if phase['phase'] == 'bulk-finalization'],
+                      'pagePhases': debug['localPhaseTimings'],
+                      'warning': protocol['counterPolicy'],
+                  })
+                  record.update(status='passed', packageSha256=current_package, originalReferencePackageMatches=current_package == original_package)
+              except Exception as error:
+                  record.update(status='failed', failureReason=str(error))
+              write_json(observation / 'acquisition.json', record)
+              records.append(record)
+              write_json(out / 'acquisitions.json', {'authoritativeTiming': False, 'records': records})
+          files = [path for path in out.rglob('*') if path.is_file() and path.name != 'files-sha256.json']
+          write_json(out / 'files-sha256.json', {str(path.relative_to(out)): {'bytes': path.stat().st_size, 'sha256': digest(path)} for path in sorted(files)})
+          if len(records) != 3 or any(record['status'] != 'passed' for record in records):
+              raise SystemExit('Repeated diagnostics retained a failed observation; inspect all raw evidence')
+          PY
+      - name: Preserve every diagnostic and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: repeated-jmdict-profile-c563d487
+          path: builds/perf/repeated-jmdict-profile-c563d487
+          if-no-files-found: warn
+          retention-days: 14
