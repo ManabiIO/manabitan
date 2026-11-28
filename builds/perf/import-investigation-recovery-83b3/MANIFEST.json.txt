@@ -1,13 +1,13 @@
 {
-  "schemaVersion": 5,
-  "kind": "current-import-evidence-with-reviewed-intake-and-source-screens",
+  "schemaVersion": 6,
+  "kind": "completed-ownership-study-hold-and-final-guard-review",
   "repository": "ManabiIO/manabitan",
   "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
   "runtimeUnchanged": true,
-  "previousSnapshotCommit": "1a08c0ee7751147feee72d47c8ba5a520252c130",
+  "previousSnapshotCommit": "9dadde699db718c02dc475dd7377c5b56e963464",
   "selfExcluded": true,
-  "payloadFiles": 93,
-  "payloadBytes": 20754448,
+  "payloadFiles": 100,
+  "payloadBytes": 23140464,
   "entries": [
     {
       "path": "builds/perf/20261128-compressed-worker-profile-83b3/attribution.json.txt",
@@ -333,9 +333,9 @@
       "path": "builds/perf/import-investigation-recovery-83b3/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "a0b084d43af155ec5a9f53e523bbdcae6ec0f59d",
-      "size": 9194,
-      "sha256": "3d1f8d6f614268adb1ffdde445b4a1a09c1112689b71f8f0971643f4e15cb85d"
+      "sha": "be1b24c9c99641097decf492edf4d2b533346c78",
+      "size": 9370,
+      "sha256": "060bf025a3e066ab7e2177b83d244c9f6ac7360381c3a8e165ef1dbb91f31a2a"
     },
     {
       "path": "builds/perf/import-investigation-recovery-83b3/recovery-status.json.txt",
@@ -549,9 +549,9 @@
       "path": "builds/perf/import-owned-columns-83b3-hosted/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "bca0910a7f4ea7b88fa05e8a2a84603ca7d2f925",
-      "size": 5561,
-      "sha256": "60cec0cb516900857b44bf574d0fda2b6dee16240872c1d1fb02e2b4e6ef6242"
+      "sha": "059490f7d79aa337796e81097249aa72756a642e",
+      "size": 7407,
+      "sha256": "62bc0d0cad6389cebf46f5104a2e4b4f476a81da05d42388f31c47a04af5b12a"
     },
     {
       "path": "builds/perf/import-owned-columns-83b3-hosted/root-archive-verification.json",
@@ -752,6 +752,62 @@
       "sha": "78ba139c273854e726a314d32e92b7aeef62b787",
       "size": 20568,
       "sha256": "5ed4b55a74b43e01be9465b44d5f2345858231875a06df0595973163e5f521a7"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/vndb-AB/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7e4ecdcf3e6b417500f22758c69b9b20d13daae",
+      "size": 2181685,
+      "sha256": "58408a3c645916847b338f9d8bf7bd839755d3d78c2fda13f0fffb5ae5578b07"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/vndb-AB/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31d0fcdde6f504cb16e32104ea670a13a837f74f",
+      "size": 64018,
+      "sha256": "d8e90baf07834e799ab049382cc0dbcd19b7aeb1f4412714ecedb1232cf79a74"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/vndb-AB/independent-analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c946bbe929f0cc6849ffe7a389ecbbc6e2019c5",
+      "size": 97839,
+      "sha256": "0d63fcb04a7ea403e555d85d3acba6f60d0cf52ba4311e4d2e7ab1ea3ac5c012"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/four-cell-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc9d4ac54251f1a0ad6fe3464ca93bed1cf41034",
+      "size": 32784,
+      "sha256": "36767e50b65b2e127e8115d2f44634feba84a7803b065c05acfcc13ad21f4351"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/completed-extracted-packages-cleanup.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccffc9c549be397004864c7bce03155ca0b834f1",
+      "size": 3485,
+      "sha256": "b90b1de8dea5d0368c545f174cf731721a6d3620eb3fe650c1190de4e7d35db2"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-analysis-source/vndb-memory-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "272261f0e44294f7cdf62775126f2cb6dd0a7be1",
+      "size": 2610,
+      "sha256": "c8fb4aaf567f6ee804c674ed6b923a3893e210181d10da3b7b7c7fc445403044"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/four-cell-root-archive-verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24e0c8a65c2ec6856d3de77f50833621acca324d",
+      "size": 1573,
+      "sha256": "cda8de8601a7f8ba47583157aa3b77c50b43bbfa8b5d8d86cbb139f4207b6603"
     }
   ]
 }

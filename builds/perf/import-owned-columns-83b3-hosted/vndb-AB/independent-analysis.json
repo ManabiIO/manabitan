@@ -1,0 +1,2328 @@
+{
+  "acquisitionChanged": false,
+  "allRecordedObservations": [
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 4381
+    },
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 4079.899999999965
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 3821.100000000035
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 3860.2000000000116
+    },
+    {
+      "arm": "A",
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 3891.7000000000116
+    },
+    {
+      "arm": "B",
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 3802.2000000000116
+    },
+    {
+      "arm": "B",
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 3871.600000000035
+    },
+    {
+      "arm": "A",
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 3893.79999999993
+    },
+    {
+      "arm": "A",
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 3925.5999999999767
+    },
+    {
+      "arm": "B",
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 3762
+    },
+    {
+      "arm": "A",
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 3860.399999999907
+    },
+    {
+      "arm": "C",
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 3945.79999999993
+    },
+    {
+      "arm": "B",
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 3903.1999999999534
+    },
+    {
+      "arm": "A",
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 3815
+    },
+    {
+      "arm": "A",
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 3824.0999999999767
+    },
+    {
+      "arm": "B",
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 3782.79999999993
+    },
+    {
+      "arm": "B",
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 3690.0999999999767
+    },
+    {
+      "arm": "A",
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 3841.79999999993
+    },
+    {
+      "arm": "C",
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 3815
+    },
+    {
+      "arm": "A",
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 3763.600000000093
+    }
+  ],
+  "allRequiredGatesPassed": false,
+  "analyzerSha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "candidateVsBaseline": {
+    "driverComparable": {
+      "count": 6,
+      "descriptiveBootstrap95Percent": [
+        -4.058092844041338,
+        0.8708947322049632
+      ],
+      "equalWorkChangePercent": -1.6389272162811386,
+      "fasterPairs": 5,
+      "medianPairedChangePercent": -1.6898794235216785,
+      "ratios": [
+        0.9770023383097362,
+        0.9942986285890658,
+        0.9583248420623656,
+        1.0231192660550337,
+        0.9892000732198304,
+        0.9605133010568077
+      ],
+      "worstPairChangePercent": 2.311926605503367
+    },
+    "incompletePairs": [],
+    "kind": "candidate",
+    "medianPairedDeltaMs": -65.40000000002328,
+    "orderStrata": {
+      "AB": {
+        "count": 3,
+        "medianPairedChangePercent": -2.299766169026385,
+        "pairIds": [
+          1,
+          3,
+          5
+        ]
+      },
+      "BA": {
+        "count": 3,
+        "medianPairedChangePercent": -0.5701371410934186,
+        "pairIds": [
+          2,
+          4,
+          6
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 3891.7000000000116,
+        "changePercent": -2.299766169026385,
+        "deltaMs": -89.5,
+        "observationIds": [
+          "pair-01-A",
+          "pair-01-B"
+        ],
+        "order": "AB",
+        "pair": 1,
+        "ratio": 0.9770023383097362,
+        "rightMs": 3802.2000000000116
+      },
+      {
+        "baselineMs": 3893.79999999993,
+        "changePercent": -0.5701371410934186,
+        "deltaMs": -22.199999999895226,
+        "observationIds": [
+          "pair-02-B",
+          "pair-02-A"
+        ],
+        "order": "BA",
+        "pair": 2,
+        "ratio": 0.9942986285890658,
+        "rightMs": 3871.600000000035
+      },
+      {
+        "baselineMs": 3925.5999999999767,
+        "changePercent": -4.167515793763443,
+        "deltaMs": -163.59999999997672,
+        "observationIds": [
+          "pair-03-A",
+          "pair-03-B"
+        ],
+        "order": "AB",
+        "pair": 3,
+        "ratio": 0.9583248420623656,
+        "rightMs": 3762
+      },
+      {
+        "baselineMs": 3815,
+        "changePercent": 2.311926605503367,
+        "deltaMs": 88.19999999995343,
+        "observationIds": [
+          "pair-04-B",
+          "pair-04-A"
+        ],
+        "order": "BA",
+        "pair": 4,
+        "ratio": 1.0231192660550337,
+        "rightMs": 3903.1999999999534
+      },
+      {
+        "baselineMs": 3824.0999999999767,
+        "changePercent": -1.079992678016961,
+        "deltaMs": -41.300000000046566,
+        "observationIds": [
+          "pair-05-A",
+          "pair-05-B"
+        ],
+        "order": "AB",
+        "pair": 5,
+        "ratio": 0.9892000732198304,
+        "rightMs": 3782.79999999993
+      },
+      {
+        "baselineMs": 3841.79999999993,
+        "changePercent": -3.9486698943192344,
+        "deltaMs": -151.69999999995343,
+        "observationIds": [
+          "pair-06-B",
+          "pair-06-A"
+        ],
+        "order": "BA",
+        "pair": 6,
+        "ratio": 0.9605133010568077,
+        "rightMs": 3690.0999999999767
+      }
+    ],
+    "rightArm": "B"
+  },
+  "cell": "vndb-AB",
+  "completeTimingScheduleVerified": true,
+  "components": [
+    {
+      "banks": 665,
+      "groups": 170,
+      "policy": 2,
+      "rows": 6648310,
+      "savedOwnedResultBytes": 229184826
+    },
+    {
+      "banks": 665,
+      "groups": 170,
+      "policy": 3,
+      "rows": 6648310,
+      "savedOwnedResultBytes": 229184826
+    },
+    {
+      "banks": 665,
+      "groups": 170,
+      "policy": 5,
+      "rows": 6648310,
+      "savedOwnedResultBytes": 229184826
+    }
+  ],
+  "controlSubtraction": false,
+  "driverAnalysis": {
+    "candidateVsBaseline": {
+      "count": 6,
+      "descriptiveBootstrap95Percent": [
+        -4.058092844041338,
+        0.8708947322049632
+      ],
+      "equalWorkChangePercent": -1.6389272162811386,
+      "fasterPairs": 5,
+      "medianPairedChangePercent": -1.6898794235216785,
+      "ratios": [
+        0.9770023383097362,
+        0.9942986285890658,
+        0.9583248420623656,
+        1.0231192660550337,
+        0.9892000732198304,
+        0.9605133010568077
+      ],
+      "worstPairChangePercent": 2.311926605503367
+    },
+    "identicalCodeControl": {
+      "count": 2,
+      "descriptiveBootstrap95Percent": [
+        1.3657136783905122,
+        2.212205989017346
+      ],
+      "equalWorkChangePercent": 1.794333683105065,
+      "fasterPairs": 0,
+      "medianPairedChangePercent": 1.7889598337039292,
+      "ratios": [
+        1.0221220598901735,
+        1.0136571367839051
+      ],
+      "worstPairChangePercent": 2.212205989017346
+    },
+    "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+    "memoryPassed": false,
+    "status": "memory-or-semantics-failed",
+    "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+    "timingScope": "File input change through post-UI completion; fresh profile per observation"
+  },
+  "expectedAttemptInventory": [
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/host-after.json",
+          "sha256": "29beacd14619add47810949c04395ed979c808d5d8119e2c2655f2b5d39f3ab6"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/host-before.json",
+          "sha256": "ad0dcfed653608094c0af2bd87ca519809ab56df3a594ab094058b91b8664411"
+        },
+        {
+          "bytes": 153025,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/run-1.json",
+          "sha256": "e64c97a809530b78a55780895f5d19864572852013202d0859b0b7ed9a01ce67"
+        },
+        {
+          "bytes": 1702,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/run.log",
+          "sha256": "7808e25bcef818e4f1ae35cbd883c825626081ae9f888a81538aa32a2822a3a0"
+        },
+        {
+          "bytes": 59687,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/summary.json",
+          "sha256": "02fa2fba6267b63a864e27f81411d447759014cb0ebc55daa98a2f00892aa208"
+        }
+      ],
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/host-after.json",
+          "sha256": "313b297395f63fc3b46ac2ede87079bf815b1f6f56a27f356559c94d1d9ddf12"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/host-before.json",
+          "sha256": "4ea4ba05a7a109004ab1570e7435ea97653c6d6828331ef3e2d7023009b37b6c"
+        },
+        {
+          "bytes": 153407,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/run-1.json",
+          "sha256": "56666e65b8af0be4b8a48bf9cf4392b22e2bdf65de785432b4c9de8b82a0f262"
+        },
+        {
+          "bytes": 1703,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/run.log",
+          "sha256": "8cc3e8196a8c7ee70e83009480d9e341a45371e61055ebcf74268895fdcc4c03"
+        },
+        {
+          "bytes": 60002,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/summary.json",
+          "sha256": "e9b41a228b0c2cdebb053dc5e4077f1e67e3fed58100b2ae6e87c9399630280c"
+        }
+      ],
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/host-after.json",
+          "sha256": "a5412965cdcbd65f52937dd95cf88aecd8dbe7c9ccfc8a939082da44917c056f"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/host-before.json",
+          "sha256": "30a0da12b1295c2e465e29184f44dd1000727713cec76a41e95ad717cd6a160c"
+        },
+        {
+          "bytes": 153490,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/run-1.json",
+          "sha256": "cb8cf5a406af8789c61e65ae6bd456b2ca7fbeb9b5c522c3697928ccf3d76cfb"
+        },
+        {
+          "bytes": 1702,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/run.log",
+          "sha256": "adf665aba3a21ae258dd2058db708bdf4217dd9c37ae60403dfa1d4791a92710"
+        },
+        {
+          "bytes": 60101,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/summary.json",
+          "sha256": "3f9084ee32e41bfef3af1018e687728b46f51ac289ee9a69e212474c493aa564"
+        }
+      ],
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/host-after.json",
+          "sha256": "362e41e9f1ddd6b9caaa0f228f369bc6ec4cb128b88a340fe753b504830ab3a9"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/host-before.json",
+          "sha256": "7ff164c930fca5db262df351b00c863590eac4a7ccf5d4c6dfb4f336fb801ee7"
+        },
+        {
+          "bytes": 153515,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/run-1.json",
+          "sha256": "36daaee5cb29665217934614a4cba06788c7b16b1c17285670b127b061d3e8d0"
+        },
+        {
+          "bytes": 1701,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/run.log",
+          "sha256": "2ab0705cb3567be4b84fc5c69c1e387aad00676dec2edc1afd5ccd084f39cb64"
+        },
+        {
+          "bytes": 60117,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/summary.json",
+          "sha256": "1fafa9e1e58061879b1c61fc547d754b8eb126e082e5f6ddd1fa52d459bb41ab"
+        }
+      ],
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/host-after.json",
+          "sha256": "d948e170b335d4b3e3f0c848678661d8023baf699818f29f2cd1f94ceb4b6071"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/host-before.json",
+          "sha256": "856697227d67ce09dacdb273c154a70cafe48894c8733163dd0255740ae97246"
+        },
+        {
+          "bytes": 153713,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/run-1.json",
+          "sha256": "2e1bf6ae7a7852ab47b4d9c17f039a6ab13411a41406fe56758e5b321ceb52dc"
+        },
+        {
+          "bytes": 1787,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/run.log",
+          "sha256": "b6266b937a98382eba061e1feee7237869af6683430206aee70afa14e2e9a731"
+        },
+        {
+          "bytes": 59945,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/summary.json",
+          "sha256": "fd929ca24ef1c8e20ed7e2f8e1df8d6160c4177e5183e8936a79be2e145f71dc"
+        }
+      ],
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/host-after.json",
+          "sha256": "e2205bfdec9b7663ce4fad09e71e58db14f8a9166865d0d66c2fc0a059b3d446"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/host-before.json",
+          "sha256": "c87e45c1f640215c727f3ad7e85998bc22eafdf272094dd982806c9d1f8d4d43"
+        },
+        {
+          "bytes": 153235,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/run-1.json",
+          "sha256": "afa73aeb2bc5249fdc24451823a611b4107137fe740d9f60fe760087b6fd8b28"
+        },
+        {
+          "bytes": 1698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/run.log",
+          "sha256": "00fc8e8315c7123e1e71faf7a72b96f02a5e14fa4327976dc3988e1c8fa2efc8"
+        },
+        {
+          "bytes": 60047,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/summary.json",
+          "sha256": "be2b1c1d661fad6da836e3a05939d0ab84282631e85323a6402873d8f25402ca"
+        }
+      ],
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/host-after.json",
+          "sha256": "ec9dcadbbc253666bee7b89fb0c0bf0cfaeaf806a31b1115572289c824266b88"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/host-before.json",
+          "sha256": "bb9ece6bf8b90d97030195d843067de18823d0594454c1bfd8ef8898851274fa"
+        },
+        {
+          "bytes": 153195,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/run-1.json",
+          "sha256": "ab2aa5fbec1699390a1a766a5fe51056fd19205af3178a8e1dd1ebb794ffa509"
+        },
+        {
+          "bytes": 1698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/run.log",
+          "sha256": "c8d8ed4a9b8b9a4511624c90af04dec2d499366ce00904e8c14d291234c37311"
+        },
+        {
+          "bytes": 59977,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/summary.json",
+          "sha256": "f0ba8733a67852a6f01627cc166c1bb181ae1b2babae6e4c39dde523a0056ffa"
+        }
+      ],
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/host-after.json",
+          "sha256": "bde0fb9650ed813e0ef9520f0079b4e22b66ec8f5e70a3ed7317a88a123920d8"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/host-before.json",
+          "sha256": "e9ca2cf6c038952c8ea653c6e29bc50e355cb6c0f81fe2f0c3abd21b2af2b7ac"
+        },
+        {
+          "bytes": 153079,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/run-1.json",
+          "sha256": "4af47b6913cc889ca0f8b7e9104f821d0ccfec1a669efdab133df24dba1d6f5c"
+        },
+        {
+          "bytes": 1699,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/run.log",
+          "sha256": "b84047a4a3ad0ec132e03e5f9adaa5ae39790b1bedcfd0384bbd1dd5a6b1086f"
+        },
+        {
+          "bytes": 59922,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/summary.json",
+          "sha256": "b230de4c33eca93f2f6a50d1b6b7d54a5e1b92383cee7a2b89e79bf5e41adfa5"
+        }
+      ],
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/host-after.json",
+          "sha256": "799ffa49ede775c84bc2d9c04fe2d6bbc7b5b2926964048fd6ace918d582941a"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/host-before.json",
+          "sha256": "d3f8d13cec3f77b839bdf8fff5a5546ab336a0a58930394d48953f55a01373cd"
+        },
+        {
+          "bytes": 153217,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/run-1.json",
+          "sha256": "0002c5163ea707fc97b8bedae74b1cc31501e206849a303d43324cd5167d2860"
+        },
+        {
+          "bytes": 1698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/run.log",
+          "sha256": "e20e8244bfc3c849eb2cf54a2e656c7b34a03a11a9a052c7bd798eb661b3183b"
+        },
+        {
+          "bytes": 59928,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/summary.json",
+          "sha256": "a35d06f4bbf6acc1a8334d1f9b415392cd9b0b2e21273c5aff55bca06e333325"
+        }
+      ],
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/host-after.json",
+          "sha256": "409498ee3f4c819d073a2c602e498a7341552caa33991bb31fe945b3c640b7ce"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/host-before.json",
+          "sha256": "26510d8ea46fbf4d76d5e4f8d1f148de94d4660216aa614ac65955db18590fe1"
+        },
+        {
+          "bytes": 153249,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/run-1.json",
+          "sha256": "0c21f14c6df6e3654646a1b501c78564c06329e019c73e005361892bbf5b38ec"
+        },
+        {
+          "bytes": 1698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/run.log",
+          "sha256": "854cf8381267ff08792dd44bf9345574fa1d600036a4eade76453415df2879b3"
+        },
+        {
+          "bytes": 59893,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/summary.json",
+          "sha256": "dfd296daa3e9961a86278168c4c836d1c622d24da280b246455b635e6b42b942"
+        }
+      ],
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/host-after.json",
+          "sha256": "ea962359d98a2f134232cfa44a0780cc0d711d6dac13ac33eaf49cae0a4e307f"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/host-before.json",
+          "sha256": "5711d31792da8d7c832ff30d486fbb601214ecfa5d04a31a52f03e235c82e117"
+        },
+        {
+          "bytes": 152707,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/run-1.json",
+          "sha256": "866113069c42087e548a74c704b52551c2ccc41b1c9881cee7fd27daa25b03d5"
+        },
+        {
+          "bytes": 1708,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/run.log",
+          "sha256": "b9519a3d52e62a70f392d3383904a89bd46f4886e3eed2fd279dde3d0c3b2d14"
+        },
+        {
+          "bytes": 59762,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/summary.json",
+          "sha256": "ec0fffe2ca5b753dcacb40db71b10242ac41c7e6575351cdeb84fc99441ffe67"
+        }
+      ],
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/host-after.json",
+          "sha256": "75385fa13a51f0fcdf9d18f0f1165b54698cb09dbae3d9104acbebcad4e0e435"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/host-before.json",
+          "sha256": "c4faf3ce551d330ce3f926eec50e02cb2d70220e8becee5652a502c782880b71"
+        },
+        {
+          "bytes": 153200,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/run-1.json",
+          "sha256": "b101474cfc5441a32bcfa27f473502982231047156e1303971c3275a72540126"
+        },
+        {
+          "bytes": 1707,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/run.log",
+          "sha256": "877cc123e7200a4d1d24e50eb4c075204ea861cbebb466d2730938462f465555"
+        },
+        {
+          "bytes": 59924,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/summary.json",
+          "sha256": "ecb5d4742b2ade907828be051a4a3be9c7b0b58d4528e3d1d689cb3ec7dbe6f4"
+        }
+      ],
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/host-after.json",
+          "sha256": "0379009814f73fa954a45d78e6f5957cba713342e80a0985696f2f6fe91e73e2"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/host-before.json",
+          "sha256": "1ca8582b8172aeed321d2b9321fd48044c9a56ed828559d38fc4551e016f06e6"
+        },
+        {
+          "bytes": 153347,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/run-1.json",
+          "sha256": "f57a931ffc0b80f93fc2f52783aac51d76bf33ce97376576ecdc5aff8c19d497"
+        },
+        {
+          "bytes": 1806,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/run.log",
+          "sha256": "8e505f991ea7d0b656010363ac9a7e9ee0356d39e15bbc9d44fb68eefb126d7a"
+        },
+        {
+          "bytes": 59892,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/summary.json",
+          "sha256": "2c0ea0d059321bf3b584d59e3eb3b7bba46f1d0d1b9cc563bf5aae6e50af1292"
+        }
+      ],
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/host-after.json",
+          "sha256": "21f211969b6df63b05a97d6f8ca7d518c22e04764c6a22b813d6c619644fc750"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/host-before.json",
+          "sha256": "171a38a4266fd60aa9e3f5b442c64fade1032e90ecf976c97341075f0f87faf2"
+        },
+        {
+          "bytes": 153002,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/run-1.json",
+          "sha256": "7677975304aa0939f9ba15bdf7904ba4b03c9c674e73cb18f1823131d0d6af78"
+        },
+        {
+          "bytes": 1699,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/run.log",
+          "sha256": "2599fdb253bc944eaf982aeffd20955867cb5d91ad75c5ce9885859380717b88"
+        },
+        {
+          "bytes": 59761,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/summary.json",
+          "sha256": "cb03aaa81d3482554d78ff0e571a00a74c63a4d325a6755a1db24611c9d7fa34"
+        }
+      ],
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/host-after.json",
+          "sha256": "d202689f696c69b2f284486b0351c9d0f6eeb4aefe751a0a8cc829184f008731"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/host-before.json",
+          "sha256": "6947aede65b14c6d520f965562303d776e80c24e082621f8c54818e3515bc97a"
+        },
+        {
+          "bytes": 153878,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/run-1.json",
+          "sha256": "63ee5c70dfa50a854d3f9aabfba3169ddc5a28d394a2b9fccb3777498ae8e736"
+        },
+        {
+          "bytes": 1788,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/run.log",
+          "sha256": "a92c2268162b52246c2377186a255025b58448fc4a29e4894f0011161404dea3"
+        },
+        {
+          "bytes": 59976,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/summary.json",
+          "sha256": "7e15fec0168113417457af2e7ba0fff654da0b30234953cba167af44791d5483"
+        }
+      ],
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/host-after.json",
+          "sha256": "d521fad1add3d7bb6d76b8bc04d8139989cc277ce18cd1e4640e3f1913d0cdd4"
+        },
+        {
+          "bytes": 496,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/host-before.json",
+          "sha256": "898fb76554f84afba6d9f3bed26660954a53dca4d022e3a1e39f1671bb142040"
+        },
+        {
+          "bytes": 152985,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/run-1.json",
+          "sha256": "4cd2383d832bbe52f04bde5332fd1db6ba3896a0d350086f0d1bc740af92c7fd"
+        },
+        {
+          "bytes": 1698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/run.log",
+          "sha256": "94946dbb83dd57924ab5bfa466237afc16ff4fc66e79414bac3743e7c32c62df"
+        },
+        {
+          "bytes": 59796,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/summary.json",
+          "sha256": "73d1b5c4ffe042a88d8a1235fe6bb4f81e5c2f035949f09a3d426029e155cb18"
+        }
+      ],
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/host-after.json",
+          "sha256": "81ed4bbd765fb2c191cd324eedd5842a9f3ef2804d978f545c46e2b28ba49cb7"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/host-before.json",
+          "sha256": "c4e8071e9865d17ea9088358b5bfa2bac8c8acfd18c0e02afc72b26c7675986e"
+        },
+        {
+          "bytes": 153838,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/run-1.json",
+          "sha256": "908403360b98d9514cb816c6ad8cceda873568d9070e0c6bae500319b653302a"
+        },
+        {
+          "bytes": 1787,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/run.log",
+          "sha256": "b80dd44ed7c9a43fd2a5989f58c328a388ed7743b092881e2d70ffd322c7e240"
+        },
+        {
+          "bytes": 59968,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/summary.json",
+          "sha256": "74907ba57beeca422741a24019fec6f784f46b775ccd051b3df6fcadbe86e9a7"
+        }
+      ],
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/host-after.json",
+          "sha256": "5a30a2fbc8e4b738a1f0eb0e9b1d413cd1f8b0e6443e97cb98fba9ef396a764e"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/host-before.json",
+          "sha256": "850c6552a7c69384b90e59f01e36867e6db0af19e2d828597f7cffc86a798c13"
+        },
+        {
+          "bytes": 153057,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/run-1.json",
+          "sha256": "86c061d4d5666c701bc58d953219bdab63dd94ad8697baf304db4ac6b99029d4"
+        },
+        {
+          "bytes": 1699,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/run.log",
+          "sha256": "946457944cf4749ff1ad5441d7fbdb9dfeedd295590b42acc077d1bd916233cd"
+        },
+        {
+          "bytes": 59991,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/summary.json",
+          "sha256": "93340773b493ce97236e4458aff825db6a52030e50b9d8bb07c2a17c5aac54f8"
+        }
+      ],
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/host-after.json",
+          "sha256": "6fa15edc6e890e2f1e48a7bbfe393c811a2b1fce680df9782e6b5022ec3a6c07"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/host-before.json",
+          "sha256": "8e448bb7907998028cd379720c9154156498ea90351acceb573e300e2070f137"
+        },
+        {
+          "bytes": 153254,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/run-1.json",
+          "sha256": "1c377cc11d8b4df3d924ec5657e9d3cd4ef98a5d9fee6f278bec496041d3429e"
+        },
+        {
+          "bytes": 1708,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/run.log",
+          "sha256": "f99781cb4a332f809b8e444c05fad3292cd88b6309ba3acfec95aa96baaf4a4d"
+        },
+        {
+          "bytes": 59960,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/summary.json",
+          "sha256": "71af3e834cd41e4580c8544c2e6dbea4bb2b95c7c5de02604b6249d1130b89ef"
+        }
+      ],
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25751,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/canonical-receipt.json",
+          "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/host-after.json",
+          "sha256": "155c7bcec64dbe0193a108a9caa18f8f981dce40943f3545ba485002a91ce3b2"
+        },
+        {
+          "bytes": 497,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/host-before.json",
+          "sha256": "1983b7926d3b8833d0b48e027b059a9c00a1fbb99a4559da011c5bc8817dc96e"
+        },
+        {
+          "bytes": 153495,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/run-1.json",
+          "sha256": "9d88d6be5175eb00fdf0d98bcad0c21523976522fdb741fed5e7db78a6a80062"
+        },
+        {
+          "bytes": 1796,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/run.log",
+          "sha256": "22fcfba6555c532a7f1d8c1067da9bdbc5e9d611c2a4eba84357b68e633bc855"
+        },
+        {
+          "bytes": 59866,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/summary.json",
+          "sha256": "42f6ce82dde1e1081cd0e6bf72a113c8db9c4021a982ffbdb4eb273c513d7e36"
+        }
+      ],
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    }
+  ],
+  "expectedCounts": {
+    "candidate": 12,
+    "control": 4,
+    "exhaustiveMedia": 2,
+    "memory": 4,
+    "ordinary": 20,
+    "warmup": 4
+  },
+  "gates": {
+    "allGroupingPolicies": "passed",
+    "attemptInventory": "passed",
+    "browserIdentityRead": "passed",
+    "exhaustiveMedia:A": "passed",
+    "exhaustiveMedia:B": "passed",
+    "frozenAuditors": "passed",
+    "independentStatistics": "passed",
+    "observationsRead": "passed",
+    "ordinary:control-01-A": "passed",
+    "ordinary:control-01-C": "passed",
+    "ordinary:control-02-A": "passed",
+    "ordinary:control-02-C": "passed",
+    "ordinary:pair-01-A": "passed",
+    "ordinary:pair-01-B": "passed",
+    "ordinary:pair-02-A": "passed",
+    "ordinary:pair-02-B": "passed",
+    "ordinary:pair-03-A": "passed",
+    "ordinary:pair-03-B": "passed",
+    "ordinary:pair-04-A": "passed",
+    "ordinary:pair-04-B": "passed",
+    "ordinary:pair-05-A": "passed",
+    "ordinary:pair-05-B": "passed",
+    "ordinary:pair-06-A": "passed",
+    "ordinary:pair-06-B": "passed",
+    "ordinary:warmup-1-A": "passed",
+    "ordinary:warmup-1-B": "passed",
+    "ordinary:warmup-2-A": "passed",
+    "ordinary:warmup-2-B": "passed",
+    "packageBytes": "passed",
+    "planRead": "passed",
+    "registeredSchedule": "passed",
+    "separateMemory": "failed",
+    "sourceFixtureRuntimeBindings": "passed",
+    "sourceIdentitiesRead": "passed"
+  },
+  "hostPooling": false,
+  "identicalCodeControl": {
+    "driverComparable": {
+      "count": 2,
+      "descriptiveBootstrap95Percent": [
+        1.3657136783905122,
+        2.212205989017346
+      ],
+      "equalWorkChangePercent": 1.794333683105065,
+      "fasterPairs": 0,
+      "medianPairedChangePercent": 1.7889598337039292,
+      "ratios": [
+        1.0221220598901735,
+        1.0136571367839051
+      ],
+      "worstPairChangePercent": 2.212205989017346
+    },
+    "incompletePairs": [],
+    "kind": "control",
+    "medianPairedDeltaMs": 68.39999999996508,
+    "orderStrata": {
+      "AC": {
+        "count": 1,
+        "medianPairedChangePercent": 2.212205989017346,
+        "pairIds": [
+          1
+        ]
+      },
+      "CA": {
+        "count": 1,
+        "medianPairedChangePercent": 1.3657136783905122,
+        "pairIds": [
+          2
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 3860.399999999907,
+        "changePercent": 2.212205989017346,
+        "deltaMs": 85.40000000002328,
+        "observationIds": [
+          "control-01-A",
+          "control-01-C"
+        ],
+        "order": "AC",
+        "pair": 1,
+        "ratio": 1.0221220598901735,
+        "rightMs": 3945.79999999993
+      },
+      {
+        "baselineMs": 3763.600000000093,
+        "changePercent": 1.3657136783905122,
+        "deltaMs": 51.39999999990687,
+        "observationIds": [
+          "control-02-C",
+          "control-02-A"
+        ],
+        "order": "CA",
+        "pair": 2,
+        "ratio": 1.0136571367839051,
+        "rightMs": 3815
+      }
+    ],
+    "rightArm": "C"
+  },
+  "inputFiles": {
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3-components/owned-column-replay.mjs": {
+      "bytes": 21730,
+      "sha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3-components/vndb-policy-2.json": {
+      "bytes": 458392,
+      "sha256": "e55e4831233de3f0a15641e3916dd52437f3adf639863cf619a5e0c1b2198bcb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3-components/vndb-policy-3.json": {
+      "bytes": 458432,
+      "sha256": "6a044a3e897c6dd39ce4592c3620d798e7401561c3cfb7d94240f55f66a852eb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3-components/vndb-policy-5.json": {
+      "bytes": 458477,
+      "sha256": "402da2c53a7d18e87b651c649b50fdd802ae22a39bd36a3bc722199cc43ef675"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/analysis.json": {
+      "bytes": 1314,
+      "sha256": "f85eca4480954c69fedead1c54dc6ccdc4d6b171d9ef94efe101fab154efe83c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/browser-identity.json": {
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "ea962359d98a2f134232cfa44a0780cc0d711d6dac13ac33eaf49cae0a4e307f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "5711d31792da8d7c832ff30d486fbb601214ecfa5d04a31a52f03e235c82e117"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/run-1.json": {
+      "bytes": 152707,
+      "sha256": "866113069c42087e548a74c704b52551c2ccc41b1c9881cee7fd27daa25b03d5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/run.log": {
+      "bytes": 1708,
+      "sha256": "b9519a3d52e62a70f392d3383904a89bd46f4886e3eed2fd279dde3d0c3b2d14"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-A/summary.json": {
+      "bytes": 59762,
+      "sha256": "ec0fffe2ca5b753dcacb40db71b10242ac41c7e6575351cdeb84fc99441ffe67"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/host-after.json": {
+      "bytes": 496,
+      "sha256": "75385fa13a51f0fcdf9d18f0f1165b54698cb09dbae3d9104acbebcad4e0e435"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/host-before.json": {
+      "bytes": 497,
+      "sha256": "c4faf3ce551d330ce3f926eec50e02cb2d70220e8becee5652a502c782880b71"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/run-1.json": {
+      "bytes": 153200,
+      "sha256": "b101474cfc5441a32bcfa27f473502982231047156e1303971c3275a72540126"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/run.log": {
+      "bytes": 1707,
+      "sha256": "877cc123e7200a4d1d24e50eb4c075204ea861cbebb466d2730938462f465555"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-01-C/summary.json": {
+      "bytes": 59924,
+      "sha256": "ecb5d4742b2ade907828be051a4a3be9c7b0b58d4528e3d1d689cb3ec7dbe6f4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "155c7bcec64dbe0193a108a9caa18f8f981dce40943f3545ba485002a91ce3b2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "1983b7926d3b8833d0b48e027b059a9c00a1fbb99a4559da011c5bc8817dc96e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/run-1.json": {
+      "bytes": 153495,
+      "sha256": "9d88d6be5175eb00fdf0d98bcad0c21523976522fdb741fed5e7db78a6a80062"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/run.log": {
+      "bytes": 1796,
+      "sha256": "22fcfba6555c532a7f1d8c1067da9bdbc5e9d611c2a4eba84357b68e633bc855"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-A/summary.json": {
+      "bytes": 59866,
+      "sha256": "42f6ce82dde1e1081cd0e6bf72a113c8db9c4021a982ffbdb4eb273c513d7e36"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/host-after.json": {
+      "bytes": 497,
+      "sha256": "6fa15edc6e890e2f1e48a7bbfe393c811a2b1fce680df9782e6b5022ec3a6c07"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/host-before.json": {
+      "bytes": 497,
+      "sha256": "8e448bb7907998028cd379720c9154156498ea90351acceb573e300e2070f137"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/run-1.json": {
+      "bytes": 153254,
+      "sha256": "1c377cc11d8b4df3d924ec5657e9d3cd4ef98a5d9fee6f278bec496041d3429e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/run.log": {
+      "bytes": 1708,
+      "sha256": "f99781cb4a332f809b8e444c05fad3292cd88b6309ba3acfec95aa96baaf4a4d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/control-02-C/summary.json": {
+      "bytes": 59960,
+      "sha256": "71af3e834cd41e4580c8544c2e6dbea4bb2b95c7c5de02604b6249d1130b89ef"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-A/canonical-receipt.json": {
+      "bytes": 25756,
+      "sha256": "72d9c2f3d7248b35ea76c0b33aa00cb55bc5aa252d9753977ef0449920c360bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-A/run-1.json": {
+      "bytes": 153443,
+      "sha256": "828a41448df972897e7aaaa0e5bc2af03ebe76d24d9b3ea33c113a5b9522ab88"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-A/summary.json": {
+      "bytes": 60005,
+      "sha256": "2fac6cf6d3c3767db6b967dbab6c7dd296dc4d78296008393ef5adabc62bcbde"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-B/canonical-receipt.json": {
+      "bytes": 25756,
+      "sha256": "72d9c2f3d7248b35ea76c0b33aa00cb55bc5aa252d9753977ef0449920c360bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-B/run-1.json": {
+      "bytes": 153765,
+      "sha256": "ce8a606974a1ddd22c4e100dde6bd27aaed8c553a94ac95a8d6f6bf5e3861e8b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/exhaustive-media-B/summary.json": {
+      "bytes": 60046,
+      "sha256": "79fc46e1123972eaec6ef7f8efe6b4d1dbd0a8701ab0adb75e75c9a2e7a8128e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A1/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A1/markers.jsonl": {
+      "bytes": 142,
+      "sha256": "b02b4ef5d26b2b3ea5427961ce778a2d03acb4fa889de2e9479a473b1ae879de"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A1/memory.json": {
+      "bytes": 4144054,
+      "sha256": "f11874e96d4e6ce81b5cb002dbac72ec36132a4b416e14801154a3d19fae8e5e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A1/run-1.json": {
+      "bytes": 153124,
+      "sha256": "832d75abb78e249f855ec8543d791facce8854f4c9b3dad685fa29e8b4914dd7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A1/summary.json": {
+      "bytes": 59995,
+      "sha256": "598340bf250f50389bfdfeb4b0bbe61cbb4296b0c48e2e906df1ff70c6a3bdec"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A2/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A2/markers.jsonl": {
+      "bytes": 142,
+      "sha256": "7d85b0629433c023539cf2418bf0f09cf9c45001866ac5c6ce20c346fd1cb295"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A2/memory.json": {
+      "bytes": 4005186,
+      "sha256": "bf335a051c8d937f254791848704e3db4c4af20b30422a0ddcb8373f369a6022"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A2/run-1.json": {
+      "bytes": 153408,
+      "sha256": "cb60dd468b9a7f7ed37d7726f1f90a10807035b5c9702a652c730404db05a9ac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/A2/summary.json": {
+      "bytes": 59993,
+      "sha256": "48f6b3d4d78fe9db92f6c4edfe773f0db0d5e554206f86cace3c288e8379e58f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/markers.jsonl": {
+      "bytes": 142,
+      "sha256": "f84c71ec34b91e730d63c8877a3732756a7d82a6b83db1d38958eee750519185"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/memory.json": {
+      "bytes": 4104968,
+      "sha256": "8c622e1285f04b3e8fac1fe4e365cfea1a27d9c8a342b7c44808de052bc9632c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/run-1.json": {
+      "bytes": 153069,
+      "sha256": "820c22fec76e78bc2ca8d4637eaea343ceca9ab8522341b2fef4d3fe2bdd096f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/summary.json": {
+      "bytes": 59844,
+      "sha256": "d05761564d4a1f5562ea41109d815e997be14e465f126e0c736206be3c9e96a5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B2/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B2/markers.jsonl": {
+      "bytes": 142,
+      "sha256": "bb693d843f42485569d1c095d79354538db8d25edd898cbf8e860d88fe99fce9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B2/memory.json": {
+      "bytes": 4185614,
+      "sha256": "c343c2e3f3966d793cb333a96f3aed1904dea532810e809985a9819a504ba6bf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B2/run-1.json": {
+      "bytes": 153278,
+      "sha256": "eecd0d9bcb288088597e274be2e493cef3f08c93dd1b22ab7e317f51a9fe7bd8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B2/summary.json": {
+      "bytes": 59934,
+      "sha256": "495aef19b54fb6b33d3c15fd5478d3f2e7d545bb89ef14a838500f55986fc3c1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/harness-instrumented.js": {
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/harness-original.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/memory-audit.json": {
+      "bytes": 402,
+      "sha256": "e78eded46854f98856391322468d97216dcc3aa798803b590b7f0c723d3455df"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/memory-comparison.json": {
+      "bytes": 10110,
+      "sha256": "098b7d626e9ea8f918619a53fa74c4a0beaa49fddde6d007787053ddd55272fc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/observations.json": {
+      "bytes": 8568,
+      "sha256": "e16f1c66eb676e34dc3fe3d0faf5391f1c1e7b3ac37aea271b4f1afa928764e8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/plan.json": {
+      "bytes": 129294,
+      "sha256": "f1a52d813b12c886a2fd2e071f1d76672e794fd6719b8a79fbb56cdc73811073"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/semantic-failures.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/observations.json": {
+      "bytes": 2490,
+      "sha256": "b571a61b605e2962c1d689bf6bb57859c633328e6c77881eb5bcbd50c68efa32"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/package-A.zip": {
+      "bytes": 16805714,
+      "sha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/package-B.zip": {
+      "bytes": 16807149,
+      "sha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "d948e170b335d4b3e3f0c848678661d8023baf699818f29f2cd1f94ceb4b6071"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "856697227d67ce09dacdb273c154a70cafe48894c8733163dd0255740ae97246"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/run-1.json": {
+      "bytes": 153713,
+      "sha256": "2e1bf6ae7a7852ab47b4d9c17f039a6ab13411a41406fe56758e5b321ceb52dc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/run.log": {
+      "bytes": 1787,
+      "sha256": "b6266b937a98382eba061e1feee7237869af6683430206aee70afa14e2e9a731"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-A/summary.json": {
+      "bytes": 59945,
+      "sha256": "fd929ca24ef1c8e20ed7e2f8e1df8d6160c4177e5183e8936a79be2e145f71dc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "e2205bfdec9b7663ce4fad09e71e58db14f8a9166865d0d66c2fc0a059b3d446"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "c87e45c1f640215c727f3ad7e85998bc22eafdf272094dd982806c9d1f8d4d43"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/run-1.json": {
+      "bytes": 153235,
+      "sha256": "afa73aeb2bc5249fdc24451823a611b4107137fe740d9f60fe760087b6fd8b28"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/run.log": {
+      "bytes": 1698,
+      "sha256": "00fc8e8315c7123e1e71faf7a72b96f02a5e14fa4327976dc3988e1c8fa2efc8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-01-B/summary.json": {
+      "bytes": 60047,
+      "sha256": "be2b1c1d661fad6da836e3a05939d0ab84282631e85323a6402873d8f25402ca"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "bde0fb9650ed813e0ef9520f0079b4e22b66ec8f5e70a3ed7317a88a123920d8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "e9ca2cf6c038952c8ea653c6e29bc50e355cb6c0f81fe2f0c3abd21b2af2b7ac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/run-1.json": {
+      "bytes": 153079,
+      "sha256": "4af47b6913cc889ca0f8b7e9104f821d0ccfec1a669efdab133df24dba1d6f5c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/run.log": {
+      "bytes": 1699,
+      "sha256": "b84047a4a3ad0ec132e03e5f9adaa5ae39790b1bedcfd0384bbd1dd5a6b1086f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-A/summary.json": {
+      "bytes": 59922,
+      "sha256": "b230de4c33eca93f2f6a50d1b6b7d54a5e1b92383cee7a2b89e79bf5e41adfa5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "ec9dcadbbc253666bee7b89fb0c0bf0cfaeaf806a31b1115572289c824266b88"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "bb9ece6bf8b90d97030195d843067de18823d0594454c1bfd8ef8898851274fa"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/run-1.json": {
+      "bytes": 153195,
+      "sha256": "ab2aa5fbec1699390a1a766a5fe51056fd19205af3178a8e1dd1ebb794ffa509"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/run.log": {
+      "bytes": 1698,
+      "sha256": "c8d8ed4a9b8b9a4511624c90af04dec2d499366ce00904e8c14d291234c37311"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-02-B/summary.json": {
+      "bytes": 59977,
+      "sha256": "f0ba8733a67852a6f01627cc166c1bb181ae1b2babae6e4c39dde523a0056ffa"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "799ffa49ede775c84bc2d9c04fe2d6bbc7b5b2926964048fd6ace918d582941a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "d3f8d13cec3f77b839bdf8fff5a5546ab336a0a58930394d48953f55a01373cd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/run-1.json": {
+      "bytes": 153217,
+      "sha256": "0002c5163ea707fc97b8bedae74b1cc31501e206849a303d43324cd5167d2860"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/run.log": {
+      "bytes": 1698,
+      "sha256": "e20e8244bfc3c849eb2cf54a2e656c7b34a03a11a9a052c7bd798eb661b3183b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-A/summary.json": {
+      "bytes": 59928,
+      "sha256": "a35d06f4bbf6acc1a8334d1f9b415392cd9b0b2e21273c5aff55bca06e333325"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "409498ee3f4c819d073a2c602e498a7341552caa33991bb31fe945b3c640b7ce"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "26510d8ea46fbf4d76d5e4f8d1f148de94d4660216aa614ac65955db18590fe1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/run-1.json": {
+      "bytes": 153249,
+      "sha256": "0c21f14c6df6e3654646a1b501c78564c06329e019c73e005361892bbf5b38ec"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/run.log": {
+      "bytes": 1698,
+      "sha256": "854cf8381267ff08792dd44bf9345574fa1d600036a4eade76453415df2879b3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-03-B/summary.json": {
+      "bytes": 59893,
+      "sha256": "dfd296daa3e9961a86278168c4c836d1c622d24da280b246455b635e6b42b942"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "21f211969b6df63b05a97d6f8ca7d518c22e04764c6a22b813d6c619644fc750"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "171a38a4266fd60aa9e3f5b442c64fade1032e90ecf976c97341075f0f87faf2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/run-1.json": {
+      "bytes": 153002,
+      "sha256": "7677975304aa0939f9ba15bdf7904ba4b03c9c674e73cb18f1823131d0d6af78"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/run.log": {
+      "bytes": 1699,
+      "sha256": "2599fdb253bc944eaf982aeffd20955867cb5d91ad75c5ce9885859380717b88"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-A/summary.json": {
+      "bytes": 59761,
+      "sha256": "cb03aaa81d3482554d78ff0e571a00a74c63a4d325a6755a1db24611c9d7fa34"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "0379009814f73fa954a45d78e6f5957cba713342e80a0985696f2f6fe91e73e2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/host-before.json": {
+      "bytes": 496,
+      "sha256": "1ca8582b8172aeed321d2b9321fd48044c9a56ed828559d38fc4551e016f06e6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/run-1.json": {
+      "bytes": 153347,
+      "sha256": "f57a931ffc0b80f93fc2f52783aac51d76bf33ce97376576ecdc5aff8c19d497"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/run.log": {
+      "bytes": 1806,
+      "sha256": "8e505f991ea7d0b656010363ac9a7e9ee0356d39e15bbc9d44fb68eefb126d7a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-04-B/summary.json": {
+      "bytes": 59892,
+      "sha256": "2c0ea0d059321bf3b584d59e3eb3b7bba46f1d0d1b9cc563bf5aae6e50af1292"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/host-after.json": {
+      "bytes": 496,
+      "sha256": "d202689f696c69b2f284486b0351c9d0f6eeb4aefe751a0a8cc829184f008731"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/host-before.json": {
+      "bytes": 496,
+      "sha256": "6947aede65b14c6d520f965562303d776e80c24e082621f8c54818e3515bc97a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/run-1.json": {
+      "bytes": 153878,
+      "sha256": "63ee5c70dfa50a854d3f9aabfba3169ddc5a28d394a2b9fccb3777498ae8e736"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/run.log": {
+      "bytes": 1788,
+      "sha256": "a92c2268162b52246c2377186a255025b58448fc4a29e4894f0011161404dea3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-A/summary.json": {
+      "bytes": 59976,
+      "sha256": "7e15fec0168113417457af2e7ba0fff654da0b30234953cba167af44791d5483"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "d521fad1add3d7bb6d76b8bc04d8139989cc277ce18cd1e4640e3f1913d0cdd4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/host-before.json": {
+      "bytes": 496,
+      "sha256": "898fb76554f84afba6d9f3bed26660954a53dca4d022e3a1e39f1671bb142040"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/run-1.json": {
+      "bytes": 152985,
+      "sha256": "4cd2383d832bbe52f04bde5332fd1db6ba3896a0d350086f0d1bc740af92c7fd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/run.log": {
+      "bytes": 1698,
+      "sha256": "94946dbb83dd57924ab5bfa466237afc16ff4fc66e79414bac3743e7c32c62df"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-05-B/summary.json": {
+      "bytes": 59796,
+      "sha256": "73d1b5c4ffe042a88d8a1235fe6bb4f81e5c2f035949f09a3d426029e155cb18"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "5a30a2fbc8e4b738a1f0eb0e9b1d413cd1f8b0e6443e97cb98fba9ef396a764e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "850c6552a7c69384b90e59f01e36867e6db0af19e2d828597f7cffc86a798c13"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/run-1.json": {
+      "bytes": 153057,
+      "sha256": "86c061d4d5666c701bc58d953219bdab63dd94ad8697baf304db4ac6b99029d4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/run.log": {
+      "bytes": 1699,
+      "sha256": "946457944cf4749ff1ad5441d7fbdb9dfeedd295590b42acc077d1bd916233cd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-A/summary.json": {
+      "bytes": 59991,
+      "sha256": "93340773b493ce97236e4458aff825db6a52030e50b9d8bb07c2a17c5aac54f8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "81ed4bbd765fb2c191cd324eedd5842a9f3ef2804d978f545c46e2b28ba49cb7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "c4e8071e9865d17ea9088358b5bfa2bac8c8acfd18c0e02afc72b26c7675986e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/run-1.json": {
+      "bytes": 153838,
+      "sha256": "908403360b98d9514cb816c6ad8cceda873568d9070e0c6bae500319b653302a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/run.log": {
+      "bytes": 1787,
+      "sha256": "b80dd44ed7c9a43fd2a5989f58c328a388ed7743b092881e2d70ffd322c7e240"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/pair-06-B/summary.json": {
+      "bytes": 59968,
+      "sha256": "74907ba57beeca422741a24019fec6f784f46b775ccd051b3df6fcadbe86e9a7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/registered-plan.json": {
+      "bytes": 3507,
+      "sha256": "431d2107f55346aedfcd971123d9f9057a9cb9bb5a87cedb002de8cecd3a89ed"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/source-identities.json": {
+      "bytes": 129037,
+      "sha256": "0e3f8970246e6ac9484adc2946dd08fa60819db2b9435ce54d367c40c9ae4c9a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "29beacd14619add47810949c04395ed979c808d5d8119e2c2655f2b5d39f3ab6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/host-before.json": {
+      "bytes": 497,
+      "sha256": "ad0dcfed653608094c0af2bd87ca519809ab56df3a594ab094058b91b8664411"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/run-1.json": {
+      "bytes": 153025,
+      "sha256": "e64c97a809530b78a55780895f5d19864572852013202d0859b0b7ed9a01ce67"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/run.log": {
+      "bytes": 1702,
+      "sha256": "7808e25bcef818e4f1ae35cbd883c825626081ae9f888a81538aa32a2822a3a0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-A/summary.json": {
+      "bytes": 59687,
+      "sha256": "02fa2fba6267b63a864e27f81411d447759014cb0ebc55daa98a2f00892aa208"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/host-after.json": {
+      "bytes": 497,
+      "sha256": "313b297395f63fc3b46ac2ede87079bf815b1f6f56a27f356559c94d1d9ddf12"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "4ea4ba05a7a109004ab1570e7435ea97653c6d6828331ef3e2d7023009b37b6c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/run-1.json": {
+      "bytes": 153407,
+      "sha256": "56666e65b8af0be4b8a48bf9cf4392b22e2bdf65de785432b4c9de8b82a0f262"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/run.log": {
+      "bytes": 1703,
+      "sha256": "8cc3e8196a8c7ee70e83009480d9e341a45371e61055ebcf74268895fdcc4c03"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-1-B/summary.json": {
+      "bytes": 60002,
+      "sha256": "e9b41a228b0c2cdebb053dc5e4077f1e67e3fed58100b2ae6e87c9399630280c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/host-after.json": {
+      "bytes": 497,
+      "sha256": "362e41e9f1ddd6b9caaa0f228f369bc6ec4cb128b88a340fe753b504830ab3a9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/host-before.json": {
+      "bytes": 496,
+      "sha256": "7ff164c930fca5db262df351b00c863590eac4a7ccf5d4c6dfb4f336fb801ee7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/run-1.json": {
+      "bytes": 153515,
+      "sha256": "36daaee5cb29665217934614a4cba06788c7b16b1c17285670b127b061d3e8d0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/run.log": {
+      "bytes": 1701,
+      "sha256": "2ab0705cb3567be4b84fc5c69c1e387aad00676dec2edc1afd5ccd084f39cb64"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-A/summary.json": {
+      "bytes": 60117,
+      "sha256": "1fafa9e1e58061879b1c61fc547d754b8eb126e082e5f6ddd1fa52d459bb41ab"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json": {
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/host-after.json": {
+      "bytes": 496,
+      "sha256": "a5412965cdcbd65f52937dd95cf88aecd8dbe7c9ccfc8a939082da44917c056f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/host-before.json": {
+      "bytes": 497,
+      "sha256": "30a0da12b1295c2e465e29184f44dd1000727713cec76a41e95ad717cd6a160c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/run-1.json": {
+      "bytes": 153490,
+      "sha256": "cb8cf5a406af8789c61e65ae6bd456b2ca7fbeb9b5c522c3697928ccf3d76cfb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/run.log": {
+      "bytes": 1702,
+      "sha256": "adf665aba3a21ae258dd2058db708bdf4217dd9c37ae60403dfa1d4791a92710"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/warmup-2-B/summary.json": {
+      "bytes": 60101,
+      "sha256": "3f9084ee32e41bfef3af1018e687728b46f51ac289ee9a69e212474c493aa564"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/data/dictionary-wasm/manifest.json": {
+      "bytes": 2588,
+      "sha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/benchmark-support.js": {
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/dictionary-fixtures.js": {
+      "bytes": 6765,
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-benchmark.js": {
+      "bytes": 11064,
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/audit_memory.py": {
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/protocol.py": {
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": {
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-qualification-20261125-a7f7.py": {
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dense-zip-directory.js": {
+      "bytes": 9309,
+      "sha256": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dictionary-importer.js": {
+      "bytes": 345457,
+      "sha256": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-experiments.js": {
+      "bytes": 3523,
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-source-pipeline.js": {
+      "bytes": 47175,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-content-ownership.js": {
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-key-hash.js": {
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index-preparation.js": {
+      "bytes": 11139,
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index.js": {
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-route.js": {
+      "bytes": 4192,
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-record-preinterned-plan.js": {
+      "bytes": 25435,
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/wasm/term-bank-parser.c": {
+      "bytes": 158441,
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/media/media-util.js": {
+      "bytes": 6039,
+      "sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/pages/settings/dictionary-import-controller.js": {
+      "bytes": 187268,
+      "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/lib/term-bank-parser.wasm": {
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/package-lock.json": {
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/extension-two-dictionary-import.e2e.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/import-flags-ab-benchmark.js": {
+      "bytes": 25889,
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/e2e/import-timing.js": {
+      "bytes": 3293,
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/perf/dictionaries.lock.json": {
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "issues": [
+    {
+      "message": "Frozen prospective memory gate failed",
+      "stage": "separateMemory",
+      "type": "ValueError"
+    }
+  ],
+  "limits": [
+    "Descriptive per-host statistics; complete qualification is not itself a latency claim.",
+    "Incomplete schedules retain all recorded values and complete-pair statistics are provisional.",
+    "Warmup, identical controls, exhaustive media, memory and separate trace never enter the candidate estimate."
+  ],
+  "memoryAudit": {
+    "everyObservationQualified": false,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": null,
+        "medianPairedChangePercent": null
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": null,
+        "medianPairedChangePercent": null
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": false,
+    "rawScanCount": 505,
+    "schemaVersion": 1
+  },
+  "readbacks": [
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "warmup-1-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 4381.0,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 4381
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "warmup-1-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 4079.899999999965,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 4079.899999999965
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "warmup-2-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3821.100000000035,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3821.100000000035
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "warmup-2-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3860.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3860.2000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-01-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3891.7000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3891.7000000000116
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-01-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3802.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3802.2000000000116
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-02-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3871.600000000035,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3871.600000000035
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-02-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3893.79999999993,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3893.79999999993
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-03-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3925.5999999999767,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3925.5999999999767
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-03-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3762.0,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3762
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "control-01-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3860.399999999907,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3860.399999999907
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "control-01-C",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3945.79999999993,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3945.79999999993
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-04-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3903.1999999999534,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3903.1999999999534
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-04-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3815,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3815
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-05-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3824.0999999999767,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3824.0999999999767
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-05-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3782.79999999993,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3782.79999999993
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-06-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3690.0999999999767,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3690.0999999999767
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "pair-06-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3841.79999999993,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3841.79999999993
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "control-02-C",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3815.0,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3815
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "control-02-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3763.600000000093,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3763.600000000093
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "f15749f9d54301faf283fca575db0f11de7e3ee471efa6a8982bc21e8b359038",
+      "id": "exhaustive-media-A",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 3768.4000000000233,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 3768.4000000000233
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "f15749f9d54301faf283fca575db0f11de7e3ee471efa6a8982bc21e8b359038",
+      "id": "exhaustive-media-B",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 3768.3000000000466,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 3768.3000000000466
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "memory/A1",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 4506.90000000014,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 4506.90000000014
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "memory/B1",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 4410.5,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 4410.5
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "memory/B2",
+      "packageSha256": "87ead44d0c50b18061a858b3317ef5a0a87a0d488374f987e85bd08e4dd7e133",
+      "rawBrowserDurationMs": 4506.90000000014,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 4506.90000000014
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "3ae3b66993b25149e8967e65b7b1c64619f3e84e6835ec8d940815b9c543ece2",
+      "id": "memory/A2",
+      "packageSha256": "6bf8115281c057c06e5eeda7f7a96553b8b859d77edaaff0d490e3e6c33af208",
+      "rawBrowserDurationMs": 4616.59999999986,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 4616.59999999986
+    }
+  ],
+  "runId": 46103918280,
+  "schemaVersion": 1,
+  "timingClaim": false,
+  "unrecordedAttempts": [],
+  "warmups": [
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 4381
+    },
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 4079.899999999965
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 3821.100000000035
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 3860.2000000000116
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "aggregateMemoryMetricsRemainNull": true,
+  "b1RawGapRecomputation": {
+    "allSamples": 125,
+    "covered": 45,
+    "fullyContained": 46,
+    "maximaRemainNull": true,
+    "maximumGap": {
+      "gapMs": 253.533022,
+      "left": 88,
+      "leftNs": 1204622023832,
+      "right": 90,
+      "rightNs": 1204875556854
+    },
+    "overlapping": 47,
+    "qualifies": false,
+    "thresholdMs": 250
+  },
+  "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "cell": "vndb-AB",
+  "completeOrdinaryTimingSchedule": true,
+  "conclusion": "The existing memory coverage rule fails at253.533022ms against250ms. This is an unqualified sampled-memory observation, not a measured memory regression; no threshold relaxation or observation replacement.",
+  "inputFiles": [
+    {
+      "bytes": 10110,
+      "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/memory-comparison.json",
+      "sha256": "098b7d626e9ea8f918619a53fa74c4a0beaa49fddde6d007787053ddd55272fc"
+    },
+    {
+      "bytes": 402,
+      "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/memory-audit.json",
+      "sha256": "e78eded46854f98856391322468d97216dcc3aa798803b590b7f0c723d3455df"
+    },
+    {
+      "bytes": 3,
+      "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/semantic-failures.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "bytes": 4104968,
+      "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB/import-owned-columns-83b3/memory/B1/memory.json",
+      "sha256": "8c622e1285f04b3e8fac1fe4e365cfea1a27d9c8a342b7c44808de052bc9632c"
+    },
+    {
+      "bytes": 97839,
+      "path": "/tmp/manabitan-qual-artifacts-83b3/vndb-AB-independent-analysis.json",
+      "sha256": "0d63fcb04a7ea403e555d85d3acba6f60d0cf52ba4311e4d2e7ab1ea3ac5c012"
+    }
+  ],
+  "memoryObservationExitCodes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "memoryScreenPassed": false,
+  "newAcquisition": false,
+  "observerSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+  "pair1Qualified": false,
+  "pair2Qualified": true,
+  "readerOnlyFailedGate": "separateMemory",
+  "reviewedAtUtc": "2026-11-28T06:22:13.739544Z",
+  "runId": 46103918280,
+  "schemaVersion": 1,
+  "scope": "Independently recomputed B1 coverage intervals from its125 raw scans and confirmed the four-observation comparison, audit summary, semantic-failure file and frozen reader gate state. Did not rerun acquisition or independently re-audit all505 process scans/package bytes.",
+  "semanticFailures": []
+}

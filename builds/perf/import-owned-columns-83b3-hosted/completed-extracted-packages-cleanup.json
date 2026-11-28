@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "recordedUtc": "2026-11-28T06:14:57.584643+00:00",
+  "scope": "Only six task-created extracted duplicate product ZIPs; original outer artifacts and all durable raw evidence retained",
+  "exclusiveIntakeLease": true,
+  "visibleProcHandleMatches": [],
+  "visibleProcDeniedPids": [],
+  "reclaimedBytes": 100838589,
+  "sources": [
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-AB-artifact.zip",
+      "bytes": 36116616,
+      "sha256": "98fe348b30a57ebe1eb3adced9c0cde94bc1fb907c9a39fc228ead5b58fe9255"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA-artifact.zip",
+      "bytes": 35603526,
+      "sha256": "c0338f08f186542919e16082e21120d13bc2e66c0fa4a12f99d2878c82dba457"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB-artifact.zip",
+      "bytes": 35020840,
+      "sha256": "90665c03115ed16bbdfaf4cc30002a0667642a2eaae8c34559c836f27e4837fb"
+    }
+  ],
+  "removed": [
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-AB/import-owned-columns-83b3/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "6b61c1ba99c16f37ca6d88e41c23b98c06aed7d8c0875da46927a0aa2bdbeb07",
+      "device": 39,
+      "inode": 127690,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jmdict-AB-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-A.zip"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-AB/import-owned-columns-83b3/package-B.zip",
+      "bytes": 16807149,
+      "sha256": "39076c3dafbe927ae40c0a78e0fc060bc24cba5f66e44f759a0e3efd495e3638",
+      "device": 39,
+      "inode": 127693,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jmdict-AB-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-B.zip"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "device": 39,
+      "inode": 131626,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-A.zip"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/package-B.zip",
+      "bytes": 16807149,
+      "sha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "device": 39,
+      "inode": 131627,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-B.zip"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "device": 39,
+      "inode": 127999,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-A.zip"
+    },
+    {
+      "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/package-B.zip",
+      "bytes": 16807149,
+      "sha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "device": 39,
+      "inode": 128000,
+      "restoreOuter": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB-artifact.zip",
+      "restoreMember": "import-owned-columns-83b3/package-B.zip"
+    }
+  ]
+}

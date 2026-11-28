@@ -1,0 +1,1080 @@
+{
+  "allFourCellJobsCompleted": true,
+  "allFourTimingSchedulesComplete": true,
+  "allRequiredGatesPassed": false,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "cells": [
+    {
+      "allRequiredGatesPassed": true,
+      "artifactBytes": 36116616,
+      "artifactId": 15250427758,
+      "artifactSha256": "98fe348b30a57ebe1eb3adced9c0cde94bc1fb907c9a39fc228ead5b58fe9255",
+      "candidate": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.1639688272249815,
+          2.2056142301287274
+        ],
+        "equalWorkChangePercent": 0.44991878089470916,
+        "fasterPairs": 6,
+        "medianPairedChangePercent": 0.25842791443480007,
+        "ratios": [
+          1.0277142857143189,
+          0.9876251390433494,
+          1.0163979988882557,
+          1.016009148084637,
+          1.0300130491517372,
+          0.9942196531792235,
+          0.990924092409193,
+          0.9890954844121509,
+          0.9752283420979485,
+          1.0109489051094724,
+          0.9875495963880461,
+          1.0309292844088294
+        ],
+        "worstPairChangePercent": 3.092928440882936
+      },
+      "candidateOrderStrata": {
+        "AB": {
+          "count": 6,
+          "medianPairedChangePercent": 0.36610456487242704,
+          "pairIds": [
+            1,
+            3,
+            5,
+            7,
+            9,
+            11
+          ]
+        },
+        "BA": {
+          "count": 6,
+          "medianPairedChangePercent": 0.25842791443480007,
+          "pairIds": [
+            2,
+            4,
+            6,
+            8,
+            10,
+            12
+          ]
+        }
+      },
+      "cell": "jmdict-AB",
+      "completeTimingScheduleVerified": true,
+      "components": [
+        {
+          "banks": 53,
+          "groups": 8,
+          "policy": 2,
+          "rows": 528299,
+          "savedOwnedResultBytes": 3068084
+        },
+        {
+          "banks": 53,
+          "groups": 12,
+          "policy": 3,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10434868
+        },
+        {
+          "banks": 53,
+          "groups": 20,
+          "policy": 5,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10451462
+        }
+      ],
+      "control": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -3.502699709260526,
+          2.390495276276905
+        ],
+        "equalWorkChangePercent": 0.23740529972582358,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 1.0746525548737562,
+        "ratios": [
+          0.9986231584744596,
+          1.0228698926230153,
+          0.9649730029073947,
+          1.023904952762769
+        ],
+        "worstPairChangePercent": 2.390495276276905
+      },
+      "controlOrderStrata": {
+        "AC": {
+          "count": 2,
+          "medianPairedChangePercent": -1.8201919309072778,
+          "pairIds": [
+            1,
+            3
+          ]
+        },
+        "CA": {
+          "count": 2,
+          "medianPairedChangePercent": 2.338742269289229,
+          "pairIds": [
+            2,
+            4
+          ]
+        }
+      },
+      "everyMemoryObservationQualified": true,
+      "expectedCounts": {
+        "candidate": 24,
+        "control": 8,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 36,
+        "warmup": 4
+      },
+      "gates": {
+        "allGroupingPolicies": "passed",
+        "attemptInventory": "passed",
+        "browserIdentityRead": "passed",
+        "exhaustiveMedia:A": "passed",
+        "exhaustiveMedia:B": "passed",
+        "frozenAuditors": "passed",
+        "independentStatistics": "passed",
+        "observationsRead": "passed",
+        "ordinary:control-01-A": "passed",
+        "ordinary:control-01-C": "passed",
+        "ordinary:control-02-A": "passed",
+        "ordinary:control-02-C": "passed",
+        "ordinary:control-03-A": "passed",
+        "ordinary:control-03-C": "passed",
+        "ordinary:control-04-A": "passed",
+        "ordinary:control-04-C": "passed",
+        "ordinary:pair-01-A": "passed",
+        "ordinary:pair-01-B": "passed",
+        "ordinary:pair-02-A": "passed",
+        "ordinary:pair-02-B": "passed",
+        "ordinary:pair-03-A": "passed",
+        "ordinary:pair-03-B": "passed",
+        "ordinary:pair-04-A": "passed",
+        "ordinary:pair-04-B": "passed",
+        "ordinary:pair-05-A": "passed",
+        "ordinary:pair-05-B": "passed",
+        "ordinary:pair-06-A": "passed",
+        "ordinary:pair-06-B": "passed",
+        "ordinary:pair-07-A": "passed",
+        "ordinary:pair-07-B": "passed",
+        "ordinary:pair-08-A": "passed",
+        "ordinary:pair-08-B": "passed",
+        "ordinary:pair-09-A": "passed",
+        "ordinary:pair-09-B": "passed",
+        "ordinary:pair-10-A": "passed",
+        "ordinary:pair-10-B": "passed",
+        "ordinary:pair-11-A": "passed",
+        "ordinary:pair-11-B": "passed",
+        "ordinary:pair-12-A": "passed",
+        "ordinary:pair-12-B": "passed",
+        "ordinary:warmup-1-A": "passed",
+        "ordinary:warmup-1-B": "passed",
+        "ordinary:warmup-2-A": "passed",
+        "ordinary:warmup-2-B": "passed",
+        "packageBytes": "passed",
+        "planRead": "passed",
+        "registeredSchedule": "passed",
+        "separateMemory": "passed",
+        "sourceFixtureRuntimeBindings": "passed",
+        "sourceIdentitiesRead": "passed"
+      },
+      "issues": [],
+      "medianPairedDeltaMs": 1.8500000000058208,
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 1.0792337898473559,
+          "medianPairedChangePercent": 0.04157304270797635
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.0362047686055087,
+          "medianPairedChangePercent": 0.18613916710494838
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 785372,
+          "maxSampledPssKiB": 1017656,
+          "maximumCoveredSampleGapMs": 93.30838,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 793848,
+          "maxSampledPssKiB": 1028201,
+          "maximumCoveredSampleGapMs": 128.285473,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 780432,
+          "maxSampledPssKiB": 1010677,
+          "maximumCoveredSampleGapMs": 123.690994,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 788284,
+          "maxSampledPssKiB": 1017432,
+          "maximumCoveredSampleGapMs": 101.680301,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ],
+      "memoryPairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 785372,
+            "candidate": 793848,
+            "changePercent": 1.0792337898473559
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1017656,
+            "candidate": 1028201,
+            "changePercent": 1.0362047686055087
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 788284,
+            "candidate": 780432,
+            "changePercent": -0.9960877044314032
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1017432,
+            "candidate": 1010677,
+            "changePercent": -0.6639264343956119
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "passesProspectiveMemoryScreen": true,
+      "preservedArchive": {
+        "bytes": 2877521,
+        "gitBlobSha": "d3c355b46ce2de026f07c787d23b933dd5bbd18b",
+        "path": "evidence.tar.gz",
+        "sha256": "3b31cd0bf6d4c35c882b76f941c18ef3402271552a65a47abeaeb9649f57d73b"
+      },
+      "sourceReport": {
+        "bytes": 158730,
+        "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-AB/independent-analysis.json",
+        "sha256": "fb826895e8e2f259145edc3909d5f6dd9764d4f7d37547221f5bd63f6f27a8c2"
+      }
+    },
+    {
+      "allRequiredGatesPassed": true,
+      "artifactBytes": 35603526,
+      "artifactId": 15250683242,
+      "artifactSha256": "c0338f08f186542919e16082e21120d13bc2e66c0fa4a12f99d2878c82dba457",
+      "candidate": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.4772294104653305,
+          6.120122401122097
+        ],
+        "equalWorkChangePercent": 2.2434617972784565,
+        "fasterPairs": 6,
+        "medianPairedChangePercent": 0.04867760906206442,
+        "ratios": [
+          1.0521859819569621,
+          1.001523229245998,
+          1.066999583853501,
+          0.9787839586028536,
+          0.9731525784157593,
+          0.9916714531878398,
+          0.9994503229352435,
+          0.9917287014061207,
+          1.1122334455668215,
+          1.1016013252346415,
+          0.9544279689838103,
+          1.055402864168941
+        ],
+        "worstPairChangePercent": 11.223344556682147
+      },
+      "candidateOrderStrata": {
+        "AB": {
+          "count": 6,
+          "medianPairedChangePercent": -0.3374034673940707,
+          "pairIds": [
+            2,
+            4,
+            6,
+            8,
+            10,
+            12
+          ]
+        },
+        "BA": {
+          "count": 6,
+          "medianPairedChangePercent": 2.581815244610275,
+          "pairIds": [
+            1,
+            3,
+            5,
+            7,
+            9,
+            11
+          ]
+        }
+      },
+      "cell": "jmdict-BA",
+      "completeTimingScheduleVerified": true,
+      "components": [
+        {
+          "banks": 53,
+          "groups": 8,
+          "policy": 2,
+          "rows": 528299,
+          "savedOwnedResultBytes": 3068084
+        },
+        {
+          "banks": 53,
+          "groups": 12,
+          "policy": 3,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10434868
+        },
+        {
+          "banks": 53,
+          "groups": 20,
+          "policy": 5,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10451462
+        }
+      ],
+      "control": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -7.478687677601825,
+          6.211092246749295
+        ],
+        "equalWorkChangePercent": 0.13705670721260166,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 1.2052069175137126,
+        "ratios": [
+          1.062110922467493,
+          0.980649717514149,
+          0.9252131232239817,
+          1.0434544208361254
+        ],
+        "worstPairChangePercent": 6.211092246749295
+      },
+      "controlOrderStrata": {
+        "AC": {
+          "count": 2,
+          "medianPairedChangePercent": 1.2052069175137126,
+          "pairIds": [
+            2,
+            4
+          ]
+        },
+        "CA": {
+          "count": 2,
+          "medianPairedChangePercent": -0.6337977154262653,
+          "pairIds": [
+            1,
+            3
+          ]
+        }
+      },
+      "everyMemoryObservationQualified": true,
+      "expectedCounts": {
+        "candidate": 24,
+        "control": 8,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 36,
+        "warmup": 4
+      },
+      "gates": {
+        "allGroupingPolicies": "passed",
+        "attemptInventory": "passed",
+        "browserIdentityRead": "passed",
+        "exhaustiveMedia:A": "passed",
+        "exhaustiveMedia:B": "passed",
+        "frozenAuditors": "passed",
+        "independentStatistics": "passed",
+        "observationsRead": "passed",
+        "ordinary:control-01-A": "passed",
+        "ordinary:control-01-C": "passed",
+        "ordinary:control-02-A": "passed",
+        "ordinary:control-02-C": "passed",
+        "ordinary:control-03-A": "passed",
+        "ordinary:control-03-C": "passed",
+        "ordinary:control-04-A": "passed",
+        "ordinary:control-04-C": "passed",
+        "ordinary:pair-01-A": "passed",
+        "ordinary:pair-01-B": "passed",
+        "ordinary:pair-02-A": "passed",
+        "ordinary:pair-02-B": "passed",
+        "ordinary:pair-03-A": "passed",
+        "ordinary:pair-03-B": "passed",
+        "ordinary:pair-04-A": "passed",
+        "ordinary:pair-04-B": "passed",
+        "ordinary:pair-05-A": "passed",
+        "ordinary:pair-05-B": "passed",
+        "ordinary:pair-06-A": "passed",
+        "ordinary:pair-06-B": "passed",
+        "ordinary:pair-07-A": "passed",
+        "ordinary:pair-07-B": "passed",
+        "ordinary:pair-08-A": "passed",
+        "ordinary:pair-08-B": "passed",
+        "ordinary:pair-09-A": "passed",
+        "ordinary:pair-09-B": "passed",
+        "ordinary:pair-10-A": "passed",
+        "ordinary:pair-10-B": "passed",
+        "ordinary:pair-11-A": "passed",
+        "ordinary:pair-11-B": "passed",
+        "ordinary:pair-12-A": "passed",
+        "ordinary:pair-12-B": "passed",
+        "ordinary:warmup-1-A": "passed",
+        "ordinary:warmup-1-B": "passed",
+        "ordinary:warmup-2-A": "passed",
+        "ordinary:warmup-2-B": "passed",
+        "packageBytes": "passed",
+        "planRead": "passed",
+        "registeredSchedule": "passed",
+        "separateMemory": "passed",
+        "sourceFixtureRuntimeBindings": "passed",
+        "sourceIdentitiesRead": "passed"
+      },
+      "issues": [],
+      "medianPairedDeltaMs": 0.3999999999869033,
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 2.076523162580135,
+          "medianPairedChangePercent": 0.3660188488135707
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.7587273962758498,
+          "medianPairedChangePercent": 0.34965096258973705
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 772816,
+          "maxSampledPssKiB": 1005165,
+          "maximumCoveredSampleGapMs": 170.750635,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 783348,
+          "maxSampledPssKiB": 1015928,
+          "maximumCoveredSampleGapMs": 157.17306,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 791708,
+          "maxSampledPssKiB": 1022785,
+          "maximumCoveredSampleGapMs": 159.489342,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 808148,
+          "maxSampledPssKiB": 1040773,
+          "maximumCoveredSampleGapMs": 130.913559,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ],
+      "memoryPairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 783348,
+            "candidate": 772816,
+            "changePercent": -1.3444854649529936
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1015928,
+            "candidate": 1005165,
+            "changePercent": -1.0594254710963757
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 791708,
+            "candidate": 808148,
+            "changePercent": 2.076523162580135
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1022785,
+            "candidate": 1040773,
+            "changePercent": 1.7587273962758498
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "passesProspectiveMemoryScreen": true,
+      "preservedArchive": {
+        "bytes": 2397382,
+        "gitBlobSha": "d16b88d22bbb3fa637a8d46b6f3689127bca9974",
+        "path": "evidence.tar.gz",
+        "sha256": "59ef18682da60c78b976da74a4ff23d448a467fea69839bfb981d246eb444e61"
+      },
+      "sourceReport": {
+        "bytes": 158618,
+        "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-BA/independent-analysis.json",
+        "sha256": "b4c4755ecba6029423f520279a1cc2d1f2bf76f5f060e7d82c0f0c62f0edb28c"
+      }
+    },
+    {
+      "allRequiredGatesPassed": true,
+      "artifactBytes": 35020840,
+      "artifactId": 15250472765,
+      "artifactSha256": "90665c03115ed16bbdfaf4cc30002a0667642a2eaae8c34559c836f27e4837fb",
+      "candidate": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -0.6179766776392981,
+          4.187443706842275
+        ],
+        "equalWorkChangePercent": 2.0372303039347006,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 2.589540469728391,
+        "ratios": [
+          1.0040193951767369,
+          1.0386337469617464,
+          0.9836210712704773,
+          1.0395553257497487,
+          1.0131570624328212,
+          1.0441935483870968
+        ],
+        "worstPairChangePercent": 4.419354838709677
+      },
+      "candidateOrderStrata": {
+        "AB": {
+          "count": 3,
+          "medianPairedChangePercent": 0.4019395176736884,
+          "pairIds": [
+            1,
+            3,
+            5
+          ]
+        },
+        "BA": {
+          "count": 3,
+          "medianPairedChangePercent": 3.9555325749748738,
+          "pairIds": [
+            2,
+            4,
+            6
+          ]
+        }
+      },
+      "cell": "jitendex-AB",
+      "completeTimingScheduleVerified": true,
+      "components": [
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 2,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        },
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 3,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        },
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 5,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        }
+      ],
+      "control": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.89049064238892,
+          0.2981366459620105
+        ],
+        "equalWorkChangePercent": -0.7864394034351019,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": -0.7961769982134603,
+        "ratios": [
+          0.9810950935761108,
+          1.00298136645962
+        ],
+        "worstPairChangePercent": 0.2981366459620105
+      },
+      "controlOrderStrata": {
+        "AC": {
+          "count": 1,
+          "medianPairedChangePercent": -1.89049064238892,
+          "pairIds": [
+            1
+          ]
+        },
+        "CA": {
+          "count": 1,
+          "medianPairedChangePercent": 0.2981366459620105,
+          "pairIds": [
+            2
+          ]
+        }
+      },
+      "everyMemoryObservationQualified": true,
+      "expectedCounts": {
+        "candidate": 12,
+        "control": 4,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 20,
+        "warmup": 4
+      },
+      "gates": {
+        "allGroupingPolicies": "passed",
+        "attemptInventory": "passed",
+        "browserIdentityRead": "passed",
+        "exhaustiveMedia:A": "passed",
+        "exhaustiveMedia:B": "passed",
+        "frozenAuditors": "passed",
+        "independentStatistics": "passed",
+        "observationsRead": "passed",
+        "ordinary:control-01-A": "passed",
+        "ordinary:control-01-C": "passed",
+        "ordinary:control-02-A": "passed",
+        "ordinary:control-02-C": "passed",
+        "ordinary:pair-01-A": "passed",
+        "ordinary:pair-01-B": "passed",
+        "ordinary:pair-02-A": "passed",
+        "ordinary:pair-02-B": "passed",
+        "ordinary:pair-03-A": "passed",
+        "ordinary:pair-03-B": "passed",
+        "ordinary:pair-04-A": "passed",
+        "ordinary:pair-04-B": "passed",
+        "ordinary:pair-05-A": "passed",
+        "ordinary:pair-05-B": "passed",
+        "ordinary:pair-06-A": "passed",
+        "ordinary:pair-06-B": "passed",
+        "ordinary:warmup-1-A": "passed",
+        "ordinary:warmup-1-B": "passed",
+        "ordinary:warmup-2-A": "passed",
+        "ordinary:warmup-2-B": "passed",
+        "packageBytes": "passed",
+        "planRead": "passed",
+        "registeredSchedule": "passed",
+        "separateMemory": "passed",
+        "sourceFixtureRuntimeBindings": "passed",
+        "sourceIdentitiesRead": "passed"
+      },
+      "issues": [],
+      "medianPairedDeltaMs": 40.60000000002037,
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.5649744091524966,
+          "medianPairedChangePercent": -2.438449631549405
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -0.5829804539892014,
+          "medianPairedChangePercent": -1.964669075179759
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 850304,
+          "maxSampledPssKiB": 1079453,
+          "maximumCoveredSampleGapMs": 173.717926,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 845500,
+          "maxSampledPssKiB": 1073160,
+          "maximumCoveredSampleGapMs": 174.262232,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 801912,
+          "maxSampledPssKiB": 1033991,
+          "maximumCoveredSampleGapMs": 179.865479,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 838048,
+          "maxSampledPssKiB": 1069790,
+          "maximumCoveredSampleGapMs": 176.238723,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ],
+      "memoryPairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 850304,
+            "candidate": 845500,
+            "changePercent": -0.5649744091524966
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1079453,
+            "candidate": 1073160,
+            "changePercent": -0.5829804539892014
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 838048,
+            "candidate": 801912,
+            "changePercent": -4.311924853946314
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1069790,
+            "candidate": 1033991,
+            "changePercent": -3.3463576963703168
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "passesProspectiveMemoryScreen": true,
+      "preservedArchive": {
+        "bytes": 1858492,
+        "gitBlobSha": "e1f573f03a9adf954936a25d9c2294c1bfb4778a",
+        "path": "evidence.tar.gz",
+        "sha256": "11af28bf85a51b9e3fbc722470d269234c68257099f082572f33ee893c31f505"
+      },
+      "sourceReport": {
+        "bytes": 98955,
+        "path": "builds/perf/import-owned-columns-83b3-hosted/jitendex-AB/independent-analysis.json",
+        "sha256": "1638eb36436491e55720c4511b55b4708a0641fd30c31cf3b8824600d5625fc4"
+      }
+    },
+    {
+      "allRequiredGatesPassed": false,
+      "artifactBytes": 35365799,
+      "artifactId": 15251462292,
+      "artifactSha256": "dda3f2c9323ecdcf3f9a77d91cb6091d0b5f1692b00c602c313e25536439a101",
+      "candidate": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -4.058092844041338,
+          0.8708947322049632
+        ],
+        "equalWorkChangePercent": -1.6389272162811386,
+        "fasterPairs": 5,
+        "medianPairedChangePercent": -1.6898794235216785,
+        "ratios": [
+          0.9770023383097362,
+          0.9942986285890658,
+          0.9583248420623656,
+          1.0231192660550337,
+          0.9892000732198304,
+          0.9605133010568077
+        ],
+        "worstPairChangePercent": 2.311926605503367
+      },
+      "candidateOrderStrata": {
+        "AB": {
+          "count": 3,
+          "medianPairedChangePercent": -2.299766169026385,
+          "pairIds": [
+            1,
+            3,
+            5
+          ]
+        },
+        "BA": {
+          "count": 3,
+          "medianPairedChangePercent": -0.5701371410934186,
+          "pairIds": [
+            2,
+            4,
+            6
+          ]
+        }
+      },
+      "cell": "vndb-AB",
+      "completeTimingScheduleVerified": true,
+      "components": [
+        {
+          "banks": 665,
+          "groups": 170,
+          "policy": 2,
+          "rows": 6648310,
+          "savedOwnedResultBytes": 229184826
+        },
+        {
+          "banks": 665,
+          "groups": 170,
+          "policy": 3,
+          "rows": 6648310,
+          "savedOwnedResultBytes": 229184826
+        },
+        {
+          "banks": 665,
+          "groups": 170,
+          "policy": 5,
+          "rows": 6648310,
+          "savedOwnedResultBytes": 229184826
+        }
+      ],
+      "control": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          1.3657136783905122,
+          2.212205989017346
+        ],
+        "equalWorkChangePercent": 1.794333683105065,
+        "fasterPairs": 0,
+        "medianPairedChangePercent": 1.7889598337039292,
+        "ratios": [
+          1.0221220598901735,
+          1.0136571367839051
+        ],
+        "worstPairChangePercent": 2.212205989017346
+      },
+      "controlOrderStrata": {
+        "AC": {
+          "count": 1,
+          "medianPairedChangePercent": 2.212205989017346,
+          "pairIds": [
+            1
+          ]
+        },
+        "CA": {
+          "count": 1,
+          "medianPairedChangePercent": 1.3657136783905122,
+          "pairIds": [
+            2
+          ]
+        }
+      },
+      "everyMemoryObservationQualified": false,
+      "expectedCounts": {
+        "candidate": 12,
+        "control": 4,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 20,
+        "warmup": 4
+      },
+      "gates": {
+        "allGroupingPolicies": "passed",
+        "attemptInventory": "passed",
+        "browserIdentityRead": "passed",
+        "exhaustiveMedia:A": "passed",
+        "exhaustiveMedia:B": "passed",
+        "frozenAuditors": "passed",
+        "independentStatistics": "passed",
+        "observationsRead": "passed",
+        "ordinary:control-01-A": "passed",
+        "ordinary:control-01-C": "passed",
+        "ordinary:control-02-A": "passed",
+        "ordinary:control-02-C": "passed",
+        "ordinary:pair-01-A": "passed",
+        "ordinary:pair-01-B": "passed",
+        "ordinary:pair-02-A": "passed",
+        "ordinary:pair-02-B": "passed",
+        "ordinary:pair-03-A": "passed",
+        "ordinary:pair-03-B": "passed",
+        "ordinary:pair-04-A": "passed",
+        "ordinary:pair-04-B": "passed",
+        "ordinary:pair-05-A": "passed",
+        "ordinary:pair-05-B": "passed",
+        "ordinary:pair-06-A": "passed",
+        "ordinary:pair-06-B": "passed",
+        "ordinary:warmup-1-A": "passed",
+        "ordinary:warmup-1-B": "passed",
+        "ordinary:warmup-2-A": "passed",
+        "ordinary:warmup-2-B": "passed",
+        "packageBytes": "passed",
+        "planRead": "passed",
+        "registeredSchedule": "passed",
+        "separateMemory": "failed",
+        "sourceFixtureRuntimeBindings": "passed",
+        "sourceIdentitiesRead": "passed"
+      },
+      "issues": [
+        {
+          "message": "Frozen prospective memory gate failed",
+          "stage": "separateMemory",
+          "type": "ValueError"
+        }
+      ],
+      "medianPairedDeltaMs": -65.40000000002328,
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 1019560,
+          "maxSampledPssKiB": 1253156,
+          "maximumCoveredSampleGapMs": 137.356867,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 253.533022,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 1020440,
+          "maxSampledPssKiB": 1248093,
+          "maximumCoveredSampleGapMs": 136.916048,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "maxSampledPrivateKiB": 1005688,
+          "maxSampledPssKiB": 1236743,
+          "maximumCoveredSampleGapMs": 120.802098,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ],
+      "memoryPairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1019560,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1253156,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 1,
+          "qualified": false
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1005688,
+            "candidate": 1020440,
+            "changePercent": 1.466856520113602
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1236743,
+            "candidate": 1248093,
+            "changePercent": 0.9177331102743214
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "passesProspectiveMemoryScreen": false,
+      "preservedArchive": {
+        "bytes": 2181685,
+        "gitBlobSha": "d7e4ecdcf3e6b417500f22758c69b9b20d13daae",
+        "path": "evidence.tar.gz",
+        "sha256": "58408a3c645916847b338f9d8bf7bd839755d3d78c2fda13f0fffb5ae5578b07"
+      },
+      "sourceReport": {
+        "bytes": 97839,
+        "path": "builds/perf/import-owned-columns-83b3-hosted/vndb-AB/independent-analysis.json",
+        "sha256": "0d63fcb04a7ea403e555d85d3acba6f60d0cf52ba4311e4d2e7ab1ea3ac5c012"
+      }
+    }
+  ],
+  "controlSubtraction": false,
+  "hostPooling": false,
+  "interpretation": [
+    "JMdict opposite-order cells remain separate host observations. Their candidate medians are near zero; no JMdict latency gain is established.",
+    "Jitendex candidate timing is slower in this fixed cell; allocation savings do not establish a latency gain.",
+    "VNDB ordinary timing completed, but candidate memory observation B1 fails the existing coverage rule. This is insufficient memory coverage, not a demonstrated memory regression or a semantic failure. No threshold was changed and no observation was replaced.",
+    "All intervals and medians are descriptive for the fixed cohorts. Controls are displayed separately; no control subtraction, pooling or tail exclusion is applied.",
+    "Sampled process-tree memory is not an exact peak. A single qualified VNDB pair cannot replace the unqualified pair."
+  ],
+  "latencyGainClaim": false,
+  "newAcquisition": false,
+  "pending": [],
+  "qualificationDecision": "HOLD",
+  "runId": 46103918280,
+  "schemaVersion": 1,
+  "sourceHead": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963"
+}
