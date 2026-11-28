@@ -583,7 +583,7 @@ export class DictionaryDatabase {
         this._termEntryContentMetaHash2Table = new Uint32Array(0);
         /** @type {Uint8Array} */
         this._termEntryContentMetaStateTable = new Uint8Array(0);
-        /** @type {Float64Array} */
+        /** @type {Float64Array} Empty until an ID differs from the import default zero. */
         this._termEntryContentMetaIdTable = new Float64Array(0);
         /** @type {Float64Array} */
         this._termEntryContentMetaOffsetTable = new Float64Array(0);
@@ -7183,13 +7183,14 @@ void 0 :
         return id;
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @param {number} index
      * @returns {{id: number, offset: number, length: number, dictName: string, hash2: number, signature1?: number, signature2?: number, signature3?: number, tableIndex: number}}
      */
     _readTermEntryContentMetaHashPairIndex(index) {
         const meta = {
-            id: this._termEntryContentMetaIdTable[index],
+            id: this._termEntryContentMetaIdTable.length === 0 ? 0 : this._termEntryContentMetaIdTable[index],
             offset: this._termEntryContentMetaOffsetTable[index],
             length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?
                 -1 :
@@ -7212,8 +7213,9 @@ void 0 :
      * @throws {RangeError} If the metadata cannot be represented by the typed tables.
      */
     _writeTermEntryContentMetaHashPairIndex(index, meta) {
-        if (!Number.isSafeInteger(meta.id) || meta.id < 0) {
-            throw new RangeError(`Invalid term content metadata id: ${meta.id}`);
+        const id = meta.id
+        if (!Number.isSafeInteger(id) || id < 0) {
+            throw new RangeError(`Invalid term content metadata id: ${id}`)
         }
         if (!Number.isSafeInteger(meta.offset) || meta.offset < 0) {
             throw new RangeError(`Invalid term content metadata offset: ${meta.offset}`);
@@ -7224,10 +7226,16 @@ void 0 :
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
-        // Interning can allocate and fail; retain an existing entry unchanged
-        // until its replacement is ready to write.
+        // Normal import IDs are implicitly zero. Allocate the legacy column
+        // only for a distinct value, including signed zero, and publish it only
+        // after interning succeeds so either allocation failure remains atomic.
+        let idTable = this._termEntryContentMetaIdTable
+        if (idTable.length === 0 && !Object.is(id, 0)) {
+            idTable = new Float64Array(this._termEntryContentMetaStateTable.length)
+        }
         const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);
-        this._termEntryContentMetaIdTable[index] = meta.id;
+        this._termEntryContentMetaIdTable = idTable
+        idTable[index] = id
         this._termEntryContentMetaOffsetTable[index] = meta.offset;
         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
         this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
@@ -7243,6 +7251,7 @@ void 0 :
             this._termEntryContentMetaSignature3Table[index] = meta.signature3;
         }
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {number} requiredCount
@@ -7275,7 +7284,8 @@ void 0 :
         }
         /* eslint-enable @stylistic/semi */
         const growDense = capacity !== oldCapacity;
-        const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
+        // eslint-disable-next-line @stylistic/semi
+        const idTable = growDense && this._termEntryContentMetaIdTable.length > 0 ? new Float64Array(capacity) : this._termEntryContentMetaIdTable
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
@@ -9817,7 +9827,7 @@ null :
             endIndex > this._termEntryContentMetaHash1Table.length ||
             endIndex > this._termEntryContentMetaHash2Table.length ||
             endIndex > this._termEntryContentMetaLengthTable.length ||
-            endIndex > this._termEntryContentMetaIdTable.length ||
+            (this._termEntryContentMetaIdTable.length > 0 && endIndex > this._termEntryContentMetaIdTable.length) ||
             endIndex > this._termEntryContentMetaOffsetTable.length ||
             endIndex > this._termEntryContentMetaDictNameIdTable.length
         ) {
@@ -9850,6 +9860,7 @@ null :
         ]
         for (let i = 0; i < writes.length; ++i) {
             const target = writes[i]
+            if (target.length === 0) { continue }
             const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
             const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
             for (const {values, start} of reads) {
