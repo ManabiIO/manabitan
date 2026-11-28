@@ -102,5 +102,13 @@
     "rawEvidence": "lint-attempt-1",
     "result": "Both hosts passed source/oracle guards,26 original contracts and normal A/B/tooling builds, then stopped on11 scoped helper lint errors. The new15 controls and all corpus acquisitions were skipped.",
     "correction": "Formatting corrections and fail-closed cleanup error capture outside finally; original body errors retain precedence, all actual resources still settle and cleanup receipts are enforced. No product, schema, fixture, oracle or resource-policy change."
+  },
+  "retainedPublicSinkContractAttempt": {
+    "runId": 46143955956,
+    "toolingCommit": "fbeefb1fcbb4a60717a37bace45fe71b51737981",
+    "rawEvidence": "public-sink-contract-attempt-1",
+    "result": "Scoped lint passed. Both hosts passed parent controls1-14 and failed public-sink control15 on a premature resident record-store size assertion (observed0 after drain). Candidate controls and all corpus acquisitions were skipped. Cleanup diagnostics were empty.",
+    "sourceDiagnosis": "Prepared OPFS import appends intentionally avoid resident caching; endImportSession drains without loading persistent indexes. The size getter is therefore not an authoritative post-import row count until the normal persistent dictionary reader runs.",
+    "correction": "Use the unchanged ensureDictionariesLoaded reader after each drain, then require exact persisted row counts and decoded records. Keep the nonempty public sink, real glossary invalidation, cold exact content comparison and every existing negative control."
   }
 }

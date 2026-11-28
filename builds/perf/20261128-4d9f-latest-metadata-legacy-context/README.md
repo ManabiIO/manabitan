@@ -24,6 +24,8 @@ JMdict is **not reacquired**. Its original latest-source12-group/528,299-row pro
 
 The first complete-schema freeze (`d4c3991`, run46143543189) stopped at scoped lint with11 helper errors, before the15 new controls or any corpus. Its26 unchanged controls and normal builds passed. Both exact raw artifacts are retained at `lint-attempt-1`. The narrow follow-up fixes formatting and records cleanup failures without replacing an original body error; cleanup-only failures remain fatal. No source/oracle/fixture/budget or production-schema behavior changes.
 
+The next control gate (`fbeefb1`, run46143955956) passed scoped lint and the first14 parent controls, then rejected the public-sink fixture's premature resident `size` check. Prepared OPFS import writes intentionally do not cache appended records, and draining does not load persistent indexes. Candidate controls and corpus did not start. Both exact artifacts are retained at `public-sink-contract-attempt-1`. The corrected control calls the ordinary persistent dictionary loader and decodes the actual stored rows before asserting exact nonempty counts and IDs; no writer policy or expected row count is weakened.
+
 ## Reproduction
 
 Use the same exact Node v22.22.0 binary, clean source checkouts, locked `npm ci` and ordinary `npm run build:libs` documented in the adjacent original latest profile. Extract and hash-check the unchanged `verification-oracles.tar.gz` here using its member index. Acquire the locked archive by its declared URL, size and SHA256.

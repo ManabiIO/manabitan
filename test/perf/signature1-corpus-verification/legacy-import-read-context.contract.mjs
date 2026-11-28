@@ -356,8 +356,36 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
             uniformContentDictName: 'raw-v2',
             termRecordPreinternedPlan: null,
         });
+        const assertPersistedRows = async (expectedCount) => {
+            // Real OPFS imports deliberately avoid the resident row cache.
+            // Load and decode the authoritative index before counting records.
+            const records = database._termRecordStore;
+            await records.ensureDictionariesLoaded([dictionary]);
+            assert.equal(records.getDictionaryRecordCount(dictionary), expectedCount);
+            assert.equal(records.size, expectedCount);
+            const ids = records.getDictionaryIdBatch(dictionary, 0, expectedCount + 1);
+            assert.deepEqual(ids, Array.from({length: expectedCount}, (_, index) => index + 1));
+            const rows = await records.getByIdsAsync(ids);
+            assert.equal(rows.size, expectedCount);
+            const meta = database._getTermEntryContentMetaByHashPair(10, 20);
+            assert(meta);
+            for (const id of ids) {
+                const row = rows.get(id);
+                assert(row);
+                assert.equal(row.id, id);
+                assert.equal(row.dictionary, dictionary);
+                assert.equal(row.expression, `public-term-${id}`);
+                assert.equal(row.reading, `public-term-${id}`);
+                assert.equal(row.score, id);
+                assert.equal(row.sequence, id);
+                assert.equal(row.entryContentOffset, meta.offset);
+                assert.equal(row.entryContentLength, bytes.byteLength);
+                assert.equal(row.entryContentDictName, meta.dictName);
+            }
+        };
         await database.bulkAddArtifactTermsChunk(chunk(1));
         await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
+        await assertPersistedRows(1);
         assert.equal(database._termRecordStore.size, 1);
         assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 1);
         assert.deepEqual(boundary.assertState(), initialRoot);
@@ -394,6 +422,7 @@ test('the actual nonempty public sink keeps real schema invalidation and cold ex
         await database._termRecordStore.beginImportSession();
         await database.bulkAddArtifactTermsChunk(chunk(2));
         await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
+        await assertPersistedRows(2);
         assert.equal(database._termRecordStore.size, 2);
         assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 0);
         assert.equal(database._lastBulkAddTermsMetrics.dedupPersistedHitCount, 1);
