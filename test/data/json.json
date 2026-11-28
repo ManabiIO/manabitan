@@ -43,6 +43,8 @@
         {"path": "dev/perf/direct-media-entries-20261123/node-worker-setup-attempt.json", "ignore": true},
         {"path": "dev/perf/direct-media-entries-20261123/validation.json", "ignore": true},
         {"path": "dev/perf/import-memory-20261125-a7f7/source-provenance.json", "ignore": true},
+        {"path": "dev/perf/import-study-20261126-21d3/policy.json", "ignore": true},
+        {"path": "dev/perf/import-study-20261126-21d3/prior-cohort.json", "ignore": true},
         {"path": "dev/perf/import-memory-ca365/provenance.json", "ignore": true},
         {"path": "dev/perf/import-qualification-ca365.json", "ignore": true},
         {"path": "dev/perf/import-qualification-ca365/results/archives/archive-manifest.json", "ignore": true},

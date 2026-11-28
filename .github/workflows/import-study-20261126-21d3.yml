@@ -1,0 +1,411 @@
+name: Import study 20261126 21d3
+
+on:
+  push:
+    branches: ['perf/import-study-20261126-21d3']
+    paths:
+      - '.github/workflows/import-study-20261126-21d3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-profile:
+    if: github.sha == 'a3427a961d69e1f4d17a86d42b95a213974f7e64'
+    name: Current baseline profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/current-baseline-${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+          persist-credentials: false
+      - name: Prepare evidence directory
+        run: mkdir -p "$PERF_EVIDENCE"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Build the exact baseline
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          npm ci 2>&1 | tee "$PERF_EVIDENCE/npm-ci.log"
+          npm run build:libs 2>&1 | tee "$PERF_EVIDENCE/build-libs.log"
+          npm run license-report:html 2>&1 | tee "$PERF_EVIDENCE/license-report.log"
+          npm run build -- --target chrome 2>&1 | tee "$PERF_EVIDENCE/build-chrome.log"
+          git diff --exit-code
+      - name: Install pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_EVIDENCE/browser-install.log"
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare and bind the locked corpus and runtime
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" 2>&1 | tee "$PERF_EVIDENCE/fixtures.log"
+          node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-before.json"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess, zipfile
+
+          root = pathlib.Path.cwd()
+          evidence = pathlib.Path(os.environ['PERF_EVIDENCE'])
+          dictionary = os.environ['PERF_DICTIONARY']
+          def digest(path):
+              with pathlib.Path(path).open('rb') as source:
+                  return hashlib.file_digest(source, 'sha256').hexdigest()
+          def command(*args):
+              return subprocess.check_output(args, text=True).strip()
+          fixture = json.loads((root / 'test/perf/dictionaries.lock.json').read_text())['dictionaries'][dictionary]
+          archive = root / 'builds/e2e-dictionary-cache' / fixture['cacheFile']
+          assert archive.stat().st_size == fixture['sizeBytes']
+          assert digest(archive) == fixture['sha256']
+          binary = command('node', '--input-type=module', '-e', "import {chromium} from '@playwright/test'; process.stdout.write(chromium.executablePath())")
+          browser_version = command(binary, '--version')
+          assert '153.0.8010.12' in browser_version
+          assert command('node', '--version') == 'v22.22.0'
+          package = root / 'builds/manabitan-chrome.zip'
+          with zipfile.ZipFile(package) as release:
+              names = release.namelist()
+              assert len(names) == len(set(names))
+              members = {item.filename: hashlib.sha256(release.read(item)).hexdigest()
+                         for item in release.infolist() if not item.is_dir()}
+          identity = {
+              'baseline': command('git', 'rev-parse', 'HEAD'),
+              'tree': command('git', 'rev-parse', 'HEAD^{tree}'),
+              'nodeVersion': command('node', '--version'),
+              'browserVersion': browser_version,
+              'browserSha256': digest(binary),
+              'fixture': fixture,
+              'fixtureLockSha256': digest(root / 'test/perf/dictionaries.lock.json'),
+              'packageLockSha256': digest(root / 'package-lock.json'),
+              'packageSha256': digest(package),
+              'packageEntries': members,
+              'timingUse': 'Diagnostic CPU profile only; not an authoritative performance comparison',
+          }
+          assert identity['baseline'] == os.environ['PERF_BASELINE']
+          (evidence / 'identity.json').write_text(json.dumps(identity, indent=2, sort_keys=True) + '\n')
+          shutil.copyfile(package, evidence / 'baseline-chrome.zip')
+          PY
+      - name: Capture the complete baseline import profile
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --trace --runs 1 --build-target chrome --no-build \
+            --output "$PERF_EVIDENCE/profile" 2>&1 | tee "$PERF_EVIDENCE/import-profile.log"
+      - name: Record final host state
+        if: always()
+        run: node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-after.json"
+      - name: Preserve profiles, exact packages and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-baseline-20261126-${{ matrix.dictionary }}
+          path: ${{ env.PERF_EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14
+
+  media-qualification:
+    if: github.sha == 'bfa5d7b73644c555ec5ea5d3788b00469c723b74'
+    name: VNDB media qualification (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 439a1c9b6d40452061cda094b0727005553c1d1d
+      PERF_CANDIDATE: 1019dc960bc03a80572182505fa9fa415aa330f8
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/media-qualification-${{ matrix.order }}
+      PERF_SETUP: ${{ github.workspace }}/builds/perf/media-setup-${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup logs
+        run: mkdir -p "$PERF_SETUP"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the identical harness dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_SETUP/npm-ci.log"
+          git fetch origin "$PERF_BASELINE" "$PERF_CANDIDATE" 2>&1 | tee "$PERF_SETUP/source-fetch.log"
+          git diff --exit-code
+      - name: Install and verify pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_SETUP/browser-install.log"
+          test "$(node --version)" = v22.22.0
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from '@playwright/test'
+          const version = execFileSync(chromium.executablePath(), ['--version'], {encoding: 'utf8'}).trim()
+          assert.match(version, /153\.0\.8010\.12/)
+          console.log(version)
+          JS
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-vndb-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed paired qualification plan
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary vndb --initial-order "$PERF_ORDER" --pairs 12 \
+            --expected-workers 3 --evidence "$PERF_EVIDENCE" \
+            --expected-package-entry js/dictionary/dictionary-generation-media-store.js \
+            --expected-package-entry js/dictionary/source-zip-media-pack.js \
+            --expected-package-entry js/dictionary/source-zip-media-preparation-worker.js \
+            2>&1 | tee "$PERF_SETUP/qualification.log"
+      - name: Preserve every observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-media-qualification-20261126-vndb-${{ matrix.order }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_SETUP }}
+          if-no-files-found: error
+          retention-days: 14
+
+  media-qualification-v2:
+    if: github.sha == 'f44e6f390eb21d220fab1595212e2973c3db941d'
+    name: VNDB current-policy qualification (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 439a1c9b6d40452061cda094b0727005553c1d1d
+      PERF_CANDIDATE: 1019dc960bc03a80572182505fa9fa415aa330f8
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/media-qualification-v2-${{ matrix.order }}
+      PERF_SETUP: ${{ github.workspace }}/builds/perf/media-setup-v2-${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup logs
+        run: mkdir -p "$PERF_SETUP"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the identical harness dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_SETUP/npm-ci.log"
+          git fetch origin "$PERF_BASELINE" "$PERF_CANDIDATE" 2>&1 | tee "$PERF_SETUP/source-fetch.log"
+          git diff --exit-code
+      - name: Verify prospective source and semantic gates
+        run: python3 -m unittest discover -s dev/perf/import-study-20261126-21d3 -p 'test_*.py' -v
+      - name: Install and verify pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_SETUP/browser-install.log"
+          test "$(node --version)" = v22.22.0
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from '@playwright/test'
+          const version = execFileSync(chromium.executablePath(), ['--version'], {encoding: 'utf8'}).trim()
+          assert.match(version, /153\.0\.8010\.12/)
+          console.log(version)
+          JS
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-vndb-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed paired qualification plan
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-study-20261126-21d3.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary vndb --initial-order "$PERF_ORDER" --pairs 12 \
+            --expected-workers 3 --evidence "$PERF_EVIDENCE" \
+            --expected-package-entry js/dictionary/dictionary-generation-media-store.js \
+            --expected-package-entry js/dictionary/source-zip-media-pack.js \
+            --expected-package-entry js/dictionary/source-zip-media-preparation-worker.js \
+            2>&1 | tee "$PERF_SETUP/qualification.log"
+      - name: Preserve every observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-media-qualification-v2-20261126-vndb-${{ matrix.order }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_SETUP }}
+          if-no-files-found: error
+          retention-days: 14
+
+  native-qualification:
+    if: github.sha == 'f44e6f390eb21d220fab1595212e2973c3db941d'
+    name: Native parser qualification (${{ matrix.dictionary }}, ${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 439a1c9b6d40452061cda094b0727005553c1d1d
+      PERF_CANDIDATE: f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/native-qualification-${{ matrix.dictionary }}-${{ matrix.order }}
+      PERF_SETUP: ${{ github.workspace }}/builds/perf/native-setup-${{ matrix.dictionary }}-${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup logs
+        run: mkdir -p "$PERF_SETUP"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the identical harness dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_SETUP/npm-ci.log"
+          git fetch origin "$PERF_BASELINE" "$PERF_CANDIDATE" 2>&1 | tee "$PERF_SETUP/source-fetch.log"
+          git diff --exit-code
+      - name: Verify prospective source and semantic gates
+        run: python3 -m unittest discover -s dev/perf/import-study-20261126-21d3 -p 'test_*.py' -v
+      - name: Install and verify pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_SETUP/browser-install.log"
+          test "$(node --version)" = v22.22.0
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from '@playwright/test'
+          const version = execFileSync(chromium.executablePath(), ['--version'], {encoding: 'utf8'}).trim()
+          assert.match(version, /153\.0\.8010\.12/)
+          console.log(version)
+          JS
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed paired qualification plan
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-study-20261126-21d3.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_ORDER" --pairs 12 \
+            --expected-workers 3 --evidence "$PERF_EVIDENCE" \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-bank-source-crc.js \
+            --expected-package-entry lib/term-bank-parser.wasm \
+            2>&1 | tee "$PERF_SETUP/qualification.log"
+      - name: Preserve every observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-native-qualification-20261126-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_SETUP }}
+          if-no-files-found: error
+          retention-days: 14
+
+  native-qualification-v2:
+    name: Native parser qualification v2 (${{ matrix.dictionary }}, ${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 439a1c9b6d40452061cda094b0727005553c1d1d
+      PERF_CANDIDATE: f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/native-qualification-v2-${{ matrix.dictionary }}-${{ matrix.order }}
+      PERF_SETUP: ${{ github.workspace }}/builds/perf/native-setup-v2-${{ matrix.dictionary }}-${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup logs
+        run: mkdir -p "$PERF_SETUP"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the identical harness dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_SETUP/npm-ci.log"
+          git fetch origin "$PERF_BASELINE" "$PERF_CANDIDATE" 2>&1 | tee "$PERF_SETUP/source-fetch.log"
+          git diff --exit-code
+      - name: Verify prospective source and semantic gates
+        run: python3 -m unittest discover -s dev/perf/import-study-20261126-21d3 -p 'test_*.py' -v
+      - name: Install and verify pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_SETUP/browser-install.log"
+          test "$(node --version)" = v22.22.0
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from '@playwright/test'
+          const version = execFileSync(chromium.executablePath(), ['--version'], {encoding: 'utf8'}).trim()
+          assert.match(version, /153\.0\.8010\.12/)
+          console.log(version)
+          JS
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed paired qualification plan
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-study-20261126-21d3.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_ORDER" --pairs 12 \
+            --expected-workers 3 --evidence "$PERF_EVIDENCE" \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-bank-source-crc.js \
+            --expected-package-entry js/dictionary/wasm/term-bank-parser.c \
+            --expected-package-entry lib/term-bank-parser.wasm \
+            2>&1 | tee "$PERF_SETUP/qualification.log"
+      - name: Preserve every observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-native-qualification-v2-20261126-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_SETUP }}
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,42 @@
+{
+  "scope": "All component attempts retained; no timing observations or statistical selection",
+  "attempts": [
+    {
+      "files": [
+        "attempts/workers-3-jmdict.json",
+        "attempts/workers-3-jmdict-failure-detail.json"
+      ],
+      "candidateWasm": "98b273b07b508a09729120d6412079c1805bbb1568148e1f887c031071a83e8e",
+      "result": "Rejected: first JMdict group lost native lookup admission (one scratch miss). Diagnostic replay captured capacities before the gate."
+    },
+    {
+      "files": [
+        "attempts/workers-3-jmdict-fixed.json"
+      ],
+      "candidateWasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264",
+      "result": "Rejected: group7 still lost native lookup admission after adding the unused string tail."
+    },
+    {
+      "files": [
+        "attempts/workers-3-jmdict-final.json"
+      ],
+      "result": "Incomplete: all12JMdict groups passed output/admission gates, but final source hash changed during lint formatting. Never counted as complete."
+    },
+    {
+      "files": [
+        "results/workers-2-jmdict-6ad7d.json",
+        "results/workers-2-jitendex-6ad7d.json",
+        "results/workers-2-vndb-6ad7d.json",
+        "results/workers-3-jmdict-6ad7d.json",
+        "results/workers-3-jitendex-6ad7d.json",
+        "results/workers-3-vndb-6ad7d.json",
+        "results/workers-5-jmdict-6ad7d.json",
+        "results/workers-5-jitendex-6ad7d.json",
+        "results/workers-5-vndb-6ad7d.json"
+      ],
+      "result": "Accepted: all nine fixed-source corpus/policy runs completed every gate and final source identity check."
+    }
+  ],
+  "setupFailure": "First CLI launch lacked @zip.js/zip.js in the new harness worktree; no corpus was opened. Identical existing lockfile dependencies were linked before acquisition.",
+  "environment": "Shared local host was contended. Corpora and reproducible runtimes were relocated to task-owned /tmp directories with original path symlinks; every corpus size and SHA256 was verified in every successful replay. No elapsed time was collected."
+}

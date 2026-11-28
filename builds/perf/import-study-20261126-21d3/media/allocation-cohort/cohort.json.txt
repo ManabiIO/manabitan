@@ -1,0 +1,50 @@
+{
+  "scope": "Forced-GC retained heap and external memory before the first media payload read; not peak memory or import latency",
+  "schedule": [
+    "baseline",
+    "parent",
+    "followup",
+    "followup",
+    "parent",
+    "baseline"
+  ],
+  "node": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "attempts": [
+    {
+      "ordinal": 1,
+      "arm": "baseline",
+      "exitCode": 0,
+      "output": "1-baseline.json"
+    },
+    {
+      "ordinal": 2,
+      "arm": "parent",
+      "exitCode": 0,
+      "output": "2-parent.json"
+    },
+    {
+      "ordinal": 3,
+      "arm": "followup",
+      "exitCode": 0,
+      "output": "3-followup.json"
+    },
+    {
+      "ordinal": 4,
+      "arm": "followup",
+      "exitCode": 0,
+      "output": "4-followup.json"
+    },
+    {
+      "ordinal": 5,
+      "arm": "parent",
+      "exitCode": 0,
+      "output": "5-parent.json"
+    },
+    {
+      "ordinal": 6,
+      "arm": "baseline",
+      "exitCode": 0,
+      "output": "6-baseline.json"
+    }
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "scope": "Retrospective semantic-only audit of unchanged first warmups. Original cohort remains failed; no original timing is admitted to the new prospective cohort. No complete paired timing, exhaustive media or memory cohort occurred.",
+  "validator": "dev/perf/import-study-20261126-21d3/study_receipts.py",
+  "validatorSha256": "a10149ca17960c0ae4a4d496518bff2d3a800cd0311192c8bd807eabb1affcdd",
+  "crossObservationSemanticComparison": "Exact content/lookup/sample-media/storage receipts match A and B",
+  "observations": [
+    {
+      "order": "AB",
+      "arm": "A",
+      "originalRunId": 45863377198,
+      "originalArtifactId": 15141150894,
+      "originalArtifactBytes": 33543434,
+      "originalArtifactSha256": "c2aa40e8a41438318f450a9405adc03be6641f15dc26dd5a6496b73fc6b38aff",
+      "originalConclusion": "failure",
+      "originalFailure": "VNDB active SAH allocation is outside 129\u2013131 pages",
+      "firstWarmup": "warmup-1-A",
+      "sourceSha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+      "rawReportSha256": "515c1b8debe3f7ee1812968cc18594c88857785d6d19164ef24591e25923dff0",
+      "retrospectiveSemanticValidation": "passed",
+      "storageBytes": 609176779,
+      "activeSqlitePages": 37,
+      "timingAccepted": false
+    },
+    {
+      "order": "BA",
+      "arm": "B",
+      "originalRunId": 45863377198,
+      "originalArtifactId": 15139693510,
+      "originalArtifactBytes": 33543437,
+      "originalArtifactSha256": "97724794bf740b8ec199c0c36e236a5fee44c91950817e9d1b3667b222696168",
+      "originalConclusion": "failure",
+      "originalFailure": "VNDB active SAH allocation is outside 129\u2013131 pages",
+      "firstWarmup": "warmup-1-B",
+      "sourceSha": "1019dc960bc03a80572182505fa9fa415aa330f8",
+      "rawReportSha256": "887dc9917e569488dd7d7e28b673d566578239b96ca3995f739a75e4cd2bfddf",
+      "retrospectiveSemanticValidation": "passed",
+      "storageBytes": 609176779,
+      "activeSqlitePages": 37,
+      "timingAccepted": false
+    }
+  ],
+  "preservedArchive": {
+    "path": "historical-failure.tar.gz",
+    "bytes": 187580,
+    "sha256": "1895d6e8cc69a5ab212c6d733486ff372d6baf51bf8273e997674361da1e1bf6",
+    "entries": [
+      {
+        "path": "media-qualification-AB/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "media-qualification-AB/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "media-qualification-AB/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "media-qualification-AB/fixtures.log",
+        "bytes": 171,
+        "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+      },
+      {
+        "path": "media-qualification-AB/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "media-qualification-AB/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "media-qualification-AB/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "media-qualification-AB/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "media-qualification-AB/registered-plan.json",
+        "bytes": 4987,
+        "sha256": "7be397ab56db018e821511a98d1028cf1087277ab6d3158561a82d5a591cf8b0"
+      },
+      {
+        "path": "media-qualification-AB/source-identities.json",
+        "bytes": 128573,
+        "sha256": "6d7091525255a89e2a0302acea575cb35fbd6004e470cff80409704f95b24de3"
+      },
+      {
+        "path": "media-qualification-AB/warmup-1-A/host-before.json",
+        "bytes": 504,
+        "sha256": "2cb135b67b778b09b29fbbe53edd89a65e7e9e7411c824595a112aaf9382cb95"
+      },
+      {
+        "path": "media-qualification-AB/warmup-1-A/run-1.html",
+        "bytes": 84364,
+        "sha256": "24a98618a0c4607840e79eef5e3fc782e530b58b9dbf93747cafd36b56f54611"
+      },
+      {
+        "path": "media-qualification-AB/warmup-1-A/run-1.json",
+        "bytes": 153007,
+        "sha256": "515c1b8debe3f7ee1812968cc18594c88857785d6d19164ef24591e25923dff0"
+      },
+      {
+        "path": "media-qualification-AB/warmup-1-A/run.log",
+        "bytes": 1692,
+        "sha256": "b237c302d9ad2a4c64eca558a76f621630f83a2bc68cb0496f192405af0e6bc1"
+      },
+      {
+        "path": "media-qualification-AB/warmup-1-A/summary.json",
+        "bytes": 59953,
+        "sha256": "1899d4f0138ec399441808d00b459663d1ae82640d498653283ccbca7fd4ac97"
+      },
+      {
+        "path": "media-qualification-AB/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "media-qualification-AB/worktree-B.log",
+        "bytes": 144,
+        "sha256": "88e50826da3be0d9b6079c45eae01a1a6f6cd02dbf28f8b748b2f1a3923da78f"
+      },
+      {
+        "path": "media-qualification-BA/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "media-qualification-BA/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "media-qualification-BA/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "media-qualification-BA/fixtures.log",
+        "bytes": 171,
+        "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+      },
+      {
+        "path": "media-qualification-BA/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "media-qualification-BA/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "media-qualification-BA/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "media-qualification-BA/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "media-qualification-BA/registered-plan.json",
+        "bytes": 4987,
+        "sha256": "1d2b85072d810ffd53d6954cb87594634967ca4f1315fa2937c2cfe5293e4c10"
+      },
+      {
+        "path": "media-qualification-BA/source-identities.json",
+        "bytes": 128573,
+        "sha256": "d9c4dd177c1ba972bb1f52ecbeeb792ee3190d4a68edbd9b4a39e232734f7b81"
+      },
+      {
+        "path": "media-qualification-BA/warmup-1-B/host-before.json",
+        "bytes": 504,
+        "sha256": "0b7c05ca4b5ebd88020b49e577d2b1042373cc6082ff40db4e72d8f2512f628c"
+      },
+      {
+        "path": "media-qualification-BA/warmup-1-B/run-1.html",
+        "bytes": 84259,
+        "sha256": "5b44b7bb473fbd06e2967c9754b5073b06b76e26decce1d7cf2049786841bd25"
+      },
+      {
+        "path": "media-qualification-BA/warmup-1-B/run-1.json",
+        "bytes": 152952,
+        "sha256": "887dc9917e569488dd7d7e28b673d566578239b96ca3995f739a75e4cd2bfddf"
+      },
+      {
+        "path": "media-qualification-BA/warmup-1-B/run.log",
+        "bytes": 1692,
+        "sha256": "e5d1696783b282d9dffe467f7077c3fc89383da0618e25be69f6fbb04a77447a"
+      },
+      {
+        "path": "media-qualification-BA/warmup-1-B/summary.json",
+        "bytes": 59926,
+        "sha256": "0cdc56b100d31d80e6ac2961f56448a5b7d791daa0774bc8c1621defcb32fa21"
+      },
+      {
+        "path": "media-qualification-BA/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "media-qualification-BA/worktree-B.log",
+        "bytes": 144,
+        "sha256": "88e50826da3be0d9b6079c45eae01a1a6f6cd02dbf28f8b748b2f1a3923da78f"
+      },
+      {
+        "path": "media-setup-AB/browser-install.log",
+        "bytes": 17219,
+        "sha256": "4b5d7416dac0e3a60076877feb6a2746b72905c4a5317501017922d2b13e3f1a"
+      },
+      {
+        "path": "media-setup-AB/npm-ci.log",
+        "bytes": 421,
+        "sha256": "890fc2d32d990d281e56f0c86f8e13e16e886798cb8b3ff5b2278579959829ec"
+      },
+      {
+        "path": "media-setup-AB/qualification.log",
+        "bytes": 1567,
+        "sha256": "cca59f87d3fb4412a393bec6f449527e787339204c02d0ed25b6b28609256b11"
+      },
+      {
+        "path": "media-setup-AB/source-fetch.log",
+        "bytes": 203,
+        "sha256": "4422ef7989b63adb5d4a312c2ceef2970c3bb48272d6c22033d75a805359a57d"
+      },
+      {
+        "path": "media-setup-BA/browser-install.log",
+        "bytes": 17219,
+        "sha256": "749c68868333a753710d0703ae49e3fb1a0bd61e9e4953f3cb791b6c095b2456"
+      },
+      {
+        "path": "media-setup-BA/npm-ci.log",
+        "bytes": 421,
+        "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c"
+      },
+      {
+        "path": "media-setup-BA/qualification.log",
+        "bytes": 1567,
+        "sha256": "cca59f87d3fb4412a393bec6f449527e787339204c02d0ed25b6b28609256b11"
+      },
+      {
+        "path": "media-setup-BA/source-fetch.log",
+        "bytes": 203,
+        "sha256": "4422ef7989b63adb5d4a312c2ceef2970c3bb48272d6c22033d75a805359a57d"
+      }
+    ]
+  },
+  "omittedOriginalMembers": [
+    "media-qualification-AB/package-A.zip",
+    "media-qualification-AB/package-B.zip",
+    "media-qualification-BA/package-A.zip",
+    "media-qualification-BA/package-B.zip"
+  ],
+  "omissionReason": "Full package hashes and every packaged member remain in preserved source-identities.json and original GitHub artifacts; reproducible binary packages are omitted from this small failure bundle."
+}

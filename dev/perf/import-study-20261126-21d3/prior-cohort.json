@@ -1,0 +1,40 @@
+{
+    "recordedAt": "2026-11-26 17:08:29 UTC",
+    "runId": 45863377198,
+    "source": "bfa5d7b73644c555ec5ea5d3788b00469c723b74",
+    "jobs": [
+        {
+            "id": 140059877396,
+            "name": "VNDB media qualification (BA)",
+            "status": "queued",
+            "conclusion": null
+        },
+        {
+            "id": 140059877941,
+            "name": "VNDB media qualification (AB)",
+            "status": "queued",
+            "conclusion": null
+        },
+        {
+            "id": 140059879711,
+            "name": "Current baseline profile (${{ matrix.dictionary }})",
+            "status": "completed",
+            "conclusion": "skipped"
+        }
+    ],
+    "offlinePreflight": {
+        "rawReportSha256": "df8a57fb93c3027d28c8ce4c3fef5fedff24031ddcafb7ea2d1fe81e5dab8b2b",
+        "dictionary": "vndb",
+        "observedActiveSqlitePages": 37,
+        "rejection": "VNDB active SAH allocation is outside 129\u2013131 pages",
+        "ruleSource": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py"
+    },
+    "disposition": "Original cohort remains registered and retained. New prospective qualification has a distinct policy and artifact name; old observations cannot be substituted into it.",
+    "completedOutcome": {
+        "originalConclusion": "failure",
+        "reason": "Both first warmups failed the preserved 129\u2013131-page SAH admission check",
+        "retrospectiveAudit": "historical-failure-audit.json.txt",
+        "archiveSha256": "1895d6e8cc69a5ab212c6d733486ff372d6baf51bf8273e997674361da1e1bf6",
+        "timingAccepted": false
+    }
+}

@@ -1,0 +1,30 @@
+{
+  "mode": "baseline",
+  "measurement": "parity",
+  "source": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "tree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a",
+  "node": "v24.22.3",
+  "wasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+  "archiveBytes": 291705969,
+  "directoryEntries": 147237,
+  "imageEntries": 146570,
+  "retainedRecords": 146570,
+  "descriptor": {
+    "version": 2,
+    "prefix": "img/cc",
+    "suffix": ".webp",
+    "firstId": 1,
+    "slotCount": 163034,
+    "count": 146570,
+    "dataBytes": 195649882
+  },
+  "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+  "payloadSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+  "rangeStart": 86882547,
+  "prepareMs": 118898.795523,
+  "rangeReadCount": 144,
+  "rangeReadBytes": 195649882,
+  "compressedBytes": 188864129,
+  "uncompressedBytes": 188131284,
+  "allocation": null
+}

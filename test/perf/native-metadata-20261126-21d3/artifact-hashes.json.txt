@@ -1,0 +1,83 @@
+{
+  "archive": "proofs.tar.gz",
+  "bytes": 101832,
+  "sha256": "f5fd58781cd62b9dd2a2207e7fae5b851dbdcc5feab43da02d503c9a7300c1f0",
+  "format": "Deterministic gzip (mtime=0) over sorted tar members with zero owner/time metadata",
+  "entries": [
+    {
+      "path": "attempts/rejected-candidate-98b273.json",
+      "bytes": 599,
+      "sha256": "58b942ad5c226c75a837b13f90d7276ad0c87be3224409348815929ff30be1d1"
+    },
+    {
+      "path": "attempts/workers-3-jmdict-failure-detail.json",
+      "bytes": 8656,
+      "sha256": "e24b712066389a1c18034c73fa932eb36970fb0f414022e19c5fedee901c14e5"
+    },
+    {
+      "path": "attempts/workers-3-jmdict-final.json",
+      "bytes": 31815,
+      "sha256": "b54791defca403e9337f558de290f34e478d2ca7739bad706421bd2d038fc63c"
+    },
+    {
+      "path": "attempts/workers-3-jmdict-fixed.json",
+      "bytes": 23399,
+      "sha256": "cfbe784ee0b040bef77b508cd1b87a0af6e367bb33c07e9355bd59a2b11d9c27"
+    },
+    {
+      "path": "attempts/workers-3-jmdict.json",
+      "bytes": 5613,
+      "sha256": "f3842973110288f4d774ad8e1f0e29a239356df66a3731da7e18a9683b205865"
+    },
+    {
+      "path": "measured-replay.mjs",
+      "bytes": 20406,
+      "sha256": "37c3e11594960afc7c35317f9a143a0db18c25696450610c0842e7877a992395"
+    },
+    {
+      "path": "results/workers-2-jitendex-6ad7d.json",
+      "bytes": 52623,
+      "sha256": "b04a1d4dd7a173f19b41bfa3918960740ecf818916b0a7f2a2f7034e07a1d579"
+    },
+    {
+      "path": "results/workers-2-jmdict-6ad7d.json",
+      "bytes": 23211,
+      "sha256": "6085ede561598473b96c70e0ee43175d2e6964eb126812dfe9d77439ef463294"
+    },
+    {
+      "path": "results/workers-2-vndb-6ad7d.json",
+      "bytes": 369893,
+      "sha256": "67ca80ca2a26b66c81ba2190dcb057285dfb7434ab27c04f39416a3473f7ea98"
+    },
+    {
+      "path": "results/workers-3-jitendex-6ad7d.json",
+      "bytes": 52623,
+      "sha256": "2e031fc0a78b903267c927dae52120b794d0cc7744339dca66a89793e3508917"
+    },
+    {
+      "path": "results/workers-3-jmdict-6ad7d.json",
+      "bytes": 31532,
+      "sha256": "60e574d11ed54c79cfb729fcf1b6669dfcb1d40162f219d26c00ed27d2df9e13"
+    },
+    {
+      "path": "results/workers-3-vndb-6ad7d.json",
+      "bytes": 369893,
+      "sha256": "adb94b9fab0c36263c8601ca6be7af1f7e1f758631f26f77a2a761fb72adbe2a"
+    },
+    {
+      "path": "results/workers-5-jitendex-6ad7d.json",
+      "bytes": 52624,
+      "sha256": "ef2be21667bc55bea24bb20ee1069e0a2bfd7bebd0fc2c932e3af1aa1fa1da6a"
+    },
+    {
+      "path": "results/workers-5-jmdict-6ad7d.json",
+      "bytes": 48269,
+      "sha256": "d7ee2e9653f68c53ed58d64c3e45cd060cfa69dff75745a85c0b7bfdc5300136"
+    },
+    {
+      "path": "results/workers-5-vndb-6ad7d.json",
+      "bytes": 369894,
+      "sha256": "c05c13b6558adb66a2c61c2eaedf4f4fb98862941dec482d3661cfc8ed32130e"
+    }
+  ]
+}
