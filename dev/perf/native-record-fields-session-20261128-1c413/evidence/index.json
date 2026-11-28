@@ -2,7 +2,8 @@
   "schemaVersion": 1,
   "kind": "reachable-evidence-index",
   "repository": "ManabiIO/manabitan",
-  "scope": "Original source/record evidence anchored as actual Git tree entries. Original failures remain failed. First actual native-fields six-cell browser acquisition is in progress; its qualification is undecided. Current develop integration is a separate activity.",
+  "observedAt": "2026-11-28 11:43:33 UTC",
+  "scope": "All original evidence retained. Four browser jobs complete and two VNDB jobs remain in progress; full-study qualification undecided, no partial numeric contrasts interpreted. Separate a300 product/control source and local validation are preserved without a timing or fresh-CI claim.",
   "files": {
     "current-correctness-result.json": "07161060078f96743419784e04ae5e33d407ddca",
     "current-correctness-completion.json": "af558285347a7e5e941509a5ee69def401bd0014",
@@ -41,7 +42,17 @@
     "final-producer-inventory-review.json": "a6a50d761da34833aa0aa5412f52a3dccabf85d8",
     "final-reader-literal-review.json": "0b3037582a23e4b07dc24c069d7bec7d7b8d90c2",
     "final-reader-independent-literal-review.json": "12032a1a31fe855ecb3a386fa0fe3433278b0fd7",
-    "pr982-non-runtime-compatibility.json": "69c82cb74fc545774c82430c2152a87c77e8ffa4"
-  },
-  "observedAt": "2026-11-28 11:23 UTC"
+    "pr982-non-runtime-compatibility.json": "69c82cb74fc545774c82430c2152a87c77e8ffa4",
+    "pr982-native-compatibility.json": "13dab61908f459381ee96e18a35b4080d9cddace",
+    "a300-integration-inventory-review.json": "f23f6dec06f96040faa7ae696b8a042e42484f11",
+    "a300-integration-root-review.json": "adac3f56f626433abdbc354381c36a00e04dd87c",
+    "a300-local-validation.json": "111c6f9a5100609fff6b5e81a4dbbe8252b075f8",
+    "a300-local-validation.tar.gz": "189ffb28741252e63bcf228bae4196ac25ee82e6",
+    "a300-local-validation-archive-readback.json": "b66c22d3b5f87e7c9e6784f0c3982f01ee3c5d46",
+    "run-planner-feasibility.json": "e7792d051320ef037db80d2516ccb8aa9769517f",
+    "browser-jmdict-AB.log": "78da821931d14ebba7494cea14626417de620f04",
+    "browser-jmdict-BA.log": "619811c4ab588773bef8c4e515218328a761397b",
+    "browser-jitendex-AB.log": "c811984e3116f1d844c6749126748aa97d08b5a4",
+    "browser-jitendex-BA.log": "6c4b9255487e20c5964a36e0f3e3cf25a7e6040c"
+  }
 }

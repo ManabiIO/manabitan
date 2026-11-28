@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 11:23 UTC",
+  "observedAt": "2026-11-28 11:43:33 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -152,7 +152,7 @@
     }
   },
   "browser": {
-    "status": "First actual native-fields six-cell whole-browser acquisition46138650386 attempt1 is in progress. All six jobs passed setup and are acquiring. No partial timing inspected or used.",
+    "status": "Four original jobs (both JMdict and both Jitendex orders) completed success; both VNDB original jobs still acquiring at the last metadata-only check. No partial timing contrasts inspected or used; all six original artifacts required before final audit.",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -498,8 +498,8 @@
         {
           "id": 140959486747,
           "name": "Complete import (jitendex, BA)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 140959486755,
@@ -510,20 +510,20 @@
         {
           "id": 140959486757,
           "name": "Complete import (jitendex, AB)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 140959486760,
           "name": "Complete import (jmdict, AB)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 140959486803,
           "name": "Complete import (jmdict, BA)",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         }
       ],
       "registration": "de7abdfe0368f1951df3559448b8bfc71ca08e1a",
@@ -753,6 +753,16 @@
     "staticNativeTableOpportunity": {
       "blob": "4a64103d2071f24cc1aaabb78b038fe3d50bddab",
       "scope": "Unmeasured smaller active hash prefix with bounded growth; current full arena retained. No implementation/timing staged. Hold until actual browser disposition."
+    },
+    "runPlannerOpportunity": {
+      "receipt": "e7792d051320ef037db80d2516ccb8aa9769517f",
+      "nominated": false,
+      "implemented": false,
+      "measured": false,
+      "mechanism": "Absorb the one existing serial JS reference-planning/min-max pass into current C encoder first pass with the same copies, only for complete unsplit compact chunks.",
+      "evidence": "Retained f28 twelve JMdict calls exceed30k cap and whole prepared admission raises row limit but does not bypass the loop. No a300 execution claim.",
+      "unresolved": "Require callback-free producer-owned prepared-index metadata; current reference provenance does not cover Map/getter callbacks. Stop if broad provenance redesign or extra copies/revalidation are required.",
+      "nativeIndependentFeasibilityReview": "In progress; source-only"
     }
   },
   "next": [
@@ -780,6 +790,59 @@
     "nonRuntimeReview": "69c82cb74fc545774c82430c2152a87c77e8ffa4",
     "nativeLifecycleStaticCompatibility": "Six existing store method bodies are byte-identical; DB four native hunks still match uniquely; store10/11 contexts exact and remaining mismatch is JSDoc only",
     "timingTransferLimit": "PR982 changes ordinary finishBulkImport high-water SQL, offscreen admission, storage/read context machinery and UI completion fencing. Frozen f28 results do not qualify a300.",
-    "next": "Native agent authorized separate isolated a300 candidate/control integration and meaningful validation prep; no new timing, performance ref or PR. Keep frozen acquisition unchanged."
+    "next": "Native agent authorized separate isolated a300 candidate/control integration and meaningful validation prep; no new timing, performance ref or PR. Keep frozen acquisition unchanged.",
+    "nativeReview": "13dab61908f459381ee96e18a35b4080d9cddace",
+    "candidate": {
+      "head": "663df294f40e1832ad3e3349d0e061681fed77cb",
+      "tree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+      "paths": 13
+    },
+    "control": {
+      "head": "a376a6872bfe49697a654af4aacd232c8f4ea84a",
+      "tree": "88bdb55d69dc7e77f4e1d53a4b7fbedad2bc1315",
+      "paths": 9
+    },
+    "rootSourceReview": "adac3f56f626433abdbc354381c36a00e04dd87c",
+    "inventorySourceReview": "f23f6dec06f96040faa7ae696b8a042e42484f11",
+    "sourceRefsPublished": false,
+    "performanceAcquired": false,
+    "validation": {
+      "receipt": "111c6f9a5100609fff6b5e81a4dbbe8252b075f8",
+      "archive": "189ffb28741252e63bcf228bae4196ac25ee82e6",
+      "archiveReadback": "b66c22d3b5f87e7c9e6784f0c3982f01ee3c5d46",
+      "archiveBytes": 142681,
+      "archiveSha256": "e4e57127c19ccc61f1ad80512ae404a872dc16e174e9049e3006d23a7837281c",
+      "node": "24.22.3",
+      "python": "3.12.14",
+      "llvm": "21.1.8",
+      "sharedDependencies": true,
+      "freshNpmCi": false,
+      "freshCi": false,
+      "originalFullUnit": {
+        "passedFiles": 698,
+        "setupFailedFiles": 2,
+        "testsPassed": 15979,
+        "skipped": 68,
+        "exitCode": 1
+      },
+      "correctedLinkerPathOnly": {
+        "sameTwoSuites": true,
+        "files": 2,
+        "tests": 21,
+        "exitCode": 0
+      },
+      "combinedTestsPassed": 16000,
+      "retainedLocalSkips": 47,
+      "singleGreenFullUnitRun": false,
+      "focusedTests": 174,
+      "scopedLint": true,
+      "mainDevTestTypes": true,
+      "pinnedNativeBuilds": 3,
+      "dryBuildTargets": 7,
+      "allOriginalFailuresPreserved": true,
+      "productSourceUnchanged": true,
+      "browserOrActualCorpus": false,
+      "performanceClaim": false
+    }
   }
 }

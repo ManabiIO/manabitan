@@ -1,0 +1,809 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-record-fields-a300-read-only-compatibility-review",
+  "createdAt": "2026-11-28 11:22:37 UTC",
+  "repository": "ManabiIO/manabitan",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "product": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+  },
+  "reviewedDevelop": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "newReachableCommits": 6,
+    "changedPaths": 103
+  },
+  "currentFrozenBrowserRun": 46138650386,
+  "productPaths": [
+    {
+      "path": "dev/bin/audit-release-packages.js",
+      "base": {
+        "path": "dev/bin/audit-release-packages.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "14b132c8cc34ea59f52f5f667a654d97163ab28e",
+        "size": 4027,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/14b132c8cc34ea59f52f5f667a654d97163ab28e"
+      },
+      "reviewedDevelop": {
+        "path": "dev/bin/audit-release-packages.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c1fd9d04969df7d32550ae47065321cc0bc02fb6",
+        "size": 4485,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c1fd9d04969df7d32550ae47065321cc0bc02fb6"
+      },
+      "productGitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "upstreamChanged": true
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "base": {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+        "size": 2588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2c658ce7874cfaaf6be816ee40b140215523b7a0"
+      },
+      "reviewedDevelop": {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+        "size": 2588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2c658ce7874cfaaf6be816ee40b140215523b7a0"
+      },
+      "productGitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+      "upstreamChanged": false
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "base": null,
+      "reviewedDevelop": null,
+      "productGitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "upstreamChanged": false
+    },
+    {
+      "path": "dev/dictionary-wasm.js",
+      "base": {
+        "path": "dev/dictionary-wasm.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "840fa7aaa110e2509c77545caef219940d0d30e1",
+        "size": 7217,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/840fa7aaa110e2509c77545caef219940d0d30e1"
+      },
+      "reviewedDevelop": {
+        "path": "dev/dictionary-wasm.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "840fa7aaa110e2509c77545caef219940d0d30e1",
+        "size": 7217,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/840fa7aaa110e2509c77545caef219940d0d30e1"
+      },
+      "productGitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "upstreamChanged": false
+    },
+    {
+      "path": "eslint.config.js",
+      "base": {
+        "path": "eslint.config.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0df55128f76aec524ffc8ce78ec45b4ebc419e2a",
+        "size": 39356,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/0df55128f76aec524ffc8ce78ec45b4ebc419e2a"
+      },
+      "reviewedDevelop": {
+        "path": "eslint.config.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c8708f8647aff665bd5f96497025c488cd46406a",
+        "size": 40956,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c8708f8647aff665bd5f96497025c488cd46406a"
+      },
+      "productGitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "upstreamChanged": true
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "base": {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b77dd9804f7b037f010d3e83996e63bb2f19bf18",
+        "size": 617431,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/b77dd9804f7b037f010d3e83996e63bb2f19bf18"
+      },
+      "reviewedDevelop": {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1b3f8367f4b4863916e7c6189a07f5f750636d20",
+        "size": 796193,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/1b3f8367f4b4863916e7c6189a07f5f750636d20"
+      },
+      "productGitBlob": "b144b0f9bb4dda83547c9865d3407643c890d741",
+      "upstreamChanged": true
+    },
+    {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "base": null,
+      "reviewedDevelop": null,
+      "productGitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "upstreamChanged": false
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "base": {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+        "size": 365322,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/b17f72437f196aa1fd21b282c03f147aad7d633f"
+      },
+      "reviewedDevelop": {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "36b0ecc7fd9d4c638545aad44b7d44aa47cbb14b",
+        "size": 391544,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/36b0ecc7fd9d4c638545aad44b7d44aa47cbb14b"
+      },
+      "productGitBlob": "4dc746075254a31016759e808e72582b7bda8afc",
+      "upstreamChanged": true
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "base": null,
+      "reviewedDevelop": null,
+      "productGitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "upstreamChanged": false
+    },
+    {
+      "path": "test/dictionary-wasm-build.test.js",
+      "base": {
+        "path": "test/dictionary-wasm-build.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5ead47d144b43549e4507feaaf507ff74eef0fe1",
+        "size": 6588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5ead47d144b43549e4507feaaf507ff74eef0fe1"
+      },
+      "reviewedDevelop": {
+        "path": "test/dictionary-wasm-build.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5ead47d144b43549e4507feaaf507ff74eef0fe1",
+        "size": 6588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5ead47d144b43549e4507feaaf507ff74eef0fe1"
+      },
+      "productGitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "upstreamChanged": false
+    },
+    {
+      "path": "test/release-package-native-assets.test.js",
+      "base": {
+        "path": "test/release-package-native-assets.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ca8b42fa79a3e26450d7fe670626d9abfe4a49c5",
+        "size": 4649,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/ca8b42fa79a3e26450d7fe670626d9abfe4a49c5"
+      },
+      "reviewedDevelop": {
+        "path": "test/release-package-native-assets.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "11c6782d309b44f27343a5a2f6bb6725ef6bfcb3",
+        "size": 5052,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/11c6782d309b44f27343a5a2f6bb6725ef6bfcb3"
+      },
+      "productGitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "upstreamChanged": true
+    },
+    {
+      "path": "test/term-record-fields-native.test.js",
+      "base": null,
+      "reviewedDevelop": null,
+      "productGitBlob": "bfdafcd86db1ca223132faa194250647321dea31",
+      "upstreamChanged": false
+    },
+    {
+      "path": "test/term-record-import-fields.test.js",
+      "base": null,
+      "reviewedDevelop": null,
+      "productGitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "upstreamChanged": false
+    }
+  ],
+  "databaseAndStore": {
+    "hunkMatches": [
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "totalHunks": 4,
+        "allOldContextsExactUnique": true,
+        "hunks": [
+          {
+            "baseLine": 1475,
+            "baseLineCount": 7,
+            "newLineCount": 7,
+            "liveMatches": [
+              1636
+            ],
+            "heading": " export class DictionaryDatabase {",
+            "contextStart": [
+              "     * @param {((index: number, count: number) => void)?} [onCheckpoint]",
+              "     * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]",
+              "     * @param {string|null} [expectedSessionId] When supplied, only this owner may publish."
+            ],
+            "contextEnd": [
+              "     */",
+              "    async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {",
+              "        await this._waitForBulkImportSetup();"
+            ]
+          },
+          {
+            "baseLine": 1522,
+            "baseLineCount": 6,
+            "newLineCount": 9,
+            "liveMatches": [
+              1683
+            ],
+            "heading": " export class DictionaryDatabase {",
+            "contextStart": [
+              "            let termRecordLookupIndexAwaitMs = 0;",
+              "            let termRecordLookupIndexMaxQueuedBytes = 0;",
+              "            let termRecordLookupIndexWorkerFileCount = 0;"
+            ],
+            "contextEnd": [
+              "            let termsVirtualTableSyncMs = 0;",
+              "            let createIndexesMs = 0;",
+              "            let createIndexesCheckpointCount = 0;"
+            ]
+          },
+          {
+            "baseLine": 1593,
+            "baseLineCount": 6,
+            "newLineCount": 8,
+            "liveMatches": [
+              1756
+            ],
+            "heading": " export class DictionaryDatabase {",
+            "contextStart": [
+              "                            termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;",
+              "                            termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;",
+              "                            termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;"
+            ],
+            "contextEnd": [
+              "                        }",
+              "                    });",
+              "                const endImportSessionResults = await Promise.allSettled(["
+            ]
+          },
+          {
+            "baseLine": 1770,
+            "baseLineCount": 6,
+            "newLineCount": 7,
+            "liveMatches": [
+              1973
+            ],
+            "heading": " export class DictionaryDatabase {",
+            "contextStart": [
+              "                    termRecordLookupIndexAwaitMs,",
+              "                    termRecordLookupIndexMaxQueuedBytes,",
+              "                    termRecordLookupIndexWorkerFileCount,"
+            ],
+            "contextEnd": [
+              "                    termsVirtualTableSyncMs,",
+              "                    createIndexesMs,",
+              "                    createIndexesCheckpointCount,"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "totalHunks": 11,
+        "allOldContextsExactUnique": false,
+        "hunks": [
+          {
+            "baseLine": 802,
+            "baseLineCount": 6,
+            "newLineCount": 10,
+            "liveMatches": [
+              920
+            ],
+            "heading": " class DenseIdRecordStore {",
+            "contextStart": [
+              " * @property {Uint8Array} generationId",
+              " */",
+              ""
+            ],
+            "contextEnd": [
+              "/**",
+              " * @typedef {object} TermRecordEndImportSessionMetrics",
+              " * @property {number} flushPendingWritesMs"
+            ]
+          },
+          {
+            "baseLine": 825,
+            "baseLineCount": 6,
+            "newLineCount": 7,
+            "liveMatches": [
+              943
+            ],
+            "heading": " class DenseIdRecordStore {",
+            "contextStart": [
+              " * @property {number} lookupIndexAwaitMs",
+              " * @property {number} lookupIndexMaxQueuedBytes",
+              " * @property {number} lookupIndexWorkerFileCount"
+            ],
+            "contextEnd": [
+              " */",
+              "",
+              "/**"
+            ]
+          },
+          {
+            "baseLine": 905,
+            "baseLineCount": 6,
+            "newLineCount": 10,
+            "liveMatches": [
+              1023
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "        this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();",
+              "        /** @type {boolean} */",
+              "        this._importSessionActive = false;"
+            ],
+            "contextEnd": [
+              "        /** @type {ExactLookupRoute|null} */",
+              "        this._exactLookupRoute = null;",
+              "        /** @type {boolean} */"
+            ]
+          },
+          {
+            "baseLine": 1185,
+            "baseLineCount": 6,
+            "newLineCount": 8,
+            "liveMatches": [],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "",
+              "    /** @returns {Promise<void>} */",
+              "    async _prepare() {"
+            ],
+            "contextEnd": [
+              "        await this._closeAllWritables();",
+              "        this._recordsById.clear();",
+              "        this._recordIdsByDictionary.clear();"
+            ]
+          },
+          {
+            "baseLine": 1235,
+            "baseLineCount": 6,
+            "newLineCount": 8,
+            "liveMatches": [
+              1359
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "                return;",
+              "            }",
+              "            this._importSessionActive = true;"
+            ],
+            "contextEnd": [
+              "            this._exactLookupRoute = null;",
+              "            this._exactLookupRouteAbandoned = false;",
+              "            this._deferIndexBuild = true;"
+            ]
+          },
+          {
+            "baseLine": 1270,
+            "baseLineCount": 6,
+            "newLineCount": 50,
+            "liveMatches": [
+              1394
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "        }, true);",
+              "    }",
+              ""
+            ],
+            "contextEnd": [
+              "    /**",
+              "     * @returns {Promise<import('dictionary-import-journal').TermRecordCheckpoint>}",
+              "     */"
+            ]
+          },
+          {
+            "baseLine": 1406,
+            "baseLineCount": 6,
+            "newLineCount": 8,
+            "liveMatches": [
+              1530
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "     */",
+              "    async _abandonImportWritesForRollback() {",
+              "        this._importSessionActive = false;"
+            ],
+            "contextEnd": [
+              "        this._rawTermBankSourceBytes = null;",
+              "        this._deferIndexBuild = false;",
+              "        this._indexDirty = false;"
+            ]
+          },
+          {
+            "baseLine": 1484,
+            "baseLineCount": 9,
+            "newLineCount": 13,
+            "liveMatches": [
+              1608
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "     * @returns {Promise<void>}",
+              "     */",
+              "    async endImportSession() {"
+            ],
+            "contextEnd": [
+              "            this._preinternedCompactionRemap = new Uint32Array(0);",
+              "            this._rawTermBankSourceBytes = null;",
+              "        }"
+            ]
+          },
+          {
+            "baseLine": 1496,
+            "baseLineCount": 6,
+            "newLineCount": 8,
+            "liveMatches": [
+              1620
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "     * @returns {Promise<void>}",
+              "     */",
+              "    async _endImportSession() {"
+            ],
+            "contextEnd": [
+              "        if (!this._importSessionActive && !this._hasPendingShardWrites()) {",
+              "            return;",
+              "        }"
+            ]
+          },
+          {
+            "baseLine": 1529,
+            "baseLineCount": 6,
+            "newLineCount": 7,
+            "liveMatches": [
+              1653
+            ],
+            "heading": " export class TermRecordOpfsStore {",
+            "contextStart": [
+              "            lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,",
+              "            lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,",
+              "            lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,"
+            ],
+            "contextEnd": [
+              "        };",
+              "        if (this._reloadFromShardsAfterImport) {",
+              "            this._indexByDictionary.clear();"
+            ]
+          },
+          {
+            "baseLine": 5838,
+            "baseLineCount": 6,
+            "newLineCount": 13,
+            "liveMatches": [
+              6294
+            ],
+            "heading": " view.chunks :",
+            "contextStart": [
+              "     * @returns {Uint8Array}",
+              "     */",
+              "    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {"
+            ],
+            "contextEnd": [
+              "        const count = chunk.rowCount;",
+              "        const useFixedContentSpan = hasFixedContentSpan(chunk, count);",
+              "        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));"
+            ]
+          }
+        ]
+      }
+    ],
+    "stockMethodBodies": [
+      {
+        "name": "_prepare",
+        "baseStart": 1187,
+        "liveStart": 1309,
+        "baseLines": 33,
+        "liveLines": 33,
+        "byteEqual": true,
+        "baseSha256": "37449ad024c03ba4c3d41bd3b216d229c8996f6576567bb2922e82fe2e4dfcfd",
+        "liveSha256": "37449ad024c03ba4c3d41bd3b216d229c8996f6576567bb2922e82fe2e4dfcfd"
+      },
+      {
+        "name": "beginImportSession",
+        "baseStart": 1232,
+        "liveStart": 1356,
+        "baseLines": 40,
+        "liveLines": 40,
+        "byteEqual": true,
+        "baseSha256": "fabaa0de9577950d306ae8c18ed72a0cfe7e7281751d4c91f0550bfda62dbfab",
+        "liveSha256": "fabaa0de9577950d306ae8c18ed72a0cfe7e7281751d4c91f0550bfda62dbfab"
+      },
+      {
+        "name": "_abandonImportWritesForRollback",
+        "baseStart": 1407,
+        "liveStart": 1531,
+        "baseLines": 75,
+        "liveLines": 75,
+        "byteEqual": true,
+        "baseSha256": "3b8b75426eac6a19389e703c9cb610c85632bd21fa60a733a6cfb8c94b6cd31d",
+        "liveSha256": "3b8b75426eac6a19389e703c9cb610c85632bd21fa60a733a6cfb8c94b6cd31d"
+      },
+      {
+        "name": "endImportSession",
+        "baseStart": 1486,
+        "liveStart": 1610,
+        "baseLines": 8,
+        "liveLines": 8,
+        "byteEqual": true,
+        "baseSha256": "9d33b4910db8cb3631fab9e2aa6f6a03668102c9f873656344e7b453e370d9b4",
+        "liveSha256": "9d33b4910db8cb3631fab9e2aa6f6a03668102c9f873656344e7b453e370d9b4"
+      },
+      {
+        "name": "_endImportSession",
+        "baseStart": 1498,
+        "liveStart": 1622,
+        "baseLines": 45,
+        "liveLines": 45,
+        "byteEqual": true,
+        "baseSha256": "fba4eb5744fe252c15316179809b70b0030b75aba96033410c8ffded24c3ff39",
+        "liveSha256": "fba4eb5744fe252c15316179809b70b0030b75aba96033410c8ffded24c3ff39"
+      },
+      {
+        "name": "_encodeArtifactRecordFields",
+        "baseStart": 5840,
+        "liveStart": 6296,
+        "baseLines": 122,
+        "liveLines": 122,
+        "byteEqual": true,
+        "baseSha256": "cb6fa52c54e60047db48234bb5b062d588d0ba6a728d46fee04f049f925c502b",
+        "liveSha256": "cb6fa52c54e60047db48234bb5b062d588d0ba6a728d46fee04f049f925c502b"
+      }
+    ]
+  },
+  "sharedNonruntimeReview": {
+    "blob": "69c82cb74fc545774c82430c2152a87c77e8ffa4",
+    "sha256": "94974768152fee95f662101068382187a6f0c8b0399145ce06f70ceaac976656",
+    "conclusions": {
+      "dev/bin/audit-release-packages.js": "Both changes insert into the same requiredNativeAssets location after the canonical scanner. The exact full-context patches do not apply in either composition order. A later reviewed merge must preserve both the record-fields WASM and the trainer WASM, along with the peer required-license validation/report.",
+      "eslint.config.js": "The two native-fields hunks and two peer hunks apply by unique complete context in both orders and produce identical 41,132-byte text, SHA25695f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266. No file was written or source executed.",
+      "test/release-package-native-assets.test.js": "Both insert after the existing zstd fixture and both rewrite the old successful-audit title/native-assets assertion. The exact context patches do not compose. A later reviewed merge must preserve field missing/corrupt cases, trainer WASM/license fixture bytes and readFile import, a five-native-asset assertion including both added binaries, and the trainer-license digest assertion."
+    }
+  },
+  "unchangedProtectedPaths": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "base": {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+        "size": 161067,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/403272a3e65cbd4084f6211a46df7d3db78979ac"
+      },
+      "reviewedDevelop": {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+        "size": 161067,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/403272a3e65cbd4084f6211a46df7d3db78979ac"
+      },
+      "equal": true
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "base": {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+        "size": 69068,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/1ee5f273b61704f775cfb95c847a1df1296e17c8"
+      },
+      "reviewedDevelop": {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+        "size": 69068,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/1ee5f273b61704f775cfb95c847a1df1296e17c8"
+      },
+      "equal": true
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "base": {
+        "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+        "size": 6853,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2035b8e2859bb4dc6a770812361040ff5b8c370f"
+      },
+      "reviewedDevelop": {
+        "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+        "size": 6853,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2035b8e2859bb4dc6a770812361040ff5b8c370f"
+      },
+      "equal": true
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "base": {
+        "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+        "size": 1624,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/e81f92e8aca60a10dbb753777eef1df6a9862f02"
+      },
+      "reviewedDevelop": {
+        "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+        "size": 1624,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/e81f92e8aca60a10dbb753777eef1df6a9862f02"
+      },
+      "equal": true
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "base": {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+        "size": 2588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2c658ce7874cfaaf6be816ee40b140215523b7a0"
+      },
+      "reviewedDevelop": {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+        "size": 2588,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/2c658ce7874cfaaf6be816ee40b140215523b7a0"
+      },
+      "equal": true
+    },
+    {
+      "path": "test/perf/dictionaries.lock.json",
+      "base": {
+        "path": "test/perf/dictionaries.lock.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+        "size": 3047,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2"
+      },
+      "reviewedDevelop": {
+        "path": "test/perf/dictionaries.lock.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+        "size": 3047,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2"
+      },
+      "equal": true
+    },
+    {
+      "path": "dev/perf/dictionary-fixtures.js",
+      "base": {
+        "path": "dev/perf/dictionary-fixtures.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+        "size": 6765,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469"
+      },
+      "reviewedDevelop": {
+        "path": "dev/perf/dictionary-fixtures.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469",
+        "size": 6765,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5cb7bbb8cb94b2d1c6c6047fd2f77301f7c9d469"
+      },
+      "equal": true
+    },
+    {
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "base": {
+        "path": "dev/perf/import-qualification-20261125-a7f7.py",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "964ab9c061b2490b65852344244f11dce62fa644",
+        "size": 19981,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/964ab9c061b2490b65852344244f11dce62fa644"
+      },
+      "reviewedDevelop": {
+        "path": "dev/perf/import-qualification-20261125-a7f7.py",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "964ab9c061b2490b65852344244f11dce62fa644",
+        "size": 19981,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/964ab9c061b2490b65852344244f11dce62fa644"
+      },
+      "equal": true
+    },
+    {
+      "path": "package-lock.json",
+      "base": {
+        "path": "package-lock.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+        "size": 333801,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/46d4c84c09debdc6e307a3cfa948bb924a4d903b"
+      },
+      "reviewedDevelop": {
+        "path": "package-lock.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+        "size": 333801,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/46d4c84c09debdc6e307a3cfa948bb924a4d903b"
+      },
+      "equal": true
+    }
+  ],
+  "conclusions": [
+    "The release auditor and release fixture require a reviewed union of five native assets and both field negative cases plus trainer/license validation. ESLint patches commute exactly.",
+    "All four own database hunks match uniquely; ten of eleven store contexts match. The remaining _prepare context drift is JSDoc-only. Six relevant stock session/encoder bodies are byte-identical.",
+    "No static native encoder lifecycle/format blocker identified. No combined runtime/types/unit/build execution was performed by this compatibility review.",
+    "PR982 adds normal import-publication high-water SQL, maintenance admission/join, root/read-context machinery and frontend completion fencing. Optional training need not actually execute for source work to differ.",
+    "The immutable f28 performance cohort remains valid only for its frozen source. No a300 performance or correctness transfer is claimed."
+  ],
+  "evidencePointers": {
+    "finishBulkImport": {
+      "blob": "1b3f8367f4b4863916e7c6189a07f5f750636d20",
+      "ordinaryHighWaterSqlLines": [
+        1826,
+        1842
+      ]
+    },
+    "offscreenImportJoin": {
+      "blob": "9b09d261eb727ae2f014c7c3630fdc8f58c3dc71",
+      "line": 847
+    },
+    "importController": "39888b2a25a22fd91d2aa1239dea64fc4c636ded"
+  },
+  "operations": {
+    "gitMerge": false,
+    "rebase": false,
+    "productFilesWritten": false,
+    "testsExecuted": false,
+    "timingAcquired": false,
+    "refsChanged": false
+  }
+}

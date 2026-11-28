@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-source-and-retained-receipt-feasibility",
+  "scope": "No implementation, source ref, test, import, new runtime metric, or timing acquisition. Derived work reach only; no speedup prediction.",
+  "source": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "frozenBrowserBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "reviewedIntegration": {
+      "commit": "663df294f40e1832ad3e3349d0e061681fed77cb",
+      "tree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+      "store": {
+        "blob": "83757284db4df342e3106baf0dc1148ddb5cd14c",
+        "sha256": "02bff38441f2ce60f027b824ece9ac74ce8131c76f4e96b939983c9db71ba74b"
+      },
+      "helper": {
+        "blob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+        "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec"
+      },
+      "c": {
+        "blob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+        "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af"
+      },
+      "wasm": {
+        "blob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+        "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+      }
+    },
+    "readOnlyLocalBindings": [
+      {
+        "stock": {
+          "path": "ext/js/dictionary/term-record-opfs-store.js",
+          "gitBlob": "36b0ecc7fd9d4c638545aad44b7d44aa47cbb14b",
+          "sha256": "4294d3518bca7519abf65abdad19a35e035e6961ca93a127d688698b994f466b",
+          "bytes": 391544
+        }
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "function": "_encodeAndAppendArtifactChunkForState",
+        "sameInA300Product": true,
+        "sha256": "c56a30074b0a7a978f19338df893ba7fcdc25fffcdeee549472a7054aec86795",
+        "stockStartLine": 2582
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "function": "_encodeArtifactChunkRecords",
+        "sameInA300Product": true,
+        "sha256": "d5bbce17f8ed476da5ee85a089b7bbc00c9a901ff6c395beae4df5e3d4d60610",
+        "stockStartLine": 6428
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "function": "getSynchronousResolvedContentReferences",
+        "sameInA300Product": true,
+        "sha256": "dbf03d83c370053c3eb06d2ef8eb976c7072abb7b14ce05eb3000745103f4091",
+        "stockStartLine": 371
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "function": "getSynchronousRecordFieldReferences",
+        "sameInA300Product": true,
+        "sha256": "58848c1da495f9d7c96231e0414690643d105134bd0156c2bd9d7d0f3fcc0a3b",
+        "stockStartLine": 424
+      },
+      {
+        "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+        "function": "hasCompletePreparedTermLookupIndexes",
+        "sameInA300Product": true,
+        "sha256": "e4a73a221f7b3844f36886fb98a79d9756fc0386140fbff235924522597218ca",
+        "stockStartLine": 229
+      },
+      {
+        "evidence": "profiles/historical-20261125/current-profile-jmdict/ordinary/summary.json",
+        "bytes": 58730,
+        "sha256": "0136a044a26507b1af8930285ff0c18e8cdc49b9055cb57c6ce88f5c9411b14f"
+      },
+      {
+        "evidence": "profiles/hosted-baseline-profile-46106637245/jmdict/diagnostic-ranks.json",
+        "bytes": 61192,
+        "sha256": "02533c1bea1f8b6e7775a5620ff55e302c444e06bf6f8bfe4e2b074633775035"
+      },
+      {
+        "evidence": "experiments/native-record-fields/run/record-field-calls.json",
+        "bytes": 39902,
+        "sha256": "8351541501c395a0e35f6df5d06e622132e21f754dd61da16552ff9c832748fa"
+      }
+    ]
+  },
+  "retainedCurrentCorrectness": {
+    "scope": "Exact f28-source correctness receipts; not executed a300 or observed browser performance.",
+    "originalRun": 46133913032,
+    "readerRun": 46135194884,
+    "readerResult": {
+      "blob": "07161060078f96743419784e04ae5e33d407ddca",
+      "sha256": "f433eb75a0e0e6e0117045580a1f4f8ec7f67a17c78fb461e8b10e747e1bc128"
+    },
+    "comparison": {
+      "bytes": 9058,
+      "sha256": "de4f5d536904cf713915fe738110a431246e5a0c7fb929f7df720946c8ab92e5"
+    },
+    "candidateReport": {
+      "bytes": 103484,
+      "sha256": "28aa121780e1059db5146e1e011c3e2a52bba5e3f9123294a24bc4ffc9fc36ed"
+    },
+    "fieldCalls": {
+      "bytes": 12722,
+      "sha256": "146d7a7c6403cd9f1fae489007643755c641ce2f08a932ea0bcb505cf0661851"
+    },
+    "groupFieldPlanSha256": "dfdbea10a54fff61e575c1612fecc1907249e48dcf23e86c77e518e45ae528dc",
+    "calls": [
+      {
+        "ordinal": 0,
+        "rows": 50000,
+        "uniqueReferences": 34951,
+        "compactScores": 340,
+        "native": true
+      },
+      {
+        "ordinal": 1,
+        "rows": 40000,
+        "uniqueReferences": 32856,
+        "compactScores": 387,
+        "native": true
+      },
+      {
+        "ordinal": 2,
+        "rows": 40000,
+        "uniqueReferences": 32421,
+        "compactScores": 430,
+        "native": true
+      },
+      {
+        "ordinal": 3,
+        "rows": 40000,
+        "uniqueReferences": 28895,
+        "compactScores": 475,
+        "native": true
+      },
+      {
+        "ordinal": 4,
+        "rows": 50000,
+        "uniqueReferences": 34677,
+        "compactScores": 243,
+        "native": true
+      },
+      {
+        "ordinal": 5,
+        "rows": 50000,
+        "uniqueReferences": 34006,
+        "compactScores": 270,
+        "native": true
+      },
+      {
+        "ordinal": 6,
+        "rows": 40000,
+        "uniqueReferences": 24271,
+        "compactScores": 248,
+        "native": true
+      },
+      {
+        "ordinal": 7,
+        "rows": 50000,
+        "uniqueReferences": 31906,
+        "compactScores": 167,
+        "native": true
+      },
+      {
+        "ordinal": 8,
+        "rows": 40000,
+        "uniqueReferences": 25774,
+        "compactScores": 198,
+        "native": true
+      },
+      {
+        "ordinal": 9,
+        "rows": 40000,
+        "uniqueReferences": 25109,
+        "compactScores": 199,
+        "native": true
+      },
+      {
+        "ordinal": 10,
+        "rows": 40000,
+        "uniqueReferences": 26102,
+        "compactScores": 192,
+        "native": true
+      },
+      {
+        "ordinal": 11,
+        "rows": 48299,
+        "uniqueReferences": 35062,
+        "compactScores": 195,
+        "native": true
+      }
+    ],
+    "groups": 12,
+    "extraCalls": 0,
+    "finalMetrics": {
+      "calls": 12,
+      "javascriptCalls": 0,
+      "native": {
+        "declines": {},
+        "inputCopiedBytes": 8618752,
+        "maximumLinearMemoryBytes": 2424832,
+        "maximumScratchBytes": 824288,
+        "memoryGrowthBytes": 2293760,
+        "nativeAttempts": 12,
+        "nativeCalls": 12,
+        "nativeRows": 528299,
+        "outputCopiedBytes": 4239960,
+        "tableBytesRequested": 6291456
+      }
+    },
+    "inference": [
+      "All twelve 40000-50000 row calls exceed ordinary 30000-row limit and each covers one complete source group; source control flow therefore admitted a whole prepared lookup index and did not split the source group.",
+      "Whole prepared admission only sets runRowLimit=count. The preceding while loop is unconditional. It advances over every row index and validates every consecutive-reference run. No existing current fast path skips this loop.",
+      "The later _encodeArtifactChunkRecords second validation/minmax pass is already skipped by its non-null validatedContentOffsetBase argument. There is only one removable JS planning pass here, not two.",
+      "All twelve native successes require current factory-origin private-reference selection, exact intrinsic typed brands, private non-resizable buffers, Int32 scores and compact eligibility. These receipts do not count exact consecutive-reference runs or establish a300 execution."
+    ]
+  },
+  "prospectiveBoundary": {
+    "interface": "Synchronous nullable tryEncodeWhole(chunk, privateReferences) -> {recordFields: owned Uint8Array, contentOffsetBase: number}|null; no native run splitting.",
+    "nativeChange": "Fold referenced offset minimum/maximum into the existing score-interning/offset-validation first pass; require max-min<=4294967294; all-null base=0; emit existing bytes in existing second pass. Return base in a bounded private result slot or equivalent ABI metadata.",
+    "copies": "Use the same four input copies and same owned output copy as current helper. Do not add a planner-only module/copy or validate all unreferenced unique slots. Retained JMdict current copies are 8618752 input and 4239960 output bytes, with 6291456 table bytes requested.",
+    "admission": "Ready per-import owner, current private ordinary typed input proof, complete one-chunk prepared index and a verified callback-free lookup metadata handoff. Unknown/getter/proxy/shared/resizable/fixed-span/Float64 inputs stay stock.",
+    "lifecycle": "Select/copy/plan/encode/read scalar/copy output in one synchronous operation, retaining no borrowed native view. Existing append/flush/rollback/commit owners and failure boundaries remain unchanged.",
+    "declines": "Any invalid/unsupported compact shape, excessive offset range, memory/ABI/readiness failure returns to unchanged split/JS path with no publication. Avoid repeating the same copied whole-chunk native attempt on fallback; never reuse its value proof across an awaited append."
+  },
+  "feasibilityConcern": {
+    "ownerGap": "The reference factory WeakMap proves chunk/reference origin only. hasCompletePreparedTermLookupIndexes invokes overridable Map methods and Reflect.get on prepared entries; the later preparedLookupIndexes.get, preinternedPlan and bytes reads occur between old validation and encoding.",
+    "consequence": "Naively encoding before those accesses can snapshot a different value state if a callback mutates reference/score columns. Shape checks alone cannot prove absence of Proxy behavior.",
+    "boundedResolution": "Require narrowly producer-owned callback-free prepared-index metadata at this exact fast boundary, or retain stock path. If this requires a broad provenance/cache system or full input recompare, stop: it defeats the narrow pass-removal proposal."
+  },
+  "disposition": {
+    "algorithmicallyFeasible": true,
+    "currentlyNominated": false,
+    "stopIf": [
+      "The whole-chunk path cannot be admitted without changing foreign/accessor/proxy behavior.",
+      "A planner-only native call adds another full copy/traversal, or fallback repeats copied attempts for the same unchanged chunk.",
+      "Run splitting, legacy/Float64 encoding, current loader lifecycle or persistence format must be redesigned.",
+      "Post-original-result complete-owner evidence shows only a few milliseconds or no stable exposed serial saving."
+    ],
+    "measurementLimit": "Prior 25-27% encoder component/~8ms and old ~698ms complete import are different studies. The earlier ordinary report actually labels 28.3ms field encoding and39.4ms record validation; the traced37.4ms is parser lookup-index encoding. Do not add worker/stage sums or forecast whole-import benefit from these values."
+  },
+  "priorSynthesisSourceBindings": {
+    "parserC": {
+      "blob": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+    },
+    "inflater": {
+      "blob": "3583271bf1214e9379a4db6fabaa7eb43479860e",
+      "sha256": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc"
+    },
+    "parserJs": {
+      "blob": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    "parserWorker": {
+      "blob": "82808931b73e099a604c598460cdeaed43d67bd5",
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    "equalBetweenF28AndA300": true
+  }
+}

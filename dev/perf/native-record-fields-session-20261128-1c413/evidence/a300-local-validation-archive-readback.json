@@ -1,0 +1,195 @@
+{
+  "kind": "complete-original-local-integration-evidence-archive",
+  "archive": "/tmp/manabitan-native-fields-a300-evidence-1c413-20261128.tar.gz",
+  "bytes": 142681,
+  "sha256": "e4e57127c19ccc61f1ad80512ae404a872dc16e174e9049e3006d23a7837281c",
+  "gitBlob": "189ffb28741252e63bcf228bae4196ac25ee82e6",
+  "memberCount": 36,
+  "members": {
+    "all-target-drybuild.json": {
+      "bytes": 943,
+      "sha256": "535e221625e43e492b50333f79faab3f1dc41d3dae9e08f97c16072f42c4738b",
+      "mode": 420
+    },
+    "all-target-drybuild.log": {
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "mode": 420
+    },
+    "apply-original-product.json": {
+      "bytes": 327,
+      "sha256": "1fac5743be2f449e0ae23fdfb0b4de004c8350f69619987db09999a05f3d904d",
+      "mode": 420
+    },
+    "apply-original-product.log": {
+      "bytes": 785,
+      "sha256": "5785ac320574f7f2ce20ecdca14d72952a2b4aca5a7851312bfa57909b096732",
+      "mode": 420
+    },
+    "compiler-probe/driver-invocation.log": {
+      "bytes": 1687,
+      "sha256": "c1abfc70585c13f75f0778e6d9f7216c20ca43af58a6fd918663487b0050a4d9",
+      "mode": 420
+    },
+    "compiler-probe/probe.json": {
+      "bytes": 1048,
+      "sha256": "1f98709c195ca61339c59860c072dd1980e00ecfaf2d96c25dde62a38ae7d607",
+      "mode": 420
+    },
+    "compiler-probe/probe.log": {
+      "bytes": 167,
+      "sha256": "b7910ae3dab8e91844eaa2247bf5ef1993ca4cf962288e34ea6dfaadf276ba89",
+      "mode": 420
+    },
+    "compiler-probe/wasm-compiler-probe.c": {
+      "bytes": 20,
+      "sha256": "560a7695bae5b3e5c00e5b918bcaffa414efb2bd2fb1097424953fce22dae8d8",
+      "mode": 420
+    },
+    "control.index": {
+      "bytes": 404671,
+      "sha256": "ddce7798678b03693c931de365727890cde270788036078fff13b84cfe6bea2f",
+      "mode": 420
+    },
+    "focused-fields-assets.json": {
+      "bytes": 1067,
+      "sha256": "6b465072abc9d4cfc6e4780309e2cf2e6885cb654e9daa07acf44f59c72ae5d8",
+      "mode": 420
+    },
+    "focused-fields-assets.log": {
+      "bytes": 238,
+      "sha256": "1cec85a6145ed43dacdb488d17a78f6e749a8e25f7ab86eacfdbe313401889c8",
+      "mode": 420
+    },
+    "full-units.json": {
+      "bytes": 983,
+      "sha256": "3ba3a83b4b47bff7076120da9f79c3ae76f80748df19dd1003c18e1ed93957cd",
+      "mode": 420
+    },
+    "full-units.log": {
+      "bytes": 14871,
+      "sha256": "cb711ded7601a3a81410d98e670e3c695ee4a46f0a41ba779427721596628810",
+      "mode": 420
+    },
+    "immutable-source-pair.json": {
+      "bytes": 5984,
+      "sha256": "ee55c12c6feee8290640f2f0ac4751bd708fc20daa3877c743b85044ca140bfa",
+      "mode": 420
+    },
+    "integration-validation.json": {
+      "bytes": 26147,
+      "sha256": "8370c42d388a9467420ec05f8580a06ddac68f89175cf1c150c30356d93c64a4",
+      "mode": 420
+    },
+    "local-tree-proof.json": {
+      "bytes": 365,
+      "sha256": "ea5caef0060d8f30dc8b92a790f02c1a86c9211f6dff02e9349646a76209c832",
+      "mode": 420
+    },
+    "native-rebuild-library-path.json": {
+      "bytes": 953,
+      "sha256": "88a61bfe410a2f49901c9352c06d8786dff63c4345f0e860423f38a22d68b5b7",
+      "mode": 420
+    },
+    "native-rebuild-library-path.log": {
+      "bytes": 547,
+      "sha256": "056565c1a37c9c9e6d21a828c1707244ade500efc2e581815965cf6b3b0691d3",
+      "mode": 420
+    },
+    "native-rebuild.json": {
+      "bytes": 832,
+      "sha256": "a21b8c72ffc279458e8cb4055f2414d6308f1a2697df4ad569fafceb295b1182",
+      "mode": 420
+    },
+    "native-rebuild.log": {
+      "bytes": 1699,
+      "sha256": "76b39d522f20329540600b54e580a501b84575a4fff3e9d7171cdb2e069324fe",
+      "mode": 420
+    },
+    "original-product.patch": {
+      "bytes": 111337,
+      "sha256": "5b133d10a6e5d7cb22bbbdd9db683e88a6fc742ea8b81c30ad58d7020aabfecb",
+      "mode": 420
+    },
+    "run-gate.py": {
+      "bytes": 2831,
+      "sha256": "84820797f7a2ec0783cd33f59508750e60e959d781d373337c8a05979f430777",
+      "mode": 420
+    },
+    "scoped-lint.json": {
+      "bytes": 1348,
+      "sha256": "de731fee9188ce66fe572ee6de31afdd52cc3f0258944ed7b65e136877980297",
+      "mode": 420
+    },
+    "scoped-lint.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "mode": 420
+    },
+    "setup-libs.json": {
+      "bytes": 799,
+      "sha256": "39f67be9e74d482a3b381bf12062c7ec0add3defe3132bb0c454986987043cd1",
+      "mode": 420
+    },
+    "setup-libs.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    "source-before-validation.json": {
+      "bytes": 3834,
+      "sha256": "342891d783fc1b2fa3134b07b62774b54d6f4f63000c0f2b33abd67c17656f37",
+      "mode": 420
+    },
+    "two-native-suites-linker-path.json": {
+      "bytes": 1168,
+      "sha256": "d5ab8c020eed93e96db796067fa90cc838bf295b090d81b473b615535bd6a71b",
+      "mode": 420
+    },
+    "two-native-suites-linker-path.log": {
+      "bytes": 234,
+      "sha256": "757ec421e070acef6af3630898854199b20c9023e9c5d1016b70eb388326cbe5",
+      "mode": 420
+    },
+    "types-dev.json": {
+      "bytes": 975,
+      "sha256": "8fc633ebc0ff1dd4ab35de08d5251d0b7ef5b0201a0960668fdd34c9c30fe6c5",
+      "mode": 420
+    },
+    "types-dev.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    "types-main.json": {
+      "bytes": 972,
+      "sha256": "4cdac38ccde899097ecc173087b382c436e1862de385a3e396b0440bd0d0be7e",
+      "mode": 420
+    },
+    "types-main.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    "types-test.json": {
+      "bytes": 987,
+      "sha256": "cdc0fbf1a5ab054da902350167a48145a7fce70b3b18bcda1799e93531f0ab83",
+      "mode": 420
+    },
+    "types-test.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    "validation-environment.json": {
+      "bytes": 1001,
+      "sha256": "aaf8fe41ac7492147a858bd4f652fb8d4f824dcf6a599661c3de95a7cd0368e7",
+      "mode": 420
+    }
+  },
+  "readBackVerified": true,
+  "sourceProduct": "663df294f40e1832ad3e3349d0e061681fed77cb",
+  "sourceControl": "a376a6872bfe49697a654af4aacd232c8f4ea84a",
+  "allOriginalFailuresRetained": true,
+  "performanceMeasurement": false
+}

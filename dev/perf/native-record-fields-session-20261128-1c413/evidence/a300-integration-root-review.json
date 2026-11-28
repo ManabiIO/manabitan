@@ -1,0 +1,143 @@
+{
+  "kind": "root-a300-native-fields-integration-source-review",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "priorProduct": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+  "product": "663df294f40e1832ad3e3349d0e061681fed77cb",
+  "control": "a376a6872bfe49697a654af4aacd232c8f4ea84a",
+  "base": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "productPaths": [
+    "dev/bin/audit-release-packages.js",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "eslint.config.js",
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/release-package-native-assets.test.js",
+    "test/term-record-fields-native.test.js",
+    "test/term-record-import-fields.test.js"
+  ],
+  "controlPaths": [
+    "dev/bin/audit-release-packages.js",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "eslint.config.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/release-package-native-assets.test.js"
+  ],
+  "packageDiff": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-opfs-store.js"
+  ],
+  "integrationChanged": [
+    "dev/bin/audit-release-packages.js",
+    "eslint.config.js",
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "test/release-package-native-assets.test.js"
+  ],
+  "unchangedProductPaths": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/term-record-fields-native.test.js",
+    "test/term-record-import-fields.test.js"
+  ],
+  "exactParentsAndUntruncatedTrees": true,
+  "passed": true,
+  "scope": "Tree identities only; source merge/test review separate; no performance transfer",
+  "runtimeEdits": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "exactOrderedEditLinesIdentical": true,
+      "oldBlob": "b144b0f9bb4dda83547c9865d3407643c890d741",
+      "newBlob": "09bd411663a0183230e1436b99cac043f1db307a",
+      "additions": 7,
+      "deletions": 1,
+      "oldHunks": [
+        "@@ -1475,7 +1475,7 @@ export class DictionaryDatabase {",
+        "@@ -1522,6 +1522,9 @@ export class DictionaryDatabase {",
+        "@@ -1593,6 +1596,8 @@ export class DictionaryDatabase {",
+        "@@ -1770,6 +1775,7 @@ export class DictionaryDatabase {"
+      ],
+      "newHunks": [
+        "@@ -1636,7 +1636,7 @@ export class DictionaryDatabase {",
+        "@@ -1683,6 +1683,9 @@ export class DictionaryDatabase {",
+        "@@ -1756,6 +1759,8 @@ export class DictionaryDatabase {",
+        "@@ -1973,6 +1978,7 @@ export class DictionaryDatabase {"
+      ]
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "exactOrderedEditLinesIdentical": true,
+      "oldBlob": "4dc746075254a31016759e808e72582b7bda8afc",
+      "newBlob": "83757284db4df342e3106baf0dc1148ddb5cd14c",
+      "additions": 73,
+      "deletions": 0,
+      "oldHunks": [
+        "@@ -802,6 +802,10 @@ class DenseIdRecordStore {",
+        "@@ -825,6 +829,7 @@ class DenseIdRecordStore {",
+        "@@ -905,6 +910,10 @@ export class TermRecordOpfsStore {",
+        "@@ -1185,6 +1194,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1235,6 +1246,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1270,6 +1283,50 @@ export class TermRecordOpfsStore {",
+        "@@ -1406,6 +1463,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1484,9 +1543,13 @@ export class TermRecordOpfsStore {",
+        "@@ -1496,6 +1559,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1529,6 +1594,7 @@ export class TermRecordOpfsStore {",
+        "@@ -5838,6 +5904,13 @@ view.chunks :"
+      ],
+      "newHunks": [
+        "@@ -920,6 +920,10 @@ class DenseIdRecordStore {",
+        "@@ -943,6 +947,7 @@ class DenseIdRecordStore {",
+        "@@ -1023,6 +1028,10 @@ export class TermRecordOpfsStore {",
+        "@@ -1307,6 +1316,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1359,6 +1370,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1394,6 +1407,50 @@ export class TermRecordOpfsStore {",
+        "@@ -1530,6 +1587,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1608,9 +1667,13 @@ export class TermRecordOpfsStore {",
+        "@@ -1620,6 +1683,8 @@ export class TermRecordOpfsStore {",
+        "@@ -1653,6 +1718,7 @@ export class TermRecordOpfsStore {",
+        "@@ -6294,6 +6360,13 @@ view.chunks :"
+      ]
+    }
+  ],
+  "runtimeContext": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "equalLineCount": true,
+      "contextDifferences": []
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "equalLineCount": true,
+      "contextDifferences": [
+        {
+          "old": " ",
+          "new": "      * @returns {Promise<void>}"
+        },
+        {
+          "old": "     /** @returns {Promise<void>} */",
+          "new": "      */"
+        }
+      ]
+    }
+  ],
+  "releaseAudit": "Exact current a300 auditor plus the required field WASM entry; current trainer-license audit retained",
+  "releaseFixture": "Five-asset set asserted; original scanner and trainer license success checks retained; field and trainer missing/corrupt cases and missing trainer license checked",
+  "lint": "Adds only fields module header list entry and its no-semicolon rule",
+  "nativeCompatibility": "13dab61908f459381ee96e18a35b4080d9cddace",
+  "inventoryReview": "f23f6dec06f96040faa7ae696b8a042e42484f11",
+  "performanceClaim": false,
+  "originalBrowserRunUnchanged": 46138650386,
+  "validationStatus": "Native agent running separate local current-source tests; this receipt establishes source identities and edit preservation only"
+}

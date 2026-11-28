@@ -1,0 +1,654 @@
+{
+  "schemaVersion": 1,
+  "kind": "a300-native-record-fields-isolated-integration-local-validation",
+  "sourcePair": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "baseTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "product": {
+      "commit": "663df294f40e1832ad3e3349d0e061681fed77cb",
+      "tree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+      "entries": [
+        {
+          "path": "dev/bin/audit-release-packages.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "76117e8c738eb56eb4c10ca708ee1ad166163394"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "0921b1806a239e1b753f199af642849afdad4077"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "5a419e0017ac6ac5b153b85575805b5ab56c54ad"
+        },
+        {
+          "path": "dev/dictionary-wasm.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "7f339b89e3f71058d16f808dab28485ffa47cff5"
+        },
+        {
+          "path": "eslint.config.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "7c1c7456b5aa318755d1ea931063b624ec663dfd"
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "09bd411663a0183230e1436b99cac043f1db307a"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-fields.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-opfs-store.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "83757284db4df342e3106baf0dc1148ddb5cd14c"
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-record-fields.c",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "b90068f8dc8b5b4740c27235f445a69a8a6177b7"
+        },
+        {
+          "path": "test/dictionary-wasm-build.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "c40698117a9573fab8c85d80aaf0be0cc5e0c072"
+        },
+        {
+          "path": "test/release-package-native-assets.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "c8ba87ac12b028edb75df954ec8eade190272eb1"
+        },
+        {
+          "path": "test/term-record-fields-native.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "bfdafcd86db1ca223132faa194250647321dea31"
+        },
+        {
+          "path": "test/term-record-import-fields.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "fbebbbccb8864d815535a74d4df9020bcafd8024"
+        }
+      ]
+    },
+    "control": {
+      "commit": "a376a6872bfe49697a654af4aacd232c8f4ea84a",
+      "tree": "88bdb55d69dc7e77f4e1d53a4b7fbedad2bc1315",
+      "entries": [
+        {
+          "path": "dev/bin/audit-release-packages.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "76117e8c738eb56eb4c10ca708ee1ad166163394"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "0921b1806a239e1b753f199af642849afdad4077"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "5a419e0017ac6ac5b153b85575805b5ab56c54ad"
+        },
+        {
+          "path": "dev/dictionary-wasm.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "7f339b89e3f71058d16f808dab28485ffa47cff5"
+        },
+        {
+          "path": "eslint.config.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "7c1c7456b5aa318755d1ea931063b624ec663dfd"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-fields.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0"
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-record-fields.c",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "b90068f8dc8b5b4740c27235f445a69a8a6177b7"
+        },
+        {
+          "path": "test/dictionary-wasm-build.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "c40698117a9573fab8c85d80aaf0be0cc5e0c072"
+        },
+        {
+          "path": "test/release-package-native-assets.test.js",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "c8ba87ac12b028edb75df954ec8eade190272eb1"
+        }
+      ]
+    },
+    "refsCreated": false,
+    "timingAcquired": false,
+    "completeTreeProof": {
+      "productChanged": [
+        "dev/bin/audit-release-packages.js",
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-record-fields.wasm",
+        "dev/dictionary-wasm.js",
+        "eslint.config.js",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-record-fields.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "ext/js/dictionary/wasm/term-record-fields.c",
+        "test/dictionary-wasm-build.test.js",
+        "test/release-package-native-assets.test.js",
+        "test/term-record-fields-native.test.js",
+        "test/term-record-import-fields.test.js"
+      ],
+      "controlChanged": [
+        "dev/bin/audit-release-packages.js",
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-record-fields.wasm",
+        "dev/dictionary-wasm.js",
+        "eslint.config.js",
+        "ext/js/dictionary/term-record-fields.js",
+        "ext/js/dictionary/wasm/term-record-fields.c",
+        "test/dictionary-wasm-build.test.js",
+        "test/release-package-native-assets.test.js"
+      ],
+      "packagedDifference": [
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-record-opfs-store.js"
+      ],
+      "productFileCount": 2916,
+      "controlFileCount": 2914,
+      "completeTrees": true
+    },
+    "reviews": {
+      "compatibility": "13dab61908f459381ee96e18a35b4080d9cddace",
+      "inventory": "f23f6dec06f96040faa7ae696b8a042e42484f11",
+      "root": "adac3f56f626433abdbc354381c36a00e04dd87c"
+    }
+  },
+  "sourceBindings": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "frozenProduct": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "paths": [
+      {
+        "path": "dev/bin/audit-release-packages.js",
+        "bytes": 4520,
+        "sha256": "16bf135e8d6555f52e2ece51d2807daa9e69b4d8ccc8ebfae04ac70a67c4fa31",
+        "gitBlob": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+        "byteIdenticalToFrozenProduct": false
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "bytes": 3159,
+        "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+        "gitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+        "bytes": 1753,
+        "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+        "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "dev/dictionary-wasm.js",
+        "bytes": 7244,
+        "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+        "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "eslint.config.js",
+        "bytes": 41132,
+        "sha256": "95f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266",
+        "gitBlob": "7c1c7456b5aa318755d1ea931063b624ec663dfd",
+        "byteIdenticalToFrozenProduct": false
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "bytes": 796663,
+        "sha256": "3df99986f532b999e2c86a9d492ffc99268cc5a1440ee4339c4456e60cff3306",
+        "gitBlob": "09bd411663a0183230e1436b99cac043f1db307a",
+        "byteIdenticalToFrozenProduct": false
+      },
+      {
+        "path": "ext/js/dictionary/term-record-fields.js",
+        "bytes": 16843,
+        "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+        "gitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "bytes": 395001,
+        "sha256": "02bff38441f2ce60f027b824ece9ac74ce8131c76f4e96b939983c9db71ba74b",
+        "gitBlob": "83757284db4df342e3106baf0dc1148ddb5cd14c",
+        "byteIdenticalToFrozenProduct": false
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-record-fields.c",
+        "bytes": 6660,
+        "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+        "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "test/dictionary-wasm-build.test.js",
+        "bytes": 7552,
+        "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+        "gitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "test/release-package-native-assets.test.js",
+        "bytes": 6904,
+        "sha256": "b778ba93aa4eba6c148f89b124acde64fcab7e6292b8275bdf17dcf1f06cd151",
+        "gitBlob": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+        "byteIdenticalToFrozenProduct": false
+      },
+      {
+        "path": "test/term-record-fields-native.test.js",
+        "bytes": 40450,
+        "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+        "gitBlob": "bfdafcd86db1ca223132faa194250647321dea31",
+        "byteIdenticalToFrozenProduct": true
+      },
+      {
+        "path": "test/term-record-import-fields.test.js",
+        "bytes": 20572,
+        "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323",
+        "gitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+        "byteIdenticalToFrozenProduct": true
+      }
+    ],
+    "localTree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+    "timingAcquired": false
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "vitest": "4.1.12",
+    "typescript": "5.7.2",
+    "eslint": "9.39.5",
+    "esbuild": "0.25.1",
+    "python": "Python 3.12.14",
+    "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+    "npmCiPerformed": false,
+    "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "dependencyPackageLockSha256": "7c151b3adbff2738922cd7a46ea98d9d2f8e5419d7a652de7c7b0e991c469ceb",
+    "sparseCheckout": [
+      "/*",
+      "!/builds/"
+    ],
+    "nativeToolchain": {
+      "compiler": "21.1.8",
+      "linker": "21.1.8",
+      "compilerPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+      "linkerPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld",
+      "libraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "finalUnitPathPrefix": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin"
+    }
+  },
+  "gates": {
+    "setup-libs": {
+      "name": "setup-libs",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "dev/bin/build-libs.js"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "native-rebuild": {
+      "name": "native-rebuild",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "dev/bin/build-dictionary-wasm.js",
+        "--check"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "exitCode": 1,
+      "timedOut": false,
+      "logBytes": 1699,
+      "logSha256": "76b39d522f20329540600b54e580a501b84575a4fff3e9d7171cdb2e069324fe",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "focused-fields-assets": {
+      "name": "focused-fields-assets",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/term-record-fields-native.test.js",
+        "test/term-record-import-fields.test.js",
+        "test/dictionary-wasm-build.test.js",
+        "test/release-package-native-assets.test.js",
+        "--maxWorkers=1",
+        "--no-file-parallelism"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 238,
+      "logSha256": "1cec85a6145ed43dacdb488d17a78f6e749a8e25f7ab86eacfdbe313401889c8",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "native-rebuild-library-path": {
+      "name": "native-rebuild-library-path",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "dev/bin/build-dictionary-wasm.js",
+        "--check"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 547,
+      "logSha256": "056565c1a37c9c9e6d21a828c1707244ade500efc2e581815965cf6b3b0691d3",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "scoped-lint": {
+      "name": "scoped-lint",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "dev/bin/audit-release-packages.js",
+        "dev/dictionary-wasm.js",
+        "eslint.config.js",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-record-fields.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "test/dictionary-wasm-build.test.js",
+        "test/release-package-native-assets.test.js",
+        "test/term-record-fields-native.test.js",
+        "test/term-record-import-fields.test.js"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 694,
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "full-units": {
+      "name": "full-units",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers=1",
+        "--no-file-parallelism"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 1,
+      "timedOut": false,
+      "logBytes": 14871,
+      "logSha256": "cb711ded7601a3a81410d98e670e3c695ee4a46f0a41ba779427721596628810",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "types-main": {
+      "name": "types-main",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "jsconfig.json"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "types-dev": {
+      "name": "types-dev",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "dev/jsconfig.json"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "types-test": {
+      "name": "types-test",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "all-target-drybuild": {
+      "name": "all-target-drybuild",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "dev/bin/build.js",
+        "--dryRun",
+        "--all"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 210,
+      "logSha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    },
+    "two-native-suites-linker-path": {
+      "name": "two-native-suites-linker-path",
+      "kind": "correctness-build-validation-only",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/term-bank-crc.test.js",
+        "test/term-bank-memory-page.test.js",
+        "--maxWorkers=1",
+        "--no-file-parallelism"
+      ],
+      "cwd": "/tmp/manabitan-native-fields-a300-1c413-20261128",
+      "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "node": "v24.22.3",
+      "dependencyRealpath": "/workspace/scratch/1c4137568bc6/manabitan/node_modules",
+      "nodeOptions": "--max-old-space-size=1536",
+      "pinnedCompilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+      "pinnedToolchainPathPrefix": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin",
+      "exitCode": 0,
+      "timedOut": false,
+      "logBytes": 234,
+      "logSha256": "757ec421e070acef6af3630898854199b20c9023e9c5d1016b70eb388326cbe5",
+      "indexPatchSha256Before": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "indexPatchSha256After": "fb4837d5188b783b1ee57b0c81f73555dce3fd866d7ce144f174e0099578f2af",
+      "sourceIndexUnchanged": true,
+      "performanceMeasurement": false
+    }
+  },
+  "nativeAssets": {
+    "ext/lib/term-bank-parser.wasm": {
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    "ext/lib/term-content-canonical-scan-v1.wasm": {
+      "bytes": 1624,
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    "ext/lib/term-record-fields.wasm": {
+      "bytes": 1753,
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+    },
+    "ext/js/dictionary/zstd-trainer.wasm": {
+      "bytes": 411649,
+      "sha256": "bf8e57277f2ad37cb60440f56837fd5f4711bf4b78945e48bebe4f6a67907f3f"
+    },
+    "ext/js/dictionary/zstd-trainer.LICENSE": {
+      "bytes": 1549,
+      "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+    },
+    "ext/lib/zstd.wasm": {
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    }
+  },
+  "unitCoverage": {
+    "originalFullAttempt": {
+      "filesPassed": 698,
+      "suiteSetupFailures": 2,
+      "testsPassed": 15979,
+      "testsSkipped": 68,
+      "exitCode": 1
+    },
+    "correctedLinkerPathOnly": {
+      "sameTwoSuites": true,
+      "filesPassed": 2,
+      "testsPassed": 21,
+      "exitCode": 0
+    },
+    "combinedTestsPassed": 16000,
+    "retainedLocalSkips": 47,
+    "singleGreenFullAttempt": false,
+    "originalFailureRetained": true
+  },
+  "sourceAfterValidationUnchanged": true,
+  "performanceMeasurement": false,
+  "browserOrCorpusImportAcquired": false,
+  "refsCreated": false,
+  "limitations": [
+    "Existing dependencies were shared by symlink; no fresh npm ci or CI result is claimed.",
+    "Generated ext/lib belongs to this isolated checkout. No cross-arm generated-package byte comparison or actual-corpus validation was performed.",
+    "The original full unit attempt failed in two compiler-discovery setup hooks. Only those exact two suites were repeated after exposing the existing pinned wasm-ld-21 path; the original result is retained.",
+    "The frozen f28 browser run46138650386 and all study/control refs remain unchanged. No a300 performance result is claimed."
+  ]
+}

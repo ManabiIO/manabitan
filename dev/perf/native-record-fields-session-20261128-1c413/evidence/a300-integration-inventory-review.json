@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent immutable tree and non-runtime asset/fixture integration review for the separate a300 product/control; original f28 browser study unaffected",
+  "repository": "ManabiIO/manabitan",
+  "upstream": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "product": {
+    "commit": "663df294f40e1832ad3e3349d0e061681fed77cb",
+    "tree": "4c3bdb5839adcab46191630db71c7d6ef1d961df",
+    "soleParent": "a300da36d00df8e353c5679b1528b50a1299b75f"
+  },
+  "control": {
+    "commit": "a376a6872bfe49697a654af4aacd232c8f4ea84a",
+    "tree": "88bdb55d69dc7e77f4e1d53a4b7fbedad2bc1315",
+    "soleParent": "a300da36d00df8e353c5679b1528b50a1299b75f"
+  },
+  "boundaries": {
+    "productPaths": [
+      "dev/bin/audit-release-packages.js",
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "dev/dictionary-wasm.js",
+      "eslint.config.js",
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-fields.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "ext/js/dictionary/wasm/term-record-fields.c",
+      "test/dictionary-wasm-build.test.js",
+      "test/release-package-native-assets.test.js",
+      "test/term-record-fields-native.test.js",
+      "test/term-record-import-fields.test.js"
+    ],
+    "controlPaths": [
+      "dev/bin/audit-release-packages.js",
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "dev/dictionary-wasm.js",
+      "eslint.config.js",
+      "ext/js/dictionary/term-record-fields.js",
+      "ext/js/dictionary/wasm/term-record-fields.c",
+      "test/dictionary-wasm-build.test.js",
+      "test/release-package-native-assets.test.js"
+    ],
+    "unchangedPriorProductBlobs": [
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "dev/dictionary-wasm.js",
+      "ext/js/dictionary/term-record-fields.js",
+      "ext/js/dictionary/wasm/term-record-fields.c",
+      "test/dictionary-wasm-build.test.js",
+      "test/term-record-fields-native.test.js",
+      "test/term-record-import-fields.test.js"
+    ],
+    "updatedProductBlobs": [
+      "dev/bin/audit-release-packages.js",
+      "eslint.config.js",
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/release-package-native-assets.test.js"
+    ],
+    "allDeltaProductVsControl": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/term-record-fields-native.test.js",
+      "test/term-record-import-fields.test.js"
+    ],
+    "packagedDifferences": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/term-record-opfs-store.js"
+    ]
+  },
+  "productEntries": {
+    "dev/bin/audit-release-packages.js": {
+      "path": "dev/bin/audit-release-packages.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+      "size": 4520,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/76117e8c738eb56eb4c10ca708ee1ad166163394"
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0921b1806a239e1b753f199af642849afdad4077",
+      "size": 3159,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/0921b1806a239e1b753f199af642849afdad4077"
+    },
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "size": 1753,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5a419e0017ac6ac5b153b85575805b5ab56c54ad"
+    },
+    "dev/dictionary-wasm.js": {
+      "path": "dev/dictionary-wasm.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "size": 7244,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/7f339b89e3f71058d16f808dab28485ffa47cff5"
+    },
+    "eslint.config.js": {
+      "path": "eslint.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c1c7456b5aa318755d1ea931063b624ec663dfd",
+      "size": 41132,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/7c1c7456b5aa318755d1ea931063b624ec663dfd"
+    },
+    "ext/js/dictionary/dictionary-database.js": {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09bd411663a0183230e1436b99cac043f1db307a",
+      "size": 796663,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/09bd411663a0183230e1436b99cac043f1db307a"
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "size": 16843,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5c786f27976064b33d798dcaf23a7d3ae78b5eb0"
+    },
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83757284db4df342e3106baf0dc1148ddb5cd14c",
+      "size": 395001,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/83757284db4df342e3106baf0dc1148ddb5cd14c"
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "size": 6660,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/b90068f8dc8b5b4740c27235f445a69a8a6177b7"
+    },
+    "test/dictionary-wasm-build.test.js": {
+      "path": "test/dictionary-wasm-build.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "size": 7552,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c40698117a9573fab8c85d80aaf0be0cc5e0c072"
+    },
+    "test/release-package-native-assets.test.js": {
+      "path": "test/release-package-native-assets.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+      "size": 6904,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c8ba87ac12b028edb75df954ec8eade190272eb1"
+    },
+    "test/term-record-fields-native.test.js": {
+      "path": "test/term-record-fields-native.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfdafcd86db1ca223132faa194250647321dea31",
+      "size": 40450,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/bfdafcd86db1ca223132faa194250647321dea31"
+    },
+    "test/term-record-import-fields.test.js": {
+      "path": "test/term-record-import-fields.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "size": 20572,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/fbebbbccb8864d815535a74d4df9020bcafd8024"
+    }
+  },
+  "controlEntries": {
+    "dev/bin/audit-release-packages.js": {
+      "path": "dev/bin/audit-release-packages.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+      "size": 4520,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/76117e8c738eb56eb4c10ca708ee1ad166163394"
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0921b1806a239e1b753f199af642849afdad4077",
+      "size": 3159,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/0921b1806a239e1b753f199af642849afdad4077"
+    },
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "size": 1753,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5a419e0017ac6ac5b153b85575805b5ab56c54ad"
+    },
+    "dev/dictionary-wasm.js": {
+      "path": "dev/dictionary-wasm.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "size": 7244,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/7f339b89e3f71058d16f808dab28485ffa47cff5"
+    },
+    "eslint.config.js": {
+      "path": "eslint.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c1c7456b5aa318755d1ea931063b624ec663dfd",
+      "size": 41132,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/7c1c7456b5aa318755d1ea931063b624ec663dfd"
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "size": 16843,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/5c786f27976064b33d798dcaf23a7d3ae78b5eb0"
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "size": 6660,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/b90068f8dc8b5b4740c27235f445a69a8a6177b7"
+    },
+    "test/dictionary-wasm-build.test.js": {
+      "path": "test/dictionary-wasm-build.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "size": 7552,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c40698117a9573fab8c85d80aaf0be0cc5e0c072"
+    },
+    "test/release-package-native-assets.test.js": {
+      "path": "test/release-package-native-assets.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+      "size": 6904,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs/c8ba87ac12b028edb75df954ec8eade190272eb1"
+    }
+  },
+  "reviewedFiles": {
+    "dev/bin/audit-release-packages.js": {
+      "gitBlob": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+      "bytes": 4520,
+      "sha256": "16bf135e8d6555f52e2ece51d2807daa9e69b4d8ccc8ebfae04ac70a67c4fa31"
+    },
+    "eslint.config.js": {
+      "gitBlob": "7c1c7456b5aa318755d1ea931063b624ec663dfd",
+      "bytes": 41132,
+      "sha256": "95f0f9f440b1c9869abc11a20aed2b9f0a2dd648d70c68ce07611adbfa7cb266"
+    },
+    "test/release-package-native-assets.test.js": {
+      "gitBlob": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+      "bytes": 6904,
+      "sha256": "b778ba93aa4eba6c148f89b124acde64fcab7e6292b8275bdf17dcf1f06cd151"
+    }
+  },
+  "checks": {
+    "bothRemoteTreesUntruncated": true,
+    "exact13And9PathSets": true,
+    "allNineSharedPathsIdentical": true,
+    "completeExtMemberSetsIdentical": true,
+    "onlyTwoPackagedActivationFilesDiffer": true,
+    "eightPriorProductBlobsByteIdentical": true,
+    "auditIsExactlyPeerSourcePlusFieldNativeAsset": true,
+    "peerTrainerWasmAndLicenseValidationAndReportingUntouched": true,
+    "eslintEqualsPreviouslyProvenCommutingBytes": true,
+    "fixtureContainsRealTrainerWasmAndLicenseBytes": true,
+    "fieldMissingAndCorruptCasesRetained": true,
+    "scannerMissingAndCorruptCasesRetained": true,
+    "exactFiveNativeAssetSetAsserted": true,
+    "trainerLicenseDigestAsserted": true,
+    "trainerMissingAndCorruptAndMissingLicenseCasesAdded": true,
+    "existingVariantVersionAndManifestCasesRetained": true
+  },
+  "notes": [
+    "Release auditor is the exact a300 file plus the field WASM in requiredNativeAssets; no weakening or replacement of trainer/license checks.",
+    "The fixture resolves the overlapping insertion and assertion explicitly, keeping both assets and all original field/trainer license expectations.",
+    "DB/store new blobs are bound by complete tree comparison; runtime interaction review belongs to the separate native/root review lane.",
+    "Author-reported validation is not presented as independent execution here."
+  ],
+  "execution": {
+    "product": false,
+    "tests": false,
+    "rebase": false,
+    "candidateEdits": false,
+    "refMutation": false,
+    "performanceTransfer": false
+  },
+  "passed": true,
+  "originalFrozenBrowser": {
+    "run": 46138650386,
+    "head": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "unchanged": true
+  }
+}
