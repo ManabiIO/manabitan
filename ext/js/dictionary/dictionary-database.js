@@ -19,6 +19,7 @@
 /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
+import {GROUP_STAGE, groupStageDiagnostic} from './import-group-stage-diagnostic.js';
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
 import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
 import {TermContentMetadataArena} from './term-content-metadata-arena.js';
@@ -8373,6 +8374,7 @@ this._readTermContentSignature(
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
+        const diagnosticDb = groupStageDiagnostic.beginDb(chunk.rowCount);
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
@@ -8398,7 +8400,9 @@ this._readTermContentSignature(
         }
         try {
             const tContentAppendStart = safePerformance.now();
+            groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.dedupBegin);
             const dedup = await this._resolveArtifactTermContentDedup(chunk, true);
+            groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.dedupEnd, dedup.pendingContentCount);
             const {
                 contentOffsets,
                 contentLengths,
@@ -8455,12 +8459,14 @@ this._readTermContentSignature(
             let preparedLookupIndexes = null;
             let recordAppended = false;
             if (pendingContentCount > 0) {
+                groupStageDiagnostic.startContentDispatch(diagnosticDb);
                 const earlyContentPersistence = useLocalTransaction ?
                     null :
                     this._tryBeginPersistArtifactTermContent(
                         chunk.dictionary,
                         pendingContentSpans,
                     );
+                groupStageDiagnostic.endContentDispatch(diagnosticDb, earlyContentPersistence !== null);
                 if (earlyContentPersistence?.initialSelection === true) {
                     importMetrics.contentInitialReservationCount += 1;
                 }
@@ -8521,6 +8527,7 @@ this._readTermContentSignature(
                     const persistenceResult = earlyContentPersistence === null ?
                         await pendingContentPersistence :
                         await earlyContentPersistence.storage;
+                    groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.storageReady);
                     const {
                         pendingOffsets,
                         pendingLengths,
@@ -8572,6 +8579,7 @@ this._readTermContentSignature(
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
                     });
+                    groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.metadataPublished);
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
                     importMetrics.contentMetadataMs += contentMetadataPublishMs;
@@ -8585,6 +8593,7 @@ this._readTermContentSignature(
                             useResolvedContentReferences,
                         );
                         resolvedContentDictNames = this._compactUniformContentDictNames(resolvedContentDictNames);
+                        groupStageDiagnostic.expectRecord(diagnosticDb);
                         pendingRecordAppend = this._appendResolvedArtifactTermRecords(
                             recordChunk,
                             contentOffsets,
@@ -8597,9 +8606,11 @@ this._readTermContentSignature(
                         const measuredContentCompletion = earlyContentPersistence.completion
                             .then((blockProfile) => {
                                 contentCompletedAt = safePerformance.now();
+                                groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.contentObserved, 0, contentCompletedAt);
                                 return blockProfile;
                             })
                             .finally(releaseInFlightContentSources);
+                        groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.joinBegin);
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
@@ -8607,6 +8618,7 @@ this._readTermContentSignature(
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
                             .map((result) => toError(result.reason));
+                        groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.joinSettled, concurrentErrors.length === 0 ? 1 : 0);
                         if (concurrentErrors.length === 1) {
                             throw concurrentErrors[0];
                         }
@@ -8655,6 +8667,8 @@ this._readTermContentSignature(
                     contentDedupPlan,
                     useResolvedContentReferences,
                 );
+                groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.unsupportedRoute);
+                groupStageDiagnostic.expectRecord(diagnosticDb);
                 await this._appendResolvedArtifactTermRecords(
                     recordChunk,
                     contentOffsets,
@@ -8669,7 +8683,9 @@ this._readTermContentSignature(
             stagedContentMetadata = null;
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
+            groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.dbDone);
         } catch (e) {
+            groupStageDiagnostic.mark(diagnosticDb, GROUP_STAGE.operationFailed);
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {
@@ -10129,6 +10145,7 @@ null :
      * @returns {Promise<void>}
      */
     async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics) {
+        const diagnosticRecord = groupStageDiagnostic.beginRecord(chunk.rowCount);
         const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
             chunk,
             contentOffsets,
@@ -10146,11 +10163,13 @@ null :
         importMetrics.termLookupIndexEncodeMs += metrics.lookupIndexEncodeMs ?? 0;
         if (this._deferTermsVirtualTableSync || this._isBulkImportInProgress()) {
             this._termsVirtualTableDirty = true;
+            groupStageDiagnostic.mark(diagnosticRecord, GROUP_STAGE.recordDone);
             return;
         }
         const tTermsVtabInsertStart = safePerformance.now();
         await this._insertTermRowsIntoVirtualTable(chunk.rowCount);
         importMetrics.termsVtabInsertMs += safePerformance.now() - tTermsVtabInsertStart;
+        groupStageDiagnostic.mark(diagnosticRecord, GROUP_STAGE.recordDone);
     }
 
     /** */

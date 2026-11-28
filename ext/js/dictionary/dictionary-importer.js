@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {groupStageDiagnostic} from './import-group-stage-diagnostic.js';
 import {MIN_EXACT_LOOKUP_SOURCE_BYTES} from './term-lookup-route.js';
 import {
     BlobReader as BlobReader0,
@@ -984,6 +985,7 @@ export class DictionaryImporter {
         const tImportStart = Date.now();
         /** @type {Array<{phase: string, elapsedMs: number, startEpochMs: number, endEpochMs: number, details?: Record<string, unknown>}>} */
         const phaseTimings = [];
+        groupStageDiagnostic.beginImport();
         /** @type {{termArchiveReadMs: number, termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, mediaZipBatchReadMs: number, mediaZipBatchInflateMs: number, mediaZipBatchCount: number, mediaZipBatchEntryCount: number, mediaZipBatchRangeBytes: number, mediaZipBatchCompressedBytes: number, mediaZipBatchUncompressedBytes: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
         const step4TimingBreakdown = {
             termArchiveReadMs: 0,
@@ -2981,6 +2983,8 @@ export class DictionaryImporter {
             }
             dictionaryDatabase.setImportDebugLogging(false);
         }
+
+        groupStageDiagnostic.appendPhase(phaseTimings, !importSession.failed);
 
         // Cancellation is checked before finalization above. Once the atomic
         // publication succeeds, report that committed result rather than a

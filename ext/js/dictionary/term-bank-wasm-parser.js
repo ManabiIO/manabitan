@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {GROUP_STAGE, groupStageDiagnostic} from './import-group-stage-diagnostic.js';
 import {buildTermLookupFilter} from './term-lookup-route.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
@@ -2893,6 +2894,8 @@ class ParallelTermBankPipelineRun {
         this._sources = sources;
         /** @type {ParallelTermBankSource[][]} */
         this._groups = groups;
+        /** @type {number} Generation-bound coordinator diagnostic identity. */
+        this._diagnosticPipeline = groupStageDiagnostic.beginPipeline(groups.length);
         /** @type {number} */
         this._totalBytes = totalBytes;
         /** @type {number} */
@@ -2961,11 +2964,13 @@ class ParallelTermBankPipelineRun {
             throw normalizedError;
         } finally {
             await this._poolLease.release(this._keepWorkers);
+            groupStageDiagnostic.endPipeline(this._diagnosticPipeline, this._keepWorkers);
         }
     }
 
     /** @param {Worker[]} workers */
     async _runPipeline(workers) {
+        groupStageDiagnostic.startPipeline(this._diagnosticPipeline, workers.length);
         this._createSlots();
         this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
         if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
@@ -3013,6 +3018,7 @@ class ParallelTermBankPipelineRun {
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
                 processedRows += result.rowCount;
                 exactTotalRows += result.rowCount;
+                groupStageDiagnostic.group(this._diagnosticPipeline, i, GROUP_STAGE.sinkEnter, result.rowCount);
                 if (chunk !== null) {
                     try {
                         await this._onChunk(chunk, {
@@ -3030,6 +3036,7 @@ class ParallelTermBankPipelineRun {
                 this._throwIfStopped();
                 // Empty groups still advance the bounded lead and wake peers,
                 // but must not invent a row or an empty storage operation.
+                groupStageDiagnostic.group(this._diagnosticPipeline, i, GROUP_STAGE.sinkRelease);
                 this._nextSinkGroupIndex = i + 1;
                 this._activateLeadSources();
                 this._wakeLeadWaiters();
@@ -3136,6 +3143,8 @@ class ParallelTermBankPipelineRun {
                 this._ownedContentBytes += ownedContentBytes;
                 this._queuedOwnedContentBytes += ownedContentBytes;
                 this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
+                // Coordinator-observed validated result readiness, not worker CPU completion.
+                groupStageDiagnostic.group(this._diagnosticPipeline, groupIndex, GROUP_STAGE.groupReady, result.rowCount);
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
                 if (consumed !== null) { await consumed; }
             }

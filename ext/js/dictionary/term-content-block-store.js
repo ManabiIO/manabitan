@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {GROUP_STAGE, groupStageDiagnostic} from './import-group-stage-diagnostic.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -792,6 +793,7 @@ export class TermContentBlockStore {
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
     _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+        const diagnosticContent = groupStageDiagnostic.beginContent(sourceLengths.length);
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
@@ -814,6 +816,7 @@ export class TermContentBlockStore {
             let compressedChunks;
             let envelopeMs = 0;
             let compressionStart = safePerformance.now();
+            groupStageDiagnostic.mark(diagnosticContent, GROUP_STAGE.compressionStart, packed.packedChunkLengths.length, compressionStart);
             let sourceWasConsumed = false;
             try {
                 const operation = beginCompressWrappedTermContentZstdSpansBatch(
@@ -846,6 +849,7 @@ export class TermContentBlockStore {
                 }
                 validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length);
             } catch (error) {
+                groupStageDiagnostic.mark(diagnosticContent, GROUP_STAGE.unsupportedRoute);
                 if (sourceWasConsumed) {
                     throw error;
                 }
@@ -870,6 +874,9 @@ export class TermContentBlockStore {
                 resolveSourceConsumed();
             }
             const completedAt = safePerformance.now();
+            // Coordinator observation includes envelope construction and output
+            // validation; it is not the compressor worker's compute-finish time.
+            groupStageDiagnostic.mark(diagnosticContent, GROUP_STAGE.compressionDone, 0, completedAt);
             const compressMs = Math.max(0, completedAt - compressionStart - envelopeMs);
             let compressedBytes = 0;
             for (const chunk of compressedChunks) { compressedBytes += chunk.byteLength; }
@@ -928,6 +935,7 @@ export class TermContentBlockStore {
                 // may release borrowed parser memory only after this terminal
                 // promise has drained every owner of that source.
                 await Promise.allSettled(pending);
+                groupStageDiagnostic.mark(diagnosticContent, GROUP_STAGE.operationFailed);
                 throw error;
             }
             const [, compressionResult, storageResult] = results;
@@ -949,6 +957,7 @@ export class TermContentBlockStore {
                     minSavingsRatio: this._minSavingsRatio,
                 });
             }
+            groupStageDiagnostic.mark(diagnosticContent, GROUP_STAGE.contentDone);
             return {
                 ...storageResult,
                 compressedBytes: compressionResult.compressedBytes,
