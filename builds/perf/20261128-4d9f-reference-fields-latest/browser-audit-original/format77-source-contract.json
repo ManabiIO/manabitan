@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "candidate": "85a8aa49f76fbabd2dc494aad247f74774ff2573",
+  "localEquivalent": null,
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "timingEligible": false,
+  "basis": "Prospective exact term-file expectations are unchanged. This final runtime differs from the earlier sixteen-file integration only by the separately validated equivalent iterator lint fix. A separate default-flag full parent import measured the new a300 SQLite allocation before this fresh VNDB-only functional cohort. No prior failed or completed acquisition is relabeled. Storage/correctness only; no timing or memory claim.",
+  "dictionaries": {
+    "vndb": {
+      "totalRows": 6648310,
+      "modes": {
+        "off": {
+          "termFiles": {
+            "manabitan-term-content.bin": 7533449,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+          },
+          "activation": {
+            "floor": 11,
+            "formatCounts": {
+              "2": 192
+            },
+            "format4Rows": 0,
+            "totalRows": 6648310,
+            "chunks": 192,
+            "requestedFlag": false
+          }
+        },
+        "on": {
+          "termFiles": {
+            "manabitan-term-content.bin": 7533449,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 375257528,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2231060
+          },
+          "activation": {
+            "floor": 13,
+            "formatCounts": {
+              "2": 30,
+              "4": 162
+            },
+            "format4Rows": 6328310,
+            "totalRows": 6648310,
+            "chunks": 192,
+            "requestedFlag": true
+          }
+        }
+      },
+      "expectedTermFileBytesSaved": 24411244,
+      "corpusReceiptHashes": {
+        "original": "c051c24b4967fdcf1fa2477637443e1fb3f5bef49c0443d152d18a0c434aafb0",
+        "compact": "37d09c1721059fd26b0d7b09d3b4adcc374ad0894cd7338c48b375a18ecaca77"
+      },
+      "sahAllocationUnits": [
+        77,
+        77
+      ]
+    }
+  },
+  "previousFailedAcquisition": {
+    "runId": 46136881596,
+    "source": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+    "reason": "The E2E serializer omitted the supplemental activation receipt. All six first-import reports and failures are retained. Observer v2 adds the actual JSON projection and an executed serializer regression contract."
+  },
+  "observerSources": [
+    {
+      "path": "test/perf/record-reference-table-verification/activation_overlay.py",
+      "sha": "3d3c7039f9b9a0fba4e3880e325350866ed4352c",
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.mjs",
+      "sha": "b20a22dd097a8f551e890120851e2a7e0cdc0852",
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/test_activation_overlay.py",
+      "sha": "eabdcd09be181acdd09b845669e98c6dbc5823e1",
+      "sha256": "ae52d3a38984bf0ffdaf98c064732e65e3f3694fb90b551e153bb3cbb1b03db4"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.contract.mjs",
+      "sha": "b528451127b29c28370460b6eced025d7d673c9a",
+      "sha256": "feea0cd1b2b52594570c4615c47768bf273c205ac1821cfe8f78735eee06f54e"
+    }
+  ],
+  "candidateTree": "ae7323d19d6da0cc500ff231a0dcd469ce4f31af",
+  "parentAllocationObservation": {
+    "schemaVersion": 1,
+    "source": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "status": "observed-parent-only",
+    "timingEligible": false,
+    "activeSahBytes": 315392,
+    "activeSahUnits": 77,
+    "allSahSizes": [
+      4096,
+      4096,
+      4096,
+      4096,
+      4096,
+      4096,
+      4096,
+      315392
+    ],
+    "importFlags": null,
+    "rawReportSha256": "3ea007adcaa5190860333540a6eb1fec87d24bd110b0315fe4235fb60e1bb07b",
+    "runId": 46140891339,
+    "toolingSource": "42c44ae9df89199c6fe2571438ef74bbab5a0aff",
+    "artifactId": 15261649240,
+    "artifactSha256": "a03b703d9e0e3ffe47edd953d8ba066911f70ea91d33d33557579eb2011cac5f"
+  },
+  "previousFailedLatestAcquisition": {
+    "runId": 46139342690,
+    "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+    "dictionaries": [
+      "vndb"
+    ],
+    "orders": [
+      "off-on",
+      "on-off"
+    ],
+    "reason": "The inherited f28 37-unit SQLite allocation expectation rejected successful latest imports before activation validation. Both original failed cells remain retained. Four JMdict/Jitendex cells passed and are not reacquired."
+  }
+}
