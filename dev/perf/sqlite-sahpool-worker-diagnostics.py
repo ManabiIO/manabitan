@@ -25,15 +25,100 @@ const sahpoolDiagnostic = {
     firstLookup: null,
 }
 let sahpoolObserver = null
+const sahpoolWorkerTimeoutMs = 5000
+async function withSahpoolTimeout(promise, label) {
+    let timer
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(`Timed out: ${label}`)), sahpoolWorkerTimeoutMs)
+            }),
+        ])
+    } finally { clearTimeout(timer) }
+}
 async function observeSahpoolWorkers(context, launchStartedMs) {
     const browser = context.browser()
     if (browser === null) { throw new Error('Missing browser for worker diagnostic') }
     const session = await browser.newBrowserCDPSession()
     const workers = new Map()
     const receipt = {launchStartedMs, readyMs: null, workers: []}
+    const pending = new Set()
+    const commands = new Map()
+    const executionContexts = new Map()
+    let commandId = 0
+    session.on('Target.receivedMessageFromTarget', ({sessionId, message}) => {
+        const payload = JSON.parse(message)
+        if (payload.method === 'Runtime.executionContextCreated') {
+            executionContexts.get(sessionId)?.resolve(payload.params.context.id)
+        }
+        const command = commands.get(`${sessionId}:${payload.id}`)
+        if (command) {
+            commands.delete(`${sessionId}:${payload.id}`)
+            clearTimeout(command.timer)
+            if (payload.error) { command.reject(new Error(payload.error.message)) }
+            else { command.resolve(payload.result) }
+        }
+    })
+    const sendToWorker = (sessionId, method, params = {}) => new Promise((resolve, reject) => {
+        const id = ++commandId
+        const key = `${sessionId}:${id}`
+        const timer = setTimeout(() => {
+            commands.delete(key)
+            reject(new Error(`Timed out: ${method}`))
+        }, sahpoolWorkerTimeoutMs)
+        commands.set(key, {resolve, reject, timer})
+        session.send('Target.sendMessageToTarget', {sessionId, message: JSON.stringify({id, method, params})}).catch((error) => {
+            commands.delete(key)
+            clearTimeout(timer)
+            reject(error)
+        })
+    })
+    const identify = async (row) => {
+        let sessionId
+        try {
+            // Chromium exposes some existing nested workers with empty target
+            // URLs. Attach without pausing, then read the worker's own location.
+            const attached = await withSahpoolTimeout(session.send('Target.attachToTarget', {targetId: row.id, flatten: false}), 'worker attach')
+            sessionId = attached.sessionId
+            const contextReady = Promise.withResolvers()
+            executionContexts.set(sessionId, contextReady)
+            await sendToWorker(sessionId, 'Runtime.enable')
+            const contextId = await withSahpoolTimeout(contextReady.promise, 'worker execution context')
+            const evaluated = await sendToWorker(sessionId, 'Runtime.evaluate', {
+                expression: 'globalThis.location.href', returnByValue: true, contextId,
+            })
+            if (evaluated.exceptionDetails || evaluated.result?.type !== 'string' || !evaluated.result.value) {
+                throw new Error('Worker location was not a nonempty string')
+            }
+            row.url = evaluated.result.value
+            row.urlSource = 'Runtime.evaluate(globalThis.location.href)'
+        } catch (error) {
+            row.resolutionError = String(error.message || error)
+        } finally {
+            if (sessionId) {
+                executionContexts.delete(sessionId)
+                try {
+                    await withSahpoolTimeout(session.send('Target.detachFromTarget', {sessionId}), 'worker detach')
+                } catch (error) { row.detachError = String(error.message || error) }
+            }
+        }
+    }
     const remember = (targetInfo) => {
         if (!['worker', 'service_worker', 'shared_worker'].includes(targetInfo.type)) { return }
-        workers.set(targetInfo.targetId, {id: targetInfo.targetId, type: targetInfo.type, url: targetInfo.url})
+        let row = workers.get(targetInfo.targetId)
+        if (!row) {
+            row = {id: targetInfo.targetId, type: targetInfo.type, url: targetInfo.url, targetInfoUrl: targetInfo.url,
+                urlSource: targetInfo.url ? 'TargetInfo.url' : null}
+            workers.set(targetInfo.targetId, row)
+            if (!row.url) {
+                const task = identify(row).finally(() => pending.delete(task))
+                pending.add(task)
+            }
+        } else if (targetInfo.url && !row.url) {
+            row.url = targetInfo.url
+            row.urlSource = 'TargetInfo.url'
+        }
         receipt.workers = [...workers.values()]
     }
     session.on('Target.targetCreated', ({targetInfo}) => remember(targetInfo))
@@ -44,6 +129,9 @@ async function observeSahpoolWorkers(context, launchStartedMs) {
     const snapshot = async () => {
         const {targetInfos} = await session.send('Target.getTargets', {filter: [{}]})
         for (const info of targetInfos) { remember(info) }
+        // Creation events may enqueue more work while prior workers resolve.
+        // Join every queued identity before emitting or checking the snapshot.
+        while (pending.size) { await Promise.all([...pending]) }
         receipt.workers = [...workers.values()]
     }
     sahpoolDiagnostic.contexts.push(receipt)
@@ -115,6 +203,11 @@ def overlay(source):
                 const restartedState = await evalSendMessage(page, 'benchmarkDictionaryState');''',
     )
     source = replace_once(
+        source, '        const relaunchPersistentContext = async () => {',
+        '''        const relaunchPersistentContext = async () => {
+            if (sahpoolObserver !== null) { await sahpoolObserver.snapshot() }''',
+    )
+    source = replace_once(
         source, '            await mkdir(path.dirname(reportPath), {recursive: true});',
         '''            if (sahpoolObserver !== null) { await sahpoolObserver.snapshot() }
             await writeFile(process.env.MANABITAN_SAHPOOL_DIAGNOSTIC_PATH, JSON.stringify(sahpoolDiagnostic, null, 2))
@@ -139,6 +232,8 @@ def verify_workers(receipt, candidate):
         if type(ready) not in (int, float) or not 0 < ready < float('inf'):
             raise ValueError('Missing cold readiness boundary')
         workers = context.get('workers', [])
+        if any(not isinstance(row.get('url'), str) or not row['url'] for row in workers):
+            raise ValueError('Unresolved worker identity makes proxy absence inconclusive')
         primary = [row for row in workers if row['type'] == 'worker' and
                    urlsplit(row['url']).path == '/js/background/offscreen-dictionary-worker.js']
         proxies = [row for row in workers if

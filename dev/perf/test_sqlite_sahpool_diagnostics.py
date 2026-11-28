@@ -29,30 +29,70 @@ class DiagnosticWitness(unittest.TestCase):
 const assert = (await import('node:assert/strict')).default
 const handlers = new Map()
 const requests = []
+const locations = {
+    primary: 'chrome-extension://test/js/background/offscreen-dictionary-worker.js',
+    proxy: 'chrome-extension://test/lib/sqlite3-opfs-async-proxy.js',
+    later: 'chrome-extension://test/later.js',
+}
 const session = {
     on: (name, callback) => handlers.set(name, callback),
     send: async (name, params) => {
         requests.push({name, params})
         if (name === 'Target.getTargets') {
             return {targetInfos: [
-                {targetId: 'primary', type: 'worker', url: 'chrome-extension://test/js/background/offscreen-dictionary-worker.js'},
-                {targetId: 'proxy', type: 'worker', url: 'chrome-extension://test/lib/sqlite3-opfs-async-proxy.js'},
+                {targetId: 'primary', type: 'worker', url: ''},
+                {targetId: 'proxy', type: 'worker', url: ''},
             ]}
+        }
+        if (name === 'Target.attachToTarget') { return {sessionId: `session-${params.targetId}`} }
+        if (name === 'Target.sendMessageToTarget') {
+            const command = JSON.parse(params.message)
+            const received = (payload) => handlers.get('Target.receivedMessageFromTarget')({sessionId: params.sessionId, message: JSON.stringify(payload)})
+            if (command.method === 'Runtime.enable') {
+                received({method: 'Runtime.executionContextCreated', params: {context: {id: 1}}})
+            }
+            if (params.sessionId === 'session-later') { await new Promise((resolve) => setTimeout(resolve, 5)) }
+            received({id: command.id, result: command.method === 'Runtime.evaluate'
+                ? {result: {type: 'string', value: locations[params.sessionId.slice(8)]}} : {}})
         }
     },
 }
 await observeSahpoolWorkers({browser: () => ({newBrowserCDPSession: async () => session})}, 1)
-assert.deepEqual(requests, [
+assert.deepEqual(requests.filter(({name}) => ['Target.setDiscoverTargets', 'Target.getTargets'].includes(name)), [
     {name: 'Target.setDiscoverTargets', params: {discover: true, filter: [{}]}},
     {name: 'Target.getTargets', params: {filter: [{}]}},
 ])
 assert.equal(sahpoolDiagnostic.contexts[0].workers.length, 2)
+assert.equal(sahpoolDiagnostic.contexts[0].workers[0].url, locations.primary)
+assert.equal(sahpoolDiagnostic.contexts[0].workers[1].url, locations.proxy)
 handlers.get('Target.targetCreated')({targetInfo: {targetId: 'later', type: 'worker', url: ''}})
-handlers.get('Target.targetInfoChanged')({targetInfo: {targetId: 'later', type: 'worker', url: 'chrome-extension://test/later.js'}})
+handlers.get('Target.targetInfoChanged')({targetInfo: {targetId: 'later', type: 'worker', url: ''}})
+await sahpoolObserver.snapshot()
 assert.equal(sahpoolDiagnostic.contexts[0].workers.length, 3)
 assert.equal(sahpoolDiagnostic.contexts[0].workers[2].url, 'chrome-extension://test/later.js')
+assert.equal(requests.filter(({name}) => name === 'Target.attachToTarget').length, 3)
+assert.ok(requests.filter(({name}) => name === 'Target.attachToTarget').every(({params}) => params.flatten === false))
+assert.equal(requests.filter(({name}) => name === 'Target.detachFromTarget').length, 3)
+assert.ok(requests.every(({name}) => name !== 'Target.setAutoAttach'))
 '''
         subprocess.run(['node', '--input-type=module', '-e', probe], check=True, capture_output=True)
+
+    def test_unresponsive_worker_is_bounded_and_remains_unidentified(self):
+        probe = DIAGNOSTICS.HELPER.replace('const sahpoolWorkerTimeoutMs = 5000', 'const sahpoolWorkerTimeoutMs = 20') + r'''
+const assert = (await import('node:assert/strict')).default
+const session = {
+    on: () => {},
+    send: async (name) => {
+        if (name === 'Target.getTargets') { return {targetInfos: [{targetId: 'unknown', type: 'worker', url: ''}]} }
+        if (name === 'Target.attachToTarget') { return {sessionId: 'silent'} }
+    },
+}
+await observeSahpoolWorkers({browser: () => ({newBrowserCDPSession: async () => session})}, 1)
+const row = sahpoolDiagnostic.contexts[0].workers[0]
+assert.equal(row.url, '')
+assert.match(row.resolutionError, /Timed out: Runtime.enable/)
+'''
+        subprocess.run(['node', '--input-type=module', '-e', probe], check=True, capture_output=True, timeout=5)
 
     def test_overlay_preserves_existing_verification_and_parses(self):
         original = (ROOT / 'test/chromium/extension-two-dictionary-import.e2e.js').read_text()
@@ -82,6 +122,11 @@ assert.equal(sahpoolDiagnostic.contexts[0].workers[2].url, 'chrome-extension://t
         broken['contexts'][0]['workers'] = []
         with self.assertRaises(ValueError):
             DIAGNOSTICS.verify_workers(broken, True)
+        for candidate in [False, True]:
+            broken = copy.deepcopy(receipt(candidate))
+            broken['contexts'][0]['workers'].append({'id': 'unknown', 'type': 'worker', 'url': ''})
+            with self.assertRaisesRegex(ValueError, 'Unresolved worker identity'):
+                DIAGNOSTICS.verify_workers(broken, candidate)
         for suffix in ['?opfs-disabled', '#?opfs-disable', '?other=opfs-disable']:
             broken = copy.deepcopy(receipt(True))
             broken['contexts'][0]['workers'][0]['url'] = 'chrome-extension://test/js/background/offscreen-dictionary-worker.js' + suffix
