@@ -1,0 +1,39 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+  "emscripten": {
+    "version": "5.0.1-git",
+    "revision": "8c5f43157a3f069ade75876e23061330521eabde",
+    "sdkRelease": "bf32ae8b61ac8efeb7eca01b54c8307f992724f7",
+    "url": "https://storage.googleapis.com/webassembly/emscripten-releases-builds/linux/bf32ae8b61ac8efeb7eca01b54c8307f992724f7/wasm-binaries.tar.xz",
+    "sha256": "bda6917b630fcc604cca39af433180adfd7195e378075331ceac926553684249",
+    "bytes": 342144156
+  },
+  "wrapperSha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+  "envelopeSourceSha256": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2",
+  "candidates": [
+    "count16",
+    "cstream64"
+  ],
+  "expected": {
+    "baseline": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "wasmBytes": 433631
+    },
+    "count16": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "97d501650796ba7080b6242d9d2aa49c7c05c84c7d8c5107d7796c25b5599afe",
+      "wasmBytes": 430878
+    },
+    "cstream64": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "80e39a8986159a56be253de74c48f4be38db732699f71eb6c68dae35044240dc",
+      "wasmBytes": 433727
+    }
+  },
+  "limitations": {
+    "count16": "SIMD bitmask cost can differ on ARM. This x64 component screen does not qualify ARM or full-import performance.",
+    "cstream64": "The 64-bit tail reserve changes some tight-destination successes into dstSize_tooSmall. Production compressBound allocation remains byte-identical. Local proof records 72 status differences across 1110 canary checks; not release-qualified."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "artifactId": 15245899188,
+  "artifactName": "jmdict-source-capture-9d6-46103338197-1",
+  "artifactBytes": 16506090,
+  "artifactSha256": "c3ab42f8714af1c21053e258c5caa7b8fa3c98a6f2eace8cf3c29f69da9f0ffe",
+  "runId": 46103338197,
+  "runAttempt": 1,
+  "sourceHeadSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+  "sourceBranch": "perf/import-components-9d6-20261128",
+  "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "termRows": 528299,
+  "groups": 12
+}

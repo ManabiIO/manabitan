@@ -1,0 +1,70 @@
+name: Codec word width v2 9d6
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['perf/import-components-9d6-20261128']
+    paths:
+      - '.github/workflows/import-codec-width-v2-9d6.yml'
+      - 'dev/perf/wasm-word-width-v2/**'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CODEC_BASELINE_REF: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+
+jobs:
+  codec:
+    name: Independent codec candidates / ${{ matrix.order }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      CODEC_ORDER: ${{ matrix.order }}
+      CODEC_OUTPUT: builds/perf/import-codec-width-v2/${{ matrix.order }}
+      CODEC_CAPTURE: builds/perf/import-codec-width-v2/capture
+    steps:
+      - name: Create evidence directory
+        run: mkdir -p "$CODEC_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CODEC_BASELINE_REF }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.22.3'
+      - name: Verify and reuse the exact frozen capture artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node candidate/dev/perf/wasm-word-width-v2/fetch-capture.mjs \
+            "$GITHUB_REPOSITORY" "$CODEC_CAPTURE" "$CODEC_OUTPUT/capture-download-receipt.json" \
+            > "$CODEC_OUTPUT/capture-download.stdout.log" 2> "$CODEC_OUTPUT/capture-download.stderr.log"
+      - name: Build, verify, and run the fixed codec protocol
+        run: |
+          node candidate/dev/perf/wasm-word-width-v2/run.mjs baseline "$CODEC_CAPTURE" \
+            "$CODEC_OUTPUT" "$CODEC_ORDER" \
+            > "$CODEC_OUTPUT/run.stdout.log" 2> "$CODEC_OUTPUT/run.stderr.log"
+      - name: Retain all prescribed observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: codec-width-v2-${{ matrix.order }}-9d6-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.CODEC_OUTPUT }}/*.json
+            ${{ env.CODEC_OUTPUT }}/*.log
+            ${{ env.CODEC_OUTPUT }}/wasm-*/zstd-simd-module.js
+            ${{ env.CODEC_OUTPUT }}/wasm-*/zstd-simd-module.wasm
+          if-no-files-found: error
+          retention-days: 14
