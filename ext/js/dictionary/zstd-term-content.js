@@ -102,6 +102,8 @@ export class TermContentCompressionPool {
         this._pending = new Map();
         /** @type {number} */
         this._nextId = 1;
+        /** @type {number} */
+        this._nextSpanWorkerIndex = 0;
         /** @type {boolean} */
         this._failed = false;
         for (const worker of workers) {
@@ -234,7 +236,9 @@ export class TermContentCompressionPool {
         }
         validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths);
         const compressionExperiments = snapshotTermBankExperiments(options);
-        const envelopeMsByWorker = new Float64Array(this._workers.length);
+        const workerCount = this._workers.length;
+        const firstWorkerIndex = this._nextSpanWorkerIndex;
+        const envelopeMsByWorker = new Float64Array(workerCount);
         // Snapshot both columns before dispatch. The caller owns its scratch
         // arrays and each worker receives views of this batch's immutable copy.
         const metadata = new SharedArrayBuffer(sourceOffsets.byteLength + sourceLengths.byteLength);
@@ -242,8 +246,12 @@ export class TermContentCompressionPool {
         const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
         offsets.set(sourceOffsets);
         lengths.set(sourceLengths);
+        // Continue assignment across adjacent shared batches so a partial worker
+        // round does not put the next batch behind the same workers. Worker
+        // count, block boundaries and result order stay fixed.
+        this._nextSpanWorkerIndex = (firstWorkerIndex + blockLengths.length) % workerCount;
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
-            const workerIndex = blockIndex % this._workers.length;
+            const workerIndex = (firstWorkerIndex + blockIndex) % workerCount;
             const start = blockStartIndexes[blockIndex];
             const end = blockStartIndexes[blockIndex + 1];
             return this._dispatchWithSourceConsumed(
@@ -281,7 +289,7 @@ export class TermContentCompressionPool {
                 /** @type {unknown} */ (results)
             );
             const chunks = successfulResults.map((result, blockIndex) => {
-                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+                envelopeMsByWorker[(firstWorkerIndex + blockIndex) % workerCount] += result.envelopeMs;
                 return result.bytes;
             });
             return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};

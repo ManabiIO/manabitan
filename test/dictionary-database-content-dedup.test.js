@@ -114,7 +114,7 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, s
  * @param {number[]} [sourceValues]
  * @param {number} [hash1]
  * @param {number} [hash2]
- * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
+ * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => ReturnType<DictionaryDatabase['_bulkAddArtifactTermsChunkWithContentDedup']>}}
  */
 function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20) {
     const database = new DictionaryDatabase();
@@ -2831,9 +2831,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
                 };
             }),
         });
-        const bulkAddArtifactTermsChunkWithContentDedup = /** @type {(this: DictionaryDatabase, chunk: unknown) => Promise<void>} */ (
-            Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup')
-        );
+        const bulkAddArtifactTermsChunkWithContentDedup = Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup');
         const makeChunk = (
             /** @type {Uint8Array[]} */ contentBytesList,
             /** @type {number[]} */ hash1List,

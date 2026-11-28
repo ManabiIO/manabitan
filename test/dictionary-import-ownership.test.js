@@ -47,6 +47,45 @@ function createSession(dictionaryDatabase, errors, archiveReader, disposeParser)
 describe('DictionaryImportSession', () => {
     const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Test dictionary'});
 
+    test('admits term tickets only after startup and forwards the captured session owner', async () => {
+        const ticket = {published: Promise.resolve(), completion: Promise.resolve({rows: 1})};
+        const begin = vi.fn(() => ticket);
+        const dictionaryDatabase = {...createDatabase(), beginBulkAddArtifactTermsChunk: begin};
+        const session = createSession(dictionaryDatabase, [], {close: async () => {}}, async () => {});
+        const chunk = /** @type {Parameters<DictionaryImportSession['beginArtifactTermChunk']>[0]} */ (/** @type {unknown} */ ({}));
+
+        expect(() => session.beginArtifactTermChunk(chunk)).toThrow('not accepting');
+        const startup = session.startBulkImport();
+        expect(() => session.beginArtifactTermChunk(chunk)).toThrow('not accepting');
+        await startup;
+        expect(session.beginArtifactTermChunk(chunk)).toBe(ticket);
+        expect(begin).toHaveBeenCalledExactlyOnceWith(chunk, 'test-import-session');
+
+        session.recordFailure(new Error('source failed'));
+        expect(() => session.beginArtifactTermChunk(chunk)).toThrow('not accepting');
+        expect(begin).toHaveBeenCalledTimes(1);
+    });
+
+    test.each([false, true])('stops new tickets synchronously before resource disposal, finalize=%s', async (finalize) => {
+        /** @type {() => void} */
+        let release = () => {};
+        /** @type {Promise<void>} */
+        const gate = new Promise((resolve) => { release = resolve; });
+        const begin = vi.fn(() => ({published: Promise.resolve(), completion: Promise.resolve({})}));
+        const dictionaryDatabase = {...createDatabase(), beginBulkAddArtifactTermsChunk: begin};
+        const session = createSession(dictionaryDatabase, [], {close: async () => {}}, async () => { await gate; });
+        const chunk = /** @type {Parameters<DictionaryImportSession['beginArtifactTermChunk']>[0]} */ (/** @type {unknown} */ ({}));
+        await session.startBulkImport();
+
+        const completion = finalize ? session.finalizeBulkImport(() => {}, summary) : session.disposeImportResources();
+        expect(() => session.beginArtifactTermChunk(chunk)).toThrow('not accepting');
+        expect(begin).not.toHaveBeenCalled();
+        expect(dictionaryDatabase.finishBulkImport).not.toHaveBeenCalled();
+        release();
+        await completion;
+        expect(() => session.beginArtifactTermChunk(chunk)).toThrow('not accepting');
+    });
+
     test('commits and publishes a completed import once', async () => {
         /** @type {string[]} */
         const order = [];

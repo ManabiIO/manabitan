@@ -144,6 +144,21 @@ export class DictionaryImportSession {
     }
 
     /**
+     * @param {Parameters<import('./dictionary-database.js').DictionaryDatabase['beginBulkAddArtifactTermsChunk']>[0]} chunk
+     * @returns {import('./artifact-term-chunk-pipeline.js').ArtifactTermChunkAppend}
+     * @throws {Error} If this import no longer owns its bulk session.
+     */
+    beginArtifactTermChunk(chunk) {
+        if (
+            this._bulkState !== 'active' || this._bulkImportSessionId === null || this._failed ||
+            this._bulkFinalizationPromise !== null || this._resourceDisposalPromise !== null
+        ) {
+            throw new Error('Dictionary import session is not accepting term chunks');
+        }
+        return this._dictionaryDatabase.beginBulkAddArtifactTermsChunk(chunk, this._bulkImportSessionId);
+    }
+
+    /**
      * Source reads and parser workers settle before the archive is closed.
      * @returns {Promise<void>}
      */

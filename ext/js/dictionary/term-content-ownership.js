@@ -24,6 +24,44 @@ export const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES = 512
 /** @type {WeakSet<ArrayBufferLike>} */
 const ownedContentBuffers = new WeakSet()
 
+/** @typedef {Readonly<{completion: Promise<void>}>} ArtifactTermChunkSinkCompletion */
+/** @type {WeakMap<object, Promise<void>|null>} */
+const sinkCompletions = new WeakMap()
+
+/**
+ * Explicitly transfers one internal sink's completion to its next consumer.
+ * Ordinary callback return values never opt in merely by having the same shape.
+ * @param {Promise<void>} completion
+ * @returns {ArtifactTermChunkSinkCompletion}
+ * @throws {TypeError} If the internal producer did not supply a completion promise.
+ */
+export function createArtifactTermChunkSinkCompletion(completion) {
+    if (completion === null || typeof completion !== 'object' || typeof completion.then !== 'function') {
+        throw new TypeError('Artifact term chunk sink completion must be a promise')
+    }
+    const ownedCompletion = Promise.resolve(completion)
+    void ownedCompletion.catch(() => {})
+    const ticket = Object.freeze({completion: ownedCompletion})
+    sinkCompletions.set(ticket, ownedCompletion)
+    return ticket
+}
+
+/**
+ * Claims a genuine ticket once without reading any caller-owned properties.
+ * The parser historically ignored values returned by ordinary void callbacks.
+ * @param {unknown} result
+ * @returns {Promise<void>|null}
+ * @throws {TypeError} If an authentic completion ticket was already claimed.
+ */
+export function takeArtifactTermChunkSinkCompletion(result) {
+    if (result === null || typeof result !== 'object') { return null }
+    const completion = sinkCompletions.get(result)
+    if (typeof completion === 'undefined') { return null }
+    if (completion === null) { throw new TypeError('Artifact term chunk sink completion was already claimed') }
+    sinkCompletions.set(result, null)
+    return completion
+}
+
 /**
  * Complete small-definition groups are eligible for the existing recent-source
  * cache. Publish a compact owned slab so the parser can advance independently.
@@ -84,6 +122,19 @@ export function registerOwnedTermContent(source) {
         return true
     }
     return false
+}
+
+/**
+ * Checks immutable parser ownership without consuming the cache's witness.
+ * @param {Uint8Array|undefined} source
+ * @returns {boolean}
+ */
+export function hasOwnedTermContent(source) {
+    return (
+        source instanceof Uint8Array && source.byteOffset === 0 &&
+        source.byteLength > 0 && source.byteLength === source.buffer.byteLength &&
+        ownedContentBuffers.has(source.buffer)
+    )
 }
 
 /**
