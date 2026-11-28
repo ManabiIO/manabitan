@@ -1748,7 +1748,7 @@ describe('term-bank WASM parser', () => {
         vi.stubGlobal('Worker', RecordWorker);
         const owner = new NativeTermRecordImportOwner(() => {});
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
-        const count = getParallelTermBankParserWorkerCount();
+        const count = Math.max(4, getParallelTermBankParserWorkerCount());
         /** @type {Array<{lease: object, chunk: object}>} */
         const leases = [];
         let chunks = 0;
