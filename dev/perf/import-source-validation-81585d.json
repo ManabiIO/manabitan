@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "study": "81585d-source-validation-correction",
+  "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "nodeVersion": "v22.22.0",
+  "sources": {
+    "lazy-signatures": {
+      "commit": "71a29d3c82575919d4571cf7f62717b563837f7f",
+      "tree": "d2045d91480a106321a6d59f1a88b1679501f33d"
+    },
+    "early-borrowed-release": {
+      "commit": "1de603b81a377391529c9e518a824ff00ac4cc04",
+      "tree": "6cb01b38cd873bce30921fc67412831c3dd9f9e8"
+    }
+  },
+  "preservedTimingInputs": {
+    "protocol.json": "904a0f4713f93da114063d8072477373116ea155409961c048a5fd7f35202e52",
+    "timing-runner.py": "f33863b1c04d2419fd80f4857876f78a1ddf4201b850c60186db3aa031c1aaa8",
+    "timing-workflow.yml": "6184ff3816ae6ec42446bb4f08fa21f40fa293aab03cc4ffee49bfebf093e3ea"
+  },
+  "gates": {
+    "runtime": [
+      "python3",
+      "builds/qualification-validation/validate-source.py",
+      "runtime"
+    ],
+    "unit": ["npm", "run", "test:unit"],
+    "options-unit": ["npm", "run", "test:unit:options"],
+    "javascript": ["npm", "run", "test:js"],
+    "types-main": ["npm", "run", "test:ts:main"],
+    "types-dev": ["npm", "run", "test:ts:dev"],
+    "types-test": ["npm", "run", "test:ts:test"],
+    "types-bench": ["npm", "run", "test:ts:bench"],
+    "build": ["npm", "run", "test:build"],
+    "native-apt-update": ["sudo", "apt-get", "update"],
+    "native-apt-install": [
+      "sudo",
+      "apt-get",
+      "install",
+      "-y",
+      "--no-install-recommends",
+      "clang-21",
+      "lld-21"
+    ],
+    "native-clang": ["/usr/bin/clang-21", "--version"],
+    "native-ld": ["/usr/bin/wasm-ld-21", "--version"],
+    "native-rebuild": ["npm", "run", "build:dictionary-wasm", "--", "--check"],
+    "package": [
+      "python3",
+      "builds/qualification-validation/validate-source.py",
+      "package"
+    ]
+  },
+  "correction": {
+    "identifiedBy": "Independent parent review",
+    "originalTimingCommit": "bc8b16e0228c71e12b0cb560182bdbc2bc83ca73",
+    "originalTimingRun": 46104094289,
+    "affectedSourceValidationSteps": "npm commands piped to tee under the unspecified default shell",
+    "finding": "GitHub unspecified bash shell uses bash -e without pipefail; tee can mask a failing npm process. Existing source-validation green steps are diagnostic, not authoritative. Timing acquisition invokes Python directly and is unaffected.",
+    "officialShellReference": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
+    "resolution": "Separate source-validation-only workflow, explicit defaults.run.shell bash, direct subprocess gate wrapper without shell pipelines, actual exit-code receipts, required final aggregate gate, exact source and package identity, final clean checkout verification.",
+    "timingAcquisitionDisposition": "Unchanged; do not supersede, rerun, cancel, replace, or pool timing cohorts because of this validation-only correction.",
+    "priorStage1TimingDisposition": "Entire prior stage 1 remains prospectively excluded according to its preserved disposition.",
+    "recordedAt": "2026-11-28T04:13:35Z"
+  }
+}
