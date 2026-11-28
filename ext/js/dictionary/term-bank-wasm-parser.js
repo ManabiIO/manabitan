@@ -407,7 +407,8 @@ async function supportsSingleMemberGzip(Stream) {
             const acceptsEmpty = async (parts) => {
                 let reader;
                 try {
-                    reader = new Blob(parts).stream().pipeThrough(new Stream('gzip')).getReader();
+                    reader = new Blob(parts).stream().pipeThrough(new Stream('gzip'))
+                        .getReader();
                     while (true) {
                         const {done, value} = await reader.read();
                         if (done) { return true; }
