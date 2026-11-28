@@ -1,0 +1,109 @@
+name: Cold source-cache full import qualification 9d6
+
+on:
+  push:
+    branches: ['perf/import-components-9d6-20261128']
+    paths:
+      - '.github/workflows/import-cache-range-9d6.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-cache-range-9d6-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: ${{ matrix.dictionary }} / ${{ matrix.order }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: dfd2523b514f291dc57f39a9f256bbc0759efd5b
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check existing observers
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch frozen product commits
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Compare complete imports and separate memory observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation_policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            allocation_policy=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-package-entry 'js/dictionary/dictionary-database.js' \
+            "${allocation_policy[@]}" \
+            --evidence "builds/perf/import-cache-range-9d6-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-cache-range-9d6-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-cache-range-9d6-${{ matrix.dictionary }}-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 14
+
+  checks:
+    name: Exact candidate unit, build, types, and lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: dfd2523b514f291dc57f39a9f256bbc0759efd5b
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        id: setup
+        with:
+          node-version: '22.22.0'
+      - name: Create validation evidence directory
+        run: mkdir -p builds/perf/cache-range-checks
+      - name: Full unit suite
+        run: npm run test:unit -- --maxWorkers=2 --no-file-parallelism > builds/perf/cache-range-checks/unit.log 2>&1
+      - name: All target build tests
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:build > builds/perf/cache-range-checks/build.log 2>&1
+      - name: Main runtime type check
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:ts:main > builds/perf/cache-range-checks/types.log 2>&1
+      - name: Changed runtime lint
+        if: always() && steps.setup.outcome == 'success'
+        run: node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js test/dictionary-database-content-dedup.test.js > builds/perf/cache-range-checks/lint.log 2>&1
+      - name: Retain exact candidate validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cache-range-checks-9d6-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/cache-range-checks
+          if-no-files-found: error
+          retention-days: 14
