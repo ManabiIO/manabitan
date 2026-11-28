@@ -72,6 +72,7 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
+import {copyMediaDiagnosticKeys} from './dictionary-media-diagnostics.js';
 // eslint-disable-next-line @stylistic/semi
 import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
@@ -3454,39 +3455,7 @@ export class DictionaryImporter {
         if (!Number.isSafeInteger(byteLength) || byteLength > 0xffffffff) {
             throw new TermBankWasmResourceError('Media diagnostic keys exceed their offset budget');
         }
-        const bytes = new Uint8Array(byteLength);
-        const spans = new Uint32Array(keys.length * 2);
-        /** @type {Map<number, string>|null} */
-        let decodedKeys = null;
-        let offset = 0;
-        for (let i = 0; i < keys.length; i += 2) {
-            const expression = keys[i];
-            const reading = keys[i + 1];
-            const expressionOffset = offset;
-            const expressionLength = typeof expression === 'string' ? 0 : expression.byteLength;
-            if (typeof expression === 'string') {
-                // Keep decoded strings verbatim, including lone surrogates
-                // that a UTF-8 encode/decode round trip would replace.
-                (decodedKeys ??= new Map()).set(i, expression);
-            } else {
-                bytes.set(expression, offset);
-                offset += expressionLength;
-            }
-            const readingOffset = reading === expression ? expressionOffset : offset;
-            const readingLength = typeof reading === 'string' ? 0 : reading.byteLength;
-            if (typeof reading === 'string') {
-                (decodedKeys ??= new Map()).set(i + 1, reading);
-            } else if (reading !== expression) {
-                bytes.set(reading, offset);
-                offset += readingLength;
-            }
-            const spanIndex = i * 2;
-            spans[spanIndex] = expressionOffset;
-            spans[spanIndex + 1] = expressionLength;
-            spans[spanIndex + 2] = readingOffset;
-            spans[spanIndex + 3] = readingLength;
-        }
-        return {bytes, spans, decodedKeys};
+        return copyMediaDiagnosticKeys(keys, byteLength);
     }
 
     /**
@@ -5183,12 +5152,28 @@ export class DictionaryImporter {
                 }
                 if (useDirectArtifactChunkImport) {
                     const tMaterializationStart = Date.now();
-                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
-                    const {mediaRows, ...columnPayload} = columnChunk;
+                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>, projectedMedia?: import('./term-bank-wasm-parser.js').ProjectedMediaReferences}} */ (/** @type {unknown} */ (parsedRows));
+                    const {mediaRows, projectedMedia, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
                         const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
                         let diagnosticIndex = 0;
+                        let projectedIndex = 0;
+                        let projectedPathStart = 0;
+                        const addProjectedReferencesBefore = (/** @type {number} */ nextIndex) => {
+                            if (typeof projectedMedia === 'undefined') { return; }
+                            const {rowIndexes, pathEnds, paths, diagnosticKeys: projectedDiagnosticKeys} = projectedMedia;
+                            while (projectedIndex < rowIndexes.length && rowIndexes[projectedIndex] < nextIndex) {
+                                const entry = {dictionary: dictionaryTitle, diagnosticKeys: projectedDiagnosticKeys, diagnosticIndex: projectedIndex};
+                                const pathEnd = pathEnds[projectedIndex];
+                                for (let i = projectedPathStart; i < pathEnd; ++i) {
+                                    this._addFastMediaRequirement(paths[i], entry, requirementsForChunk);
+                                }
+                                projectedPathStart = pathEnd;
+                                ++projectedIndex;
+                            }
+                        };
                         for (const {index, row, imagePaths} of mediaRows) {
+                            addProjectedReferencesBefore(index);
                             if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
                                 const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
                                 for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
@@ -5232,6 +5217,7 @@ export class DictionaryImporter {
                                 }
                             }
                         }
+                        addProjectedReferencesBefore(Infinity);
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                     const tChunkSinkStart = Date.now();

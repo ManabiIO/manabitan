@@ -10,9 +10,10 @@ import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
 
-/** @typedef {Parameters<typeof parser.copyWasmBackedColumnChunk>[0]} ColumnChunk */
+/** @typedef {ReturnType<typeof parser.copyWasmBackedColumnChunk>} ColumnChunk */
 
 const encoder = new TextEncoder()
+const decoder = new TextDecoder()
 const nativeParse = parser.parseTermBankWithWasmColumnChunks
 
 beforeAll(async () => {
@@ -26,12 +27,13 @@ afterEach(() => { vi.restoreAllMocks() })
  * be observed without spawning a browser for this unit test.
  * @param {unknown[]} rows
  * @param {(chunk: ColumnChunk) => void} [inspect]
+ * @param {boolean} [columnarMedia]
  * @returns {Promise<{importer: DictionaryImporter, requirements: import('dictionary-importer').ImportRequirement[]}>}
  */
-async function collectReferences(rows, inspect = () => {}) {
+async function collectReferences(rows, inspect = () => {}, columnarMedia = false) {
     vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
         return await nativeParse(source, version, async (chunk, progress) => {
-            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
+            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true, false, void 0, columnarMedia)
             inspect(projected)
             await onChunk(projected, progress)
         }, size, options)
@@ -49,6 +51,68 @@ async function collectReferences(rows, inspect = () => {}) {
 }
 
 describe('preformatted image references', () => {
+    test('merges projected columns and fallback rows in source order with identical diagnostics', async () => {
+        const rows = [
+            ['先行', 'せんこう', '', '', 0, [{type: 'image', path: 'first.png'}], 0, ''],
+            ['fallback', '', '', '', 0, [{type: 'image', path: 'unsupported.bin'}], 0, ''],
+            ['別名', '', '', '', 0, [{type: 'structured-content',
+                content: [
+                    {tag: 'img', path: 'first.png'},
+                    {tag: 'img', path: 'last.webp'},
+                ]}], 0, ''],
+        ]
+        const baseline = await collectReferences(rows)
+        /** @type {ColumnChunk|undefined} */
+        let copied
+        const candidate = await collectReferences(rows, (chunk) => { copied = chunk }, true)
+        if (typeof copied === 'undefined' || typeof copied.projectedMedia === 'undefined') { throw new Error('Missing media columns') }
+        expect(copied.mediaRows.map(({index}) => index)).toEqual([1])
+        expect(copied.projectedMedia.rowIndexes).toEqual(
+            new Uint32Array([0, 2]),
+        )
+        expect(copied.projectedMedia.pathEnds).toEqual(new Uint32Array([1, 3]))
+        expect(copied.projectedMedia.paths).toEqual(['first.png', 'first.png', 'last.webp'])
+        /**
+         * @param {Awaited<ReturnType<typeof collectReferences>>} result
+         * @returns {Array<{path: string, expression: string, reading: string}>}
+         */
+        const normalize = ({importer, requirements}) => requirements.map((requirement) => {
+            const deferred = importer._createDeferredMediaRequirement(requirement)
+            if (!('diagnosticKeys' in deferred)) {
+                return {path: requirement.source.path, expression: deferred.expression, reading: deferred.reading}
+            }
+            const {diagnosticKeys, diagnosticIndex} = deferred
+            const index = diagnosticIndex * 4
+            const key = (/** @type {number} */ byteOffset, /** @type {number} */ byteLength, /** @type {number} */ decodedIndex) => (
+                diagnosticKeys.decodedKeys?.get(decodedIndex) ?? decoder.decode(diagnosticKeys.bytes.subarray(byteOffset, byteOffset + byteLength))
+            )
+            return {
+                path: requirement.source.path,
+                expression: key(diagnosticKeys.spans[index], diagnosticKeys.spans[index + 1], diagnosticIndex * 2),
+                reading: key(diagnosticKeys.spans[index + 2], diagnosticKeys.spans[index + 3], diagnosticIndex * 2 + 1),
+            }
+        })
+        expect(normalize(candidate)).toEqual(normalize(baseline))
+        for (const requirement of candidate.requirements) {
+            if (requirement.type === 'image-reference' && requirement.entry.dictionary === 'Media references') {
+                expect(Reflect.get(requirement.entry, 'diagnosticKeys')).toBe(copied.projectedMedia.diagnosticKeys)
+            }
+        }
+    })
+
+    test('keeps empty and unsupported media projections on the existing path', async () => {
+        const rows = [
+            ['text', '', '', '', 0, ['ordinary'], 0, ''],
+            ['unsupported', '', '', '', 0, [{type: 'image', path: 'unsupported.bin'}], 0, ''],
+        ]
+        const baseline = await collectReferences(rows)
+        const candidate = await collectReferences(rows, (chunk) => {
+            expect(chunk.projectedMedia).toBeUndefined()
+            expect(chunk.mediaRows).toHaveLength(1)
+        }, true)
+        expect(candidate.requirements.map(({source}) => source.path)).toEqual(baseline.requirements.map(({source}) => source.path))
+    })
+
     test('keeps exact diagnostic key views in the owned string arena across native reuse', async () => {
         /** @type {Uint8Array[]} */
         const keys = []

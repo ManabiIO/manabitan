@@ -152,10 +152,20 @@ for (const config of [
                 ++calls
                 assert.equal(typeof chunk.releaseBorrowedContent, config.borrowed ? 'function' : 'undefined')
                 assert.equal(takeOwnedTermContent(chunk.contentBytesBuffer), !config.borrowed)
-                assert.ok(chunk.mediaRows.length > 0)
-                assert.ok(chunk.mediaRows.every(({imagePaths}) => (config.forceNonProjected ?
-                    typeof imagePaths === 'undefined' :
-                    imagePaths.length === 1 && imagePaths[0].endsWith('.png'))))
+                if (config.forceNonProjected) {
+                    assert.equal(chunk.projectedMedia, undefined)
+                    assert.ok(chunk.mediaRows.length > 0)
+                    assert.ok(chunk.mediaRows.every(({imagePaths}) => typeof imagePaths === 'undefined'))
+                } else {
+                    assert.equal(chunk.mediaRows.length, 0)
+                    const {rowIndexes, pathEnds, paths, diagnosticKeys} = chunk.projectedMedia
+                    assert.ok(rowIndexes.length > 0)
+                    assert.equal(pathEnds.length, rowIndexes.length)
+                    assert.equal(paths.length, rowIndexes.length)
+                    assert.ok(pathEnds.every((end, index) => end === index + 1))
+                    assert.ok(paths.every((path) => /^image-\d+\.png$/.test(path)))
+                    assert.equal(diagnosticKeys.spans.length, rowIndexes.length * 4)
+                }
                 const fields = independentFields(chunk)
                 retained.push({fields, snapshot: structuredClone(fields)})
                 if (calls !== 1) { return }
