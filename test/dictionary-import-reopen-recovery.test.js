@@ -380,6 +380,65 @@ test.each(['content', 'records'])('explicit purge discards failed live %s writes
     expect(await database._termContentStore.readSlice(0, 3)).toEqual(bytes)
 })
 
+test.each([
+    {stage: 'create', hook: 'beforeCreateWritable', rawRejection: false},
+    {stage: 'seek', hook: 'beforeSeek', rawRejection: false},
+    {stage: 'write', hook: 'beforeWrite', rawRejection: false},
+    {stage: 'write with a non-Error reason', hook: 'beforeWrite', rawRejection: true},
+])('rolls back a sealed index after descriptor $stage fails and reopens cleanly', async ({stage, hook, rawRejection}) => {
+    const {database, opfs} = await fixture()
+    const sessionId = await database.startBulkImport()
+    await appendTerm(database, 'Interrupted')
+    const store = database._termRecordStore
+    const fileName = store._getShardFileName('Interrupted', 'raw')
+    const recordDirectory = await opfs.root.getDirectoryHandle('manabitan-term-records')
+    const message = `descriptor ${stage} witness`
+    const failure = rawRejection ? message : new Error(message)
+    let failures = 0
+    Reflect.set(opfs.hooks, hook, (/** @type {string} */ name) => {
+        if (name !== fileName) { return }
+        ++failures
+        throw failure
+    })
+    let indexSealed = false
+    const flushIndex = store._flushLookupIndexFile.bind(store)
+    vi.spyOn(store, '_flushLookupIndexFile').mockImplementation(async (state) => {
+        await flushIndex(state)
+        if (state.fileName !== fileName || indexSealed) { return }
+        const handle = await recordDirectory.getFileHandle(`${fileName}.mbti`)
+        const bytes = new Uint8Array(await (await handle.getFile()).arrayBuffer())
+        expect(new TextDecoder().decode(bytes.subarray(0, 8))).toBe('MBTIDX11')
+        indexSealed = true
+    })
+    const health = vi.spyOn(store, '_setDictionaryHealth')
+    const result = await database.finishBulkImport(null, null, sessionId).then(() => null, (error) => error)
+    expect(result).not.toBeInstanceOf(AggregateError)
+    if (rawRejection) {
+        expect(result).toBeInstanceOf(Error)
+        expect(result).toHaveProperty('message', message)
+    } else {
+        expect(result).toBe(failure)
+    }
+    expect(failures).toBe(1)
+    expect(indexSealed).toBe(true)
+    expect(health).not.toHaveBeenCalledWith('Interrupted', 'available')
+    expect(await database._importJournal.read()).toBeNull()
+    await expect(recordDirectory.getFileHandle(fileName)).rejects.toHaveProperty('name', 'NotFoundError')
+    await expect(recordDirectory.getFileHandle(`${fileName}.mbti`)).rejects.toHaveProperty('name', 'NotFoundError')
+    Reflect.set(opfs.hooks, hook, null)
+    await database.close()
+
+    const reopened = new DictionaryDatabase()
+    await reopened.prepare()
+    expect(await reopened.getDictionaryInfo()).toMatchObject([{title: 'Survivor'}])
+    expect(await reopened.findTermsBulk(['Survivor'], new Set(['Survivor']), 'exact')).toMatchObject([
+        {dictionary: 'Survivor', definitions: ['Survivor definition']},
+    ])
+    expect(reopened._termRecordStore.getDictionaryRecordCount('Interrupted')).toBe(0)
+    const nextSession = await reopened.startBulkImport()
+    await expect(reopened.abortBulkImport(nextSession)).resolves.toBeUndefined()
+})
+
 test('purge joins an in-flight content writer before deleting its files', async () => {
     const {database, opfs} = await fixture()
     const entered = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())

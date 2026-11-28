@@ -804,9 +804,9 @@ class DenseIdRecordStore {
 
 /**
  * @typedef {object} TermRecordEndImportSessionMetrics
- * @property {number} flushPendingWritesMs
- * @property {number} awaitQueuedWritesMs
- * @property {number} closeWritableMs
+ * @property {number} flushPendingWritesMs Descriptor preparation duration, overlapping index sealing.
+ * @property {number} awaitQueuedWritesMs Descriptor drain duration, overlapping index sealing.
+ * @property {number} closeWritableMs Wall duration of both finalization chains; includes the overlapping preparation/drain phases.
  * @property {number} totalMs
  * @property {number} drainCycleCount
  * @property {number} writeCallCount
@@ -1492,6 +1492,7 @@ export class TermRecordOpfsStore {
         }
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @returns {Promise<void>}
      */
@@ -1500,23 +1501,19 @@ export class TermRecordOpfsStore {
             return;
         }
         const tStart = safePerformance.now();
-        let flushPendingWritesMs = 0;
-        let awaitQueuedWritesMs = 0;
-        let closeWritableMs = 0;
-        const tFlushPendingWritesStart = safePerformance.now();
-        await this._flushPendingWrites();
-        flushPendingWritesMs = safePerformance.now() - tFlushPendingWritesStart;
-        const tAwaitQueuedWritesStart = safePerformance.now();
-        await this._awaitQueuedWrites();
-        awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
-        const tCloseWritableStart = safePerformance.now();
-        await this._closeAllWritables();
+        const tCloseWritableStart = safePerformance.now()
+        // The lookup header uses the final logical descriptor length. Its
+        // durable close need not wait for the independent descriptor stream
+        // to open and drain. Keep both chains owned until they settle.
+        const {flushPendingWritesMs, awaitQueuedWritesMs} = await this._closeAllWritables(true)
         for (const dictionaryName of this._importSessionDictionaryNames) {
             this._setDictionaryHealth(dictionaryName, 'available');
         }
         this._importSessionDictionaryNames.clear();
         this._importSessionActive = false;
-        closeWritableMs = safePerformance.now() - tCloseWritableStart;
+        // Descriptor preparation now overlaps index sealing; these phase
+        // durations are diagnostic and are not additive.
+        const closeWritableMs = safePerformance.now() - tCloseWritableStart
         this._deferIndexBuild = false;
         this._lastEndImportSessionMetrics = {
             flushPendingWritesMs,
@@ -1540,6 +1537,7 @@ export class TermRecordOpfsStore {
             this._indexDirty = false;
         }
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @returns {TermRecordEndImportSessionMetrics|null}
@@ -6518,17 +6516,26 @@ view.chunks :
         }
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
-     * @returns {Promise<void>}
+     * @param {boolean} [flushPendingWrites=false] Drain pending descriptors during import finalization.
+     * @returns {Promise<{flushPendingWritesMs: number, awaitQueuedWritesMs: number}>}
      */
-    async _closeAllWritables() {
+    async _closeAllWritables(flushPendingWrites = false) {
+        let flushPendingWritesMs = 0
+        let awaitQueuedWritesMs = 0
         /** @type {Error[]} */
         const errors = [];
         for (const state of this._shardStateByFileName.values()) {
             const results = await Promise.allSettled([
-                this._finalizeShardWritable(state),
+                this._finalizeShardWritable(state, flushPendingWrites),
                 this._flushLookupIndexFile(state),
             ]);
+            const recordResult = results[0]
+            if (recordResult.status === 'fulfilled') {
+                flushPendingWritesMs += recordResult.value.flushPendingWritesMs
+                awaitQueuedWritesMs += recordResult.value.awaitQueuedWritesMs
+            }
             for (const result of results) {
                 if (result.status === 'fulfilled') { continue; }
                 errors.push(
@@ -6545,24 +6552,56 @@ view.chunks :
         if (errors.length > 1) {
             throw new AggregateError(errors, 'Failed to finalize term-record storage');
         }
+        return {flushPendingWritesMs, awaitQueuedWritesMs}
     }
 
     /**
      * @param {TermRecordShardState} state
-     * @returns {Promise<void>}
+     * @param {boolean} [flushPendingWrites=false]
+     * @returns {Promise<{flushPendingWritesMs: number, awaitQueuedWritesMs: number}>}
      */
-    async _finalizeShardWritable(state) {
+    async _finalizeShardWritable(state, flushPendingWrites = false) {
+        let flushPendingWritesMs = 0
         /** @type {Error[]} */
         const errors = [];
+        /** @type {unknown[]} */
+        const failureReasons = []
+        /** @param {unknown} reason */
+        const recordFailure = (reason) => {
+            if (failureReasons.includes(reason)) { return }
+            failureReasons.push(reason)
+            const queuedFailure = state.queuedWriteError
+            const cause = queuedFailure === null ? void 0 : Object.getOwnPropertyDescriptor(queuedFailure, 'cause')
+            // A terminal stream can repeat its write rejection during close.
+            // The queue owns one normalized Error for a non-Error reason too.
+            const failure = (
+                queuedFailure !== null && !(reason instanceof Error) &&
+                typeof cause !== 'undefined' && Object.hasOwn(cause, 'value') && Object.is(cause.value, reason)
+            ) ?
+                queuedFailure :
+                toError(reason)
+            if (!errors.includes(failure)) { errors.push(failure) }
+        }
+        if (flushPendingWrites) {
+            const startedAt = safePerformance.now()
+            try {
+                await this._flushPendingWritesForShard(state)
+            } catch (error) {
+                recordFailure(error)
+            }
+            flushPendingWritesMs = safePerformance.now() - startedAt
+        }
+        const tAwaitQueuedWritesStart = safePerformance.now()
         try {
             await this._awaitQueuedWritesForShard(state);
         } catch (error) {
-            errors.push(error instanceof Error ? error : new Error(String(error)));
+            recordFailure(error)
         }
+        const awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart
         try {
             await this._closeShardWritable(state);
         } catch (error) {
-            errors.push(error instanceof Error ? error : new Error(String(error)));
+            recordFailure(error)
         }
         if (errors.length === 1) {
             throw errors[0];
@@ -6573,7 +6612,9 @@ view.chunks :
                 `Failed to finalize term-record file ${state.fileName}`,
             );
         }
+        return {flushPendingWritesMs, awaitQueuedWritesMs}
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {TermRecordShardState} state
@@ -7134,7 +7175,10 @@ view.chunks :
                 await this._writeChunksForShard(state, chunks, writeStartOffset);
             }
         } catch (error) {
-            state.queuedWriteError = error instanceof Error ? error : new Error(String(error));
+            // Preserve an unusual stream rejection reason so finalization can
+            // recognize the same terminal failure if close repeats it.
+            // eslint-disable-next-line @stylistic/semi
+            state.queuedWriteError = error instanceof Error ? error : new Error(String(error), {cause: error})
             state.queuedWriteChunks = [];
             state.queuedWriteBytes = 0;
             throw error;

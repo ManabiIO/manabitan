@@ -1351,14 +1351,18 @@ describe('TermRecordOpfsStore', () => {
     test('blocks index repair until import finalization has durably closed writes', async () => {
         const store = new TermRecordOpfsStore();
         await store.beginImportSession();
+        /* eslint-disable @stylistic/semi */
+        const state = store._createShardState('pending-finalization.mbtr', asFileHandle({}), 0)
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state)
         let finishQueuedWrites = /** @type {() => void} */ (() => {});
-        vi.spyOn(store, '_awaitQueuedWrites').mockImplementation(async () => await new Promise((resolve) => {
+        const queuedWrites = vi.spyOn(store, '_awaitQueuedWritesForShard').mockImplementation(async () => await new Promise((resolve) => {
             finishQueuedWrites = resolve;
-        }));
+        }))
         const repair = vi.spyOn(store, '_repairPersistentDictionaryIndex').mockResolvedValue(true);
 
         const end = store.endImportSession();
-        await Promise.resolve();
+        await vi.waitFor(() => expect(queuedWrites).toHaveBeenCalledOnce())
+        /* eslint-enable @stylistic/semi */
         await expect(store._tryRepairPersistentDictionaryIndex('JMdict')).resolves.toBe(false);
         expect(repair).not.toHaveBeenCalled();
 
@@ -3539,6 +3543,8 @@ describe('TermRecordOpfsStore', () => {
         vi.spyOn(store, '_finalizeShardWritable').mockImplementation(async (state) => {
             finalizedFileNames.push(state.fileName);
             if (state === firstState) { throw firstError; }
+            // eslint-disable-next-line @stylistic/semi
+            return {flushPendingWritesMs: 0, awaitQueuedWritesMs: 0}
         });
         /** @type {string[]} */
         const finalizedIndexFileNames = [];
