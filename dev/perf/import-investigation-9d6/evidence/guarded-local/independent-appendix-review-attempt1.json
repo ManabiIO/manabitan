@@ -1,0 +1,6 @@
+{
+  "status": "Reviewer assertion corrected before final approval",
+  "reason": "reconstruction.captureGroups carries an additional compressedBytes provenance field absent from the parity captureInputs projection; shared fields and compressedBytes are now checked separately against their original receipts.",
+  "artifactOrMeasurementChanged": false,
+  "failedAssertion": "reconstruction.captureGroups == parity.captureInputs"
+}

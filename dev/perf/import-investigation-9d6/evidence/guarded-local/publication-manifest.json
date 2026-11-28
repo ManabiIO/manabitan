@@ -1,0 +1,61 @@
+{
+  "status": "Frozen completed local diagnostic evidence; no promotion or external publication by this agent.",
+  "files": [
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/guarded-local.tar.gz",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/guarded-local.tar.gz",
+      "encoding": "base64",
+      "bytes": 80928,
+      "sha256": "6cc09c15d798cf6950c398e9c8b9afbcd38205ebfaac9da8de7e139ca3a06bfe",
+      "gitBlobSha1": "2aead314b8f82a4bed2b8ead302a0ac8716e1a0c"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/inventory.json",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/inventory.json",
+      "encoding": "utf-8",
+      "bytes": 34473,
+      "sha256": "1320368ca189a6b1486e0bd2907deae1e3aad241d2e3989721e46bb012ea563d",
+      "gitBlobSha1": "774a022955b24eb133d53c99f3fd91f93fe2f797"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/analysis.json",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/analysis.json",
+      "encoding": "utf-8",
+      "bytes": 44368,
+      "sha256": "9b42d7d844a22f4a18dc82be1d4789e0ec002757241580644c89e75e3a9774c3",
+      "gitBlobSha1": "3bd917adf61295063a19ce3a60db7913df73fb8d"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/README.md",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/README.md",
+      "encoding": "utf-8",
+      "bytes": 6078,
+      "sha256": "689ad2949d1eb028a0d0bdcc361dfade9d277ae8d790063865a2bc57e622a61b",
+      "gitBlobSha1": "616ca6a1be3d15269c0baae46421556f6f53a7a1"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/reconstruction.json",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/reconstruction.json",
+      "encoding": "utf-8",
+      "bytes": 6486,
+      "sha256": "e39deda35e1bb3dc2b1652cc5dcd41ffc253b45437b605d70f788e4f959b2d1a",
+      "gitBlobSha1": "cf3299d3532080bf3b9ef854cebbfe4df502ff72"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/audit-local-screen.py",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/audit-local-screen.py",
+      "encoding": "utf-8",
+      "bytes": 9766,
+      "sha256": "210985b40221b8334f66af175cbfa51cb7936d3b3e4d12579e7806bec1d7fd61",
+      "gitBlobSha1": "7edba88b1443190e546bc338aa2e6a55558b422b"
+    },
+    {
+      "path": "dev/perf/import-investigation-9d6/evidence/guarded-local/build-appendix.py",
+      "localPath": "/home/agent/manabitan-guarded-local-9d6/appendix/build-appendix.py",
+      "encoding": "utf-8",
+      "bytes": 15927,
+      "sha256": "da5feaf26a0937ae820eaa4ef8374b49be7fbe5f89d2a7d2a0e259f73a403e35",
+      "gitBlobSha1": "451f7b18360b55f3c830bd649855b1a493165572"
+    }
+  ]
+}

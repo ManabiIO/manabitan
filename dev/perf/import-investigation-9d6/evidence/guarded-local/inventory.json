@@ -1,0 +1,736 @@
+{
+  "complete": true,
+  "scope": "Exact corrected-binary Node codec component only; not isolated-host or browser/full-import qualification.",
+  "status": "Inconclusive shared-host diagnostic; closed after the single authorized cohort. No follow-up.",
+  "archive": {
+    "name": "guarded-local.tar.gz",
+    "bytes": 80928,
+    "sha256": "6cc09c15d798cf6950c398e9c8b9afbcd38205ebfaac9da8de7e139ca3a06bfe",
+    "files": 65,
+    "uncompressedBytes": 454139
+  },
+  "files": [
+    {
+      "archivePath": "analysis/analysis.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/analysis.json",
+      "bytes": 44368,
+      "sha256": "9b42d7d844a22f4a18dc82be1d4789e0ec002757241580644c89e75e3a9774c3"
+    },
+    {
+      "archivePath": "analysis/audit-local-screen.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/audit-local-screen.log",
+      "bytes": 3340,
+      "sha256": "b62ff1c97c93bb8232a2a2f9024e6727bb07bd75550b41f2efcb88954b6bd14a"
+    },
+    {
+      "archivePath": "cohort/commands.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/commands.json",
+      "bytes": 19962,
+      "sha256": "9d24c61729b38c08dac31b972188527bb608e1f81aafc10dc5658f024a632a65"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-A-baseline.json",
+      "bytes": 5014,
+      "sha256": "27e254209710d50d0d4af4c25457169f18957eb5de93e71111e95295d5f7215e"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-A-baseline.log",
+      "bytes": 641,
+      "sha256": "7b8b66c77950f578ef1ad83964b26f01047d4cca885dec39d857018331a54b2c"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-B-count16guarded.json",
+      "bytes": 5056,
+      "sha256": "ad9b8a0d87c59de4d16b06e57bfa52edeaad4c5d07e180fa0fac41e67cfe927e"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-B-count16guarded.log",
+      "bytes": 656,
+      "sha256": "386058ca088b031e8cd8a6292e208b9fa363e9e8397caedc340745ac07ed439f"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-C-baseline.json",
+      "bytes": 5032,
+      "sha256": "a78a18b7eba85a4d2ac5efb3665b07f251b4312bb42b607672ad92502207b9ee"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-0-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-0-C-baseline.log",
+      "bytes": 650,
+      "sha256": "fc7eedc8db1dc5b55740e8ecd4b1349a344ad7b770762b9b135bdcebbd1318a5"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-A-baseline.json",
+      "bytes": 5031,
+      "sha256": "a1f64263a0aad4b23ce63be6857711e907e79eee6c7b1e55287e27ff5b0d3bed"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-A-baseline.log",
+      "bytes": 650,
+      "sha256": "943ba29058aa3f0771a96dd5448442164b80262fad1ad45efa7dddf607d51ce2"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-B-count16guarded.json",
+      "bytes": 5056,
+      "sha256": "3c65c89e962975de1dca82fb7c0ead7dfcc4f7991437381820d134c2a37d4fc6"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-B-count16guarded.log",
+      "bytes": 656,
+      "sha256": "96e25424675210d0fa1ad3417341535f690f3c7015518cd494791e24b98b10b8"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-C-baseline.json",
+      "bytes": 5030,
+      "sha256": "a0f5cd9f10b87f4a4d5ef1f3506f1923b22ee5ecaf98d07069b50bb440407589"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-1-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-1-C-baseline.log",
+      "bytes": 649,
+      "sha256": "cdcb285dd7381f7adae7a7f6bf0c6e09189e545fde3ab1c48272aea57741393d"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-A-baseline.json",
+      "bytes": 5032,
+      "sha256": "aa2e69bf4062696913bfc5115e6e41179464f896ddee00e86cb49786eb67c25b"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-A-baseline.log",
+      "bytes": 650,
+      "sha256": "fe3ae2e6d816b9afd5413982bc8fba3715ed5cdaa876a0bc765ddf7d8e3e0b73"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-B-count16guarded.json",
+      "bytes": 5053,
+      "sha256": "a5bf729ebedf9d4f1b7d0939118e0c08d6f96f6717849709ba33ae3b22aa4442"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-B-count16guarded.log",
+      "bytes": 655,
+      "sha256": "f3274baeee5242ec7e1f3b830a03e479e8e41721639c7aaa9ece63100a4a8ccc"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-C-baseline.json",
+      "bytes": 5030,
+      "sha256": "4be999b764de391505c25682168d6805e5af0e9f9496e01ffba75c8cfcd602f6"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-2-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-2-C-baseline.log",
+      "bytes": 649,
+      "sha256": "a07e049fa696ee64769f0d351adec31e447868079dfa4322360058fd5904b982"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-A-baseline.json",
+      "bytes": 5032,
+      "sha256": "01fa5193945efa93b6078c05728ac2e26de3d7ac9977937cb296e464927ad838"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-A-baseline.log",
+      "bytes": 650,
+      "sha256": "930a10f948fcaed54975d5f1c70145bb3359b03653eeb38bfbab16dc7c4b109d"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-B-count16guarded.json",
+      "bytes": 5029,
+      "sha256": "7591c42b3021fa90a78ae7bc2c6890e369b611ccfd8361f449e5db109ae8f077"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-B-count16guarded.log",
+      "bytes": 647,
+      "sha256": "5b0872eef915331c1e8addda34725164267fca10e31e05512f0ec28b34cc8334"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-C-baseline.json",
+      "bytes": 5016,
+      "sha256": "07d6f4e28d7eec3953896e27ee6ed0dd7e18bd8e43a2164fcbb87a262fd070c4"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-3-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-3-C-baseline.log",
+      "bytes": 642,
+      "sha256": "c094a2c75399eaee63ed39de3ea69e596def95958c261c994b15efe9fa8ac7d9"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-A-baseline.json",
+      "bytes": 5029,
+      "sha256": "2be1490c977a853c508df3b141a8378d6c16a723c9c0a0574804f27edd0f4e6d"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-A-baseline.log",
+      "bytes": 649,
+      "sha256": "19f6c2c1dd00e16b29b669eb27946665f99a23aedcfc2dc07860647bb14957bc"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-B-count16guarded.json",
+      "bytes": 5056,
+      "sha256": "cf072bbdd1de91faf73d9c1d33f184bd12c1a1ebafd960a222d4da869a97b42a"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-B-count16guarded.log",
+      "bytes": 656,
+      "sha256": "36d6c9077d506a73b8343c551cf82813940215b76465c06e0391eadf0ba6b268"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-C-baseline.json",
+      "bytes": 5029,
+      "sha256": "20a3994f7f9e4683e93c9c0f7285c849abdaf201735e41c0d31695b628e57b31"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-4-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-4-C-baseline.log",
+      "bytes": 649,
+      "sha256": "0380a82f86318ecef45498098a8fee382dd9bc7b7d0b0d395480463a5c39baec"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-A-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-A-baseline.json",
+      "bytes": 5019,
+      "sha256": "471068aabf8ee282a476f0d6f339a4a7d0f4a5b308ac08a5dc6d175d4a9161b4"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-A-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-A-baseline.log",
+      "bytes": 648,
+      "sha256": "f68335a2e22ea7a70dc037124c2186caf71fd691b9fdd2e0da2b4c00375bed89"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-B-count16guarded.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-B-count16guarded.json",
+      "bytes": 5054,
+      "sha256": "f07eb9dfe95e5855aa8b7cb925f380248f178f014f90eab05de65b626e7598b0"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-B-count16guarded.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-B-count16guarded.log",
+      "bytes": 655,
+      "sha256": "d8c90f2328047314b18014f37cf6cb6ead3cd1d7ad0083e47cf9c49b56c2be08"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-C-baseline.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-C-baseline.json",
+      "bytes": 5031,
+      "sha256": "6aaf3caf3d78940b8187fa0a687adb6137f435748a1afaa81dba34414a8a3fe8"
+    },
+    {
+      "archivePath": "cohort/count16guarded-cold-AB-5-C-baseline.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-cold-AB-5-C-baseline.log",
+      "bytes": 650,
+      "sha256": "9410872c07f681fe83b700e01eafe27821d0d633407f07faebb3a39d8bcccca9"
+    },
+    {
+      "archivePath": "cohort/count16guarded-warm-AB.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-warm-AB.json",
+      "bytes": 12797,
+      "sha256": "946cf11ab96a63b4172f78ee50e6344412c7cb5d13c5a0bfc27728142086d650"
+    },
+    {
+      "archivePath": "cohort/count16guarded-warm-AB.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/count16guarded-warm-AB.log",
+      "bytes": 1241,
+      "sha256": "7644b076850e7eb92e7e0f16a700a801afb54948c0f4f3d96c69d16bb2ec41ed"
+    },
+    {
+      "archivePath": "cohort/execution.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/execution.json",
+      "bytes": 51274,
+      "sha256": "3ec5c2248943c80cca1fb200676cc08cbe86a922c4fda82139e07659e08d7e15"
+    },
+    {
+      "archivePath": "cohort/input-identities.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/input-identities.json",
+      "bytes": 7292,
+      "sha256": "a43f895577953647ea5106acd9a73a052018de7362b7932c599db5ac87177e58"
+    },
+    {
+      "archivePath": "cohort/orchestration-review.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/orchestration-review.json",
+      "bytes": 2441,
+      "sha256": "6396234d3ed3c6afc06489a06c0bc6e8e0f73682fe151792bade1ccc317423b5"
+    },
+    {
+      "archivePath": "cohort/proposed-plan.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/proposed-plan.json",
+      "bytes": 11906,
+      "sha256": "4dab9c657ec2ca96ea92f239d50f1bbc30995842dd3e4b3e8fc46f09f05985fc"
+    },
+    {
+      "archivePath": "cohort/root-release.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/root-release.json",
+      "bytes": 1068,
+      "sha256": "03d32074b56f51bc28da1abbc205f3906d08f070c5a1697721ff68fa4a3179d5"
+    },
+    {
+      "archivePath": "cohort/run-fixed-screen.py",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/cohort-01/run-fixed-screen.py",
+      "bytes": 11256,
+      "sha256": "d125be9413f064e4cba1c33c6e87bc3f76610e78e0a94b0cb7268d806b4ea9c4"
+    },
+    {
+      "archivePath": "identity/capture-artifact.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/compression-experiments/dev/perf/wasm-word-width-v2/capture-artifact.json",
+      "bytes": 626,
+      "sha256": "c46ef65e0e41ba9fef4e95c635271057a6180116041a000b891461f206c57fd3"
+    },
+    {
+      "archivePath": "identity/capture-download-receipt.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188-receipt.json",
+      "bytes": 1080,
+      "sha256": "34ed4bd06ba09d1bbf3e726f22771a386b5b07138ee20ebab4f5012399e6eb20"
+    },
+    {
+      "archivePath": "identity/capture-report.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/report.json",
+      "bytes": 24604,
+      "sha256": "6c897506cdc81a7c24520e861415c0523f24437f8c20ff684bdc60ce4702ac76"
+    },
+    {
+      "archivePath": "identity/corrected-wrapper-parity.json",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wrapper-parity.json",
+      "bytes": 26727,
+      "sha256": "faa1045625232b06ffd78a9f6e0342b0a02d2bdb63d436300396945159668560"
+    },
+    {
+      "archivePath": "identity/guarded-manifest.json",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/compression-experiments/dev/perf/zstd-count16-guarded/manifest.json",
+      "bytes": 3890,
+      "sha256": "ca6855cc6caa91523a8bda915223dc427126dda5e3f1a4ec4f6b568ed8b99bb9"
+    },
+    {
+      "archivePath": "identity/guarded-proof/boundary-result.json",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/boundary-result.json",
+      "bytes": 7358,
+      "sha256": "218f05f6b5558999efca76ff09cdd21e910151c6c6af1fd589a09dc102758fe6"
+    },
+    {
+      "archivePath": "identity/guarded-proof/raw-parity.json",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/raw-parity.json",
+      "bytes": 20641,
+      "sha256": "24b09aebcd2c805a0fbc01f365b645bdc638519670ee986a791cbe0ec6107eab"
+    },
+    {
+      "archivePath": "identity/guarded-proof/verification.json",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/verification.json",
+      "bytes": 11181,
+      "sha256": "dbb78c0baeb8c646f2ea6e98b2b63618da01bb5e45bc8a29c81958bfea7c8595"
+    },
+    {
+      "archivePath": "identity/reconstruction.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/appendix/reconstruction.json",
+      "bytes": 6486,
+      "sha256": "e39deda35e1bb3dc2b1652cc5dcd41ffc253b45437b605d70f788e4f959b2d1a"
+    },
+    {
+      "archivePath": "inputs/jmdict.zdict",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/data/zstd-dicts/jmdict.zdict",
+      "bytes": 16384,
+      "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    },
+    {
+      "archivePath": "logs/launch-01.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/launch-01.log",
+      "bytes": 172,
+      "sha256": "431c094f26a88257e58b242d838fbd1af00d7fa09004291643d3ccd6ae049db1"
+    },
+    {
+      "archivePath": "packaging/preliminary-build.log",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/build-appendix-preliminary.log",
+      "bytes": 410,
+      "sha256": "3aef99b12c6f136db43ec3ba437ec95cab8f7a29449dedce0e4f469f6e2af009"
+    },
+    {
+      "archivePath": "packaging/preparation.json",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/packaging-preparation.json",
+      "bytes": 1476,
+      "sha256": "cfb4615a70a28ec3a0620fffb1b7ad06a5a614647c2278822cfed0dfee07c54b"
+    },
+    {
+      "archivePath": "tools/audit-local-screen.py",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/audit-local-screen.py",
+      "bytes": 9766,
+      "sha256": "210985b40221b8334f66af175cbfa51cb7936d3b3e4d12579e7806bec1d7fd61"
+    },
+    {
+      "archivePath": "tools/build-appendix.py",
+      "sourcePath": "/home/agent/manabitan-guarded-local-9d6/build-appendix.py",
+      "bytes": 15927,
+      "sha256": "da5feaf26a0937ae820eaa4ef8374b49be7fbe5f89d2a7d2a0e259f73a403e35"
+    },
+    {
+      "archivePath": "tools/screen.mjs",
+      "sourcePath": "/workspace/scratch/9d6dcf05cf8f/compression-experiments/dev/perf/wasm-word-width-v2/screen.mjs",
+      "bytes": 8422,
+      "sha256": "5f93fd0ed084b2f499192e64dbcafa16823c37a883c311c3a5313298a30ad1d4"
+    },
+    {
+      "archivePath": "tools/zstd-simd-module.js",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-simd-module.js",
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    {
+      "archivePath": "tools/zstd-wasm.js",
+      "sourcePath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-wasm.js",
+      "bytes": 20667,
+      "sha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e"
+    }
+  ],
+  "packagerSha256": "da5feaf26a0937ae820eaa4ef8374b49be7fbe5f89d2a7d2a0e259f73a403e35",
+  "auditorSha256": "210985b40221b8334f66af175cbfa51cb7936d3b3e4d12579e7806bec1d7fd61",
+  "analysisSha256": "9b42d7d844a22f4a18dc82be1d4789e0ec002757241580644c89e75e3a9774c3",
+  "inputIdentities": {
+    "verified": [
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-experiments/dev/perf/wasm-word-width-v2/screen.mjs",
+        "bytes": 8422,
+        "sha256": "5f93fd0ed084b2f499192e64dbcafa16823c37a883c311c3a5313298a30ad1d4"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-experiments/dev/perf/zstd-count16-guarded/manifest.json",
+        "bytes": 3890,
+        "sha256": "ca6855cc6caa91523a8bda915223dc427126dda5e3f1a4ec4f6b568ed8b99bb9"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wrapper-parity.json",
+        "bytes": 26727,
+        "sha256": "faa1045625232b06ffd78a9f6e0342b0a02d2bdb63d436300396945159668560"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/report.json",
+        "bytes": 24604,
+        "sha256": "6c897506cdc81a7c24520e861415c0523f24437f8c20ff684bdc60ce4702ac76"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-simd-module.wasm",
+        "bytes": 433631,
+        "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-simd-module.js",
+        "bytes": 9046,
+        "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-wasm.js",
+        "bytes": 20667,
+        "sha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-count16guarded/zstd-simd-module.wasm",
+        "bytes": 433757,
+        "sha256": "13890c7e75e7a2ff5fa00bd65f1e518e15f545da85154719be6a2eaa2a773a22"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-count16guarded/zstd-simd-module.js",
+        "bytes": 9046,
+        "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+      },
+      {
+        "path": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-count16guarded/zstd-wasm.js",
+        "bytes": 20667,
+        "sha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e"
+      },
+      {
+        "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "bytes": 126951512,
+        "sha256": "acbe4b8d9153b841ed0697cbfc4f93e767386620edb745ab9358306c0a6f31aa"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/lib/zstd-wasm.js",
+        "bytes": 20667,
+        "sha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/lib/zstd-simd-module.js",
+        "bytes": 9046,
+        "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/data/zstd-block-envelope.c",
+        "bytes": 4179,
+        "sha256": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/dev/data/zstd-dicts/jmdict.zdict",
+        "bytes": 16384,
+        "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/ext/js/dictionary/dictionary-database.js",
+        "bytes": 613153,
+        "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/ext/js/dictionary/term-content-block-store.js",
+        "bytes": 70348,
+        "sha256": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/manabitan/test/perf/dictionaries.lock.json",
+        "bytes": 3047,
+        "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-01.bin.gz",
+        "bytes": 1336702,
+        "sha256": "0b865a95a4128ffd2784f63741fbcb264df414a437396d09745e1a5852f97468"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-02.bin.gz",
+        "bytes": 1415480,
+        "sha256": "3284368e2fd6444e0892dc3de2f4079467c1d256963afa12bf990b6720345dfd"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-03.bin.gz",
+        "bytes": 1414226,
+        "sha256": "f80287fd7c31cd0ea675267ed7b7a142c177ccc1b297cfa54dc8db7393878f97"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-04.bin.gz",
+        "bytes": 1231728,
+        "sha256": "8c5156316bb5a44978cf06f0105b2f009a75f597ea6b8dc31a9311ccc2a6f590"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-05.bin.gz",
+        "bytes": 1484297,
+        "sha256": "0f44612276123fa3ac5d1ef943b3f78312f70f3739ed6c9d4d211eca29138ec0"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-06.bin.gz",
+        "bytes": 1568579,
+        "sha256": "b4d38d6e65258f53349c48fb3757d95899c662f67912129f4efbc75c9ed7c691"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-07.bin.gz",
+        "bytes": 1159714,
+        "sha256": "ff0ba9ebf1a909f7809ee1df820b86c86e9d503158e35c13f1aa33a5e446cc33"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-08.bin.gz",
+        "bytes": 1288380,
+        "sha256": "7e4f5e17e93c67e2f3936dabbd6ed1bdd9c65dcbbc7688ba26618f28c5615d11"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-09.bin.gz",
+        "bytes": 1299004,
+        "sha256": "29b8057f9077a611ec291e6ff73338dd16a9f82f4b00268c5c177eaa8b56070e"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-10.bin.gz",
+        "bytes": 1294688,
+        "sha256": "9fa658136fee766df9167e65429e72ab00ed1b77bae13774777b6f7b9a19800a"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-11.bin.gz",
+        "bytes": 1340876,
+        "sha256": "f09df9c9386d2364aaa073bb9973cf51c42d5801c8b3d567c60bc1cf85b55c1f"
+      },
+      {
+        "path": "/workspace/scratch/9d6dcf05cf8f/compression-probe/hosted-results/capture/artifact-15245899188/group-12.bin.gz",
+        "bytes": 1645275,
+        "sha256": "f320e9096051944ff7cf31088db0e033560a663666d68558d8a81d1256ad1896"
+      }
+    ],
+    "rootReleaseSha256": "03d32074b56f51bc28da1abbc205f3906d08f070c5a1697721ff68fa4a3179d5",
+    "reviewSha256": "6396234d3ed3c6afc06489a06c0bc6e8e0f73682fe151792bade1ccc317423b5",
+    "parityReceiptSha256": "faa1045625232b06ffd78a9f6e0342b0a02d2bdb63d436300396945159668560"
+  },
+  "reconstruction": {
+    "scope": "Native WASM and derived source-capture payloads are omitted; their exact identities and pinned retrieval/reconstruction sources are retained. No old invalid binary timings are reused.",
+    "nativeAssets": [
+      {
+        "kind": "baseline",
+        "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "repositoryPath": "dev/data/zstd-simd.wasm",
+        "materializedPath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-simd-module.wasm",
+        "bytes": 433631,
+        "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+        "gitBlobSha1": "bc83266947d7d1900e49e8cf88b0621cbe32c16e",
+        "gitObjectBytesVerified": true
+      },
+      {
+        "kind": "count16guarded",
+        "commit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+        "repositoryPath": "dev/data/zstd-simd.wasm",
+        "materializedPath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-count16guarded/zstd-simd-module.wasm",
+        "bytes": 433757,
+        "sha256": "13890c7e75e7a2ff5fa00bd65f1e518e15f545da85154719be6a2eaa2a773a22",
+        "gitBlobSha1": "87a2820eebfb88aeb5fe54450bdc401f73a66dc0",
+        "gitObjectBytesVerified": true
+      }
+    ],
+    "nativeReconstruction": {
+      "repository": "ManabiIO/manabitan",
+      "candidateCommit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+      "builderPath": "dev/bin/build-zstd-wasm.js",
+      "patchPath": "dev/data/zstd-wasm32-count.patch",
+      "provenancePath": "dev/data/zstd-wasm.PROVENANCE.md",
+      "recipe": "Use the pinned production builder and Emscripten/Zstd revisions in identity/guarded-manifest.json; require exact baseline and guarded WASM hashes before reuse."
+    },
+    "captureArtifact": {
+      "repository": "ManabiIO/manabitan",
+      "artifactId": 15245899188,
+      "artifactName": "jmdict-source-capture-9d6-46103338197-1",
+      "artifactBytes": 16506090,
+      "artifactSha256": "c3ab42f8714af1c21053e258c5caa7b8fa3c98a6f2eace8cf3c29f69da9f0ffe",
+      "runId": 46103338197,
+      "runAttempt": 1,
+      "sourceHeadSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+      "sourceBranch": "perf/import-components-9d6-20261128",
+      "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "termRows": 528299,
+      "groups": 12
+    },
+    "captureGroups": [
+      {
+        "name": "group-01.bin.gz",
+        "sha256": "0b865a95a4128ffd2784f63741fbcb264df414a437396d09745e1a5852f97468",
+        "sourceBytes": 8486982,
+        "shared": true,
+        "spans": 34951,
+        "compressedBytes": 1336702
+      },
+      {
+        "name": "group-02.bin.gz",
+        "sha256": "3284368e2fd6444e0892dc3de2f4079467c1d256963afa12bf990b6720345dfd",
+        "sourceBytes": 9427894,
+        "shared": true,
+        "spans": 32739,
+        "compressedBytes": 1415480
+      },
+      {
+        "name": "group-03.bin.gz",
+        "sha256": "f80287fd7c31cd0ea675267ed7b7a142c177ccc1b297cfa54dc8db7393878f97",
+        "sourceBytes": 9272798,
+        "shared": true,
+        "spans": 32256,
+        "compressedBytes": 1414226
+      },
+      {
+        "name": "group-04.bin.gz",
+        "sha256": "8c5156316bb5a44978cf06f0105b2f009a75f597ea6b8dc31a9311ccc2a6f590",
+        "sourceBytes": 8619220,
+        "shared": true,
+        "spans": 28758,
+        "compressedBytes": 1231728
+      },
+      {
+        "name": "group-05.bin.gz",
+        "sha256": "0f44612276123fa3ac5d1ef943b3f78312f70f3739ed6c9d4d211eca29138ec0",
+        "sourceBytes": 8782091,
+        "shared": true,
+        "spans": 34159,
+        "compressedBytes": 1484297
+      },
+      {
+        "name": "group-06.bin.gz",
+        "sha256": "b4d38d6e65258f53349c48fb3757d95899c662f67912129f4efbc75c9ed7c691",
+        "sourceBytes": 9009676,
+        "shared": true,
+        "spans": 33543,
+        "compressedBytes": 1568579
+      },
+      {
+        "name": "group-07.bin.gz",
+        "sha256": "ff0ba9ebf1a909f7809ee1df820b86c86e9d503158e35c13f1aa33a5e446cc33",
+        "sourceBytes": 7077918,
+        "shared": true,
+        "spans": 24030,
+        "compressedBytes": 1159714
+      },
+      {
+        "name": "group-08.bin.gz",
+        "sha256": "7e4f5e17e93c67e2f3936dabbd6ed1bdd9c65dcbbc7688ba26618f28c5615d11",
+        "sourceBytes": 7502995,
+        "shared": true,
+        "spans": 31330,
+        "compressedBytes": 1288380
+      },
+      {
+        "name": "group-09.bin.gz",
+        "sha256": "29b8057f9077a611ec291e6ff73338dd16a9f82f4b00268c5c177eaa8b56070e",
+        "sourceBytes": 7850259,
+        "shared": true,
+        "spans": 25442,
+        "compressedBytes": 1299004
+      },
+      {
+        "name": "group-10.bin.gz",
+        "sha256": "9fa658136fee766df9167e65429e72ab00ed1b77bae13774777b6f7b9a19800a",
+        "sourceBytes": 7597844,
+        "shared": true,
+        "spans": 24806,
+        "compressedBytes": 1294688
+      },
+      {
+        "name": "group-11.bin.gz",
+        "sha256": "f09df9c9386d2364aaa073bb9973cf51c42d5801c8b3d567c60bc1cf85b55c1f",
+        "sourceBytes": 7885247,
+        "shared": true,
+        "spans": 25651,
+        "compressedBytes": 1340876
+      },
+      {
+        "name": "group-12.bin.gz",
+        "sha256": "f320e9096051944ff7cf31088db0e033560a663666d68558d8a81d1256ad1896",
+        "sourceBytes": 9631061,
+        "shared": true,
+        "spans": 34367,
+        "compressedBytes": 1645275
+      }
+    ],
+    "captureReconstruction": {
+      "repository": "ManabiIO/manabitan",
+      "sourceCommit": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+      "generatorPath": "dev/perf/experimental-9d6/capture.mjs",
+      "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "fixtureLockPath": "test/perf/dictionaries.lock.json",
+      "recipe": "Retrieve the original pinned artifact and check its ZIP digest, or regenerate derived groups using the pinned fixture/generator and Node 24.22.3; require every saved group SHA256. The original capture report remains retained separately."
+    },
+    "earlierCompletedEvidence": {
+      "commit": "d602e1b003811b0ebac63e9ef2c8019f430aea21",
+      "guardedProofArchive": "dev/perf/import-investigation-9d6/evidence/codec-v2-and-guarded-proof.tar.gz",
+      "guardedProofArchiveBytes": 247023,
+      "guardedProofArchiveSha256": "19daffeaa033adef237c3a24d96998b3d0595510934137e0bfe2fb949470293d",
+      "scope": "Separate prior correctness/invalid-candidate evidence; this local screen is a new corrected-binary result."
+    },
+    "hostedQualification": {
+      "runId": 46109596112,
+      "statusAtLocalClosure": "Separate prospective full-import qualification is running. Its outcomes are not inferred from this local screen."
+    }
+  },
+  "credentialPatternScanPassed": true,
+  "verification": [
+    "Every source file hash checked before and after packaging",
+    "Every saved regular tar member read back and hashed",
+    "All 19 original child outputs/logs and source-identical controls retained unchanged",
+    "No benchmark, measurement-source mutation, prior published archive replacement or external publication performed"
+  ]
+}

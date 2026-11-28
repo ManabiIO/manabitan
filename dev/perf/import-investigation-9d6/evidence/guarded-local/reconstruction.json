@@ -1,0 +1,165 @@
+{
+  "scope": "Native WASM and derived source-capture payloads are omitted; their exact identities and pinned retrieval/reconstruction sources are retained. No old invalid binary timings are reused.",
+  "nativeAssets": [
+    {
+      "kind": "baseline",
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "repositoryPath": "dev/data/zstd-simd.wasm",
+      "materializedPath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-baseline/zstd-simd-module.wasm",
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "gitBlobSha1": "bc83266947d7d1900e49e8cf88b0621cbe32c16e",
+      "gitObjectBytesVerified": true
+    },
+    {
+      "kind": "count16guarded",
+      "commit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+      "repositoryPath": "dev/data/zstd-simd.wasm",
+      "materializedPath": "/home/agent/manabitan-compression-toolchain/guarded-verification-01/wasm-count16guarded/zstd-simd-module.wasm",
+      "bytes": 433757,
+      "sha256": "13890c7e75e7a2ff5fa00bd65f1e518e15f545da85154719be6a2eaa2a773a22",
+      "gitBlobSha1": "87a2820eebfb88aeb5fe54450bdc401f73a66dc0",
+      "gitObjectBytesVerified": true
+    }
+  ],
+  "nativeReconstruction": {
+    "repository": "ManabiIO/manabitan",
+    "candidateCommit": "20e4af5897013ee76dfd4bed1ee6c383d71ba8e4",
+    "builderPath": "dev/bin/build-zstd-wasm.js",
+    "patchPath": "dev/data/zstd-wasm32-count.patch",
+    "provenancePath": "dev/data/zstd-wasm.PROVENANCE.md",
+    "recipe": "Use the pinned production builder and Emscripten/Zstd revisions in identity/guarded-manifest.json; require exact baseline and guarded WASM hashes before reuse."
+  },
+  "captureArtifact": {
+    "repository": "ManabiIO/manabitan",
+    "artifactId": 15245899188,
+    "artifactName": "jmdict-source-capture-9d6-46103338197-1",
+    "artifactBytes": 16506090,
+    "artifactSha256": "c3ab42f8714af1c21053e258c5caa7b8fa3c98a6f2eace8cf3c29f69da9f0ffe",
+    "runId": 46103338197,
+    "runAttempt": 1,
+    "sourceHeadSha": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+    "sourceBranch": "perf/import-components-9d6-20261128",
+    "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "termRows": 528299,
+    "groups": 12
+  },
+  "captureGroups": [
+    {
+      "name": "group-01.bin.gz",
+      "sha256": "0b865a95a4128ffd2784f63741fbcb264df414a437396d09745e1a5852f97468",
+      "sourceBytes": 8486982,
+      "shared": true,
+      "spans": 34951,
+      "compressedBytes": 1336702
+    },
+    {
+      "name": "group-02.bin.gz",
+      "sha256": "3284368e2fd6444e0892dc3de2f4079467c1d256963afa12bf990b6720345dfd",
+      "sourceBytes": 9427894,
+      "shared": true,
+      "spans": 32739,
+      "compressedBytes": 1415480
+    },
+    {
+      "name": "group-03.bin.gz",
+      "sha256": "f80287fd7c31cd0ea675267ed7b7a142c177ccc1b297cfa54dc8db7393878f97",
+      "sourceBytes": 9272798,
+      "shared": true,
+      "spans": 32256,
+      "compressedBytes": 1414226
+    },
+    {
+      "name": "group-04.bin.gz",
+      "sha256": "8c5156316bb5a44978cf06f0105b2f009a75f597ea6b8dc31a9311ccc2a6f590",
+      "sourceBytes": 8619220,
+      "shared": true,
+      "spans": 28758,
+      "compressedBytes": 1231728
+    },
+    {
+      "name": "group-05.bin.gz",
+      "sha256": "0f44612276123fa3ac5d1ef943b3f78312f70f3739ed6c9d4d211eca29138ec0",
+      "sourceBytes": 8782091,
+      "shared": true,
+      "spans": 34159,
+      "compressedBytes": 1484297
+    },
+    {
+      "name": "group-06.bin.gz",
+      "sha256": "b4d38d6e65258f53349c48fb3757d95899c662f67912129f4efbc75c9ed7c691",
+      "sourceBytes": 9009676,
+      "shared": true,
+      "spans": 33543,
+      "compressedBytes": 1568579
+    },
+    {
+      "name": "group-07.bin.gz",
+      "sha256": "ff0ba9ebf1a909f7809ee1df820b86c86e9d503158e35c13f1aa33a5e446cc33",
+      "sourceBytes": 7077918,
+      "shared": true,
+      "spans": 24030,
+      "compressedBytes": 1159714
+    },
+    {
+      "name": "group-08.bin.gz",
+      "sha256": "7e4f5e17e93c67e2f3936dabbd6ed1bdd9c65dcbbc7688ba26618f28c5615d11",
+      "sourceBytes": 7502995,
+      "shared": true,
+      "spans": 31330,
+      "compressedBytes": 1288380
+    },
+    {
+      "name": "group-09.bin.gz",
+      "sha256": "29b8057f9077a611ec291e6ff73338dd16a9f82f4b00268c5c177eaa8b56070e",
+      "sourceBytes": 7850259,
+      "shared": true,
+      "spans": 25442,
+      "compressedBytes": 1299004
+    },
+    {
+      "name": "group-10.bin.gz",
+      "sha256": "9fa658136fee766df9167e65429e72ab00ed1b77bae13774777b6f7b9a19800a",
+      "sourceBytes": 7597844,
+      "shared": true,
+      "spans": 24806,
+      "compressedBytes": 1294688
+    },
+    {
+      "name": "group-11.bin.gz",
+      "sha256": "f09df9c9386d2364aaa073bb9973cf51c42d5801c8b3d567c60bc1cf85b55c1f",
+      "sourceBytes": 7885247,
+      "shared": true,
+      "spans": 25651,
+      "compressedBytes": 1340876
+    },
+    {
+      "name": "group-12.bin.gz",
+      "sha256": "f320e9096051944ff7cf31088db0e033560a663666d68558d8a81d1256ad1896",
+      "sourceBytes": 9631061,
+      "shared": true,
+      "spans": 34367,
+      "compressedBytes": 1645275
+    }
+  ],
+  "captureReconstruction": {
+    "repository": "ManabiIO/manabitan",
+    "sourceCommit": "d4470d35a684a8c37628123d7740ec2fa3375f4b",
+    "generatorPath": "dev/perf/experimental-9d6/capture.mjs",
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "fixtureLockPath": "test/perf/dictionaries.lock.json",
+    "recipe": "Retrieve the original pinned artifact and check its ZIP digest, or regenerate derived groups using the pinned fixture/generator and Node 24.22.3; require every saved group SHA256. The original capture report remains retained separately."
+  },
+  "earlierCompletedEvidence": {
+    "commit": "d602e1b003811b0ebac63e9ef2c8019f430aea21",
+    "guardedProofArchive": "dev/perf/import-investigation-9d6/evidence/codec-v2-and-guarded-proof.tar.gz",
+    "guardedProofArchiveBytes": 247023,
+    "guardedProofArchiveSha256": "19daffeaa033adef237c3a24d96998b3d0595510934137e0bfe2fb949470293d",
+    "scope": "Separate prior correctness/invalid-candidate evidence; this local screen is a new corrected-binary result."
+  },
+  "hostedQualification": {
+    "runId": 46109596112,
+    "statusAtLocalClosure": "Separate prospective full-import qualification is running. Its outcomes are not inferred from this local screen."
+  }
+}

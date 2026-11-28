@@ -1,0 +1,161 @@
+{
+  "complete": true,
+  "reviewedAtUtc": "2026-11-28T06:48:38.315954+00:00",
+  "scope": "Independent archive/source readback and saved-data arithmetic only; no timing/build/parity rerun or product promotion.",
+  "manifestSha256": "65adebfa453c6855aa604c8dfbd0feb3f525063f4818451929b8836b2ab25c82",
+  "publicationFilesVerified": 7,
+  "archive": {
+    "name": "guarded-local.tar.gz",
+    "bytes": 80928,
+    "sha256": "6cc09c15d798cf6950c398e9c8b9afbcd38205ebfaac9da8de7e139ca3a06bfe",
+    "files": 65,
+    "uncompressedBytes": 454139
+  },
+  "sourceMembersVerified": 65,
+  "allOriginalBytesMatch": true,
+  "childrenValidated": 19,
+  "measuredCorpusPasses": 50,
+  "excludedWarmups": 8,
+  "totalCorpusPasses": 58,
+  "blockCompressions": 5974,
+  "controlsAndTailRetained": true,
+  "candidateTailBcaMs": 304.650751,
+  "recomputedComparisons": {
+    "warm": {
+      "B/A": {
+        "count": 8,
+        "medianChangeMs": -9.347690499999771,
+        "medianChangePercent": -5.413154034291468,
+        "faster": 6,
+        "equalWorkChangePercent": -4.767854085990598
+      },
+      "B/C": {
+        "count": 8,
+        "medianChangeMs": -1.8177235000002838,
+        "medianChangePercent": -1.058312502856551,
+        "faster": 4,
+        "equalWorkChangePercent": 7.390630581663737
+      },
+      "D/A": {
+        "count": 8,
+        "medianChangeMs": -7.395766499999354,
+        "medianChangePercent": -4.359031202384522,
+        "faster": 6,
+        "equalWorkChangePercent": -9.665716494537701
+      },
+      "D/C": {
+        "count": 8,
+        "medianChangeMs": 1.1906854999999723,
+        "medianChangePercent": 0.711504621999981,
+        "faster": 3,
+        "equalWorkChangePercent": 1.867447968189495
+      },
+      "C/A": {
+        "count": 8,
+        "medianChangeMs": -10.349883499999578,
+        "medianChangePercent": -5.778117468959887,
+        "faster": 7,
+        "equalWorkChangePercent": -11.3217369167123
+      },
+      "D/B": {
+        "count": 8,
+        "medianChangeMs": -2.8081975000004604,
+        "medianChangePercent": -1.6268218218523867,
+        "faster": 5,
+        "equalWorkChangePercent": -5.143076806196989
+      },
+      "mean(B,D)/mean(A,C)": {
+        "count": 8,
+        "medianChangeMs": -6.55463299999974,
+        "medianChangePercent": -3.833419827535822,
+        "faster": 6,
+        "equalWorkChangePercent": -1.64928042741328
+      }
+    },
+    "cold": {
+      "B/A": {
+        "count": 6,
+        "medianChangeMs": -7.342024499999923,
+        "medianChangePercent": -4.057633975077978,
+        "faster": 4,
+        "equalWorkChangePercent": 2.716268793909582
+      },
+      "B/C": {
+        "count": 6,
+        "medianChangeMs": 1.8587665000000015,
+        "medianChangePercent": 0.9844503564605089,
+        "faster": 3,
+        "equalWorkChangePercent": 6.097304370008683
+      },
+      "C/A": {
+        "count": 6,
+        "medianChangeMs": -2.685125499999998,
+        "medianChangePercent": -1.2927521794393382,
+        "faster": 3,
+        "equalWorkChangePercent": -3.1867308940365713
+      },
+      "B/mean(A,C)": {
+        "count": 6,
+        "medianChangeMs": -13.469263249999983,
+        "medianChangePercent": -6.586229773068986,
+        "faster": 4,
+        "equalWorkChangePercent": 4.379414315411401
+      }
+    },
+    "initialization": {
+      "B/A": {
+        "count": 6,
+        "medianChangeMs": -8.387566000000021,
+        "medianChangePercent": -26.44696190716499,
+        "faster": 5,
+        "equalWorkChangePercent": -15.905195641249115
+      },
+      "B/C": {
+        "count": 6,
+        "medianChangeMs": -2.75644650000001,
+        "medianChangePercent": -9.872614628112064,
+        "faster": 4,
+        "equalWorkChangePercent": 21.74389321724877
+      },
+      "C/A": {
+        "count": 6,
+        "medianChangeMs": -5.7503930000000025,
+        "medianChangePercent": -18.24654766386773,
+        "faster": 5,
+        "equalWorkChangePercent": -30.92482740905457
+      }
+    },
+    "total": {
+      "B/A": {
+        "count": 6,
+        "medianChangeMs": -15.729590499999944,
+        "medianChangePercent": -7.446133709844838,
+        "faster": 4,
+        "equalWorkChangePercent": -0.09068286491755728
+      },
+      "B/C": {
+        "count": 6,
+        "medianChangeMs": 0.029566000000016857,
+        "medianChangePercent": 0.1576500714990381,
+        "faster": 3,
+        "equalWorkChangePercent": 7.856042753635384
+      },
+      "C/A": {
+        "count": 6,
+        "medianChangeMs": -1.486204000000015,
+        "medianChangePercent": -0.6439548515529858,
+        "faster": 3,
+        "equalWorkChangePercent": -7.367900226698332
+      },
+      "B/mean(A,C)": {
+        "count": 6,
+        "medianChangeMs": -24.28781949999997,
+        "medianChangePercent": -10.467146434050512,
+        "faster": 4,
+        "equalWorkChangePercent": 3.730704542659624
+      }
+    }
+  },
+  "conclusion": "All archive/source identities and all four comparison families reproduce exactly. The retained controls and candidate tail support the stated inconclusive local-only disposition.",
+  "reviewerSourceSha256": "74b327a2a08bea1c993364a95a51aca8438f015afd24742e32d89a8e81752c81"
+}
