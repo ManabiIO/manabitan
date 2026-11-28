@@ -1,0 +1,61 @@
+name: Gzip-framed inflation Chromium screen 20261128 beb5
+
+on:
+  push:
+    branches: ['perf/decompression-stream-chromium-20261128-beb5']
+    paths:
+      - '.github/workflows/decompression-stream-chromium-beb5.yml'
+      - 'dev/perf/decompression-stream-chromium/**'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: Fresh Chromium inflation (JMdict)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify source identity and capture every pinned JMdict group
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/decompression-stream-chromium-beb5/jmdict"
+          mkdir -p "$evidence"
+          git rev-parse HEAD > "$evidence/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
+          node dev/perf/host-environment.js > "$evidence/host.json"
+          node --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", ["jmdict"])'
+          node --max-old-space-size=768 dev/perf/decompression-stream-chromium/capture.mjs \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$RUNNER_TEMP/inflate-captures" \
+            2>&1 | tee "$evidence/capture.log"
+          cp "$RUNNER_TEMP/inflate-captures/manifest.json" "$evidence/capture-manifest.json"
+          cp "$RUNNER_TEMP/inflate-captures/conformance.json" "$evidence/conformance-manifest.json"
+      - name: Require conformance then run both fixed slice variants and controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/decompression-stream-chromium-beb5/jmdict"
+          node dev/perf/decompression-stream-chromium/campaign.mjs \
+            "$RUNNER_TEMP/inflate-captures" "$evidence/campaign" 6 \
+            2>&1 | tee "$evidence/campaign.log"
+      - name: Retain registration, every completed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: decompression-stream-chromium-beb5-jmdict
+          path: builds/perf/decompression-stream-chromium-beb5
+          if-no-files-found: error
+          retention-days: 14
