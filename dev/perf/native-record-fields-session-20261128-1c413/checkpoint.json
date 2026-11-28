@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 10:41:01 UTC",
+  "observedAt": "2026-11-28 11:04:22 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -152,7 +152,7 @@
     }
   },
   "browser": {
-    "status": "First browser launcher failed closed before setup/imports on all six cells; separate zero-acquisition artifact audit and narrow fixture-selection guard repair pending",
+    "status": "No native-fields whole-browser timings acquired. First launcher failed before setup; second exact source passed preflight but acquisition workflow did not register. Trigger-only source revision in preparation.",
     "protocol": {
       "cells": 6,
       "dictionaries": [
@@ -228,7 +228,11 @@
       "rootCoreReview": "567b805fd40629243db747057b2fab8126eb0ecb",
       "assemblyProof": "13d00893f1bfe94f4563fb96b367cda8b7015fb8",
       "published": false,
-      "nativeReview": "d1ec2e300f307bdd69494dd2c1e5e1ace6e86ed8"
+      "nativeReview": "d1ec2e300f307bdd69494dd2c1e5e1ace6e86ed8",
+      "correctedCaller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
+      "correctedTests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099",
+      "literalReview": "a8cc87e701781cfb2db63fbff7f79518317affcf",
+      "localPurePreflight": "Pipeline is reconstructing exact reviewed assembly in isolated scratch and running existing pure tests only; no real artifacts or imports."
     },
     "numericEvaluator": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
     "activationChecker": "9e03c189823092fa7a8217f65ab9283893f85d2e",
@@ -337,7 +341,8 @@
           "bytes": 51739,
           "sha256": "80bbd2183699ec8ef7f050f6263528a6debef8fa6a4656eb6f06acf22f5c7907"
         }
-      ]
+      ],
+      "failurePreservation": "e77d71829fb743df78edbd48984699b08460675c"
     },
     "repair": {
       "cause": "JMnedict is an unrelated fourth entry in the full source-bound lock. All three selected dictionary metadata objects match exactly.",
@@ -348,7 +353,95 @@
       "noObservedTimingsReplaced": true,
       "native": "Own corrected producer source",
       "pipeline": "Own separate source-only preflight",
-      "inventory": "Own six original failure logs/archive zero-acquisition auditor and then74-report reader"
+      "inventory": "Own six original failure logs/archive zero-acquisition auditor and then74-report reader",
+      "correctedProducer": {
+        "head": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+        "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+        "source": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+        "digest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+        "study": "8ca91786b116b52c12cc93421e7656864ab9e2af",
+        "workflow": "04010c559969df24352fae867e60b7a3c32a3b4a",
+        "guard": "7f3df3b27de3b4012d0481884ac34a53de363402",
+        "tests": "f290fc66fe1b74f70d815925fcaf260d47ede50e",
+        "pureCases": 29,
+        "oldCasesUnchanged": 22,
+        "testSourceRef": "test/native-record-fields-browser-preflight-source-20261128-1c413",
+        "testSourceRefPublished": true,
+        "acquisitionPublished": true,
+        "rootReview": "f95b541db8085b772226aae2f02314a7489e2f22",
+        "nativeReview": "87f769a1999a76f967a92d9f84a45d6176846a40",
+        "fixtureGuardReviews": [
+          "57ecf7edbfb5296320bb7383c716167ab35ea8f3",
+          "8bbb1de376158262c162ed7998fe0604272c3563"
+        ],
+        "publicationReview": "114c65e1fdc26ac55dc7d1bfd470a0d45c7ba670",
+        "acquisitionRegistration": "No custom run; only actionlint46137570371. Commit-wide query shows only test-source/perf lint. No observations acquired.",
+        "absenceEvidence": "232ae9f84f705cd5bdb0cb7883127289591a0b8b"
+      },
+      "sourcePreflight": {
+        "head": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+        "tree": "06ffc2642545675d20062a6b59b51227fa2fa130",
+        "branch": "test/native-record-fields-browser-preflight-env-20261128-1c413",
+        "run": 46137023673,
+        "job": 140954485323,
+        "attempt": 1,
+        "conclusion": "success",
+        "target": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+        "tests": 29,
+        "bothGuardsPassed": true,
+        "fullLog": "d82a26cdaca6966c06fb751367cc52748459a54f",
+        "outcomes": "980f66038f4e8cbba8ba766cf96cab0dcdc68a18",
+        "completion": "04b6779799b477521d8644c315688a662efe7936",
+        "rootReview": "8f52b626c7202d1e29ff885f0f3237ab4a36ab30",
+        "artifact": {
+          "id": 15259224388,
+          "bytes": 165797,
+          "sha256": "b85778bfbd78f5da614bb93a99c35ab5b7df8a13a0100020d5956b29fc1f945b"
+        },
+        "previousInvalid": {
+          "head": "0ab9f1390876af6458c97bf1cbb385dcae94ca1e",
+          "run": 46136784829,
+          "jobs": 0,
+          "lintRun": 46136785712,
+          "lintJob": 140953757151,
+          "failure": "runner context was invalid in job env",
+          "receipt": "404b841700a130ab5f478d9e5eb2d681d7734fc2"
+        }
+      },
+      "zeroAudit": {
+        "head": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+        "tree": "2b68623b3d6460c79f0259345ec2bf7f2d6f19f7",
+        "branch": "audit/native-fields-browser-failed-launch-20261128-1c413",
+        "run": 46137216352,
+        "job": 140955079610,
+        "attempt": 1,
+        "conclusion": "success",
+        "tests": 12,
+        "all6OriginalArtifactsVerified": true,
+        "members": 78,
+        "reports": 0,
+        "timingObservations": 0,
+        "originalStudyPassed": false,
+        "receipt": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+        "result": "222e137181478cf9adbd96ff95276c8cb5ca3c52",
+        "resultSha256": "0993e18f86fc4a4e3bee32099a0cea524929d26c25ba44a59b9b2e264f43601c",
+        "log": "9c40065dcddc1f80c91722a38983d5f60b6727e2",
+        "artifact": {
+          "id": 15260456656,
+          "bytes": 1728452,
+          "sha256": "6257e9e3c076b5bb56a6b61e651ffcb31cd7081acfb2368edd4fc051a43104ff"
+        }
+      },
+      "triggerOnlyNext": {
+        "branch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+        "scope": "Remove only acquisition push.paths and use fresh exact branch; preserve complete jobs section, product/control, source guard/tests, readiness, schedule and numeric gates. New source/README/study provenance only.",
+        "owner": "native_host_review",
+        "preflightOwner": "pipeline_audit",
+        "preflightBranch": "test/native-record-fields-browser-preflight-trigger-20261128-1c413",
+        "noRefYet": true,
+        "noTimingObserved": true,
+        "triggerCause": "Path-filter suppression after prior test-source introduction is an unconfirmed hypothesis; original event diff was not available. Official docs confirms path filters skip when no files change."
+      }
     }
   },
   "historicalCorrectness": {
@@ -543,13 +636,17 @@
         "banks": 665
       }
     },
-    "totalRows": 7613164
+    "totalRows": 7613164,
+    "staticNativeTableOpportunity": {
+      "blob": "4a64103d2071f24cc1aaabb78b038fe3d50bddab",
+      "scope": "Unmeasured smaller active hash prefix with bounded growth; current full arena retained. No implementation/timing staged. Hold until actual browser disposition."
+    }
   },
   "next": [
-    "Complete six-artifact zero-acquisition audit for failed46136060186",
-    "Review corrected guard and full source; publish unique testsource ref",
-    "Run separate source-only preflight exact corrected source",
-    "Publish new original6-cell cohort only afterpreflight; preservefailedsource andallgates",
-    "Readall74reports/cell and decidePRonlyifqualified gain"
+    "Review new trigger-only producer and separate preflight rebind",
+    "Require unchanged products/gates and completed source preflight; check older915d branch still has no customrun",
+    "Publish one unfiltered original6-cell acquisition",
+    "Read every original74report percell and apply frozen thresholds",
+    "PR only after qualified worthwhile import gain"
   ]
 }
