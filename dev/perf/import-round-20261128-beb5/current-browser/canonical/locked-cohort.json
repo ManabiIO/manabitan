@@ -1,0 +1,19 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "runId": 46128439514,
+  "runAttempt": 1,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+  "branch": "test/canonical-current-confirmation-20261128-beb5",
+  "workflow": ".github/workflows/canonical-current-confirmation-beb5.yml",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "artifactNames": [
+    "canonical-current-confirmation-beb5-jmdict-BA",
+    "canonical-current-confirmation-beb5-jitendex-BA",
+    "canonical-current-confirmation-beb5-vndb-BA"
+  ],
+  "auditCheckout": "/tmp/manabitan-beb5/canonical-current-audit-source",
+  "noPooling": true,
+  "noMeasurementRerun": true
+}

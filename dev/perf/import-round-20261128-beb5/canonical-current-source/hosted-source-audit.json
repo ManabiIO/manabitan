@@ -1,0 +1,158 @@
+{
+  "scope": "Independent original source/unit artifact byte audit and source identity comparison against immutable published Git objects. No new benchmark or unit execution.",
+  "sourceJobId": 140928131643,
+  "unitJobId": 140928131835,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+  "artifacts": {
+    "canonical-source": {
+      "artifactId": 15257355156,
+      "bytes": 8455,
+      "sha256": "0634e4a2ef956e9995705faa18772da1ef55e8233a8b44f13b27453ed4a56c65",
+      "memberCount": 7
+    },
+    "canonical-units": {
+      "artifactId": 15256583372,
+      "bytes": 50411,
+      "sha256": "856203bb21ec55ce37c3489ddd9d4a740fbc32febb7d020bb670e969ab12e0e2",
+      "memberCount": 4
+    }
+  },
+  "runtimeFileBindings": [
+    {
+      "arm": "A",
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "sha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+      "bytes": 2588
+    },
+    {
+      "arm": "A",
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "bytes": 1624
+    },
+    {
+      "arm": "A",
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "bytes": 613153
+    },
+    {
+      "arm": "A",
+      "path": "ext/js/dictionary/term-content-canonical-layout.js",
+      "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c",
+      "bytes": 1827
+    },
+    {
+      "arm": "A",
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "bytes": 19536
+    },
+    {
+      "arm": "A",
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "bytes": 365309
+    },
+    {
+      "arm": "A",
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+      "bytes": 6853
+    },
+    {
+      "arm": "A",
+      "path": "test/term-lookup-native-checksum.test.js",
+      "expectedAbsent": true
+    },
+    {
+      "arm": "B",
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "sha256": "5a0ce28ef82c86994535db8fe6a35934ee793a7dc5035e24369b812eaefe1dc9",
+      "bytes": 2588
+    },
+    {
+      "arm": "B",
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+      "bytes": 6206
+    },
+    {
+      "arm": "B",
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "sha256": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb",
+      "bytes": 613435
+    },
+    {
+      "arm": "B",
+      "path": "ext/js/dictionary/term-content-canonical-layout.js",
+      "sha256": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80",
+      "bytes": 2346
+    },
+    {
+      "arm": "B",
+      "path": "ext/js/dictionary/term-content-canonical-scan.js",
+      "sha256": "874f1b9465f7206eaa86e2895df33c55bf1fce5c36e02753873e5dd99ab79a28",
+      "bytes": 29026
+    },
+    {
+      "arm": "B",
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha256": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59",
+      "bytes": 366499
+    },
+    {
+      "arm": "B",
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "sha256": "d485531b3796491c7cc22657decff9f9a19e5096ed29e2823911a990699d0f97",
+      "bytes": 13861
+    },
+    {
+      "arm": "B",
+      "path": "test/term-lookup-native-checksum.test.js",
+      "sha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53",
+      "bytes": 16877
+    }
+  ],
+  "qualificationSourceBindings": {
+    ".github/workflows/canonical-current-confirmation-beb5.yml": "63229c26ebe2e0f29956dabdea9e40be925b5bf1d5b0a3459b27647d7b810a88",
+    "dev/perf/canonical-current-confirmation-20261128-beb5/audit-browser.py": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+    "dev/perf/canonical-current-confirmation-20261128-beb5/run.py": "f3f96d269fd1e31dfcf02e49087edb399811d8acd9a63ea17a1b1c7a848dd511",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/import-qualification-20261128-beb5.py": "326e8ca36aa0162ba4c22957b8331016284fef9f28a48cc395f3d664f1d7ffd4"
+  },
+  "configSha256": "3776441de5f190fa136eff61f7b79358fef64b246d3f5abfd6200c461feb1408",
+  "nativeBuild": {
+    "mode": "check",
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      }
+    ]
+  },
+  "unitResults": {
+    "filesPassed": 670,
+    "testsPassed": 15151,
+    "testsSkipped": 47,
+    "exactCompilerProbePassed": true
+  },
+  "buildValidation": {
+    "kind": "all-target dry run",
+    "targetCount": 7,
+    "emittedReleaseArchives": false
+  },
+  "passed": true
+}

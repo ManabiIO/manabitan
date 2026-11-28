@@ -1,0 +1,24 @@
+{
+  "runId": 46128439514,
+  "runAttempt": 1,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "resolvedAt": "2026-11-28T09:15:55.310Z",
+  "dictionaryJobs": {
+    "jmdict": {
+      "id": 140930868518,
+      "name": "Canonical checksum imports (jmdict, 12 BA-start pairs)",
+      "runId": 46128439514
+    },
+    "jitendex": {
+      "id": 140930868620,
+      "name": "Canonical checksum imports (jitendex, 12 BA-start pairs)",
+      "runId": 46128439514
+    },
+    "vndb": {
+      "id": 140930868544,
+      "name": "Canonical checksum imports (vndb, 12 BA-start pairs)",
+      "runId": 46128439514
+    }
+  },
+  "source": "GitHub run jobs response before any corpus completed"
+}

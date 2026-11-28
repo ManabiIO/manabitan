@@ -1,0 +1,318 @@
+{
+  "dictionary": "jitendex",
+  "runId": 46128439514,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "artifactId": 15256763937,
+  "jobId": 140930868620,
+  "originalArchiveSha256": "10a4b22a23e76ab94d6b1a3e9ba1b9aa6ea050168cc42bb08f346bed8bfbc83f",
+  "censusSha256": "98a7d7031d3478b202b18610f952d3fa104f1c1ec4b50e8074a650cc492da3cf",
+  "independentAuditSha256": "c8e5eba7ee43046903b3ba24b34281809ed8bfffd527ecd4b223cd62f94cffed",
+  "candidate": {
+    "relative": {
+      "count": 12,
+      "ratios": [
+        1.0415059687787067,
+        1.0124458544323067,
+        1.0062606370046123,
+        0.9730801586348037,
+        1.0323386190535941,
+        0.9703978906998899,
+        0.9899928092042115,
+        1.0105637982196123,
+        0.9913215226238927,
+        0.9970852418059466,
+        0.988787750919298,
+        1.0169995750106249
+      ],
+      "medianPairedChangePercent": 0.1672939405279461,
+      "equalWorkChangePercent": 0.23761219876914375,
+      "worstPairChangePercent": 4.150596877870671,
+      "descriptiveBootstrap95Percent": [
+        -1.0609719938245221,
+        1.4722714721465913
+      ],
+      "fasterPairs": 6
+    },
+    "absolute": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 1633.5,
+          "otherMs": 1701.3000000000175,
+          "differenceMs": 67.80000000001746
+        },
+        {
+          "pair": 2,
+          "baselineMs": 1639.1000000000058,
+          "otherMs": 1659.5,
+          "differenceMs": 20.39999999999418
+        },
+        {
+          "pair": 3,
+          "baselineMs": 1645.2000000000116,
+          "otherMs": 1655.5,
+          "differenceMs": 10.299999999988358
+        },
+        {
+          "pair": 4,
+          "baselineMs": 1664.1999999999825,
+          "otherMs": 1619.4000000000233,
+          "differenceMs": -44.799999999959255
+        },
+        {
+          "pair": 5,
+          "baselineMs": 1601.7999999999884,
+          "otherMs": 1653.600000000035,
+          "differenceMs": 51.800000000046566
+        },
+        {
+          "pair": 6,
+          "baselineMs": 1668.7999999999884,
+          "otherMs": 1619.399999999965,
+          "differenceMs": -49.40000000002328
+        },
+        {
+          "pair": 7,
+          "baselineMs": 1668.7999999999884,
+          "otherMs": 1652.0999999999767,
+          "differenceMs": -16.70000000001164
+        },
+        {
+          "pair": 8,
+          "baselineMs": 1685,
+          "otherMs": 1702.8000000000466,
+          "differenceMs": 17.800000000046566
+        },
+        {
+          "pair": 9,
+          "baselineMs": 1670.7999999999884,
+          "otherMs": 1656.2999999999884,
+          "differenceMs": -14.5
+        },
+        {
+          "pair": 10,
+          "baselineMs": 1681.100000000035,
+          "otherMs": 1676.2000000000116,
+          "differenceMs": -4.900000000023283
+        },
+        {
+          "pair": 11,
+          "baselineMs": 1658.9000000000233,
+          "otherMs": 1640.3000000000466,
+          "differenceMs": -18.599999999976717
+        },
+        {
+          "pair": 12,
+          "baselineMs": 1647.0999999999767,
+          "otherMs": 1675.0999999999767,
+          "differenceMs": 28.0
+        }
+      ],
+      "medianPairedDifferenceMs": 2.6999999999825377,
+      "meanPairedDifferenceMs": 3.9333333333415794,
+      "sumDifferenceMs": 47.20000000009895,
+      "minimumDifferenceMs": -49.40000000002328,
+      "maximumDifferenceMs": 67.80000000001746,
+      "fasterPairs": 6
+    }
+  },
+  "control": {
+    "relative": {
+      "count": 4,
+      "ratios": [
+        1.2246597476850405,
+        1.0479070892814004,
+        1.0089603607880577,
+        0.9822119102861426
+      ],
+      "medianPairedChangePercent": 2.8433725034729074,
+      "equalWorkChangePercent": 6.425381690906096,
+      "worstPairChangePercent": 22.465974768504047,
+      "descriptiveBootstrap95Percent": [
+        -1.778808971385737,
+        22.465974768504047
+      ],
+      "fasterPairs": 1
+    },
+    "absolute": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 1609.1000000000058,
+          "otherMs": 1970.6000000000058,
+          "differenceMs": 361.5
+        },
+        {
+          "pair": 2,
+          "baselineMs": 1653.2000000000116,
+          "otherMs": 1732.4000000000233,
+          "differenceMs": 79.20000000001164
+        },
+        {
+          "pair": 3,
+          "baselineMs": 1685.2000000000116,
+          "otherMs": 1700.3000000000466,
+          "differenceMs": 15.100000000034925
+        },
+        {
+          "pair": 4,
+          "baselineMs": 1680.9000000000233,
+          "otherMs": 1651,
+          "differenceMs": -29.900000000023283
+        }
+      ],
+      "medianPairedDifferenceMs": 47.15000000002328,
+      "meanPairedDifferenceMs": 106.47500000000582,
+      "sumDifferenceMs": 425.9000000000233,
+      "minimumDifferenceMs": -29.900000000023283,
+      "maximumDifferenceMs": 361.5,
+      "fasterPairs": 1
+    }
+  },
+  "termRecordWrite": {
+    "candidate": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 119.70000000004075,
+          "otherMs": 76.30000000001746,
+          "differenceMs": -43.40000000002328
+        },
+        {
+          "pair": 2,
+          "baselineMs": 91.09999999997672,
+          "otherMs": 60.40000000002328,
+          "differenceMs": -30.699999999953434
+        },
+        {
+          "pair": 3,
+          "baselineMs": 138.5,
+          "otherMs": 66.89999999993597,
+          "differenceMs": -71.60000000006403
+        },
+        {
+          "pair": 4,
+          "baselineMs": 98.20000000001164,
+          "otherMs": 74.5999999998603,
+          "differenceMs": -23.60000000015134
+        },
+        {
+          "pair": 5,
+          "baselineMs": 91.50000000011642,
+          "otherMs": 85.9000000001979,
+          "differenceMs": -5.599999999918509
+        },
+        {
+          "pair": 6,
+          "baselineMs": 117.09999999997672,
+          "otherMs": 69.60000000003492,
+          "differenceMs": -47.49999999994179
+        },
+        {
+          "pair": 7,
+          "baselineMs": 99.10000000003492,
+          "otherMs": 58.39999999990687,
+          "differenceMs": -40.70000000012806
+        },
+        {
+          "pair": 8,
+          "baselineMs": 94.49999999994179,
+          "otherMs": 65.39999999990687,
+          "differenceMs": -29.100000000034925
+        },
+        {
+          "pair": 9,
+          "baselineMs": 89.20000000006985,
+          "otherMs": 64.29999999998836,
+          "differenceMs": -24.90000000008149
+        },
+        {
+          "pair": 10,
+          "baselineMs": 105.80000000010477,
+          "otherMs": 62.60000000009313,
+          "differenceMs": -43.20000000001164
+        },
+        {
+          "pair": 11,
+          "baselineMs": 75.40000000002328,
+          "otherMs": 70.00000000005821,
+          "differenceMs": -5.399999999965075
+        },
+        {
+          "pair": 12,
+          "baselineMs": 79.30000000004657,
+          "otherMs": 52.899999999965075,
+          "differenceMs": -26.40000000008149
+        }
+      ],
+      "medianPairedDifferenceMs": -29.89999999999418,
+      "meanPairedDifferenceMs": -32.67500000002959,
+      "sumDifferenceMs": -392.10000000035507,
+      "minimumDifferenceMs": -71.60000000006403,
+      "maximumDifferenceMs": -5.399999999965075,
+      "fasterPairs": 12
+    },
+    "control": {
+      "available": true,
+      "pairs": [
+        {
+          "pair": 1,
+          "baselineMs": 99.19999999998254,
+          "otherMs": 72.00000000008731,
+          "differenceMs": -27.199999999895226
+        },
+        {
+          "pair": 2,
+          "baselineMs": 99.99999999994179,
+          "otherMs": 134.30000000004657,
+          "differenceMs": 34.300000000104774
+        },
+        {
+          "pair": 3,
+          "baselineMs": 58.5999999998603,
+          "otherMs": 82.39999999973224,
+          "differenceMs": 23.799999999871943
+        },
+        {
+          "pair": 4,
+          "baselineMs": 61.100000000034925,
+          "otherMs": 85.39999999996508,
+          "differenceMs": 24.29999999993015
+        }
+      ],
+      "medianPairedDifferenceMs": 24.049999999901047,
+      "meanPairedDifferenceMs": 13.80000000000291,
+      "sumDifferenceMs": 55.20000000001164,
+      "minimumDifferenceMs": -27.199999999895226,
+      "maximumDifferenceMs": 34.300000000104774,
+      "fasterPairs": 1
+    },
+    "scope": "Append/write component including checksum work; not an isolated checksum timer."
+  },
+  "memoryPassed": true,
+  "memoryAudit": {
+    "schemaVersion": 1,
+    "observations": 4,
+    "rawScanCount": 446,
+    "everyObservationQualified": true,
+    "passesProspectiveMemoryScreen": true,
+    "metrics": {
+      "maxSampledPssKiB": {
+        "medianPairedChangePercent": 1.7280318294770614,
+        "maximumPairedChangePercent": 1.91950856348162
+      },
+      "maxSampledPrivateKiB": {
+        "medianPairedChangePercent": 2.2660422034551764,
+        "maximumPairedChangePercent": 3.0539456085599603
+      }
+    }
+  },
+  "memoryReceiptFailures": [],
+  "validatedObservationCount": 42,
+  "noPooling": true,
+  "noControlSubtraction": true,
+  "noTrimmingOrReplacement": true
+}

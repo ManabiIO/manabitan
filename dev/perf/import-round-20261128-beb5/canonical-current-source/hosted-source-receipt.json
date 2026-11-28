@@ -1,0 +1,46 @@
+{
+  "artifactId": 15257355156,
+  "runId": 46128439514,
+  "sourceCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "bytes": 8455,
+  "sha256": "0634e4a2ef956e9995705faa18772da1ef55e8233a8b44f13b27453ed4a56c65",
+  "gitBlob": "d5a50dfb05326414b606730f647a2dd040f37d7e",
+  "members": [
+    {
+      "path": "build-dry-run.log",
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "path": "json-format.log",
+      "bytes": 759,
+      "sha256": "e739f86f192724afd466e6fd712b8f12d80c11f56c471bab2c5c06d120e33d6a"
+    },
+    {
+      "path": "lint.log",
+      "bytes": 764,
+      "sha256": "7299800c2295e66c451f9ab2a9407eee7e7968f1066572ee3cccb7030b15ff4c"
+    },
+    {
+      "path": "native-build.log",
+      "bytes": 500,
+      "sha256": "54ff25597c958d38cc96e1c4362326cc332af3983df22952e896653549aa56de"
+    },
+    {
+      "path": "source-preflight/qualification-config.json",
+      "bytes": 10061,
+      "sha256": "3776441de5f190fa136eff61f7b79358fef64b246d3f5abfd6200c461feb1408"
+    },
+    {
+      "path": "source-preflight/qualification-source-identities.json",
+      "bytes": 5955,
+      "sha256": "c9bb953342be9915eb7844e961679010ad5265d2d59b7f8a62379aa2aa560686"
+    },
+    {
+      "path": "types.log",
+      "bytes": 444,
+      "sha256": "493d95206d825009022843ae583d9cebbfd9d664d812523227e48c71d733d454"
+    }
+  ],
+  "archiveIndependentlyDownloadedAndRehashed": true
+}

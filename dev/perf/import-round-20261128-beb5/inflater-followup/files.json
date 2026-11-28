@@ -1,0 +1,15 @@
+{
+  "scope": "Read-only inflater follow-up review; no new native execution or timing.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6192,
+      "sha256": "65d41fee3f0f31cfa9984cfd83eb1b954256cafdb22828e92e404bf8210dae32"
+    },
+    {
+      "path": "review.json",
+      "bytes": 9078,
+      "sha256": "5957a319239894fefea03f481d9a5cdab76b383f6479f539869bd76a12f74c20"
+    }
+  ]
+}

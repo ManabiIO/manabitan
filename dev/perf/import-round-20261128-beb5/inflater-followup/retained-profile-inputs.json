@@ -1,0 +1,80 @@
+{
+  "scope": "Original processed profile summaries, mapping helpers, named and production WASM, and current capture manifest. This is not the complete original raw browser trace and cannot replay trace acquisition. Ordinary and traced observations remain separate. No new timing was run.",
+  "reviewSha256": "5957a319239894fefea03f481d9a5cdab76b383f6479f539869bd76a12f74c20",
+  "baselineNonCustomWasmSectionsEqual": true,
+  "members": [
+    {
+      "member": "profiles/jmdict/ordinary/summary.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/profiles/jmdict/ordinary/summary.json",
+      "bytes": 59109,
+      "sha256": "2e6212d20b6b47d524bab4d4e50c80045bd77cdc52a33e1b1b22389a17765840"
+    },
+    {
+      "member": "profiles/jmdict/trace/summary.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/profiles/jmdict/trace/summary.json",
+      "bytes": 59197,
+      "sha256": "663f0c7eacc2ad0c7b61c9c2592f54901da13cd30fc40a7693d4b2e0724223ef"
+    },
+    {
+      "member": "profiles/jmdict/trace/attribution.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/profiles/jmdict/trace/attribution.json",
+      "bytes": 159605,
+      "sha256": "42ab5934cf3161be5b0bbc3ffffa3481aec6098f6c47358a1d25b9193c781cfe"
+    },
+    {
+      "member": "profiles/jmdict/source-sha.txt",
+      "originalPath": "/workspace/scratch/beb5caac0497/profiles/jmdict/source-sha.txt",
+      "bytes": 41,
+      "sha256": "e3774462125e71139fdc00efd590bee6e14782bff8a3efa52049b3d4c7cfa65b"
+    },
+    {
+      "member": "profiles/jmdict/source-identities.txt",
+      "originalPath": "/workspace/scratch/beb5caac0497/profiles/jmdict/source-identities.txt",
+      "bytes": 277,
+      "sha256": "6c67f40dadfee5d422581748dd1af54c06fa83e08d9e08fb0edf8db29edb18c3"
+    },
+    {
+      "member": "native-parser-analysis/function-profile.json",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/function-profile.json",
+      "bytes": 4390,
+      "sha256": "d1c23b0f7137e08f5e533256d22ac76d19293dafe9e3dab3c6c7e1a3ef6bb598"
+    },
+    {
+      "member": "native-parser-analysis/map-functions.py",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/map-functions.py",
+      "bytes": 2908,
+      "sha256": "824cb98ba9a14e339470c4c5a82eecde7d7812fe517616ac54bd0fc7ffb74918"
+    },
+    {
+      "member": "trace-attribution.py",
+      "originalPath": "/workspace/scratch/beb5caac0497/trace-attribution.py",
+      "bytes": 7006,
+      "sha256": "76ee3796acd72047d03fdaa36bce8a7bff7409855f3729ecbef9213615c76345"
+    },
+    {
+      "member": "native-parser-analysis/term-bank-parser-names.wasm",
+      "originalPath": "/workspace/scratch/beb5caac0497/native-parser-analysis/term-bank-parser-names.wasm",
+      "bytes": 69297,
+      "sha256": "b0177c031902070af8526928769926cb5236ee2ad10f2c804473d12476237e29"
+    },
+    {
+      "member": "native-parser-analysis/profile-baseline-production.wasm",
+      "originalGitRevision": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "originalGitPath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    {
+      "member": "current-capture/manifest.json",
+      "originalPath": "/tmp/manabitan-beb5/crc-current-inputs/manifest.json",
+      "bytes": 29656,
+      "sha256": "6c99bf187e086fea2b4f52eb41b0ee04d8db72833d39922a4aaae441b3e12f75"
+    }
+  ],
+  "archive": {
+    "name": "retained-profile-inputs.zip",
+    "bytes": 92893,
+    "sha256": "bb0278eb36806788fdc0eaa2dd226cdd81f23b3b08811933690e9ebc230e1d8a",
+    "memberCount": 12
+  }
+}

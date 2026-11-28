@@ -1,0 +1,124 @@
+{
+  "id": 140930868620,
+  "run_id": 46128439514,
+  "workflow_name": "Current-base canonical checksum BA confirmation 20261128 beb5",
+  "head_branch": "test/canonical-current-confirmation-20261128-beb5",
+  "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46128439514",
+  "run_attempt": 1,
+  "node_id": "CR_kwDORX5CfM8AAAAg0CJljA",
+  "head_sha": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140930868620",
+  "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46128439514/job/140930868620",
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-11-28T09:12:07Z",
+  "started_at": "2026-11-28T09:15:25Z",
+  "completed_at": "2026-11-28T09:24:04Z",
+  "name": "Canonical checksum imports (jitendex, 12 BA-start pairs)",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-11-28T09:15:25Z",
+      "completed_at": "2026-11-28T09:15:26Z"
+    },
+    {
+      "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-11-28T09:15:26Z",
+      "completed_at": "2026-11-28T09:15:43Z"
+    },
+    {
+      "name": "Run ./.github/actions/setup",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-11-28T09:15:43Z",
+      "completed_at": "2026-11-28T09:15:56Z"
+    },
+    {
+      "name": "Install pinned Chromium",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-11-28T09:15:56Z",
+      "completed_at": "2026-11-28T09:16:13Z"
+    },
+    {
+      "name": "Restore pinned dictionary archives",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-11-28T09:16:13Z",
+      "completed_at": "2026-11-28T09:16:13Z"
+    },
+    {
+      "name": "Execute the frozen BA-start 42-observation protocol",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-11-28T09:16:13Z",
+      "completed_at": "2026-11-28T09:23:58Z"
+    },
+    {
+      "name": "Independently audit original complete or partial receipts",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-11-28T09:23:58Z",
+      "completed_at": "2026-11-28T09:23:59Z"
+    },
+    {
+      "name": "Retain every original package, observation and failure",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-11-28T09:23:59Z",
+      "completed_at": "2026-11-28T09:24:01Z"
+    },
+    {
+      "name": "Post Restore pinned dictionary archives",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14,
+      "started_at": "2026-11-28T09:24:01Z",
+      "completed_at": "2026-11-28T09:24:02Z"
+    },
+    {
+      "name": "Post Run ./.github/actions/setup",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15,
+      "started_at": "2026-11-28T09:24:02Z",
+      "completed_at": "2026-11-28T09:24:02Z"
+    },
+    {
+      "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 16,
+      "started_at": "2026-11-28T09:24:02Z",
+      "completed_at": "2026-11-28T09:24:02Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 17,
+      "started_at": "2026-11-28T09:24:02Z",
+      "completed_at": "2026-11-28T09:24:02Z"
+    }
+  ],
+  "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140930868620",
+  "labels": [
+    "ubuntu-26.04"
+  ],
+  "runner_id": 1000092889,
+  "runner_name": "GitHub Actions 1000092889",
+  "runner_group_id": 0,
+  "runner_group_name": "GitHub Actions"
+}

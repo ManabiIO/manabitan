@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python",
+    "/tmp/manabitan-beb5/canonical-current-audit-source/dev/perf/canonical-current-confirmation-20261128-beb5/audit-browser.py",
+    "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex",
+    "--out",
+    "/tmp/manabitan-beb5/current-browser-artifacts/canonical-jitendex/local-independent-audit.json"
+  ],
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "auditorSha256": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+  "exitCode": 0,
+  "originalCiAuditUnchanged": true
+}

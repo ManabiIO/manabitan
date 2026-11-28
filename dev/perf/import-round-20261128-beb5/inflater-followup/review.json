@@ -1,0 +1,217 @@
+{
+  "scope": "Bounded read-only source/history/profile review. No implementation, native execution, new timing, variant or tuning. Existing summaries are diagnostic and relative to their exact original runtime.",
+  "decision": "No new inflater candidate justified by the available evidence.",
+  "currentBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "profileRuntimeBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "profileResearchCommit": "44f51f85ea8269caa060d75e11971945c7c4c497",
+  "sourceBindings": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-inflate.c",
+      "currentSha256": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+      "bytes": 1234,
+      "unchangedSinceProfileRuntime": true,
+      "currentGitBlob": "3583271bf1214e9379a4db6fabaa7eb43479860e"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_decompress.c",
+      "currentSha256": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f",
+      "bytes": 49357,
+      "unchangedSinceProfileRuntime": true,
+      "currentGitBlob": "d5af5eb02472af00e53d5a51b45eee3fc26982df"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+      "currentSha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+      "bytes": 25048,
+      "unchangedSinceProfileRuntime": true,
+      "currentGitBlob": "8c874c364499bc537dffd2a1316c3d30796ca249"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/common_defs.h",
+      "currentSha256": "00ff4bdc24e0003fb9a3f18e692d21cc59200f09920d327fa1341a33915bbc71",
+      "bytes": 21674,
+      "unchangedSinceProfileRuntime": true,
+      "currentGitBlob": "6ca69fc919c6c99c784c3ff59f0b1bc311324c16"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "currentSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "bytes": 210111,
+      "unchangedSinceProfileRuntime": true,
+      "currentGitBlob": "4f3f7e73c78bca23672f46588cb897633fc7a4ac"
+    }
+  ],
+  "inputArtifacts": [
+    {
+      "path": "/workspace/scratch/beb5caac0497/profiles/jmdict/ordinary/summary.json",
+      "sha256": "2e6212d20b6b47d524bab4d4e50c80045bd77cdc52a33e1b1b22389a17765840",
+      "bytes": 59109
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/profiles/jmdict/trace/summary.json",
+      "sha256": "663f0c7eacc2ad0c7b61c9c2592f54901da13cd30fc40a7693d4b2e0724223ef",
+      "bytes": 59197
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/profiles/jmdict/trace/attribution.json",
+      "sha256": "42ab5934cf3161be5b0bbc3ffffa3481aec6098f6c47358a1d25b9193c781cfe",
+      "bytes": 159605
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/profiles/jmdict/source-sha.txt",
+      "sha256": "e3774462125e71139fdc00efd590bee6e14782bff8a3efa52049b3d4c7cfa65b",
+      "bytes": 41
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/profiles/jmdict/source-identities.txt",
+      "sha256": "6c67f40dadfee5d422581748dd1af54c06fa83e08d9e08fb0edf8db29edb18c3",
+      "bytes": 277
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/function-profile.json",
+      "sha256": "d1c23b0f7137e08f5e533256d22ac76d19293dafe9e3dab3c6c7e1a3ef6bb598",
+      "bytes": 4390
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/native-parser-analysis/map-functions.py",
+      "sha256": "824cb98ba9a14e339470c4c5a82eecde7d7812fe517616ac54bd0fc7ffb74918",
+      "bytes": 2908
+    },
+    {
+      "path": "/workspace/scratch/beb5caac0497/trace-attribution.py",
+      "sha256": "76ee3796acd72047d03fdaa36bce8a7bff7409855f3729ecbef9213615c76345",
+      "bytes": 7006
+    }
+  ],
+  "namedModuleProof": {
+    "baselineSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "namedSha256": "b0177c031902070af8526928769926cb5236ee2ad10f2c804473d12476237e29",
+    "allNonCustomSectionsRecheckedIdentical": true,
+    "mapping": {
+      "1": "inflate_and_join_term_banks",
+      "2": "crc32_bytes",
+      "48": "libdeflate_deflate_decompress_ex",
+      "49": "build_decode_table",
+      "50": "term_bank_inflate"
+    },
+    "namedModulePath": "/workspace/scratch/beb5caac0497/native-parser-analysis/term-bank-parser-names.wasm",
+    "productionGitPath": "dev/data/dictionary-wasm/term-bank-parser.wasm"
+  },
+  "profileScopes": {
+    "ordinary": {
+      "authoritativeTiming": true,
+      "totalImportMs": 1053.3999999999942,
+      "sourceInflateMs": 459.29999999999563
+    },
+    "trace": {
+      "authoritativeTiming": false,
+      "totalImportMs": 1297.9000000000015,
+      "sourceInflateMs": 402.099999999984,
+      "nativeInflateWrapperInclusiveSampleMs": 402.698,
+      "decoderSelfSampleMs": 228.037,
+      "crcSelfSampleMs": 166.852,
+      "retainedTableBuilderSelfSampleMs": 5.304,
+      "tableBuilderTop25Workers": [
+        {
+          "pid": 3445,
+          "tid": 3517,
+          "retainedSelfCount": 25,
+          "tableSelfMs": 0,
+          "tablePresent": false,
+          "omittedFrameUpperRoundedCutoffMs": 2.898
+        },
+        {
+          "pid": 3445,
+          "tid": 3518,
+          "retainedSelfCount": 25,
+          "tableSelfMs": 3.39,
+          "tablePresent": true,
+          "omittedFrameUpperRoundedCutoffMs": 0
+        },
+        {
+          "pid": 3445,
+          "tid": 3519,
+          "retainedSelfCount": 25,
+          "tableSelfMs": 1.914,
+          "tablePresent": true,
+          "omittedFrameUpperRoundedCutoffMs": 0
+        }
+      ],
+      "tableBuilderApproxUpperSampleMs": 8.202
+    }
+  },
+  "scopeLimits": [
+    "Do not add or subtract the ordinary459.3ms and separate traced166.852ms CRC value.",
+    "The table bound is based on rounded top25 self summaries, not an exact CPU duration or end-to-end saving.",
+    "Table-builder attribution excludes dynamic-header bit decoding in the main decoder function.",
+    "Summed worker samples and nested phase counters are not elapsed import latency.",
+    "Unchanged inflater source does not make the entire current parser module/code layout identical to the old profile."
+  ],
+  "existingWorkRemoval": {
+    "decompressor": "One persistent zero-initialized static context per parser instance; no per-bank allocator or CPU dispatcher.",
+    "fixedHuffmanTables": "Already reused across fixed blocks/streams without intervening dynamic blocks.",
+    "decodedOutput": "Native writes directly into final parser-owned input storage; all12 target groups preserve independent bank spans and skip the joined-copy branch.",
+    "inputCopy": "One compressed source copy perbank into WASM linear memory; no second decoded-bank ownership copy here.",
+    "dynamicTableReuse": "Not a free cache hit: new header lengths/precode overwrite the union shared with previous litlen table. Preserving candidate tables/lengths adds state or copies; current evidence bounds only a small table-builder target."
+  },
+  "currentCapture": {
+    "path": "/tmp/manabitan-beb5/crc-current-inputs/manifest.json",
+    "sha256": "6c99bf187e086fea2b4f52eb41b0ee04d8db72833d39922a4aaae441b3e12f75",
+    "groups": 12,
+    "banks": 53,
+    "banksPerGroup": [
+      5,
+      4,
+      4,
+      4,
+      5,
+      5,
+      4,
+      5,
+      4,
+      4,
+      4,
+      5
+    ],
+    "compressedBytes": 15632849,
+    "decodedBytes": 171617523,
+    "allGroupsPreserveBankSpans": true
+  },
+  "priorReferences": [
+    {
+      "number": 41,
+      "url": "https://github.com/ManabiIO/manabitan/pull/41",
+      "relevance": "Introduced full-buffer libdeflate with persistent per-instance context; not a new opportunity."
+    },
+    {
+      "number": 39,
+      "url": "https://github.com/ManabiIO/manabitan/pull/39",
+      "relevance": "Previously removed native self-copy; retained review context, not newly re-audited here."
+    },
+    {
+      "number": 664,
+      "url": "https://github.com/ManabiIO/manabitan/pull/664",
+      "relevance": "Already enabled64-bit WASM machine words and associated decode/copy path; phase-only claims with original full-browser uncertainty retained."
+    },
+    {
+      "number": 812,
+      "url": "https://github.com/ManabiIO/manabitan/pull/812",
+      "relevance": "SIMD history-copy candidate,252 full browser observations; no replicated whole-import gain.",
+      "runtime": "5555f3efd3e0c8baa99e93b4c14e7f1889c30383",
+      "study": "1788fa1fe889c407d24d0f4b5ca23689946fbcec",
+      "jmdictMedianPercentForward": -1.97,
+      "jmdictMedianPercentReverse": 0.64
+    },
+    {
+      "number": 642,
+      "url": "https://github.com/ManabiIO/manabitan/pull/642",
+      "relevance": "Removed inactive libdeflate switch; both paths already used the same decoder."
+    }
+  ],
+  "historyLimit": "Targeted GitHubPR searches found no explicit dynamic-table-cache or bitbuffer proposal; this is not proof that every possible prior experiment was absent.",
+  "currentProductionWasm": {
+    "gitPath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+    "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "bytes": 69068
+  }
+}

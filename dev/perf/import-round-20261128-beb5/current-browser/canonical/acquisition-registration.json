@@ -1,0 +1,19 @@
+{
+  "scope": "Acquisition and analysis of original fixed canonical BA observations only; no measurement, runtime or frozen-auditor changes.",
+  "runId": 46128439514,
+  "runAttempt": 1,
+  "studyCommit": "07307bed49e6fd80ec28c37e0313a6bff402b66f",
+  "studyTree": "f18eaa4af84d68086a7fcfe0e7215a742cf55a79",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+  "frozenAuditorSha256": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+  "acquisitionHelperSha256": "cf201c2ad61387dbcec5c161c9d86e15c6ff9f1efe1b6575923432e29b6c41fb",
+  "independentSourceReview": "Agent /root/jmdict_hotspots reviewed the helper and final run/job/census joins with no concrete blocker before artifact acquisition.",
+  "dictionaryJobNames": {
+    "jmdict": "Canonical checksum imports (jmdict, 12 BA-start pairs)",
+    "jitendex": "Canonical checksum imports (jitendex, 12 BA-start pairs)",
+    "vndb": "Canonical checksum imports (vndb, 12 BA-start pairs)"
+  },
+  "artifactSelection": "Exactly one non-expired artifact named canonical-current-confirmation-beb5-{dictionary}-BA from fixed run/head/attempt1. Resolve API artifact ID, size, SHA256 and unique completed matching job; preserve API receipts and verify outer bytes before extraction.",
+  "outputPolicy": "Keep every outer ZIP and original member unchanged. Local frozen auditor writes local-independent-audit.json and separate stdout/stderr. Retain every failure; no trimming, replacement, control subtraction or pooling with other cohorts."
+}
