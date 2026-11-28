@@ -1465,7 +1465,7 @@ static int reuse_validated_glossary(
     return 0;
 }
 
-static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
+static __attribute__((always_inline)) inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
     uint32_t i = skip_ws(src, len, *position);
     if (i >= len || src[i] != ',') { return 0; }
     i = skip_ws(src, len, i + 1u);
