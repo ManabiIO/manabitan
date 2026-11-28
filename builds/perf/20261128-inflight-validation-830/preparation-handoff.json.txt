@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "status": "preparation-completed-partially; executor-unavailable; no-admission-or-timing",
+  "repository": "ManabiIO/manabitan",
+  "upstream": {
+    "pr": 830,
+    "url": "https://github.com/ManabiIO/manabitan/pull/830",
+    "head": "a628c6c7915576dcf280e98bc9129a508f2f9644",
+    "base": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "headTree": "adff40c99df989355aa2f5d4a512137c75f573fc",
+    "patchBlob": "bd12f46b3b70aa5ad6938f0be60fa6c89385c74d",
+    "patchSha256": "d898d3d68852072ccffae877a003781e52730f4f880c983e1d3c7b28be9ee756",
+    "state": "open draft at read",
+    "comments": 0,
+    "performanceEvidence": "Only the explicitly pre-hardening warmed historical ~3.7ms component claim. No final-source current/cold performance acquisition found. All9 exact-head Actions runs were completed ordinary CI/auxiliary checks.",
+    "originalPrOrBranchChanged": false
+  },
+  "port": {
+    "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "commit": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+    "tree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+    "worktree": "/workspace/scratch/83b3b3bfba02/inflight-validation-830",
+    "branch": "perf/qualify-inflight-validation-830-20261128-83b3",
+    "patchSha256": "a9bbb773661fccb060ced37de200dc20e7d04884ccd736083c004598293cd327",
+    "files": {
+      "ext/js/dictionary/dictionary-database.js": "12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd",
+      "test/dictionary-in-flight-content-sources.test.js": "0b162f3d4889fba176a08aaee15bd8641115db7012f75c5124dcaf43119c30fe"
+    },
+    "changes": "Exact existing upstream2-file patch applied with line offsets only;434 insertions/18 deletions. No extra optimization, safeguard change or remote runtime publication.",
+    "untrackedAfterCommit": [
+      "ext/lib (shared symlink)",
+      "node_modules (shared symlink)"
+    ],
+    "localEvidenceRoot": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830"
+  },
+  "validation": {
+    "note": "These are exact observed receipt fields retained in tool output. Raw files existed locally before outage, but their complete bytes are not reconstructed here.",
+    "focused": {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=512",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/dictionary-in-flight-content-sources.test.js",
+        "test/dictionary-database-content-dedup.test.js",
+        "test/term-content-block-store.test.js",
+        "test/dictionary-content-plan-publication.test.js",
+        "test/dictionary-content-publication-range.test.js",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/20261128-inflight-validation-830/focused-tests.json"
+      ],
+      "cwd": "/workspace/scratch/83b3b3bfba02/inflight-validation-830",
+      "startedUtc": "2026-11-28T04:56:53.956937+00:00",
+      "exitCode": 0,
+      "elapsedSeconds": 5.7096340170000985,
+      "filesPassed": 5,
+      "testsPassed": 293,
+      "vitestVersion": "4.1.12",
+      "vitestDurationSeconds": 5.05,
+      "perFile": [
+        {
+          "file": "test/dictionary-database-content-dedup.test.js",
+          "tests": 145,
+          "testMs": 1195
+        },
+        {
+          "file": "test/term-content-block-store.test.js",
+          "tests": 75,
+          "testMs": 636
+        },
+        {
+          "file": "test/dictionary-content-publication-range.test.js",
+          "tests": 30,
+          "testMs": 81
+        },
+        {
+          "file": "test/dictionary-in-flight-content-sources.test.js",
+          "tests": 28,
+          "testMs": 30
+        },
+        {
+          "file": "test/dictionary-content-plan-publication.test.js",
+          "tests": 15,
+          "testMs": 13
+        }
+      ],
+      "provenance": "The220 current dedup/block cases plus28 upstream registration and45 publication cases total293. This is not presented as reproduction of the unavailable historical220-test command."
+    },
+    "scopedTypes": {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=512",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "builds/perf/inflight-validation-830-scoped-types.json"
+      ],
+      "cwd": "/workspace/scratch/83b3b3bfba02/inflight-validation-830",
+      "startedUtc": "2026-11-28T04:57:29.914547+00:00",
+      "exitCode": 0,
+      "elapsedSeconds": 6.885679345999961,
+      "config": {
+        "extends": "../../test/jsconfig.json",
+        "include": [
+          "../../ext/js/dictionary/dictionary-database.js",
+          "../../test/dictionary-in-flight-content-sources.test.js",
+          "../../types/ext/**/*.ts",
+          "../../types/dev/**/*.ts",
+          "../../types/test/**/*.ts",
+          "../../types/other/globals.d.ts"
+        ]
+      }
+    },
+    "scopedEslint": {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=768",
+        "node_modules/eslint/bin/eslint.js",
+        "ext/js/dictionary/dictionary-database.js",
+        "test/dictionary-in-flight-content-sources.test.js"
+      ],
+      "cwd": "/workspace/scratch/83b3b3bfba02/inflight-validation-830",
+      "startedUtc": "2026-11-28T04:57:36.800766+00:00",
+      "exitCode": -9,
+      "signal": "SIGKILL",
+      "elapsedSeconds": 3.6762647819996346,
+      "status": "incomplete, not a pass",
+      "observedOutput": "Experimental Undici proxy warnings and the existing pako CommonJS-in-ESM warning; no source violation reported before termination.",
+      "cause": "Not established by the retained receipt."
+    },
+    "whitespace": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    "rawLocalFiles": [
+      "focused-tests.log",
+      "focused-tests.json",
+      "focused-tests-receipt.json",
+      "scoped-types.json",
+      "scoped-types.log",
+      "scoped-types-receipt.json",
+      "scoped-eslint.log",
+      "scoped-eslint-receipt.json",
+      "upstream.diff",
+      "upstream-pr.json",
+      "port.diff",
+      "port-source.json"
+    ],
+    "fullUnitBuildBrowserNotRun": true
+  },
+  "prospectiveProtocol": {
+    "status": "proposed and partially agreed in chat; not written/frozen, not executed or independently runner-reviewed",
+    "arms": {
+      "A": "exact current9e baseline",
+      "B": "exact existing#830 patch port3eb1b7a",
+      "C": "byte-identical A in another fresh child"
+    },
+    "orders": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC",
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ],
+    "rounds": 12,
+    "children": 36,
+    "corpusWarmups": 0,
+    "runtime": "Fresh Node22.22 process and four actual native codec workers per arm; first full actual canonical sink pass.",
+    "producer": "Real current parser worker, actual producer-created spans, original ownership receipt, per-group processing; no reconstructed objects that lose the private WeakSet origin.",
+    "primary": "Explicitly NONCONTIGUOUS sum of12 complete public bulkAddArtifactTermsChunk intervals plus separately retained final store/session drain interval.",
+    "secondary": "Sum of direct synchronous registration call intervals, distinct from primary and including no producer cost by itself.",
+    "diagnosticEnvelope": "Separate contiguous pipeline envelope includes parsing/oracle gaps; never described as pure storage latency or used to replace the primary metric.",
+    "hashBoundaries": "All source, descriptor, frame, persisted-record and metadata hashing outside authoritative timed windows.",
+    "finalDrain": "Close block import session and await public content-store and record-store endImportSession; retain separate drain duration and ensure all103 codec frames complete.",
+    "queuedWorkProof": "Preflight records observed pool._pending.size=0, planned block count==dispatched requests==source-consumed==completed replies at every sink boundary. Current beginCompressWrappedSpans synchronously creates and dispatches the full block plan with no separate queue.",
+    "admissionProof": "PROPOSED ONLY: V8 precise coverage in a separate untimed candidate child, on the exact unchanged DB module, proving createPendingTermContentSpans/hasSimple calls and true-return coverage, plus zero generic-loop body executions. No inspector/coverage in measured children.",
+    "oracles": "Current locked528299-row/12-group JMdict; all103 existing native frame hashes, source-window/descriptor hashes, exact parent ownership, full final OPFS content/record/index file hashes and complete DB metadata-array/scalar/map hashes. Establish fresh baseline oracle and candidate equality untimed.",
+    "limits": "No candidate tuning, optional rounds, outlier exclusion, timed-trial substitution or retry. Stop on failed correctness/admission/resource checks; freeze runner/source/protocol and obtain prior_work_audit review plus root quiet-slot go-ahead before any timing.",
+    "unresolvedPreparation": [
+      "Write/review runner and protocol",
+      "Restore executor; run untimed source-bound admission and complete parity",
+      "Freeze exact resource gates and child arguments before timing",
+      "Preserve any failed setup/preflight without substituting a timed observation"
+    ],
+    "noRunnerOrProtocolFileWrittenBeforeOutage": true
+  },
+  "acquisitionStatus": {
+    "admissionRuns": 0,
+    "parityCorpusRuns": 0,
+    "timedChildren": 0,
+    "admissionPassed": false,
+    "cohortPassed": false,
+    "reason": "Executor unavailable before runner/protocol writing or acquisition."
+  },
+  "heldEvidenceUploadInventory": {
+    "schemaVersion": 1,
+    "boundary": "Inventory of this agent's retained upload receipts, not a claim to know every other agent's remote objects.",
+    "localBundleRoot": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf",
+    "payloadFileCount": 57,
+    "payloadBytes": 14159401,
+    "totalBytesWithManifest": 14239264,
+    "manifest": {
+      "path": "20261128-held-import-evidence/manifest.json",
+      "bytes": 79863,
+      "sha256": "277e8765cd04df2d8c8c701d43f839cd314468ee3ae16ecd7465da74ff1b80a0",
+      "gitBlobSha": "43dc8e43bb5a0397ac9f367c3c3cd4e23920d409",
+      "remoteProbe": {
+        "method": "GitHub fetch_blob",
+        "status": 404,
+        "result": "Not Found during executor outage"
+      }
+    },
+    "files": [
+      {
+        "path": "20261128-canonical-sink-profile/README.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/analyze.py",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/cache-origin-screen.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/inflater-source-screen.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/metadata-record-screen.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/profile.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/provenance/native-symbol-proof.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/attribution.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/checkpoint.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/codec-worker-0.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/codec-worker-1.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/codec-worker-2.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/codec-worker-3.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/result.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-0.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-1.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-10.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-11.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-2.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-3.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-4.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-5.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-6.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-7.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-8.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-canonical-sink-profile/run-1/sink-group-9.cpuprofile",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/README.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/capture.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/capture.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/cohort-1/analysis.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/cohort-1/protocol.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/cohort-1/results.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/prototype-and-tests.patch",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/prototype-complete.patch",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/prototype-initial.patch",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/prototype-tested.patch",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/replay.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/staging-reclaimed.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/types.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-compression-request-batches/validation.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-held-import-evidence/README.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-held-import-evidence/verify-bundle.py",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/README.md",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/analyze.py",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/capture.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/analysis.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/capture-checkpoint.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/capture.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/checkpoint.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/input-archive.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/inputs.tar.gz",
+        "status": "confirmed-remote-individual-blob",
+        "gitBlobSha": "fcde760cf012fd0184b7dd348e89a05bc3e77019",
+        "bytes": 11351347,
+        "sha256": "39fdc85d583249e25009a7072c61cd6b75e22cbd555b187bbd3bf59ca9a49a66",
+        "evidence": "Root explicitly confirmed its upload; local integration verified matching Git blob."
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/protocol.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/prototype.patch",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/results.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/evidence/validation.json",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/replay.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      },
+      {
+        "path": "20261128-lookup-word-loads/validate-legacy-ranges.mjs",
+        "status": "local-verified-before-outage; remote-upload-unconfirmed-in-this-agent-context"
+      }
+    ],
+    "confirmedRemoteIndividualPayloadFiles": 1,
+    "otherPayloadFilesWithoutRetainedRemoteReceipt": 56,
+    "caveat": "No individual held-evidence payload uploads were performed by this agent. Other agents may have uploaded some files or an archive containing them; use their returned object maps to refine this inventory. A locally computed Git blob SHA alone is not proof the object exists remotely."
+  }
+}

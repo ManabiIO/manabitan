@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-11-28T04:40:19.336352+00:00",
+  "kind": "launcher-failure-before-node",
+  "exitCode": 127,
+  "nodeStarted": false,
+  "profilerStarted": false,
+  "command": "timeout --signal=TERM 120 /usr/bin/time -v /workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --expose-gc --max-old-space-size=192 builds/perf/import-owned-columns-83b3-analysis-source/profile-compressed-jmdict.mjs --out /tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile",
+  "cwd": "/workspace/scratch/83b3b3bfba02/manabitan",
+  "scriptSha256": "220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3",
+  "log": {
+    "path": "/tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile.log",
+    "bytes": 78,
+    "sha256": "edbe47204943cdd0e2c73b656876576a393789ba9a090b2cef9ce504500c3189"
+  },
+  "retryPerformed": false
+}

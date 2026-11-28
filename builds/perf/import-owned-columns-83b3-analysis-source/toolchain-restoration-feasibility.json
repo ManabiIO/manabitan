@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "acquisitionPerformed": false,
+  "status": "Stopped after prior-work audit; no new native candidate justified restoration",
+  "sourceReceipt": "builds/perf/20261128-native-symbols-83b3/proof/symbol-proof.json",
+  "sourceReceiptSha256": "263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69",
+  "exactVersion": "21.1.8",
+  "remainingExecutableCopy": false,
+  "essentialRuntimeFiles": [
+    {"name": "clang", "bytes": 133136},
+    {"name": "lld", "bytes": 5872144},
+    {"name": "libLLVM.so.21.1", "bytes": 138765160},
+    {"name": "libclang-cpp.so.21.1", "bytes": 60964288}
+  ],
+  "essentialRuntimeBytesExcludingResourceHeaders": 205734728,
+  "dependencyFinding": "Preserved ldd receipts show these CLI executables do not load libclang1-21 or LLVM linker plugins. Required resource headers would still have to be restored and verified.",
+  "resourceFinding": "A 181MiB temporary-filesystem headroom observation was insufficient for these approximately196.2MiB runtime bytes alone. A split task-owned prefix could be evaluated only after a fresh disk check; no such split or download occurred.",
+  "haltReasonProvenance": "Parent stopped restoration after the independent prior-work audit identified the input-independent CRC power mechanism in existing open PR910."
+}

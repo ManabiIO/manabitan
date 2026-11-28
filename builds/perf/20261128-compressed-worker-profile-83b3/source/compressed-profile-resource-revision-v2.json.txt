@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "frozenAt": "2026-11-28T04:45:21.641374+00:00",
+  "prospectiveBeforeAnySamples": true,
+  "observationsBeforeRevision": 0,
+  "changes": "Explicit unavailable exposed-cgroup state, visible memory headroom gates, and external direct-child sampled RSS supervisor only. No product/protocol/oracle change.",
+  "originalRunnerSha256": "220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3",
+  "originalPlanSha256": "7eba808132edeb079fb5e2d1ecb043651c21d766fb186b7466d786ce693bcedd",
+  "files": [
+    {
+      "path": "profile-compressed-jmdict.mjs",
+      "bytes": 36046,
+      "sha256": "f04e84a13d7980f5453841c798775056a2c09b9b4c41ccd65fccfd49d1f1dd95"
+    },
+    {
+      "path": "watch-compressed-profile.py",
+      "bytes": 6594,
+      "sha256": "a67ab3771137a80b99cb40f4f1f50a159c33687e8b381669238ac476af66af3b"
+    },
+    {
+      "path": "compressed-profile-plan.md",
+      "bytes": 9808,
+      "sha256": "45a5dfe659b489e6b9b4bca21b47615537938091d62b754885714d01ff6a4a04"
+    },
+    {
+      "path": "compressed-profile-resource-v2.diff",
+      "bytes": 5899,
+      "sha256": "5ebb54abe704ff3d1f7a7961e1e3f86fa1646375f6a1dd4de58b19db058462a7"
+    }
+  ],
+  "finalReviewFreezeAt": "2026-11-28T04:46:36.199660+00:00",
+  "preReviewWatcherSha256": "e25b685bdc0da373ce90c5995b048205af613a3fa8a5fa8b8c86a4ced9a46786",
+  "reviewCorrection": "Watcher records external signal again after child.wait() and at finalization; a concurrent successful child exit cannot erase a deadline signal."
+}

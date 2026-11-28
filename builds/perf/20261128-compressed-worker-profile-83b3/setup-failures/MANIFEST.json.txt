@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "completeDiagnostic": false,
+  "observationsCollected": 0,
+  "scriptSha256": "220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3",
+  "files": [
+    {
+      "path": "incomplete-result.json.txt",
+      "bytes": 2270,
+      "sha256": "c3e506e03b75c4ea595520f740f3ec48c02b339499f3a01938802eb4e199eb63"
+    },
+    {
+      "path": "launcher-failure.json.txt",
+      "bytes": 839,
+      "sha256": "b6437c5282ae5f65066a70d1103b39746a436a1953132407d8f5659e3256e5a5"
+    },
+    {
+      "path": "launcher.log",
+      "bytes": 78,
+      "sha256": "edbe47204943cdd0e2c73b656876576a393789ba9a090b2cef9ce504500c3189"
+    },
+    {
+      "path": "preflight.log",
+      "bytes": 797,
+      "sha256": "5e4fad20b19ce60bda71ac78657378af9eb38b58431d642bf83daa26260ee927"
+    },
+    {
+      "path": "resource-interface.json.txt",
+      "bytes": 1919,
+      "sha256": "e5d1540eafb769b2c483e78ef8d91fd7a574218c3b533b2b9182d084889c2ea8"
+    },
+    {
+      "path": "status.json.txt",
+      "bytes": 1902,
+      "sha256": "50ce8ccad67bfd74cc9817c4f64ae6b9c256c93ec1dc49a99e69267c6f75fb70"
+    }
+  ]
+}

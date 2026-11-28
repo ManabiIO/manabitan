@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-11-28T04:41:17.693320+00:00",
+  "complete": false,
+  "observationsCollected": 0,
+  "firstLaunch": {
+    "exitCode": 127,
+    "nodeStarted": false,
+    "reason": "Unavailable /usr/bin/time wrapper"
+  },
+  "correctedLaunch": {
+    "exitCode": 1,
+    "nodeStarted": true,
+    "workerInitialized": false,
+    "samplingStarted": false,
+    "reason": "Cgroup-v2 path unavailable during resource preflight"
+  },
+  "scriptSha256": "220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3",
+  "correctedCommand": "timeout --signal=TERM 120 /workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node --expose-gc --max-old-space-size=192 builds/perf/import-owned-columns-83b3-analysis-source/profile-compressed-jmdict.mjs --out /tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile",
+  "files": [
+    {
+      "path": "compressed-jmdict-profile.log",
+      "bytes": 78,
+      "sha256": "edbe47204943cdd0e2c73b656876576a393789ba9a090b2cef9ce504500c3189"
+    },
+    {
+      "path": "compressed-jmdict-profile-launch-failure.json",
+      "bytes": 839,
+      "sha256": "b6437c5282ae5f65066a70d1103b39746a436a1953132407d8f5659e3256e5a5"
+    },
+    {
+      "path": "compressed-jmdict-profile-acquisition.log",
+      "bytes": 797,
+      "sha256": "5e4fad20b19ce60bda71ac78657378af9eb38b58431d642bf83daa26260ee927"
+    },
+    {
+      "path": "compressed-jmdict-profile/result.json",
+      "bytes": 2270,
+      "sha256": "c3e506e03b75c4ea595520f740f3ec48c02b339499f3a01938802eb4e199eb63"
+    }
+  ],
+  "resourceInspection": {
+    "procSelfCgroup": "0::/\n",
+    "visibleCgroupMounts": [],
+    "sysFsCgroupExists": false,
+    "nodeConstrainedMemoryBytes": 0,
+    "nodeAvailableMemoryBytes": 2224836608,
+    "applicableRlimits": "RSS, data, address-space all unlimited",
+    "finiteCgroupHeadroom": "unavailable, not inferred unlimited"
+  },
+  "acquisitionRetryPerformed": false
+}

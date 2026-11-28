@@ -1,0 +1,15 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"phase":"group-0","banks":5}
+{"phase":"group-1","banks":4}
+{"phase":"group-2","banks":4}
+{"phase":"group-3","banks":4}
+{"phase":"group-4","banks":5}
+{"phase":"group-5","banks":5}
+{"phase":"group-6","banks":4}
+{"phase":"group-7","banks":5}
+{"phase":"group-8","banks":4}
+{"phase":"group-9","banks":4}
+{"phase":"group-10","banks":4}
+{"phase":"group-11","banks":5}
+{"complete":true,"output":"/tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile-v2","rows":528299,"groups":12,"profiles":13}

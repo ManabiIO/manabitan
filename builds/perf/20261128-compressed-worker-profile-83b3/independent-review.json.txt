@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "prior_work_audit",
+  "recordedAt": "2026-11-28T04:49:11.344322+00:00",
+  "kind": "Independent readback of one completed baseline diagnostic; no new acquisition",
+  "authoritativeBrowserTiming": false,
+  "comparativeTiming": false,
+  "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runnerSha256": "f04e84a13d7980f5453841c798775056a2c09b9b4c41ccd65fccfd49d1f1dd95",
+  "watcherSha256": "a67ab3771137a80b99cb40f4f1f50a159c33687e8b381669238ac476af66af3b",
+  "planSha256": "45a5dfe659b489e6b9b4bca21b47615537938091d62b754885714d01ff6a4a04",
+  "result": {
+    "path": "/tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile-v2/result.json",
+    "sha256": "de935a5a20ee5a37b6841e359bb0cc5947de57ae943ed0d0f138e88f20f03189",
+    "complete": true
+  },
+  "watcherReceipt": {
+    "path": "/tmp/manabitan-owned-columns-83b3/compressed-jmdict-profile-v2-watch.json",
+    "sha256": "a2aad90371108d7ef4896c1562aeba58ea9a309ce5defdbaa33622b454d96167",
+    "complete": true,
+    "childExitCode": 0,
+    "receivedSignal": null,
+    "terminationReason": null
+  },
+  "referenceReceiptSha256": "b471985781ae3a6ee6e8b3363f71020ba221dbd7e049347cc7bc7408d22a1c11",
+  "verified": {
+    "groups": 12,
+    "banks": 53,
+    "rows": 528299,
+    "allGroupIdentitiesAndSourceByteCountsMatchReference": true,
+    "allRowsDigestsStableDigestsTransferBytesAndBufferCountsMatchBaselineObservations": true,
+    "allOwnedFlagsNonBorrowingAndOwnershipReceiptsPass": true,
+    "beforeAndAfterSourceHashReceiptsEqualFrozenReference": true,
+    "sourceDependencyCount": 16,
+    "gitStatusBefore": "",
+    "gitStatusAfter": "",
+    "allRawProfileBytesAndSha256Verify": true,
+    "rawProfileCount": 13,
+    "rawProfiles": [
+      {
+        "name": "initialization.cpuprofile",
+        "bytes": 12238,
+        "sha256": "f6b9a9a2691b41848be0f743f693e4d8ec9f691e795ba224e7052aa1afdaf9fa"
+      },
+      {
+        "name": "group-00.cpuprofile",
+        "bytes": 14321,
+        "sha256": "cb35a4127dc9efed0f90a5aa59a43bc005ba21b6e1db8f9f09148639e7f5d0f2"
+      },
+      {
+        "name": "group-01.cpuprofile",
+        "bytes": 11298,
+        "sha256": "b22ff2b0e74aa06d8c3a967c3bcc2dbee22eca93de0d8e9ae02524c6e5cf5158"
+      },
+      {
+        "name": "group-02.cpuprofile",
+        "bytes": 9978,
+        "sha256": "16e7aaff1c4fc7a9665ab7f83497b38316359a37b0de1889aa5a2a140f83566e"
+      },
+      {
+        "name": "group-03.cpuprofile",
+        "bytes": 10277,
+        "sha256": "994b4ce66c054d4449ada31505553999f522d13fe786795f402bf5ef4a75888c"
+      },
+      {
+        "name": "group-04.cpuprofile",
+        "bytes": 9916,
+        "sha256": "925b2145f9db2af502f6d3e10c7b89025778e4216eca36d9924a221ed6c0c489"
+      },
+      {
+        "name": "group-05.cpuprofile",
+        "bytes": 9915,
+        "sha256": "9f8764780e5572d6ca0670cffd19e6a22a763ad234eb6d02e32a094c48541ed2"
+      },
+      {
+        "name": "group-06.cpuprofile",
+        "bytes": 9854,
+        "sha256": "e7f4e1b22dc50d3e853ce3eb8ac3ead203e893b015fc75b77961a889f8440559"
+      },
+      {
+        "name": "group-07.cpuprofile",
+        "bytes": 11972,
+        "sha256": "fab7d696bdafa1eabae297e09abff87b523763e12c02906938bbd0c55a96fc15"
+      },
+      {
+        "name": "group-08.cpuprofile",
+        "bytes": 10008,
+        "sha256": "1c0532d1a430a0777b93301f65f4026eb9606c2861b5b0fecc23ee7a67d27b85"
+      },
+      {
+        "name": "group-09.cpuprofile",
+        "bytes": 9795,
+        "sha256": "8ce741ef1fc4806496229884e61f9a7bfc079ba7d69dcbeea3ee7472f3021a81"
+      },
+      {
+        "name": "group-10.cpuprofile",
+        "bytes": 9770,
+        "sha256": "7ea3f61d48f10a67747d8b6f356f3100b53fe3e068df3ccc15e9fa7ccffbafc2"
+      },
+      {
+        "name": "group-11.cpuprofile",
+        "bytes": 10994,
+        "sha256": "3289abefee58e9e20dac926f3a820d48ebd3b712a1862c422013f1a4f1bbdf50"
+      }
+    ],
+    "rawGroupSampleMicroseconds": 1085906,
+    "reportedAggregateSampleMicroseconds": 1085906,
+    "numericParserFrameUrl": "wasm://wasm/0004212e",
+    "otherWasmFrameKind": "unmapped V8 js-to-wasm bridges at wasm://wasm/0002f80e",
+    "frozenBodyRangeSymbolBindingReviewed": true
+  },
+  "resourceReadback": {
+    "maximumSampledChildRssBytes": 212611072,
+    "maximumObservedRunnerRssBytes": 212127744,
+    "childMaxRssKiB": 207936,
+    "combinedResultProfilesLogAndWatcherBytes": 399432,
+    "maximumWasmHeapBytes": 43384832,
+    "initialNodeAvailableMemoryBytes": 2086502400,
+    "initialHostMemAvailableBytes": 2086502400,
+    "cgroupAvailability": "unavailable-no-exposed-controller-mount",
+    "finiteCgroupHeadroomVerified": false
+  },
+  "attributionReadbackMs": {
+    "libdeflate_deflate_decompress_ex_self": 140.915,
+    "crc32_bytes_self": 70.306,
+    "parse_composite_span_impl_self": 170.695,
+    "parse_and_encode_term_bank_token_binary_dedup_self": 117.813,
+    "encode_term_content_token_binary_row_self": 62.062,
+    "hash_content_xxh32_pair_self": 46.076,
+    "sourceInflateResponseCounterIncludesImmediateCrc": 215.1558910000001,
+    "separateSourceCrcResponseCounter": 0,
+    "inspectorPostInstrumentationExcluded": 184.826
+  },
+  "limits": [
+    "Single fresh baseline process, sequential actual compressed-worker adapter; no candidate, repeated cohort, browser, concurrent workers, real IPC, storage or codec sink.",
+    "Group zero remains cold. Sampled self time is descriptive attribution; response counters overlap and are not added into inferred elapsed import time.",
+    "Inspector post/stop samples are instrumentation, not product cost.",
+    "Sampled RSS is not a transient-peak guarantee; unavailable finite cgroup headroom is not inferred unlimited.",
+    "The original unavailable-time-wrapper and unmounted-cgroup setup failures occurred before worker initialization or sampling and remain preserved. Resource-plan revision 2 was frozen prospectively before this sole acquired diagnostic."
+  ]
+}

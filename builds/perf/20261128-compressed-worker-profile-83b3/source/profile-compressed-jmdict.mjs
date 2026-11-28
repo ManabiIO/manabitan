@@ -1,0 +1,441 @@
+// Copyright (C) 2026 Manabitan authors
+// SPDX-License-Identifier: GPL-3.0-or-later
+// One frozen baseline diagnostic. Not a timing cohort or browser import.
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {createReadStream, openAsBlob} from 'node:fs';
+import {mkdir, readFile, statfs, writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import path from 'node:path';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {parseArgs} from 'node:util';
+import {Session} from 'node:inspector';
+import {performance} from 'node:perf_hooks';
+import {BlobReader, ZipReader} from '@zip.js/zip.js';
+
+const {values}=parseArgs({options:{out:{type:'string'}}});
+assert.equal(typeof values.out,'string');
+assert.equal(process.version,'v22.22.0');
+assert(process.execArgv.includes('--max-old-space-size=192'),'Diagnostic requires the declared 192MiB V8 old-space cap');
+const root='/workspace/scratch/83b3b3bfba02/manabitan';
+const output=path.resolve(values.out);
+const originalPath=path.join(root,'builds/perf/import-owned-columns-83b3-source/owned-column-replay.mjs');
+const referencePath='/tmp/manabitan-owned-columns-83b3/parity-v3-w3.json';
+const proofPath=path.join(root,'builds/perf/20261128-native-symbols-83b3/proof/symbol-proof.json');
+const expectedSha='9e10d3b3fcf66d344ab31bc42c9b522fa5215da2';
+const expectedWasm='8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee';
+const parserWorkers=3;
+const MiB=1024*1024;
+const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
+const viewBytes=view=>new Uint8Array(view.buffer,view.byteOffset,view.byteLength);
+const load=(sourceRoot,file)=>import(pathToFileURL(path.join(sourceRoot,file)).href);
+const sourceFiles=[
+    'ext/js/dictionary/term-bank-wasm-parser.js','ext/js/dictionary/term-bank-wasm-parser-worker.js',
+    'ext/js/dictionary/term-bank-experiments.js','ext/js/dictionary/term-content-ownership.js',
+    'ext/js/dictionary/term-record-preinterned-plan.js','ext/js/dictionary/term-lookup-index-preparation.js',
+    'ext/js/dictionary/term-lookup-index.js','ext/js/dictionary/term-lookup-route.js',
+    'ext/js/dictionary/dictionary-importer.js','ext/js/dictionary/dense-zip-directory.js',
+    'ext/js/dictionary/term-bank-source-pipeline.js','ext/js/dictionary/term-key-hash.js',
+    'ext/js/media/media-util.js','ext/lib/term-bank-parser.wasm',
+    'ext/js/dictionary/wasm/term-bank-parser.c','dev/data/dictionary-wasm/manifest.json',
+];
+const sourceIdentity=async()=>Object.fromEntries(await Promise.all(sourceFiles.map(async file=>[file,sha256(await readFile(path.join(root,file)))])));
+const {readDenseZipDirectory}=await load(root,'ext/js/dictionary/dense-zip-directory.js');
+const {RawZipPayloadReader}=await load(root,'ext/js/dictionary/term-bank-source-pipeline.js');
+const {getImageMediaTypeFromFileName}=await load(root,'ext/js/media/media-util.js');
+const {hashTermKeyBytes}=await load(root,'ext/js/dictionary/term-key-hash.js');
+const {registerOwnedTermContent}=await load(root,'ext/js/dictionary/term-content-ownership.js');
+
+// BEGIN EXACT V3 HELPERS
+function partition(entries,groupsPerWorker){
+    const total=entries.reduce((sum,entry)=>sum+entry.uncompressedSize,0);
+    const groupCount=Math.min(entries.length,Math.max(parserWorkers*groupsPerWorker,Math.ceil(total/(24*1024*1024))));
+    const groups=[];let start=0;let consumed=0;
+    for(let index=0;index<groupCount-1;++index){
+        const remaining=groupCount-index;const target=(total-consumed)/remaining;
+        let end=start+1;let bytes=entries[start].uncompressedSize;const maxEnd=entries.length-(remaining-1);
+        while(end<maxEnd){const nextBytes=bytes+entries[end].uncompressedSize;if(Math.abs(nextBytes-target)>Math.abs(bytes-target))break;bytes=nextBytes;++end;}
+        groups.push(entries.slice(start,end));start=end;consumed+=bytes;
+    }
+    groups.push(entries.slice(start));return groups;
+}
+async function openTermBanks(archivePath){
+    const archive=await openAsBlob(archivePath);let reader=null;
+    const dense=await readDenseZipDirectory(archive);
+    let entries=dense;
+    if(entries===null){reader=new ZipReader(new BlobReader(archive),{useWebWorkers:false});entries=await reader.getEntries();}
+    const hasArchiveImages=entries.some(entry=>!entry.directory&&getImageMediaTypeFromFileName(entry.filename)!==null);
+    const banks=entries.filter(entry=>/^term_bank_\d+\.json$/.test(entry.filename)).sort((a,b)=>Number(a.filename.slice(10,-5))-Number(b.filename.slice(10,-5)));
+    const payloads=new RawZipPayloadReader(archive);const signal=new AbortController().signal;
+    return {entries:banks,hasArchiveImages,close:async()=>{if(reader)await reader.close();},read:async entry=>({
+        bytes:await payloads.read(entry,signal),compressionMethod:entry.compressionMethod,
+        compressedSize:entry.compressedSize,uncompressedSize:entry.uncompressedSize,
+        signature:entry.signature,filename:entry.filename,
+    })};
+}
+function updateView(digest,label,view){
+    digest.update(label+':');
+    if(!view){digest.update('absent;');return;}
+    digest.update(String(view.byteLength)+':');digest.update(viewBytes(view));
+}
+function digestPlan(digest,plan){
+    const offsets=plan.stringOffsets??new Uint32Array(plan.stringLengths.length);
+    const hashes=plan.stringHashes??new Uint32Array(plan.stringLengths.length);
+    if(!plan.stringOffsets||!plan.stringHashes){
+        let offset=0;for(let key=0;key<plan.stringLengths.length;++key){const end=offset+plan.stringLengths[key];
+            if(!plan.stringOffsets)offsets[key]=offset;if(!plan.stringHashes)hashes[key]=hashTermKeyBytes(plan.stringsBuffer.subarray(offset,end));offset=end;}
+        assert.equal(offset,plan.stringsBuffer.byteLength);
+    }
+    for(const [label,view]of Object.entries({lengths:plan.stringLengths,offsets,hashes,strings:plan.stringsBuffer,
+        expressions:Uint32Array.from(plan.expressionIndexes),readings:Uint32Array.from(plan.readingIndexes)}))updateView(digest,label,view);
+}
+function digestMedia(digest,rows){
+    digest.update('media:'+rows.length+':');
+    for(const entry of rows){digest.update(JSON.stringify({index:entry.index,imagePaths:entry.imagePaths??null}));
+        for(const [key,value]of Object.entries(entry.row).sort(([a],[b])=>a.localeCompare(b))){
+            if(ArrayBuffer.isView(value))updateView(digest,key,value);else digest.update(key+':'+JSON.stringify(value)+';');
+        }
+    }
+}
+function outputDigest(owned,includeContent){
+    const digest=createHash('sha256');digestPlan(digest,owned.termRecordPreinternedPlan);
+    for(const [key,entry]of owned.preparedLookupIndexes){digest.update(key);updateView(digest,'index',entry.bytes);updateView(digest,'route',entry.routeFilter);digestPlan(digest,entry.preinternedPlan);}
+    for(const key of ['readingEqualsExpressionList','scoreList','sequenceList','contentHash1List','contentHash2List','contentMetaList','contentUniqueIndexList'])updateView(digest,key,owned[key]);
+    for(const key of ['expressionBytesList','readingBytesList','contentBytesList']){
+        digest.update(key+':'+owned[key].length+':');
+        for(const [index,bytes]of owned[key].entries())updateView(digest,String(index),bytes);
+    }
+    digest.update('dedup:');
+    if(owned.contentDedupPlan===null||typeof owned.contentDedupPlan==='undefined')digest.update(String(owned.contentDedupPlan));
+    else for(const [key,value]of Object.entries(owned.contentDedupPlan).sort(([a],[b])=>a.localeCompare(b))){
+        if(ArrayBuffer.isView(value))updateView(digest,key,value);else digest.update(key+':'+JSON.stringify(value)+';');
+    }
+    digest.update(JSON.stringify({contentMetaByUniqueIndex:owned.contentMetaByUniqueIndex===true,contentBytesBaseOffset:owned.contentBytesBaseOffset,contentBytesLength:owned.contentBytesLength,rowCount:owned.rowCount,contentRowStart:owned.contentRowStart,useResolvedContentReferences:owned.useResolvedContentReferences}));
+    if(includeContent)updateView(digest,'content',owned.contentBytesBuffer);
+    digestMedia(digest,owned.mediaRows);return digest.digest('hex');
+}
+function transferFootprint(chunk){
+    const buffers=new Set();const addView=value=>{if(ArrayBuffer.isView(value)&&value.buffer instanceof ArrayBuffer&&value.buffer.byteLength>0)buffers.add(value.buffer);};
+    for(const key of ['expressionBytesList','readingBytesList','contentBytesList'])for(const bytes of chunk[key])addView(bytes);
+    for(const key of ['readingEqualsExpressionList','scoreList','sequenceList','contentHash1List','contentHash2List','contentBytesBuffer','contentMetaList','contentUniqueIndexList'])addView(chunk[key]);
+    for(const {row}of chunk.mediaRows)for(const key of ['expressionBytes','readingBytes','glossaryJsonBytes','termEntryContentBytes'])addView(row[key]);
+    const addPlan=plan=>{for(const key of ['stringLengths','stringOffsets','stringHashes','stringsBuffer','expressionIndexes','readingIndexes'])addView(plan?.[key]);};
+    addPlan(chunk.termRecordPreinternedPlan);
+    for(const prepared of chunk.preparedLookupIndexes.values()){addView(prepared.bytes);addView(prepared.routeFilter);addPlan(prepared.preinternedPlan);}
+    for(const key of ['uniqueRowIndexes','uniqueSignatures','resolvedFlags','resolvedOffsets','resolvedLengths','pendingEpochs','pendingIndexes','pendingSpanOffsetsScratch','pendingSpanLengthsScratch'])addView(chunk.contentDedupPlan?.[key]);
+    return {bufferCount:buffers.size,bytes:[...buffers].reduce((sum,b)=>sum+b.byteLength,0)};
+}
+// END EXACT V3 HELPERS
+
+const fileSizes=new Map();
+const report={schemaVersion:1,complete:false,authoritativeBrowserTiming:false,comparativeTiming:false,
+    sourceRoot:root,sourceSha:expectedSha,node:process.version,nodeArguments:process.execArgv,dictionary:'jmdict',
+    resourcePlanRevision:{version:2,prospectiveBeforeSamples:true,originalRunnerSha256:'220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3',originalPlanSha256:'7eba808132edeb079fb5e2d1ecb043651c21d766fb186b7466d786ce693bcedd',reason:'No cgroup controller is mounted in the exposed environment. Record that limit as unavailable; require both visible Node and host headroom, retain every existing cap, and use an external sampled RSS watcher. No finite hidden container limit is claimed verified.'},
+    grouping:{parserWorkers:3,targetBytes:24*MiB,executionConcurrency:1},
+    boundary:'Profiler starts immediately before each original compressed-source worker request and stops in its postMessage adapter before structuredClone. Worker heap.set, native inflate/immediate CRC, parse/encode, lookup preparation, result copying and transfer-list collection remain inside. Adapter input construction, file reads, SHA oracles, parent ownership receipt, clone/delivery and report writes remain outside. No browser, concurrent workers, real IPC, canonical sink, compression or storage.',
+    initializationBoundary:'Separate profile of worker-module import, WebAssembly.compile and initialize/ready. Fixture/hash helper setup precedes it.',
+    samplingIntervalMicroseconds:250,warmupCorpusPasses:0,firstGroupCold:true,
+    limits:{oldSpaceMiB:192,observedRssStopBytes:400*MiB,minimumInitialHeadroomBytes:512*MiB,minimumDiskFreeBytes:64*MiB,maximumProfileBytes:2*MiB,maximumOutputBytes:16*MiB,responseDeadlineMs:30000,outerDeadlineSeconds:120},
+    resources:[],groups:[],instrumentationWarnings:[],profileFiles:[]};
+let session;
+let reader;
+let previous=null;
+let totalRows=0;
+let profileActive=false;
+let activeProfileName=null;
+const profiles=[];
+const post=(method,params={})=>new Promise((resolve,reject)=>session.post(method,params,(error,result)=>error?reject(error):resolve(result)));
+
+async function writeEvidence(name,value,profile=false){
+    const bytes=Buffer.from(JSON.stringify(value,profile?undefined:null,profile?undefined:2)+'\n');
+    if(profile)assert(bytes.length<=2*MiB,`CPU profile ${name} exceeds 2MiB; stopping without truncating`);
+    const nextBytes=[...fileSizes.entries()].reduce((sum,[key,size])=>sum+(key===name?0:size),0)+bytes.length;
+    assert(nextBytes<=16*MiB,'Evidence exceeds 16MiB output budget');
+    await writeFile(path.join(output,name),bytes,{flag:fileSizes.has(name)?'w':'wx'});
+    fileSizes.set(name,bytes.length);
+    return {name,bytes:bytes.length,sha256:sha256(bytes)};
+}
+const checkpoint=()=>writeEvidence('result.json',report);
+async function availableResources(stage,initial=false){
+    const meminfo=await readFile('/proc/meminfo','utf8');
+    const status=await readFile('/proc/self/status','utf8');
+    const limits=await readFile('/proc/self/limits','utf8');
+    const hostAvailableBytes=Number(meminfo.match(/^MemAvailable:\s+(\d+) kB$/m)?.[1])*1024;
+    assert(Number.isFinite(hostAvailableBytes),'Missing host MemAvailable');
+    assert.equal(typeof process.availableMemory,'function','Node process/cgroup headroom unavailable');
+    const processAvailableBytes=process.availableMemory();
+    assert(Number.isSafeInteger(processAvailableBytes)&&processAvailableBytes>0,'Invalid available process memory');
+    const cgroupMembership=await readFile('/proc/self/cgroup','utf8');
+    const cgroupMounts=(await readFile('/proc/self/mountinfo','utf8')).split('\n').filter(line=>/ - cgroup2? /.test(line));
+    let cgroupAvailability='unavailable-no-exposed-controller-mount';
+    let cgroupPath=null;let cgroupLimitText=null;let cgroupLimitBytes=null;let cgroupCurrentBytes=null;
+    if(cgroupMounts.length>0){
+        const mounts=cgroupMounts.filter(line=>/ - cgroup2 /.test(line));
+        assert.equal(mounts.length,1,'Exposed cgroup memory-controller layout is unsupported; do not ignore its limit');
+        const unescapeMount=value=>value.replace(/\\([0-7]{3})/g,(_,octal)=>String.fromCharCode(Number.parseInt(octal,8)));
+        const fields=mounts[0].split(' - ')[0].split(' ');const mountRoot=unescapeMount(fields[3]);const mountPoint=unescapeMount(fields[4]);
+        const membership=cgroupMembership.split('\n').find(line=>line.startsWith('0::'));assert(membership,'Missing cgroup-v2 membership');
+        const memberPath=membership.slice(3);const relative=path.posix.relative(mountRoot,memberPath);
+        assert(relative!== '..'&&!relative.startsWith('../')&&!path.posix.isAbsolute(relative),'Cgroup membership is outside exposed mount');
+        cgroupPath=path.join(mountPoint,relative);
+        cgroupLimitText=(await readFile(path.join(cgroupPath,'memory.max'),'utf8')).trim();
+        cgroupCurrentBytes=Number((await readFile(path.join(cgroupPath,'memory.current'),'utf8')).trim());
+        assert(Number.isSafeInteger(cgroupCurrentBytes)&&cgroupCurrentBytes>=0);
+        cgroupLimitBytes=cgroupLimitText==='max'?null:Number(cgroupLimitText);
+        assert(cgroupLimitBytes===null||Number.isSafeInteger(cgroupLimitBytes)&&cgroupLimitBytes>0);
+        cgroupAvailability='exposed-v2-controller';
+    }
+    const headrooms=[hostAvailableBytes,processAvailableBytes];
+    const rlimitHeadrooms={};
+    if(cgroupLimitBytes!==null)headrooms.push(cgroupLimitBytes-cgroupCurrentBytes);
+    for(const [label,statusKey]of [['Max resident set','VmRSS'],['Max data size','VmData'],['Max address space','VmSize']]){
+        const row=limits.split('\n').find(line=>line.startsWith(label+' '));assert(row,`Missing ${label}`);
+        const fields=row.trim().split(/\s{2,}/);const soft=fields[1];
+        if(soft==='unlimited'){rlimitHeadrooms[label]=null;continue;}
+        const limit=Number(soft);const used=Number(status.match(new RegExp('^'+statusKey+':\\s+(\\d+) kB$','m'))?.[1])*1024;
+        assert(Number.isSafeInteger(limit)&&Number.isFinite(used));
+        rlimitHeadrooms[label]=limit-used;headrooms.push(limit-used);
+    }
+    const disk=await statfs(output);const diskFreeBytes=disk.bavail*disk.bsize;
+    const memory=process.memoryUsage();
+    const record={stage,hostAvailableBytes,hostAvailableSource:'/proc/meminfo MemAvailable',processAvailableBytes,processAvailableSource:'Node process.availableMemory()',nodeConstrainedMemoryBytes:process.constrainedMemory(),cgroupAvailability,cgroupMembership,cgroupMounts,cgroupPath,cgroupLimitText,cgroupCurrentBytes,finiteExposedCgroupLimitObserved:cgroupLimitBytes!==null,rlimitHeadrooms,
+        applicableHeadroomBytes:Math.min(...headrooms),diskFreeBytes,...memory,maxRssKiB:process.resourceUsage().maxRSS};
+    report.resources.push(record);
+    assert(diskFreeBytes>=64*MiB,'Less than 64MiB output disk headroom');
+    assert(memory.rss<=400*MiB,'Observed RSS exceeds 400MiB stop condition');
+    if(initial){
+        assert(hostAvailableBytes>=512*MiB,'Less than 512MiB host MemAvailable');
+        assert(processAvailableBytes>=512*MiB,'Less than 512MiB Node availableMemory');
+        assert(record.applicableHeadroomBytes>=512*MiB,'Less than 512MiB visible process/cgroup/rlimit headroom');
+    }
+}
+async function startProfile(name){
+    assert.equal(profileActive,false);assert.equal(activeProfileName,null);
+    await post('Profiler.start');profileActive=true;activeProfileName=name;
+}
+async function stopProfile(){
+    assert.equal(profileActive,true);const name=activeProfileName;
+    profileActive=false;activeProfileName=null;
+    const result=await post('Profiler.stop');
+    assert(result?.profile&&Array.isArray(result.profile.nodes),'Missing CPU profile');
+    return {name,cpu:result.profile};
+}
+const context={callback:null,pending:null,stopOnPost:false,postCount:0};
+context.self={
+    addEventListener(type,callback){if(type==='message')context.callback=callback;},
+    postMessage(message,transfer=[]){
+        const pending=context.pending;
+        if(pending===null){throw new Error('Unexpected worker message without a pending request');}
+        if(pending.postSeen){pending.rejectOnce(new Error('Multiple replies to one worker request'));return;}
+        pending.postSeen=true;context.postCount++;
+        const at=performance.now();
+        // Stop before the local transport copy and before any result digest.
+        // No next request can start until stop, transfer and outside-profile
+        // ownership/parity checks have completed.
+        const stopped=context.stopOnPost?stopProfile():Promise.resolve(null);
+        void stopped.then(profile=>{
+            if(pending.settled)return;
+            try{
+                const transferBytes=transfer.reduce((sum,buffer)=>sum+buffer.byteLength,0);
+                const received=structuredClone(message,{transfer});
+                pending.resolveOnce({message:received,transferBytes,transferBuffers:transfer.length,profile,
+                    postReachedAt:at,adapterDeliveryMs:performance.now()-at});
+            }catch(error){pending.rejectOnce(error);}
+        },error=>pending.rejectOnce(error));
+    },
+};
+async function send(data,stopOnPost){
+    assert.equal(context.pending,null,'Concurrent worker replay is prohibited');
+    context.stopOnPost=stopOnPost;globalThis.self=context.self;
+    let timer;const promise=new Promise((resolve,reject)=>{
+        const pending={settled:false,postSeen:false,resolveOnce(value){if(!pending.settled){pending.settled=true;resolve(value);}},rejectOnce(error){if(!pending.settled){pending.settled=true;reject(error);}}};
+        context.pending=pending;
+        timer=setTimeout(()=>pending.rejectOnce(new Error(`Worker ${data.type} reply exceeded 30s deadline`)),30000);
+    });
+    try{
+        context.callback({data});const result=await promise;
+        const expectedType=data.type==='initialize'?'ready':'result';
+        if(result.message.type!==expectedType){
+            const errorText=typeof result.message.error?.message==='string'?result.message.error.message.slice(0,2048):'';
+            throw new Error(`Expected ${expectedType}; received ${String(result.message.type).slice(0,64)}: ${errorText}`);
+        }
+        if(data.type==='parse')assert.equal(result.message.id,data.id);
+        return result;
+    }finally{clearTimeout(timer);context.pending=null;context.stopOnPost=false;}
+}
+function codeBodies(bytes){
+    assert.deepEqual([...bytes.subarray(0,8)],[0,97,115,109,1,0,0,0]);
+    const readUleb=cursor=>{let value=0;let shift=0;for(let i=0;i<5;++i){assert(cursor.at<bytes.length);const byte=bytes[cursor.at++];
+        value+=(byte&127)*2**shift;if((byte&128)===0)return value;shift+=7;}throw new Error('Invalid WASM ULEB32');};
+    const cursor={at:8};let bodies=null;
+    while(cursor.at<bytes.length){
+        const id=bytes[cursor.at++];const length=readUleb(cursor);const end=cursor.at+length;assert(end<=bytes.length);
+        // The pinned freestanding module has no imports, so function indices
+        // are exactly the order of code bodies; reject an unexpected layout.
+        assert.notEqual(id,2,'Unexpected import section in pinned parser');
+        if(id===10){
+            assert.equal(bodies,null);bodies=[];const count=readUleb(cursor);
+            for(let index=0;index<count;++index){const size=readUleb(cursor);const start=cursor.at;const stop=start+size;
+                assert(stop<=end&&stop>start);assert.equal(bytes[stop-1],11);bodies.push({index,start,end:stop});cursor.at=stop;}
+            assert.equal(cursor.at,end);
+        }
+        cursor.at=end;
+    }
+    assert(bodies&&bodies.length===51,'Unexpected pinned parser function count');return bodies;
+}
+function validateNativeFrame(frame,bodies){
+    const indexText=frame.functionName.match(/^wasm-function\[(\d+)\]$/)?.[1];assert(indexText,'Expected numeric WASM frame');
+    const index=Number(indexText);const body=bodies[index];assert(body,`Unknown pinned function index ${index}`);
+    assert.equal(frame.lineNumber,0);assert(Number.isInteger(frame.columnNumber)&&frame.columnNumber>=body.start&&frame.columnNumber<body.end,
+        `WASM function ${index} column ${frame.columnNumber} is outside exact pinned body [${body.start},${body.end})`);
+    return index;
+}
+function namedSamples(cpu,names,binding){
+    const nodes=new Map(cpu.nodes.map(node=>[node.id,node]));const aggregate=new Map();const wasmUrls=new Set();
+    assert.equal(cpu.samples?.length,cpu.timeDeltas?.length);
+    for(let index=0;index<cpu.samples.length;++index){
+        const frame=nodes.get(cpu.samples[index])?.callFrame;assert(frame);
+        const key=JSON.stringify([frame.functionName,frame.url,frame.lineNumber,frame.columnNumber,frame.scriptId]);
+        let row=aggregate.get(key);
+        if(!row){row={function:frame.functionName,url:frame.url,scriptId:frame.scriptId,line:frame.lineNumber,column:frame.columnNumber,sampledMicroseconds:0,samples:0};aggregate.set(key,row);}
+        const delta=cpu.timeDeltas[index];assert(Number.isFinite(delta)&&delta>=0);row.sampledMicroseconds+=delta;row.samples++;
+    }
+    for(const row of aggregate.values()){
+        if(row.url?.startsWith('wasm://')){
+            wasmUrls.add(row.url);
+            if(row.url===binding.parserUrl&&/^wasm-function\[\d+\]$/.test(row.function)){
+                const index=validateNativeFrame({functionName:row.function,lineNumber:row.line,columnNumber:row.column},binding.codeBodies);
+                assert.equal(typeof names[index],'string');row.nativeFunctionIndex=index;row.nativeFunctionName=names[index];
+                row.nativeBodyRange=binding.codeBodies[index];row.symbolMapping='exact-pinned-parser-body';
+            }else{
+                row.symbolMapping=/^(js-to-wasm|wasm-to-js):/.test(row.function)?'unmapped-v8-bridge':'unmapped-other-wasm-frame';
+            }
+        }
+    }
+    return {wasmUrls:[...wasmUrls],selfSamples:[...aggregate.values()].sort((a,b)=>b.sampledMicroseconds-a.sampledMicroseconds)};
+}
+
+await mkdir(output,{recursive:false});
+await checkpoint();
+try{
+    await availableResources('initial',true);await checkpoint();
+    const original=await readFile(originalPath,'utf8');
+    assert.equal(sha256(original),'cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf');
+    const ownSource=await readFile(fileURLToPath(import.meta.url),'utf8');
+    const originalHelpers=original.slice(original.indexOf('function partition('),original.indexOf('async function replayGroup('));
+    const ownHelpers=ownSource.split('// BEGIN EXACT V3 HELPERS\n')[1].split('// END EXACT V3 HELPERS')[0];
+    assert.equal(ownHelpers,originalHelpers,'Copied v3 helpers changed');
+    const referenceBytes=await readFile(referencePath);assert.equal(sha256(referenceBytes),'b471985781ae3a6ee6e8b3363f71020ba221dbd7e049347cc7bc7408d22a1c11');
+    const reference=JSON.parse(referenceBytes);assert.equal(reference.complete,true);
+    const expected=reference.dictionaries.find(entry=>entry.dictionary==='jmdict');assert(expected);
+    const proofBytes=await readFile(proofPath);assert.equal(sha256(proofBytes),'263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69');
+    const proof=JSON.parse(proofBytes);assert.equal(proof.complete,true);
+    const symbolTarget=proof.targets.find(target=>target.name==='term-bank-parser.wasm');
+    assert.equal(symbolTarget.pinned.sha256,expectedWasm);assert.equal(symbolTarget.releaseExactMatch,true);assert.equal(symbolTarget.allNoncustomSectionsEqual,true);
+    assert(symbolTarget.noncustomSections.every(section=>section.equal&&section.releaseSha256===section.namesSha256));
+    assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),expectedSha);
+    report.gitStatusBefore=execFileSync('git',['status','--porcelain','--untracked-files=no'],{cwd:root,encoding:'utf8'});assert.equal(report.gitStatusBefore,'');
+    report.sourceBefore=await sourceIdentity();assert.deepEqual(report.sourceBefore,reference.sources.baseline.hashes);
+    const artifacts=await load(root,'dev/dictionary-wasm.js');artifacts.loadDictionaryWasm();
+    const wasm=await readFile(path.join(root,'ext/lib/term-bank-parser.wasm'));assert.equal(sha256(wasm),expectedWasm);
+    const priorProfileBytes=await readFile(path.join(root,'builds/perf/20261128-native-symbols-83b3/original-profiles/jmdict/worker.cpuprofile'));
+    const priorResultBytes=await readFile(path.join(root,'builds/perf/20261128-native-symbols-83b3/original-profiles/jmdict/result.json'));
+    assert.equal(sha256(priorProfileBytes),'853874a85e3ceaab733a5c6fc51a2d819222d31255593409e8a57c2471c59f24');
+    assert.equal(sha256(priorResultBytes),'802c13e90ce7959b3b5724c7d84b2a321864825b5f5b681ec759ad84e2ac0b83');
+    const priorResult=JSON.parse(priorResultBytes);assert.equal(priorResult.wasmSha256,expectedWasm);assert.equal(priorResult.sourceSha,expectedSha);
+    assert.equal(priorResult.node,process.version);assert.equal(priorResult.profileEnabled,true);
+    const bodies=codeBodies(wasm);const priorUrls=new Set();
+    for(const node of JSON.parse(priorProfileBytes).nodes){const frame=node.callFrame;
+        if(frame.url?.startsWith('wasm://')&&/^wasm-function\[\d+\]$/.test(frame.functionName)){
+            validateNativeFrame(frame,bodies);priorUrls.add(frame.url);}}
+    assert.equal(priorUrls.size,1,'Previous source-bound parser profile has ambiguous module URLs');
+    const binding={parserUrl:[...priorUrls][0],codeBodies:bodies,priorProfileSha256:sha256(priorProfileBytes),priorResultSha256:sha256(priorResultBytes),
+        runtimeWasmSha256:expectedWasm,method:'Source-bound archived parser URL plus exact pinned function-index/code-body column membership. V8 bridge and other module frames remain unnamed.'};
+    report.nativeModuleBinding=binding;
+    const lockBytes=await readFile(path.join(root,'test/perf/dictionaries.lock.json'));assert.equal(sha256(lockBytes),reference.lockSha256);
+    const fixture=JSON.parse(lockBytes).dictionaries.jmdict;
+    assert.equal(fixture.sha256,'3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f');
+    const archivePath=path.join(root,'builds/e2e-dictionary-cache',fixture.cacheFile);
+    const archiveDigest=createHash('sha256');let archiveBytes=0;
+    for await(const bytes of createReadStream(archivePath)){archiveBytes+=bytes.length;archiveDigest.update(bytes);}
+    assert.equal(archiveBytes,15645766);assert.equal(archiveDigest.digest('hex'),fixture.sha256);
+    reader=await openTermBanks(archivePath);assert.equal(reader.hasArchiveImages,false);assert.equal(reader.entries.length,53);
+    for(const [index,entry]of reader.entries.entries())assert.equal(entry.filename,`term_bank_${index+1}.json`);
+    const totalSourceBytes=reader.entries.reduce((sum,entry)=>sum+entry.uncompressedSize,0);assert.equal(totalSourceBytes,171617523);
+    const groups=partition(reader.entries,4);assert.equal(groups.length,12);
+    report.inputs={archiveSha256:fixture.sha256,archiveBytes,banks:53,rows:528299,totalSourceBytes,wasmSha256:expectedWasm,
+        fixtureLockSha256:sha256(lockBytes),packageLockSha256:sha256(await readFile(path.join(root,'package-lock.json'))),
+        originalRunnerSha256:sha256(original),referenceReceiptSha256:sha256(referenceBytes),symbolProofSha256:sha256(proofBytes),
+        runnerSha256:sha256(ownSource),helperSha256:sha256(originalHelpers)};
+    report.phase='initialization';await checkpoint();
+    session=new Session();session.connect();await post('Profiler.enable');await post('Profiler.setSamplingInterval',{interval:250});
+    globalThis.self=context.self;
+    await startProfile('initialization.cpuprofile');
+    await load(root,'ext/js/dictionary/term-bank-wasm-parser-worker.js');
+    const initialized=await send({type:'initialize',module:await WebAssembly.compile(wasm)},true);
+    assert(initialized.profile);report.profileFiles.push(await writeEvidence(initialized.profile.name,initialized.profile.cpu,true));
+    report.initializationSamples=namedSamples(initialized.profile.cpu,symbolTarget.functionNames,binding);
+    await availableResources('after-initialization');await checkpoint();
+    const options={copyContentBytes:false,includeContentMetadata:true,initialContentBytesPerRow:48,minimalDecode:true,
+        reuseExpressionForReadingDecode:true,preallocateChunkRows:true,skipTagRuleDecode:false,lazyGlossaryDecode:true,
+        mediaHintFastScan:false,projectImagePaths:false,validateGlossaryTypes:true,computeContentHashes:true,
+        emitContentSlab:true,emitTokenBinaryContent:true,emitTermByteLists:false,prepareLookupIndexes:true,
+        prepareLookupRoute:true,ownContentBytes:false,experimentalNativeEscapedKeys:false};
+    report.options=options;
+    for(const [index,group]of groups.entries()){
+        const expectedGroup=expected.groups[index];assert.equal(expectedGroup.index,index);
+        assert.equal(group.length,expectedGroup.banks);
+        assert.equal(group[0].filename,expectedGroup.firstBank);assert.equal(group.at(-1).filename,expectedGroup.lastBank);
+        const compressed=[];for(const entry of group)compressed.push(await reader.read(entry));
+        const sourceBuffers=compressed.map(entry=>Uint8Array.from(entry.bytes).buffer);
+        const sourceMetadata=compressed.map(({bytes,...metadata})=>metadata);
+        report.phase=`group-${index}`;await availableResources('before-group-'+index);await checkpoint();
+        console.log(JSON.stringify({phase:report.phase,banks:group.length}));
+        await startProfile(`group-${String(index).padStart(2,'0')}.cpuprofile`);
+        const response=await send({type:'parse',id:index,version:3,sourceBuffers,sourceMetadata,chunkSize:8192,options},true);
+        assert.equal(profileActive,false);assert(response.profile);
+        const {chunk,profile,borrowsWorkerMemory,ownsContentBytes}=response.message;assert(chunk);
+        assert.equal(borrowsWorkerMemory,false);assert.equal(ownsContentBytes,true);
+        const ownershipReceipt=ownsContentBytes===true&&borrowsWorkerMemory!==true&&registerOwnedTermContent(chunk.contentBytesBuffer);
+        assert.equal(ownershipReceipt,true,'JMdict parent owned-content receipt must succeed');
+        if(previous)assert.equal(outputDigest(previous.chunk,true),previous.digest,'Previous owned result mutated after heap reuse');
+        const digest=outputDigest(chunk,true);const stableDigest=outputDigest(chunk,false);
+        const expectedOutput=expectedGroup.observations[0].baseline;
+        assert.equal(digest,expectedOutput.digest);assert.equal(stableDigest,expectedOutput.stableDigest);
+        assert.equal(chunk.rowCount,expectedOutput.rows);
+        const footprint=transferFootprint(chunk);assert.equal(footprint.bytes,response.transferBytes);assert.equal(footprint.bufferCount,response.transferBuffers);
+        assert.equal(footprint.bytes,expectedOutput.transferBytes);assert.equal(footprint.bufferCount,expectedOutput.transferBuffers);
+        const ownedSharedBytes=chunk.contentBytesBuffer.buffer instanceof SharedArrayBuffer?chunk.contentBytesBuffer.buffer.byteLength:0;
+        assert.equal(footprint.bytes+ownedSharedBytes,expectedOutput.ownedOutputBufferBytes);
+        assert.equal(profile.sourceCompressedBytes,compressed.reduce((sum,entry)=>sum+entry.compressedSize,0));
+        assert.equal(profile.sourceUncompressedBytes,expectedGroup.sourceBytes);assert.equal(profile.sourceCrcMs,0);
+        report.profileFiles.push(await writeEvidence(response.profile.name,response.profile.cpu,true));
+        const named=namedSamples(response.profile.cpu,symbolTarget.functionNames,binding);profiles.push(named);
+        report.groups.push({index,cold:index===0,firstBank:group[0].filename,lastBank:group.at(-1).filename,banks:group.length,
+            sourceBytes:expectedGroup.sourceBytes,rows:chunk.rowCount,digest,stableDigest,transferBytes:footprint.bytes,
+            transferBuffers:footprint.bufferCount,ownedSharedBytes,contentBytesLength:chunk.contentBytesLength,
+            ownsContentBytes,borrowsWorkerMemory,ownershipReceipt,profileName:response.profile.name,
+            responseCounters:profile,adapterDeliveryMsIncludingInspectorStop:response.adapterDeliveryMs,namedSamples:named});
+        previous={chunk,digest};totalRows+=chunk.rowCount;
+        await availableResources('after-group-'+index);await checkpoint();
+    }
+    assert.equal(totalRows,528299);assert.equal(report.groups.length,12);assert.equal(context.postCount,13);
+    assert.equal(outputDigest(previous.chunk,true),previous.digest);previous=null;
+    report.sourceAfter=await sourceIdentity();assert.deepEqual(report.sourceAfter,report.sourceBefore);artifacts.loadDictionaryWasm();
+    report.gitStatusAfter=execFileSync('git',['status','--porcelain','--untracked-files=no'],{cwd:root,encoding:'utf8'});assert.equal(report.gitStatusAfter,report.gitStatusBefore);
+    const aggregate=new Map();
+    for(const named of profiles)for(const row of named.selfSamples){const key=JSON.stringify([row.function,row.url,row.line,row.column,row.scriptId]);let target=aggregate.get(key);
+        if(!target){target={...row,sampledMicroseconds:0,samples:0};aggregate.set(key,target);}target.sampledMicroseconds+=row.sampledMicroseconds;target.samples+=row.samples;}
+    report.aggregateSelfSamples=[...aggregate.values()].sort((a,b)=>b.sampledMicroseconds-a.sampledMicroseconds);
+    assert(report.aggregateSelfSamples.some(row=>row.symbolMapping==='exact-pinned-parser-body'),'No samples matched the bound current parser module');
+    report.rows=totalRows;report.phase='complete';report.complete=true;await availableResources('complete');await checkpoint();
+    console.log(JSON.stringify({complete:true,output,rows:totalRows,groups:report.groups.length,profiles:report.profileFiles.length}));
+}catch(error){
+    report.complete=false;report.failure={name:error?.name??'Error',message:String(error?.message??error).slice(0,8192),stack:String(error?.stack??'').slice(0,16384)};
+    if(profileActive){try{const failed=await stopProfile();report.profileFiles.push(await writeEvidence('failed-'+failed.name,failed.cpu,true));}catch(stopError){report.failure.profileStopError=String(stopError?.message??stopError).slice(0,2048);}}
+    try{await checkpoint();}catch(saveError){console.error('Failure checkpoint error: '+String(saveError?.message??saveError).slice(0,2048));}
+    console.error(JSON.stringify(report.failure));process.exitCode=1;
+}finally{
+    if(reader)await reader.close();
+    if(session)session.disconnect();
+}

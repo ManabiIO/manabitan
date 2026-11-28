@@ -1,0 +1,61 @@
+--- original-profile-compressed-jmdict.mjs
++++ profile-compressed-jmdict.mjs
+@@ -130,6 +130,7 @@
+ const fileSizes=new Map();
+ const report={schemaVersion:1,complete:false,authoritativeBrowserTiming:false,comparativeTiming:false,
+     sourceRoot:root,sourceSha:expectedSha,node:process.version,nodeArguments:process.execArgv,dictionary:'jmdict',
++    resourcePlanRevision:{version:2,prospectiveBeforeSamples:true,originalRunnerSha256:'220f769840933837dd76bfca23c12821b5473cfbd8da08bb37eae043a9e9acc3',originalPlanSha256:'7eba808132edeb079fb5e2d1ecb043651c21d766fb186b7466d786ce693bcedd',reason:'No cgroup controller is mounted in the exposed environment. Record that limit as unavailable; require both visible Node and host headroom, retain every existing cap, and use an external sampled RSS watcher. No finite hidden container limit is claimed verified.'},
+     grouping:{parserWorkers:3,targetBytes:24*MiB,executionConcurrency:1},
+     boundary:'Profiler starts immediately before each original compressed-source worker request and stops in its postMessage adapter before structuredClone. Worker heap.set, native inflate/immediate CRC, parse/encode, lookup preparation, result copying and transfer-list collection remain inside. Adapter input construction, file reads, SHA oracles, parent ownership receipt, clone/delivery and report writes remain outside. No browser, concurrent workers, real IPC, canonical sink, compression or storage.',
+     initializationBoundary:'Separate profile of worker-module import, WebAssembly.compile and initialize/ready. Fixture/hash helper setup precedes it.',
+@@ -164,11 +165,26 @@
+     assert.equal(typeof process.availableMemory,'function','Node process/cgroup headroom unavailable');
+     const processAvailableBytes=process.availableMemory();
+     assert(Number.isSafeInteger(processAvailableBytes)&&processAvailableBytes>0,'Invalid available process memory');
+-    const cgroupLimitText=(await readFile('/sys/fs/cgroup/memory.max','utf8')).trim();
+-    const cgroupCurrentBytes=Number((await readFile('/sys/fs/cgroup/memory.current','utf8')).trim());
+-    assert(Number.isSafeInteger(cgroupCurrentBytes)&&cgroupCurrentBytes>=0);
+-    const cgroupLimitBytes=cgroupLimitText==='max'?null:Number(cgroupLimitText);
+-    assert(cgroupLimitBytes===null||Number.isSafeInteger(cgroupLimitBytes)&&cgroupLimitBytes>0);
++    const cgroupMembership=await readFile('/proc/self/cgroup','utf8');
++    const cgroupMounts=(await readFile('/proc/self/mountinfo','utf8')).split('\n').filter(line=>/ - cgroup2? /.test(line));
++    let cgroupAvailability='unavailable-no-exposed-controller-mount';
++    let cgroupPath=null;let cgroupLimitText=null;let cgroupLimitBytes=null;let cgroupCurrentBytes=null;
++    if(cgroupMounts.length>0){
++        const mounts=cgroupMounts.filter(line=>/ - cgroup2 /.test(line));
++        assert.equal(mounts.length,1,'Exposed cgroup memory-controller layout is unsupported; do not ignore its limit');
++        const unescapeMount=value=>value.replace(/\\([0-7]{3})/g,(_,octal)=>String.fromCharCode(Number.parseInt(octal,8)));
++        const fields=mounts[0].split(' - ')[0].split(' ');const mountRoot=unescapeMount(fields[3]);const mountPoint=unescapeMount(fields[4]);
++        const membership=cgroupMembership.split('\n').find(line=>line.startsWith('0::'));assert(membership,'Missing cgroup-v2 membership');
++        const memberPath=membership.slice(3);const relative=path.posix.relative(mountRoot,memberPath);
++        assert(relative!== '..'&&!relative.startsWith('../')&&!path.posix.isAbsolute(relative),'Cgroup membership is outside exposed mount');
++        cgroupPath=path.join(mountPoint,relative);
++        cgroupLimitText=(await readFile(path.join(cgroupPath,'memory.max'),'utf8')).trim();
++        cgroupCurrentBytes=Number((await readFile(path.join(cgroupPath,'memory.current'),'utf8')).trim());
++        assert(Number.isSafeInteger(cgroupCurrentBytes)&&cgroupCurrentBytes>=0);
++        cgroupLimitBytes=cgroupLimitText==='max'?null:Number(cgroupLimitText);
++        assert(cgroupLimitBytes===null||Number.isSafeInteger(cgroupLimitBytes)&&cgroupLimitBytes>0);
++        cgroupAvailability='exposed-v2-controller';
++    }
+     const headrooms=[hostAvailableBytes,processAvailableBytes];
+     const rlimitHeadrooms={};
+     if(cgroupLimitBytes!==null)headrooms.push(cgroupLimitBytes-cgroupCurrentBytes);
+@@ -182,12 +198,16 @@
+     }
+     const disk=await statfs(output);const diskFreeBytes=disk.bavail*disk.bsize;
+     const memory=process.memoryUsage();
+-    const record={stage,hostAvailableBytes,processAvailableBytes,cgroupLimitText,cgroupCurrentBytes,rlimitHeadrooms,
++    const record={stage,hostAvailableBytes,hostAvailableSource:'/proc/meminfo MemAvailable',processAvailableBytes,processAvailableSource:'Node process.availableMemory()',nodeConstrainedMemoryBytes:process.constrainedMemory(),cgroupAvailability,cgroupMembership,cgroupMounts,cgroupPath,cgroupLimitText,cgroupCurrentBytes,finiteExposedCgroupLimitObserved:cgroupLimitBytes!==null,rlimitHeadrooms,
+         applicableHeadroomBytes:Math.min(...headrooms),diskFreeBytes,...memory,maxRssKiB:process.resourceUsage().maxRSS};
+     report.resources.push(record);
+     assert(diskFreeBytes>=64*MiB,'Less than 64MiB output disk headroom');
+     assert(memory.rss<=400*MiB,'Observed RSS exceeds 400MiB stop condition');
+-    if(initial)assert(record.applicableHeadroomBytes>=512*MiB,'Less than 512MiB applicable process/cgroup/rlimit headroom');
++    if(initial){
++        assert(hostAvailableBytes>=512*MiB,'Less than 512MiB host MemAvailable');
++        assert(processAvailableBytes>=512*MiB,'Less than 512MiB Node availableMemory');
++        assert(record.applicableHeadroomBytes>=512*MiB,'Less than 512MiB visible process/cgroup/rlimit headroom');
++    }
+ }
+ async function startProfile(name){
+     assert.equal(profileActive,false);assert.equal(activeProfileName,null);

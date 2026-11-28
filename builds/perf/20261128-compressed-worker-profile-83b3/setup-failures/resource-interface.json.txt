@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-11-28T04:42:12.451778+00:00",
+  "scope": "read-only resource-interface inspection after failed preflight; no profiling",
+  "procSelfCgroup": "0::/\n",
+  "procSelfLimits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             39792                39792                processes \nMax open files            16384                16384                files     \nMax locked memory         8388608              8388608              bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       39792                39792                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         0                    0                    \nMax realtime priority     0                    0                    \nMax realtime timeout      unlimited            unlimited            us        \n",
+  "cgroupMountinfoLines": [],
+  "sysFsCgroupExists": false,
+  "earlierNodeObservation": {
+    "availableMemoryBytes": 2224836608,
+    "constrainedMemoryBytes": 0,
+    "osFreeMemoryBytes": 2224836608,
+    "osTotalMemoryBytes": 10451423232,
+    "interpretation": "No mounted controller could be inspected. Zero constrainedMemory does not establish absence of a hidden limit."
+  }
+}

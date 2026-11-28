@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-28 05:08:14 UTC",
+  "repository": "ManabiIO/manabitan",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "runtimeChangedByRecovery": false,
+  "executorStatus": "unavailable",
+  "interruption": "exec-server transport disconnected; recovery timed out after 45 seconds",
+  "newTimingRunningAtOutage": false,
+  "completedRemote": {
+    "compressedMapBlob": "285c64411f362d22e22b6a97ddee39ba7b758ac2",
+    "fileCount": 37,
+    "bytes": 590757,
+    "checksumInputArchive": {
+      "blob": "fcde760cf012fd0184b7dd348e89a05bc3e77019",
+      "bytes": 11351347,
+      "sha256": "39fdc85d583249e25009a7072c61cd6b75e22cbd555b187bbd3bf59ca9a49a66",
+      "includedInThisEvidenceBranch": false,
+      "note": "Retained as an existing unreferenced object for complete-report recovery; this branch does not publish a standalone input archive."
+    }
+  },
+  "localOnlyRecoveryTarget": {
+    "path": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-owned-columns-83b3-followup/evidence.tar.gz",
+    "payloadFiles": 153,
+    "payloadBytes": 15511504,
+    "archiveBytes": 11294013,
+    "archiveSha256": "78af8326b7fdf03799c22f914bfee2d861e9ae4ad2a4566a63fd57f793e31a46",
+    "gitBlobSha": "60f818efafabc59c44c5f8fcf0308d3aa4c7e0cb",
+    "independentlyVerifiedBeforeOutage": true,
+    "uploaded": false
+  },
+  "nativeProof": {
+    "sha256": "263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69",
+    "fullFolderConfirmedUploaded": false,
+    "releaseParserSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "inflight830": {
+    "upstreamHead": "a628c6c7915576dcf280e98bc9129a508f2f9644",
+    "localPortCommit": "3eb1b7afa13c821af96e95fee1d6b4583af8e434",
+    "localPortTree": "28e0dd109918bc63a106e78cee718a7eb8c9d91e",
+    "tests": {
+      "total": 293,
+      "dedup": 145,
+      "blockStore": 75,
+      "registration": 28,
+      "publication": 45
+    },
+    "scopedTypes": "passed",
+    "scopedLint": "incomplete: process killed by SIGKILL",
+    "admissionProof": "not run",
+    "protocol": "proposed, not frozen",
+    "timing": "not run",
+    "runtimePromoted": false
+  },
+  "browserTrace": {
+    "ownerPr": 973,
+    "runId": 46104197268,
+    "jobId": 140853159231,
+    "artifactId": 15248139923,
+    "artifactBytes": 34013156,
+    "artifactSha256": "b0dc59b4ffe9ff0d85a0a752255537431b24475c7ba15626f2342f1dc40ef775",
+    "outerArchiveHashAndSafeMemberInventoryVerified": true,
+    "independentPackageMemberBindingComplete": false,
+    "profileReconstructionComplete": false,
+    "traceSha256FromManifest": "3beac18db05dad6198e2b40695b8e9c3eb0bf94622b57b413be41a5056a5351e",
+    "traceHashIndependentlyVerified": false
+  },
+  "notes": [
+    "Cumulative emitted private-buffer allocation savings are neither peak memory nor browser latency.",
+    "Do not update PR820 branch while its normal CI is pending; cancellation policy is enabled.",
+    "No forced retries, relaxed gates or replacement cohorts. Unavailable local evidence must not be silently reconstructed as original raw files."
+  ]
+}

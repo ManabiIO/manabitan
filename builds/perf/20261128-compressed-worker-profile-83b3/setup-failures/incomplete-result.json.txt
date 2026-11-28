@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "complete": false,
+  "authoritativeBrowserTiming": false,
+  "comparativeTiming": false,
+  "sourceRoot": "/workspace/scratch/83b3b3bfba02/manabitan",
+  "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "node": "v22.22.0",
+  "nodeArguments": [
+    "--expose-gc",
+    "--max-old-space-size=192"
+  ],
+  "dictionary": "jmdict",
+  "grouping": {
+    "parserWorkers": 3,
+    "targetBytes": 25165824,
+    "executionConcurrency": 1
+  },
+  "boundary": "Profiler starts immediately before each original compressed-source worker request and stops in its postMessage adapter before structuredClone. Worker heap.set, native inflate/immediate CRC, parse/encode, lookup preparation, result copying and transfer-list collection remain inside. Adapter input construction, file reads, SHA oracles, parent ownership receipt, clone/delivery and report writes remain outside. No browser, concurrent workers, real IPC, canonical sink, compression or storage.",
+  "initializationBoundary": "Separate profile of worker-module import, WebAssembly.compile and initialize/ready. Fixture/hash helper setup precedes it.",
+  "samplingIntervalMicroseconds": 250,
+  "warmupCorpusPasses": 0,
+  "firstGroupCold": true,
+  "limits": {
+    "oldSpaceMiB": 192,
+    "observedRssStopBytes": 419430400,
+    "minimumInitialHeadroomBytes": 536870912,
+    "minimumDiskFreeBytes": 67108864,
+    "maximumProfileBytes": 2097152,
+    "maximumOutputBytes": 16777216,
+    "responseDeadlineMs": 30000,
+    "outerDeadlineSeconds": 120
+  },
+  "resources": [],
+  "groups": [],
+  "instrumentationWarnings": [],
+  "profileFiles": [],
+  "failure": {
+    "name": "Error",
+    "message": "ENOENT: no such file or directory, open '/sys/fs/cgroup/memory.max'",
+    "stack": "Error: ENOENT: no such file or directory, open '/sys/fs/cgroup/memory.max'\n    at async open (node:internal/fs/promises:636:25)\n    at async readFile (node:internal/fs/promises:1235:14)\n    at async availableResources (file:///workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-owned-columns-83b3-analysis-source/profile-compressed-jmdict.mjs:167:28)\n    at async file:///workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-owned-columns-83b3-analysis-source/profile-compressed-jmdict.mjs:301:5"
+  }
+}

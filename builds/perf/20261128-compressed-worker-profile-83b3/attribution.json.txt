@@ -1,0 +1,819 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "kind": "single sequential baseline CPU attribution; no speed comparison or browser timing",
+  "rawResultSha256": "de935a5a20ee5a37b6841e359bb0cc5947de57ae943ed0d0f138e88f20f03189",
+  "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "inputs": {
+    "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "archiveBytes": 15645766,
+    "banks": 53,
+    "rows": 528299,
+    "totalSourceBytes": 171617523,
+    "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "originalRunnerSha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf",
+    "referenceReceiptSha256": "b471985781ae3a6ee6e8b3363f71020ba221dbd7e049347cc7bc7408d22a1c11",
+    "symbolProofSha256": "263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69",
+    "runnerSha256": "f04e84a13d7980f5453841c798775056a2c09b9b4c41ccd65fccfd49d1f1dd95",
+    "helperSha256": "5d7b08331e17ddad733c59bf83b737389e145b6d3d67a7be57c3866f9fff2fdc"
+  },
+  "groups": 12,
+  "banks": 53,
+  "rows": 528299,
+  "initializationSelfSampleMicroseconds": 48173,
+  "groupSelfSampleMicroseconds": 1085906,
+  "responseCounterTotals": {
+    "sourceInflateMs": 215.1558910000001,
+    "sourceCrcMs": 0,
+    "sourceCompressedBytes": 15632849,
+    "sourceUncompressedBytes": 171617523,
+    "parseBankMs": 511,
+    "lookupIndexPrepareMs": 25.685694000000126,
+    "resultCopyMs": 100.76386200000036,
+    "copyJsonMs": 0,
+    "bufferSetupMs": 531,
+    "chunkDispatchMs": 102,
+    "encodedContentBytes": 101143985,
+    "validatedGlossaryReuseCount": 54641,
+    "nativeLookupScratchReusedBytes": 29954640
+  },
+  "responseCounterOverlap": "bufferSetupMs and chunkDispatchMs are inclusive/overlapping; do not sum phase columns into wall time",
+  "maxWasmHeapBytes": 43384832,
+  "groupSelfSamples": [
+    {
+      "function": "post",
+      "url": "node:inspector",
+      "scriptId": "195",
+      "line": 117,
+      "column": 6,
+      "sampledMicroseconds": 184826,
+      "samples": 12
+    },
+    {
+      "function": "wasm-function[13]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 17819,
+      "sampledMicroseconds": 170695,
+      "samples": 505,
+      "nativeFunctionIndex": 13,
+      "nativeFunctionName": "parse_composite_span_impl",
+      "nativeBodyRange": {
+        "index": 13,
+        "start": 17819,
+        "end": 23888
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[48]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 60257,
+      "sampledMicroseconds": 140915,
+      "samples": 424,
+      "nativeFunctionIndex": 48,
+      "nativeFunctionName": "libdeflate_deflate_decompress_ex",
+      "nativeBodyRange": {
+        "index": 48,
+        "start": 60257,
+        "end": 64170
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[36]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 50726,
+      "sampledMicroseconds": 117813,
+      "samples": 355,
+      "nativeFunctionIndex": 36,
+      "nativeFunctionName": "parse_and_encode_term_bank_token_binary_dedup",
+      "nativeBodyRange": {
+        "index": 36,
+        "start": 50726,
+        "end": 55474
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "parseTermBankWithWasmColumnChunks",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "scriptId": "249",
+      "line": 129,
+      "column": 12,
+      "sampledMicroseconds": 79558,
+      "samples": 239
+    },
+    {
+      "function": "wasm-function[2]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 1786,
+      "sampledMicroseconds": 70306,
+      "samples": 212,
+      "nativeFunctionIndex": 2,
+      "nativeFunctionName": "crc32_bytes",
+      "nativeBodyRange": {
+        "index": 2,
+        "start": 1786,
+        "end": 8395
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[27]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 37995,
+      "sampledMicroseconds": 62062,
+      "samples": 183,
+      "nativeFunctionIndex": 27,
+      "nativeFunctionName": "encode_term_content_token_binary_row",
+      "nativeBodyRange": {
+        "index": 27,
+        "start": 37995,
+        "end": 41430
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[24]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 36434,
+      "sampledMicroseconds": 46076,
+      "samples": 138,
+      "nativeFunctionIndex": 24,
+      "nativeFunctionName": "hash_content_xxh32_pair",
+      "nativeBodyRange": {
+        "index": 24,
+        "start": 36434,
+        "end": 37445
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[18]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 26359,
+      "sampledMicroseconds": 45154,
+      "samples": 133,
+      "nativeFunctionIndex": 18,
+      "nativeFunctionName": "parse_row_single_pass",
+      "nativeBodyRange": {
+        "index": 18,
+        "start": 26359,
+        "end": 32299
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "parseTermBankWasmBuffersUnchecked",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 867,
+      "column": 48,
+      "sampledMicroseconds": 17158,
+      "samples": 50
+    },
+    {
+      "function": "wasm-function[37]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 55476,
+      "sampledMicroseconds": 16049,
+      "samples": 47,
+      "nativeFunctionIndex": 37,
+      "nativeFunctionName": "scan_scalar_span",
+      "nativeBodyRange": {
+        "index": 37,
+        "start": 55476,
+        "end": 55629
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "copyWasmBackedColumnChunk",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 4110,
+      "column": 41,
+      "sampledMicroseconds": 14516,
+      "samples": 42
+    },
+    {
+      "function": "encodeNativeTermLookupIndex",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 1595,
+      "column": 36,
+      "sampledMicroseconds": 13210,
+      "samples": 38
+    },
+    {
+      "function": "wasm-function[34]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 45757,
+      "sampledMicroseconds": 11904,
+      "samples": 36,
+      "nativeFunctionIndex": 34,
+      "nativeFunctionName": "encode_term_lookup_index",
+      "nativeBodyRange": {
+        "index": 34,
+        "start": 45757,
+        "end": 49652
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "inflateCompressedTermBankSourcesWasm",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 227,
+      "column": 58,
+      "sampledMicroseconds": 10334,
+      "samples": 25
+    },
+    {
+      "function": "wasm-function[44]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 58741,
+      "sampledMicroseconds": 10160,
+      "samples": 30,
+      "nativeFunctionIndex": 44,
+      "nativeFunctionName": "next_format3_field",
+      "nativeBodyRange": {
+        "index": 44,
+        "start": 58741,
+        "end": 58921
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[38]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 55631,
+      "sampledMicroseconds": 8455,
+      "samples": 25,
+      "nativeFunctionIndex": 38,
+      "nativeFunctionName": "parse_int32_token",
+      "nativeBodyRange": {
+        "index": 38,
+        "start": 55631,
+        "end": 55935
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "buildContentUniqueRowIndexes",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 547,
+      "column": 37,
+      "sampledMicroseconds": 6976,
+      "samples": 20
+    },
+    {
+      "function": "wasm-function[31]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 44832,
+      "sampledMicroseconds": 6801,
+      "samples": 18,
+      "nativeFunctionIndex": 31,
+      "nativeFunctionName": "copy_valid_utf8",
+      "nativeBodyRange": {
+        "index": 31,
+        "start": 44832,
+        "end": 45241
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[42]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 57631,
+      "sampledMicroseconds": 6358,
+      "samples": 19,
+      "nativeFunctionIndex": 42,
+      "nativeFunctionName": "reuse_validated_glossary",
+      "nativeBodyRange": {
+        "index": 42,
+        "start": 57631,
+        "end": 58331
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[40]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 56087,
+      "sampledMicroseconds": 6328,
+      "samples": 19,
+      "nativeFunctionIndex": 40,
+      "nativeFunctionName": "raw_term_content_tokens_equal",
+      "nativeBodyRange": {
+        "index": 40,
+        "start": 56087,
+        "end": 57191
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "buildTermLookupFilter",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-route.js",
+      "scriptId": "250",
+      "line": 53,
+      "column": 37,
+      "sampledMicroseconds": 6012,
+      "samples": 18
+    },
+    {
+      "function": "wasm-function[43]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 58333,
+      "sampledMicroseconds": 4943,
+      "samples": 15,
+      "nativeFunctionIndex": 43,
+      "nativeFunctionName": "is_valid_json_number",
+      "nativeBodyRange": {
+        "index": 43,
+        "start": 58333,
+        "end": 58739
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "parseTermBankWithWasmColumnChunks",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 2119,
+      "column": 55,
+      "sampledMicroseconds": 4938,
+      "samples": 16
+    },
+    {
+      "function": "wasm-function[30]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 44339,
+      "sampledMicroseconds": 4333,
+      "samples": 13,
+      "nativeFunctionIndex": 30,
+      "nativeFunctionName": "hash_content_xxh32",
+      "nativeBodyRange": {
+        "index": 30,
+        "start": 44339,
+        "end": 44830
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[49]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 64172,
+      "sampledMicroseconds": 3236,
+      "samples": 10,
+      "nativeFunctionIndex": 49,
+      "nativeFunctionName": "build_decode_table",
+      "nativeBodyRange": {
+        "index": 49,
+        "start": 64172,
+        "end": 66004
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "wasm-function[41]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 57193,
+      "sampledMicroseconds": 2310,
+      "samples": 7,
+      "nativeFunctionIndex": 41,
+      "nativeFunctionName": "raw_term_content_quick_signature",
+      "nativeBodyRange": {
+        "index": 41,
+        "start": 57193,
+        "end": 57629
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "js-to-wasm:i:i",
+      "url": "wasm://wasm/0002f80e",
+      "scriptId": "244",
+      "line": 0,
+      "column": 34274,
+      "sampledMicroseconds": 2240,
+      "samples": 7,
+      "symbolMapping": "unmapped-v8-bridge"
+    },
+    {
+      "function": "parse",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "scriptId": "249",
+      "line": 71,
+      "column": 20,
+      "sampledMicroseconds": 1969,
+      "samples": 6
+    },
+    {
+      "function": "parseTermBankWasmBuffers",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 842,
+      "column": 39,
+      "sampledMicroseconds": 1940,
+      "samples": 6
+    },
+    {
+      "function": "wasm-function[45]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 58922,
+      "sampledMicroseconds": 1621,
+      "samples": 5,
+      "nativeFunctionIndex": 45,
+      "nativeFunctionName": "parse_value_span_with_glossary_hints",
+      "nativeBodyRange": {
+        "index": 45,
+        "start": 58922,
+        "end": 59002
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "onMessage",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "scriptId": "249",
+      "line": 44,
+      "column": 18,
+      "sampledMicroseconds": 979,
+      "samples": 2
+    },
+    {
+      "function": "",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-scratch.js",
+      "scriptId": "259",
+      "line": 30,
+      "column": 31,
+      "sampledMicroseconds": 700,
+      "samples": 2
+    },
+    {
+      "function": "now",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/core/safe-performance.js",
+      "scriptId": "252",
+      "line": 62,
+      "column": 7,
+      "sampledMicroseconds": 677,
+      "samples": 2
+    },
+    {
+      "function": "(program)",
+      "url": "",
+      "scriptId": "0",
+      "line": -1,
+      "column": -1,
+      "sampledMicroseconds": 662,
+      "samples": 2
+    },
+    {
+      "function": "invokeColumnChunk",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 2627,
+      "column": 38,
+      "sampledMicroseconds": 634,
+      "samples": 2
+    },
+    {
+      "function": "stopProfile",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-owned-columns-83b3-analysis-source/profile-compressed-jmdict.mjs",
+      "scriptId": "180",
+      "line": 215,
+      "column": 26,
+      "sampledMicroseconds": 380,
+      "samples": 1
+    },
+    {
+      "function": "wasm-function[19]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 32301,
+      "sampledMicroseconds": 335,
+      "samples": 1,
+      "nativeFunctionIndex": 19,
+      "nativeFunctionName": "next_term_row",
+      "nativeBodyRange": {
+        "index": 19,
+        "start": 32301,
+        "end": 32598
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "collectChunkTransferables",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "scriptId": "249",
+      "line": 248,
+      "column": 34,
+      "sampledMicroseconds": 332,
+      "samples": 1
+    },
+    {
+      "function": "wasm-function[7]",
+      "url": "wasm://wasm/0004212e",
+      "scriptId": "261",
+      "line": 0,
+      "column": 12506,
+      "sampledMicroseconds": 328,
+      "samples": 1,
+      "nativeFunctionIndex": 7,
+      "nativeFunctionName": "wasm_alloc",
+      "nativeBodyRange": {
+        "index": 7,
+        "start": 12506,
+        "end": 12655
+      },
+      "symbolMapping": "exact-pinned-parser-body"
+    },
+    {
+      "function": "now",
+      "url": "node:internal/perf/performance",
+      "scriptId": "158",
+      "line": 136,
+      "column": 5,
+      "sampledMicroseconds": 321,
+      "samples": 1
+    },
+    {
+      "function": "addView",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "scriptId": "249",
+      "line": 252,
+      "column": 20,
+      "sampledMicroseconds": 321,
+      "samples": 1
+    },
+    {
+      "function": "get buffer",
+      "url": "",
+      "scriptId": "0",
+      "line": -1,
+      "column": -1,
+      "sampledMicroseconds": 320,
+      "samples": 1
+    },
+    {
+      "function": "allocator",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "scriptId": "251",
+      "line": 2229,
+      "column": 0,
+      "sampledMicroseconds": 318,
+      "samples": 1
+    },
+    {
+      "function": "hashMask",
+      "url": "file:///workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-route.js",
+      "scriptId": "250",
+      "line": 34,
+      "column": 17,
+      "sampledMicroseconds": 312,
+      "samples": 1
+    },
+    {
+      "function": "dispatch",
+      "url": "",
+      "scriptId": "0",
+      "line": -1,
+      "column": -1,
+      "sampledMicroseconds": 91,
+      "samples": 1
+    }
+  ],
+  "chronologicalGroups": [
+    {
+      "index": 0,
+      "cold": true,
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 14543374,
+      "sourceInflateMs": 57.15563300000008,
+      "parseBankMs": 69,
+      "lookupIndexPrepareMs": 1.911149000000023,
+      "resultCopyMs": 5.092899999999986,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 1,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13240716,
+      "sourceInflateMs": 13.183440000000019,
+      "parseBankMs": 45,
+      "lookupIndexPrepareMs": 5.256271999999967,
+      "resultCopyMs": 21.67707500000006,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 2,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13257737,
+      "sourceInflateMs": 12.447771999999986,
+      "parseBankMs": 34,
+      "lookupIndexPrepareMs": 1.6063799999999446,
+      "resultCopyMs": 9.997761000000082,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 3,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 14088207,
+      "sourceInflateMs": 11.257309000000078,
+      "parseBankMs": 34,
+      "lookupIndexPrepareMs": 1.1815860000001521,
+      "resultCopyMs": 5.885627999999997,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 4,
+      "cold": false,
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 15138615,
+      "sourceInflateMs": 14.352253000000019,
+      "parseBankMs": 42,
+      "lookupIndexPrepareMs": 1.3068230000001222,
+      "resultCopyMs": 11.542654999999968,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 5,
+      "cold": false,
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 15955653,
+      "sourceInflateMs": 16.33035699999982,
+      "parseBankMs": 42,
+      "lookupIndexPrepareMs": 1.3067610000000514,
+      "resultCopyMs": 18.47327599999994,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 6,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13702906,
+      "sourceInflateMs": 12.812261000000035,
+      "parseBankMs": 38,
+      "lookupIndexPrepareMs": 1.2111319999999068,
+      "resultCopyMs": 2.74398599999995,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 7,
+      "cold": false,
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 14307906,
+      "sourceInflateMs": 12.881460999999945,
+      "parseBankMs": 35,
+      "lookupIndexPrepareMs": 2.214187999999922,
+      "resultCopyMs": 8.64412799999991,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 8,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 14119170,
+      "sourceInflateMs": 16.846612999999934,
+      "parseBankMs": 37,
+      "lookupIndexPrepareMs": 1.4799319999999625,
+      "resultCopyMs": 2.195174000000179,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 9,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13775196,
+      "sourceInflateMs": 14.524527000000035,
+      "parseBankMs": 37,
+      "lookupIndexPrepareMs": 5.272613000000092,
+      "resultCopyMs": 6.475812000000133,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 10,
+      "cold": false,
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13936647,
+      "sourceInflateMs": 14.40857700000015,
+      "parseBankMs": 33,
+      "lookupIndexPrepareMs": 1.1203129999998964,
+      "resultCopyMs": 1.6699280000002545,
+      "ownershipReceipt": true
+    },
+    {
+      "index": 11,
+      "cold": false,
+      "banks": 5,
+      "rows": 48299,
+      "sourceBytes": 15551396,
+      "sourceInflateMs": 18.95568800000001,
+      "parseBankMs": 65,
+      "lookupIndexPrepareMs": 1.8185450000000856,
+      "resultCopyMs": 6.365538999999899,
+      "ownershipReceipt": true
+    }
+  ],
+  "resources": {
+    "initial": {
+      "stage": "initial",
+      "hostAvailableBytes": 2086502400,
+      "hostAvailableSource": "/proc/meminfo MemAvailable",
+      "processAvailableBytes": 2086502400,
+      "processAvailableSource": "Node process.availableMemory()",
+      "nodeConstrainedMemoryBytes": 0,
+      "cgroupAvailability": "unavailable-no-exposed-controller-mount",
+      "cgroupMembership": "0::/\n",
+      "cgroupMounts": [],
+      "cgroupPath": null,
+      "cgroupLimitText": null,
+      "cgroupCurrentBytes": null,
+      "finiteExposedCgroupLimitObserved": false,
+      "rlimitHeadrooms": {
+        "Max resident set": null,
+        "Max data size": null,
+        "Max address space": null
+      },
+      "applicableHeadroomBytes": 2086502400,
+      "diskFreeBytes": 183160832,
+      "rss": 67936256,
+      "heapTotal": 12947456,
+      "heapUsed": 9358712,
+      "external": 4169109,
+      "arrayBuffers": 519168,
+      "maxRssKiB": 66344
+    },
+    "maximumSampledRssBytes": 212611072,
+    "childResourceUsage": {
+      "userSeconds": 2.032804,
+      "systemSeconds": 0.606825,
+      "maxRssKiB": 207936,
+      "voluntaryContextSwitches": 7096,
+      "involuntaryContextSwitches": 194
+    },
+    "watcherComplete": true,
+    "watcherSamples": 48,
+    "watcherElapsedSeconds": 2.4441636029996516,
+    "watcherTerminationReason": null,
+    "containerLimit": "unavailable, not asserted unlimited or verified"
+  },
+  "instrumentation": "node:inspector post is excluded from product attribution; V8 bridges remain unmapped; startup profile remains separate; all raw tails retained"
+}
