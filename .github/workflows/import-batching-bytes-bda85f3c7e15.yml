@@ -1,0 +1,77 @@
+name: JMdict batching complete storage byte audit bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-batching-bytes-bda85f3c7e15
+    paths:
+      - .github/workflows/import-batching-bytes-bda85f3c7e15.yml
+      - dev/perf/bda85f3c7e15/*storage-byte-audit*.py
+      - dev/perf/bda85f3c7e15/batching-byte-audit.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-batching-bytes-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  byte-parity:
+    name: Four complete JMdict imports / storage byte parity only
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Validate the independent storage observer
+        run: python3 dev/perf/bda85f3c7e15/test-storage-byte-audits.py
+      - name: Install pinned Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Build the exact independent source roots
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex
+          for spec in A:9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 B:83b0bafd51fff334a2f2e94beaf67cfa68e85eea; do
+            audit_arm="${spec%%:*}"
+            audit_sha="${spec#*:}"
+            audit_root="$RUNNER_TEMP/import-batching-bytes-bda85f3c7e15-$audit_arm"
+            git fetch --no-tags --depth=1 origin "$audit_sha"
+            git worktree add --detach "$audit_root" "$audit_sha"
+            cmp package-lock.json "$audit_root/package-lock.json"
+            cmp test/perf/dictionaries.lock.json "$audit_root/test/perf/dictionaries.lock.json"
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$audit_root/node_modules"
+            mkdir -p "$audit_root/builds"
+            ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$audit_root/builds/e2e-dictionary-cache"
+            (
+              cd "$audit_root"
+              npm run build:libs
+              npm run license-report:html
+              npm run build -- --target chrome
+            )
+          done
+      - name: Compare every custom storage byte after independent imports and restart
+        run: |
+          set -euo pipefail
+          python3 dev/perf/bda85f3c7e15/batching-byte-audit.py \
+            --baseline-root "$RUNNER_TEMP/import-batching-bytes-bda85f3c7e15-A" \
+            --candidate-root "$RUNNER_TEMP/import-batching-bytes-bda85f3c7e15-B" \
+            --output builds/perf/import-batching-bytes-bda85f3c7e15
+      - name: Retain raw byte hashes and all failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-batching-bytes-bda85f3c7e15
+          path: builds/perf/import-batching-bytes-bda85f3c7e15
+          if-no-files-found: error
+          retention-days: 90
