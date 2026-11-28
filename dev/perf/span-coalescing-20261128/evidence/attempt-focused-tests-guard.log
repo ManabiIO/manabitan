@@ -1,0 +1,29 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/1c4137568bc6/span-coalescing
+
+··············································································································x···············································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-content-span-coalescing.test.js > bounded compression span coalescing > keeps original descriptors for forged Float64 offsets metadata
+TypeError: Term content span offsets and lengths must be equally sized Uint32Arrays
+ ❯ validateTermContentSpans ext/js/dictionary/term-content-block-store.js:1292:15
+    1290|         sourceOffsets.length !== sourceLengths.length
+    1291|     ) {
+    1292|         throw new TypeError('Term content span offsets and lengths mus…
+       |               ^
+    1293|     }
+    1294|     let totalBytes = 0;
+ ❯ TermContentBlockStore.tryBeginAppendSpans ext/js/dictionary/term-content-block-store.js:764:35
+ ❯ append test/term-content-span-coalescing.test.js:107:33
+ ❯ test/term-content-span-coalescing.test.js:272:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 157 passed (158)
+   Start at  23:28:15
+   Duration  5.14s (transform 1.53s, setup 82ms, import 2.12s, tests 1.50s, environment 1ms)
+

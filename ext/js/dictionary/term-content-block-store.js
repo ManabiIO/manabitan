@@ -63,6 +63,12 @@ const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
 const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
 const EARLY_SELECTION_MAX_SPANS = 512;
 const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
+/* eslint-disable @stylistic/semi */
+const MAX_COALESCED_CONTENT_RUNS = 4096
+const MIN_CONTENT_SPANS_PER_COALESCED_RUN = 4
+const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')
+const TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)
+/* eslint-enable @stylistic/semi */
 
 export class TermContentBlockImportSession {
     /**
@@ -699,6 +705,8 @@ export class TermContentBlockStore {
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
+        /* eslint-disable-next-line @stylistic/semi */
+        const coalesceSpans = canCoalesceContentSpans(sourceBytes, sourceOffsets, sourceLengths)
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (uncompressedBytes === 0) { return null; }
         if (
@@ -713,6 +721,7 @@ export class TermContentBlockStore {
                 compressionDictName,
                 force,
                 uncompressedBytes,
+                coalesceSpans,
             );
         }
         return await this._tryAppendPacked(
@@ -750,6 +759,8 @@ export class TermContentBlockStore {
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}|null}
      */
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
+        /* eslint-disable-next-line @stylistic/semi */
+        const coalesceSpans = canCoalesceContentSpans(sourceBytes, sourceOffsets, sourceLengths)
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (
             uncompressedBytes === 0 ||
@@ -779,6 +790,7 @@ export class TermContentBlockStore {
             compressionDictName,
             uncompressedBytes,
             !force,
+            coalesceSpans,
         );
     }
 
@@ -789,12 +801,13 @@ export class TermContentBlockStore {
      * @param {string} compressionDictName
      * @param {number} uncompressedBytes
      * @param {boolean} initialSelection
+     * @param {boolean} [coalesceSpans] Synchronous ordinary-view witness from the public entry point.
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
-    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, coalesceSpans = false) {
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, coalesceSpans ? sourceOffsets : null);
         let packMs = safePerformance.now() - planStart;
         const referenceLayout = createTermContentReferenceLayout(
             sourceLengths.length,
@@ -818,9 +831,9 @@ export class TermContentBlockStore {
             try {
                 const operation = beginCompressWrappedTermContentZstdSpansBatch(
                     sourceBytes,
-                    sourceOffsets,
-                    sourceLengths,
-                    packed.blockStartIndexes,
+                    packed.compressionSpans?.offsets ?? sourceOffsets,
+                    packed.compressionSpans?.lengths ?? sourceLengths,
+                    packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
                     packed.packedChunkLengths,
                     compressionDictName,
                     compressionExperiments,
@@ -972,14 +985,15 @@ export class TermContentBlockStore {
      * @param {string|null} compressionDictName
      * @param {boolean} force
      * @param {number} uncompressedBytes
+     * @param {boolean} [coalesceSpans] Synchronous ordinary-view witness from the public entry point.
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
+    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes, coalesceSpans = false) {
         const compressionExperiments = this._compressionExperiments;
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, coalesceSpans ? sourceOffsets : null);
         const packMs = safePerformance.now() - phaseStart;
         let compressedChunks;
         let envelopeMs = 0;
@@ -987,9 +1001,9 @@ export class TermContentBlockStore {
         try {
             const result = await compressWrappedTermContentZstdSpansBatch(
                 sourceBytes,
-                sourceOffsets,
-                sourceLengths,
-                packed.blockStartIndexes,
+                packed.compressionSpans?.offsets ?? sourceOffsets,
+                packed.compressionSpans?.lengths ?? sourceLengths,
+                packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
                 packed.packedChunkLengths,
                 compressionDictName,
                 compressionExperiments,
@@ -1445,41 +1459,129 @@ function packContentChunksIntoSlabs(chunks, sourceLengths, targetBytes) {
     return {packedChunks, blockStartIndexes};
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * @param {Uint32Array} sourceLengths
  * @param {number} targetBytes
- * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array}}
+ * @param {Uint32Array|null} [sourceOffsets]
+ * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array, compressionSpans: {offsets: Uint32Array, lengths: Uint32Array, blockStartIndexes: Uint32Array}|null}}
  * @throws {RangeError} If a planned block cannot use the 32-bit storage format.
  */
-function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
+function planContentSpansIntoSlabs(sourceLengths, targetBytes, sourceOffsets = null) {
     /** @type {number[]} */
-    const packedChunkLengths = [];
+    const packedChunkLengths = []
     /** @type {number[]} */
-    const blockStartIndexes = [0];
-    let startIndex = 0;
+    const blockStartIndexes = [0]
+    // Every original span was checked before this synchronous planner. Only
+    // owned columns can retain that validation while runs are constructed;
+    // shared metadata stays on the original worker validation path.
+    const runCapacity = sourceOffsets !== null ?
+        Math.min(MAX_COALESCED_CONTENT_RUNS, Math.floor(sourceLengths.length / MIN_CONTENT_SPANS_PER_COALESCED_RUN)) :
+        0
+    let runOffsets = runCapacity > 0 ? new Uint32Array(runCapacity) : null
+    let runLengths = runCapacity > 0 ? new Uint32Array(runCapacity) : null
+    /** @type {number[]|null} */
+    let runBlockStartIndexes = runCapacity > 0 ? [0] : null
+    let runCount = 0
+    let runEnd = 0
+    let startIndex = 0
     while (startIndex < sourceLengths.length) {
-        let totalBytes = 0;
-        let endIndex = startIndex;
+        const firstBlockRun = runCount
+        let totalBytes = 0
+        let endIndex = startIndex
         while (endIndex < sourceLengths.length) {
-            const nextBytes = sourceLengths[endIndex];
+            const nextBytes = sourceLengths[endIndex]
             if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
-                break;
+                break
             }
-            totalBytes += nextBytes;
-            ++endIndex;
+            totalBytes += nextBytes
+            if (runOffsets !== null && runLengths !== null && sourceOffsets !== null) {
+                const offset = sourceOffsets[endIndex]
+                if (runCount > firstBlockRun && offset === runEnd) {
+                    runLengths[runCount - 1] += nextBytes
+                } else if (runCount < runCapacity) {
+                    runOffsets[runCount] = offset
+                    runLengths[runCount] = nextBytes
+                    ++runCount
+                } else {
+                    // Fragmented input keeps the original plan. Staging is
+                    // capped at 32 KiB of columns, with no extra full-span pass.
+                    runOffsets = null
+                    runLengths = null
+                    runBlockStartIndexes = null
+                }
+                runEnd = offset + nextBytes
+            }
+            ++endIndex
         }
         if (totalBytes > 0xffffffff) {
-            throw new RangeError('Packed term content block exceeds the 32-bit storage format');
+            throw new RangeError('Packed term content block exceeds the 32-bit storage format')
         }
-        packedChunkLengths.push(totalBytes);
-        blockStartIndexes.push(endIndex);
-        startIndex = endIndex;
+        packedChunkLengths.push(totalBytes)
+        blockStartIndexes.push(endIndex)
+        runBlockStartIndexes?.push(runCount)
+        startIndex = endIndex
     }
     return {
         packedChunkLengths: Uint32Array.from(packedChunkLengths),
         blockStartIndexes: Uint32Array.from(blockStartIndexes),
-    };
+        compressionSpans: runOffsets !== null && runLengths !== null && runBlockStartIndexes !== null ?
+            {
+                offsets: runOffsets.subarray(0, runCount),
+                lengths: runLengths.subarray(0, runCount),
+                blockStartIndexes: Uint32Array.from(runBlockStartIndexes),
+            } :
+            null,
+    }
 }
+
+/**
+ * Establish eligibility before validation or selection can invoke accessors.
+ * Ordinary source views and private columns stay stable until this synchronous
+ * call reaches the planner; unusual views retain the original descriptors.
+ * @param {Uint8Array} source
+ * @param {Uint32Array} offsets
+ * @param {Uint32Array} lengths
+ * @returns {boolean}
+ */
+function canCoalesceContentSpans(source, offsets, lengths) {
+    if (
+        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function' ||
+        !isOrdinaryContentSpanView(source, Uint8Array.prototype, 'Uint8Array') ||
+        !isOrdinaryContentSpanView(offsets, Uint32Array.prototype, 'Uint32Array') ||
+        !isOrdinaryContentSpanView(lengths, Uint32Array.prototype, 'Uint32Array')
+    ) { return false }
+    for (const column of [offsets, lengths]) {
+        // Check internal buffer identity; instanceof alone accepts a shared
+        // buffer whose prototype has been replaced with ArrayBuffer.prototype.
+        try {
+            ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(column.buffer)
+        } catch {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * @param {Uint8Array|Uint32Array} view
+ * @param {object} prototype
+ * @param {string} tag
+ * @returns {boolean}
+ */
+function isOrdinaryContentSpanView(view, prototype, tag) {
+    return (
+        typeof TYPED_ARRAY_TAG_DESCRIPTOR?.get === 'function' &&
+        ArrayBuffer.isView(view) &&
+        Object.getPrototypeOf(view) === prototype &&
+        !Object.hasOwn(view, 'length') &&
+        !Object.hasOwn(view, 'buffer') &&
+        !Object.hasOwn(view, 'byteOffset') &&
+        !Object.hasOwn(view, 'byteLength') &&
+        TYPED_ARRAY_TAG_DESCRIPTOR.get.call(view) === tag
+    )
+}
+/* eslint-enable @stylistic/semi */
 
 /**
  * Re-packs a stable shared source using the exact block plan whose reference

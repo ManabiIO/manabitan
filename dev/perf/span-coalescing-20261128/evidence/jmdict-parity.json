@@ -1,0 +1,236 @@
+{
+  "scope": "Untimed full current JMdict Node importer using unchanged production grouping and actual four-worker Zstd compression. SQLite is in memory and OPFS is the file adapter; no browser latency claim.",
+  "candidateSourceIdentity": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "patchSha256": "34dfc34fee0f5a86974b571781352b9e5b0153884aa652b6a0de8c67acbf9980",
+    "files": {
+      "ext/js/dictionary/term-content-block-store.js": "55125db702dfe2d2745b7cb72e591b98938970b7a877663d0c6b7135271aa223",
+      "test/term-content-block-store.test.js": "c452aaea3ef969e04a8272dd5784a6e67380db7f24c1c9280e046d96bfb47f97",
+      "test/term-content-span-coalescing.test.js": "9baf9f01c7ef5f9a96784e4cbd9120acf6ed7957e7123d52d0414a7c3dba8bba"
+    }
+  },
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "termRows": 528299,
+  "groups": [
+    {
+      "index": 0,
+      "termRows": 50000,
+      "originalDescriptors": 34951,
+      "coalescedDescriptors": 9,
+      "originalTransportBytes": 279608,
+      "coalescedTransportBytes": 72,
+      "blocks": 9,
+      "uncompressedBytes": 8486982,
+      "compressedBytes": 893466,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 1,
+      "termRows": 40000,
+      "originalDescriptors": 32739,
+      "coalescedDescriptors": 124,
+      "originalTransportBytes": 261912,
+      "coalescedTransportBytes": 992,
+      "blocks": 9,
+      "uncompressedBytes": 9404475,
+      "compressedBytes": 1026845,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 2,
+      "termRows": 40000,
+      "originalDescriptors": 32256,
+      "coalescedDescriptors": 168,
+      "originalTransportBytes": 258048,
+      "coalescedTransportBytes": 1344,
+      "blocks": 9,
+      "uncompressedBytes": 9240449,
+      "compressedBytes": 1029511,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 3,
+      "termRows": 40000,
+      "originalDescriptors": 28758,
+      "coalescedDescriptors": 146,
+      "originalTransportBytes": 230064,
+      "coalescedTransportBytes": 1168,
+      "blocks": 9,
+      "uncompressedBytes": 8589228,
+      "compressedBytes": 871190,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 4,
+      "termRows": 50000,
+      "originalDescriptors": 34159,
+      "coalescedDescriptors": 500,
+      "originalTransportBytes": 273272,
+      "coalescedTransportBytes": 4000,
+      "blocks": 9,
+      "uncompressedBytes": 8679448,
+      "compressedBytes": 1071836,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 5,
+      "termRows": 50000,
+      "originalDescriptors": 33543,
+      "coalescedDescriptors": 457,
+      "originalTransportBytes": 268344,
+      "coalescedTransportBytes": 3656,
+      "blocks": 9,
+      "uncompressedBytes": 8915186,
+      "compressedBytes": 1197575,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 6,
+      "termRows": 40000,
+      "originalDescriptors": 24030,
+      "coalescedDescriptors": 240,
+      "originalTransportBytes": 192240,
+      "coalescedTransportBytes": 1920,
+      "blocks": 7,
+      "uncompressedBytes": 7025024,
+      "compressedBytes": 899946,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 7,
+      "termRows": 50000,
+      "originalDescriptors": 31330,
+      "coalescedDescriptors": 548,
+      "originalTransportBytes": 250640,
+      "coalescedTransportBytes": 4384,
+      "blocks": 8,
+      "uncompressedBytes": 7384763,
+      "compressedBytes": 876632,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 8,
+      "termRows": 40000,
+      "originalDescriptors": 25442,
+      "coalescedDescriptors": 329,
+      "originalTransportBytes": 203536,
+      "coalescedTransportBytes": 2632,
+      "blocks": 8,
+      "uncompressedBytes": 7772813,
+      "compressedBytes": 1045145,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 9,
+      "termRows": 40000,
+      "originalDescriptors": 24806,
+      "coalescedDescriptors": 301,
+      "originalTransportBytes": 198448,
+      "coalescedTransportBytes": 2408,
+      "blocks": 8,
+      "uncompressedBytes": 7520891,
+      "compressedBytes": 1061237,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 10,
+      "termRows": 40000,
+      "originalDescriptors": 25651,
+      "coalescedDescriptors": 435,
+      "originalTransportBytes": 205208,
+      "coalescedTransportBytes": 3480,
+      "blocks": 8,
+      "uncompressedBytes": 7774895,
+      "compressedBytes": 1091890,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    },
+    {
+      "index": 11,
+      "termRows": 48299,
+      "originalDescriptors": 34367,
+      "coalescedDescriptors": 683,
+      "originalTransportBytes": 274936,
+      "coalescedTransportBytes": 5464,
+      "blocks": 10,
+      "uncompressedBytes": 9506472,
+      "compressedBytes": 1260767,
+      "allCompressedFramesEqual": true,
+      "allUniqueReferenceColumnsEqual": true
+    }
+  ],
+  "baselineTotals": {
+    "groups": 12,
+    "originalDescriptorCount": 362032,
+    "transportDescriptorCount": 362032,
+    "originalColumnBytes": 2896256,
+    "transportColumnBytes": 2896256,
+    "compressedBlocks": 103,
+    "compressedBytes": 12326040,
+    "uncompressedBytes": 100300626,
+    "references": 362032
+  },
+  "candidateTotals": {
+    "groups": 12,
+    "originalDescriptorCount": 362032,
+    "transportDescriptorCount": 3940,
+    "originalColumnBytes": 2896256,
+    "transportColumnBytes": 31520,
+    "compressedBlocks": 103,
+    "compressedBytes": 12326040,
+    "uncompressedBytes": 100300626,
+    "references": 362032
+  },
+  "eliminatedDescriptors": 358092,
+  "eliminatedMetadataTransportBytes": 2864736,
+  "descriptorReductionPercent": 98.91169841339992,
+  "all103ActualCompressedFramesEqual": true,
+  "all362032UniqueReferenceColumnsEqual": true,
+  "all528299FinalizedRowReferencesAndLookupBytesEqual": true,
+  "finalizedPayloads": [
+    {
+      "path": "manabitan-term-content.bin",
+      "sizeBytes": 19566680,
+      "sha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963",
+      "generationNormalized": false
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "sizeBytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "generationNormalized": true
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "sizeBytes": 23748952,
+      "sha256": "397dae5e5f86853b47a90384739e42754e7ed84869a2d2142d05220f3600114f",
+      "generationNormalized": true
+    }
+  ],
+  "lookupProbeCount": 15,
+  "lookupProbeDigest": "ca739afb54d028370bdb6ba99a985987a40ea3c0e3dc84ae804fe2efd4ceb0f2",
+  "checksPassed": true
+}

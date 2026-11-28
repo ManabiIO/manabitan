@@ -1,0 +1,2 @@
+Ignoring inability to install OPFS sqlite3_vfs: The OPFS sqlite3_vfs cannot run in the main thread because it requires Atomics.wait().
+{"outputDir":"/workspace/scratch/1c4137568bc6/experiments/span-coalescing/jmdict-baseline","chunkCount":12,"compressionCensus":{"groups":12,"originalDescriptorCount":362032,"transportDescriptorCount":362032,"originalColumnBytes":2896256,"transportColumnBytes":2896256,"compressedBlocks":103,"compressedBytes":12326040,"uncompressedBytes":100300626,"references":362032},"lookupProbeCount":15,"timingClaim":false}

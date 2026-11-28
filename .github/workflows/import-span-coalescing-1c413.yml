@@ -1,0 +1,134 @@
+name: Content span coalescing import experiment 20261128
+
+on:
+  push:
+    branches: [perf/content-span-coalescing-20261128-1c413]
+    paths:
+      - 'ext/js/dictionary/term-content-block-store.js'
+      - 'test/term-content-block-store.test.js'
+      - 'test/term-content-span-coalescing.test.js'
+      - 'dev/perf/span-coalescing-20261128/verify-source.py'
+      - 'dev/perf/span-coalescing-20261128/PLAN.md'
+      - 'dev/perf/span-coalescing-20261128/source.json'
+      - '.github/workflows/import-span-coalescing-1c413.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: span-coalescing-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: ${{ github.sha }}
+
+jobs:
+  correctness:
+    name: Unit tests, types, and dry build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify the frozen source and unchanged qualification driver
+        run: |
+          python dev/perf/span-coalescing-20261128/verify-source.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --output builds/perf/span-coalescing-validation/source-proof.json
+      - name: Validate unchanged observer and receipt checks
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Validate changed JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/span-coalescing-validation
+          npx eslint ext/js/dictionary/term-content-block-store.js 2>&1 | tee builds/perf/span-coalescing-validation/runtime-lint.log
+          npx eslint test/term-content-span-coalescing.test.js test/term-content-block-store.test.js 2>&1 | tee builds/perf/span-coalescing-validation/test-lint.log
+      - name: Complete unit suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:unit 2>&1 | tee builds/perf/span-coalescing-validation/unit.log
+      - name: Main and test type validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts:main 2>&1 | tee builds/perf/span-coalescing-validation/types-main.log
+          npm run test:ts:test 2>&1 | tee builds/perf/span-coalescing-validation/types-test.log
+      - name: All-target dry build
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/span-coalescing-validation
+          npm run test:build 2>&1 | tee builds/perf/span-coalescing-validation/dry-build.log
+      - name: Preserve correctness results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: span-coalescing-validation-${{ github.sha }}
+          path: builds/perf/span-coalescing-validation
+          if-no-files-found: error
+          retention-days: 14
+
+  compare:
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        initial_order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_INITIAL_ORDER: ${{ matrix.initial_order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify the frozen source and unchanged qualification driver
+        run: |
+          python dev/perf/span-coalescing-20261128/verify-source.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --output builds/perf/span-coalescing-source-proof.json
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run frozen comparisons and separate media and memory verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            allocation+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_INITIAL_ORDER" \
+            --pairs 12 \
+            --expected-package-entry js/dictionary/term-content-block-store.js \
+            "${allocation[@]}" \
+            --evidence builds/perf/span-coalescing-comparison
+      - name: Preserve every observation, package, and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: span-coalescing-${{ matrix.dictionary }}-${{ matrix.initial_order }}-${{ github.sha }}
+          path: |
+            builds/perf/span-coalescing-comparison
+            builds/perf/span-coalescing-source-proof.json
+          if-no-files-found: error
+          retention-days: 14

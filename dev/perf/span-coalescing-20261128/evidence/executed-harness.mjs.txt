@@ -1,0 +1,427 @@
+// Diagnostic component replay. This is not an authoritative browser benchmark.
+// It uses unchanged importer/parser/store/compression/lookup workers, SQLite
+// :memory:, and the repository's real-file OPFS test adapter. UI and the browser
+// SQLite VFS are excluded; the OPFS adapter copies bytes on each write/snapshot.
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {readFile, writeFile, mkdir, readdir, stat, link} from 'node:fs/promises'
+import {openSync, readSync, writeSync, ftruncateSync, fsyncSync, closeSync, fstatSync, createReadStream} from 'node:fs'
+import {crc32} from 'node:zlib'
+import {resolve, basename, relative} from 'node:path'
+import {fileURLToPath, pathToFileURL} from 'node:url'
+import {Worker as NodeWorker} from 'node:worker_threads'
+import {Session} from 'node:inspector/promises'
+import {execFileSync} from 'node:child_process'
+import os from 'node:os'
+
+const [sourceInput, fixtureId, outputInput, ...flags] = process.argv.slice(2)
+assert(sourceInput && fixtureId && outputInput, 'Usage: node import-sink-screen.mjs sourceRoot fixtureId outputDir [--profile] [--tail] [--setup-only]')
+if (flags.includes('--gc-after-import')) assert.equal(typeof globalThis.gc, 'function', 'Run Node with --expose-gc')
+const sourceRoot = resolve(sourceInput)
+const outputDir = resolve(outputInput)
+const moduleUrl = (name) => pathToFileURL(resolve(sourceRoot, name)).href
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const hardwareConcurrency = Number(process.env.MANABITAN_HOST_CPUS ?? 4)
+const deviceMemory = Number(process.env.MANABITAN_HOST_MEMORY ?? 8)
+const cacheDir = process.env.MANABITAN_FIXTURE_DIR ?? '/workspace/scratch/1c4137568bc6/fixtures'
+await mkdir(outputDir, {recursive: true})
+const sourceIdentity = {
+    commit: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: sourceRoot, encoding: 'utf8'}).trim(),
+    trackedDiffSha256: sha256(execFileSync('git', ['diff', '--binary', 'HEAD'], {cwd: sourceRoot, maxBuffer: 16 * 1024 * 1024})),
+    files: {},
+}
+for (const name of ['ext/lib/term-bank-parser.wasm', 'ext/lib/term-content-canonical-scan-v1.wasm', 'test/fixtures/fused-score/node-opfs-adapter.mjs']) {
+    sourceIdentity.files[name] = sha256(await readFile(resolve(sourceRoot, name)))
+}
+sourceIdentity.harnessSha256 = sha256(await readFile(fileURLToPath(import.meta.url)))
+sourceIdentity.workerBridgeSha256 = sha256(await readFile(new URL('./node-import-worker-bridge.mjs', import.meta.url)))
+if (flags.includes('--tail')) sourceIdentity.tailProbeSha256 = sha256(await readFile('/workspace/scratch/1c4137568bc6/tail-probe.mjs'))
+if (flags.includes('--capture-record')) sourceIdentity.recordCaptureSha256 = sha256(await readFile('/workspace/scratch/1c4137568bc6/record-field-capture.mjs'))
+const originalFetch = globalThis.fetch
+globalThis.fetch = async (resource, options) => {
+    const url = resource instanceof URL ? resource : new URL(typeof resource === 'string' ? resource : resource.url)
+    return url.protocol === 'file:' ? new Response(await readFile(fileURLToPath(url)), {headers: {'Content-Type': 'application/wasm'}}) : originalFetch(resource, options)
+}
+const {createNodeOpfs} = await import(moduleUrl('test/fixtures/fused-score/node-opfs-adapter.mjs'))
+const opfs = await createNodeOpfs()
+// The repository's asynchronous adapter has no sync handles. Supply the host
+// equivalent so eligible production index writes/readers retain their normal
+// synchronous path. JMdict is below the separate I/O-worker source threshold.
+const sampleFile = await opfs.root.getFileHandle('sync-handle-prototype', {create: true})
+globalThis.FileSystemFileHandle = sampleFile.constructor
+globalThis.FileSystemDirectoryHandle = opfs.root.constructor
+Object.getPrototypeOf(sampleFile).createSyncAccessHandle = async function ({mode} = {}) {
+    const fd = openSync(this.location, mode === 'read-only' ? 'r' : 'r+')
+    return {
+        read(buffer, {at = 0} = {}) { return readSync(fd, buffer, 0, buffer.byteLength, at) },
+        write(buffer, {at = 0} = {}) { return writeSync(fd, buffer, 0, buffer.byteLength, at) },
+        getSize() { return fstatSync(fd).size },
+        truncate(size) { ftruncateSync(fd, size) },
+        flush() { fsyncSync(fd) },
+        close() { closeSync(fd) },
+    }
+}
+await opfs.root.removeEntry('sync-handle-prototype')
+Object.defineProperty(globalThis, 'navigator', {value: {hardwareConcurrency, deviceMemory, storage: {getDirectory: async () => opfs.root}}, configurable: true})
+globalThis.self = globalThis
+const workers = []
+const terminations = []
+const workerEvents = []
+const sourceMediaWorkerReceipts = []
+const timeline = []
+globalThis.manabitanSinkProfileEvent = (event) => timeline.push({...event, observedAt: performance.now()})
+const bridge = new URL('./node-import-worker-bridge.mjs', import.meta.url)
+globalThis.Worker = class BrowserWorker extends EventTarget {
+    constructor(url, options = {}) {
+        super()
+        assert.equal(new URL(url).protocol, 'file:', 'Only repository module workers are supported')
+        this.role = basename(fileURLToPath(url))
+        this.id = workers.length
+        this.ready = false
+        this.closed = false
+        this.received = {}
+        this.sent = {}
+        this.thread = new NodeWorker(bridge, {workerData: {url: new URL(url).href, hardwareConcurrency, deviceMemory}})
+        this.thread.on('message', (data) => {
+            const type = data?.type ?? data?.action ?? (data?.id === undefined ? 'other' : 'result')
+            this.received[type] = (this.received[type] ?? 0) + 1
+            if (type === 'ready') this.ready = true
+            if (this.role === 'source-zip-media-preparation-worker.js') {
+                sourceMediaWorkerReceipts.push({at: performance.now(), prepared: data !== null, mediaCount: data?.plan?.descriptor?.count ?? null, payloadBytes: data?.blob?.size ?? null})
+            }
+            workerEvents.push({worker: this.id, role: this.role, direction: 'received', type, jobId: data?.id, at: performance.now()})
+            const event = new Event('message')
+            event.data = data
+            this.dispatchEvent(event)
+            this.onmessage?.(event)
+        })
+        this.thread.on('error', (error) => {
+            workerEvents.push({worker: this.id, role: this.role, error: String(error), at: performance.now()})
+            const event = new Event('error')
+            event.error = error
+            event.message = error.message
+            this.dispatchEvent(event)
+            this.onerror?.(event)
+        })
+        this.thread.on('messageerror', (error) => {
+            const event = new Event('messageerror')
+            event.error = error
+            this.dispatchEvent(event)
+            this.onmessageerror?.(event)
+        })
+        workers.push(this)
+    }
+    postMessage(data, transfer) {
+        const type = data?.type ?? data?.action ?? 'job'
+        this.sent[type] = (this.sent[type] ?? 0) + 1
+        workerEvents.push({worker: this.id, role: this.role, direction: 'sent', type, jobId: data?.id, at: performance.now()})
+        this.thread.postMessage(data, transfer)
+    }
+    terminate() {
+        if (this.closed) return
+        this.closed = true
+        const result = this.thread.terminate()
+        terminations.push(result)
+        return result
+    }
+}
+
+const lockBytes = await readFile(resolve(sourceRoot, 'test/perf/dictionaries.lock.json'))
+const {dictionaries} = JSON.parse(lockBytes)
+const fixture = dictionaries[fixtureId]
+assert(fixture)
+const archiveBytes = flags.includes('--setup-only') ? null : await readFile(resolve(cacheDir, fixture.cacheFile))
+if (archiveBytes !== null) {
+    assert.equal(archiveBytes.length, fixture.sizeBytes)
+    assert.equal(createHash('sha256').update(archiveBytes).digest('hex'), fixture.sha256)
+}
+const {DictionaryDatabase} = await import(moduleUrl('ext/js/dictionary/dictionary-database.js'))
+const {DictionaryImporter} = await import(moduleUrl('ext/js/dictionary/dictionary-importer.js'))
+const {getSqlite3} = await import(moduleUrl('ext/js/dictionary/sqlite-wasm.js'))
+const db = new DictionaryDatabase()
+// The one persistence override is SQLite connection creation. Schema setup,
+// migrations, import transactions, payload stores and publication remain real.
+db._openConnection = async function () {
+    this._sqlite3 = await getSqlite3()
+    this._db = new this._sqlite3.oo1.DB(':memory:', 'c')
+    // Real file-backed OPFS payload stores are available. This capability flag
+    // also enables production packed generation-media admission; it must not be
+    // set merely because the diagnostic metadata DB itself uses :memory:.
+    this._usesFallbackStorage = false
+    this._openStorageDiagnostics = {mode: 'diagnostic-node-memory-sqlite'}
+    this._getSupportedInstalledSchemaVersion()
+    await this._recoverInterruptedImportSession()
+    await this._termContentStore.prepare()
+    await this._termRecordStore.prepare()
+    this._termContentBlockStore.clearCache()
+    this._clearTermsVtabCursorState()
+    this._termsVtabModuleRegistered = false
+    this._applyRuntimePragmas()
+    await this._initializeSchema()
+    await this._runSchemaMigrations()
+    this._restoreTermRecordDictionaryHealth()
+}
+const chunks = []
+const bulkAdd = db.bulkAddArtifactTermsChunk.bind(db)
+db.bulkAddArtifactTermsChunk = async (chunk) => {
+    const start = performance.now()
+    const result = await bulkAdd(chunk)
+    chunks.push({index: chunks.length, start, end: performance.now(), rowCount: chunk.rowCount, metrics: {...db.getLastBulkAddTermsMetrics()}})
+    return result
+}
+const {installCompressionObserver} = await import('/workspace/scratch/1c4137568bc6/experiments/span-coalescing/observe-compression.mjs')
+const compressionObserver = await installCompressionObserver(db, moduleUrl, () => chunks.length)
+let finishMetrics
+const finish = db.finishBulkImport.bind(db)
+db.finishBulkImport = async (...args) => {
+    const start = performance.now()
+    const result = await finish(...args)
+    finishMetrics = {elapsedMs: performance.now() - start, ...result}
+    return result
+}
+let probe
+if (flags.includes('--tail')) {
+    const {installTailProbe} = await import('/workspace/scratch/1c4137568bc6/tail-probe.mjs')
+    probe = installTailProbe(db)
+}
+const synchronousCalls = []
+const OriginalWasmInstance = WebAssembly.Instance
+if (flags.includes('--sync-cpu')) {
+    assert.equal(typeof process.threadCpuUsage, 'function')
+    const exportViews = new WeakMap()
+    WebAssembly.Instance = class ObservedCanonicalInstance extends OriginalWasmInstance {
+        get exports() {
+            const actual = super.exports
+            if (typeof actual.scan_canonical !== 'function') return actual
+            if (!exportViews.has(this)) {
+                const scan = actual.scan_canonical
+                exportViews.set(this, {...actual, scan_canonical(...args) {
+                    const started = performance.now()
+                    const before = process.threadCpuUsage()
+                    try { return scan(...args) } finally {
+                        const cpu = process.threadCpuUsage(before)
+                        synchronousCalls.push({method: 'wasm.scan_canonical', groupIndex: chunks.length, started, wallMs: performance.now() - started, userCpuMs: cpu.user / 1000, systemCpuMs: cpu.system / 1000})
+                    }
+                }})
+            }
+            return exportViews.get(this)
+        }
+    }
+    for (const [owner, names] of [
+        [db, ['_registerInFlightTermContentSources', '_publishResolvedArtifactTermContentPlan', '_publishArtifactTermContentMetadata', '_tryPublishContiguousArtifactTermContentMetadata', '_cacheRecentPublishedTermContentSources']],
+        [db._termRecordStore, ['_encodeArtifactRecordFields', '_createLookupIndexChunk']],
+    ]) {
+        for (const name of names) {
+            const original = owner[name]
+            assert.equal(typeof original, 'function', name)
+            owner[name] = function (...args) {
+                const started = performance.now()
+                const before = process.threadCpuUsage()
+                try { return original.apply(this, args) } finally {
+                    const cpu = process.threadCpuUsage(before)
+                    synchronousCalls.push({method: name, groupIndex: chunks.length, started, wallMs: performance.now() - started, userCpuMs: cpu.user / 1000, systemCpuMs: cpu.system / 1000})
+                }
+            }
+        }
+    }
+}
+let recordCapture
+if (flags.includes('--capture-record')) {
+    const {installRecordFieldCapture} = await import('/workspace/scratch/1c4137568bc6/record-field-capture.mjs')
+    recordCapture = installRecordFieldCapture(db)
+}
+const progress = []
+const importer = new DictionaryImporter({async getImageDetails() { throw new Error('Image metadata is intentionally disabled in this component replay') }}, (value) => progress.push({...value, observedAt: performance.now()}))
+let session
+let report
+let error
+let mediaAdapterSmoke = null
+try {
+    const prepareStart = performance.now()
+    await db.prepare()
+    const prepareMs = performance.now() - prepareStart
+    if (flags.includes('--media-adapter-smoke')) {
+        assert(flags.includes('--setup-only'), 'Media adapter smoke requires --setup-only')
+        const {createGenerationMediaIndex, DictionaryGenerationMediaStore} = await import(moduleUrl('ext/js/dictionary/dictionary-generation-media-store.js'))
+        assert.equal(DictionaryGenerationMediaStore.supportsWrite(), true)
+        const sessionId = await db.startBulkImport()
+        assert.equal(db.canWriteGenerationMedia(), true)
+        const bytes = Uint8Array.of(3, 4, 5, 6)
+        const records = [1, 2, 4, 5].map((id) => ({path: `img/card${id}.webp`, packedOffset: 0, packedLength: bytes.length, compressionMethod: 0, uncompressedLength: bytes.length, signature: crc32(bytes)}))
+        const blob = new Blob([bytes])
+        const plan = createGenerationMediaIndex(records, blob.size)
+        assert(plan)
+        const staged = db.stageGenerationMediaPayload(blob, plan)
+        await staged.seal(plan)
+        for (const {path} of records) {
+            const stored = await db._generationMediaStore.read(sessionId, plan.descriptor, path)
+            assert(stored)
+            assert.deepEqual(new Uint8Array(stored.content), bytes)
+        }
+        await db.abortBulkImport(sessionId)
+        await assert.rejects(db._generationMediaStore.read(sessionId, plan.descriptor, records[0].path), {name: 'NotFoundError'})
+        mediaAdapterSmoke = {supportsWrite: true, importAdmission: true, stagedAndSealed: true, exactReadCount: records.length, rollbackRemoved: true}
+    }
+    // A loaded extension initializes compression before the user picks a file.
+    // Wait for real worker readiness outside the import interval.
+    const deadline = performance.now() + 30000
+    while (workers.filter((worker) => worker.role === 'zstd-term-content-compression-worker.js' && worker.ready).length < 4) {
+        assert(performance.now() < deadline, 'Real compression workers did not initialize')
+        await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+    if (flags.includes('--profile')) {
+        session = new Session()
+        session.connect()
+        await session.post('Profiler.enable')
+        await session.post('Profiler.setSamplingInterval', {interval: 500})
+        await session.post('Profiler.start')
+    }
+    const memoryBefore = process.memoryUsage()
+    const start = performance.now()
+    const result = flags.includes('--setup-only') ? null : await importer.importDictionary(db, new Blob([archiveBytes]), {skipImageMetadata: true, zipUseWebWorkers: false})
+    const end = performance.now()
+    const memoryAfter = process.memoryUsage()
+    if (session) {
+        const {profile} = await session.post('Profiler.stop')
+        await writeFile(resolve(outputDir, 'import-main.cpuprofile'), JSON.stringify(profile))
+        session.disconnect()
+        session = null
+    }
+    let postImportGcMs = null
+    if (flags.includes('--gc-after-import')) {
+        const gcStarted = performance.now()
+        globalThis.gc()
+        postImportGcMs = performance.now() - gcStarted
+    }
+    if (result) {
+        assert.equal(result.outcome.status, 'published')
+        assert.equal(result.errors.length, 0, result.errors.map(String).join('\n'))
+        assert.equal(result.result.title, fixture.expectedTitle)
+        assert.equal(result.result.revision, fixture.revision)
+        assert.equal(result.result.counts.media.total, fixture.mediaFiles ?? 0)
+        assert.equal(chunks.reduce((sum, chunk) => sum + chunk.rowCount, 0), fixture.termRows)
+        assert.equal(workers.filter((worker) => worker.role === 'zstd-term-content-compression-worker.js' && worker.ready).length, 4)
+        if (fixtureId === 'jmdict' || fixtureId === 'jitendex') {
+            assert(workers.some((worker) => worker.role === 'zstd-term-content-compression-worker.js' && worker.received.result > 0), 'No real compression work recorded')
+        }
+    }
+    const compressionCensus = await compressionObserver.finish()
+    const metricTotals = {}
+    for (const chunk of chunks) {
+        for (const [key, value] of Object.entries(chunk.metrics)) {
+            if (typeof value === 'number') metricTotals[key] = (metricTotals[key] ?? 0) + value
+        }
+    }
+    const fileReceipts = []
+    async function inspectFiles(directory) {
+        for (const name of (await readdir(directory)).sort()) {
+            const location = resolve(directory, name)
+            const fileStat = await stat(location)
+            if (fileStat.isDirectory()) await inspectFiles(location)
+            else {
+                const header = Buffer.alloc(Math.min(40, fileStat.size))
+                const fd = openSync(location, 'r')
+                try { readSync(fd, header, 0, header.byteLength, 0) } finally { closeSync(fd) }
+                const magic = header.subarray(0, 8).toString('ascii')
+                // Generation-bound containers intentionally differ each import.
+                // Retain their actual identity and also hash every semantic byte
+                // with only the documented random 16-byte generation normalized.
+                const generationOffset = magic === 'MBTRD16X' ? 8 : magic === 'MBTIDX11' ? 24 : null
+                const fullHash = createHash('sha256')
+                const normalizedHash = generationOffset === null ? null : createHash('sha256')
+                let first = true
+                for await (const bytes of createReadStream(location)) {
+                    fullHash.update(bytes)
+                    if (normalizedHash !== null) {
+                        if (first) {
+                            normalizedHash.update(bytes.subarray(0, generationOffset)).update(new Uint8Array(16)).update(bytes.subarray(generationOffset + 16))
+                        } else normalizedHash.update(bytes)
+                    }
+                    first = false
+                }
+                const receipt = {path: relative(opfs.rootPath, location), sizeBytes: fileStat.size, sha256: fullHash.digest('hex')}
+                if (generationOffset !== null) {
+                    receipt.generationId = header.subarray(generationOffset, generationOffset + 16).toString('hex')
+                    receipt.generationNormalizedSha256 = normalizedHash.digest('hex')
+                }
+                fileReceipts.push(receipt)
+            }
+        }
+    }
+    await inspectFiles(opfs.rootPath)
+    const lookupProbe = result && !flags.includes('--skip-lookup-read') ? await db.findTermsBulk(['猫', '犬', '食べる'], new Set([fixture.expectedTitle]), 'exact') : []
+    if (fixtureId === 'jmdict' && result && !flags.includes('--skip-lookup-read')) assert(lookupProbe.length > 0, 'Published lookup is empty')
+    let lookupCaptureReceipt = null
+    if (flags.includes('--capture-lookup')) {
+        const directory = resolve(outputDir, 'lookup-index-files')
+        await mkdir(directory, {recursive: true})
+        const files = []
+        for (const receipt of fileReceipts.filter(({path}) => path.endsWith('.mbti'))) {
+            const name = `index-${files.length}.mbti`
+            await link(resolve(opfs.rootPath, receipt.path), resolve(directory, name))
+            files.push({...receipt, originalPath: receipt.path, path: name})
+        }
+        lookupCaptureReceipt = {schemaVersion: 1, sourceRoot, sourceIdentity, fixture, scope: 'Finalized sidecars hardlinked after the import and profiler stopped; exact production chunk bytes and integrity fields', files}
+        await writeFile(resolve(directory, 'manifest.json'), JSON.stringify(lookupCaptureReceipt, null, 2) + '\n')
+    }
+    const recordCaptureReceipt = recordCapture ? await recordCapture.write(resolve(outputDir, 'record-fields.v8'), {sourceRoot, sourceIdentity, fixture}) : null
+    report = {
+        schemaVersion: 1,
+        authoritativeTiming: false,
+        scope: 'Node component: complete production importer, source planner, real parser/compression/index workers and file payload stores; in-memory SQLite and test OPFS adapter; no browser/UI timing claim',
+        sourceRoot,
+        sourceCommit: sourceIdentity.commit,
+        sourceIdentity,
+        payloadStorageCapability: {usesFallbackStorage: db._usesFallbackStorage},
+        mediaAdapterSmoke,
+        fixture: {...fixture, lockSha256: createHash('sha256').update(lockBytes).digest('hex')},
+        host: {node: process.version, v8: process.versions.v8, platform: process.platform, cpus: os.cpus().length, cpuModel: os.cpus()[0]?.model, hardwareConcurrency, deviceMemory},
+        substitutions: {sqlite: ':memory:', opfs: 'test/fixtures/fused-score/node-opfs-adapter.mjs; atomic real files, in-memory copy per asynchronous write and file snapshot; Node fd sync handles for production index writes/reads', worker: 'node:worker_threads with true transferable buffers; file fetch and sync access handle bridge', zipUseWebWorkers: false, skipImageMetadata: true},
+        prepareMs,
+        memoryBefore,
+        memoryAfter,
+        resourceUsage: process.resourceUsage(),
+        postImportGcMs,
+        lookupReadSkipped: flags.includes('--skip-lookup-read'),
+        importMs: end - start,
+        importStart: start,
+        importEnd: end,
+        profileEnabled: flags.includes('--profile'),
+        tailProbeEnabled: flags.includes('--tail'),
+        recordCaptureEnabled: flags.includes('--capture-record'),
+        recordCaptureReceipt,
+        lookupCaptureReceipt,
+        synchronousCpuObserved: flags.includes('--sync-cpu'),
+        synchronousCalls,
+        result,
+        chunkCount: chunks.length,
+        chunks,
+        metricTotals,
+        finishMetrics,
+        parserProfile: importer._lastFastTermBankReadProfile,
+        workers: workers.map(({id, role, ready, received, sent}) => ({id, role, ready, received, sent})),
+        workerEvents,
+        sourceMediaWorkerReceipts,
+        tailProbe: probe?.summarize(),
+        timeline,
+        progress,
+        compressionCensus,
+        fileReceipts,
+        lookupProbeCount: lookupProbe.length,
+        lookupProbeDigest: createHash('sha256').update(JSON.stringify(lookupProbe)).digest('hex'),
+        opfsOperations: opfs.operations,
+    }
+    await writeFile(resolve(outputDir, 'report.json'), JSON.stringify(report, null, 2) + '\n')
+    console.log(JSON.stringify({outputDir, chunkCount: report.chunkCount, compressionCensus: compressionCensus.totals, lookupProbeCount: report.lookupProbeCount, timingClaim: false}))
+} catch (caught) {
+    error = caught
+    await writeFile(resolve(outputDir, 'failure.json'), JSON.stringify({error: String(caught), stack: caught?.stack, workers: workers.map(({id, role, ready, received, sent}) => ({id, role, ready, received, sent})), workerEvents, chunks, progress}, null, 2) + '\n')
+} finally {
+    WebAssembly.Instance = OriginalWasmInstance
+    if (session) session.disconnect()
+    await db.close().catch((caught) => { error ??= caught })
+    for (const worker of workers) worker.terminate()
+    await Promise.allSettled(terminations)
+    await opfs.dispose()
+}
+if (error) throw error

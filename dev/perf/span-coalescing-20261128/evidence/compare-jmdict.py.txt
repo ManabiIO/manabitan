@@ -1,0 +1,74 @@
+from pathlib import Path
+import hashlib, json, subprocess
+
+root = Path(__file__).resolve().parent
+baseline = json.loads((root / 'jmdict-baseline/report.json').read_text())
+candidate = json.loads((root / 'jmdict-candidate/report.json').read_text())
+identity = json.loads((root / 'source-identity.json').read_text())
+assert baseline['sourceCommit'] == candidate['sourceCommit'] == identity['commit']
+assert baseline['sourceIdentity']['trackedDiffSha256'] == hashlib.sha256(b'').hexdigest()
+assert candidate['sourceIdentity']['trackedDiffSha256'] == identity['patchSha256']
+for key in ['harnessSha256', 'workerBridgeSha256', 'files']:
+    assert baseline['sourceIdentity'][key] == candidate['sourceIdentity'][key]
+assert baseline['fixture'] == candidate['fixture']
+assert baseline['fixture']['sha256'] == '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f'
+assert baseline['chunkCount'] == candidate['chunkCount'] == 12
+assert sum(chunk['rowCount'] for chunk in baseline['chunks']) == sum(chunk['rowCount'] for chunk in candidate['chunks']) == 528299
+assert [chunk['rowCount'] for chunk in baseline['chunks']] == [chunk['rowCount'] for chunk in candidate['chunks']]
+assert baseline['lookupProbeCount'] == candidate['lookupProbeCount'] == 15
+assert baseline['lookupProbeDigest'] == candidate['lookupProbeDigest']
+before = baseline['compressionCensus']['groups']
+after = candidate['compressionCensus']['groups']
+assert len(before) == len(after) == 12
+groups = []
+for a,b in zip(before,after):
+    for key in ['index','method','sourceBytes','originalDescriptorCount','originalColumnBytes','originalOffsetsSha256','originalLengthsSha256','originalOffsetsPrivate','originalLengthsPrivate','references','compressedFrames','compressedFramesSha256','compressedFrameBytes','wrapped','finalCompressedBytes','finalUncompressedBytes']:
+        assert a[key] == b[key], (a['index'],key)
+    assert a['transport']['blockLengths'] == b['transport']['blockLengths']
+    assert a['transport']['blockCount'] == b['transport']['blockCount']
+    assert a['transport']['descriptorCount'] == a['originalDescriptorCount']
+    assert b['transport']['descriptorCount'] <= min(4096,b['originalDescriptorCount']//4)
+    assert a['originalOffsetsPrivate'] and a['originalLengthsPrivate']
+    groups.append({
+        'index':a['index'],
+        'termRows':baseline['chunks'][a['index']]['rowCount'],
+        'originalDescriptors':a['originalDescriptorCount'],
+        'coalescedDescriptors':b['transport']['descriptorCount'],
+        'originalTransportBytes':a['transport']['columnBytes'],
+        'coalescedTransportBytes':b['transport']['columnBytes'],
+        'blocks':a['transport']['blockCount'],
+        'uncompressedBytes':a['finalUncompressedBytes'],
+        'compressedBytes':a['compressedFrameBytes'],
+        'allCompressedFramesEqual':True,
+        'allUniqueReferenceColumnsEqual':True,
+    })
+files = []
+for a,b in zip(baseline['fileReceipts'], candidate['fileReceipts']):
+    assert a['path'] == b['path'] and a['sizeBytes'] == b['sizeBytes']
+    field = 'generationNormalizedSha256' if 'generationNormalizedSha256' in a else 'sha256'
+    assert a[field] == b[field], a['path']
+    files.append({'path':a['path'],'sizeBytes':a['sizeBytes'],'sha256':a[field],'generationNormalized':field!='sha256'})
+assert len(files) == 3
+base = baseline['compressionCensus']['totals']
+new = candidate['compressionCensus']['totals']
+receipt = {
+    'scope':'Untimed full current JMdict Node importer using unchanged production grouping and actual four-worker Zstd compression. SQLite is in memory and OPFS is the file adapter; no browser latency claim.',
+    'candidateSourceIdentity':identity,
+    'fixture':baseline['fixture'],
+    'termRows':528299,
+    'groups':groups,
+    'baselineTotals':base,
+    'candidateTotals':new,
+    'eliminatedDescriptors':base['transportDescriptorCount']-new['transportDescriptorCount'],
+    'eliminatedMetadataTransportBytes':base['transportColumnBytes']-new['transportColumnBytes'],
+    'descriptorReductionPercent':100*(1-new['transportDescriptorCount']/base['transportDescriptorCount']),
+    'all103ActualCompressedFramesEqual':True,
+    'all362032UniqueReferenceColumnsEqual':True,
+    'all528299FinalizedRowReferencesAndLookupBytesEqual':True,
+    'finalizedPayloads':files,
+    'lookupProbeCount':15,
+    'lookupProbeDigest':baseline['lookupProbeDigest'],
+    'checksPassed':True,
+}
+(root/'jmdict-parity.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({k:receipt[k] for k in ['termRows','eliminatedDescriptors','eliminatedMetadataTransportBytes','descriptorReductionPercent','all103ActualCompressedFramesEqual','all362032UniqueReferenceColumnsEqual','all528299FinalizedRowReferencesAndLookupBytesEqual','checksPassed']},indent=2))

@@ -1,0 +1,697 @@
+diff --git a/ext/js/dictionary/term-content-block-store.js b/ext/js/dictionary/term-content-block-store.js
+index f085d63ff3..798d5fd2d4 100644
+--- a/ext/js/dictionary/term-content-block-store.js
++++ b/ext/js/dictionary/term-content-block-store.js
+@@ -63,6 +63,12 @@ const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+ const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
+ const EARLY_SELECTION_MAX_SPANS = 512;
+ const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
++/* eslint-disable @stylistic/semi */
++const MAX_COALESCED_CONTENT_RUNS = 4096
++const MIN_CONTENT_SPANS_PER_COALESCED_RUN = 4
++const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')
++const TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)
++/* eslint-enable @stylistic/semi */
+ 
+ export class TermContentBlockImportSession {
+     /**
+@@ -699,6 +705,8 @@ export class TermContentBlockStore {
+      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
+      */
+     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
++        /* eslint-disable-next-line @stylistic/semi */
++        const coalesceSpans = canCoalesceContentSpans(sourceBytes, sourceOffsets, sourceLengths)
+         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+         if (uncompressedBytes === 0) { return null; }
+         if (
+@@ -713,6 +721,7 @@ export class TermContentBlockStore {
+                 compressionDictName,
+                 force,
+                 uncompressedBytes,
++                coalesceSpans,
+             );
+         }
+         return await this._tryAppendPacked(
+@@ -750,6 +759,8 @@ export class TermContentBlockStore {
+      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}|null}
+      */
+     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
++        /* eslint-disable-next-line @stylistic/semi */
++        const coalesceSpans = canCoalesceContentSpans(sourceBytes, sourceOffsets, sourceLengths)
+         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+         if (
+             uncompressedBytes === 0 ||
+@@ -779,6 +790,7 @@ export class TermContentBlockStore {
+             compressionDictName,
+             uncompressedBytes,
+             !force,
++            coalesceSpans,
+         );
+     }
+ 
+@@ -789,12 +801,13 @@ export class TermContentBlockStore {
+      * @param {string} compressionDictName
+      * @param {number} uncompressedBytes
+      * @param {boolean} initialSelection
++     * @param {boolean} [coalesceSpans] Synchronous ordinary-view witness from the public entry point.
+      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
+      */
+-    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
++    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, coalesceSpans = false) {
+         const compressionExperiments = this._compressionExperiments;
+         const planStart = safePerformance.now();
+-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
++        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, coalesceSpans ? sourceOffsets : null);
+         let packMs = safePerformance.now() - planStart;
+         const referenceLayout = createTermContentReferenceLayout(
+             sourceLengths.length,
+@@ -818,9 +831,9 @@ export class TermContentBlockStore {
+             try {
+                 const operation = beginCompressWrappedTermContentZstdSpansBatch(
+                     sourceBytes,
+-                    sourceOffsets,
+-                    sourceLengths,
+-                    packed.blockStartIndexes,
++                    packed.compressionSpans?.offsets ?? sourceOffsets,
++                    packed.compressionSpans?.lengths ?? sourceLengths,
++                    packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
+                     packed.packedChunkLengths,
+                     compressionDictName,
+                     compressionExperiments,
+@@ -972,14 +985,15 @@ export class TermContentBlockStore {
+      * @param {string|null} compressionDictName
+      * @param {boolean} force
+      * @param {number} uncompressedBytes
++     * @param {boolean} [coalesceSpans] Synchronous ordinary-view witness from the public entry point.
+      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
+      */
+-    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
++    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes, coalesceSpans = false) {
+         const compressionExperiments = this._compressionExperiments;
+         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
+ 
+         let phaseStart = safePerformance.now();
+-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
++        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, coalesceSpans ? sourceOffsets : null);
+         const packMs = safePerformance.now() - phaseStart;
+         let compressedChunks;
+         let envelopeMs = 0;
+@@ -987,9 +1001,9 @@ export class TermContentBlockStore {
+         try {
+             const result = await compressWrappedTermContentZstdSpansBatch(
+                 sourceBytes,
+-                sourceOffsets,
+-                sourceLengths,
+-                packed.blockStartIndexes,
++                packed.compressionSpans?.offsets ?? sourceOffsets,
++                packed.compressionSpans?.lengths ?? sourceLengths,
++                packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
+                 packed.packedChunkLengths,
+                 compressionDictName,
+                 compressionExperiments,
+@@ -1445,41 +1459,129 @@ function packContentChunksIntoSlabs(chunks, sourceLengths, targetBytes) {
+     return {packedChunks, blockStartIndexes};
+ }
+ 
++/* eslint-disable @stylistic/semi */
+ /**
+  * @param {Uint32Array} sourceLengths
+  * @param {number} targetBytes
+- * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array}}
++ * @param {Uint32Array|null} [sourceOffsets]
++ * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array, compressionSpans: {offsets: Uint32Array, lengths: Uint32Array, blockStartIndexes: Uint32Array}|null}}
+  * @throws {RangeError} If a planned block cannot use the 32-bit storage format.
+  */
+-function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
++function planContentSpansIntoSlabs(sourceLengths, targetBytes, sourceOffsets = null) {
+     /** @type {number[]} */
+-    const packedChunkLengths = [];
++    const packedChunkLengths = []
+     /** @type {number[]} */
+-    const blockStartIndexes = [0];
+-    let startIndex = 0;
++    const blockStartIndexes = [0]
++    // Every original span was checked before this synchronous planner. Only
++    // owned columns can retain that validation while runs are constructed;
++    // shared metadata stays on the original worker validation path.
++    const runCapacity = sourceOffsets !== null ?
++        Math.min(MAX_COALESCED_CONTENT_RUNS, Math.floor(sourceLengths.length / MIN_CONTENT_SPANS_PER_COALESCED_RUN)) :
++        0
++    let runOffsets = runCapacity > 0 ? new Uint32Array(runCapacity) : null
++    let runLengths = runCapacity > 0 ? new Uint32Array(runCapacity) : null
++    /** @type {number[]|null} */
++    let runBlockStartIndexes = runCapacity > 0 ? [0] : null
++    let runCount = 0
++    let runEnd = 0
++    let startIndex = 0
+     while (startIndex < sourceLengths.length) {
+-        let totalBytes = 0;
+-        let endIndex = startIndex;
++        const firstBlockRun = runCount
++        let totalBytes = 0
++        let endIndex = startIndex
+         while (endIndex < sourceLengths.length) {
+-            const nextBytes = sourceLengths[endIndex];
++            const nextBytes = sourceLengths[endIndex]
+             if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
+-                break;
++                break
+             }
+-            totalBytes += nextBytes;
+-            ++endIndex;
++            totalBytes += nextBytes
++            if (runOffsets !== null && runLengths !== null && sourceOffsets !== null) {
++                const offset = sourceOffsets[endIndex]
++                if (runCount > firstBlockRun && offset === runEnd) {
++                    runLengths[runCount - 1] += nextBytes
++                } else if (runCount < runCapacity) {
++                    runOffsets[runCount] = offset
++                    runLengths[runCount] = nextBytes
++                    ++runCount
++                } else {
++                    // Fragmented input keeps the original plan. Staging is
++                    // capped at 32 KiB of columns, with no extra full-span pass.
++                    runOffsets = null
++                    runLengths = null
++                    runBlockStartIndexes = null
++                }
++                runEnd = offset + nextBytes
++            }
++            ++endIndex
+         }
+         if (totalBytes > 0xffffffff) {
+-            throw new RangeError('Packed term content block exceeds the 32-bit storage format');
++            throw new RangeError('Packed term content block exceeds the 32-bit storage format')
+         }
+-        packedChunkLengths.push(totalBytes);
+-        blockStartIndexes.push(endIndex);
+-        startIndex = endIndex;
++        packedChunkLengths.push(totalBytes)
++        blockStartIndexes.push(endIndex)
++        runBlockStartIndexes?.push(runCount)
++        startIndex = endIndex
+     }
+     return {
+         packedChunkLengths: Uint32Array.from(packedChunkLengths),
+         blockStartIndexes: Uint32Array.from(blockStartIndexes),
+-    };
++        compressionSpans: runOffsets !== null && runLengths !== null && runBlockStartIndexes !== null ?
++            {
++                offsets: runOffsets.subarray(0, runCount),
++                lengths: runLengths.subarray(0, runCount),
++                blockStartIndexes: Uint32Array.from(runBlockStartIndexes),
++            } :
++            null,
++    }
++}
++
++/**
++ * Establish eligibility before validation or selection can invoke accessors.
++ * Ordinary source views and private columns stay stable until this synchronous
++ * call reaches the planner; unusual views retain the original descriptors.
++ * @param {Uint8Array} source
++ * @param {Uint32Array} offsets
++ * @param {Uint32Array} lengths
++ * @returns {boolean}
++ */
++function canCoalesceContentSpans(source, offsets, lengths) {
++    if (
++        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function' ||
++        !isOrdinaryContentSpanView(source, Uint8Array.prototype, 'Uint8Array') ||
++        !isOrdinaryContentSpanView(offsets, Uint32Array.prototype, 'Uint32Array') ||
++        !isOrdinaryContentSpanView(lengths, Uint32Array.prototype, 'Uint32Array')
++    ) { return false }
++    for (const column of [offsets, lengths]) {
++        // Check internal buffer identity; instanceof alone accepts a shared
++        // buffer whose prototype has been replaced with ArrayBuffer.prototype.
++        try {
++            ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(column.buffer)
++        } catch {
++            return false
++        }
++    }
++    return true
++}
++
++/**
++ * @param {Uint8Array|Uint32Array} view
++ * @param {object} prototype
++ * @param {string} tag
++ * @returns {boolean}
++ */
++function isOrdinaryContentSpanView(view, prototype, tag) {
++    return (
++        typeof TYPED_ARRAY_TAG_DESCRIPTOR?.get === 'function' &&
++        ArrayBuffer.isView(view) &&
++        Object.getPrototypeOf(view) === prototype &&
++        !Object.hasOwn(view, 'length') &&
++        !Object.hasOwn(view, 'buffer') &&
++        !Object.hasOwn(view, 'byteOffset') &&
++        !Object.hasOwn(view, 'byteLength') &&
++        TYPED_ARRAY_TAG_DESCRIPTOR.get.call(view) === tag
++    )
+ }
++/* eslint-enable @stylistic/semi */
+ 
+ /**
+  * Re-packs a stable shared source using the exact block plan whose reference
+diff --git a/test/term-content-block-store.test.js b/test/term-content-block-store.test.js
+index bca5294104..bd36ca1659 100644
+--- a/test/term-content-block-store.test.js
++++ b/test/term-content-block-store.test.js
+@@ -541,8 +541,13 @@ describe('TermContentBlockStore', () => {
+ 
+         if (result === null) { throw new Error('Expected compressed content'); }
+         expect(compress).toHaveBeenCalledOnce();
+-        const blockStarts = compress.mock.calls[0][3];
+-        const blockLengths = compress.mock.calls[0][4];
++        // Compression descriptors may coalesce; the scalar row oracle uses
++        // the independently specified block boundaries of this fixture.
++        /* eslint-disable @stylistic/semi */
++        const blockStarts = Uint32Array.of(0, 181, 362, 517, 518, 699, 879, 1031)
++        const blockLengths = compress.mock.calls[0][4]
++        expect(blockLengths).toStrictEqual(Uint32Array.of(510, 510, 438, 800, 510, 510, 426))
++        /* eslint-enable @stylistic/semi */
+         const actual = new Uint8Array(lengths.length * 20);
+         let outputOffset = 0;
+         for (const bytes of references) {
+diff --git a/test/term-content-span-coalescing.test.js b/test/term-content-span-coalescing.test.js
+new file mode 100644
+index 0000000000..945aa01dbc
+--- /dev/null
++++ b/test/term-content-span-coalescing.test.js
+@@ -0,0 +1,414 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {afterAll, beforeAll, beforeEach, describe, expect, test, vi} from 'vitest'
++import {TermContentBlockStore} from '../ext/js/dictionary/term-content-block-store.js'
++import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js'
++import {
++    beginCompressWrappedTermContentZstdSpansBatch,
++    compressWrappedTermContentZstd,
++    compressWrappedTermContentZstdSpansBatch,
++    finishWrappedTermContentZstdSpans,
++    initializeTermContentZstd,
++    prepareWrappedTermContentZstdSpans,
++} from '../ext/js/dictionary/zstd-term-content.js'
++
++vi.mock('../ext/js/dictionary/zstd-term-content.js', async (importOriginal) => {
++    const actual = /** @type {typeof import('../ext/js/dictionary/zstd-term-content.js')} */ (await importOriginal())
++    /** @type {typeof actual.compressWrappedTermContentZstdSpansBatch} */
++    const compressSpans = async (source, offsets, lengths, starts, blockLengths, dictName, options) => ({
++        chunks: Array.from(blockLengths, (bytes, block) => actual.compressWrappedTermContentZstdSpans(
++            source,
++            offsets.subarray(starts[block], starts[block + 1]),
++            lengths.subarray(starts[block], starts[block + 1]),
++            bytes,
++            dictName,
++            options,
++        ).bytes),
++        envelopeMs: 0,
++        wrapped: true,
++    })
++    /** @type {typeof actual.beginCompressWrappedTermContentZstdSpansBatch} */
++    const beginCompression = (...args) => {
++        const completion = compressSpans(...args)
++        return {sourceConsumed: completion.then(() => {}), completion}
++    }
++    return {
++        ...actual,
++        compressWrappedTermContentZstdSpansBatch: vi.fn(compressSpans),
++        beginCompressWrappedTermContentZstdSpansBatch: vi.fn(beginCompression),
++    }
++})
++
++const originalFetch = globalThis.fetch
++beforeAll(async () => {
++    globalThis.fetch = async (input, init) => {
++        const resource = new URL(String(input))
++        if (resource.protocol !== 'file:') { return await originalFetch(input, init) }
++        return new Response(await readFile(resource), {headers: {'Content-Type': 'application/wasm'}})
++    }
++    await initializeTermContentZstd()
++})
++afterAll(() => { globalThis.fetch = originalFetch })
++beforeEach(() => { vi.clearAllMocks() })
++
++/** @typedef {NonNullable<Awaited<ReturnType<TermContentBlockStore['tryAppendSpans']>>>} StoredResult */
++
++/**
++ * @param {number} length
++ * @param {number} [alignment]
++ * @returns {Uint8Array}
++ */
++function createSource(length, alignment = 0) {
++    const source = new Uint8Array(new SharedArrayBuffer(length + alignment + 8), alignment, length)
++    for (let i = 0; i < source.length; ++i) { source[i] = (i * 23 + (i >>> 4)) & 0xff }
++    return source
++}
++
++/**
++ * @param {Uint32Array} values
++ * @returns {Uint32Array}
++ */
++function sharedColumn(values) {
++    const result = new Uint32Array(new SharedArrayBuffer(values.byteLength))
++    result.set(values)
++    return result
++}
++
++/**
++ * @param {number} blockTargetBytes
++ * @returns {{contentStore: TermContentOpfsStore, blockStore: TermContentBlockStore}}
++ */
++function createStore(blockTargetBytes) {
++    const contentStore = new TermContentOpfsStore()
++    const blockStore = new TermContentBlockStore(contentStore, {
++        blockTargetBytes,
++        referencePackTargetBytes: 80,
++        minInputBytes: 0,
++    })
++    return {contentStore, blockStore}
++}
++
++/**
++ * @param {string} mode
++ * @param {TermContentBlockStore} store
++ * @param {Uint8Array} source
++ * @param {Uint32Array} offsets
++ * @param {Uint32Array} lengths
++ * @returns {Promise<StoredResult>}
++ */
++async function append(mode, store, source, offsets, lengths) {
++    if (mode === 'reserved') {
++        const operation = store.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true)
++        if (operation === null) { throw new Error('Expected shared append reservation') }
++        await operation.sourceConsumed
++        return await operation.completion
++    }
++    const result = await store.tryAppendSpans(source, offsets, lengths, 'jmdict', true)
++    if (result === null) { throw new Error('Expected shared append') }
++    return result
++}
++
++/**
++ * @param {{contentStore: TermContentOpfsStore}} store
++ * @returns {Promise<Uint8Array|null>}
++ */
++async function storedBytes(store) {
++    return await store.contentStore.readSlice(0, Reflect.get(store.contentStore, '_length'))
++}
++
++describe('bounded compression span coalescing', () => {
++    test.each([
++        {mode: 'reserved', alignment: 0},
++        {mode: 'reserved', alignment: 3},
++        {mode: 'completed', alignment: 0},
++        {mode: 'completed', alignment: 3},
++    ])('preserves all compressed frames and row references for $mode appends at alignment $alignment', async ({mode, alignment}) => {
++        const source = createSource(32, alignment)
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i * 2)
++        const lengths = new Uint32Array(16).fill(2)
++        const candidate = createStore(8)
++        const control = createStore(8)
++        const stored = await append(mode, candidate.blockStore, source, offsets, lengths)
++        const baseline = await append(mode, control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        const dispatch = mode === 'reserved' ?
++            vi.mocked(beginCompressWrappedTermContentZstdSpansBatch) :
++            vi.mocked(compressWrappedTermContentZstdSpansBatch)
++        expect(dispatch).toHaveBeenCalledTimes(2)
++        const [, runs, runLengths, runStarts, blockLengths] = dispatch.mock.calls[0]
++        expect(runs).toEqual(Uint32Array.of(0, 8, 16, 24))
++        expect(runLengths).toEqual(Uint32Array.of(8, 8, 8, 8))
++        expect(runStarts).toEqual(Uint32Array.of(0, 1, 2, 3, 4))
++        expect(blockLengths).toEqual(Uint32Array.of(8, 8, 8, 8))
++        expect(dispatch.mock.calls[1][1]).toHaveLength(offsets.length)
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(stored.contentLengths).toBe(lengths)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++        for (let i = 0; i < lengths.length; ++i) {
++            expect(await candidate.blockStore.read(stored.contentOffsets[i], lengths[i], stored.contentDictName))
++                .toEqual(source.slice(offsets[i], offsets[i] + lengths[i]))
++        }
++    })
++
++    test('keeps zero-length entries and oversized-entry boundaries in the original reference plan', async () => {
++        const source = createSource(40, 5)
++        const offsets = Uint32Array.of(0, 0, 1, 2, 3, 4, 4, 4, 16, 28, 28, 29, 30, 31, 32, 32)
++        const lengths = Uint32Array.of(0, 1, 1, 1, 1, 0, 0, 0, 12, 0, 1, 1, 1, 1, 0, 0)
++        const candidate = createStore(4)
++        const control = createStore(4)
++        const stored = await append('reserved', candidate.blockStore, source, offsets, lengths)
++        const baseline = await append('reserved', control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        const [, runs, runLengths, runStarts, blockLengths] = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mock.calls[0]
++        expect(runs).toEqual(Uint32Array.of(0, 16, 28))
++        expect(runLengths).toEqual(Uint32Array.of(4, 12, 4))
++        expect(runStarts).toEqual(Uint32Array.of(0, 1, 2, 3))
++        expect(blockLengths).toEqual(Uint32Array.of(4, 12, 4))
++        expect(stored.contentOffsets).toHaveLength(16)
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++        for (let i = 0; i < lengths.length; ++i) {
++            const expected = lengths[i] === 0 ? null : source.slice(offsets[i], offsets[i] + lengths[i])
++            expect(await candidate.blockStore.read(stored.contentOffsets[i], lengths[i], stored.contentDictName)).toEqual(expected)
++        }
++    })
++
++    test.each([
++        {name: 'gapped', offsets: [0, 2, 4, 6, 8, 10, 12, 14]},
++        {name: 'reversed', offsets: [7, 6, 5, 4, 3, 2, 1, 0]},
++        {name: 'repeated', offsets: [0, 0, 0, 0, 0, 0, 0, 0]},
++    ])('abandons unhelpful $name coalescing and preserves exact bytes', async ({offsets: values}) => {
++        const source = createSource(32)
++        const offsets = Uint32Array.from(values)
++        const lengths = new Uint32Array(offsets.length).fill(1)
++        const candidate = createStore(32)
++        const control = createStore(32)
++        await append('reserved', candidate.blockStore, source, offsets, lengths)
++        await append('reserved', control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        const [, actualOffsets, actualLengths] = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mock.calls[0]
++        expect(actualOffsets).toBe(offsets)
++        expect(actualLengths).toBe(lengths)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++    })
++
++    test('caps temporary columns when a large fragmented batch exceeds the run budget', async () => {
++        const source = createSource(40000)
++        const offsets = Uint32Array.from({length: 20000}, (_, i) => i * 2)
++        const lengths = new Uint32Array(offsets.length).fill(1)
++        const store = createStore(40000)
++        const stored = await append('reserved', store.blockStore, source, offsets, lengths)
++        const [, actualOffsets, actualLengths] = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mock.calls[0]
++        expect(actualOffsets).toBe(offsets)
++        expect(actualLengths).toBe(lengths)
++        expect(stored.contentOffsets).toHaveLength(offsets.length)
++        const last = offsets.length - 1
++        expect(await store.blockStore.read(stored.contentOffsets[last], lengths[last], stored.contentDictName))
++            .toEqual(source.slice(offsets[last], offsets[last] + 1))
++    })
++
++    test('coalesces plain offset and length subviews of one private allocation', async () => {
++        const source = createSource(32)
++        const metadata = new ArrayBuffer(144)
++        const offsets = new Uint32Array(metadata, 8, 16)
++        const lengths = new Uint32Array(metadata, 80, 16)
++        for (let i = 0; i < offsets.length; ++i) { offsets[i] = i * 2 }
++        lengths.fill(2)
++        const candidate = createStore(8)
++        const control = createStore(8)
++        const stored = await append('reserved', candidate.blockStore, source, offsets, lengths)
++        const baseline = await append('reserved', control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        const [, actualOffsets, actualLengths] = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mock.calls[0]
++        expect(actualOffsets).toEqual(Uint32Array.of(0, 8, 16, 24))
++        expect(actualLengths).toEqual(Uint32Array.of(8, 8, 8, 8))
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++    })
++
++    test.each([
++        'shared offsets',
++        'shared lengths',
++        'subclass',
++        'shadowed length',
++        'shadowed buffer',
++        'shadowed byteOffset',
++        'shadowed byteLength',
++        'shared buffer with replaced prototype',
++        'forged Float32 offsets',
++        'forged Float32 lengths',
++        'forged Float64 offsets',
++    ])('keeps original descriptors for %s metadata', async (kind) => {
++        const source = createSource(32)
++        let offsets = Uint32Array.from({length: 16}, (_, i) => i * 2)
++        let lengths = new Uint32Array(16).fill(2)
++        switch (kind) {
++            case 'shared offsets': {
++                offsets = sharedColumn(offsets)
++
++                break
++            }
++            case 'shared lengths': {
++                lengths = sharedColumn(lengths)
++
++                break
++            }
++            case 'subclass': {
++                class CustomColumn extends Uint32Array {}
++                offsets = new CustomColumn(offsets)
++
++                break
++            }
++            case 'shared buffer with replaced prototype': {
++                offsets = sharedColumn(offsets)
++                Object.setPrototypeOf(offsets.buffer, ArrayBuffer.prototype)
++                expect(offsets.buffer instanceof ArrayBuffer).toBe(true)
++
++                break
++            }
++            case 'forged Float32 offsets':
++            case 'forged Float64 offsets': {
++                offsets = Object.setPrototypeOf(kind.includes('Float32') ? Float32Array.from(offsets) : Float64Array.from(offsets), Uint32Array.prototype)
++                expect(offsets instanceof Uint32Array).toBe(true)
++
++                break
++            }
++            case 'forged Float32 lengths': {
++                lengths = Object.setPrototypeOf(Float32Array.from(lengths), Uint32Array.prototype)
++                expect(lengths instanceof Uint32Array).toBe(true)
++
++                break
++            }
++            default: {
++                const property = kind.slice('shadowed '.length)
++                const value = Reflect.get(offsets, property)
++                Object.defineProperty(offsets, property, {value})
++            }
++        }
++        const candidate = createStore(8)
++        const control = createStore(8)
++        const stored = await append('reserved', candidate.blockStore, source, offsets, lengths)
++        const baseline = await append('reserved', control.blockStore, source, sharedColumn(Uint32Array.from(offsets)), sharedColumn(Uint32Array.from(lengths)))
++        const [, actualOffsets, actualLengths] = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mock.calls[0]
++        expect(actualOffsets).toBe(offsets)
++        expect(actualLengths).toBe(lengths)
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++    })
++
++    test.each([
++        {mode: 'reserved', property: 'buffer'},
++        {mode: 'reserved', property: 'byteLength'},
++        {mode: 'completed', property: 'buffer'},
++        {mode: 'completed', property: 'byteLength'},
++    ])('keeps original descriptors after a self-removing source $property accessor in $mode appends', async ({mode, property}) => {
++        const source = createSource(32)
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i * 2)
++        const lengths = new Uint32Array(16).fill(2)
++        const value = Reflect.get(source, property)
++        Object.defineProperty(source, property, {
++            configurable: true,
++            get() {
++                offsets[15] = 28
++                Reflect.deleteProperty(source, property)
++                return value
++            },
++        })
++        const candidate = createStore(8)
++        const control = createStore(8)
++        const stored = await append(mode, candidate.blockStore, source, offsets, lengths)
++        const baseline = await append(mode, control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        const dispatch = mode === 'reserved' ?
++            vi.mocked(beginCompressWrappedTermContentZstdSpansBatch) :
++            vi.mocked(compressWrappedTermContentZstdSpansBatch)
++        expect(Object.hasOwn(source, property)).toBe(false)
++        expect(dispatch.mock.calls[0][1]).toBe(offsets)
++        expect(dispatch.mock.calls[0][2]).toBe(lengths)
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++    })
++
++    test.each(['reserved', 'completed'])('defaults direct private %s calls to original descriptors', async (mode) => {
++        const source = createSource(32)
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i * 2)
++        const lengths = new Uint32Array(16).fill(2)
++        const {blockStore} = createStore(8)
++        const stored = mode === 'reserved' ?
++            await Reflect.get(blockStore, '_beginAppendSharedSpans').call(blockStore, source, offsets, lengths, 'jmdict', 32, false).completion :
++            await Reflect.get(blockStore, '_tryAppendSharedSpans').call(blockStore, source, offsets, lengths, 'jmdict', true, 32)
++        const dispatch = mode === 'reserved' ?
++            vi.mocked(beginCompressWrappedTermContentZstdSpansBatch) :
++            vi.mocked(compressWrappedTermContentZstdSpansBatch)
++        expect(dispatch.mock.calls[0][1]).toBe(offsets)
++        expect(dispatch.mock.calls[0][2]).toBe(lengths)
++        expect(stored.contentOffsets).toHaveLength(offsets.length)
++    })
++
++    test.each([0, 1])('validates an invalid final original span of length %i before any reservation or compression', (invalidLength) => {
++        const source = createSource(16)
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i)
++        const lengths = new Uint32Array(16).fill(1)
++        offsets[15] = 17
++        lengths[15] = invalidLength
++        const {blockStore, contentStore} = createStore(32)
++        const reserve = vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix')
++        expect(() => blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true)).toThrow('span 15 is out of bounds')
++        expect(reserve).not.toHaveBeenCalled()
++        expect(beginCompressWrappedTermContentZstdSpansBatch).not.toHaveBeenCalled()
++    })
++
++    test('keeps the compression-owned copy valid after source consumption and immediate slab reuse', async () => {
++        const source = createSource(2048, 3)
++        const expected = new Uint8Array(source)
++        const expectedFrame = compressWrappedTermContentZstd(expected, 'jmdict').bytes
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i * 128)
++        const lengths = new Uint32Array(16).fill(128)
++        /** @type {() => void} */
++        let finish = () => {}
++        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce((bytes, runs, sizes, starts, blockLengths, dictName) => {
++            expect(runs).toHaveLength(1)
++            expect(starts).toEqual(Uint32Array.of(0, 1))
++            const prepared = prepareWrappedTermContentZstdSpans(bytes, runs, sizes, blockLengths[0], dictName)
++            /** @type {ReturnType<typeof beginCompressWrappedTermContentZstdSpansBatch>['completion']} */
++            const completion = new Promise((resolve) => {
++                finish = () => {
++                    const {bytes: frame} = finishWrappedTermContentZstdSpans(prepared)
++                    expect(frame).toEqual(expectedFrame)
++                    resolve({chunks: [frame], envelopeMs: 0, wrapped: true})
++                }
++            })
++            return {sourceConsumed: Promise.resolve(), completion}
++        })
++        const {blockStore} = createStore(4096)
++        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true)
++        if (operation === null) { throw new Error('Expected source-owned operation') }
++        await operation.sourceConsumed
++        source.fill(0xff)
++        finish()
++        const stored = await operation.completion
++        for (let i = 0; i < lengths.length; ++i) {
++            expect(await blockStore.read(stored.contentOffsets[i], lengths[i], stored.contentDictName))
++                .toEqual(expected.slice(offsets[i], offsets[i] + lengths[i]))
++        }
++    })
++
++    test('uses the original row block plan for fallback before source consumption', async () => {
++        const source = createSource(32)
++        const offsets = Uint32Array.from({length: 16}, (_, i) => i * 2)
++        const lengths = new Uint32Array(16).fill(2)
++        const failure = new Error('injected coalesced dispatch failure')
++        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => ({
++            sourceConsumed: Promise.reject(failure),
++            completion: Promise.reject(failure),
++        }))
++        const candidate = createStore(8)
++        const control = createStore(8)
++        const stored = await append('reserved', candidate.blockStore, source, offsets, lengths)
++        const baseline = await append('reserved', control.blockStore, source, sharedColumn(offsets), sharedColumn(lengths))
++        expect(stored.contentOffsets).toEqual(baseline.contentOffsets)
++        expect(stored.contentLengths).toEqual(baseline.contentLengths)
++        expect(await storedBytes(candidate)).toEqual(await storedBytes(control))
++    })
++})

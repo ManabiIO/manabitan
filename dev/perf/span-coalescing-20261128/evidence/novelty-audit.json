@@ -1,0 +1,66 @@
+{
+  "scope": "Read-only source comparison of current concurrent experiment heads against exact baseline; no files or workflows modified in those sessions",
+  "entries": [
+    {
+      "branch": "experiment/import-descriptor-queue-20261128-eef4",
+      "head": "d5d25f8f4bb86615d67ed9a0ead095b5c0139aa5",
+      "run": 46103114958,
+      "compareBase": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "changedFiles": [
+        ".github/workflows/import-descriptor-queue-eef4.yml",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/dictionary-importer.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "test/dictionary-import-publication-cleanup.test.js",
+        "test/dictionary-importer-artifact-consumption.test.js",
+        "test/dictionary-importer-compact-media-raw-fallback.test.js",
+        "test/dictionary-importer-direct-read-cancellation.test.js",
+        "test/dictionary-importer-glossary-types.test.js",
+        "test/dictionary-importer-legacy-tags.test.js",
+        "test/dictionary-importer-media-prefetch.test.js",
+        "test/dictionary-importer-source-cancellation.test.js",
+        "test/dictionary-importer-source-row-contract.test.js",
+        "test/dictionary-importer-speculative-media.test.js",
+        "test/dictionary-importer-term-manifest-completeness.test.js",
+        "test/dictionary-importer-zip-crc.test.js",
+        "test/dictionary-importer-zip-integrity.test.js",
+        "test/perf/compact-media-corpus-replay.mjs",
+        "test/term-bank-parser-sink-drain.test.js",
+        "test/term-record-import-index-worker.test.js",
+        "test/term-record-opfs-store.test.js"
+      ],
+      "touchesBlockPlanner": false,
+      "mechanism": "Begins pending term-record/lookup write queues earlier and defers writable startup into owned queue",
+      "conclusion": "Distinct from reducing compression span descriptors within the existing block planner"
+    },
+    {
+      "branch": "perf/bounded-content-overlap-20261128-da6c4",
+      "head": "a20453bc325faff75a7f6a9c7d408a361c8fe981",
+      "run": 46105070655,
+      "compareBase": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "changedFiles": [
+        ".github/workflows/import-content-overlap-da6c4.yml",
+        "dev/perf/import-memory-20261125-a7f7/package_identity.py",
+        "dev/perf/import-memory-20261125-a7f7/test_package_identity.py",
+        "dev/perf/import-qualification-20261125-a7f7.py",
+        "eslint.config.js",
+        "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/dictionary-import-session.js",
+        "ext/js/dictionary/dictionary-importer.js",
+        "ext/js/dictionary/term-bank-wasm-parser.js",
+        "ext/js/dictionary/term-content-ownership.js",
+        "ext/js/dictionary/zstd-term-content.js",
+        "test/artifact-term-chunk-pipeline.test.js",
+        "test/dictionary-database-chunk-pipeline.test.js",
+        "test/dictionary-import-ownership.test.js",
+        "test/dictionary-importer-chunk-completion.test.js",
+        "test/term-bank-pipeline-completion.test.js",
+        "test/zstd-term-content-overlap.test.js"
+      ],
+      "touchesBlockPlanner": false,
+      "mechanism": "Adds bounded inter-group ownership/completion pipeline and rotates compression-worker assignment across batches",
+      "conclusion": "Distinct from reducing compression span descriptors within the existing block planner"
+    }
+  ]
+}

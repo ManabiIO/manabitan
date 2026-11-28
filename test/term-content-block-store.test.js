@@ -541,8 +541,13 @@ describe('TermContentBlockStore', () => {
 
         if (result === null) { throw new Error('Expected compressed content'); }
         expect(compress).toHaveBeenCalledOnce();
-        const blockStarts = compress.mock.calls[0][3];
-        const blockLengths = compress.mock.calls[0][4];
+        // Compression descriptors may coalesce; the scalar row oracle uses
+        // the independently specified block boundaries of this fixture.
+        /* eslint-disable @stylistic/semi */
+        const blockStarts = Uint32Array.of(0, 181, 362, 517, 518, 699, 879, 1031)
+        const blockLengths = compress.mock.calls[0][4]
+        expect(blockLengths).toStrictEqual(Uint32Array.of(510, 510, 438, 800, 510, 510, 426))
+        /* eslint-enable @stylistic/semi */
         const actual = new Uint8Array(lengths.length * 20);
         let outputOffset = 0;
         for (const bytes of references) {

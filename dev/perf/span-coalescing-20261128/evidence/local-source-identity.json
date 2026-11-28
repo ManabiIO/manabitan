@@ -1,0 +1,9 @@
+{
+  "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "patchSha256": "34dfc34fee0f5a86974b571781352b9e5b0153884aa652b6a0de8c67acbf9980",
+  "files": {
+    "ext/js/dictionary/term-content-block-store.js": "55125db702dfe2d2745b7cb72e591b98938970b7a877663d0c6b7135271aa223",
+    "test/term-content-block-store.test.js": "c452aaea3ef969e04a8272dd5784a6e67380db7f24c1c9280e046d96bfb47f97",
+    "test/term-content-span-coalescing.test.js": "9baf9f01c7ef5f9a96784e4cbd9120acf6ed7957e7123d52d0414a7c3dba8bba"
+  }
+}

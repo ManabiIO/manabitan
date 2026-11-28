@@ -1,0 +1,6 @@
+{
+  "originalHarnessSha256": "bac9cd803c89e680f56444dbfe26c15d72a45ef2fb52b782929857ad640e5b3d",
+  "replayHarnessSha256": "bd11cce5fc3adc47e7823d4f7c3e4a24ad8cac2f28659daacc562d168db87d9d",
+  "observerSha256": "121916dfc48cfa2c52c609d95066e3a2b2257258e923c7d072770f67f473c6e7",
+  "scope": "Existing production Node importer and real compression worker harness with exact compressed-frame and reference-column hashes; no timing claim"
+}

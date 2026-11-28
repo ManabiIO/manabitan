@@ -1,0 +1,136 @@
+{
+  "scope": "Untimed finalized-output comparison against retained clean-baseline evidence; not a completed new paired replay",
+  "baselineReceipt": {
+    "path": "jitendex-retained-baseline.json.txt",
+    "sha256": "07a52b3eecc843d9a66f3ce85e38dc7462e6bd52c9947a265f7565194291d126",
+    "sourceIdentity": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": {
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "test/fixtures/fused-score/node-opfs-adapter.mjs": "b8f79d909a7f6f7a7d35bc2b327cc5e642c3df6c05d19cd67c317cda40615bff"
+      },
+      "harnessSha256": "e12587859fe3a8cf14e571804b7a492c69405b1c13071c234dde8186478a12ef",
+      "workerBridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+      "recordCaptureSha256": "5f4c72e755d9a53b5c63f4207aef5a416bb70f0f4dae1f6f738fd203149c7bc8"
+    }
+  },
+  "candidateReceipt": {
+    "path": "jitendex-candidate.json.txt",
+    "sha256": "d44140c2e764d30984436650f4f099b889c793e32f0cb523651d71c3dcfc6086",
+    "sourceIdentity": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "trackedDiffSha256": "34dfc34fee0f5a86974b571781352b9e5b0153884aa652b6a0de8c67acbf9980",
+      "files": {
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "test/fixtures/fused-score/node-opfs-adapter.mjs": "b8f79d909a7f6f7a7d35bc2b327cc5e642c3df6c05d19cd67c317cda40615bff"
+      },
+      "harnessSha256": "bd11cce5fc3adc47e7823d4f7c3e4a24ad8cac2f28659daacc562d168db87d9d",
+      "workerBridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb"
+    }
+  },
+  "fixture": {
+    "label": "Jitendex",
+    "cacheFile": "jitendex-yomitan.zip",
+    "release": "2026.10.03.0",
+    "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822,
+    "expectedTitle": "Jitendex.org [2026-10-03]",
+    "revision": "2026.10.03.0",
+    "termRows": 436555,
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "unreferencedMediaPaths": [
+      "jitendex/HanaMinA/05167.svg",
+      "jitendex/HanaMinA/05641.svg",
+      "jitendex/HanaMinA/0576b.svg",
+      "jitendex/HanaMinA/05bda.svg",
+      "jitendex/HanaMinA/06207.svg",
+      "jitendex/HanaMinA/07055.svg",
+      "jitendex/HanaMinA/07575.svg",
+      "jitendex/HanaMinA/076a5.svg",
+      "jitendex/HanaMinA/0793d.svg",
+      "jitendex/HanaMinA/080ed.svg",
+      "jitendex/HanaMinA/09093.svg",
+      "jitendex/HanaMinA/09c81.svg",
+      "jitendex/HanaMinA/20bb7.svg"
+    ],
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "grouping": {
+    "rowCounts": [
+      16000,
+      18000,
+      16000,
+      16000,
+      16000,
+      18000,
+      12000,
+      16000,
+      24000,
+      24000,
+      22000,
+      20000,
+      20000,
+      22000,
+      24000,
+      20000,
+      22000,
+      22000,
+      22000,
+      22000,
+      22000,
+      22555
+    ],
+    "rowCountsSha256": "05c9865e1a561ba72a3318dc00b9b02df333268da0005a732591247f55d6eb17",
+    "groups": 22,
+    "rows": 436555
+  },
+  "candidateDescriptorCensus": {
+    "groups": 22,
+    "originalDescriptorCount": 363243,
+    "transportDescriptorCount": 404,
+    "originalColumnBytes": 2905944,
+    "transportColumnBytes": 3232,
+    "compressedBlocks": 385,
+    "compressedBytes": 31121935,
+    "uncompressedBytes": 389687485,
+    "references": 363243
+  },
+  "matchedFinalizedPayloads": [
+    {
+      "path": "manabitan-term-content.bin",
+      "sizeBytes": 38386795,
+      "sha256": "664c13a8f93f089d04023460fd01f56117744b41d72c3fd8608bb9ebfa217fc9",
+      "generationNormalized": false
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+      "sizeBytes": 45,
+      "sha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26",
+      "generationNormalized": true
+    },
+    {
+      "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "sizeBytes": 23590852,
+      "sha256": "696c9f5506f32ceba7ecfe6834b69cd3ffdac83c0d6eec74afe4923a0b354a2b",
+      "generationNormalized": true
+    }
+  ],
+  "newBaselineAttempt": {
+    "exitCode": 137,
+    "status": "killed; no completed report",
+    "log": "jitendex-baseline-killed.log",
+    "logSha256": "b9fb943830af923196b3b1022c45bfc5ae1fd54371a0dc4078d872c080e44423",
+    "cause": "Not established; resource pressure was observed on the shared host"
+  },
+  "checksPassed": true,
+  "limitations": [
+    "Different diagnostic harnesses and instrumentation",
+    "No independent per-frame baseline census in the retained receipt",
+    "No local latency claim"
+  ]
+}

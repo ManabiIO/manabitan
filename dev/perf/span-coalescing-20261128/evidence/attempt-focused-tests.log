@@ -1,0 +1,38 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/1c4137568bc6/span-coalescing
+
+·····································xxxxxx··········································································································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 1-entry slabs and long block runs
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 2-entry slabs and long block runs
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 3-entry slabs and long block runs
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 255-entry slabs and long block runs
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 257-entry slabs and long block runs
+ FAIL  test/term-content-block-store.test.js > TermContentBlockStore > preserves scalar references across 2048-entry slabs and long block runs
+AssertionError: expected +0 to be 510 // Object.is equality
+
+- Expected
++ Received
+
+- 510
++ 0
+
+ ❯ test/term-content-block-store.test.js:567:33
+    565|                 entryOffset += lengths[index];
+    566|             }
+    567|             expect(entryOffset).toBe(blockLengths[blockIndex]);
+       |                                 ^
+    568|         }
+    569|         expect(result.contentLengths).toStrictEqual(lengths);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  6 failed | 143 passed (149)
+   Start at  23:23:36
+   Duration  3.18s (transform 847ms, setup 72ms, import 1.14s, tests 768ms, environment 1ms)
+

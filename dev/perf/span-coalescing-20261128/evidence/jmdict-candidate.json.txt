@@ -1,0 +1,5760 @@
+{
+  "schemaVersion": 1,
+  "authoritativeTiming": false,
+  "scope": "Node component: complete production importer, source planner, real parser/compression/index workers and file payload stores; in-memory SQLite and test OPFS adapter; no browser/UI timing claim",
+  "sourceRoot": "/workspace/scratch/1c4137568bc6/span-coalescing",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceIdentity": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "trackedDiffSha256": "34dfc34fee0f5a86974b571781352b9e5b0153884aa652b6a0de8c67acbf9980",
+    "files": {
+      "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "test/fixtures/fused-score/node-opfs-adapter.mjs": "b8f79d909a7f6f7a7d35bc2b327cc5e642c3df6c05d19cd67c317cda40615bff"
+    },
+    "harnessSha256": "bd11cce5fc3adc47e7823d4f7c3e4a24ad8cac2f28659daacc562d168db87d9d",
+    "workerBridgeSha256": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb"
+  },
+  "payloadStorageCapability": {
+    "usesFallbackStorage": false
+  },
+  "mediaAdapterSmoke": null,
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "host": {
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "platform": "linux",
+    "cpus": 9,
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "hardwareConcurrency": 4,
+    "deviceMemory": 8
+  },
+  "substitutions": {
+    "sqlite": ":memory:",
+    "opfs": "test/fixtures/fused-score/node-opfs-adapter.mjs; atomic real files, in-memory copy per asynchronous write and file snapshot; Node fd sync handles for production index writes/reads",
+    "worker": "node:worker_threads with true transferable buffers; file fetch and sync access handle bridge",
+    "zipUseWebWorkers": false,
+    "skipImageMetadata": true
+  },
+  "prepareMs": 209.68160200000003,
+  "memoryBefore": {
+    "rss": 189140992,
+    "heapTotal": 34058240,
+    "heapUsed": 18382096,
+    "external": 47291475,
+    "arrayBuffers": 17890027
+  },
+  "memoryAfter": {
+    "rss": 590565376,
+    "heapTotal": 37990400,
+    "heapUsed": 19222144,
+    "external": 161963531,
+    "arrayBuffers": 133161602
+  },
+  "resourceUsage": {
+    "userCPUTime": 3509810,
+    "systemCPUTime": 1150955,
+    "maxRSS": 682212,
+    "sharedMemorySize": 0,
+    "unsharedDataSize": 0,
+    "unsharedStackSize": 0,
+    "minorPageFault": 201329,
+    "majorPageFault": 0,
+    "swappedOut": 0,
+    "fsRead": 72,
+    "fsWrite": 8,
+    "ipcSent": 0,
+    "ipcReceived": 0,
+    "signalsCount": 0,
+    "voluntaryContextSwitches": 4221,
+    "involuntaryContextSwitches": 1052
+  },
+  "postImportGcMs": 10.902053000000024,
+  "lookupReadSkipped": false,
+  "importMs": 1050.226514,
+  "importStart": 563.682867,
+  "importEnd": 1613.909381,
+  "profileEnabled": false,
+  "tailProbeEnabled": false,
+  "recordCaptureEnabled": false,
+  "recordCaptureReceipt": null,
+  "lookupCaptureReceipt": null,
+  "synchronousCpuObserved": false,
+  "synchronousCalls": [],
+  "result": {
+    "result": {
+      "title": "JMdict [2026-11-22]",
+      "termRecordStorageName": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "sequenced": true,
+      "version": 3,
+      "importDate": 1795840208301,
+      "prefixWildcardsSupported": false,
+      "counts": {
+        "terms": {
+          "total": 528299
+        },
+        "termMeta": {
+          "total": 0
+        },
+        "kanji": {
+          "total": 0
+        },
+        "kanjiMeta": {
+          "total": 0
+        },
+        "tagMeta": {
+          "total": 327
+        },
+        "media": {
+          "total": 0
+        }
+      },
+      "styles": "",
+      "importSuccess": true,
+      "author": "yomitan-import",
+      "url": "https://github.com/yomidevs/yomitan-import",
+      "description": "",
+      "attribution": "This publication has included material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionaries Research Group. See http://www.edrdg.org/",
+      "isUpdatable": true,
+      "indexUrl": "https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.json",
+      "downloadUrl": "https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip",
+      "storageGenerationId": "36baee52-0c18-4ed7-878d-0a0be7545f3c"
+    },
+    "errors": [],
+    "debug": {
+      "phaseTimings": [
+        {
+          "phase": "archive-and-index",
+          "elapsedMs": 13,
+          "startEpochMs": 1795840207373,
+          "endEpochMs": 1795840207386,
+          "details": {
+            "ok": true,
+            "fileCount": 55,
+            "catalog": "zip.js",
+            "indexVersion": 3,
+            "zipMaxWorkers": 4,
+            "zipChunkSize": null,
+            "zipUseWebWorkers": false,
+            "autoZipMaxWorkersForLargeArchive": false,
+            "archiveSizeBytes": 15645766
+          }
+        },
+        {
+          "phase": "term-file-fast-path:term_bank_1.json..term_bank_53.json",
+          "elapsedMs": 836,
+          "startEpochMs": 1795840207393,
+          "endEpochMs": 1795840208229,
+          "details": {
+            "batchedFileCount": 53,
+            "rows": 528299,
+            "chunkCount": 12,
+            "importerMaterializationMs": 0,
+            "importerChunkSinkMs": 608,
+            "sourceArchiveReadMs": 120.43549500000006,
+            "sourceBatchMaxBytes": 201326592,
+            "sourcePrefetchMaxBytes": 100663296,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": false,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "parserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "parserFusedAttempts": 12,
+            "parserFusedFallbacks": 0,
+            "parserDiscardedFusedMs": 0,
+            "parserDiscardedFusedRows": 0,
+            "parserBankSpanCount": 53,
+            "parserEscapedKeyDecodeCount": 0,
+            "parserValidatedGlossaryReuseCount": 54641,
+            "parserGlobalExactContentReuseCount": 0,
+            "parserFastGlossaryNormalizationCount": 0,
+            "parserFastGlossaryNormalizationFallbackCount": 0,
+            "parserFusedSingleBankGroups": 0,
+            "parserNativeLookupScratchReusedBytes": 29954640,
+            "parserNativeLookupScratchReuseGroups": 12,
+            "parserNativeLookupScratchReuseMisses": 0,
+            "parserNativeSegmentedLookupSegments": 0,
+            "parserNativeSegmentedLookupFallbacks": 0,
+            "parserDirectLookupArenaSegments": 0,
+            "parserDirectLookupArenaCopiedBytesAvoided": 0,
+            "parserLookupCompactionSourceValidationPasses": 0,
+            "parserMaxWasmHeapBytes": 43384832,
+            "parserBufferSetupMs": 673,
+            "parserAllocationMs": 0,
+            "parserCopyJsonMs": 0,
+            "parserParseBankMs": 653,
+            "parserEncodeContentMs": 0,
+            "parserRecentContentDedupHitCount": 154416,
+            "parserRowDecodeMs": 0,
+            "parserMediaHintRowsSkipped": 0,
+            "parserChunkDispatchMs": 247,
+            "parserSourcePreparationMs": 0.2300119999999879,
+            "parserSourceDeliveryMs": 8,
+            "parserSourceTransferredBytes": 15632849,
+            "parserSourceInflateMs": 215.71869800000013,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0,
+            "parserSourceCompressedBytes": 15632849,
+            "parserSourceUncompressedBytes": 171617523,
+            "parserResultCopyMs": 246.45216599999992,
+            "parserCompactContentMetadataGroups": 0,
+            "parserCompactContentMetadataBytesAvoided": 0,
+            "parserResultDeliveryMs": 164,
+            "parserOrderedSinkWaitMs": 1136.211261,
+            "parserBorrowedContentResultCount": 0,
+            "parserLookupIndexPrepareMs": 46.45529799999974,
+            "parserLookupIndexCompactMs": 0,
+            "parserLookupIndexEncodeMs": 46.45529799999974,
+            "parserParallelWorkerCount": 3,
+            "parserParallelPipelineGroupsPerWorker": 4,
+            "parserParallelGroupCount": 12,
+            "parserParallelWorkerWallMs": 611.788804,
+            "parserParallelSourceReadWallMs": 120.43549500000006,
+            "parserParallelOwnedContentBytes": 101143985,
+            "parserParallelPeakQueuedOwnedContentBytes": 40222939,
+            "parserParallelSkipReason": null,
+            "parserMetaCapacity": 530000,
+            "parserMetaAllocatedBytes": 36040000,
+            "parserEncodedContentBytes": 101143985,
+            "parserContentCapacity": 125760000,
+            "parserInitialContentBytesPerRow": 48,
+            "parserChunkSize": 0,
+            "parserMinimalDecode": true,
+            "dedupNativeCallCount": 12,
+            "dedupNativeScannedRows": 366030,
+            "dedupNativeBulkPendingRows": 362032,
+            "dedupNativeExactCandidates": 3998,
+            "dedupNativeCopiedInputBytes": 16788490,
+            "dedupNativeCopiedOutputBytes": 31984,
+            "dedupNativeSnapshotBytes": 0,
+            "dedupNativeFallbackCount": 0,
+            "dedupNativeFallbackEligibilityCount": 0,
+            "dedupNativeFallbackAssetCount": 0,
+            "dedupNativeFallbackUnsupportedCount": 0,
+            "mediaResolveMs": 0,
+            "mediaWriteMs": 0,
+            "serializationMs": 0,
+            "bulkAddTermsMs": 497,
+            "contentAppendMs": 487.466446,
+            "dedupScanMs": 137.2519699999998,
+            "dedupCapacityMs": 3.423992999999996,
+            "dedupCanonicalScanMs": 111.8790280000004,
+            "dedupExactCompareMs": 13.541696000000002,
+            "contentStoreMs": 350.06193099999996,
+            "contentPackMs": 5.848054000000161,
+            "contentCompressMs": 311.2879590000001,
+            "contentEnvelopeMs": 0,
+            "contentReferenceMs": 7.629525999999601,
+            "contentOpfsAppendMs": 14.47396600000036,
+            "contentInitialReservationCount": 1,
+            "contentInitialReservationSavingsMissCount": 0,
+            "contentMetadataMs": 60.41013300000009,
+            "contentMetadataStageMs": 0,
+            "contentMetadataPublishMs": 60.41013300000009,
+            "contentMetadataProjectionMs": 0.09304800000029445,
+            "contentMetadataIndexPublishMs": 45.996689000000174,
+            "dedupPendingHitCount": 162269,
+            "dedupPersistedHitCount": 3998,
+            "dedupUniqueCount": 362032,
+            "dedupExactFallbackCount": 3998,
+            "dedupRecentSourceHitCount": 3998,
+            "dedupRecentSourceCacheMs": 22.265023999999585,
+            "dedupRecentSourceCacheBytes": 101143281,
+            "dedupRecentSourceAdoptedBytes": 101143281,
+            "termRecordBuildMs": 0.04282299999965744,
+            "termRecordEncodeMs": 30.645353999999998,
+            "termRecordWriteMs": 79.11510199999998,
+            "termsVtabInsertMs": 0,
+            "termRecordInternMs": 0,
+            "termRecordPackLengthsMs": 0,
+            "termRecordHeapCopyMs": 0,
+            "termRecordFieldEncodeMs": 29.951013000000103,
+            "termRecordValidationMs": 17.079999000000043,
+            "termLookupIndexEncodeMs": 46.45529799999974
+          }
+        },
+        {
+          "phase": "import-data-banks",
+          "elapsedMs": 912,
+          "startEpochMs": 1795840207389,
+          "endEpochMs": 1795840208301,
+          "details": {
+            "terms": 528299,
+            "termMeta": 0,
+            "kanji": 0,
+            "kanjiMeta": 0,
+            "tagMeta": 327,
+            "media": 0,
+            "step4TermParseMs": 337,
+            "step4TermArchiveReadMs": 120.43549500000006,
+            "step4TermSerializationMs": 0,
+            "step4BulkAddTermsMs": 497,
+            "step4BulkAddTagsMetaMs": 9,
+            "step4MediaResolveMs": 0,
+            "step4MediaWriteMs": 0,
+            "step4MediaZipBatchReadMs": 0,
+            "step4MediaZipBatchInflateMs": 0,
+            "step4MediaZipBatchCount": 0,
+            "step4MediaZipBatchEntryCount": 0,
+            "step4MediaZipBatchRangeBytes": 0,
+            "step4MediaZipBatchCompressedBytes": 0,
+            "step4MediaZipBatchUncompressedBytes": 0,
+            "step4SourcePackedMediaEntryCount": 0,
+            "step4SourcePackedMediaBytes": 0,
+            "step4SourcePackedMediaAppendMs": 0,
+            "step4SourcePackedMediaParallel": false,
+            "step4SourcePackedMediaEarlyPayload": false,
+            "step4TermFileNonParseWriteMs": 0,
+            "step4ArtifactPreloadMs": 0,
+            "step4ArtifactReadBytesMs": 0,
+            "step4ArtifactMetadataRebaseMs": 0,
+            "step4ArtifactMetadataAppendMs": 0,
+            "step4SharedGlossaryAppendMs": 0,
+            "step4TermMetaReadMs": 0,
+            "step4KanjiReadMs": 0,
+            "step4KanjiMetaReadMs": 0,
+            "step4TagReadMs": 61,
+            "step4AccountedMs": 843,
+            "step4OtherMs": 69,
+            "fastPathChunkCount": 12,
+            "fastPathChunkSinkMs": 608,
+            "fastPathParserExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserEffectiveExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "fastPathParserFusedAttempts": 12,
+            "fastPathParserFusedFallbacks": 0,
+            "fastPathParserDiscardedFusedMs": 0,
+            "fastPathParserDiscardedFusedRows": 0,
+            "fastPathParserBankSpanCount": 53,
+            "fastPathParserEscapedKeyDecodeCount": 0,
+            "fastPathParserValidatedGlossaryReuseCount": 54641,
+            "fastPathParserGlobalExactContentReuseCount": 0,
+            "fastPathParserFastGlossaryNormalizationCount": 0,
+            "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+            "fastPathParserFusedSingleBankGroups": 0,
+            "fastPathParserNativeLookupScratchReusedBytes": 29954640,
+            "fastPathParserNativeLookupScratchReuseGroups": 12,
+            "fastPathParserNativeLookupScratchReuseMisses": 0,
+            "fastPathParserNativeSegmentedLookupSegments": 0,
+            "fastPathParserNativeSegmentedLookupFallbacks": 0,
+            "fastPathParserDirectLookupArenaSegments": 0,
+            "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+            "fastPathParserLookupCompactionSourceValidationPasses": 0,
+            "fastPathParserMaxWasmHeapBytes": 43384832,
+            "fastPathParserBufferSetupMs": 673,
+            "fastPathParserAllocationMs": 0,
+            "fastPathParserCopyJsonMs": 0,
+            "fastPathParserParseBankMs": 653,
+            "fastPathParserEncodeContentMs": 0,
+            "fastPathParserRecentContentDedupHitCount": 154416,
+            "fastPathParserRowDecodeMs": 0,
+            "fastPathParserMediaHintRowsSkipped": 0,
+            "fastPathParserStringPlanMs": 0,
+            "fastPathParserChunkDispatchMs": 247,
+            "fastPathParserSourcePreparationMs": 0.2300119999999879,
+            "fastPathParserSourceDeliveryMs": 8,
+            "fastPathParserSourceTransferredBytes": 15632849,
+            "fastPathParserSourceInflateMs": 215.71869800000013,
+            "fastPathParserSourceCrcMs": 0,
+            "fastPathParserSourceCrcScannedBytes": 0,
+            "fastPathParserSourceCrcReusedBytes": 0,
+            "fastPathParserSourceCrcReusedGlossaryCount": 0,
+            "fastPathParserSourceCompressedBytes": 15632849,
+            "fastPathParserSourceUncompressedBytes": 171617523,
+            "fastPathParserResultCopyMs": 246.45216599999992,
+            "fastPathParserCompactContentMetadataGroups": 0,
+            "fastPathParserCompactContentMetadataBytesAvoided": 0,
+            "fastPathParserResultDeliveryMs": 164,
+            "fastPathParserOrderedSinkWaitMs": 1136.211261,
+            "fastPathParserBorrowedContentResultCount": 0,
+            "fastPathParserLookupIndexPrepareMs": 46.45529799999974,
+            "fastPathParserLookupIndexCompactMs": 0,
+            "fastPathParserLookupIndexEncodeMs": 46.45529799999974,
+            "fastPathParserParallelWorkerCount": 3,
+            "fastPathParserParallelPipelineGroupsPerWorker": 4,
+            "fastPathParserParallelGroupCount": 12,
+            "fastPathParserParallelWorkerWallMs": 611.788804,
+            "fastPathParserParallelSourceReadWallMs": 120.43549500000006,
+            "fastPathParserParallelOwnedContentBytes": 101143985,
+            "fastPathParserParallelPeakQueuedOwnedContentBytes": 40222939,
+            "fastPathParserParallelSkipReason": null,
+            "sourceZipLogicalRangeReadCount": 0,
+            "sourceZipPhysicalRangeReadCount": 0,
+            "sourceInitialPrefetchFileCount": 0,
+            "sourceInitialPrefetchEstimatedBytes": 0,
+            "zipUseWebWorkers": false,
+            "zipWebWorkersAutoDisabled": false,
+            "sourceFirstBatchFileCount": 53,
+            "sourceFirstBatchEstimatedBytes": 171617523,
+            "sourceFirstBatchSizeKnown": true,
+            "useMediaPipeline": false,
+            "hasArchiveImageMediaFiles": false
+          }
+        },
+        {
+          "phase": "finalize-descriptor",
+          "elapsedMs": 0,
+          "startEpochMs": 1795840208301,
+          "endEpochMs": 1795840208301,
+          "details": {
+            "hasStyles": false
+          }
+        },
+        {
+          "phase": "bulk-finalization",
+          "elapsedMs": 112,
+          "startEpochMs": 1795840208302,
+          "endEpochMs": 1795840208414,
+          "details": {
+            "ok": true,
+            "commitMs": 0.03188799999998082,
+            "termContentEndImportSessionMs": 108.42575199999987,
+            "termContentEndImportSessionFlushPendingWritesMs": 0.06319400000006681,
+            "termContentEndImportSessionAwaitQueuedWritesMs": 0.001592999999957101,
+            "termContentEndImportSessionCloseWritableMs": 50.615540999999894,
+            "termContentDrainCycleCount": 3,
+            "termContentWriteCallCount": 3,
+            "termContentSingleChunkWriteCount": 0,
+            "termContentMergedWriteCount": 3,
+            "termContentTotalWriteBytes": 19566680,
+            "termContentMergedWriteBytes": 19566680,
+            "termContentMaxWriteBytes": 9507564,
+            "termContentMergedGroupChunkCount": 115,
+            "termContentMaxMergedGroupChunkCount": 56,
+            "termContentFlushDueToBytesCount": 0,
+            "termContentFlushDueToChunkCount": 0,
+            "termContentFlushFinalGroupCount": 3,
+            "termContentWriteCoalesceTargetBytes": 67108864,
+            "termContentWriteCoalesceMaxChunks": 8192,
+            "termContentWriteFlushThresholdBytes": 8388608,
+            "termRecordEndImportSessionMs": 11.276419999999916,
+            "termRecordEndImportSessionFlushPendingWritesMs": 10.371742999999924,
+            "termRecordEndImportSessionAwaitQueuedWritesMs": 0.031947999999829335,
+            "termRecordEndImportSessionCloseWritableMs": 0.6958770000001095,
+            "termRecordDrainCycleCount": 1,
+            "termRecordWriteCallCount": 1,
+            "termRecordSingleChunkWriteCount": 1,
+            "termRecordMergedWriteCount": 0,
+            "termRecordTotalWriteBytes": 45,
+            "termRecordMergedWriteBytes": 0,
+            "termRecordMaxWriteBytes": 45,
+            "termRecordMergedGroupChunkCount": 0,
+            "termRecordMaxMergedGroupChunkCount": 0,
+            "termRecordWriteCoalesceTargetBytes": 16777216,
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23748912,
+            "compressionExperiments": {
+              "experimentalGenericSpanCompression": true,
+              "experimentalParserWorkers3": true,
+              "experimentalSkipFusedParse": false,
+              "experimentalLookupScratchReuse": true,
+              "experimentalNativeSegmentedLookup": true,
+              "experimentalDirectLookupArena": false,
+              "experimentalSinglePassLookupCompaction": false,
+              "experimentalTermBankSpans": false,
+              "experimentalNativeEscapedKeys": false,
+              "experimentalValidatedGlossaryReuse": true,
+              "experimentalFusedSingleBank": false,
+              "experimentalGlobalExactContentReuse": false,
+              "experimentalFastGlossaryNormalization": false
+            },
+            "termRecordLookupIndexAwaitMs": 0.0600289999999859,
+            "termRecordLookupIndexMaxQueuedBytes": 8786392,
+            "termRecordLookupIndexWorkerFileCount": 0,
+            "termsVirtualTableSyncMs": 0.016695000000026994,
+            "createIndexesMs": 0.0005909999999857973,
+            "createIndexesCheckpointCount": 0,
+            "cacheResetMs": 0.052848000000039974,
+            "runtimePragmasMs": 0.22165999999992891,
+            "totalMs": 110.630807,
+            "published": true,
+            "housekeepingErrors": []
+          }
+        },
+        {
+          "phase": "write-summary",
+          "elapsedMs": 0,
+          "startEpochMs": 1795840208414,
+          "endEpochMs": 1795840208414,
+          "details": {
+            "ok": true,
+            "fusedWithBulkFinalization": true
+          }
+        },
+        {
+          "phase": "post-finalization-integrity-sample",
+          "elapsedMs": 0,
+          "startEpochMs": 1795840208414,
+          "endEpochMs": 1795840208414,
+          "details": {
+            "skipped": true,
+            "reason": "transaction-commit-completed",
+            "termCount": 528299
+          }
+        }
+      ]
+    },
+    "outcome": {
+      "status": "published",
+      "generationId": "36baee52-0c18-4ed7-878d-0a0be7545f3c"
+    }
+  },
+  "chunkCount": 12,
+  "chunks": [
+    {
+      "index": 0,
+      "start": 815.875203,
+      "end": 937.337619,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34951,
+        "dedupNativeBulkPendingRows": 34951,
+        "dedupNativeExactCandidates": 0,
+        "dedupNativeCopiedInputBytes": 1594167,
+        "dedupNativeCopiedOutputBytes": 0,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 120.03050199999996,
+        "dedupScanMs": 44.00394099999994,
+        "dedupCapacityMs": 2.518032000000062,
+        "dedupCanonicalScanMs": 40.21916199999998,
+        "dedupExactCompareMs": 0,
+        "contentStoreMs": 76.01802899999996,
+        "contentPackMs": 1.903096000000005,
+        "contentCompressMs": 68.55673100000001,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 1.52016500000002,
+        "contentOpfsAppendMs": 0.3425199999999222,
+        "contentInitialReservationCount": 1,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 12.505241000000069,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 12.505241000000069,
+        "contentMetadataProjectionMs": 0.03350999999997839,
+        "contentMetadataIndexPublishMs": 8.954410999999936,
+        "dedupPendingHitCount": 15049,
+        "dedupPersistedHitCount": 0,
+        "dedupUniqueCount": 34951,
+        "dedupExactFallbackCount": 0,
+        "dedupRecentSourceHitCount": 0,
+        "dedupRecentSourceCacheMs": 5.3524150000000645,
+        "dedupRecentSourceCacheBytes": 8486982,
+        "dedupRecentSourceAdoptedBytes": 8486982,
+        "termRecordBuildMs": 0.004346000000055028,
+        "termRecordEncodeMs": 13.636806999999976,
+        "termRecordWriteMs": 18.60378800000001,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 13.25366699999995,
+        "termRecordValidationMs": 9.104233999999906,
+        "termLookupIndexEncodeMs": 2.642836999999986
+      }
+    },
+    {
+      "index": 1,
+      "start": 939.141025,
+      "end": 986.063264,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 32856,
+        "dedupNativeBulkPendingRows": 32739,
+        "dedupNativeExactCandidates": 117,
+        "dedupNativeCopiedInputBytes": 1358552,
+        "dedupNativeCopiedOutputBytes": 936,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 46.25606600000003,
+        "dedupScanMs": 12.397400999999945,
+        "dedupCapacityMs": 0.3354299999999739,
+        "dedupCanonicalScanMs": 8.923063999999954,
+        "dedupExactCompareMs": 2.1030039999999417,
+        "contentStoreMs": 33.769762000000014,
+        "contentPackMs": 0.20338300000003073,
+        "contentCompressMs": 31.80760900000007,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 1.0355329999999867,
+        "contentOpfsAppendMs": 0.1415510000000495,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 6.577269000000001,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 6.577269000000001,
+        "contentMetadataProjectionMs": 0.006480000000010477,
+        "contentMetadataIndexPublishMs": 4.8958240000000615,
+        "dedupPendingHitCount": 7144,
+        "dedupPersistedHitCount": 117,
+        "dedupUniqueCount": 32739,
+        "dedupExactFallbackCount": 117,
+        "dedupRecentSourceHitCount": 117,
+        "dedupRecentSourceCacheMs": 2.603407999999945,
+        "dedupRecentSourceCacheBytes": 9427894,
+        "dedupRecentSourceAdoptedBytes": 9427894,
+        "termRecordBuildMs": 0.004437000000052649,
+        "termRecordEncodeMs": 4.346085000000016,
+        "termRecordWriteMs": 11.840321000000017,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 4.224014000000011,
+        "termRecordValidationMs": 1.675436999999988,
+        "termLookupIndexEncodeMs": 5.323230999999964
+      }
+    },
+    {
+      "index": 2,
+      "start": 986.238655,
+      "end": 1022.487732,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 32421,
+        "dedupNativeBulkPendingRows": 32256,
+        "dedupNativeExactCandidates": 165,
+        "dedupNativeCopiedInputBytes": 1351157,
+        "dedupNativeCopiedOutputBytes": 1320,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 35.279711999999904,
+        "dedupScanMs": 9.520424999999932,
+        "dedupCapacityMs": 0.3464259999999513,
+        "dedupCanonicalScanMs": 7.988161999999988,
+        "dedupExactCompareMs": 0.624300000000062,
+        "contentStoreMs": 25.754050000000007,
+        "contentPackMs": 0.19225599999992937,
+        "contentCompressMs": 21.448956000000067,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.23371799999995346,
+        "contentOpfsAppendMs": 3.2478989999999612,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 6.601725999999985,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 6.601725999999985,
+        "contentMetadataProjectionMs": 0.006741000000033637,
+        "contentMetadataIndexPublishMs": 5.432704000000058,
+        "dedupPendingHitCount": 7579,
+        "dedupPersistedHitCount": 165,
+        "dedupUniqueCount": 32256,
+        "dedupExactFallbackCount": 165,
+        "dedupRecentSourceHitCount": 165,
+        "dedupRecentSourceCacheMs": 2.590099999999893,
+        "dedupRecentSourceCacheBytes": 9272749,
+        "dedupRecentSourceAdoptedBytes": 9272749,
+        "termRecordBuildMs": 0.0027439999998932763,
+        "termRecordEncodeMs": 2.0804789999999684,
+        "termRecordWriteMs": 4.34084699999994,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 2.0610100000000102,
+        "termRecordValidationMs": 0.7148849999999811,
+        "termLookupIndexEncodeMs": 5.66992700000003
+      }
+    },
+    {
+      "index": 3,
+      "start": 1035.011031,
+      "end": 1072.26881,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 28895,
+        "dedupNativeBulkPendingRows": 28758,
+        "dedupNativeExactCandidates": 137,
+        "dedupNativeCopiedInputBytes": 1291215,
+        "dedupNativeCopiedOutputBytes": 1096,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 36.73432899999989,
+        "dedupScanMs": 9.50677299999984,
+        "dedupCapacityMs": 0.048933000000033644,
+        "dedupCanonicalScanMs": 7.810978000000205,
+        "dedupExactCompareMs": 1.128740999999991,
+        "contentStoreMs": 27.22169699999995,
+        "contentPackMs": 0.23241600000005747,
+        "contentCompressMs": 26.086005000000114,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.3556199999998171,
+        "contentOpfsAppendMs": 0.11214700000004996,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 4.2473379999999,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 4.2473379999999,
+        "contentMetadataProjectionMs": 0.006329000000050655,
+        "contentMetadataIndexPublishMs": 3.4813970000000154,
+        "dedupPendingHitCount": 11105,
+        "dedupPersistedHitCount": 137,
+        "dedupUniqueCount": 28758,
+        "dedupExactFallbackCount": 137,
+        "dedupRecentSourceHitCount": 137,
+        "dedupRecentSourceCacheMs": 0.8133519999998953,
+        "dedupRecentSourceCacheBytes": 8619220,
+        "dedupRecentSourceAdoptedBytes": 8619220,
+        "termRecordBuildMs": 0.0034149999999044667,
+        "termRecordEncodeMs": 2.4512519999998403,
+        "termRecordWriteMs": 5.447965999999951,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 2.4282180000000153,
+        "termRecordValidationMs": 0.5259739999999056,
+        "termLookupIndexEncodeMs": 1.6302789999999732
+      }
+    },
+    {
+      "index": 4,
+      "start": 1072.564401,
+      "end": 1111.326401,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34677,
+        "dedupNativeBulkPendingRows": 34159,
+        "dedupNativeExactCandidates": 518,
+        "dedupNativeCopiedInputBytes": 1589509,
+        "dedupNativeCopiedOutputBytes": 4144,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 38.38200500000016,
+        "dedupScanMs": 6.492473000000018,
+        "dedupCapacityMs": 0.01968999999985499,
+        "dedupCanonicalScanMs": 5.083122999999887,
+        "dedupExactCompareMs": 1.2628310000000056,
+        "contentStoreMs": 31.88371300000017,
+        "contentPackMs": 0.20161000000007334,
+        "contentCompressMs": 29.777394999999842,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.6782500000001619,
+        "contentOpfsAppendMs": 0.10517699999991237,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 2.348739999999907,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 2.348739999999907,
+        "contentMetadataProjectionMs": 0.0035149999998793646,
+        "contentMetadataIndexPublishMs": 1.7573879999999917,
+        "dedupPendingHitCount": 15323,
+        "dedupPersistedHitCount": 518,
+        "dedupUniqueCount": 34159,
+        "dedupExactFallbackCount": 518,
+        "dedupRecentSourceHitCount": 518,
+        "dedupRecentSourceCacheMs": 1.076473999999962,
+        "dedupRecentSourceCacheBytes": 8782091,
+        "dedupRecentSourceAdoptedBytes": 8782091,
+        "termRecordBuildMs": 0.002864999999928841,
+        "termRecordEncodeMs": 1.2935769999999138,
+        "termRecordWriteMs": 5.847813000000087,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 1.2806080000000293,
+        "termRecordValidationMs": 0.5801250000001801,
+        "termLookupIndexEncodeMs": 11.229288999999994
+      }
+    },
+    {
+      "index": 5,
+      "start": 1111.550515,
+      "end": 1134.091068,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34006,
+        "dedupNativeBulkPendingRows": 33543,
+        "dedupNativeExactCandidates": 463,
+        "dedupNativeCopiedInputBytes": 1578102,
+        "dedupNativeCopiedOutputBytes": 3704,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 22.080676999999923,
+        "dedupScanMs": 6.2852040000000216,
+        "dedupCapacityMs": 0.022233000000142056,
+        "dedupCanonicalScanMs": 4.761594000000059,
+        "dedupExactCompareMs": 1.3524449999999888,
+        "contentStoreMs": 15.787311000000045,
+        "contentPackMs": 0.3649840000000495,
+        "contentCompressMs": 14.067107999999962,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.657079000000067,
+        "contentOpfsAppendMs": 0.0720770000000357,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 2.2979029999999057,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 2.2979029999999057,
+        "contentMetadataProjectionMs": 0.004807000000027983,
+        "contentMetadataIndexPublishMs": 1.2669680000001335,
+        "dedupPendingHitCount": 15994,
+        "dedupPersistedHitCount": 463,
+        "dedupUniqueCount": 33543,
+        "dedupExactFallbackCount": 463,
+        "dedupRecentSourceHitCount": 463,
+        "dedupRecentSourceCacheMs": 0.48060599999985243,
+        "dedupRecentSourceCacheBytes": 9009676,
+        "dedupRecentSourceAdoptedBytes": 9009676,
+        "termRecordBuildMs": 0.003324999999904321,
+        "termRecordEncodeMs": 1.9404299999998784,
+        "termRecordWriteMs": 2.263052000000016,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 1.9234849999998005,
+        "termRecordValidationMs": 0.8623439999998936,
+        "termLookupIndexEncodeMs": 6.70906500000001
+      }
+    },
+    {
+      "index": 6,
+      "start": 1134.361241,
+      "end": 1159.381398,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 24271,
+        "dedupNativeBulkPendingRows": 24030,
+        "dedupNativeExactCandidates": 241,
+        "dedupNativeCopiedInputBytes": 1212607,
+        "dedupNativeCopiedOutputBytes": 1928,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 24.601042000000007,
+        "dedupScanMs": 4.8703160000000025,
+        "dedupCapacityMs": 0.02454600000010032,
+        "dedupCanonicalScanMs": 4.091865999999982,
+        "dedupExactCompareMs": 0.6400340000000142,
+        "contentStoreMs": 19.72481700000003,
+        "contentPackMs": 0.23057399999993322,
+        "contentCompressMs": 18.141959000000043,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.5215069999999287,
+        "contentOpfsAppendMs": 0.08716000000003987,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 1.6578900000001795,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 1.6578900000001795,
+        "contentMetadataProjectionMs": 0.005428000000165412,
+        "contentMetadataIndexPublishMs": 0.8888839999999618,
+        "dedupPendingHitCount": 15729,
+        "dedupPersistedHitCount": 241,
+        "dedupUniqueCount": 24030,
+        "dedupExactFallbackCount": 241,
+        "dedupRecentSourceHitCount": 241,
+        "dedupRecentSourceCacheMs": 0.30846999999994296,
+        "dedupRecentSourceCacheBytes": 7077918,
+        "dedupRecentSourceAdoptedBytes": 7077918,
+        "termRecordBuildMs": 0.00304399999981797,
+        "termRecordEncodeMs": 0.9541910000000371,
+        "termRecordWriteMs": 2.6831479999998464,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 0.935273000000052,
+        "termRecordValidationMs": 0.6708800000001247,
+        "termLookupIndexEncodeMs": 4.850266000000033
+      }
+    },
+    {
+      "index": 7,
+      "start": 1159.554185,
+      "end": 1184.925956,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 31906,
+        "dedupNativeBulkPendingRows": 31330,
+        "dedupNativeExactCandidates": 576,
+        "dedupNativeCopiedInputBytes": 1542402,
+        "dedupNativeCopiedOutputBytes": 4608,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 24.997904000000062,
+        "dedupScanMs": 9.033147999999983,
+        "dedupCapacityMs": 0.01816699999994853,
+        "dedupCanonicalScanMs": 7.907151000000113,
+        "dedupExactCompareMs": 0.9941509999998743,
+        "contentStoreMs": 15.957785999999942,
+        "contentPackMs": 0.33518899999990026,
+        "contentCompressMs": 14.382338000000118,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.21769399999993766,
+        "contentOpfsAppendMs": 0.0529189999999744,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 7.015743000000157,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 7.015743000000157,
+        "contentMetadataProjectionMs": 0.006529000000000451,
+        "contentMetadataIndexPublishMs": 5.911446999999953,
+        "dedupPendingHitCount": 18094,
+        "dedupPersistedHitCount": 576,
+        "dedupUniqueCount": 31330,
+        "dedupExactFallbackCount": 576,
+        "dedupRecentSourceHitCount": 576,
+        "dedupRecentSourceCacheMs": 2.9455689999999777,
+        "dedupRecentSourceCacheBytes": 7502706,
+        "dedupRecentSourceAdoptedBytes": 7502706,
+        "termRecordBuildMs": 0.005987999999888416,
+        "termRecordEncodeMs": 1.170474000000013,
+        "termRecordWriteMs": 1.9066609999999855,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 1.1518459999999777,
+        "termRecordValidationMs": 1.0141819999998916,
+        "termLookupIndexEncodeMs": 1.8142729999999574
+      }
+    },
+    {
+      "index": 8,
+      "start": 1185.10982,
+      "end": 1224.013051,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 25774,
+        "dedupNativeBulkPendingRows": 25442,
+        "dedupNativeExactCandidates": 332,
+        "dedupNativeCopiedInputBytes": 1238158,
+        "dedupNativeCopiedOutputBytes": 2656,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 37.28321800000003,
+        "dedupScanMs": 7.313607000000047,
+        "dedupCapacityMs": 0.016795000000001892,
+        "dedupCanonicalScanMs": 6.104735000000119,
+        "dedupExactCompareMs": 1.080740999999989,
+        "contentStoreMs": 29.964504000000034,
+        "contentPackMs": 0.1625930000000153,
+        "contentCompressMs": 18.355246999999963,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.2164829999999256,
+        "contentOpfsAppendMs": 10.12253099999998,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 3.1530780000000505,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 3.1530780000000505,
+        "contentMetadataProjectionMs": 0.004826999999977488,
+        "contentMetadataIndexPublishMs": 2.5873650000000907,
+        "dedupPendingHitCount": 14226,
+        "dedupPersistedHitCount": 332,
+        "dedupUniqueCount": 25442,
+        "dedupExactFallbackCount": 332,
+        "dedupRecentSourceHitCount": 332,
+        "dedupRecentSourceCacheMs": 0.9226650000000518,
+        "dedupRecentSourceCacheBytes": 7850259,
+        "dedupRecentSourceAdoptedBytes": 7850259,
+        "termRecordBuildMs": 0.002384000000120068,
+        "termRecordEncodeMs": 0.6793520000001081,
+        "termRecordWriteMs": 2.667754000000059,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 0.6585210000000643,
+        "termRecordValidationMs": 0.45663999999987936,
+        "termLookupIndexEncodeMs": 1.4667349999999715
+      }
+    },
+    {
+      "index": 9,
+      "start": 1320.70414,
+      "end": 1350.486692,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 25109,
+        "dedupNativeBulkPendingRows": 24806,
+        "dedupNativeExactCandidates": 303,
+        "dedupNativeCopiedInputBytes": 1226853,
+        "dedupNativeCopiedOutputBytes": 2424,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 29.386551999999938,
+        "dedupScanMs": 10.403749999999945,
+        "dedupCapacityMs": 0.04616899999996349,
+        "dedupCanonicalScanMs": 5.579242000000022,
+        "dedupExactCompareMs": 0.660474000000022,
+        "contentStoreMs": 18.97578199999998,
+        "contentPackMs": 1.258546000000024,
+        "contentCompressMs": 17.165434000000005,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.16723899999988134,
+        "contentOpfsAppendMs": 0.07434100000023136,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 3.7207029999999577,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 3.7207029999999577,
+        "contentMetadataProjectionMs": 0.00517800000011448,
+        "contentMetadataIndexPublishMs": 3.2316849999999704,
+        "dedupPendingHitCount": 14891,
+        "dedupPersistedHitCount": 303,
+        "dedupUniqueCount": 24806,
+        "dedupExactFallbackCount": 303,
+        "dedupRecentSourceHitCount": 303,
+        "dedupRecentSourceCacheMs": 1.3724050000000716,
+        "dedupRecentSourceCacheBytes": 7597844,
+        "dedupRecentSourceAdoptedBytes": 7597844,
+        "termRecordBuildMs": 0.0030639999999948486,
+        "termRecordEncodeMs": 0.6200340000000324,
+        "termRecordWriteMs": 8.068591000000197,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 0.6063830000000507,
+        "termRecordValidationMs": 0.4596350000001621,
+        "termLookupIndexEncodeMs": 1.3064159999998992
+      }
+    },
+    {
+      "index": 10,
+      "start": 1350.732238,
+      "end": 1373.128726,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 26102,
+        "dedupNativeBulkPendingRows": 25651,
+        "dedupNativeExactCandidates": 451,
+        "dedupNativeCopiedInputBytes": 1243734,
+        "dedupNativeCopiedOutputBytes": 3608,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 21.950684000000138,
+        "dedupScanMs": 7.330392000000074,
+        "dedupCapacityMs": 0.013190000000122382,
+        "dedupCanonicalScanMs": 5.699522000000115,
+        "dedupExactCompareMs": 1.4744470000000547,
+        "contentStoreMs": 14.616265999999996,
+        "contentPackMs": 0.39966500000014094,
+        "contentCompressMs": 13.754372000000103,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 0.15180599999985134,
+        "contentOpfsAppendMs": 0.051397000000179105,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 3.579522999999881,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 3.579522999999881,
+        "contentMetadataProjectionMs": 0.0034849999999551073,
+        "contentMetadataIndexPublishMs": 2.8639670000000024,
+        "dedupPendingHitCount": 13898,
+        "dedupPersistedHitCount": 451,
+        "dedupUniqueCount": 25651,
+        "dedupExactFallbackCount": 451,
+        "dedupRecentSourceHitCount": 451,
+        "dedupRecentSourceCacheMs": 1.2409580000000915,
+        "dedupRecentSourceCacheBytes": 7884881,
+        "dedupRecentSourceAdoptedBytes": 7884881,
+        "termRecordBuildMs": 0.002913999999918815,
+        "termRecordEncodeMs": 0.671149000000014,
+        "termRecordWriteMs": 6.051985999999943,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 0.6449010000001181,
+        "termRecordValidationMs": 0.48445200000014665,
+        "termLookupIndexEncodeMs": 1.9294039999999768
+      }
+    },
+    {
+      "index": 11,
+      "start": 1373.348623,
+      "end": 1424.20214,
+      "rowCount": 48299,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 35062,
+        "dedupNativeBulkPendingRows": 34367,
+        "dedupNativeExactCandidates": 695,
+        "dedupNativeCopiedInputBytes": 1562034,
+        "dedupNativeCopiedOutputBytes": 5560,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "serializationMs": 0,
+        "bulkAddTermsMs": 0,
+        "contentAppendMs": 50.483754999999974,
+        "dedupScanMs": 10.094540000000052,
+        "dedupCapacityMs": 0.014381999999841355,
+        "dedupCanonicalScanMs": 7.710428999999976,
+        "dedupExactCompareMs": 2.2205280000000585,
+        "contentStoreMs": 40.388213999999834,
+        "contentPackMs": 0.363742000000002,
+        "contentCompressMs": 37.744804999999815,
+        "contentEnvelopeMs": 0,
+        "contentReferenceMs": 1.8744320000000698,
+        "contentOpfsAppendMs": 0.06424700000002304,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "contentMetadataMs": 6.704979000000094,
+        "contentMetadataStageMs": 0,
+        "contentMetadataPublishMs": 6.704979000000094,
+        "contentMetadataProjectionMs": 0.006219000000101005,
+        "contentMetadataIndexPublishMs": 4.724648999999999,
+        "dedupPendingHitCount": 13237,
+        "dedupPersistedHitCount": 695,
+        "dedupUniqueCount": 34367,
+        "dedupExactFallbackCount": 695,
+        "dedupRecentSourceHitCount": 695,
+        "dedupRecentSourceCacheMs": 2.558601999999837,
+        "dedupRecentSourceCacheBytes": 9631061,
+        "dedupRecentSourceAdoptedBytes": 9631061,
+        "termRecordBuildMs": 0.004297000000178741,
+        "termRecordEncodeMs": 0.8015240000001995,
+        "termRecordWriteMs": 9.393174999999928,
+        "termsVtabInsertMs": 0,
+        "termRecordInternMs": 0,
+        "termRecordPackLengthsMs": 0,
+        "termRecordHeapCopyMs": 0,
+        "termRecordFieldEncodeMs": 0.7830870000000232,
+        "termRecordValidationMs": 0.5312109999999848,
+        "termLookupIndexEncodeMs": 1.8835759999999482
+      }
+    }
+  ],
+  "metricTotals": {
+    "dedupNativeCallCount": 12,
+    "dedupNativeScannedRows": 366030,
+    "dedupNativeBulkPendingRows": 362032,
+    "dedupNativeExactCandidates": 3998,
+    "dedupNativeCopiedInputBytes": 16788490,
+    "dedupNativeCopiedOutputBytes": 31984,
+    "dedupNativeSnapshotBytes": 0,
+    "dedupNativeFallbackCount": 0,
+    "dedupNativeFallbackEligibilityCount": 0,
+    "dedupNativeFallbackAssetCount": 0,
+    "dedupNativeFallbackUnsupportedCount": 0,
+    "mediaResolveMs": 0,
+    "mediaWriteMs": 0,
+    "serializationMs": 0,
+    "bulkAddTermsMs": 0,
+    "contentAppendMs": 487.466446,
+    "dedupScanMs": 137.2519699999998,
+    "dedupCapacityMs": 3.423992999999996,
+    "dedupCanonicalScanMs": 111.8790280000004,
+    "dedupExactCompareMs": 13.541696000000002,
+    "contentStoreMs": 350.06193099999996,
+    "contentPackMs": 5.848054000000161,
+    "contentCompressMs": 311.2879590000001,
+    "contentEnvelopeMs": 0,
+    "contentReferenceMs": 7.629525999999601,
+    "contentOpfsAppendMs": 14.47396600000036,
+    "contentInitialReservationCount": 1,
+    "contentInitialReservationSavingsMissCount": 0,
+    "contentMetadataMs": 60.41013300000009,
+    "contentMetadataStageMs": 0,
+    "contentMetadataPublishMs": 60.41013300000009,
+    "contentMetadataProjectionMs": 0.09304800000029445,
+    "contentMetadataIndexPublishMs": 45.996689000000174,
+    "dedupPendingHitCount": 162269,
+    "dedupPersistedHitCount": 3998,
+    "dedupUniqueCount": 362032,
+    "dedupExactFallbackCount": 3998,
+    "dedupRecentSourceHitCount": 3998,
+    "dedupRecentSourceCacheMs": 22.265023999999585,
+    "dedupRecentSourceCacheBytes": 101143281,
+    "dedupRecentSourceAdoptedBytes": 101143281,
+    "termRecordBuildMs": 0.04282299999965744,
+    "termRecordEncodeMs": 30.645353999999998,
+    "termRecordWriteMs": 79.11510199999998,
+    "termsVtabInsertMs": 0,
+    "termRecordInternMs": 0,
+    "termRecordPackLengthsMs": 0,
+    "termRecordHeapCopyMs": 0,
+    "termRecordFieldEncodeMs": 29.951013000000103,
+    "termRecordValidationMs": 17.079999000000043,
+    "termLookupIndexEncodeMs": 46.45529799999974
+  },
+  "finishMetrics": {
+    "elapsedMs": 111.66409599999997,
+    "commitMs": 0.03188799999998082,
+    "termContentEndImportSessionMs": 108.42575199999987,
+    "termContentEndImportSessionFlushPendingWritesMs": 0.06319400000006681,
+    "termContentEndImportSessionAwaitQueuedWritesMs": 0.001592999999957101,
+    "termContentEndImportSessionCloseWritableMs": 50.615540999999894,
+    "termContentDrainCycleCount": 3,
+    "termContentWriteCallCount": 3,
+    "termContentSingleChunkWriteCount": 0,
+    "termContentMergedWriteCount": 3,
+    "termContentTotalWriteBytes": 19566680,
+    "termContentMergedWriteBytes": 19566680,
+    "termContentMaxWriteBytes": 9507564,
+    "termContentMergedGroupChunkCount": 115,
+    "termContentMaxMergedGroupChunkCount": 56,
+    "termContentFlushDueToBytesCount": 0,
+    "termContentFlushDueToChunkCount": 0,
+    "termContentFlushFinalGroupCount": 3,
+    "termContentWriteCoalesceTargetBytes": 67108864,
+    "termContentWriteCoalesceMaxChunks": 8192,
+    "termContentWriteFlushThresholdBytes": 8388608,
+    "termRecordEndImportSessionMs": 11.276419999999916,
+    "termRecordEndImportSessionFlushPendingWritesMs": 10.371742999999924,
+    "termRecordEndImportSessionAwaitQueuedWritesMs": 0.031947999999829335,
+    "termRecordEndImportSessionCloseWritableMs": 0.6958770000001095,
+    "termRecordDrainCycleCount": 1,
+    "termRecordWriteCallCount": 1,
+    "termRecordSingleChunkWriteCount": 1,
+    "termRecordMergedWriteCount": 0,
+    "termRecordTotalWriteBytes": 45,
+    "termRecordMergedWriteBytes": 0,
+    "termRecordMaxWriteBytes": 45,
+    "termRecordMergedGroupChunkCount": 0,
+    "termRecordMaxMergedGroupChunkCount": 0,
+    "termRecordWriteCoalesceTargetBytes": 16777216,
+    "termRecordLookupIndexWriteCallCount": 5,
+    "termRecordLookupIndexWriteBytes": 23748912,
+    "compressionExperiments": {
+      "experimentalGenericSpanCompression": true,
+      "experimentalParserWorkers3": true,
+      "experimentalSkipFusedParse": false,
+      "experimentalLookupScratchReuse": true,
+      "experimentalNativeSegmentedLookup": true,
+      "experimentalDirectLookupArena": false,
+      "experimentalSinglePassLookupCompaction": false,
+      "experimentalTermBankSpans": false,
+      "experimentalNativeEscapedKeys": false,
+      "experimentalValidatedGlossaryReuse": true,
+      "experimentalFusedSingleBank": false,
+      "experimentalGlobalExactContentReuse": false,
+      "experimentalFastGlossaryNormalization": false
+    },
+    "termRecordLookupIndexAwaitMs": 0.0600289999999859,
+    "termRecordLookupIndexMaxQueuedBytes": 8786392,
+    "termRecordLookupIndexWorkerFileCount": 0,
+    "termsVirtualTableSyncMs": 0.016695000000026994,
+    "createIndexesMs": 0.0005909999999857973,
+    "createIndexesCheckpointCount": 0,
+    "cacheResetMs": 0.052848000000039974,
+    "runtimePragmasMs": 0.22165999999992891,
+    "totalMs": 110.630807,
+    "published": true,
+    "housekeepingErrors": []
+  },
+  "parserProfile": {
+    "parserProfile": {
+      "experiments": {
+        "experimentalGenericSpanCompression": true,
+        "experimentalParserWorkers3": true,
+        "experimentalSkipFusedParse": false,
+        "experimentalLookupScratchReuse": true,
+        "experimentalNativeSegmentedLookup": true,
+        "experimentalDirectLookupArena": false,
+        "experimentalSinglePassLookupCompaction": false,
+        "experimentalTermBankSpans": false,
+        "experimentalNativeEscapedKeys": false,
+        "experimentalValidatedGlossaryReuse": true,
+        "experimentalFusedSingleBank": false,
+        "experimentalGlobalExactContentReuse": false,
+        "experimentalFastGlossaryNormalization": false
+      },
+      "fusedParseAttempts": 12,
+      "fusedParseFallbacks": 0,
+      "discardedFusedParseMs": 0,
+      "discardedFusedRows": 0,
+      "bankSpanCount": 53,
+      "escapedKeyDecodeCount": 0,
+      "validatedGlossaryReuseCount": 54641,
+      "globalExactContentReuseCount": 0,
+      "fastGlossaryNormalizationCount": 0,
+      "fastGlossaryNormalizationFallbackCount": 0,
+      "fusedSingleBankGroups": 0,
+      "maxWasmHeapBytes": 43384832,
+      "bufferSetupMs": 673,
+      "allocationMs": 0,
+      "nativeStringPlanAllocationMs": 0,
+      "copyJsonMs": 0,
+      "parseBankMs": 653,
+      "encodeContentMs": 0,
+      "recentContentDedupHitCount": 154416,
+      "rowDecodeMs": 0,
+      "mediaHintRowsSkipped": 0,
+      "nativeStringPlanMs": 0,
+      "nativeStringPlanChunkCount": 12,
+      "nativeStringPlanFallbackChunkCount": 0,
+      "chunkDispatchMs": 247,
+      "sourcePreparationMs": 0.2300119999999879,
+      "sourceDeliveryMs": 8,
+      "sourceTransferredBytes": 15632849,
+      "sourceInflateMs": 215.71869800000013,
+      "sourceCrcMs": 0,
+      "sourceCrcScannedBytes": 0,
+      "sourceCrcReusedBytes": 0,
+      "sourceCrcReusedGlossaryCount": 0,
+      "sourceCompressedBytes": 15632849,
+      "sourceUncompressedBytes": 171617523,
+      "resultCopyMs": 246.45216599999992,
+      "resultDeliveryMs": 164,
+      "orderedSinkWaitMs": 1136.211261,
+      "borrowedContentResultCount": 0,
+      "nativeLookupScratchReusedBytes": 29954640,
+      "compactContentMetadataGroups": 0,
+      "compactContentMetadataBytesAvoided": 0,
+      "nativeLookupScratchReuseGroups": 12,
+      "nativeLookupScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "nativeSegmentedLookupFallbacks": 0,
+      "directLookupArenaSegments": 0,
+      "directLookupArenaCopiedBytesAvoided": 0,
+      "lookupCompactionSourceValidationPasses": 0,
+      "lookupIndexPrepareMs": 46.45529799999974,
+      "lookupIndexCompactMs": 0,
+      "lookupIndexEncodeMs": 46.45529799999974,
+      "rowCount": 528299,
+      "metaCapacity": 530000,
+      "metaAllocatedBytes": 36040000,
+      "encodedContentBytes": 101143985,
+      "contentCapacity": 125760000,
+      "initialContentBytesPerRow": 48,
+      "chunkCount": 12,
+      "chunkSize": 0,
+      "maxPendingChunks": 1,
+      "minimalDecode": true,
+      "includeContentMetadata": true,
+      "copyContentBytes": false,
+      "reuseExpressionForReadingDecode": true,
+      "skipTagRuleDecode": true,
+      "lazyGlossaryDecode": true,
+      "mediaHintFastScan": false,
+      "parallelWorkerCount": 3,
+      "parallelPipelineGroupsPerWorker": 4,
+      "parallelGroupCount": 12,
+      "parallelWorkerWallMs": 611.788804,
+      "parallelSourceReadWallMs": 120.43549500000006,
+      "parallelOwnedContentBytes": 101143985,
+      "parallelPeakQueuedOwnedContentBytes": 40222939
+    },
+    "materializationMs": 0,
+    "chunkSinkMs": 608,
+    "chunkCount": 12,
+    "totalRows": 528299
+  },
+  "workers": [
+    {
+      "id": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 31,
+        "result": 31
+      },
+      "sent": {
+        "job": 31
+      }
+    },
+    {
+      "id": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 25,
+        "result": 25
+      },
+      "sent": {
+        "job": 25
+      }
+    },
+    {
+      "id": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 24,
+        "result": 24
+      },
+      "sent": {
+        "job": 24
+      }
+    },
+    {
+      "id": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 23,
+        "result": 23
+      },
+      "sent": {
+        "job": 23
+      }
+    },
+    {
+      "id": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    },
+    {
+      "id": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    },
+    {
+      "id": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    }
+  ],
+  "workerEvents": [
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 548.708166
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 549.000091
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 551.326537
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 559.245105
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize",
+      "at": 597.410927
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize",
+      "at": 597.767388
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize",
+      "at": 598.082909
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 676.490567
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 680.567752
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready",
+      "at": 683.638737
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 1,
+      "at": 714.859392
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 2,
+      "at": 715.027773
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 3,
+      "at": 715.148032
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 1,
+      "at": 814.627775
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 4,
+      "at": 821.553764
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 1,
+      "at": 868.619587
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 2,
+      "at": 868.693727
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 3,
+      "at": 868.741088
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 4,
+      "at": 868.779906
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 5,
+      "at": 868.80982
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 6,
+      "at": 868.82319
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 7,
+      "at": 868.832234
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 8,
+      "at": 868.841507
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 9,
+      "at": 868.85687
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 2,
+      "at": 883.81096
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 5,
+      "at": 884.037407
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 1,
+      "at": 884.218347
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 2,
+      "at": 884.395951
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 2,
+      "at": 884.43518
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 6,
+      "at": 884.459937
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 3,
+      "at": 884.471344
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 3,
+      "at": 884.480367
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 7,
+      "at": 884.504914
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 7,
+      "at": 884.513647
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 4,
+      "at": 884.524423
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 1,
+      "at": 885.046511
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 6,
+      "at": 885.092269
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 3,
+      "at": 890.716398
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 6,
+      "at": 890.931499
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 5,
+      "at": 933.146695
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 5,
+      "at": 933.181416
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 9,
+      "at": 933.208477
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 9,
+      "at": 933.252282
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 4,
+      "at": 933.281395
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 8,
+      "at": 933.312572
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 8,
+      "at": 933.480472
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 4,
+      "at": 938.443496
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 7,
+      "at": 938.624546
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 10,
+      "at": 953.465117
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 11,
+      "at": 953.529212
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 12,
+      "at": 953.577755
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 13,
+      "at": 953.615761
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 14,
+      "at": 953.637704
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 15,
+      "at": 953.655941
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 16,
+      "at": 953.663452
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 17,
+      "at": 953.772565
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 18,
+      "at": 953.781318
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 10,
+      "at": 982.929334
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 10,
+      "at": 982.992769
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 14,
+      "at": 983.011657
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 14,
+      "at": 983.019949
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 18,
+      "at": 983.025938
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 18,
+      "at": 983.031727
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 11,
+      "at": 983.041451
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 11,
+      "at": 983.048552
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 15,
+      "at": 983.053119
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 15,
+      "at": 983.059058
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 12,
+      "at": 983.066509
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 12,
+      "at": 983.073159
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 16,
+      "at": 983.078507
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 16,
+      "at": 983.083083
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 13,
+      "at": 983.090755
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 13,
+      "at": 983.096914
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 17,
+      "at": 983.101871
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 17,
+      "at": 983.110224
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 19,
+      "at": 997.504881
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 20,
+      "at": 997.557489
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 21,
+      "at": 997.577389
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 22,
+      "at": 997.597228
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 23,
+      "at": 997.636557
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 24,
+      "at": 997.642275
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 25,
+      "at": 997.647052
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 26,
+      "at": 997.651078
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 27,
+      "at": 997.658279
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 5,
+      "at": 1013.26371
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 8,
+      "at": 1013.501955
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 6,
+      "at": 1013.577036
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 9,
+      "at": 1013.638819
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 19,
+      "at": 1013.808271
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 19,
+      "at": 1013.826969
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 23,
+      "at": 1013.838075
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 23,
+      "at": 1013.845126
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 27,
+      "at": 1013.851175
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 27,
+      "at": 1013.857645
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 20,
+      "at": 1013.8677
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 20,
+      "at": 1013.87481
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 24,
+      "at": 1013.880909
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 24,
+      "at": 1013.887529
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 21,
+      "at": 1013.897013
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 21,
+      "at": 1013.904444
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 25,
+      "at": 1013.909762
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 25,
+      "at": 1013.915701
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 22,
+      "at": 1013.923713
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 22,
+      "at": 1013.930553
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 26,
+      "at": 1013.935571
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 26,
+      "at": 1013.945556
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 28,
+      "at": 1045.896007
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 29,
+      "at": 1045.953263
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 30,
+      "at": 1045.976958
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 31,
+      "at": 1045.999512
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 32,
+      "at": 1046.021154
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 33,
+      "at": 1046.028395
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 34,
+      "at": 1046.034203
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 35,
+      "at": 1046.040012
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 36,
+      "at": 1046.047313
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 7,
+      "at": 1062.273217
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 10,
+      "at": 1062.56347
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 28,
+      "at": 1070.267208
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 28,
+      "at": 1070.371373
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 32,
+      "at": 1070.397692
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 32,
+      "at": 1070.406876
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 36,
+      "at": 1070.414177
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 36,
+      "at": 1070.420737
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 29,
+      "at": 1070.431092
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 29,
+      "at": 1070.439244
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 33,
+      "at": 1070.445223
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 33,
+      "at": 1070.451553
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 30,
+      "at": 1070.460656
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 30,
+      "at": 1070.469059
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 34,
+      "at": 1070.47646
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 34,
+      "at": 1070.507606
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 31,
+      "at": 1070.518502
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 31,
+      "at": 1070.525613
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 35,
+      "at": 1070.530881
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 35,
+      "at": 1070.541977
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 37,
+      "at": 1081.015111
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 38,
+      "at": 1081.067939
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 39,
+      "at": 1081.08881
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 40,
+      "at": 1081.107288
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 41,
+      "at": 1081.127138
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 42,
+      "at": 1081.132235
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 43,
+      "at": 1081.138454
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 44,
+      "at": 1081.14246
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 45,
+      "at": 1081.15532
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 8,
+      "at": 1092.476077
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 11,
+      "at": 1092.621433
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 9,
+      "at": 1092.717246
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 12,
+      "at": 1092.794311
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 37,
+      "at": 1108.841389
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 37,
+      "at": 1108.875079
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 41,
+      "at": 1108.898644
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 41,
+      "at": 1108.908729
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 45,
+      "at": 1108.918113
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 45,
+      "at": 1108.926836
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 38,
+      "at": 1108.939886
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 38,
+      "at": 1108.94987
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 42,
+      "at": 1108.957612
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 42,
+      "at": 1108.964853
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 39,
+      "at": 1108.97618
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 39,
+      "at": 1108.985894
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 43,
+      "at": 1108.995719
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 43,
+      "at": 1109.004892
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 40,
+      "at": 1109.01667
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 40,
+      "at": 1109.026665
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 44,
+      "at": 1109.033745
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 44,
+      "at": 1109.046354
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 46,
+      "at": 1119.772706
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 47,
+      "at": 1119.831633
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 48,
+      "at": 1119.856561
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 49,
+      "at": 1119.878744
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 50,
+      "at": 1119.899835
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 51,
+      "at": 1119.907286
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 52,
+      "at": 1119.913565
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 53,
+      "at": 1119.920285
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 54,
+      "at": 1119.927056
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 46,
+      "at": 1128.775869
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 46,
+      "at": 1128.809659
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 50,
+      "at": 1128.829889
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 50,
+      "at": 1128.841927
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 54,
+      "at": 1128.850981
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 54,
+      "at": 1128.859704
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 47,
+      "at": 1128.872332
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 47,
+      "at": 1128.882578
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 51,
+      "at": 1128.891791
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 48,
+      "at": 1128.901396
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 48,
+      "at": 1128.910569
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 52,
+      "at": 1128.919573
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 49,
+      "at": 1128.93116
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 49,
+      "at": 1128.941185
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 53,
+      "at": 1128.988285
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 53,
+      "at": 1129.003458
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 51,
+      "at": 1129.949978
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 52,
+      "at": 1131.811281
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 55,
+      "at": 1140.940924
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 56,
+      "at": 1140.995555
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 57,
+      "at": 1141.020733
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 58,
+      "at": 1141.042184
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 59,
+      "at": 1141.066471
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 60,
+      "at": 1141.075684
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 61,
+      "at": 1141.084337
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 10,
+      "at": 1155.253097
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 55,
+      "at": 1157.366446
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 55,
+      "at": 1157.391083
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 59,
+      "at": 1157.406576
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 59,
+      "at": 1157.41587
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 56,
+      "at": 1157.427457
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 56,
+      "at": 1157.43615
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 60,
+      "at": 1157.443731
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 60,
+      "at": 1157.451723
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 57,
+      "at": 1157.461918
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 57,
+      "at": 1157.470841
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 61,
+      "at": 1157.478333
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 61,
+      "at": 1157.486555
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 58,
+      "at": 1157.497281
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 58,
+      "at": 1157.511472
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 62,
+      "at": 1170.741483
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 63,
+      "at": 1170.79983
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 64,
+      "at": 1170.824106
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 65,
+      "at": 1170.848222
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 66,
+      "at": 1170.871476
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 67,
+      "at": 1170.878367
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 68,
+      "at": 1170.886909
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 69,
+      "at": 1170.89376
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 11,
+      "at": 1183.070942
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 62,
+      "at": 1183.205923
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 62,
+      "at": 1183.225983
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 66,
+      "at": 1183.240304
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 66,
+      "at": 1183.252563
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 63,
+      "at": 1183.271511
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 63,
+      "at": 1183.311931
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 67,
+      "at": 1183.323989
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 67,
+      "at": 1183.333734
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 64,
+      "at": 1183.346252
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 64,
+      "at": 1183.356478
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 68,
+      "at": 1183.363849
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 68,
+      "at": 1183.372572
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 65,
+      "at": 1183.384429
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 65,
+      "at": 1183.394604
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 69,
+      "at": 1183.402386
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 69,
+      "at": 1183.416567
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 70,
+      "at": 1193.863692
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 71,
+      "at": 1193.919686
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 72,
+      "at": 1193.944092
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 73,
+      "at": 1193.965404
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 74,
+      "at": 1193.986095
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 75,
+      "at": 1193.992174
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 76,
+      "at": 1193.997442
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 77,
+      "at": 1194.003
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 12,
+      "at": 1205.242956
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 70,
+      "at": 1210.50158
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 70,
+      "at": 1210.524875
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 74,
+      "at": 1210.538085
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 74,
+      "at": 1210.545907
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 71,
+      "at": 1210.557904
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 71,
+      "at": 1210.566037
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 75,
+      "at": 1210.571495
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 75,
+      "at": 1210.577884
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 72,
+      "at": 1210.586757
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 72,
+      "at": 1210.594579
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 76,
+      "at": 1210.600097
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 76,
+      "at": 1210.605726
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 73,
+      "at": 1210.61549
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 73,
+      "at": 1210.623282
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 77,
+      "at": 1210.629141
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 77,
+      "at": 1210.64201
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 78,
+      "at": 1334.875683
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 79,
+      "at": 1334.928082
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 80,
+      "at": 1334.951456
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 81,
+      "at": 1334.972428
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 82,
+      "at": 1334.99398
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 83,
+      "at": 1334.998767
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 84,
+      "at": 1335.003975
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 85,
+      "at": 1335.008812
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 78,
+      "at": 1348.680982
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 78,
+      "at": 1348.737696
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 82,
+      "at": 1348.755122
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 82,
+      "at": 1348.763715
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 79,
+      "at": 1348.77419
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 79,
+      "at": 1348.782853
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 83,
+      "at": 1348.788812
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 83,
+      "at": 1348.795011
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 80,
+      "at": 1348.803724
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 80,
+      "at": 1348.829373
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 84,
+      "at": 1348.835502
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 84,
+      "at": 1348.841451
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 81,
+      "at": 1348.849683
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 81,
+      "at": 1348.869052
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 85,
+      "at": 1348.876653
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 85,
+      "at": 1348.887649
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 86,
+      "at": 1359.690986
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 87,
+      "at": 1359.749042
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 88,
+      "at": 1359.782893
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 89,
+      "at": 1359.803643
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 90,
+      "at": 1359.844424
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 91,
+      "at": 1359.864574
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 92,
+      "at": 1359.868941
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 93,
+      "at": 1359.883703
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 86,
+      "at": 1371.41983
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 86,
+      "at": 1371.464406
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 90,
+      "at": 1371.477706
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 90,
+      "at": 1371.484877
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 87,
+      "at": 1371.494231
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 87,
+      "at": 1371.516624
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 91,
+      "at": 1371.522192
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 91,
+      "at": 1371.52725
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 88,
+      "at": 1371.534551
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 88,
+      "at": 1371.552447
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 92,
+      "at": 1371.557745
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 92,
+      "at": 1371.563153
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 89,
+      "at": 1371.568842
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 89,
+      "at": 1371.575802
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 93,
+      "at": 1371.593098
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 93,
+      "at": 1371.600649
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 94,
+      "at": 1384.748899
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 95,
+      "at": 1384.805804
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 96,
+      "at": 1384.832073
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 97,
+      "at": 1384.862608
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 98,
+      "at": 1384.881516
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 99,
+      "at": 1384.898432
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 100,
+      "at": 1384.90394
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 101,
+      "at": 1384.919603
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 102,
+      "at": 1384.936468
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 103,
+      "at": 1384.943489
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 94,
+      "at": 1420.387376
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 94,
+      "at": 1420.414176
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 98,
+      "at": 1420.477841
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 98,
+      "at": 1420.491902
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 102,
+      "at": 1420.499493
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 102,
+      "at": 1420.506253
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 95,
+      "at": 1420.529468
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 95,
+      "at": 1420.537209
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 99,
+      "at": 1420.543869
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 99,
+      "at": 1420.549468
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 103,
+      "at": 1420.554315
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 103,
+      "at": 1420.572191
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 96,
+      "at": 1420.603778
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 96,
+      "at": 1420.611881
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 100,
+      "at": 1420.619342
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 100,
+      "at": 1420.639221
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 97,
+      "at": 1420.65825
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 97,
+      "at": 1420.666011
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 101,
+      "at": 1420.67181
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 101,
+      "at": 1420.694474
+    }
+  ],
+  "sourceMediaWorkerReceipts": [],
+  "timeline": [],
+  "progress": [
+    {
+      "index": 0,
+      "count": 0,
+      "nextStep": true,
+      "observedAt": 572.200336
+    },
+    {
+      "index": 0,
+      "count": 108000,
+      "nextStep": true,
+      "observedAt": 587.161266
+    },
+    {
+      "index": 8982,
+      "count": 108000,
+      "nextStep": false,
+      "observedAt": 937.621902
+    },
+    {
+      "index": 30541,
+      "count": 108000,
+      "nextStep": false,
+      "observedAt": 1072.407297
+    },
+    {
+      "index": 64675,
+      "count": 108000,
+      "nextStep": false,
+      "observedAt": 1184.98231
+    },
+    {
+      "index": 79048,
+      "count": 108000,
+      "nextStep": false,
+      "observedAt": 1350.578789
+    },
+    {
+      "index": 108000,
+      "count": 108000,
+      "nextStep": false,
+      "observedAt": 1500.30238
+    },
+    {
+      "index": 0,
+      "count": 0,
+      "nextStep": true,
+      "observedAt": 1500.802996
+    }
+  ],
+  "compressionCensus": {
+    "measurement": "Untimed correctness census; callback hashing perturbs import latency",
+    "groups": [
+      {
+        "index": 0,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8486982,
+        "originalDescriptorCount": 34951,
+        "originalColumnBytes": 279608,
+        "originalOffsetsSha256": "ef07ff5194e4a8db1613c16d4d2ff1e2c38324adc563083ec3d891734151841d",
+        "originalLengthsSha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 9,
+          "columnBytes": 72,
+          "offsetsSha256": "afe8e1a28bd479b61d56d853bea51ff0557c09703f2da85d97687a40e4b37a1a",
+          "lengthsSha256": "b9a490b1c8c658d05146325d36b7da34c464f4e7be001be80e9b475d55b3b59c",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "blockLengths": [
+            1048470,
+            1048562,
+            1048567,
+            1048508,
+            1048558,
+            1048458,
+            1048352,
+            1048351,
+            99156
+          ],
+          "metadataSnapshotBytes": 72
+        },
+        "references": {
+          "count": 34951,
+          "offsetsSha256": "78ccd2bd3bd99601fc5f4948ad3f81d4dfe4da3402ba44ac7b470128aa1c1441",
+          "lengthsSha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 110332,
+            "sha256": "eba2f093843f477a9b45a143ba6af8fcf778866d46cc203adecbae2a7ac6db43"
+          },
+          {
+            "byteLength": 109825,
+            "sha256": "bda1dab5fbdee066dc2d2074198b1fb760ed1af57f69653736c78dcf1435947f"
+          },
+          {
+            "byteLength": 110091,
+            "sha256": "9b5a0f769ee99f1bd8774bbc83347c0113a1756c1aa929c5299a4b44d7cecd31"
+          },
+          {
+            "byteLength": 106987,
+            "sha256": "81c4a54df1aafc9e5ffd7bcdfd1e9be1f1ae6e66381726be3dc85a12abff3d6c"
+          },
+          {
+            "byteLength": 109735,
+            "sha256": "af2cf4a52101fd56d444f94d9f1ebe5e80bb4c811084b79387c0c3e451509c8a"
+          },
+          {
+            "byteLength": 109212,
+            "sha256": "19d9614fb8291d1c9507ad8abfb0c40c7c1e0b2897f0034e0dde2290d2d3aeef"
+          },
+          {
+            "byteLength": 111306,
+            "sha256": "226e1da66fe33b6f811cd0d1cf243eb6b89a5d2adb1718681ee6c5e2c55f74f6"
+          },
+          {
+            "byteLength": 113685,
+            "sha256": "e04caf4d7524257ea34d5c5887b8d06e0f6741cea823df1b2be2ce70fb632a76"
+          },
+          {
+            "byteLength": 12293,
+            "sha256": "77532b1d9fd99395a8f75c547594c04e839abdd2fbec1bb41a0a8c99602c2631"
+          }
+        ],
+        "compressedFramesSha256": "aa62cad9769eafbc7f01412cfb0500b2471a465d6619ab475da069a2ba74d9d6",
+        "compressedFrameBytes": 893466,
+        "wrapped": true,
+        "finalCompressedBytes": 893466,
+        "finalUncompressedBytes": 8486982
+      },
+      {
+        "index": 1,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9427894,
+        "originalDescriptorCount": 32739,
+        "originalColumnBytes": 261912,
+        "originalOffsetsSha256": "71f117e7ca2628c2814f9a3cf7810b0130f6278a1d13df4834e5ff23a235715a",
+        "originalLengthsSha256": "3419759a9f67135c0334ea0e7d4a135e465260bc12c6d7021327355090600ac5",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 124,
+          "columnBytes": 992,
+          "offsetsSha256": "bfbceb8ebf7f083ffe7ce49fa6aa590ea3c8335a8569d87644000a74d3e2f40f",
+          "lengthsSha256": "78d330063a46a61f644089af7fd52b6ca754731ccbfc71494524db098544792b",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            15,
+            27,
+            37,
+            44,
+            59,
+            74,
+            89,
+            104,
+            124
+          ],
+          "blockLengths": [
+            1048340,
+            1048391,
+            1048467,
+            1048535,
+            1048527,
+            1048555,
+            1048530,
+            1048536,
+            1016594
+          ],
+          "metadataSnapshotBytes": 992
+        },
+        "references": {
+          "count": 32739,
+          "offsetsSha256": "cf63619232463db1b731a26e0ea4abf83654c5e9f57e73c994486c88e47854aa",
+          "lengthsSha256": "3419759a9f67135c0334ea0e7d4a135e465260bc12c6d7021327355090600ac5",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 114372,
+            "sha256": "5627cf90c1125de785a6eaa41f018635611cbf61da77c7dc665c0d10b4e8733b"
+          },
+          {
+            "byteLength": 110222,
+            "sha256": "ac845f5965303bd388f2d48a940f7abebe833d4fce15ce9a661d3e43409f905e"
+          },
+          {
+            "byteLength": 115814,
+            "sha256": "ac7ec3b2c902c998abc83eb82cc047d710311af76a20098e6f10b30c43d17735"
+          },
+          {
+            "byteLength": 115543,
+            "sha256": "a7fdd09986ded09ce79830dcd5c95f5cda5744409960e7c3a187bd444e3d074b"
+          },
+          {
+            "byteLength": 115897,
+            "sha256": "a8dd6bf1e68e23fb45710d32299d96289ba4cf5aa0b794e8f35fe57093691884"
+          },
+          {
+            "byteLength": 115738,
+            "sha256": "4b16415fbda95909bee0c2d428c996587e748f36fff95f1ddd29c86d4c15adfb"
+          },
+          {
+            "byteLength": 113850,
+            "sha256": "23eb8f3e42118f7b9c4a6ed18dd9d1cb021e802416db9e5ec71dea0a1adea683"
+          },
+          {
+            "byteLength": 115626,
+            "sha256": "2fe156f5a6ccf192e7a8a2a808fa5da7d7294fcbb8cb568ab284abcf7bc1993e"
+          },
+          {
+            "byteLength": 109783,
+            "sha256": "c6b5cd8a8da152a200da72eef8a531987dd2200723192a21bb14c1ca6cb99854"
+          }
+        ],
+        "compressedFramesSha256": "448f6c05cb8c455d5bf7d45c0d82ec5c2f2363c7966060c84ca670eac9c783f0",
+        "compressedFrameBytes": 1026845,
+        "wrapped": true,
+        "finalCompressedBytes": 1026845,
+        "finalUncompressedBytes": 9404475
+      },
+      {
+        "index": 2,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9272798,
+        "originalDescriptorCount": 32256,
+        "originalColumnBytes": 258048,
+        "originalOffsetsSha256": "dc075ea3f0bd7fe5a8ec802793f2a5febbd50aed75538cfa88783af62581c6fe",
+        "originalLengthsSha256": "b1e67c18e5ddf82d66e5c13956c2ed1524571d3448f7594e95070d63a6fa781b",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 168,
+          "columnBytes": 1344,
+          "offsetsSha256": "a990102c34da9846ec4df95bf9f0ba11773364c971fc135b6dc98257665cfdf7",
+          "lengthsSha256": "7ea07a92ba804432fb2710646c7b75829b2f419cb8f614b9b4f0b01c094e59a1",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            20,
+            42,
+            53,
+            78,
+            88,
+            107,
+            126,
+            143,
+            168
+          ],
+          "blockLengths": [
+            1048412,
+            1048443,
+            1048564,
+            1048405,
+            1048428,
+            1048008,
+            1048334,
+            1048469,
+            853386
+          ],
+          "metadataSnapshotBytes": 1344
+        },
+        "references": {
+          "count": 32256,
+          "offsetsSha256": "ceca00c7a2ff811bf104c40458cd4ef9e55ef8ea06c464ae87ec518b2044e324",
+          "lengthsSha256": "b1e67c18e5ddf82d66e5c13956c2ed1524571d3448f7594e95070d63a6fa781b",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 115586,
+            "sha256": "d1b7c11cc1e9d945bcdda90b7a753eccd85d7044ddefaef098d2ad5a8583fea7"
+          },
+          {
+            "byteLength": 116843,
+            "sha256": "750da548d77c52166268e045c4dc26e151652420e33a1cbc9918d2b9b379086a"
+          },
+          {
+            "byteLength": 114990,
+            "sha256": "1d834ec320733ce07cca607f985af8cbbc8e1c44d79a5e7cc56af39d887596ec"
+          },
+          {
+            "byteLength": 116882,
+            "sha256": "ba54c95a90bec39a80dbe129ed32c38def544722ee889ea6f3fdd520dbcf473f"
+          },
+          {
+            "byteLength": 116084,
+            "sha256": "dfd57cf858ae8de4625c884487f490aa30c22b52a20f9c44084df29dcd8ff7ca"
+          },
+          {
+            "byteLength": 116163,
+            "sha256": "fc290970a5585d97b9a18ab2d6b5cefaf84701e2b754cc4624f435e35481cc02"
+          },
+          {
+            "byteLength": 119714,
+            "sha256": "2bf1c557c129fbbb68d2b1a05ddac1c8330c208f00338be5a139811625dba7b4"
+          },
+          {
+            "byteLength": 118631,
+            "sha256": "9f078271fc4322b57bd0a605fd82b614e8021c9ca5aa6856524548c465e15de6"
+          },
+          {
+            "byteLength": 94618,
+            "sha256": "3389650b2e5d4d6cb8b228a7b32560794f3ec951e72ce146ead75e607a9b6e4d"
+          }
+        ],
+        "compressedFramesSha256": "75415546f8e82caacb9db49d18757a52abd987ffe1b3c18e53ba92183e32be26",
+        "compressedFrameBytes": 1029511,
+        "wrapped": true,
+        "finalCompressedBytes": 1029511,
+        "finalUncompressedBytes": 9240449
+      },
+      {
+        "index": 3,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8619220,
+        "originalDescriptorCount": 28758,
+        "originalColumnBytes": 230064,
+        "originalOffsetsSha256": "68c8f50de20e6c70f7735e90477ec7ef1720d975160a34fb5271c3a176898e2c",
+        "originalLengthsSha256": "2aa05498a74298f3725f38d4e06bd9615da3f6ace7af0d6cd4e31e021834b794",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 146,
+          "columnBytes": 1168,
+          "offsetsSha256": "051608add7fae43e4358ba17b5b6b7de49ef1e2e13c3f97dd1cb6a3fbce6062d",
+          "lengthsSha256": "fb7d4c8b67ef94f48ff5fdd06c4b94ab89711d19999165367a7d20b6f9510552",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            23,
+            48,
+            64,
+            82,
+            103,
+            115,
+            132,
+            139,
+            146
+          ],
+          "blockLengths": [
+            1048364,
+            1048375,
+            1048431,
+            1047797,
+            1048454,
+            1048308,
+            1048394,
+            1048232,
+            202873
+          ],
+          "metadataSnapshotBytes": 1168
+        },
+        "references": {
+          "count": 28758,
+          "offsetsSha256": "5a5804d7058edd5a7b6b99e7fcd6b2ad32ff61f0ab38c582b11c65b275a3e7df",
+          "lengthsSha256": "2aa05498a74298f3725f38d4e06bd9615da3f6ace7af0d6cd4e31e021834b794",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 117756,
+            "sha256": "3144e90d3101f3ee3009b9394842e0381e9d3acf70a532ef7312832d57f47f0f"
+          },
+          {
+            "byteLength": 118068,
+            "sha256": "61c036e830c694579df5dadecbbfd9b48bf87f44b6af8ec6e624b86a2300f868"
+          },
+          {
+            "byteLength": 115155,
+            "sha256": "4f2d34884b23286e8aee057639ea156148ed010f9d2d85e0d0b0e592762bc2b1"
+          },
+          {
+            "byteLength": 79070,
+            "sha256": "8f7ab03975d350c583eb60f1cbda74a693531d68e40494d0b2745edb7e33d8db"
+          },
+          {
+            "byteLength": 89298,
+            "sha256": "79b068a6b2032747c8d8c293c9d6293f3d7fed057ea22ea3ca7ee2de7ada407c"
+          },
+          {
+            "byteLength": 104385,
+            "sha256": "8dbab5730d23db370045faee9a0ffa032976102246f1648481883b51d4969202"
+          },
+          {
+            "byteLength": 103916,
+            "sha256": "4bc3152749a724c2c85327895a39f0c13a06cd8924312d143a1fdf777dc03086"
+          },
+          {
+            "byteLength": 117211,
+            "sha256": "0681fe1c49b7f4cacfc501cb6f702fba32a5e014bbc01f004077004b2ef306ae"
+          },
+          {
+            "byteLength": 26331,
+            "sha256": "845535b2aeb11eb213f76042dafe6158a3e081b44843a781d7711b0a36e3d58b"
+          }
+        ],
+        "compressedFramesSha256": "0c4c808d5a917eabaa873c3eff5dad764dc0bd7a555edca87282fc78d8e6606f",
+        "compressedFrameBytes": 871190,
+        "wrapped": true,
+        "finalCompressedBytes": 871190,
+        "finalUncompressedBytes": 8589228
+      },
+      {
+        "index": 4,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8782091,
+        "originalDescriptorCount": 34159,
+        "originalColumnBytes": 273272,
+        "originalOffsetsSha256": "7e6761123c3811da417fe02408b48e1bc40a5d356ba257fee6771682a6b76ddd",
+        "originalLengthsSha256": "6d2a47865efbd12a679ce73410ae7d4c18115571644a2d6568dde13a92b9d646",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 500,
+          "columnBytes": 4000,
+          "offsetsSha256": "8e091b22d3e75eed3f01b2a795cd233fb9b7699aafa7fa76e9586fffcdf162c3",
+          "lengthsSha256": "d355841a8f4faea9107e9ab9ad737c63f669c836d19c7dfef2f27f8db33be399",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            18,
+            59,
+            140,
+            212,
+            289,
+            357,
+            439,
+            489,
+            500
+          ],
+          "blockLengths": [
+            1048259,
+            1048452,
+            1048533,
+            1048133,
+            1048489,
+            1048493,
+            1048398,
+            1048434,
+            292257
+          ],
+          "metadataSnapshotBytes": 4000
+        },
+        "references": {
+          "count": 34159,
+          "offsetsSha256": "a76f3923193a1fa6e1643c01ea47b63a3afbb89fe10ef54707a63b96431e28e7",
+          "lengthsSha256": "6d2a47865efbd12a679ce73410ae7d4c18115571644a2d6568dde13a92b9d646",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 134847,
+            "sha256": "b243ba98c124e995b042371c6a8b08cd509a6bf128be4010f49a41109e0e7fec"
+          },
+          {
+            "byteLength": 117063,
+            "sha256": "489fb26b999660228167cbe22371ba655e16d2f1953da6cb2554b2cb047b2211"
+          },
+          {
+            "byteLength": 128068,
+            "sha256": "8fedbee4cd051597491f9ff8ee71be80b9bcf752340fa9e1ac31c8f5eb6f1a91"
+          },
+          {
+            "byteLength": 132124,
+            "sha256": "e57ca48195d9bbf9f10e369a26f29ca0667ef3be0e9ba439f200fe9f06aa5a6e"
+          },
+          {
+            "byteLength": 128694,
+            "sha256": "e7f546e29ce4859adffa0ec95affcde76fd1a9a314365084576bb8bfdb6cae2a"
+          },
+          {
+            "byteLength": 132583,
+            "sha256": "0e1c85e66a2d1eb32deb6e028d6bab4ee88d15fab66c5873bfccc52dbb774a2c"
+          },
+          {
+            "byteLength": 127866,
+            "sha256": "54e3d8e8a8bbb0d05c23da482747e9e5e0f19fdb398f0d244c71a0a96c0b5ddf"
+          },
+          {
+            "byteLength": 130798,
+            "sha256": "bf461ed3d3253bbfc5786909231418d9d10e663ec16114ee78e40d36f3563666"
+          },
+          {
+            "byteLength": 39793,
+            "sha256": "57b891941b456bc63811d31aee1a57352ff6f1bf72881ca5220f6b42c0da7cd3"
+          }
+        ],
+        "compressedFramesSha256": "08ac4b48aef9c8d8e1a7a02602cddf4c374a7b90372ddf4449d52ce47d263bf4",
+        "compressedFrameBytes": 1071836,
+        "wrapped": true,
+        "finalCompressedBytes": 1071836,
+        "finalUncompressedBytes": 8679448
+      },
+      {
+        "index": 5,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9009676,
+        "originalDescriptorCount": 33543,
+        "originalColumnBytes": 268344,
+        "originalOffsetsSha256": "d105d2e7d336b5066b9dbb81fe55c666dd571e632fc4a4616b5b53a21e8122d0",
+        "originalLengthsSha256": "6c580ef73f78c3261f3458d4551396598001fed63802014152af1edc3ffcf3f5",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 457,
+          "columnBytes": 3656,
+          "offsetsSha256": "3eb4411ce946260a985fc85779b06cb77f850a5c3a6be546b1035fb12ad7e2b0",
+          "lengthsSha256": "a46a2160bfb88f24ff9669a23ae050ff2690954ae9c82827d3f2d1b6cfd550ca",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            79,
+            183,
+            273,
+            334,
+            362,
+            378,
+            406,
+            443,
+            457
+          ],
+          "blockLengths": [
+            1048248,
+            1048323,
+            1047969,
+            1048398,
+            1048350,
+            1048097,
+            1048474,
+            1048118,
+            529209
+          ],
+          "metadataSnapshotBytes": 3656
+        },
+        "references": {
+          "count": 33543,
+          "offsetsSha256": "a8dc86b6020fc2c5d2b6b5f969a211c1462024fc1554a02f32a3c52a5db69ad3",
+          "lengthsSha256": "6c580ef73f78c3261f3458d4551396598001fed63802014152af1edc3ffcf3f5",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 134893,
+            "sha256": "4cdacdd2b8ca4d8c5b4c791131af38d9414aad6f895cb1e0c00452d4f3e720d1"
+          },
+          {
+            "byteLength": 131627,
+            "sha256": "3d35a3949dfccda1370bfd28086df28c635af3c7550581dc7eddcbcea6285f25"
+          },
+          {
+            "byteLength": 123783,
+            "sha256": "5a730b15753f900217fb6187ff53fc183088eec0fb2c6b1aa8d94cc86c94682e"
+          },
+          {
+            "byteLength": 126986,
+            "sha256": "68977bcbf8e6cac820042a04cea05f0d6eba41991027648d5b1a62bc6197f5fd"
+          },
+          {
+            "byteLength": 151615,
+            "sha256": "b5ce5e59d445b46e7e59d73bb62aef263a96073a0f04367b1f54c1a6975a8cf9"
+          },
+          {
+            "byteLength": 158469,
+            "sha256": "b4384c8af458cead9fd3e5fb33ec359c24183bf7d42fb1f23355306f67fcb6d9"
+          },
+          {
+            "byteLength": 145604,
+            "sha256": "3c2cedd656d2625abaac2523e293c01fdee29c0bbab2d47132ffb9551f7d717f"
+          },
+          {
+            "byteLength": 147816,
+            "sha256": "94d681a2ebca00f37f905aecf263eeb14daf52080bf8fadb45010cb93e723f60"
+          },
+          {
+            "byteLength": 76782,
+            "sha256": "780839b4bc44c807c67b87c2e0aa0a0ce812c0278ca0f224cd2bc5de13d2946c"
+          }
+        ],
+        "compressedFramesSha256": "55cd775676a4f31e3c4b08910c951411ab321e5fb79ba79b0ee91d22e94292cb",
+        "compressedFrameBytes": 1197575,
+        "wrapped": true,
+        "finalCompressedBytes": 1197575,
+        "finalUncompressedBytes": 8915186
+      },
+      {
+        "index": 6,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7077918,
+        "originalDescriptorCount": 24030,
+        "originalColumnBytes": 192240,
+        "originalOffsetsSha256": "374de31efcc48f49f0fb464a7df1a88c5b74cb0ec92be68213a9abdf80aa8859",
+        "originalLengthsSha256": "2d67a6c660548abb4d2d64bcd0347c95f1d66b531b1ff4014b080af898b139e4",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 240,
+          "columnBytes": 1920,
+          "offsetsSha256": "cb6f759d767c39d0c0f5a3e5026b974699b05e94fa9de88e482d200edf5a3e28",
+          "lengthsSha256": "b40d0b9241c210440f46b6da8dc848794a076700047bb3fd230457e6b67228c9",
+          "blockCount": 7,
+          "blockStartIndexes": [
+            0,
+            56,
+            91,
+            129,
+            164,
+            185,
+            215,
+            240
+          ],
+          "blockLengths": [
+            1048478,
+            1048569,
+            1048568,
+            1048341,
+            1048154,
+            1048519,
+            734395
+          ],
+          "metadataSnapshotBytes": 1920
+        },
+        "references": {
+          "count": 24030,
+          "offsetsSha256": "96847d02f61732d4b38c1f4650bcdb42943872810bc4785fe3c8c32983f35ac3",
+          "lengthsSha256": "2d67a6c660548abb4d2d64bcd0347c95f1d66b531b1ff4014b080af898b139e4",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 147089,
+            "sha256": "6db7b889d8bc7ac4b9da80021f1d48173f578ef321e2e319de41ff737701804e"
+          },
+          {
+            "byteLength": 135985,
+            "sha256": "3b5683ee87f58923f4456f9f79e4824e6b6cda74d4766885535adf808c2a639e"
+          },
+          {
+            "byteLength": 135956,
+            "sha256": "8a34fe779ed597b29cb99323bdcbcd1c2ce7417bbd49c7b2ffe4dbf4e9bdf25b"
+          },
+          {
+            "byteLength": 134204,
+            "sha256": "054e4490f23320361ea27dc951b6abb79ea2b329b0b1ed59fe46812976d664a7"
+          },
+          {
+            "byteLength": 127342,
+            "sha256": "2d3c1c4202d365ab1be26bb3c0d67f80e7d11ccbfe6b18b623a3ca137a6e39ad"
+          },
+          {
+            "byteLength": 135723,
+            "sha256": "d4e9c9b37cfa712acacdfcc26a5aeafbdeb22c7b4ea567b28bfcbcdfb2236af8"
+          },
+          {
+            "byteLength": 83647,
+            "sha256": "15308845234584d61c40cbad52bb89711805148f9e4c1cf63089390ed97c514b"
+          }
+        ],
+        "compressedFramesSha256": "9514a8f9a759d06d463c07f1b632a1832bf97c16e3b15ff71c86bec5426f53bf",
+        "compressedFrameBytes": 899946,
+        "wrapped": true,
+        "finalCompressedBytes": 899946,
+        "finalUncompressedBytes": 7025024
+      },
+      {
+        "index": 7,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7502995,
+        "originalDescriptorCount": 31330,
+        "originalColumnBytes": 250640,
+        "originalOffsetsSha256": "8323b875abc349c547e993d9e5b96b2f4d34cc2ea3899c3bca584b60e3875940",
+        "originalLengthsSha256": "b9e2b6e494d49d8f64f8648fb52c7ad6464b37e710c8f122776b1b984d1cd82d",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 548,
+          "columnBytes": 4384,
+          "offsetsSha256": "445cdd85c397af36d17974a38db6f57ddef3a0c85ccdb2236b64fc0e5132f2c0",
+          "lengthsSha256": "a8d1eab0d578c2320ed33c478fd7d79117ffd75651c57b5116032329dce88fb4",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            41,
+            120,
+            166,
+            235,
+            366,
+            505,
+            547,
+            548
+          ],
+          "blockLengths": [
+            1048464,
+            1048430,
+            1048216,
+            1048545,
+            1048491,
+            1048022,
+            1048490,
+            46105
+          ],
+          "metadataSnapshotBytes": 4384
+        },
+        "references": {
+          "count": 31330,
+          "offsetsSha256": "25a96c2c499838b722f1acd894e279185ec8b35e8a43b5acf5adf19d593db27a",
+          "lengthsSha256": "b9e2b6e494d49d8f64f8648fb52c7ad6464b37e710c8f122776b1b984d1cd82d",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 96221,
+            "sha256": "43da94a5669618501be31006cf338d25e81032583fe03d5979e2268ef3481b6a"
+          },
+          {
+            "byteLength": 85817,
+            "sha256": "6f38db9b488ad33b9f0bd7eb1f175e32ee3e7b3a985118aa5d2cea3391b62408"
+          },
+          {
+            "byteLength": 149943,
+            "sha256": "66737719b5b2371371c8b6bf016677bee77fe25899711fe87df4bdeeab60b5a4"
+          },
+          {
+            "byteLength": 136711,
+            "sha256": "3706d0905ae087eeb59585732b7124da159f290a55339672c13479e9e13fc56f"
+          },
+          {
+            "byteLength": 129438,
+            "sha256": "210a7eb0961edfeec8351dd9ce19554fa4dde5bbe5537647f3a0fa0d6f8effb7"
+          },
+          {
+            "byteLength": 125537,
+            "sha256": "8bd652802e48f9f116f1dc1fd0e0852610812ab0f0e8e2988ef71c10067d12a4"
+          },
+          {
+            "byteLength": 146460,
+            "sha256": "d1502f3986b31433ce68d575eba2d25f1ebe76bcb22900fe87c4f754c3fe3b94"
+          },
+          {
+            "byteLength": 6505,
+            "sha256": "6756c4d25c6cc5fc410d5f9fcff6e23d2718133f30ebc400ad0c574b8e2666c1"
+          }
+        ],
+        "compressedFramesSha256": "252425d7a1451498ba625acd692f4f9d2cef36e1e942301ee77cde743fc8be9b",
+        "compressedFrameBytes": 876632,
+        "wrapped": true,
+        "finalCompressedBytes": 876632,
+        "finalUncompressedBytes": 7384763
+      },
+      {
+        "index": 8,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7850259,
+        "originalDescriptorCount": 25442,
+        "originalColumnBytes": 203536,
+        "originalOffsetsSha256": "85c41a810754a7f2513a5f419800d3f31d5bafa40bcb3493bce08b70e211ab9f",
+        "originalLengthsSha256": "67c4f2907f17922d3cd8bdf7e72d0f07d408bf89a943097860a3af9991d3f7ee",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 329,
+          "columnBytes": 2632,
+          "offsetsSha256": "75e2b0f5b837f7937278e6049628183355b3555f85c5be7565cfd077c5984502",
+          "lengthsSha256": "257ef8980d8b82c31d78bf8676e632055acb49eedaa06293f33f2e4b26e94175",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            34,
+            56,
+            110,
+            172,
+            238,
+            268,
+            310,
+            329
+          ],
+          "blockLengths": [
+            1048508,
+            1048156,
+            1048074,
+            1048427,
+            1047997,
+            1048518,
+            1048038,
+            435095
+          ],
+          "metadataSnapshotBytes": 2632
+        },
+        "references": {
+          "count": 25442,
+          "offsetsSha256": "d9a0941fea76b51f0e5e3bed934b1a645fd087d54e276b4fbce9c0716673a256",
+          "lengthsSha256": "67c4f2907f17922d3cd8bdf7e72d0f07d408bf89a943097860a3af9991d3f7ee",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 137155,
+            "sha256": "7b537cda2f88533e884802bb52d9b011c9bbbcf09ffdd96df093ae89927203a5"
+          },
+          {
+            "byteLength": 135121,
+            "sha256": "9845f62f58c30c9cabe4de5d7608eeaa14fb50c78c72ec8ad9722b8eda6271d1"
+          },
+          {
+            "byteLength": 136329,
+            "sha256": "ccf6374bf44e47951f8832bf1bad7854050b89bbe8d6df8f22bfc342395c6b42"
+          },
+          {
+            "byteLength": 145156,
+            "sha256": "cd76bb36d2003a8e22915a55a6dc57d29d3521850ab49fa14e39687c61784e51"
+          },
+          {
+            "byteLength": 144764,
+            "sha256": "280d481a0d13beeb2fc4b91f8a1dd2910a2212b09406f07802911296c474c272"
+          },
+          {
+            "byteLength": 144859,
+            "sha256": "e9da02af71f7b00f6912383194ad7b99f679d39c7d3e35e4c9db7d6d457b1b29"
+          },
+          {
+            "byteLength": 142497,
+            "sha256": "631759bf9dadd4c1550fcb23b44dda1deb6aebbed6544a1d090e6dcae6f9f0ee"
+          },
+          {
+            "byteLength": 59264,
+            "sha256": "c710ead984834255098cd1c636f5624227785bca664b6e19cd9c4784e4989c56"
+          }
+        ],
+        "compressedFramesSha256": "15c36e4f606b2a0b84b4c4d05dee845a05f34919b46c9800a0e897638f8e8aad",
+        "compressedFrameBytes": 1045145,
+        "wrapped": true,
+        "finalCompressedBytes": 1045145,
+        "finalUncompressedBytes": 7772813
+      },
+      {
+        "index": 9,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7597844,
+        "originalDescriptorCount": 24806,
+        "originalColumnBytes": 198448,
+        "originalOffsetsSha256": "116c37901c98f657e1f0bb1e48a748b8fac853ca05fec968b0d1abf47b1617a7",
+        "originalLengthsSha256": "c47d28b8bad4fd43450fa3b01b7e1c40ca3ef0b9673efb6cb7ec284e04799ef4",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 301,
+          "columnBytes": 2408,
+          "offsetsSha256": "d67f14e683f4cec694bb02165e3d20b6f700ecf14090ba4bb1ce4fe60e89b7b5",
+          "lengthsSha256": "9272d46c559b16d0099840f5c849fc5a595433558cd3fefc3d23ada1710411c9",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            43,
+            90,
+            143,
+            177,
+            205,
+            253,
+            290,
+            301
+          ],
+          "blockLengths": [
+            1048537,
+            1048509,
+            1048456,
+            1048526,
+            1048429,
+            1048474,
+            1048253,
+            181707
+          ],
+          "metadataSnapshotBytes": 2408
+        },
+        "references": {
+          "count": 24806,
+          "offsetsSha256": "a4bc244e9454480dd335095d151ca04d003b09995762aef3acb021abc9548f3f",
+          "lengthsSha256": "c47d28b8bad4fd43450fa3b01b7e1c40ca3ef0b9673efb6cb7ec284e04799ef4",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 144147,
+            "sha256": "45af97a04decc4b720e4df79f668bda4f618dff317d5e3349b75a9bce5f59c56"
+          },
+          {
+            "byteLength": 147211,
+            "sha256": "f48bef032151c5d4054fbfc7746c77e98cd5b54b485b5115f689cd712bc2641e"
+          },
+          {
+            "byteLength": 153706,
+            "sha256": "dd59ece05a3906a8c0eb8c9b57fae063a05dce62a3486e622be48b9c3797a58d"
+          },
+          {
+            "byteLength": 144353,
+            "sha256": "55461149eb23b6dedc91d1bd34ae19f91a496333c067f0a16d9041c4f8a028d3"
+          },
+          {
+            "byteLength": 152008,
+            "sha256": "9ccb0815a7c50e299f063ab5acfdc69f43abc12764b72b53c7f5d9cdf60d298f"
+          },
+          {
+            "byteLength": 145072,
+            "sha256": "21050f2dc05952f3d9728869b580ddf8c5021fddc4ab19e15bb43384fa4414d5"
+          },
+          {
+            "byteLength": 149282,
+            "sha256": "5f995a77e042ea527c07f8f4dcf2699e2a5906e56fceb57c48b029c14bfbdd68"
+          },
+          {
+            "byteLength": 25458,
+            "sha256": "543de5218e87d40903800be433f92005b8697631e6b90326d6b7890d66003c5d"
+          }
+        ],
+        "compressedFramesSha256": "bca5a6164ab4fd87a428338aeb238b5f35de664f0e2ae7e2cb6bed78fa18be28",
+        "compressedFrameBytes": 1061237,
+        "wrapped": true,
+        "finalCompressedBytes": 1061237,
+        "finalUncompressedBytes": 7520891
+      },
+      {
+        "index": 10,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7885247,
+        "originalDescriptorCount": 25651,
+        "originalColumnBytes": 205208,
+        "originalOffsetsSha256": "60e77f3bf9663aaa18289c53dc2a36594d363d70ca76a38f16af88e178ceff96",
+        "originalLengthsSha256": "214e2833bed85a785a9af2ccc400067ac387784005677f007195603b22f5b600",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 435,
+          "columnBytes": 3480,
+          "offsetsSha256": "6631025efe002896fd7ab18248007c1e24f0b37c46ab98bf81f2170b6d6022da",
+          "lengthsSha256": "9a981fdbbf5369f95f92182fc127da0cae2e0e1ec5901d7d53fd372db097d724",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            44,
+            93,
+            146,
+            177,
+            243,
+            313,
+            401,
+            435
+          ],
+          "blockLengths": [
+            1048210,
+            1048311,
+            1047729,
+            1048393,
+            1048105,
+            1048035,
+            1048548,
+            437564
+          ],
+          "metadataSnapshotBytes": 3480
+        },
+        "references": {
+          "count": 25651,
+          "offsetsSha256": "15260572773b548900858c3c5fae2cd8c79cb8febce58f15d75f3b379892fb1b",
+          "lengthsSha256": "214e2833bed85a785a9af2ccc400067ac387784005677f007195603b22f5b600",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 151287,
+            "sha256": "7379b6c1496e1238872e29ab5da1e7f33c3ab9e04c7b5b1bf59ed16cafc67e7b"
+          },
+          {
+            "byteLength": 144368,
+            "sha256": "19b4af40f265ca76dd5b4d10bcca7d58f3cefb2422824a858f4651b3cc4b6720"
+          },
+          {
+            "byteLength": 151756,
+            "sha256": "61024edba24f8d3b45efe8bc4b0c76d6669de853cf810ba00c4f000136beff9c"
+          },
+          {
+            "byteLength": 142844,
+            "sha256": "6a09b78a0902f2683c31a2d8eae8ad65e61cb2dc6748028a47615614a2264f49"
+          },
+          {
+            "byteLength": 145470,
+            "sha256": "72637ca882c227f88511fdbe7dcbf0e25e2482b3f9a266ca358ee9fc66e526b1"
+          },
+          {
+            "byteLength": 148920,
+            "sha256": "6fb2343c25046749f718a7417c0002be09790f49ff61ae31061dc2ce31f359cd"
+          },
+          {
+            "byteLength": 143493,
+            "sha256": "366b00714d0b0cfe0aea961deb801ec4d20a2a71a3764f96b4433a50f5038102"
+          },
+          {
+            "byteLength": 63752,
+            "sha256": "589852fb63c89bc65724003375c4a1620d8252d4c3423b5b53d4fe25d2cae137"
+          }
+        ],
+        "compressedFramesSha256": "6b2a743ab4824d90f1653683b7f192487c1a04452768b1346b5bb63922a7941a",
+        "compressedFrameBytes": 1091890,
+        "wrapped": true,
+        "finalCompressedBytes": 1091890,
+        "finalUncompressedBytes": 7774895
+      },
+      {
+        "index": 11,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9631061,
+        "originalDescriptorCount": 34367,
+        "originalColumnBytes": 274936,
+        "originalOffsetsSha256": "42f13f00c56383299289e57a44e11d6dd77f39736af19d34f315601c5758f6c7",
+        "originalLengthsSha256": "1171525348a6a2d5e40d6a8d284ce63faf174a040c26eb5f9c8e3729e76f2d10",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 683,
+          "columnBytes": 5464,
+          "offsetsSha256": "65f13c1926a149bb087b9cf18c114c5858f1272c5b1d2e9cc15d7382489af815",
+          "lengthsSha256": "66e4bec8b1d585106c2402e2444caa20f600fa9184eebb83816adb9394902254",
+          "blockCount": 10,
+          "blockStartIndexes": [
+            0,
+            106,
+            179,
+            266,
+            384,
+            456,
+            535,
+            563,
+            617,
+            676,
+            683
+          ],
+          "blockLengths": [
+            1048374,
+            1048554,
+            1048415,
+            1048365,
+            1048385,
+            1048426,
+            1048516,
+            1048355,
+            1048571,
+            70511
+          ],
+          "metadataSnapshotBytes": 5464
+        },
+        "references": {
+          "count": 34367,
+          "offsetsSha256": "8c0a510cd940c379fc56919a8add9b9c2b40a60c9c331cba977c84a7dd8f7676",
+          "lengthsSha256": "1171525348a6a2d5e40d6a8d284ce63faf174a040c26eb5f9c8e3729e76f2d10",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 153097,
+            "sha256": "48b5bcf7b695a1f206845c2f0e9803f9d38de75f512ba2788806c2cec28c6f92"
+          },
+          {
+            "byteLength": 146653,
+            "sha256": "c528b9ad7713d6b247e78cf548ba495c07e0660475675b7be08ef97d6c983949"
+          },
+          {
+            "byteLength": 142638,
+            "sha256": "aedcb2fad311d152aca8299c184e494ff39b875034acea1b81fd2dca6714010c"
+          },
+          {
+            "byteLength": 142401,
+            "sha256": "dc81305daa226b1d07f9c49d050c7dd40f3a8338ff969194676b671feec086a4"
+          },
+          {
+            "byteLength": 144727,
+            "sha256": "b5203edf4856a0ad098eaade732c57d85b92fee535acacca1c105392e7635890"
+          },
+          {
+            "byteLength": 136981,
+            "sha256": "569ce451d0f8338e60a51ae2534f0e8d51c495267cf8c6d9c8291f384632cf8b"
+          },
+          {
+            "byteLength": 154659,
+            "sha256": "277e7445f101db9f749e3f56c8a2cb6cc0ea88519c1a715b4432ba29f40110f6"
+          },
+          {
+            "byteLength": 121367,
+            "sha256": "f383d397cac01ac4ed06475f23b80e6488c6baff96a9e13ade489c87889ebb8f"
+          },
+          {
+            "byteLength": 107213,
+            "sha256": "bee96f768da0c74bda4454799ffd241d7121984e14945ce154bc6a7966804ba6"
+          },
+          {
+            "byteLength": 11031,
+            "sha256": "665edf1fe39ee3aac3ff3382facde4d75224e0441e26880977906434143c8d34"
+          }
+        ],
+        "compressedFramesSha256": "5cf927d7141df2febe28c9f7c4b42fcb3cc1e3a36166325eb298b2e1938cd810",
+        "compressedFrameBytes": 1260767,
+        "wrapped": true,
+        "finalCompressedBytes": 1260767,
+        "finalUncompressedBytes": 9506472
+      }
+    ],
+    "totals": {
+      "groups": 12,
+      "originalDescriptorCount": 362032,
+      "transportDescriptorCount": 3940,
+      "originalColumnBytes": 2896256,
+      "transportColumnBytes": 31520,
+      "compressedBlocks": 103,
+      "compressedBytes": 12326040,
+      "uncompressedBytes": 100300626,
+      "references": 362032
+    }
+  },
+  "fileReceipts": [
+    {
+      "path": "manabitan-term-content.bin",
+      "sizeBytes": 19566680,
+      "sha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963"
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "sizeBytes": 45,
+      "sha256": "76e49b4e31f9e5bb889833e17d737a8b14e804f79aca3e5364bebbccf17969db",
+      "generationId": "10a94b83c86a49ac324becbdd644875f",
+      "generationNormalizedSha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26"
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "sizeBytes": 23748952,
+      "sha256": "8074edfcf6305bfdfa92d28b7a541e41071eb47038bcd7b7504c8e259a001be7",
+      "generationId": "10a94b83c86a49ac324becbdd644875f",
+      "generationNormalizedSha256": "397dae5e5f86853b47a90384739e42754e7ed84869a2d2142d05220f3600114f"
+    }
+  ],
+  "lookupProbeCount": 15,
+  "lookupProbeDigest": "ca739afb54d028370bdb6ba99a985987a40ea3c0e3dc84ae804fe2efd4ceb0f2",
+  "opfsOperations": [
+    {
+      "type": "create",
+      "name": "sync-handle-prototype"
+    },
+    {
+      "type": "remove",
+      "name": "sync-handle-prototype"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "truncate",
+      "name": "manabitan-term-content.bin",
+      "size": 0,
+      "previousSize": 0
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 0
+    },
+    {
+      "type": "create",
+      "name": "manabitan-dictionary-import-journal.json"
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-dictionary-import-journal.json"
+    },
+    {
+      "type": "write",
+      "name": "manabitan-dictionary-import-journal.json",
+      "length": 215
+    },
+    {
+      "type": "close",
+      "name": "manabitan-dictionary-import-journal.json",
+      "length": 215
+    },
+    {
+      "type": "writable",
+      "name": "manabitan-term-content.bin"
+    },
+    {
+      "type": "create",
+      "name": "dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr"
+    },
+    {
+      "type": "write",
+      "name": "manabitan-term-content.bin",
+      "length": 4948742
+    },
+    {
+      "type": "create",
+      "name": "dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+    },
+    {
+      "type": "write",
+      "name": "manabitan-term-content.bin",
+      "length": 9507564
+    },
+    {
+      "type": "write",
+      "name": "manabitan-term-content.bin",
+      "length": 5110374
+    },
+    {
+      "type": "writable",
+      "name": "dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr"
+    },
+    {
+      "type": "write",
+      "name": "dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "length": 45
+    },
+    {
+      "type": "close",
+      "name": "dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "length": 45
+    },
+    {
+      "type": "close",
+      "name": "manabitan-term-content.bin",
+      "length": 19566680
+    },
+    {
+      "type": "remove",
+      "name": "manabitan-dictionary-import-journal.json"
+    }
+  ]
+}

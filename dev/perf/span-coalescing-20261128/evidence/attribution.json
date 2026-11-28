@@ -1,0 +1,13 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "originalPullRequest": "https://github.com/ManabiIO/manabitan/pull/764",
+  "originalSourceCommit": "1e82e1a237410c5a850661c1c361c444fa624546",
+  "originalSourceSha256": "edf1ea05be45f7fce775369b8bec01eabd819750d11b10292a200526197f3685",
+  "originalTestSha256": "b15e5e6c7ce773160809469513388f58dc7a4d8a9b8944d8c6e27782852dd3bc",
+  "portScope": "Only bounded compression descriptor coalescing in the existing planner and the two shared-source compression calls; original row plan and fallback paths are retained.",
+  "constantPolicy": {
+    "maximumRuns": 4096,
+    "minimumOriginalSpansPerRun": 4
+  },
+  "guardChange": "Witness before public validation: ordinary source and metadata views, native typed-array element-kind tag, no shadowed metadata properties, native private-buffer identity. Both private shared append methods default false. No witness crosses an await before planner consumption."
+}

@@ -1,0 +1,30 @@
+{
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidateFiles": {
+        "ext/js/dictionary/term-content-block-store.js": "55125db702dfe2d2745b7cb72e591b98938970b7a877663d0c6b7135271aa223",
+        "test/term-content-block-store.test.js": "c452aaea3ef969e04a8272dd5784a6e67380db7f24c1c9280e046d96bfb47f97",
+        "test/term-content-span-coalescing.test.js": "9baf9f01c7ef5f9a96784e4cbd9120acf6ed7957e7123d52d0414a7c3dba8bba"
+    },
+    "unchangedFiles": {
+        "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+        "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+        "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+        "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+        "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17"
+    },
+    "expectedPackageEntries": [
+        "js/dictionary/term-content-block-store.js"
+    ],
+    "localEvidenceScope": "Untimed diagnostics; source-bound JMdict paired output oracle and separately labeled retained-baseline Jitendex output comparison",
+    "generatedFiles": {
+        "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    }
+}

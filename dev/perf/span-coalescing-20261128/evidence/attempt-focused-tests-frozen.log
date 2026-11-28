@@ -1,0 +1,11 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/1c4137568bc6/span-coalescing
+
+······························································································································································
+
+ Test Files  8 passed (8)
+      Tests  158 passed (158)
+   Start at  23:29:41
+   Duration  4.07s (transform 1.01s, setup 205ms, import 1.22s, tests 1.32s, environment 1ms)
+
