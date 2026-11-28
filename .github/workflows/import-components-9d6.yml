@@ -1,0 +1,143 @@
+name: Import component screens 9d6
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['perf/import-components-9d6-20261128']
+    paths:
+      - '.github/workflows/import-components-9d6.yml'
+      - 'dev/perf/experimental-9d6/**'
+      - 'dev/perf/wasm-word-width/**'
+      - 'test/dictionary-content-inflight-range.test.js'
+
+permissions:
+  contents: read
+
+env:
+  COMPONENT_BASELINE_REF: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+
+jobs:
+  capture:
+    name: Frozen JMdict source capture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      artifact-name: ${{ steps.identity.outputs.artifact-name }}
+    steps:
+      - name: Create evidence directory and artifact identity
+        id: identity
+        run: |
+          mkdir -p builds/perf/import-components-9d6/capture
+          echo "artifact-name=jmdict-source-capture-9d6-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.COMPONENT_BASELINE_REF }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.22.3'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - name: Prepare frozen dependencies and vendored parser WASM
+        working-directory: baseline
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Share frozen dependencies with measurement scripts
+        run: ln -s "$GITHUB_WORKSPACE/baseline/node_modules" candidate/node_modules
+      - name: Restore exact JMdict fixture cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: baseline/builds/e2e-dictionary-cache
+          key: import-components-9d6-jmdict-${{ runner.os }}-${{ hashFiles('baseline/test/perf/dictionaries.lock.json') }}
+      - name: Verify and acquire pinned JMdict archive
+        working-directory: baseline
+        run: node dev/perf/prepare-dictionaries.js jmdict
+      - name: Capture baseline source groups and verify every row
+        run: |
+          node --expose-gc --max-old-space-size=4096 candidate/dev/perf/experimental-9d6/capture.mjs \
+            baseline baseline baseline/builds/e2e-dictionary-cache \
+            builds/perf/import-components-9d6/capture jmdict 4 8 \
+            > builds/perf/import-components-9d6/capture/capture.stdout.log \
+            2> builds/perf/import-components-9d6/capture/capture.stderr.log
+      - name: Retain capture receipts, source groups, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.identity.outputs.artifact-name }}
+          path: builds/perf/import-components-9d6/capture
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  screen:
+    name: ${{ matrix.component }} / ${{ matrix.order }}
+    needs: capture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [inflight, codec]
+        order: [AB, BA]
+    env:
+      COMPONENT_KIND: ${{ matrix.component }}
+      COMPONENT_ORDER: ${{ matrix.order }}
+      COMPONENT_OUTPUT: builds/perf/import-components-9d6/${{ matrix.component }}-${{ matrix.order }}
+    steps:
+      - name: Create evidence directory
+        run: mkdir -p "$COMPONENT_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.COMPONENT_BASELINE_REF }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.22.3'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - name: Prepare frozen dependencies and vendored runtime assets
+        working-directory: baseline
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Share frozen dependencies with measurement scripts
+        run: ln -s "$GITHUB_WORKSPACE/baseline/node_modules" candidate/node_modules
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.capture.outputs.artifact-name }}
+          path: builds/perf/import-components-9d6/capture
+      - name: Run fixed component protocol on this isolated host
+        run: |
+          case "$COMPONENT_KIND" in
+            inflight) component_runner=candidate/dev/perf/experimental-9d6/run.mjs ;;
+            codec) component_runner=candidate/dev/perf/wasm-word-width/run.mjs ;;
+            *) exit 1 ;;
+          esac
+          node "$component_runner" baseline builds/perf/import-components-9d6/capture \
+            "$COMPONENT_OUTPUT" "$COMPONENT_ORDER" \
+            > "$COMPONENT_OUTPUT/run.stdout.log" 2> "$COMPONENT_OUTPUT/run.stderr.log"
+      - name: Retain all prescribed observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-component-${{ matrix.component }}-${{ matrix.order }}-9d6-${{ github.run_attempt }}
+          path: |
+            ${{ env.COMPONENT_OUTPUT }}/*.json
+            ${{ env.COMPONENT_OUTPUT }}/*.log
+            ${{ env.COMPONENT_OUTPUT }}/wasm-*/zstd-simd-module.js
+            ${{ env.COMPONENT_OUTPUT }}/wasm-*/zstd-simd-module.wasm
+          if-no-files-found: error
+          retention-days: 14

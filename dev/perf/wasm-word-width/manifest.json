@@ -1,0 +1,35 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
+  "emscripten": {
+    "version": "5.0.1-git",
+    "revision": "8c5f43157a3f069ade75876e23061330521eabde",
+    "sdkRelease": "bf32ae8b61ac8efeb7eca01b54c8307f992724f7",
+    "url": "https://storage.googleapis.com/webassembly/emscripten-releases-builds/linux/bf32ae8b61ac8efeb7eca01b54c8307f992724f7/wasm-binaries.tar.xz",
+    "sha256": "bda6917b630fcc604cca39af433180adfd7195e378075331ceac926553684249",
+    "bytes": 342144156
+  },
+  "wrapperSha256": "5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e",
+  "envelopeSourceSha256": "7405c444dc18f72fa877260115494fa01605ea32399a40741db393d7ba489ae2",
+  "candidates": [
+    "count8ctz",
+    "count8unroll"
+  ],
+  "expected": {
+    "baseline": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "wasmBytes": 433631
+    },
+    "count8ctz": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "b12df4915a3423bda016f46d8a4845530e8cf5045d6227e4972199b628f246d6",
+      "wasmBytes": 438474
+    },
+    "count8unroll": {
+      "jsSha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "wasmSha256": "0e1c9482d7a2c6efd8fb5dbe134e3782a8c5f8cfc0e172b1c9e25d28312e620f",
+      "wasmBytes": 443995
+    }
+  }
+}

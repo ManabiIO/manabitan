@@ -1,0 +1,36 @@
+{
+    "protocol": "inflight-registration-9d6-v1",
+    "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "nodeVersion": "v24.22.3",
+    "sourceFile": "ext/js/dictionary/dictionary-database.js",
+    "baselineSourceSha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "candidateSourceSha256": "3dea4ad1bf3d2ef763328c8a90e413891712798b94bd063badc44adc213ecce0",
+    "patchSha256": "f6e85a0f4afe4298bcfe3bdaa1986c6a6eab810da724ce7ccbe8092ec9e4243e",
+    "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "encodedByteSha256": "7dd16413a3775b36008a3b14bef7bd14272674a9edc1cc83eaf23ddd697d396b",
+    "termRows": 528299,
+    "pendingRows": 362032,
+    "groups": 12,
+    "warmPassesPerObservation": 16,
+    "schedulesAB": [
+        "ABC",
+        "BCA",
+        "CAB",
+        "ACB",
+        "CBA",
+        "BAC"
+    ],
+    "schedulesBA": [
+        "BAC",
+        "CBA",
+        "ACB",
+        "CAB",
+        "BCA",
+        "ABC"
+    ],
+    "arms": {
+        "A": "baseline",
+        "B": "candidate",
+        "C": "baseline"
+    }
+}

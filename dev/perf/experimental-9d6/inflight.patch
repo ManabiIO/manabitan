@@ -1,0 +1,192 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 6414e12c51..7048dd38e7 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -124,6 +124,41 @@ const BULK_IMPORT_STATE_ACTIVE = 'active';
+ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
+ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
+ 
++/* eslint-disable @stylistic/semi */
++const termContentSourceSpanContainers = new WeakSet()
++const termContentTypedArrayTag = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)
++const termContentArrayBufferLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')
++
++/**
++ * Excludes proxies, subclasses, spoofed view kinds and property accessors before
++ * reading the ordinary typed-array metadata used by the synchronous validator.
++ * @param {unknown} value
++ * @param {typeof Uint8Array|typeof Uint32Array|typeof Float64Array} type
++ * @param {boolean} requirePrivateBuffer
++ * @returns {boolean}
++ */
++function isTermContentSourceView(value, type, requirePrivateBuffer) {
++    if (!(
++        ArrayBuffer.isView(value) &&
++        Object.getPrototypeOf(value) === type.prototype &&
++        termContentTypedArrayTag?.get?.call(value) === type.name &&
++        !Object.hasOwn(value, 'length') &&
++        !Object.hasOwn(value, 'buffer') &&
++        !Object.hasOwn(value, 'byteLength') &&
++        !Object.hasOwn(value, 'byteOffset')
++    )) {
++        return false
++    }
++    if (!requirePrivateBuffer) { return true }
++    try {
++        // The intrinsic rejects shared stores even with a changed prototype.
++        return typeof termContentArrayBufferLength?.get?.call(value.buffer) === 'number'
++    } catch {
++        return false
++    }
++}
++/* eslint-enable @stylistic/semi */
++
+ /**
+  * @typedef {object} InFlightTermContentSourceBatch
+  * @property {number[]|Float64Array} offsets
+@@ -6966,6 +7001,73 @@ void 0 :
+         return {count, sampleKeys};
+     }
+ 
++    /* eslint-disable @stylistic/semi */
++    /**
++     * Records only the immutable container shape, never validated row values.
++     * Columns remain borrowed and are checked again immediately before use.
++     * @param {Uint8Array} buffer
++     * @param {Uint32Array} offsets
++     * @param {Uint32Array} lengths
++     * @returns {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}}
++     */
++    _createTermContentSourceSpans(buffer, offsets, lengths) {
++        const spans = Object.freeze({buffer, offsets, lengths})
++        termContentSourceSpanContainers.add(spans)
++        return spans
++    }
++
++    /**
++     * Checks the common ordered, typed span batch without per-row type checks
++     * or lookups into earlier reservations. Overlapping or general inputs keep
++     * the full duplicate and validation path below.
++     * @param {number[]|Float64Array} offsets
++     * @param {number[]|Uint32Array} lengths
++     * @param {string|string[]} dictNames
++     * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
++     * @param {number} count
++     * @returns {{minimumOffset: number, maximumOffset: number}|null}
++     */
++    _getDisjointTermContentSpanRange(offsets, lengths, dictNames, spans, count) {
++        if (
++            count === 0 || spans === null || typeof dictNames !== 'string' ||
++            !termContentSourceSpanContainers.has(spans) ||
++            !isTermContentSourceView(offsets, Float64Array, true) ||
++            !isTermContentSourceView(lengths, Uint32Array, true) ||
++            !isTermContentSourceView(spans.buffer, Uint8Array, false) ||
++            !isTermContentSourceView(spans.offsets, Uint32Array, true) ||
++            !isTermContentSourceView(spans.lengths, Uint32Array, true) ||
++            spans.offsets.length < count || spans.lengths.length < count
++        ) {
++            return null
++        }
++        const sourceBytes = spans.buffer.byteLength
++        const sourceOffsets = spans.offsets
++        const sourceLengths = spans.lengths
++        let previousOffset = -1
++        for (let i = 0; i < count; ++i) {
++            const offset = offsets[i]
++            const sourceOffset = sourceOffsets[i]
++            const sourceLength = sourceLengths[i]
++            if (
++                !Number.isSafeInteger(offset) || offset <= previousOffset ||
++                sourceLength !== lengths[i] || sourceOffset > sourceBytes ||
++                sourceLength > sourceBytes - sourceOffset
++            ) {
++                return null
++            }
++            previousOffset = offset
++        }
++        const minimumOffset = offsets[0]
++        const maximumOffset = previousOffset
++        for (const batch of this._inFlightTermContentSourceBatches) {
++            if (!(maximumOffset < batch.minimumOffset || minimumOffset > batch.maximumOffset)) {
++                return null
++            }
++        }
++        return {minimumOffset, maximumOffset}
++    }
++    /* eslint-enable @stylistic/semi */
++
+     /**
+      * Keeps byte-exact verification available after reserved metadata becomes
+      * visible but before its OPFS block is durable.
+@@ -6988,12 +7090,17 @@ void 0 :
+         if (pendingLengths.length !== count) {
+             throw new RangeError('In-flight term content offset and length counts do not match');
+         }
++        // This witness is consumed synchronously, before the batch is exposed.
++        // eslint-disable-next-line @stylistic/semi
++        const disjointRange = this._getDisjointTermContentSpanRange(pendingOffsets, pendingLengths, pendingResolvedDictNames, pendingContentSpans, count)
+         let sortedOffsets = true;
+-        let minimumOffset = Infinity;
+-        let maximumOffset = -Infinity;
++        // eslint-disable-next-line @stylistic/semi
++        let minimumOffset = disjointRange?.minimumOffset ?? Infinity
++        // eslint-disable-next-line @stylistic/semi
++        let maximumOffset = disjointRange?.maximumOffset ?? -Infinity
+         /** @type {Set<string>|null} */
+         let unsortedKeys = null;
+-        for (let i = 0; i < count; ++i) {
++        for (let i = disjointRange === null ? 0 : count; i < count; ++i) {
+             const buffer = pendingContentSpans === null ? pendingContentBytes[i] : pendingContentSpans.buffer;
+             const sourceOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+             const sourceLength = pendingContentSpans === null ? buffer?.byteLength : pendingContentSpans.lengths[i];
+@@ -8941,11 +9048,11 @@ null :
+             contentDedupPlan.nextUnresolvedUniqueIndex = nextPendingUniqueIndex;
+             const pendingContentCount = nextPendingUniqueIndex - firstPendingUniqueIndex;
+             const pendingContentSpans = useContentSpans ?
+-                {
+-                    buffer: contentBytesBuffer,
+-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
+-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
+-                } :
++                this._createTermContentSourceSpans(
++                    contentBytesBuffer,
++                    pendingSpanOffsets.subarray(0, pendingContentCount),
++                    pendingSpanLengths.subarray(0, pendingContentCount),
++                ) :
+                 null;
+             return {
+                 contentOffsets,
+@@ -9280,11 +9387,11 @@ null :
+                 pendingContentDictNames,
+                 pendingRowToUniqueIndex: null,
+                 pendingContentCount,
+-                pendingContentSpans: {
+-                    buffer: contentBytesBuffer,
+-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
+-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
+-                },
++                pendingContentSpans: this._createTermContentSourceSpans(
++                    contentBytesBuffer,
++                    pendingSpanOffsets.subarray(0, pendingContentCount),
++                    pendingSpanLengths.subarray(0, pendingContentCount),
++                ),
+                 uniformContentDictName,
+                 pendingHitCount,
+                 persistedHitCount,
+@@ -9517,11 +9624,11 @@ null :
+             }
+         }
+         if (usePendingContentSpans) {
+-            pendingContentSpans = {
+-                buffer: contentBytesBuffer,
+-                offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
+-                lengths: pendingSpanLengths.subarray(0, pendingContentCount),
+-            };
++            pendingContentSpans = this._createTermContentSourceSpans(
++                contentBytesBuffer,
++                pendingSpanOffsets.subarray(0, pendingContentCount),
++                pendingSpanLengths.subarray(0, pendingContentCount),
++            );
+         }
+         return {
+             contentOffsets,
