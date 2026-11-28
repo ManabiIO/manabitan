@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-final-callback-compatibility-review",
+  "reviewedAt": "2026-11-28 09:15:25 UTC",
+  "commit": "88add36ce87811bf0e7ce4f61d833b49911d7b11",
+  "tree": "331e46081ec8938b3ffcdee3b8dbebf905c3dbd2",
+  "base": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+  "repairEvidenceBlob": "54a143076148e5073f502e9caeb5df4bae5e04a3",
+  "byteIdentity": {
+    "allEightPaths": true,
+    "callbackPaths": "Compared exact fetched commit contents to recovered source used for current V8 checks.",
+    "rotationPath": "Compared exact fetched commit contents to independent blob2271f2744adda13d0e902281aadbae80c2f2dd3d.",
+    "extraChangedPaths": false
+  },
+  "findings": [
+    "No concrete correctness blocker found in the reviewed source.",
+    "Ordinary callback values are awaited by existing JavaScript await behavior; registry lookup never reads their completion property.",
+    "The private WeakMap stores a captured promise, and a consumed null state rejects authentic-ticket reuse. Spread, prototype and Proxy wrappers cannot claim the original capability.",
+    "The genuine producer entry is created by beginArtifactTermChunkSink; importer direct path takes it, attaches its metrics promise, and creates a distinct genuine ticket. Materialized and sequential adapters take and fully await the genuine promise.",
+    "Promise rejection identity is preserved. The existing parser failure/cancellation path still drains admitted completions before active leases and worker ownership are released.",
+    "Private capability helpers stay in term-content-ownership, which parser workers already import; the coordinator class is not added to the parser-worker graph.",
+    "Public callback result annotations now accept unknown, while internal producer result/factory signatures remain exact.",
+    "The independent rotation test now targets logical dispatched jobs and prevents cleanup-triggered retries; zstd runtime bytes are unchanged."
+  ],
+  "coverage": {
+    "actualCurrentNative": "Both unchanged31-case modes completed with exit0 on exact current generated WASM; rawJSON unavailable after outage, tool receipt retained.",
+    "currentV8": "17parser+14coordinator+3producer components pass; stand-in worker/SAB, no typecheck.",
+    "additionalNonblockingSuggestion": "An explicit already-claimed producer ticket entering the importer in parallel/sequential modes would complement parser reuse tests; no gap in reviewed registry enforcement found."
+  },
+  "pending": [
+    "Full current lint/types including the callback assignability test",
+    "Current focused importer adapter tests under Vitest",
+    "Required hosted full unit/build gates",
+    "Any full-browser/performance qualification"
+  ],
+  "latestUnrepairedCurrentGate": {
+    "run": 46125980377,
+    "job": 140920563232,
+    "status": "failure",
+    "logBlob": "32ba0897c3e554c490dfd91729fbedd475ada890",
+    "failures": "Same two native settlement child failures and stale spans-rotation timeout before these repairs; browser matrix skipped.",
+    "passedFiles": 672,
+    "passedTests": 15174
+  }
+}

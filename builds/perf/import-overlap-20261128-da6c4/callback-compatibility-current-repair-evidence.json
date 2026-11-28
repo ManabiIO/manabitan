@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "kind": "callback-compatibility-current-repair-evidence",
+  "createdAt": "2026-11-28 09:07:52 UTC",
+  "baseCommit": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+  "baseTree": "11db07622fe196dd1a6fd587aec247553e8de193",
+  "developBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sourceFiles": [
+    {
+      "path": "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+      "blob": "6655bd36acb4b56c2a288f40314eaaaebe6433c9",
+      "chars": 9395
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "blob": "ac53375d350e48088eb207bd6c210e2f293415c4",
+      "chars": 350541
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "blob": "00603c0fe2c6ef10df7bb923bcfa06bce0013f0b",
+      "chars": 214677
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "blob": "84326a4b654bb0485b82a3cce557b2cb5571e09a",
+      "chars": 6389
+    },
+    {
+      "path": "test/artifact-term-chunk-pipeline.test.js",
+      "blob": "b7786a5b83550dee50cec14f345125e54f30c42e",
+      "chars": 20051
+    },
+    {
+      "path": "test/term-bank-pipeline-completion.test.js",
+      "blob": "806241f0e59ee0875c9bdbe79d58eb7da08a6081",
+      "chars": 23565
+    },
+    {
+      "path": "test/dictionary-importer-chunk-completion.test.js",
+      "blob": "9886e3b11b4d2c9fc0a07ffa44daa862dcd51b1b",
+      "chars": 10619
+    },
+    {
+      "path": "test/zstd-term-content-initialization.test.js",
+      "blob": "2271f2744adda13d0e902281aadbae80c2f2dd3d",
+      "chars": null
+    }
+  ],
+  "implementation": "Explicit single-use WeakMap tickets in already-imported term-content-ownership. Ordinary awaited callback values are ignored without reading completion properties. Importer consumes and re-wraps genuine tickets. Public callback return type unknown preserves legacy assignability; private producer/factory remains precise. No zstd-pool runtime change.",
+  "sourceRecovery": {
+    "method": "Fetched exact original files from baseCommit through GitHub; applied the recorded deterministic source edits in V8 after executor disconnection.",
+    "finalFilesystemHashComparison": "Unavailable after executor outage; not claimed.",
+    "postOutageTestOnlyAmendment": "Added an explicit string[] annotation to the new producer-test events array; no runtime behavior change.",
+    "supersededUnreferencedParserTest": "ac893d7c1877eccd980e1f1d76285d290dd70cf2"
+  },
+  "currentNative": {
+    "scope": "Real unchanged Node worker/native-parser settlement fixtures, both ordinary and reference modes, current rebuilt parser WASM. No browser or timing comparison.",
+    "node": "v24.22.3",
+    "worktree": "/home/agent/manabitan-da6c4dbd0097/ci-repair-current",
+    "head": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+    "buildLibraries": {
+      "command": "node --max-old-space-size=1536 dev/bin/build-libs.js",
+      "exitCode": 0,
+      "wallSeconds": 0.547970739
+    },
+    "parserWasm": {
+      "bytes": 69068,
+      "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    "command": "MANABITAN_SETTLEMENT_REFERENCE=0 node --max-old-space-size=1536 test/fixtures/parser-settlement/check.mjs /workspace/scratch/da6c4dbd0097/profiling/settlement-current-default.json > /workspace/scratch/da6c4dbd0097/profiling/settlement-current-default.log 2>&1 && MANABITAN_SETTLEMENT_REFERENCE=1 node --max-old-space-size=1536 test/fixtures/parser-settlement/check.mjs /workspace/scratch/da6c4dbd0097/profiling/settlement-current-reference.json > /workspace/scratch/da6c4dbd0097/profiling/settlement-current-reference.log 2>&1",
+    "observedToolResult": {
+      "exit_code": 0,
+      "wall_time_seconds": 5.452935008,
+      "chunk_id": "393f86",
+      "output": ""
+    },
+    "completionInterpretation": "Both child processes succeeded because the command used &&. The unchanged checker exits nonzero if any case fails or unhandled rejection occurs. The unchanged case source defines31cases per mode; exact output JSON bytes were not recovered before outage.",
+    "rawReportAvailability": "Expected scratch files were written by successful checker but could not be read before transport failure; not durably retained or independently numerically inspected in this receipt.",
+    "unchangedFixtureSource": {
+      "check": "6b5d37366faf35c01b6768d377fa63db2744e489a261f3bee55ba867f9ce5be4",
+      "cases": "3f1842f36e29318f1c5ceeef518f22264c96f8ace845b2d514de0f1384a92317",
+      "worker": "cc04b9bf7b875c7b49b4047823b6fb638598352620994c78dd88776b0752ad5c"
+    }
+  },
+  "currentV8": {
+    "scope": "Actual recovered source control-flow components with deterministic fake worker transport; SharedArrayBuffer stand-in, no browser/native parser/codec, no typecheck and not a substitute for required full gates.",
+    "nativeSharedArrayBuffer": false,
+    "parser": {
+      "kind": "actual extracted ParallelTermBankPipelineRun control-flow component; fake worker transport; native SharedArrayBuffer when available, stand-in otherwise; no browser/native parser/DB execution",
+      "total": 17,
+      "passed": 17,
+      "failed": 0,
+      "results": [
+        {
+          "name": "one owned lookahead preserves source lead and byte budget until completion",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "parse:2",
+            "parse:3",
+            "sink:1",
+            "sink:2",
+            "parse:4",
+            "sink:3",
+            "parse:5",
+            "sink:4",
+            "sink:5",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "borrowed next result waits predecessor and its own ticket blocks later callbacks",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "parse:2",
+            "sink:1",
+            "sink:2",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "unwitnessed and private results never overlap pending storage",
+          "status": "passed",
+          "detail": "both variants remained serial"
+        },
+        {
+          "name": "peer failure retains active borrowed ticket lease until storage completion",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "peer failure also retains legacy active borrowed callback lease",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "callback exception drains admitted predecessor before pool release",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "ticket rejection wakes a wait for the next parser result",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "parser failure waiting next result drains earlier storage ticket",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "late successor ticket remains owned after predecessor failure during callback",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "cancellation during final ticket cannot report successful parse",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "empty result cannot jump an outstanding ticket or invent sink work",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "legacy void callbacks retain ordered completion semantics",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "parse:2",
+            "sink:1",
+            "sink:2",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "invalid internal ticket construction still drains prior admitted completion",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:false"
+          ]
+        },
+        {
+          "name": "ordinary values and incidental completion properties retain legacy void behavior",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "parse:2",
+            "parse:3",
+            "sink:1",
+            "parse:4",
+            "sink:2",
+            "sink:3",
+            "sink:4",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "ordinary thenables are awaited and their resolved values are ignored",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "copied inherited and proxied ticket shapes cannot claim a producer completion",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "parse:2",
+            "parse:3",
+            "sink:1",
+            "sink:2",
+            "sink:3",
+            "pool-release:true"
+          ]
+        },
+        {
+          "name": "authentic ticket reuse fails only after its previously admitted work drains",
+          "status": "passed",
+          "detail": [
+            "parse:0",
+            "parse:1",
+            "sink:0",
+            "sink:1",
+            "pool-release:false"
+          ]
+        }
+      ]
+    },
+    "coordinator": {
+      "kind": "dependency-injected coordinator component only",
+      "total": 14,
+      "passed": 14,
+      "failed": 0,
+      "results": [
+        {
+          "name": "eligible successor prepares before predecessor completion; publication and metrics ordered",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "compress:1",
+            "complete:0",
+            "publish:1",
+            "records:1",
+            "complete:1"
+          ]
+        },
+        {
+          "name": "predecessor failure waits for successor preparation and reverses rollback",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "rollback:1",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "predecessor failure drains successor compression before predecessor rollback",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "compress:1",
+            "rollback:1",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "successor preparation failure does not deadlock pending predecessor",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "rollback:1",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "undefined rejection retains a distinct failed state",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "compress:1",
+            "rollback:1",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "terminal aggregate errors survive first-failure latch",
+          "status": "passed",
+          "detail": {
+            "terminalCount": 1,
+            "aggregateMembers": [
+              "content",
+              "records"
+            ]
+          }
+        },
+        {
+          "name": "forced serial request occupies bound and cannot be leapfrogged",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "complete:0",
+            "reserve:1",
+            "compress:1",
+            "publish:1",
+            "records:1",
+            "complete:1",
+            "reserve:2",
+            "compress:2",
+            "publish:2",
+            "records:2",
+            "complete:2"
+          ]
+        },
+        {
+          "name": "ineligible successor touches no state until predecessor completion",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "complete:0",
+            "reserve:1",
+            "compress:1",
+            "publish:1",
+            "records:1",
+            "complete:1"
+          ]
+        },
+        {
+          "name": "close fences new admission while draining and remains closed",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "complete:0"
+          ]
+        },
+        {
+          "name": "active cancellation outranks stale-owner validation",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "reserve:1",
+            "compress:1",
+            "rollback:1",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "owner changes reject new and active operations without new mutation",
+          "status": "passed",
+          "detail": [
+            "reserve:0",
+            "compress:0",
+            "publish:0",
+            "records:0",
+            "rollback:0"
+          ]
+        },
+        {
+          "name": "no early publication branch still settles both ticket phases",
+          "status": "passed",
+          "detail": [
+            "start:0",
+            "start:1"
+          ]
+        },
+        {
+          "name": "synchronous append failure rejects publication and completion",
+          "status": "passed",
+          "detail": {
+            "terminalCount": 1
+          }
+        },
+        {
+          "name": "coordinator rejects cancellation after fallback append returns without context checks",
+          "status": "passed",
+          "detail": {
+            "publication": "rejected",
+            "completion": "rejected"
+          }
+        }
+      ]
+    },
+    "producer": {
+      "scope": "Three exact test function bodies executed with minimal equality/throw/rejection assertions, actual current capability/factory code; not Vitest or a typecheck.",
+      "total": 3,
+      "passed": 3,
+      "results": [
+        {
+          "name": "only explicit immutable producer tickets can transfer one completion",
+          "status": "passed"
+        },
+        {
+          "name": "the actual published sink factory retains genuine work until completion",
+          "status": "passed"
+        },
+        {
+          "name": "published and unpublished sink failures preserve the original rejection",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "preservedFailures": {
+    "originalHosted": {
+      "run": 46121740432,
+      "job": 140907547397,
+      "source": "c4330b235eaa31a62c48837578f230038dc48226",
+      "logBlob": "7a7daec74adfce8e909dd909b583299f9f52bb1a",
+      "summary": "Fullunit:672files/15170tests passed;2files/3tests failed, both settlement checker children and stale spans pool-rotation test. Browser matrix skipped; no timing cohort."
+    },
+    "historicalLocalBefore": {
+      "source": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6 plus two earlier test-only type fixes",
+      "node": "v24.22.3",
+      "passed": 23,
+      "failed": 8,
+      "unhandled": [],
+      "error": "All eight healthy/successor cases returned Array.push numbers and were rejected by shape-based completion-ticket validation. Real native fixtures, no missing compiler."
+    },
+    "historicalLocalAfter": {
+      "scope": "Earlier helper placement in artifact-term-chunk-pipeline before move to existing ownership module; old9e generated WASM only.",
+      "bothChildrenExitCode": 0,
+      "wallSeconds": 5.575169142,
+      "reportedPerMode": {
+        "passed": 31,
+        "failed": 0,
+        "unhandled": []
+      }
+    },
+    "scopedLintAttempts": [
+      {
+        "scope": "historical repaired checkout, multi-file lint",
+        "exitCode": 137,
+        "diagnostics": "None retained before external kill"
+      },
+      {
+        "scope": "historical repaired checkout, fresh single file,384MiB heap",
+        "returnCode": -9,
+        "diagnostics": "Only existing pako CommonJS/esbuild warning, no lint result"
+      }
+    ],
+    "currentVitestAttempt": {
+      "scope": "Current ae19 source plus repairs,6focused files,maxWorkers1,1536MiB heap",
+      "exitCode": 137,
+      "wallSeconds": 4.57558164,
+      "stdout": "RUN v4.1.12 /home/agent/manabitan-da6c4dbd0097/ci-repair-current",
+      "caseResult": "None; no pass claim"
+    }
+  },
+  "requiredPending": [
+    "Full current source lint",
+    "Full current main/test typechecks including callback assignability regression",
+    "Current focused Vitest importer-adapter and source-contract suites",
+    "Full hosted unit/build gates",
+    "Any browser/performance qualification on the repaired exact source"
+  ],
+  "performanceClaim": false,
+  "notes": [
+    "The local full-suite gate was not rerun after old failures.",
+    "Main/test types had not started before outage.",
+    "Rotation fixture is independent exact blob2271f274 from critical_path; its detailed38case proof is separate evidencef1560fd3.",
+    "Source changes require a new exact qualification identity; prior component timing cannot be treated as current full-import evidence."
+  ]
+}

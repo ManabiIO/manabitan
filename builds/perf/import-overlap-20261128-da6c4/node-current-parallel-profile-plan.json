@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "status": "design checkpoint; no corpus or profile acquisition started",
+  "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "scope": "Possible one source-unchanged actual-parallel Node term-storage CPU diagnostic. It is distinct from the already registered full Chromium trace and cannot establish a browser or ordinary full-import speed gain.",
+  "currentHostedTrace": {
+    "head": "e2786268b7576849fc4e84358623cd9d2277dcc0",
+    "run": 46127144239,
+    "job": 140924149519,
+    "roleCounts": {
+      "parser": 3,
+      "compression": 4,
+      "import": 1
+    }
+  },
+  "fixture": {
+    "dictionary": "jmdict",
+    "path": "/home/agent/manabitan-da6c4dbd0097/fixtures/JMdict.zip",
+    "bytes": 15645766,
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+  },
+  "verifiedInstalledAssets": {
+    "parserSourceAndInstalledSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "zstdWasmSha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+    "zstdGlueSha256": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+    "readChunk": "e82710",
+    "qualification": "These were verified during design; a later acquisition must rehash source, generated assets and harness before and after."
+  },
+  "observedApi": {
+    "node": "v24.22.3",
+    "startMethodSource": "startCpuProfile() { const startTaker = this[kHandle]?.startCpuProfile(); return new Promise((resolve, reject) => { if (!startTaker) return reject(new ERR_WORKER_NOT_RUNNING()); startTaker.ondone = (err, id) => { if (err) { reject(err); return; } resolve(new CPUProfileHandle(this, id)); }; }); }",
+    "firstProbe": {
+      "chunk": "9b08d7",
+      "exitCode": 1,
+      "scope": "Toy API probe only; no Manabitan source or corpus",
+      "cause": "The eval worker inherited the parent's ES-module mode, so CommonJS require was unavailable.",
+      "message": "ReferenceError: require is not defined in ES module scope, you can use import instead"
+    },
+    "correctedProbeSource": "import {Worker} from 'node:worker_threads';\nimport {once} from 'node:events';\nconst source='import {parentPort} from \"node:worker_threads\";parentPort.on(\"message\",()=>{let x=0;for(let i=0;i<100000;++i)x+=Math.sqrt(i);parentPort.postMessage(x)});';\nconst w = new Worker(new URL('data:text/javascript,'+encodeURIComponent(source)), {execArgv:[]});\ntry {\n await once(w,'online');\n const handle = await w.startCpuProfile();\n w.postMessage('run');await once(w,'message');\n const result=await handle.stop();\n const p=typeof result==='string'?JSON.parse(result):result;\n console.log(JSON.stringify({node:process.version,methods:Object.getOwnPropertyNames(Object.getPrototypeOf(handle)),resultType:typeof result,keys:Object.keys(p),samples:p.samples?.length}));\n} finally { await w.terminate(); }\n",
+    "correctedProbe": {
+      "chunk": "466ebd",
+      "exitCode": 0,
+      "result": {
+        "node": "v24.22.3",
+        "methods": [
+          "constructor",
+          "stop"
+        ],
+        "resultType": "string",
+        "keys": [
+          "nodes",
+          "startTime",
+          "endTime",
+          "samples",
+          "timeDeltas"
+        ],
+        "samples": 5
+      }
+    },
+    "interpretation": "Feature/shape check only, no timing or performance conclusion."
+  },
+  "reviewedBase": {
+    "runnerPath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-arm.mjs",
+    "adapterPath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-worker-adapter.mjs",
+    "bridgePath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-worker-bridge.mjs",
+    "adapterSource": "// SPDX-License-Identifier: GPL-3.0-or-later\nimport assert from 'node:assert/strict';\nimport {Worker as NodeWorker} from 'node:worker_threads';\nimport {describeFileHandle} from './archived/raw-alias-node-opfs.mjs';\nexport function createWorkerAdapter(rootPath) {\n    const workers = [], receivedByPreparedMap = new WeakMap();\n    class WorkerAdapter {\n        constructor(entry) {\n            this.entry = String(entry);\n            assert(/\\/(?:zstd-term-content-compression-worker|term-record-import-index-worker|term-bank-wasm-parser-worker)\\.js$/.test(new URL(entry).pathname));\n            this.kind = /term-record-import-index-worker/.test(this.entry) ? 'index' : (/term-bank-wasm-parser-worker/.test(this.entry) ? 'parser' : 'compression');\n            this.listeners = new Map(); this.messages = 0; this.transferBytes = 0; this.readySeen = false;\n            this.termination = null; this.terminationRequested = false; this.failures = []; this.jobs = new Map(); this.results = [];\n            this.ready = new Promise((resolve, reject) => { this.resolveReady = resolve; this.rejectReady = reject; });\n            void this.ready.catch(() => {});\n            this.worker = new NodeWorker(new URL('./product-worker-bridge.mjs', import.meta.url), {workerData: {entry: this.entry, rootPath}, execArgv: []});\n            workers.push(this);\n            this.worker.on('message', (data) => {\n                if (data?.type === 'ready') { this.readySeen = true; this.resolveReady(); }\n                if (data?.type === 'initialization-error') { this.rejectReady(new Error(String(data.error))); }\n                if (this.kind === 'parser' && data?.type === 'result') {\n                    const chunk = data.chunk, files = this.jobs.get(data.id); assert(files);\n                    const receipt = {files, rows: data.rowCount, ownsContentBytes: data.ownsContentBytes,\n                        borrowsWorkerMemory: data.borrowsWorkerMemory, mediaRows: chunk?.mediaRows?.length ?? null,\n                        sourceBufferKind: chunk?.contentBytesBuffer?.buffer?.constructor?.name ?? null};\n                    this.results.push(receipt); this.jobs.delete(data.id);\n                    if (chunk?.preparedLookupIndexes instanceof Map) { receivedByPreparedMap.set(chunk.preparedLookupIndexes, receipt); }\n                }\n                for (const listener of this.listeners.get('message') ?? []) { listener({data}); }\n            });\n            this.worker.on('error', (error) => this.fail('error', error));\n            this.worker.on('messageerror', (error) => this.fail('messageerror', error));\n            this.worker.on('exit', (code) => {\n                if (!this.terminationRequested) { this.fail('exit', new Error('Unexpected worker exit ' + code)); }\n                else if (!this.readySeen) { this.rejectReady(new Error('Terminated before readiness')); }\n            });\n        }\n        fail(event, error) {\n            this.failures.push({event, message: String(error)}); this.rejectReady(error);\n            for (const listener of this.listeners.get(event === 'messageerror' ? 'messageerror' : 'error') ?? []) { listener({error, message: String(error)}); }\n        }\n        addEventListener(type, listener) { if (!this.listeners.has(type)) { this.listeners.set(type, new Set()); } this.listeners.get(type).add(listener); }\n        removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }\n        postMessage(message, transfer = []) {\n            let data = message;\n            if (this.kind === 'index' && data.action === 'open') { data = {...data, fileHandle: describeFileHandle(data.fileHandle)}; }\n            if (this.kind === 'parser' && data.type === 'parse') {\n                assert(Array.isArray(data.sourceMetadata)); this.jobs.set(data.id, data.sourceMetadata.map(({filename}) => filename));\n            }\n            ++this.messages; for (const item of transfer) { if (item instanceof ArrayBuffer) { this.transferBytes += item.byteLength; } }\n            this.worker.postMessage(data, transfer);\n        }\n        terminate() { this.terminationRequested = true; this.termination ??= this.worker.terminate(); return this.termination; }\n    }\n    return {WorkerAdapter, workers, receivedByPreparedMap,\n        receipts: () => workers.map(({kind, readySeen, messages, transferBytes, failures, results}) => ({kind, readySeen, messages, transferBytes, failures, resultCount: results.length})),\n        assertHealthy: () => assert(workers.every(({failures}) => failures.length === 0), 'Worker failure or unexpected exit'),\n        terminateAll: async () => {\n            const results = await Promise.allSettled(workers.map((worker) => worker.terminate()));\n            const failures = results.filter(({status}) => status === 'rejected').map(({reason}) => reason);\n            if (failures.length) { throw new AggregateError(failures, 'Worker termination failed'); }\n        },\n    };\n}\n",
+    "bridgeSource": "// SPDX-License-Identifier: GPL-3.0-or-later\n// Same tested lazy OPFS bridge, extended only to the real native parser worker.\nimport {parentPort, workerData} from 'node:worker_threads';\nimport {readFile} from 'node:fs/promises';\nimport {reviveFileHandle} from './archived/raw-alias-node-opfs.mjs';\nconst entry = new URL(workerData.entry);\nconst indexWriter = entry.pathname.endsWith('/term-record-import-index-worker.js');\nif (!/\\/(?:zstd-term-content-compression-worker|term-record-import-index-worker|term-bank-wasm-parser-worker)\\.js$/.test(entry.pathname)) { throw new Error('Unexpected research worker entry'); }\nconst originalFetch = globalThis.fetch;\nglobalThis.fetch = async (input, options) => {\n    const url = input instanceof URL ? input : new URL(typeof input === 'string' ? input : input.url);\n    if (url.protocol !== 'file:') { return originalFetch(input, options); }\n    return new Response(await readFile(url), {headers: {'Content-Type': url.pathname.endsWith('.wasm') ? 'application/wasm' : 'application/octet-stream'}});\n};\nconst listeners = new Set();\nglobalThis.self = {\n    addEventListener(type, listener) { if (type === 'message') { listeners.add(listener); } },\n    postMessage(data, transfer = []) { parentPort.postMessage(data, transfer); },\n};\nparentPort.on('message', (message) => {\n    void (async () => {\n        let data = message;\n        if (indexWriter && data.action === 'open') {\n            if (data.fileHandle?.rootPath !== workerData.rootPath) { throw new Error('Index worker escaped the observation root'); }\n            data = {...data, fileHandle: await reviveFileHandle(data.fileHandle)};\n        }\n        for (const listener of listeners) { listener({data}); }\n    })().catch((error) => { setImmediate(() => { throw error; }); });\n});\nawait import(entry.href);\n",
+    "implementationQualification": "The runner is VNDB-specific and was only inspected. No profiler implementation or JMdict adaptation was completed."
+  },
+  "proposedWork": [
+    {
+      "stage": "Prospective binding",
+      "steps": [
+        "Freeze the current dcfc checkout/tree and every loaded runtime/generated asset, fixture archive, lockfile, Node version and all new helper bytes before acquisition.",
+        "Require exact source/installed parser WASM equality; do not accidentally reuse historical 9e generated assets.",
+        "Create a fresh own output directory and check sufficient free space before starting. Preserve every failure; no unchanged retry."
+      ]
+    },
+    {
+      "stage": "Actual producer",
+      "steps": [
+        "Use actual DictionaryImporter._getFilesFromArchive, RawZipPayloadReader, TermBankSourcePipeline.createCompressedImportRunPlan and _readTermBankFileFast with the real three parser workers.",
+        "Derive title/format/media and source bytes from pinned archive metadata, current defaults and current source policy; derive exact lookup route from the actual 128 MiB threshold.",
+        "Preserve the existing batched row override from the real multi-file call site, native content sharing/ownership decisions, worker/budget settings, MessageChannel event-loop yielding and serial baseline sink completion.",
+        "Do not reuse the old serial production-group-loader, synthesize ownership, copy to private buffers, import VNDB lead=3, or force counts by changing defaults.",
+        "Historical expectations to assert against actual current behavior (not settings): 53 banks, 171617523 source bytes, 528299 rows, 12 groups, 3 parser workers, plain pipeline4groups/worker, 4 compression workers, 103 content blocks at1MiB. If current source differs, record and investigate; do not override."
+      ]
+    },
+    {
+      "stage": "Profiles",
+      "steps": [
+        "Start main inspector CPU profile before native startup/work. Start each actual Node worker profile through Worker.startCpuProfile immediately after construction.",
+        "Hold only the worker's ready notification until the profiler-start promise settles; do not queue, defer or alter private postMessage transfer/detachment. Require profiler readiness before the first parse/compression job.",
+        "Track physical posted jobs; source-consumed notices do not retire compression jobs. Preserve original error delivery and fail the diagnostic on worker/profiler/fallback errors.",
+        "After complete producer/sink draining, stop parser profiles before disposeParallelTermBankParser. After both real content/record stores finalize, stop compression profiles and main profiler before independent output verification.",
+        "Emergency termination remains immediate. Never delay a failure/cancellation terminate to obtain a profile while a borrowed source may still be read. Missing/failed profile stops invalidate completeness instead.",
+        "Require all3parser+4compression+1main profiles, nonempty samples, valid node/sample relations, no lost worker jobs and clean intentional terminations. Retain negative raw deltas."
+      ]
+    },
+    {
+      "stage": "Reduce observer interference",
+      "steps": [
+        "Remove the VNDB alias-specific wrappers and per-group full-source/payload hashing or synchronous report checkpoints from the sampled sink.",
+        "Keep only minimal group/route counters and a few expected source probes before each source expires; perform full persisted-file hashing, validated generation normalization, integrity checks and fresh-reader probes after all profiles stop.",
+        "Use the real content and record stores over the already tested lazy Node OPFS adapter. Explicitly initialize only the required bulk lifecycle state as this existing diagnostic does.",
+        "Scope exclusions remain SQLite setup/commit, tags, media payload writes and browser OPFS. Main profile necessarily contains some adapter and profiling bookkeeping; classify those separately and do not infer ordinary import critical-path duration."
+      ]
+    }
+  ],
+  "environmentFailure": {
+    "operation": "First scratch source/helper materialization command",
+    "result": "No successful tool receipt; execution environment became explicitly unavailable after exec transport disconnect.",
+    "knownState": "No corpus process or diagnostic acquisition was started. Whether the interrupted helper-copy command made partial scratch files is unknown.",
+    "policy": "Do not probe or retry local execution while the environment is explicitly unavailable."
+  },
+  "nextStep": "Wait for current hosted trace; independently review compatible-ticket/helper sources. If local execution is later restored, finish source/plan and independent checks, acquire the heavy slot after combined types, then run at most the one registered diagnostic."
+}
