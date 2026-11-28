@@ -1,0 +1,139 @@
+name: Compact media catalog experiment 4a779
+
+on:
+  push:
+    branches: [perf/media-catalog-lab-20261128-4a779]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: media-catalog-lab-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Validate source, tests and packaged builds
+        run: |
+          mkdir -p builds/perf/media-catalog-validation
+          set -o pipefail
+          npx eslint ext/js/dictionary/dense-zip-directory.js ext/js/dictionary/dense-zip-file-map.js ext/js/dictionary/source-zip-media-pack.js ext/js/dictionary/source-zip-media-preparation-worker.js test/dense-zip-directory.test.js test/source-zip-media-entry-pack.test.js 2>&1 | tee builds/perf/media-catalog-validation/lint.log
+          npm run test:ts 2>&1 | tee builds/perf/media-catalog-validation/types.log
+          npm run test:unit -- --maxWorkers=2 2>&1 | tee builds/perf/media-catalog-validation/unit.log
+          npm run test:build 2>&1 | tee builds/perf/media-catalog-validation/build.log
+      - name: Preserve validation outcomes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: media-catalog-validation
+          path: builds/perf/media-catalog-validation
+          if-no-files-found: error
+          retention-days: 14
+
+  imports:
+    needs: validate
+    name: Complete imports (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare complete imports with identical-code controls
+        run: |
+          args=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order AB --pairs 6 \
+            "${args[@]}" \
+            --expected-package-entry js/dictionary/dense-zip-directory.js \
+            --expected-package-entry js/dictionary/dense-zip-file-map.js \
+            --expected-package-entry js/dictionary/source-zip-media-pack.js \
+            --expected-package-entry js/dictionary/source-zip-media-preparation-worker.js \
+            --evidence "builds/perf/media-catalog-imports/$PERF_DICTIONARY"
+      - name: Preserve all observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: media-catalog-imports-${{ matrix.dictionary }}
+          path: builds/perf/media-catalog-imports/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
+
+  worker-memory:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare isolated baseline and pinned source
+        run: |
+          node dev/perf/prepare-dictionaries.js vndb
+          git worktree add --detach "$RUNNER_TEMP/media-catalog-baseline" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/media-catalog-baseline/node_modules"
+          (cd "$RUNNER_TEMP/media-catalog-baseline" && npm run build:libs)
+      - name: Verify every media payload and measure actual worker retained memory
+        run: |
+          mkdir -p builds/perf/media-catalog-memory
+          set -o pipefail
+          node --expose-gc .github/scripts/media-catalog-parity.mjs \
+            --baseline "$RUNNER_TEMP/media-catalog-baseline" --candidate "$GITHUB_WORKSPACE" \
+            --archive builds/e2e-dictionary-cache/vndb_characters_by_bee.zip \
+            --out builds/perf/media-catalog-memory/node 2>&1 | tee builds/perf/media-catalog-memory/node.log
+          node .github/scripts/media-catalog-heap.mjs \
+            --baseline "$RUNNER_TEMP/media-catalog-baseline" --candidate "$GITHUB_WORKSPACE" \
+            --archive builds/e2e-dictionary-cache/vndb_characters_by_bee.zip \
+            --parity builds/perf/media-catalog-memory/node/results.json \
+            --out builds/perf/media-catalog-memory/chromium 2>&1 | tee builds/perf/media-catalog-memory/chromium.log
+      - name: Preserve memory, parity and failure records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: media-catalog-memory
+          path: builds/perf/media-catalog-memory
+          if-no-files-found: error
+          retention-days: 14

@@ -12,6 +12,7 @@ import {createGenerationMediaIndex} from '../ext/js/dictionary/dictionary-genera
 import {preparePackedSourceZipMedia, preparePackedSourceZipMediaEntries, preparePackedSourceZipMediaIndex} from '../ext/js/dictionary/source-zip-media-pack.js'
 import {setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
+import {DenseZipEntryCatalog} from '../ext/js/dictionary/dense-zip-file-map.js'
 
 /** @typedef {Parameters<typeof preparePackedSourceZipMediaEntries>[1][number]} ZipEntry */
 const FILE_COUNT = 8192
@@ -102,6 +103,93 @@ function prepare(mode, archive, files, checkCancellation = () => {}) {
     }))
     return preparePackedSourceZipMedia(archive, requirements, new Map(files.map((file) => [file.filename, file])), reader, checkCancellation)
 }
+
+/**
+ * @param {ZipEntry[]} files
+ * @returns {DenseZipEntryCatalog}
+ */
+function compactCatalog(files) {
+    const filenames = new Uint8Array(files.reduce((sum, {rawFilename}) => sum + rawFilename.length, 0))
+    const catalog = new DenseZipEntryCatalog(files.length, filenames)
+    let filenameOffset = 0
+    for (let row = 0; row < files.length; ++row) {
+        const file = files[row]
+        filenames.set(file.rawFilename, filenameOffset)
+        catalog.addDirectoryMetadata(row, filenameOffset, file.offset, file.compressedSize, file.uncompressedSize, /** @type {0|8} */ (file.compressionMethod), file.signature)
+        filenameOffset += file.rawFilename.length
+    }
+    catalog.finishDirectory()
+    return catalog
+}
+
+describe('compact source ZIP media catalog', () => {
+    test('materializes bounded batches with identical payload reads, sealed index and source bytes', async () => {
+        const {archive, files} = fixture()
+        const expected = await preparePackedSourceZipMediaIndex(archive, files, new RawZipPayloadReader(archive), () => {})
+        if (expected === null) { throw new Error('Expected an indexed source span') }
+        const ranges = [...archive.ranges]
+        archive.ranges.length = 0
+        const catalog = compactCatalog(files)
+        const materialize = vi.spyOn(catalog, 'getEntries')
+        const actual = await preparePackedSourceZipMediaIndex(archive, catalog, new RawZipPayloadReader(archive), () => {})
+        if (actual === null) { throw new Error('Expected a compact indexed source span') }
+        expect(materialize.mock.calls).toEqual(Array.from({length: 8}, (_, i) => [i * 1024, (i + 1) * 1024]))
+        expect(actual.plan).toEqual(expected.plan)
+        expect(archive.ranges).toEqual(ranges)
+        expect(Buffer.from(await actual.blob.arrayBuffer()).equals(Buffer.from(await expected.blob.arrayBuffer()))).toBe(true)
+        for (const key of /** @type {const} */ (['rangeReadCount', 'rangeReadBytes', 'compressedBytes', 'uncompressedBytes'])) {
+            expect(actual[key]).toBe(expected[key])
+        }
+    })
+
+    test.each(['duplicate-name', 'duplicate-offset', 'wrong-namespace', 'sparse-namespace', 'payload-limit'])('rejects %s before any payload read or entry allocation', async (mode) => {
+        const {archive, files} = fixture({duplicate: mode === 'duplicate-name'})
+        if (mode === 'duplicate-offset') { files[1].offset = files[0].offset }
+        if (mode === 'payload-limit') { files[files.length - 1].uncompressedSize = 4 * 1024 * 1024 + 1 }
+        if (mode === 'wrong-namespace' || mode === 'sparse-namespace') {
+            const file = files[files.length - 1]
+            file.filename = mode === 'wrong-namespace' ? 'different/cc8192.webp' : 'img/cc100000.webp'
+            file.rawFilename = encoder.encode(file.filename)
+        }
+        const catalog = compactCatalog(files)
+        const materialize = vi.spyOn(catalog, 'getEntries')
+        expect(await preparePackedSourceZipMediaIndex(archive, catalog, new RawZipPayloadReader(archive), () => {})).toBeNull()
+        expect(archive.ranges).toEqual([])
+        expect(materialize).not.toHaveBeenCalled()
+    })
+
+    test('preserves an earlier CRC failure before a later invalid local header', async () => {
+        const {archive, files} = fixture({badHeader: FILE_COUNT - 1})
+        files[0].signature = (checksum ^ 1) >>> 0
+        await expect(preparePackedSourceZipMediaIndex(archive, compactCatalog(files), new RawZipPayloadReader(archive), () => {})).rejects.toMatchObject({
+            name: 'DictionarySourceIntegrityError', message: expect.stringContaining('CRC32'),
+        })
+        expect(archive.ranges).toHaveLength(1)
+    })
+
+    test('joins a cancelled read without materializing the next batch', async () => {
+        const {archive, files} = fixture()
+        const catalog = compactCatalog(files)
+        const materialize = vi.spyOn(catalog, 'getEntries')
+        const error = new DOMException('Cancelled compact source media', 'AbortError')
+        await expect(preparePackedSourceZipMediaIndex(archive, catalog, new RawZipPayloadReader(archive), () => {
+            if (archive.ranges.length > 0) { throw error }
+        })).rejects.toBe(error)
+        expect(archive.ranges).toHaveLength(1)
+        expect(materialize).toHaveBeenCalledTimes(1)
+    })
+
+    test('retains local filename validation after directory selection', async () => {
+        const {archive, files} = fixture()
+        files[0].rawFilename[6] = 0x32
+        files[1].rawFilename[6] = 0x31
+        const catalog = compactCatalog(files)
+        await expect(preparePackedSourceZipMediaIndex(archive, catalog, new RawZipPayloadReader(archive), () => {})).rejects.toMatchObject({
+            name: 'DictionarySourceIntegrityError', message: expect.stringContaining('local filename'),
+        })
+        expect(archive.ranges).toHaveLength(1)
+    })
+})
 
 describe('direct source ZIP media entries', () => {
     test.each(['physical', 'reverse', 'rotated'])('writes the same sealed index and source span for %s input without retaining media records', async (order) => {

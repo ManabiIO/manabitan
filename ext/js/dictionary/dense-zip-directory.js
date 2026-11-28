@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {DenseZipFileMap} from './dense-zip-file-map.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap, DenseZipEntryCatalog} from './dense-zip-file-map.js'
 import {createDenseZipFilenameDecoder} from './dense-zip-filenames.js';
 
 const SEARCH_BYTES = 98;
@@ -44,7 +45,7 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
 /* eslint-disable @stylistic/semi */
 /**
  * Read the same checked catalog while retaining compact metadata for members
- * which the importer may never open. The media worker keeps the array API.
+ * which the importer may never open.
  * @param {Blob} archive
  * @param {DenseZipEntryReader} getData
  * @param {() => void} [checkCancellation]
@@ -53,16 +54,28 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
 export async function readDenseZipFileMap(archive, getData, checkCancellation = () => {}) {
     return /** @type {DenseZipFileMap|null} */ (await readDenseZipDirectoryInternal(archive, checkCancellation, getData))
 }
+
+/**
+ * Read the same checked directory for a sequential consumer which only needs
+ * ordinary entry objects for its current bounded payload batch.
+ * @param {Blob} archive
+ * @param {() => void} [checkCancellation]
+ * @returns {Promise<DenseZipEntryCatalog|null>}
+ */
+export async function readDenseZipEntryCatalog(archive, checkCancellation = () => {}) {
+    return /** @type {DenseZipEntryCatalog|null} */ (await readDenseZipDirectoryInternal(archive, checkCancellation, null, true))
+}
 /* eslint-enable @stylistic/semi */
 
 /**
  * @param {Blob} archive
  * @param {() => void} checkCancellation
  * @param {DenseZipEntryReader|null} getData
- * @returns {Promise<DenseZipEntry[]|DenseZipFileMap|null>}
+ * @param {boolean} [compactEntries]
+ * @returns {Promise<DenseZipEntry[]|DenseZipFileMap|DenseZipEntryCatalog|null>}
  * @throws {Error} If an otherwise valid directory contains duplicate names.
  */
-async function readDenseZipDirectoryInternal(archive, checkCancellation, getData) {
+async function readDenseZipDirectoryInternal(archive, checkCancellation, getData, compactEntries = false) {
     if (archive.size < MIN_ARCHIVE_BYTES) { return null; }
     const tailStart = archive.size - SEARCH_BYTES;
     checkCancellation();
@@ -127,6 +140,8 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
     // retain a compact arena so catalog entries can release central headers.
     const filenameBytes = new Uint8Array(length - count * DIRECTORY_HEADER_BYTES)
     const fileMap = getData === null ? null : new DenseZipFileMap(count, filenameBytes, getData)
+    const entryCatalog = compactEntries ? new DenseZipEntryCatalog(count, filenameBytes) : null
+    const compactCatalog = fileMap ?? entryCatalog
     /** @type {string|null} */
     let duplicateFilename = null
     /** @type {DenseZipEntry[]} */
@@ -163,7 +178,7 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
             if (value < 0x20 || value > 0x7e) { return null; }
             filenameBytes[filenamePosition + i] = value
         }
-        if (fileMap === null) {
+        if (compactCatalog === null) {
             const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
             entries.push({
                 filename: '',
@@ -177,7 +192,7 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
                 directory: false,
             })
         } else {
-            fileMap.addDirectoryMetadata(row, filenamePosition, localOffset, compressedSize, uncompressedSize, compressionMethod, signature)
+            compactCatalog.addDirectoryMetadata(row, filenamePosition, localOffset, compressedSize, uncompressedSize, compressionMethod, signature)
         }
         position = filenameEnd;
         localEnd = localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize;
@@ -187,6 +202,9 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
     if (position !== length || localEnd !== offset) { return null; }
     if (fileMap !== null) {
         duplicateFilename = fileMap.finishDirectory();
+    } else if (entryCatalog !== null) {
+        // eslint-disable-next-line @stylistic/semi
+        entryCatalog.finishDirectory()
     } else {
         const decodeFilename = createDenseZipFilenameDecoder(filenameBytes);
         for (const entry of entries) {
@@ -195,5 +213,6 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
         }
     }
     if (duplicateFilename !== null) { throw new Error(`Duplicate archive filename: '${duplicateFilename}'`); }
-    return fileMap ?? entries;
+    // eslint-disable-next-line @stylistic/semi
+    return compactCatalog ?? entries
 }

@@ -7,7 +7,8 @@ import {readFile} from 'node:fs/promises';
 import {crc32} from 'node:zlib';
 import {describe, expect, test} from 'vitest';
 import {TextWriter, Uint8ArrayWriter} from '../ext/lib/zip.js';
-import {readDenseZipDirectory, readDenseZipFileMap} from '../ext/js/dictionary/dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {readDenseZipDirectory, readDenseZipEntryCatalog, readDenseZipFileMap} from '../ext/js/dictionary/dense-zip-directory.js'
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
@@ -203,6 +204,66 @@ describe('dense ZIP directory', () => {
 });
 
 /* eslint-disable @stylistic/semi */
+describe('sequential dense ZIP catalog', () => {
+    test.each([false, true])('preserves every checked field and physical order with ZIP64=%s', async (zip64) => {
+        const archive = new SparseZipDirectory({zip64})
+        const expected = await readDenseZipDirectory(archive)
+        const catalog = await readDenseZipEntryCatalog(archive)
+        if (expected === null || catalog === null) { throw new Error('Expected a dense ZIP catalog') }
+        expect(catalog.length).toBe(expected.length)
+        for (let start = 0; start < catalog.length; start += 997) {
+            const end = Math.min(start + 997, catalog.length)
+            expect(catalog.getEntries(start, end)).toEqual(expected.slice(start, end))
+        }
+    })
+
+    test('selects variable-length names in place without changing metadata or order', async () => {
+        const archive = new SparseZipDirectory()
+        setSparseZipNames(archive, (index) => (index % 7 === 0 ? `${'a'.repeat(index === 0 ? 65_530 : 5)}${index}.png` : `${index}.json`))
+        const expected = await readDenseZipDirectory(archive)
+        const catalog = await readDenseZipEntryCatalog(archive)
+        if (expected === null || catalog === null) { throw new Error('Expected a dense ZIP catalog') }
+        catalog.selectFilenames((filename) => filename.endsWith('.png'))
+        const selected = expected.filter(({filename}) => filename.endsWith('.png'))
+        expect(catalog.getEntries(0, catalog.length)).toEqual(selected)
+        for (let i = 0; i < selected.length; ++i) {
+            expect(catalog.filenameAt(i)).toBe(selected[i].filename)
+            expect(catalog.offsetAt(i)).toBe(selected[i].offset)
+            expect(catalog.compressedSizeAt(i)).toBe(selected[i].compressedSize)
+            expect(catalog.uncompressedSizeAt(i)).toBe(selected[i].uncompressedSize)
+            expect(catalog.compressionMethodAt(i)).toBe(selected[i].compressionMethod)
+            expect(catalog.hasExactRawFilename(i, selected[i].filename)).toBe(true)
+        }
+        catalog.selectFilenames(() => false)
+        expect(catalog.length).toBe(0)
+        expect(catalog.getEntries(0, 0)).toEqual([])
+    })
+
+    test('keeps duplicate names for the selected media index to reject', async () => {
+        const archive = new SparseZipDirectory()
+        setSparseZipNames(archive, (index) => (index < 2 ? 'same.png' : void 0))
+        const catalog = await readDenseZipEntryCatalog(archive)
+        if (catalog === null) { throw new Error('Expected a dense ZIP catalog') }
+        expect(catalog.length).toBe(count)
+        expect(catalog.filenameAt(0)).toBe('same.png')
+        expect(catalog.filenameAt(1)).toBe('same.png')
+        expect(catalog.getEntries(0, 2)).toEqual((await readDenseZipDirectory(archive))?.slice(0, 2))
+    })
+
+    test.each(['filename', 'length', 'overlap', 'descriptor', 'locator'])('preserves the generic ZIP fallback for %s', async (corrupt) => {
+        expect(await readDenseZipEntryCatalog(new SparseZipDirectory({zip64: true, corrupt}))).toBeNull()
+    })
+
+    test('checks cancellation at the same bounded read boundaries', async () => {
+        let calls = 0
+        const error = new DOMException('Cancelled sequential catalog', 'AbortError')
+        await expect(readDenseZipEntryCatalog(new SparseZipDirectory(), () => {
+            if (++calls === 3) { throw error }
+        })).rejects.toBe(error)
+        expect(calls).toBe(3)
+    })
+})
+
 describe('compact dense ZIP catalog', () => {
     const getData = async () => null
 

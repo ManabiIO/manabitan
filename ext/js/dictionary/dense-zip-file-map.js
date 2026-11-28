@@ -198,3 +198,151 @@ export class DenseZipFileMap {
         for (const [key, value] of this.entries()) { callback.call(thisArg, value, key, this) }
     }
 }
+
+/**
+ * A checked, physically ordered directory for sequential payload consumers.
+ * Keep numeric metadata compact until a bounded read batch needs entry objects.
+ */
+export class DenseZipEntryCatalog {
+    /**
+     * @param {number} count
+     * @param {Uint8Array} filenames
+     */
+    constructor(count, filenames) {
+        /** @type {Uint32Array} */
+        this._metadata = new Uint32Array(count * METADATA_WORDS)
+        /** @type {Uint8Array} */
+        this._filenames = filenames
+        /** @type {string[]} */
+        this._names = []
+        this._names.length = count
+    }
+
+    /** @returns {number} */
+    get length() { return this._names.length }
+
+    /**
+     * Used only while the directory reader validates and fills this catalog.
+     * @param {number} row
+     * @param {number} filenameOffset
+     * @param {number} offset
+     * @param {number} compressedSize
+     * @param {number} uncompressedSize
+     * @param {0|8} compressionMethod
+     * @param {number} signature
+     */
+    addDirectoryMetadata(row, filenameOffset, offset, compressedSize, uncompressedSize, compressionMethod, signature) {
+        const base = row * METADATA_WORDS
+        this._metadata[base] = offset
+        this._metadata[base + 1] = compressedSize
+        this._metadata[base + 2] = uncompressedSize
+        this._metadata[base + 3] = compressionMethod
+        this._metadata[base + 4] = signature
+        this._metadata[base + 5] = filenameOffset
+    }
+
+    /** Decode names only after the complete directory has passed validation. */
+    finishDirectory() {
+        const decodeFilename = createDenseZipFilenameDecoder(this._filenames)
+        for (let row = 0; row < this.length; ++row) {
+            const start = this._metadata[row * METADATA_WORDS + 5]
+            const end = row + 1 < this.length ? this._metadata[(row + 1) * METADATA_WORDS + 5] : this._filenames.length
+            this._names[row] = decodeFilename(start, end)
+        }
+    }
+
+    /**
+     * Compact the selected rows in place without creating entries or an index
+     * array. Stable order preserves the directory's checked physical order.
+     * @param {(filename: string) => boolean} predicate
+     */
+    selectFilenames(predicate) {
+        let selected = 0
+        for (let row = 0; row < this.length; ++row) {
+            const filename = this._names[row]
+            if (!predicate(filename)) { continue }
+            if (selected !== row) {
+                this._names[selected] = filename
+                const source = row * METADATA_WORDS
+                this._metadata.copyWithin(selected * METADATA_WORDS, source, source + METADATA_WORDS)
+            }
+            ++selected
+        }
+        this._names.length = selected
+    }
+
+    /**
+     * @param {number} row
+     * @returns {string}
+     */
+    filenameAt(row) { return this._names[row] }
+
+    /**
+     * @param {number} row
+     * @returns {number}
+     */
+    offsetAt(row) { return this._metadata[row * METADATA_WORDS] }
+
+    /**
+     * @param {number} row
+     * @returns {number}
+     */
+    compressedSizeAt(row) { return this._metadata[row * METADATA_WORDS + 1] }
+
+    /**
+     * @param {number} row
+     * @returns {number}
+     */
+    uncompressedSizeAt(row) { return this._metadata[row * METADATA_WORDS + 2] }
+
+    /**
+     * @param {number} row
+     * @returns {0|8}
+     */
+    compressionMethodAt(row) { return /** @type {0|8} */ (this._metadata[row * METADATA_WORDS + 3]) }
+
+    /**
+     * Check the raw pathname without constructing a filename view per member.
+     * @param {number} row
+     * @param {string} filename
+     * @returns {boolean}
+     */
+    hasExactRawFilename(row, filename) {
+        const start = this._metadata[row * METADATA_WORDS + 5]
+        if (filename !== this._names[row] || filename.length > 0xffff || start + filename.length > this._filenames.length) { return false }
+        for (let i = 0; i < filename.length; ++i) {
+            const value = this._filenames[start + i]
+            if (value > 0x7f || value !== filename.charCodeAt(i)) { return false }
+        }
+        return true
+    }
+
+    /**
+     * Materialize only the caller's current read batch. The catalog retains no
+     * reference to these entries or their filename views after the read ends.
+     * @param {number} start
+     * @param {number} end
+     * @returns {import('./dense-zip-directory.js').DenseZipEntry[]}
+     */
+    getEntries(start, end) {
+        /** @type {import('./dense-zip-directory.js').DenseZipEntry[]} */
+        const entries = []
+        for (let row = start; row < end; ++row) {
+            const base = row * METADATA_WORDS
+            const filename = this._names[row]
+            const filenameOffset = this._metadata[base + 5]
+            entries.push({
+                filename,
+                rawFilename: this._filenames.subarray(filenameOffset, filenameOffset + filename.length),
+                offset: this._metadata[base],
+                compressedSize: this._metadata[base + 1],
+                uncompressedSize: this._metadata[base + 2],
+                compressionMethod: /** @type {0|8} */ (this._metadata[base + 3]),
+                signature: this._metadata[base + 4],
+                encrypted: false,
+                directory: false,
+            })
+        }
+        return entries
+    }
+}

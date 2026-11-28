@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {readDenseZipDirectory} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {readDenseZipEntryCatalog} from './dense-zip-directory.js'
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 // eslint-disable-next-line @stylistic/semi
 import {preparePackedSourceZipMediaIndex} from './source-zip-media-pack.js'
@@ -27,16 +28,15 @@ self.addEventListener('message', (event) => { void prepare(event.data); }, {once
 async function prepare(archive) {
     try {
         if (!(archive instanceof Blob)) { throw new TypeError('Missing source ZIP'); }
-        const entries = await readDenseZipDirectory(archive);
+        // eslint-disable-next-line @stylistic/semi
+        const entries = await readDenseZipEntryCatalog(archive)
         if (entries === null) {
             self.postMessage(null);
             return;
         }
         /* eslint-disable @stylistic/semi */
-        const imageEntries = /** @type {import('@zip.js/zip.js').Entry[]} */ (
-            /** @type {unknown} */ (entries.filter(({filename}) => getImageMediaTypeFromFileName(filename) !== null))
-        )
-        const packed = await preparePackedSourceZipMediaIndex(archive, imageEntries, new RawZipPayloadReader(archive), () => {})
+        entries.selectFilenames((filename) => getImageMediaTypeFromFileName(filename) !== null)
+        const packed = await preparePackedSourceZipMediaIndex(archive, entries, new RawZipPayloadReader(archive), () => {})
         /* eslint-enable @stylistic/semi */
         if (packed === null) {
             self.postMessage(null);

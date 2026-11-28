@@ -20,6 +20,8 @@ import {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './term-b
 import {validateCompressedZipMediaBatchWasm} from './term-bank-wasm-parser.js';
 // eslint-disable-next-line @stylistic/semi
 import {createGenerationMediaIndexWriter} from './dictionary-generation-media-store.js'
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipEntryCatalog} from './dense-zip-file-map.js'
 
 export const MIN_SOURCE_ZIP_IMAGE_COUNT = 8192;
 
@@ -32,6 +34,7 @@ const MAX_RELATIVE_RANGE_OVERHEAD = 1 / 8;
 /** @typedef {{blob: Blob, records: import('./dictionary-generation-media-store.js').SourceMediaRange[]} & SourceMediaMetrics} SourceMediaPack */
 /** @typedef {{blob: Blob, plan: import('./dictionary-generation-media-store.js').GenerationMediaIndex} & SourceMediaMetrics} SourceMediaIndexPack */
 /** @typedef {Array<{type: string, source: {path: string}}>|import('@zip.js/zip.js').Entry[]} SourceMediaFiles */
+/** @typedef {import('@zip.js/zip.js').Entry[]|DenseZipEntryCatalog} SourceMediaIndexFiles */
 
 /* eslint-disable @stylistic/semi */
 /**
@@ -69,17 +72,19 @@ export async function preparePackedSourceZipMediaEntries(archive, files, reader,
  * catalogs already have physical order; other inputs sort only references.
  * Unsupported namespaces leave the ordinary resolver available.
  * @param {Blob} archive
- * @param {import('@zip.js/zip.js').Entry[]} files
+ * @param {SourceMediaIndexFiles} files
  * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
  * @param {() => void} checkCancellation
  * @returns {Promise<SourceMediaIndexPack|null>}
  */
 export async function preparePackedSourceZipMediaIndex(archive, files, reader, checkCancellation) {
     let orderedFiles = files
-    for (let i = 1; i < files.length; ++i) {
-        if (files[i].offset < files[i - 1].offset) {
-            orderedFiles = [...files].sort((a, b) => a.offset - b.offset)
-            break
+    if (!(files instanceof DenseZipEntryCatalog)) {
+        for (let i = 1; i < files.length; ++i) {
+            if (files[i].offset < files[i - 1].offset) {
+                orderedFiles = [...files].sort((a, b) => a.offset - b.offset)
+                break
+            }
         }
     }
     return await preparePackedSourceZipMediaFiles(archive, orderedFiles, null, reader, checkCancellation, true)
@@ -90,7 +95,7 @@ export async function preparePackedSourceZipMediaIndex(archive, files, reader, c
 /**
  * @overload
  * @param {Blob} archive
- * @param {SourceMediaFiles} sources
+ * @param {SourceMediaFiles|DenseZipEntryCatalog} sources
  * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
  * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
  * @param {() => void} checkCancellation
@@ -109,7 +114,7 @@ export async function preparePackedSourceZipMediaIndex(archive, files, reader, c
  */
 /**
  * @param {Blob} archive
- * @param {SourceMediaFiles} sources
+ * @param {SourceMediaFiles|DenseZipEntryCatalog} sources
  * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
  * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
  * @param {() => void} checkCancellation
@@ -121,69 +126,75 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
     if (sources.length < MIN_SOURCE_ZIP_IMAGE_COUNT || archive.size <= MIN_ARCHIVE_BYTES || !reader.supportsBatchReads()) { return null }
 
     /* eslint-disable @stylistic/semi */
-    const indexFiles = indexOutput ? /** @type {import('@zip.js/zip.js').Entry[]} */ (sources) : null
-    const indexWriter = indexFiles === null ? null : createGenerationMediaIndexWriter(indexFiles.length, (i) => indexFiles[i].filename)
+    const catalog = sources instanceof DenseZipEntryCatalog ? sources : null
+    const arraySources = Array.isArray(sources) ? sources : []
+    const indexFiles = indexOutput ? /** @type {SourceMediaIndexFiles} */ (sources) : null
+    const indexEntries = Array.isArray(indexFiles) ? indexFiles : []
+    const indexWriter = indexFiles === null ? null : createGenerationMediaIndexWriter(indexFiles.length, (i) => (catalog === null ? indexEntries[i].filename : catalog.filenameAt(i)))
     if (indexFiles !== null && indexWriter === null) { return null }
     const records = []
     const paths = indexFiles === null ? new Set() : null
     let previousOffset = -1
-    /* eslint-enable @stylistic/semi */
     let rangeStart = Infinity;
     let rangeEndLowerBound = 0;
     let compressedTotal = 0;
-    for (const source of sources) {
-        /* eslint-disable @stylistic/semi */
+    for (let row = 0; row < sources.length; ++row) {
         let entry
         let path
-        if (fileMap === null) {
+        if (catalog !== null) {
+            path = catalog.filenameAt(row)
+        } else if (fileMap === null) {
+            const source = arraySources[row]
             entry = /** @type {import('@zip.js/zip.js').Entry} */ (source)
             path = entry.filename
         } else {
+            const source = arraySources[row]
             const requirement = /** @type {{type: string, source: {path: string}}} */ (source)
             if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null }
             path = requirement.source.path
             entry = fileMap.get(path)
         }
-        /* eslint-enable @stylistic/semi */
         const mediaType = getImageMediaTypeFromFileName(path);
         if (
             mediaType === null ||
             path.startsWith('mdict-media/') ||
-            typeof entry === 'undefined' ||
-            entry.filename !== path ||
-            Reflect.has(entry, 'bytes') ||
+            (catalog === null && (typeof entry === 'undefined' || entry.filename !== path || Reflect.has(entry, 'bytes'))) ||
             paths?.has(path)
         ) {
             return null;
         }
-        const file = /** @type {import('@zip.js/zip.js').Entry} */ (entry);
-        const {offset, rawFilename, compressedSize, uncompressedSize, compressionMethod} = file;
+        const file = /** @type {import('@zip.js/zip.js').Entry} */ (entry)
+        const offset = catalog === null ? file.offset : catalog.offsetAt(row)
+        const compressedSize = catalog === null ? file.compressedSize : catalog.compressedSizeAt(row)
+        const uncompressedSize = catalog === null ? file.uncompressedSize : catalog.uncompressedSizeAt(row)
+        const compressionMethod = catalog === null ? file.compressionMethod : catalog.compressionMethodAt(row)
+        const rawFilename = file?.rawFilename
         if (
             !Number.isSafeInteger(offset) || offset < 0 || offset >= archive.size ||
             !Number.isSafeInteger(compressedSize) || compressedSize < 0 || compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ||
             !Number.isSafeInteger(uncompressedSize) || uncompressedSize < 0 || uncompressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ||
             (compressionMethod !== 0 && compressionMethod !== 8) ||
-            file.encrypted ||
-            !(rawFilename instanceof Uint8Array) ||
-            rawFilename.byteLength !== path.length || rawFilename.byteLength > 0xffff
+            file?.encrypted ||
+            (catalog === null && (!(rawFilename instanceof Uint8Array) || rawFilename.byteLength !== path.length || rawFilename.byteLength > 0xffff))
         ) {
             return null;
         }
-        /* eslint-disable @stylistic/semi */
         if (indexFiles !== null && offset <= previousOffset) { return null }
         previousOffset = offset
-        /* eslint-enable @stylistic/semi */
         // A normalized UTF-8 alias or Unicode extra field can describe a
         // different logical pathname. Leave either to the general resolver.
-        for (let i = 0; i < rawFilename.byteLength; ++i) {
-            if (rawFilename[i] > 0x7f || rawFilename[i] !== path.charCodeAt(i)) { return null; }
+        if (catalog !== null) {
+            if (!catalog.hasExactRawFilename(row, path)) { return null }
+        } else if (typeof rawFilename !== 'undefined') {
+            for (let i = 0; i < rawFilename.byteLength; ++i) {
+                if (rawFilename[i] > 0x7f || rawFilename[i] !== path.charCodeAt(i)) { return null }
+            }
         }
-        const firstPossibleEnd = offset + ZIP_LOCAL_HEADER_BYTES + rawFilename.byteLength + compressedSize;
+        const firstPossibleEnd = offset + ZIP_LOCAL_HEADER_BYTES + path.length + compressedSize
         if (firstPossibleEnd > archive.size) { return null; }
         rangeStart = Math.min(rangeStart, offset);
         rangeEndLowerBound = Math.max(rangeEndLowerBound, firstPossibleEnd);
         compressedTotal += compressedSize;
-        /* eslint-disable @stylistic/semi */
         paths?.add(path)
         if (indexFiles === null) {
             records.push({
@@ -199,8 +210,8 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
                 signature: file.signature,
             })
         }
-        /* eslint-enable @stylistic/semi */
     }
+    /* eslint-enable @stylistic/semi */
 
     const maxSpan = Math.min(MAX_PACKED_MEDIA_BYTES, compressedTotal * (1 + MAX_RELATIVE_RANGE_OVERHEAD));
     if (rangeEndLowerBound - rangeStart > maxSpan) { return null; }
@@ -226,8 +237,8 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
         let unpackedBytes = 0;
         while (end < fileCount && end - start < RAW_ZIP_BATCH_MAX_FILES) {
             /* eslint-disable @stylistic/semi */
-            const compressedSize = indexFiles === null ? byOffset[end].compressedSize : indexFiles[end].compressedSize
-            const uncompressedLength = indexFiles === null ? byOffset[end].uncompressedLength : indexFiles[end].uncompressedSize
+            const compressedSize = catalog !== null ? catalog.compressedSizeAt(end) : (indexFiles === null ? byOffset[end].compressedSize : indexEntries[end].compressedSize)
+            const uncompressedLength = catalog !== null ? catalog.uncompressedSizeAt(end) : (indexFiles === null ? byOffset[end].uncompressedLength : indexEntries[end].uncompressedSize)
             /* eslint-enable @stylistic/semi */
             if (
                 packedBytes + compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ||
@@ -242,7 +253,7 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
 
         const readStart = Date.now();
         // eslint-disable-next-line @stylistic/semi
-        const files = indexFiles === null ? byOffset.slice(start, end).map(({file}) => file) : indexFiles.slice(start, end)
+        const files = catalog !== null ? /** @type {import('@zip.js/zip.js').Entry[]} */ (/** @type {unknown} */ (catalog.getEntries(start, end))) : (indexFiles === null ? byOffset.slice(start, end).map(({file}) => file) : indexEntries.slice(start, end))
         // eslint-disable-next-line @stylistic/semi
         const offsets = indexFiles === null ? null : files.map(({offset}) => offset)
         // Large-Blob reads use bounded coalesced ranges. Keep payload subviews
