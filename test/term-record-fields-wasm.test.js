@@ -117,7 +117,7 @@ describe('native compact record fields', () => {
         expect(native.encode(chunk.rowCount, chunk.scoreList, chunk.resolvedContentReferences, 2 ** 40)).toBeNull()
     })
 
-    test.each([NaN, Infinity, -Infinity, -2, 1.5, Number.MAX_SAFE_INTEGER + 1])('declines invalid current offset %s', async (offset) => {
+    test.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, -2, 1.5, Number.MAX_SAFE_INTEGER + 1])('declines invalid current offset %s', async (offset) => {
         const chunk = fixture()
         chunk.resolvedContentReferences.offsets[0] = offset
         expect((await encoder()).encode(chunk.rowCount, chunk.scoreList, chunk.resolvedContentReferences, 2 ** 40)).toBeNull()
