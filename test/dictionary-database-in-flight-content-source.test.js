@@ -40,6 +40,12 @@ function fixture(offsets = [100, 120, 140], lengths = [1, 2, 1]) {
     };
 }
 
+/**
+ * @param {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} database
+ * @param {ReturnType<typeof fixture>} value
+ * @param {{offsets: Float64Array, lengths: Uint32Array, spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}, dictName: string}|null} [witness]
+ * @returns {() => void}
+ */
 function register(database, value, witness = null) {
     return Reflect.get(database, '_registerInFlightTermContentSources').call(
         database,
@@ -146,14 +152,14 @@ describe('DictionaryDatabase in-flight term-content producer witness', () => {
         );
         if (typeof witnessSymbol !== 'symbol') { throw new Error('Expected private producer witness slot'); }
         if (singleReferenceSlab && !sharedOffsets) {
-            expect(result[witnessSymbol]).toMatchObject({
+            expect(Reflect.get(result, witnessSymbol)).toMatchObject({
                 offsets: result.pendingOffsets,
                 lengths,
                 spans,
                 dictName: 'raw-block-v2:jmdict',
             });
         } else {
-            expect(result[witnessSymbol]).toBeNull();
+            expect(Reflect.get(result, witnessSymbol)).toBeNull();
         }
     });
 });
