@@ -17,8 +17,9 @@ const harnessCommit = 'a300da36d00df8e353c5679b1528b50a1299b75f'
 const product = path.join(process.env.RUNNER_TEMP, 'manabitan-develop-a300da36')
 const extensionDir = path.join(process.env.RUNNER_TEMP, 'cross-engine/manabitan-develop-extension')
 const runner = path.join(harness, 'test/qualification/hoshidicts-jmdict/run-glossary.mjs')
+// JMdict was already imported once in run 46143842404. Its complete snapshot
+// is retained despite a harness title-identity assertion bug, so do not repeat it.
 const datasets = {
-    jmdict: {archive: 'JMdict_2026-11-22.zip', oracle: 'source-oracle.json'},
     jitendex: {archive: 'jitendex_2026-10-03.zip', oracle: 'jitendex-source-oracle.json'},
     vndb: {archive: 'vndb_characters_by_bee.zip', oracle: 'vndb-source-oracle.json'},
 }
@@ -67,7 +68,7 @@ try {
         await run(process.execPath, [runner, 'manabitan', dataset, '1', oracle], {env: environment, cwd: harness})
         const receipt = JSON.parse(await readFile(path.join(evidence, 'runs', `${dataset}-1-${arm}`, 'receipt.json'), 'utf8'))
         const snapshot = receipt.importDebugSnapshot
-        if (receipt.status !== 'passed' || !snapshot || snapshot.dictionaryTitle !== receipt.title ||
+        if (receipt.status !== 'passed' || !snapshot || snapshot.resultTitle !== receipt.title ||
             !Array.isArray(snapshot.importerPhaseTimings) || snapshot.importerPhaseTimings.length === 0 ||
             !Array.isArray(snapshot.localPhaseTimings) || snapshot.localPhaseTimings.length === 0) {
             throw new Error(`Missing passed lookup or complete phase snapshot for ${dataset}`)

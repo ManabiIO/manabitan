@@ -321,7 +321,8 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
         }
         if (process.env.BENCH_CAPTURE_IMPORT_PHASES === '1') {
             record.importDebugSnapshot = await page.evaluate(() => globalThis.__manabitanLastImportDebug ?? null)
-            if (!record.importDebugSnapshot || record.importDebugSnapshot.dictionaryTitle !== spec.title) {
+            if (!record.importDebugSnapshot || record.importDebugSnapshot.resultTitle !== spec.title ||
+                record.importDebugSnapshot.hasResult !== true || record.importDebugSnapshot.errorCount !== 0) {
                 errors.push('Importer phase snapshot was missing or belonged to a different dictionary')
             }
         }
