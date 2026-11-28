@@ -905,6 +905,9 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {import('./term-content-canonical-scan.js').LookupChecksumProvider|null} */
+        // eslint-disable-next-line @stylistic/semi
+        this._lookupChecksumProvider = null
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1185,6 +1188,8 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _prepare() {
+        // eslint-disable-next-line @stylistic/semi
+        this._lookupChecksumProvider = null
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1227,14 +1232,17 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {import('./term-content-canonical-scan.js').LookupChecksumProvider|null} [lookupChecksum=null]
      * @returns {Promise<void>}
      */
-    async beginImportSession() {
+    async beginImportSession(lookupChecksum = null) {
         await this._runExclusiveStorageMutation(async () => {
             if (this._importSessionActive) {
                 return;
             }
             this._importSessionActive = true;
+            // eslint-disable-next-line @stylistic/semi
+            this._lookupChecksumProvider = lookupChecksum
             this._exactLookupRoute = null;
             this._exactLookupRouteAbandoned = false;
             this._deferIndexBuild = true;
@@ -1405,6 +1413,8 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _abandonImportWritesForRollback() {
+        // eslint-disable-next-line @stylistic/semi
+        this._lookupChecksumProvider = null
         this._importSessionActive = false;
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
@@ -1487,6 +1497,8 @@ export class TermRecordOpfsStore {
         try {
             await this._endImportSession();
         } finally {
+            // eslint-disable-next-line @stylistic/semi
+            this._lookupChecksumProvider = null
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
         }
@@ -6106,6 +6118,7 @@ view.chunks :
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                this._lookupChecksumProvider,
             );
             if (
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
@@ -6238,6 +6251,7 @@ view.chunks :
      * @param {Uint8Array} payload
      * @param {Uint8Array|null} recordFields
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
+     * @param {import('./term-content-canonical-scan.js').LookupChecksumProvider|null} [lookupChecksum=null]
      * @returns {Uint8Array}
      * @throws {Error} If the authoritative fields do not match the declared record count.
      */
@@ -6248,6 +6262,7 @@ view.chunks :
         payload,
         recordFields,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+        lookupChecksum = null,
     ) {
         if (!(recordFields instanceof Uint8Array)) {
             throw new Error('Invalid authoritative term-record fields');
@@ -6270,9 +6285,12 @@ view.chunks :
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        /* eslint-disable @stylistic/semi */
+        const checksums = lookupChecksum?.(base, derived, recordFields) ?? null
+        view.setUint32(24, checksums === null ? hashLookupIndexBytes(base) : checksums[0], true)
+        view.setUint32(28, checksums === null ? hashLookupIndexBytes(derived) : checksums[1], true)
+        view.setUint32(32, checksums === null ? hashLookupIndexBytes(recordFields) : checksums[2], true)
+        /* eslint-enable @stylistic/semi */
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
