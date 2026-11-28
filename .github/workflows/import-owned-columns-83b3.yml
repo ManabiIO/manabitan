@@ -1,0 +1,216 @@
+name: Import owned columns qualification 83b3
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "ext/**"
+      - "package.json"
+      - "package-lock.json"
+      - "dev/*.js"
+      - "dev/bin/**"
+      - "dev/data/**"
+      - "dev/lib/**"
+      - "dev/perf/**/*.js"
+      - "dev/perf/**/*.mjs"
+      - "dev/perf/**/*.html"
+      - "dev/perf/**/*.py"
+      - "test/e2e/**"
+      - "test/chromium/**"
+      - "test/perf/dictionaries.lock.json"
+      - "builds/perf/import-owned-columns-83b3-source/**"
+      - ".github/actions/setup/action.yml"
+      - ".github/workflows/import-owned-columns-83b3.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-owned-columns-83b3-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'perf/r2-transfer-20261123-fcff' &&
+      github.base_ref == 'develop'
+    runs-on: ubuntu-latest
+    outputs:
+      acquire: ${{ steps.changed.outputs.acquire }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: changed
+        name: Skip follow-ups that leave runtime and acquisition unchanged
+        shell: bash
+        env:
+          PERF_ACTION: ${{ github.event.action }}
+          PERF_BEFORE: ${{ github.event.before }}
+          PERF_CANDIDATE: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          acquire=true
+          if [[ "$PERF_ACTION" == synchronize && "$PERF_BEFORE" =~ ^[a-f0-9]{40}$ ]] &&
+             git cat-file -e "${PERF_BEFORE}^{commit}" &&
+             git diff --quiet "$PERF_BEFORE" "$PERF_CANDIDATE" -- \
+               ext package.json package-lock.json \
+               ':(glob)dev/*.js' dev/bin dev/data dev/lib \
+               ':(glob)dev/perf/**/*.js' ':(glob)dev/perf/**/*.mjs' \
+               ':(glob)dev/perf/**/*.html' ':(glob)dev/perf/**/*.py' \
+               test/e2e test/chromium test/perf/dictionaries.lock.json \
+               builds/perf/import-owned-columns-83b3-source \
+               .github/actions/setup/action.yml \
+               .github/workflows/import-owned-columns-83b3.yml; then
+            acquire=false
+          fi
+          echo "acquire=$acquire" >> "$GITHUB_OUTPUT"
+
+  qualify:
+    needs: select
+    if: needs.select.outputs.acquire == 'true'
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }}, ${{ matrix.pairs }} pairs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            initial_order: AB
+            pairs: 12
+          - dictionary: jmdict
+            initial_order: BA
+            pairs: 12
+          - dictionary: jitendex
+            initial_order: AB
+            pairs: 6
+          - dictionary: vndb
+            initial_order: AB
+            pairs: 6
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.event.pull_request.head.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_INITIAL_ORDER: ${{ matrix.initial_order }}
+      PERF_PAIRS: ${{ matrix.pairs }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify frozen qualification tooling and source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/import-owned-columns-83b3-logs
+          printf 'baseline=%s\ncandidate=%s\n' "$PERF_BASELINE" "$PERF_CANDIDATE" \
+            | tee builds/perf/import-owned-columns-83b3-logs/source-guard.log
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
+            package.json package-lock.json .github/actions/setup/action.yml \
+            test/perf/dictionaries.lock.json ':(glob)dev/perf/**/*.py' \
+            2>&1 | tee -a builds/perf/import-owned-columns-83b3-logs/source-guard.log
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Acquire and verify the complete locked corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" \
+            2>&1 | tee builds/perf/import-owned-columns-83b3-logs/fixtures.log
+      - name: Prepare the frozen baseline for worker replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline_root="$GITHUB_WORKSPACE/builds/perf/import-owned-columns-83b3-component-source"
+          git worktree add --detach "$baseline_root" "$PERF_BASELINE" \
+            2>&1 | tee builds/perf/import-owned-columns-83b3-logs/component-source.log
+          cp -al "$GITHUB_WORKSPACE/node_modules" "$baseline_root/node_modules"
+          npm --prefix "$baseline_root" run build:libs \
+            2>&1 | tee -a builds/perf/import-owned-columns-83b3-logs/component-source.log
+          for source_root in "$baseline_root" "$GITHUB_WORKSPACE"; do
+            if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
+              git -C "$source_root" status --short \
+                | tee -a builds/perf/import-owned-columns-83b3-logs/component-source.log
+              exit 1
+            fi
+          done
+      - name: Verify every row under existing 2, 3 and 5 worker groupings
+        shell: bash
+        run: |
+          set -euo pipefail
+          component_dir="$GITHUB_WORKSPACE/builds/perf/import-owned-columns-83b3-components"
+          mkdir -p "$component_dir"
+          runner=builds/perf/import-owned-columns-83b3-source/owned-column-replay.mjs
+          cp "$runner" "$component_dir/owned-column-replay.mjs"
+          for policy in 2 3 5; do
+            # Sequential source replay models existing grouping policies only.
+            # It does not configure the subsequent browser's worker policy.
+            node --expose-gc "$runner" \
+              --baseline-root "$GITHUB_WORKSPACE/builds/perf/import-owned-columns-83b3-component-source" \
+              --candidate-root "$GITHUB_WORKSPACE" \
+              --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+              --parser-workers "$policy" --pairs 1 \
+              --out "$component_dir/$PERF_DICTIONARY-policy-$policy.json" \
+              "$PERF_DICTIONARY" \
+              2>&1 | tee "builds/perf/import-owned-columns-83b3-logs/component-policy-$policy.log"
+          done
+      - name: Compare frozen release packages with unchanged qualification tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          storage=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Prospective contract; neighboring page counts fail. The current
+            # baseline must pass before this cohort can qualify either arm.
+            storage=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_INITIAL_ORDER" \
+            --pairs "$PERF_PAIRS" \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser-worker.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            "${storage[@]}" \
+            --evidence builds/perf/import-owned-columns-83b3 \
+            2>&1 | tee builds/perf/import-owned-columns-83b3-logs/browser-qualification.log
+      - name: Profile baseline JMdict separately after qualification
+        if: success() && matrix.dictionary == 'jmdict' && matrix.initial_order == 'AB'
+        working-directory: builds/perf/import-owned-columns-83b3-sources/A
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          test -z "$(git status --porcelain)"
+          # Diagnostic attribution only: this trace is outside every timed
+          # observation and has a different completion boundary.
+          node dev/perf/import-benchmark.js jmdict \
+            --build-target chrome --no-build --trace --runs 1 --media-check all \
+            --output "$GITHUB_WORKSPACE/builds/perf/import-owned-columns-83b3-diagnostic" \
+            2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/import-owned-columns-83b3-logs/jmdict-baseline-diagnostic.log"
+      - name: Preserve every component and browser observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-owned-columns-83b3-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+          path: |
+            builds/perf/import-owned-columns-83b3
+            builds/perf/import-owned-columns-83b3-components
+            builds/perf/import-owned-columns-83b3-diagnostic
+            builds/perf/import-owned-columns-83b3-logs
+          if-no-files-found: error
+          retention-days: 14

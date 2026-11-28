@@ -80,6 +80,9 @@ const EMPTY_UINT32_ARRAY = new Uint32Array(0);
 const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+
+/** @type {WeakMap<TermBankColumnChunk, {plan: TermBankColumnChunk['termRecordPreinternedPlan'], prepared: import('./term-lookup-index-preparation.js').PreparedTermLookupIndex, bytes: Uint8Array, stringsBuffer: Uint8Array, stringLengths: Uint16Array, expressionIndexes: Uint16Array|Uint32Array}>} */
+const ownedWholeChunkLookupSources = new WeakMap();
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -1669,6 +1672,25 @@ allocator(n, 'segmented lookup compaction'));
 }
 
 /**
+ * Views into the owned v7 index returned by the native encoder. Key lengths
+ * immediately follow the padded key arena; expression IDs follow the lengths.
+ * @param {Uint8Array} bytes
+ * @param {number} keyCount
+ * @param {number} stringBytes
+ * @param {number} rowCount
+ * @returns {{stringsBuffer: Uint8Array, stringLengths: Uint16Array, expressionIndexes: Uint16Array}}
+ */
+function getOwnedNativeLookupColumns(bytes, keyCount, stringBytes, rowCount) {
+    // v7: 16-byte container header, then the 32-byte base header.
+    const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(stringBytes / 4) * 4, keyCount);
+    return {
+        stringsBuffer: bytes.subarray(48, 48 + stringBytes),
+        stringLengths,
+        expressionIndexes: new Uint16Array(bytes.buffer, stringLengths.byteOffset + stringLengths.byteLength, rowCount),
+    };
+}
+
+/**
  * Uses one reusable native segment workspace. Returned key arenas alias the
  * owned v7 index, not the parser heap; later parses cannot mutate them.
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
@@ -1735,12 +1757,8 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
         // The owned v7 base already contains the compact lengths immediately
         // after its padded key arena, followed by the expression IDs. Reuse
         // both owned columns; optional offsets can be reconstructed for splits.
-        const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)
-        const ownedPlan = {stringLengths,
+        const ownedPlan = {...getOwnedNativeLookupColumns(bytes, keys, length, rows),
             stringHashes: new Uint32Array(runPlan.stringHashes),
-            // v7: 16-byte container header, then the 32-byte base header.
-            stringsBuffer: bytes.subarray(48, 48 + length),
-            expressionIndexes: new Uint16Array(bytes.buffer, stringLengths.byteOffset + stringLengths.byteLength, rows),
             // The persisted reading column uses a sentinel for equal readings;
             // the plan still requires their actual interned string IDs.
             readingIndexes: new Uint32Array(runPlan.readingIndexes)}
@@ -2610,9 +2628,18 @@ null :
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
                     nativeSegmentedLookupSegments += segments.size;
                 } else if (bytes !== null) {
+                    const prepared = {bytes, preinternedPlan: termRecordPreinternedPlan};
                     chunk.preparedLookupIndexes = new Map([
-                        [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
+                        [`0:${count}`, prepared],
                     ]);
+                    ownedWholeChunkLookupSources.set(chunk, {
+                        plan: termRecordPreinternedPlan,
+                        prepared,
+                        bytes,
+                        stringsBuffer: termRecordPreinternedPlan.stringsBuffer,
+                        stringLengths: termRecordPreinternedPlan.stringLengths,
+                        expressionIndexes: termRecordPreinternedPlan.expressionIndexes,
+                    });
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
                 } else if (nativeCompactionScratch !== null) {
                     ++nativeSegmentedLookupFallbacks;
@@ -4105,10 +4132,11 @@ function tryProjectNativeGlossaryImagePath(row, source) {
  * @param {boolean} [projectImagePaths=false]
  * @param {boolean} [prepareLookupRoute=false]
  * @param {PreloadedTermBankSource} [preloadedSource]
+ * @param {boolean} [adoptOwnedLookupColumns=false] Internal immediate worker-transfer path; native sidecar bytes are relinquished unchanged to the result.
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0, adoptOwnedLookupColumns = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4143,7 +4171,8 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
-    const ownedStrings = new Uint8Array(plan.stringsBuffer);
+    const ownedLookupColumns = adoptOwnedLookupColumns ? getOwnedWholeChunkLookupColumns(chunk) : null;
+    const ownedStrings = ownedLookupColumns?.stringsBuffer ?? new Uint8Array(plan.stringsBuffer);
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             (tryProjectNativeGlossaryImagePath(row, preloadedSource) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
@@ -4170,7 +4199,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         };
     });
     const stablePlan = {
-        stringLengths: new Uint16Array(plan.stringLengths),
+        stringLengths: ownedLookupColumns?.stringLengths ?? new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             new Uint32Array(stringOffsets),
@@ -4182,7 +4211,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     void 0
             ),
         stringsBuffer: ownedStrings,
-        expressionIndexes: new Uint32Array(plan.expressionIndexes),
+        expressionIndexes: ownedLookupColumns?.expressionIndexes ?? new Uint32Array(plan.expressionIndexes),
         readingIndexes: new Uint32Array(plan.readingIndexes),
     };
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
@@ -4223,6 +4252,41 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
     };
+}
+
+/**
+ * A whole-chunk native sidecar owns the same strings, lengths and expression
+ * IDs as its original plan. Reuse those persisted columns at the worker-copy
+ * boundary, just as segmented plans already do. Readings still need their
+ * actual IDs copied: the persisted column uses a sentinel for equal readings.
+ * Only the exact chunk, plan, columns, entry and byte object produced by this
+ * parser qualify. The private ownership association does not survive worker
+ * transfer and does not cache validation of an external prepared plan. Callers
+ * which need a snapshot of mutable columns retain the ordinary copy path.
+ * @param {TermBankColumnChunk} chunk
+ * @returns {{stringsBuffer: Uint8Array, stringLengths: Uint16Array, expressionIndexes: Uint16Array}|null}
+ */
+function getOwnedWholeChunkLookupColumns(chunk) {
+    const {preparedLookupIndexes, termRecordPreinternedPlan: plan, rowCount} = chunk;
+    const source = ownedWholeChunkLookupSources.get(chunk);
+    if (typeof source === 'undefined' || source.plan !== plan || source.stringsBuffer !== plan.stringsBuffer ||
+    source.stringLengths !== plan.stringLengths || source.expressionIndexes !== plan.expressionIndexes) { return null; }
+    if (!(preparedLookupIndexes instanceof Map) || preparedLookupIndexes.size !== 1) { return null; }
+    const prepared = preparedLookupIndexes.get(`0:${rowCount}`);
+    if (typeof prepared === 'undefined' || prepared !== source.prepared || prepared.preinternedPlan !== plan || prepared.bytes !== source.bytes) { return null; }
+    const {bytes} = prepared;
+    if (!(bytes instanceof Uint8Array) || !(bytes.buffer instanceof ArrayBuffer) ||
+    bytes.buffer === plan.stringsBuffer.buffer || bytes.byteOffset % 4 !== 0 || bytes.byteLength < 48) { return null; }
+    const header = new Uint32Array(bytes.buffer, bytes.byteOffset, 12);
+    const keyCount = plan.stringLengths.length;
+    const stringBytes = plan.stringsBuffer.byteLength;
+    const baseLength = 32 + Math.ceil(stringBytes / 4) * 4 + align4((keyCount + rowCount * 3) * 2) + header[8] * 4;
+    if (header[0] !== 0x37494c4d || header[1] !== 7 || header[4] !== rowCount ||
+    header[5] !== keyCount || header[6] !== stringBytes || header[7] !== 7 ||
+    rowCount <= 0 || rowCount >= 0xffff || keyCount <= 0 || keyCount >= 0xffff ||
+    header[8] > rowCount || header[9] > rowCount || header[10] !== 0 || header[11] !== 0 ||
+    header[2] !== baseLength || header[3] < 32 || 16 + baseLength + header[3] !== bytes.byteLength) { return null; }
+    return getOwnedNativeLookupColumns(bytes, keyCount, stringBytes, rowCount);
 }
 
 /**

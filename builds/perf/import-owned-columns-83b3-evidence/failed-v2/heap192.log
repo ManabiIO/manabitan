@@ -1,0 +1,36 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+<--- Last few GCs --->
+
+[6:0x34acc000]     1958 ms: Scavenge (reduce) (interleaved) 185.6 (203.9) -> 185.6 (195.7) MB, pooled: 0 MB, 42.03 / 0.00 ms  (average mu = 0.746, current mu = 0.523) allocation failure; 
+[6:0x34acc000]     2128 ms: Mark-Compact (reduce) 193.2 (195.7) -> 193.2 (195.7) MB, pooled: 0 MB, 143.85 / 0.00 ms  (+ 15.3 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 239 ms) (average mu = 0.658, current mu
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0xe40d24 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 2: 0x1216be0 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 3: 0x1216eb7 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 4: 0x1444875  [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 5: 0x145e109 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 6: 0x14327b8 v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 7: 0x14336e5 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 8: 0x140bade v8::internal::Factory::AllocateRaw(int, v8::internal::AllocationType, v8::internal::AllocationAlignment) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+ 9: 0x13fabd4 v8::internal::FactoryBase<v8::internal::Factory>::AllocateRawWithImmortalMap(int, v8::internal::AllocationType, v8::internal::Tagged<v8::internal::Map>, v8::internal::AllocationAlignment) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+10: 0x13fc09e v8::internal::FactoryBase<v8::internal::Factory>::NewRawOneByteString(int, v8::internal::AllocationType) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+11: 0x13fc116 v8::internal::FactoryBase<v8::internal::Factory>::NewStringFromOneByte(v8::base::Vector<unsigned char const>, v8::internal::AllocationType) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+12: 0x13fc6b5 v8::internal::FactoryBase<v8::internal::Factory>::SmiToString(v8::internal::Tagged<v8::internal::Smi>, v8::internal::NumberCacheMode) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+13: 0x15fa5df  [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+14: 0x16daac2  [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+15: 0x16e14e3 v8::internal::KeyAccumulator::GetKeys(v8::internal::Isolate*, v8::internal::Handle<v8::internal::JSReceiver>, v8::internal::KeyCollectionMode, v8::internal::PropertyFilter, v8::internal::GetKeysConversion, bool, bool) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+16: 0x158591b v8::internal::JsonStringifier::SerializeJSReceiverSlow(v8::internal::Handle<v8::internal::JSReceiver>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+17: 0x1584327 v8::internal::JsonStringifier::Result v8::internal::JsonStringifier::Serialize_<true>(v8::internal::Handle<v8::internal::Object>, bool, v8::internal::Handle<v8::internal::Object>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+18: 0x1584f85 v8::internal::JsonStringifier::Result v8::internal::JsonStringifier::Serialize_<true>(v8::internal::Handle<v8::internal::Object>, bool, v8::internal::Handle<v8::internal::Object>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+19: 0x1587f77 v8::internal::JsonStringifier::Result v8::internal::JsonStringifier::Serialize_<false>(v8::internal::Handle<v8::internal::Object>, bool, v8::internal::Handle<v8::internal::Object>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+20: 0x1588d35 v8::internal::JsonStringifier::Stringify(v8::internal::Handle<v8::internal::Object>, v8::internal::Handle<v8::internal::Object>, v8::internal::Handle<v8::internal::Object>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+21: 0x1588e64 v8::internal::JsonStringify(v8::internal::Isolate*, v8::internal::Handle<v8::internal::Object>, v8::internal::Handle<v8::internal::Object>, v8::internal::Handle<v8::internal::Object>) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+22: 0x1294202 v8::internal::Builtin_JsonStringify(int, unsigned long*, v8::internal::Isolate*) [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]
+23: 0x1dcb3b6  [/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node]

@@ -1,0 +1,17 @@
+(node:12) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+file:///workspace/scratch/83b3b3bfba02/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:406
+          throw new CACError(`Unknown option \`${name.length > 1 ? `--${name}` : `-${name}`}\``);
+                ^
+
+CACError: Unknown option `--minWorkers`
+    at Command.checkUnknownOptions (file:///workspace/scratch/83b3b3bfba02/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:406:17)
+    at CAC.runMatchedCommand (file:///workspace/scratch/83b3b3bfba02/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:606:13)
+    at CAC.parse (file:///workspace/scratch/83b3b3bfba02/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:547:12)
+    at file:///workspace/scratch/83b3b3bfba02/manabitan/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.0

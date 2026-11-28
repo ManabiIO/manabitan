@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Exact local evidence index for the #820 ownership follow-up; no full-import timing or peak-browser-memory qualification is asserted.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtime": {
+    "node": "v22.22.0",
+    "successfulReplayNodeArgs": [
+      "--max-old-space-size=384",
+      "--expose-gc"
+    ],
+    "executionConcurrency": 1,
+    "dependencyLock": "package-lock.json",
+    "fixtureLock": "test/perf/dictionaries.lock.json",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "finalRunner": {
+    "path": "builds/perf/import-owned-columns-83b3-source/owned-column-replay.mjs",
+    "blobSHA": "62c7b66bbadc780586dfdcfb153a2c62afb2620a",
+    "sha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf",
+    "size": 21730
+  },
+  "measuredCandidateFiles": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "a7e5d0049502926806faa3511dc93a79653816c8054ac2ef78c304b7327ef917",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56",
+    "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+  },
+  "fixtures": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "rows": 528299,
+      "banks": 53
+    },
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "rows": 436555,
+      "banks": 219
+    },
+    {
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "rows": 6648310,
+      "banks": 665
+    }
+  ],
+  "completedCohorts": [
+    {
+      "policy": 2,
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 8,
+      "reusedColumnBytes": 3068084,
+      "wholeIndexRows": 180000,
+      "maximumGroupByteReduction": 1264041,
+      "nativeSegments": 15
+    },
+    {
+      "policy": 2,
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "reusedColumnBytes": 11477248,
+      "wholeIndexRows": 436555,
+      "maximumGroupByteReduction": 740518,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 2,
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "reusedColumnBytes": 229184826,
+      "wholeIndexRows": 6648310,
+      "maximumGroupByteReduction": 1521540,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 3,
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "reusedColumnBytes": 10434868,
+      "wholeIndexRows": 528299,
+      "maximumGroupByteReduction": 1249901,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 3,
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "reusedColumnBytes": 11477248,
+      "wholeIndexRows": 436555,
+      "maximumGroupByteReduction": 740518,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 3,
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "reusedColumnBytes": 229184826,
+      "wholeIndexRows": 6648310,
+      "maximumGroupByteReduction": 1521540,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 5,
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 20,
+      "reusedColumnBytes": 10451462,
+      "wholeIndexRows": 528299,
+      "maximumGroupByteReduction": 824050,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 5,
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "reusedColumnBytes": 11477248,
+      "wholeIndexRows": 436555,
+      "maximumGroupByteReduction": 740518,
+      "nativeSegments": 0
+    },
+    {
+      "policy": 5,
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "reusedColumnBytes": 229184826,
+      "wholeIndexRows": 6648310,
+      "maximumGroupByteReduction": 1521540,
+      "nativeSegments": 0
+    }
+  ],
+  "attribution": {
+    "policy": 3,
+    "allRows": 7613164,
+    "totalAvoidedEmittedOwnedBufferBytes": 251096942,
+    "expressionColumnIncrementBytes": 30452656,
+    "keyBytesAndLengthsOverlappingPrior820Mechanism": 220644286,
+    "splitMethod": "4 * wholeIndexRows is the expression-column arithmetic increment. No separate key-only timing or allocation control was executed."
+  },
+  "boundaries": [
+    "Actual parser-worker handlers and actual structuredClone transfer lists, replayed sequentially with modeled existing 2/3/5 grouping policies.",
+    "Complete semantic lookup/content/hash/metadata/dedup/media output parity, actual unique buffer accounting, and prior owned-output persistence checked outside worker intervals.",
+    "Borrowed heap content is checked before reuse but is excluded from post-reuse owned-output persistence checks.",
+    "Counts are cumulative emitted owned buffers; they are neither bytes copied over IPC nor peak browser/process import memory.",
+    "No comparative performance claim; raw per-group timers are diagnostic. Full browser scheduling, storage/compression, image-payload import and additional low-memory source batching are outside this replay."
+  ],
+  "failures": [
+    {
+      "cohort": "v2 ENOSPC",
+      "status": "failed",
+      "exitCode": 1,
+      "reason": "Actual disk-full write failure; preserved JSON is truncated. The v2 diagnostic serialization bug also affected this cohort."
+    },
+    {
+      "cohort": "v2 exit137",
+      "status": "failed",
+      "exitCode": 137,
+      "reason": "Observed exec/write_stdin termination by SIGKILL; shell kill message was outside redirected stdout. No kernel OOM receipt. The v2 serialization bug caused substantial avoidable memory pressure."
+    },
+    {
+      "cohort": "v2 heap192",
+      "status": "failed",
+      "returncode": -6,
+      "reason": "Explicit V8 heap-limit failure in JsonStringifier. V2 eagerly evaluated JSON.stringify(successfulWorkerResponse) as an assertion message."
+    },
+    {
+      "cohort": "v2 missing time wrapper",
+      "status": "not-launched",
+      "exitCode": 127,
+      "reason": "/usr/bin/time was unavailable; Node did not launch. A separate Python resource wrapper was then used."
+    }
+  ],
+  "harnessFix": "V3 performs only a type comparison on success; bounded type/id/error-message diagnostics execute only on mismatches. Independent review and all nine dictionary-policy cohorts passed.",
+  "validation": {
+    "parserWorkerReceipt": "validation/parser-worker/validation.json.txt",
+    "parserWorkerSelectedTests": 18,
+    "retainedRecordReceipt": "validation/retained-records/validation.json.txt",
+    "retainedRecordSelectedTests": 22,
+    "scope": "Focused tests and scoped strict TypeScript/ESLint; not a full repository or hosted CI pass. Raw receipts include exact commands, source hashes and exclusions."
+  },
+  "entries": [
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/jmdict-node22-01.log",
+      "blobSHA": "1c7104b6f764d672d81d25acd8fa9277e04b62c2",
+      "sha256": "9c71f5fe7f71236c8b52dca33846e0718be87811be9c998f4728a8c7217116b8",
+      "size": 1112,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/jmdict-node22-01.partial.txt",
+      "blobSHA": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "kind": "declined-experiment-empty-enospc-report"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/README.md.txt",
+      "blobSHA": "6d12ab6a345c3b0800d49f0a7c5b6a4d5dfe2887",
+      "sha256": "92187cb06087a8e5b383f2220ebd99020b2be90f24d750fcd0edcb12269baa68",
+      "size": 3522,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/restoration.patch.txt",
+      "blobSHA": "6ccbc04f6c36da047e78445ab40cd559a96bbcac",
+      "sha256": "5c5db739adf0eee89803b5e1e01b8aa573543ac7fc9c7ec6c292c662f61fef59",
+      "size": 768,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-benchmark.mjs.txt",
+      "blobSHA": "eb6d23d801144763895571d421c6f03605dc631c",
+      "sha256": "a1e3db7d7d3b6e215e53d8e06373e36b6a73949ec067973a8987f4f96a748b2b",
+      "size": 16499,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-focused-tests-02.log",
+      "blobSHA": "798c7a0ea3b4d7b29f10a4b9762b4fa3f343caa4",
+      "sha256": "8d6d7215fe28037c3d03a0dcec5ff308e692fbaefb40fcfa13a3fef6afd8189f",
+      "size": 1600,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-focused-tests-03.log",
+      "blobSHA": "0ac483e1766be47099b036193a8c58c490f35902",
+      "sha256": "15a285b26a77dfb448f6fb038348f7f62d82e1eb9ce3448ccf8ef32552a06621",
+      "size": 408,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-focused-tests.log",
+      "blobSHA": "df9e0f1bd87f9dc598035000cfe3d04e3ff8a5fc",
+      "sha256": "b9dd8e5271b9edcb1b8f456e6143551a1ad50d4f5d4cd0e16ac4d460c5cd6e93",
+      "size": 1265,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-jmdict-node22-02.json.txt",
+      "blobSHA": "88eacf9f8951bd51985b38e9006410990691e1f3",
+      "sha256": "9875c109a76f5fd8a5285ccff3a85f0f83eea52597cdcc175cdf2122c420201b",
+      "size": 41707,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/declined-score-loop/score-loop-jmdict-node22-02.log",
+      "blobSHA": "8632cd991005ae8675d63ee47fe9ccccef0cec28",
+      "sha256": "d639e6b17892a54ba1924283cd7cadabbd80e5f5c711cdb2387eef07c225bb1b",
+      "size": 34078,
+      "kind": "declined-score-loop-evidence"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/enospc.log",
+      "blobSHA": "015b601b2037ad920c3ce3ea1669d687eb524b2e",
+      "sha256": "9d27a3c8d3dfba9a0dff9aa327df15ea99bce5f409a3191682feb41f5948e32b",
+      "size": 1612,
+      "kind": "failed-process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/enospc.partial.txt",
+      "blobSHA": "2414a8ca75c085379e5af9dbae411971023186ee",
+      "sha256": "60063fc30b35423af3eae0f3bb6a10954f58980d85c0f64d1ccf12d36ba66834",
+      "size": 53248,
+      "kind": "truncated-invalid-json"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/exit137.log",
+      "blobSHA": "90566e3d1d265da7f593438b971857b277f4b186",
+      "sha256": "4559c26b7394f28853e5c7e148b7b56b0bb14d651a1c8e1d027ba48a76ef7db7",
+      "size": 348,
+      "kind": "failed-process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/exit137.partial.json.txt",
+      "blobSHA": "ce826f13fdb46b06db0842a2d57ece79efa9c319",
+      "sha256": "3944b2d780be3ad3f009c8c4899cfb35d26da0effedf57968cb1254e31a3f3db",
+      "size": 13390,
+      "kind": "incomplete-json"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/heap192-resource.json.txt",
+      "blobSHA": "0a3cecf5bac68f1cf343c5533451c33312c0e74a",
+      "sha256": "9accd67a1b920e2fb164e5640253b349df67d5181ad912002156ac38b4f6c31e",
+      "size": 720,
+      "kind": "failed-process-resource-receipt"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/heap192.log",
+      "blobSHA": "d56db58aad7c06c429a989feb625fabc236cdb9d",
+      "sha256": "b38cff50d5bc14041496921d1b844d06f2861eda3b943d1d33968cb198d5f004",
+      "size": 5326,
+      "kind": "fatal-v8-heap-limit-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/heap192.partial.json.txt",
+      "blobSHA": "9510c72b9036a4c47360587d096b2334722353fc",
+      "sha256": "126b2926785d1126aea84fc600ab475828ff8cc58baa9f2f4cf0252ed0e749c2",
+      "size": 5502,
+      "kind": "incomplete-json"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/missing-time-wrapper.log",
+      "blobSHA": "e458d5054554b7086c50f2befafdcc0da169214e",
+      "sha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548",
+      "size": 60,
+      "kind": "wrapper-failure-before-node-launch"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/failed-v2/replay.mjs.txt",
+      "blobSHA": "a92c507005cd0cef3f74264a98d794346ea04bc7",
+      "sha256": "8c1a17572ca35dd6b24c528b2b46a50a8124baa0fd50870d719acc410d93a554",
+      "size": 21446,
+      "kind": "failed-harness-source"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/independent-corpus-audit.json.txt",
+      "blobSHA": "5a2c9f4152c618e5d231b46c82d43d2d1a80be06",
+      "sha256": "dbca1b1780f5400d59f2f7a5115ee327ac1474ae9c7df0026f0bf1644d9f7ace",
+      "size": 4194,
+      "kind": "independent-descriptive-audit"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/original-v1/jmdict-policy3.json.txt",
+      "blobSHA": "6ff5d202ca2cd7c8d45e0dc7e6b6d7c83f3189b9",
+      "sha256": "dd6c493f70b01a1f4d9f4175d4425f62cea7ebf180a83ab2759343f074ad6da4",
+      "size": 37255,
+      "kind": "complete-original-jmdict-parity"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/original-v1/jmdict-policy3.log",
+      "blobSHA": "3d34e0abdc2f190e74fa5de33be63ea258c30757",
+      "sha256": "5a4bd9408cdc43754aa3477b27705aa2c97adf823d49c6baa6866bad5420f58e",
+      "size": 876,
+      "kind": "process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/original-v1/replay.mjs.txt",
+      "blobSHA": "f04bee054d58f8a3d61a0e57b56eb7f7c9c4d8f4",
+      "sha256": "91cc7888674b5993521f3c169895519234962a9741bb018685a274038b3532ab",
+      "size": 20077,
+      "kind": "historical-runner"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-2-resource.json.txt",
+      "blobSHA": "01b5cb7e48aca4313f1e7c64abd5259cd58bf6af",
+      "sha256": "ad85184db3d9c637126451d0c85c11c78c7ef4ac26cb12b80239c87d417dc6cc",
+      "size": 742,
+      "kind": "process-resource-receipt"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-2.json.txt",
+      "blobSHA": "9cdad7ef333e232d7031f988bdfebd146d5515f1",
+      "sha256": "0135a020a266fd97c5b8598c625f3317db9ffc9d341bdb15e4e3f8f1dccd4244",
+      "size": 538048,
+      "kind": "complete-corpus-parity"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-2.log",
+      "blobSHA": "3c109e945f5933921e803df9c51ba6df6c1e5151",
+      "sha256": "12942ae8c4c3943e925a34e47e8518af366751c10b5b9493168b5f6b270c70d3",
+      "size": 12027,
+      "kind": "process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-3-resource.json.txt",
+      "blobSHA": "9d3c1a7594dc577ec2c9714f694c6cf8f02c7355",
+      "sha256": "be7704b9ccf93f0f8db4b4fb256a0a119b6dec8015eb2315aa5a5079cd0b5339",
+      "size": 726,
+      "kind": "process-resource-receipt"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-3.json.txt",
+      "blobSHA": "9fd473e3c9dc4d508e5f774537fec88c64188cd0",
+      "sha256": "b471985781ae3a6ee6e8b3363f71020ba221dbd7e049347cc7bc7408d22a1c11",
+      "size": 548717,
+      "kind": "complete-corpus-parity"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-3.log",
+      "blobSHA": "5f154cf331d0d76985f9313bf9066cf53640d8e3",
+      "sha256": "54d5d9124df1d8c03d0b2365717daee16f0f40471b1032076260a6c9d5ccf144",
+      "size": 12297,
+      "kind": "process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-5-resource.json.txt",
+      "blobSHA": "2e54c6f26ae980e78b76bf30255bb6292eac6dd8",
+      "sha256": "4c82638a6a9301a0a2b3c9d1c555fadbee77c43f007781312ffbdc7952d006a1",
+      "size": 748,
+      "kind": "process-resource-receipt"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-5.json.txt",
+      "blobSHA": "a4dd46a2c5797da38ac2e8d10c5cc5c1bc864035",
+      "sha256": "84e75e282543a74bdf4da9cef5881e98d4a06fa8d5380fb5dfaf2dc2a10832ac",
+      "size": 569605,
+      "kind": "complete-corpus-parity"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/v3/policy-5.log",
+      "blobSHA": "d8dced8eef58f5795068677aae20658f6d93c004",
+      "sha256": "1e2b0edffb8df770a5787810f15ada9d6ca32275094953f80ba1b5910380fce8",
+      "size": 12767,
+      "kind": "process-output"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/commit.log",
+      "blobSHA": "af0155e61a82e10e23afa8ffa83844b5125e590e",
+      "sha256": "8d5cba8dce60e45dc160f4a229214e21d14b6048db7b0817d4d09970a3325a26",
+      "size": 216,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/focused-tests-final.log",
+      "blobSHA": "f32571e09365172e00be86779f02ede0f16d7706",
+      "sha256": "9b18c9bbfb6d4eb5ca59afd1ba35579282a2782a814d80b8b436c0d67aac1b72",
+      "size": 951,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/focused-tests.log",
+      "blobSHA": "1a4baaeb8d813274390c913d5a45b03e75e45943",
+      "sha256": "4071bcfe55ff6a408c54904a5a94e220902dc5c0ea7371840faf00bb7f51b0f0",
+      "size": 951,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/scoped-lint-before-fix.log",
+      "blobSHA": "b04eccc191a880d9ecbc3789d1c670098dd00474",
+      "sha256": "95d5b35348b7e355508e2876f915693ca70f8a95f29847b5fb53117606502b85",
+      "size": 3143,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/scoped-lint.log",
+      "blobSHA": "ab2c1b98fc2c80db8b269f9612fdb5a810b60bec",
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67",
+      "size": 1042,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/scoped-types-final.log",
+      "blobSHA": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/scoped-types.log",
+      "blobSHA": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/parser-worker/validation.json.txt",
+      "blobSHA": "452d9f135f1c8aa7d570765d6a794906c99d9189",
+      "sha256": "150ba874aa40bc272759d2c735de51bcd343f247233d8a7f6db411185f6ac457",
+      "size": 5050,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/retained-records/commit.log",
+      "blobSHA": "4f2b688ee66f3ecb2fd812b02dfbc40ffda1e2c6",
+      "sha256": "546b644adc5a2e68e36401f7c773c4637cef0d5b0142c46760d811e7e05f620c",
+      "size": 142,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/retained-records/focused-tests.log",
+      "blobSHA": "f6450023db9c496b89e0b08f3ccf425c73f7be10",
+      "sha256": "5002c2542407a73c49888cb887ca2adecda18cd647748a0fe91051fa0f5fb32f",
+      "size": 1126,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/retained-records/scoped-lint.log",
+      "blobSHA": "4ce5d3e8acfa7b2b8eed4785462593c134b9fc3d",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "size": 1042,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/retained-records/scoped-types.log",
+      "blobSHA": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "kind": "scoped-validation"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-evidence/validation/retained-records/validation.json.txt",
+      "blobSHA": "16c77369c09b7596f92e644d115d809cd983c6a4",
+      "sha256": "7a9a45e6681949ab3e2863f4c1c45d55a6612dd9ca5babc38472bf9d10418cc9",
+      "size": 4940,
+      "kind": "scoped-validation"
+    }
+  ],
+  "independentAudit": {
+    "path": "independent-corpus-audit.json.txt",
+    "scope": "Parent independently fetched all three final Git blobs and checked protocol/hash/source identities, ordered bank and row coverage, semantic digests, allocation and count relations.",
+    "groups": 616,
+    "rowsAcrossThreePolicies": 22839492,
+    "notBrowserQualification": true
+  },
+  "declinedScoreLoop": {
+    "path": "declined-score-loop/README.md.txt",
+    "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "localCommit": "1f61dbf2f462d8a3594da3bac7372d72432e6896",
+    "status": "Not promoted into the candidate runtime",
+    "reason": "Approximately 0.9 ms retained-buffer component gain was too small for a standalone speed PR; all observations, controls, failures and the exact two-line patch are retained."
+  }
+}

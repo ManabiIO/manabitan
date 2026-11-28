@@ -1,0 +1,258 @@
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {createReadStream, openAsBlob} from 'node:fs';
+import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {performance} from 'node:perf_hooks';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {Worker as ThreadWorker} from 'node:worker_threads';
+
+const [rootArgument, cacheArgument, outputArgument, dictionary = 'jmdict'] = process.argv.slice(2);
+assert(rootArgument && cacheArgument && outputArgument);
+const root = path.resolve(rootArgument);
+const cache = path.resolve(cacheArgument);
+const output = path.resolve(outputArgument);
+const sourceFile = 'ext/js/dictionary/term-record-opfs-store.js';
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const localImport = (file) => import(pathToFileURL(path.join(root, file)));
+const baseline = execFileSync('git', ['show', `HEAD:${sourceFile}`], {cwd: root, encoding: 'utf8'});
+const candidate = await readFile(path.join(root, sourceFile), 'utf8');
+const beforeLoop = 'for (const scoreKey of scoreKeys) {\n        if (scoreKey >= scoreCount) {';
+const afterLoop = 'for (let i = 0; i < scoreKeys.length; ++i) {\n        if (scoreKeys[i] >= scoreCount) {';
+assert.equal(baseline.split(beforeLoop).length, 2);
+assert.equal(candidate, baseline.replace(beforeLoop, afterLoop), 'Only the two restored loop lines may differ');
+async function loadStore(source, label) {
+    // Diagnostic export only. Import dependencies are bound to the same source
+    // tree; module identities stay separate for the identical-source control.
+    const rewritten = source.replace(/(from\s+)(['"])(\.\.?\/[^'"]+)\2/g,
+        (_, prefix, quote, relative) => `${prefix}${quote}${new URL(relative, pathToFileURL(path.join(root, sourceFile))).href}${quote}`);
+    return import(`data:text/javascript;base64,${Buffer.from(`${rewritten}\nexport {parseCompactRecordFields};\n`).toString('base64')}#${label}`);
+}
+const arms = {
+    A: {source: 'baseline', module: await loadStore(baseline, 'A')},
+    B: {source: 'candidate', module: await loadStore(candidate, 'B')},
+    C: {source: 'baseline-identical-control', module: await loadStore(baseline, 'C')},
+};
+for (const arm of Object.values(arms)) { arm.store = new arm.module.TermRecordOpfsStore(); }
+
+const {BlobReader, Uint8ArrayWriter, ZipReader} = await localImport('node_modules/@zip.js/zip.js/index.js');
+const parser = await localImport('ext/js/dictionary/term-bank-wasm-parser.js');
+const pipeline = await localImport('ext/js/dictionary/term-bank-source-pipeline.js');
+const native = await localImport('dev/dictionary-wasm.js');
+const wasm = native.loadDictionaryWasm(root).get('term-bank-parser.wasm');
+parser.setTermBankWasmModule(await WebAssembly.compile(wasm));
+const lockBytes = await readFile(path.join(root, 'test/perf/dictionaries.lock.json'));
+const fixture = JSON.parse(lockBytes).dictionaries[dictionary];
+assert(fixture);
+const archivePath = path.join(cache, fixture.cacheFile);
+const archiveHash = createHash('sha256');
+for await (const bytes of createReadStream(archivePath)) { archiveHash.update(bytes); }
+assert.equal(archiveHash.digest('hex'), fixture.sha256);
+const archive = await openAsBlob(archivePath);
+assert.equal(archive.size, fixture.sizeBytes);
+
+const terminations = [];
+const sourceGroups = [];
+class BrowserWorker extends EventTarget {
+    constructor(url) {
+        super();
+        this.worker = new ThreadWorker(pathToFileURL(path.join(root, 'test/fixtures/parser-settlement/worker-node.mjs')), {workerData: {url: url.href}});
+        this.worker.on('message', (data) => this.dispatchEvent(new MessageEvent('message', {data})));
+        this.worker.on('error', (error) => {
+            const event = new Event('error');
+            Object.defineProperty(event, 'message', {value: error.message});
+            this.dispatchEvent(event);
+        });
+        this.worker.on('messageerror', () => this.dispatchEvent(new MessageEvent('messageerror')));
+    }
+    postMessage(data, transfer) {
+        if (data.type === 'parse') {
+            sourceGroups.push({id: data.id, files: data.sourceMetadata?.map(({filename}) => filename) ?? null,
+                bytes: data.sourceBuffers.map((buffer) => buffer.byteLength)});
+        }
+        this.worker.postMessage(data, transfer);
+    }
+    terminate() { terminations.push(this.worker.terminate()); }
+}
+globalThis.Worker = BrowserWorker;
+Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency: 4, deviceMemory: 8}});
+const reader = new ZipReader(new BlobReader(archive));
+const entries = await reader.getEntries();
+const termFiles = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename))
+    .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)));
+const rawReader = new pipeline.RawZipPayloadReader(archive);
+const sourcePipeline = new pipeline.TermBankSourcePipeline({termFiles, enabled: true,
+    read: (file) => file.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}),
+    readCompressed: (file, signal) => rawReader.read(file, signal)});
+const blocks = [];
+const groups = [];
+let rowCount = 0;
+let contentBase = 2 ** 40;
+async function consume(chunk) {
+    const plan = chunk.contentDedupPlan;
+    assert(plan && chunk.contentUniqueIndexList && chunk.contentMetaList);
+    const offsets = new Float64Array(plan.uniqueCount);
+    const lengths = new Uint32Array(plan.uniqueCount);
+    for (let i = 0; i < plan.uniqueCount; ++i) {
+        const meta = (chunk.contentMetaByUniqueIndex ? i : plan.uniqueRowIndexes[i]) * 4;
+        offsets[i] = contentBase + chunk.contentMetaList[meta];
+        lengths[i] = chunk.contentMetaList[meta + 1];
+    }
+    const module = arms.A.module;
+    const store = new module.TermRecordOpfsStore();
+    const start = blocks.length;
+    store._appendEncodedChunk = async (_state, firstId, count, _dict, base, payload, fields, format) => {
+        // Retain private bytes before native buffers may be reused. This is the
+        // only intercepted operation; grouping, parser, run splitting and field
+        // encoding are the actual current implementations.
+        blocks.push({firstId, count, base, payload: Uint8Array.from(payload), fields: Uint8Array.from(fields), format});
+    };
+    const recordChunk = module.createArtifactTermRecordChunkWithResolvedContent(
+        {...chunk, dictionary: fixture.expectedTitle}, chunk.contentUniqueIndexList, offsets, lengths, chunk.preparedLookupIndexes);
+    await store._encodeAndAppendArtifactChunkForState({}, recordChunk, rowCount + 1,
+        new Float64Array(0), new Uint32Array(0), chunk.termRecordPreinternedPlan, 'raw', chunk.preparedLookupIndexes);
+    groups.push({rows: chunk.rowCount, uniqueContent: plan.uniqueCount, runRows: blocks.slice(start).map(({count}) => count)});
+    rowCount += chunk.rowCount;
+    contentBase += chunk.contentBytesLength ?? chunk.contentBytesBuffer.byteLength;
+}
+const options = {emitTermByteLists: false, computeContentHashes: true, emitContentSlab: true,
+    emitTokenBinaryContent: true, mediaHintFastScan: fixture.mediaFiles > 0, projectImagePaths: fixture.mediaFiles > 0,
+    validateGlossaryTypes: true, prepareLookupIndexes: true, maxPendingChunks: 2};
+try {
+    for (let start = 0; start < termFiles.length;) {
+        const compressed = sourcePipeline.createCompressedImportRunPlan(start);
+        if (compressed !== null) {
+            assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                compressed.loaders, compressed.estimatedByteLengths, 3, consume, options), true);
+            sourcePipeline.releaseBatch(compressed.files);
+            start += compressed.files.length;
+        } else {
+            const files = sourcePipeline.getBatch(start);
+            const batch = await sourcePipeline.readBatch(files);
+            if (batch?.promises) {
+                assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelDeferred(batch.promises, batch.estimatedByteLengths, 3, consume, options), true);
+            } else {
+                await parser.parseTermBankWithWasmColumnChunks(batch, 3, consume, 2048, {...options, singleChunk: true});
+            }
+            sourcePipeline.releaseBatch(files);
+            start += files.length;
+        }
+    }
+} finally {
+    await sourcePipeline.dispose();
+    await parser.disposeParallelTermBankParser();
+    await Promise.all(terminations);
+    await reader.close();
+}
+assert.equal(rowCount, fixture.termRows);
+assert.equal(blocks.reduce((sum, block) => sum + block.count, 0), rowCount);
+assert(blocks.every(({format}) => format === 2), 'This validator benchmark requires the complete corpus to use compact fields');
+const blockDigest = createHash('sha256');
+const blockReceipts = [];
+for (const block of blocks) {
+    blockDigest.update(block.payload);
+    blockDigest.update(block.fields);
+    const parsed = arms.A.module.parseCompactRecordFields(block.fields, block.count);
+    const encoded = arms.A.store._createLookupIndexChunk(block.firstId, block.count, block.base, block.payload, block.fields, block.format);
+    for (const name of ['B', 'C']) {
+        assert.deepEqual(arms[name].module.parseCompactRecordFields(block.fields, block.count), parsed);
+        assert.deepEqual(arms[name].store._createLookupIndexChunk(block.firstId, block.count, block.base, block.payload, block.fields, block.format), encoded);
+    }
+    blockReceipts.push({firstId: block.firstId, count: block.count, base: block.base, scoreCount: parsed.scores.length,
+        payloadBytes: block.payload.byteLength, fieldBytes: block.fields.byteLength,
+        payloadSha256: sha(block.payload), fieldSha256: sha(block.fields), envelopeSha256: sha(encoded)});
+}
+
+// All traversal timings use the captured, current-encoder output for all rows.
+// Enclosing-sidecar timing includes all checksums, allocation and copies. There
+// is no instrumentation in the timed methods or production files.
+let sink = 0;
+function runValidator(arm, repetitions) {
+    for (let repeat = 0; repeat < repetitions; ++repeat) {
+        for (const block of blocks) {
+            const value = arm.module.parseCompactRecordFields(block.fields, block.count);
+            sink = (sink + value.scoreKeys[block.count - 1] + value.scores.length) | 0;
+        }
+    }
+}
+function runSidecars(arm, repetitions) {
+    for (let repeat = 0; repeat < repetitions; ++repeat) {
+        for (const block of blocks) {
+            const value = arm.store._createLookupIndexChunk(block.firstId, block.count, block.base, block.payload, block.fields, block.format);
+            sink = (sink + value.length + value[value.length - 1]) | 0;
+        }
+    }
+}
+const measurements = [];
+const balancedOrders = ['ABC', 'BCA', 'CAB', 'CBA', 'ACB', 'BAC'];
+const specs = [{name: 'validator', run: runValidator, repetitions: 100, warmups: 15},
+    {name: 'complete-sidecar', run: runSidecars, repetitions: 5, warmups: 3}];
+const startTime = new Date().toISOString();
+for (const spec of specs) {
+    for (const arm of Object.values(arms)) { spec.run(arm, spec.warmups); }
+    for (let round = 0; round < 12; ++round) {
+        const order = balancedOrders[round % balancedOrders.length];
+        for (const name of order) {
+            globalThis.gc?.();
+            const cpuStart = process.threadCpuUsage?.() ?? process.cpuUsage();
+            const wallStart = performance.now();
+            spec.run(arms[name], spec.repetitions);
+            const wallMs = performance.now() - wallStart;
+            const cpu = process.threadCpuUsage?.(cpuStart) ?? process.cpuUsage(cpuStart);
+            measurements.push({component: spec.name, round, order, arm: name, repetitions: spec.repetitions,
+                wallMs, cpuUserUs: cpu.user, cpuSystemUs: cpu.system,
+                perCorpusWallMs: wallMs / spec.repetitions, perCorpusCpuMs: (cpu.user + cpu.system) / (1000 * spec.repetitions)});
+        }
+    }
+}
+const integrityDigest = createHash('sha256');
+for (const block of blocks) { integrityDigest.update(block.payload); integrityDigest.update(block.fields); }
+const corpusDigest = blockDigest.digest('hex');
+assert.equal(integrityDigest.digest('hex'), corpusDigest, 'Timing must not mutate captured corpus bytes');
+const median = (xs) => { const sorted = [...xs].sort((a, b) => a - b); const middle = Math.floor(sorted.length / 2); return (sorted[middle] + sorted[sorted.length % 2 ? middle : middle - 1]) / 2; };
+const summaries = {};
+for (const spec of specs) {
+    const result = {};
+    for (const name of Object.keys(arms)) {
+        const values = measurements.filter((sample) => sample.component === spec.name && sample.arm === name);
+        result[name] = {medianWallMs: median(values.map(({perCorpusWallMs}) => perCorpusWallMs)),
+            medianCpuMs: median(values.map(({perCorpusCpuMs}) => perCorpusCpuMs))};
+    }
+    const paired = [];
+    for (let round = 0; round < 12; ++round) {
+        const values = Object.fromEntries(measurements.filter((sample) => sample.component === spec.name && sample.round === round).map((sample) => [sample.arm, sample]));
+        const controlMs = (values.A.perCorpusWallMs + values.C.perCorpusWallMs) / 2;
+        paired.push({round, candidateMinusControlsMs: values.B.perCorpusWallMs - controlMs,
+            candidateChangePercent: (values.B.perCorpusWallMs / controlMs - 1) * 100,
+            identicalControlChangePercent: (values.C.perCorpusWallMs / values.A.perCorpusWallMs - 1) * 100});
+    }
+    summaries[spec.name] = {...result, paired,
+        medianCandidateChangePercent: median(paired.map(({candidateChangePercent}) => candidateChangePercent)),
+        medianIdenticalControlChangePercent: median(paired.map(({identicalControlChangePercent}) => identicalControlChangePercent))};
+}
+const sourceFiles = [sourceFile, 'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-bank-source-pipeline.js',
+    'ext/js/dictionary/term-record-preinterned-plan.js', 'ext/js/dictionary/term-lookup-index-preparation.js',
+    'ext/js/dictionary/term-lookup-index.js', 'ext/js/dictionary/term-bank-wasm-parser-worker.js',
+    'dev/data/dictionary-wasm/manifest.json'];
+const sourceHashes = {};
+for (const file of sourceFiles) { sourceHashes[file] = sha(await readFile(path.join(root, file))); }
+const report = {complete: true, startTime, finishTime: new Date().toISOString(), dictionary,
+    boundary: 'Actual source planner and native parser workers; actual record encoder and run splitting. Native uncompressed content lengths at deterministic offsets; persistence intercepted. Complete real corpus record-field validator and sidecar methods measured in Node on retained bytes. No browser import, compression, OPFS, peak-memory, or elapsed whole-import gain claim.',
+    protocol: {balancedOrders, rounds: 12, arms: {A: 'baseline', B: 'candidate', C: 'independent module with identical baseline source'},
+        components: specs.map(({name, repetitions, warmups}) => ({name, repetitions, warmups})),
+        gcBeforeSamples: typeof globalThis.gc === 'function', cpuMetric: process.threadCpuUsage ? 'threadCpuUsage' : 'processCpuUsage'},
+    environment: {node: process.version, v8: process.versions.v8, platform: process.platform, arch: process.arch,
+        cpu: os.cpus()[0]?.model, cpuCount: os.cpus().length, simulatedBrowser: {hardwareConcurrency: 4, deviceMemory: 8}},
+    baselineGitHead: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
+    baselineSourceSha256: sha(baseline), candidateSourceSha256: sha(candidate), sourceHashes,
+    runnerSha256: sha(await readFile(fileURLToPath(import.meta.url))), lockSha256: sha(lockBytes), parserWasmSha256: sha(wasm),
+    fixture, corpus: {rows: rowCount, banks: termFiles.length, groups, sourceGroups, blocks: blockReceipts, payloadAndFieldsSha256: corpusDigest},
+    sink, summaries, measurements};
+await mkdir(path.dirname(output), {recursive: true});
+// Preserve every observation in redirected stdout before the independent JSON
+// write, so a filesystem failure cannot leave only an unreviewable summary.
+console.log(JSON.stringify({rawReport: report}));
+await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, {flag: 'wx'});
+console.log(JSON.stringify({complete: true, output, rows: rowCount, banks: termFiles.length, blocks: blocks.length, summaries}));
