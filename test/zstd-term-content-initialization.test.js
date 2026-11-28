@@ -130,7 +130,7 @@ describe('term content zstd initialization', () => {
         expect(zstd.compressUsingDictWithPrefix).toHaveBeenCalled();
     });
 
-    test.each(['constructor', 'initialization-error', 'messageerror', 'error'])(
+    test.each(['constructor', 'dispatch', 'initialization-error', 'messageerror', 'error'])(
         'settles peer startup waits before compression fallback after %s',
         async (failure) => {
             /** @type {StartupWorker[]} */
@@ -150,7 +150,7 @@ describe('term content zstd initialization', () => {
                     queueMicrotask(() => {
                         if (!failStartup) {
                             this.emit('message', {data: {type: 'ready'}});
-                        } else if (index % 4 === 0 && failure !== 'constructor') {
+                        } else if (index % 4 === 0 && failure !== 'constructor' && failure !== 'dispatch') {
                             this.emit(failure === 'initialization-error' ? 'message' : failure, {
                                 data: {type: failure, error: 'Compression startup failed'},
                                 message: 'Compression startup failed',
@@ -181,8 +181,14 @@ describe('term content zstd initialization', () => {
                     for (const listener of this.listeners.get(type) ?? []) { listener(event); }
                 }
 
-                /** @param {{id: number}} message */
+                /** @param {{id: number, type?: string}} message */
                 postMessage(message) {
+                    /* eslint-disable @stylistic/semi */
+                    if (message.type === 'initialize') {
+                        if (failStartup && failure === 'dispatch') { throw new DOMException('Compiled module could not be cloned', 'DataCloneError') }
+                        return
+                    }
+                    /* eslint-enable @stylistic/semi */
                     queueMicrotask(() => this.emit('message', {
                         data: {id: message.id, compressed: Uint8Array.of(9).buffer, envelopeMs: 0},
                     }));
@@ -249,10 +255,12 @@ describe('term content zstd initialization', () => {
             }
 
             /**
-             * @param {unknown} message
+             * @param {{type?: string}} message
              * @param {Transferable[]} [transfer]
              */
             postMessage(message, transfer = []) {
+                // eslint-disable-next-line @stylistic/semi
+                if (message.type === 'initialize') { return }
                 structuredClone(message, {transfer});
                 queueMicrotask(() => { this._emit('error', {message: 'injected worker failure'}); });
             }
@@ -325,10 +333,12 @@ describe('term content zstd initialization', () => {
             }
 
             /**
-             * @param {{id: number}} message
+             * @param {{id: number, type?: string}} message
              * @param {Transferable[]} [transfer]
              */
             postMessage(message, transfer = []) {
+                // eslint-disable-next-line @stylistic/semi
+                if (message.type === 'initialize') { return }
                 this.calls.push(structuredClone(message, {transfer}));
                 if (this.generation > 0) {
                     queueMicrotask(() => this.emit('message', {

@@ -20,16 +20,36 @@ Reflect.set(globalThis, '__manabitanTermContentCompressionWorker', true);
 const modulePromise = /** @type {Promise<typeof import('./zstd-term-content.js')>} */ (
     import('./zstd-term-content.js')
 );
-const initialization = modulePromise.then(({initializeTermContentZstd}) => initializeTermContentZstd());
-
-void initialization.then(
-    () => { self.postMessage({type: 'ready'}); },
-    (error) => { self.postMessage({type: 'initialization-error', error: `${error}`}); },
-);
-
+/* eslint-disable @stylistic/semi */
+// Observe an early import failure while waiting for the initialization message.
+// The original promise retains its rejection for the initialization response.
+void modulePromise.catch(() => {})
+/** @type {Promise<void>|null} */
+let initialization = null
 self.addEventListener('message', (event) => {
-    void compressContent(event);
-});
+    const rawData = /** @type {unknown} */ (event.data)
+    const data = /** @type {{type?: unknown, module?: unknown, dictionary?: unknown}|null} */ (rawData)
+    if (data?.type === 'initialize') {
+        if (initialization !== null) { return }
+        initialization = (async () => {
+            if (!(data.module instanceof WebAssembly.Module)) {
+                throw new TypeError('Compression worker module is invalid')
+            }
+            if (!(data.dictionary instanceof Uint8Array) || !(data.dictionary.buffer instanceof ArrayBuffer) || data.dictionary.byteLength === 0) {
+                throw new TypeError('Compression worker dictionary is invalid')
+            }
+            const {initializeTermContentZstd} = await modulePromise
+            await initializeTermContentZstd({module: data.module, dictionary: data.dictionary})
+        })()
+        void initialization.then(
+            () => { self.postMessage({type: 'ready'}) },
+            (error) => { self.postMessage({type: 'initialization-error', error: `${error}`}) },
+        )
+        return
+    }
+    void compressContent(event)
+})
+/* eslint-enable @stylistic/semi */
 
 /** @param {MessageEvent} event */
 async function compressContent(event) {
@@ -37,6 +57,8 @@ async function compressContent(event) {
     const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
+        // eslint-disable-next-line @stylistic/semi
+        if (initialization === null) { throw new Error('Compression worker is not initialized') }
         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
         const dictName = typeof data.dictName === 'string' ? data.dictName : null;

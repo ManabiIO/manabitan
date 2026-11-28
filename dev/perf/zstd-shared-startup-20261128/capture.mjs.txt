@@ -1,0 +1,39 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {pathToFileURL} from 'node:url'
+import {createHash} from 'node:crypto'
+import path from 'node:path'
+
+const [root, output] = process.argv.slice(2)
+const {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} = await import(pathToFileURL(path.join(root, 'node_modules/@zip.js/zip.js/index.js')).href)
+const parser = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-bank-wasm-parser.js')).href)
+const locks = JSON.parse(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'), 'utf8'))
+const spec = locks.dictionaries.jmdict
+const archive = await readFile(path.join(root, 'builds/e2e-dictionary-cache', spec.cacheFile))
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex')
+if (hash(archive) !== spec.sha256) { throw new Error('JMdict archive hash differs from lock') }
+const zip = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)))
+const entries = (await zip.getEntries()).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename))
+    .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const sources = []
+for (const entry of entries.slice(0, 7)) { sources.push(await entry.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true})) }
+await zip.close()
+parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(root, 'ext/lib/term-bank-parser.wasm'))))
+let result
+await parser.parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+    if (!chunk.contentBytesBuffer || !Number.isSafeInteger(chunk.contentBytesLength)) { throw new Error('Missing canonical bytes') }
+    result = {
+        rows: chunk.rowCount,
+        bytes: Uint8Array.from(chunk.contentBytesBuffer.subarray(chunk.contentBytesBaseOffset, chunk.contentBytesBaseOffset + chunk.contentBytesLength)),
+    }
+}, 2048, {
+    singleChunk: true,
+    emitTermByteLists: false,
+    computeContentHashes: true,
+    emitContentSlab: true,
+    emitTokenBinaryContent: true,
+    mediaHintFastScan: true,
+    validateGlossaryTypes: true,
+    prepareLookupIndexes: true,
+})
+await writeFile(output, result.bytes)
+console.log(JSON.stringify({archiveSha256: spec.sha256, banks: 7, rows: result.rows, contentBytes: result.bytes.length, contentSha256: hash(result.bytes)}))

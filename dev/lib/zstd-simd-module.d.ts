@@ -34,4 +34,8 @@ export interface ZstdModule {
     _manabitan_write_block_envelope(destination: number, size: number): number;
 }
 
-export default function createZstdModule(options: {locateFile?(fileName: string): string, wasmBinary?: Uint8Array}): Promise<ZstdModule>;
+export default function createZstdModule(options: {
+    locateFile?(fileName: string): string,
+    wasmBinary?: Uint8Array,
+    instantiateWasm?(imports: WebAssembly.Imports, receiveInstance: (instance: WebAssembly.Instance, module: WebAssembly.Module) => void): WebAssembly.Exports,
+}): Promise<ZstdModule>;

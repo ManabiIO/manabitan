@@ -38,6 +38,9 @@ let isInitialized = false;
 let initializePromise = null;
 /** @type {Uint8Array|null} */
 let jmdictDict = null;
+/** @type {WebAssembly.Module|null} */
+// eslint-disable-next-line @stylistic/semi
+let compiledModule = null
 /** @type {number|null} */
 let cctx = null;
 /** @type {number|null} */
@@ -472,9 +475,10 @@ async function loadTermContentZstdDictionary() {
 /* eslint-enable @stylistic/semi */
 
 /**
+ * @param {{module: WebAssembly.Module, dictionary: Uint8Array}} [assets]
  * @returns {Promise<void>}
  */
-export async function initializeTermContentZstd() {
+export async function initializeTermContentZstd(assets) {
     if (isInitialized) { return; }
     if (initializePromise !== null) {
         await initializePromise;
@@ -485,8 +489,8 @@ export async function initializeTermContentZstd() {
         // The immutable assets are independent. Join both loads before publishing
         // contexts or allowing a retry, including when either load fails first.
         const [moduleResult, dictionaryResult] = await Promise.allSettled([
-            init(new URL('../../lib/zstd.wasm', import.meta.url).href),
-            loadTermContentZstdDictionary(),
+            init(new URL('../../lib/zstd.wasm', import.meta.url).href, assets?.module),
+            typeof assets === 'undefined' ? loadTermContentZstdDictionary() : assets.dictionary,
         ])
         if (moduleResult.status === 'rejected') { throw moduleResult.reason }
         if (dictionaryResult.status === 'rejected') { throw dictionaryResult.reason }
@@ -517,6 +521,10 @@ export async function initializeTermContentZstd() {
         // eslint-disable-next-line @stylistic/semi
         dctx = nextDctx === 0 ? null : nextDctx
         jmdictDict = loadedJmdictDict;
+        /* eslint-disable @stylistic/semi */
+        const initializedModule = /** @type {unknown} */ (moduleResult.value)
+        compiledModule = /** @type {WebAssembly.Module|null} */ (initializedModule)
+        /* eslint-enable @stylistic/semi */
         isInitialized = true;
         // Prewarm workers while archive/index preparation continues.
         void initializeCompressionPool();
@@ -795,6 +803,10 @@ async function initializeCompressionPool() {
                 );
                 workers.push(worker);
                 readyPromises.push(waitForCompressionWorkerReady(worker, abortController.signal));
+                // Clone only immutable compiled code and the small dictionary.
+                // Each worker still owns a separate native instance and heap.
+                // eslint-disable-next-line @stylistic/semi
+                worker.postMessage({type: 'initialize', module: compiledModule, dictionary: jmdictDict})
             }
             await Promise.all(readyPromises);
             compressionPool = new TermContentCompressionPool(workers);

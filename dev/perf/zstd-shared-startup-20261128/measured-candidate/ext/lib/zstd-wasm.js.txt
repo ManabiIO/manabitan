@@ -1,0 +1,769 @@
+// @ts-nocheck
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+// dev/lib/zstd-simd-module.js
+async function createZstdModule(moduleArg = {}) {
+  var moduleRtn;
+  var Module = moduleArg;
+  var ENVIRONMENT_IS_WEB = !!globalThis.window;
+  var ENVIRONMENT_IS_WORKER = !!globalThis.WorkerGlobalScope;
+  var ENVIRONMENT_IS_NODE = globalThis.process?.versions?.node && globalThis.process?.type != "renderer";
+  var arguments_ = [];
+  var thisProgram = "./this.program";
+  var quit_ = (status, toThrow) => {
+    throw toThrow;
+  };
+  var _scriptName = import.meta.url;
+  var scriptDirectory = "";
+  function locateFile(path) {
+    if (Module["locateFile"]) {
+      return Module["locateFile"](path, scriptDirectory);
+    }
+    return scriptDirectory + path;
+  }
+  var readAsync, readBinary;
+  if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
+    try {
+      scriptDirectory = new URL(".", _scriptName).href;
+    } catch {
+    }
+    {
+      if (ENVIRONMENT_IS_WORKER) {
+        readBinary = (url) => {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, false);
+          xhr.responseType = "arraybuffer";
+          xhr.send(null);
+          return new Uint8Array(xhr.response);
+        };
+      }
+      readAsync = async (url) => {
+        var response = await fetch(url, { credentials: "same-origin" });
+        if (response.ok) {
+          return response.arrayBuffer();
+        }
+        throw new Error(response.status + " : " + response.url);
+      };
+    }
+  } else {
+  }
+  var out = console.log.bind(console);
+  var err = console.error.bind(console);
+  var wasmBinary;
+  var ABORT = false;
+  var EXITSTATUS;
+  var readyPromiseResolve, readyPromiseReject;
+  var HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
+  var HEAP64, HEAPU64;
+  var runtimeInitialized = false;
+  function updateMemoryViews() {
+    var b = wasmMemory.buffer;
+    HEAP8 = new Int8Array(b);
+    HEAP16 = new Int16Array(b);
+    Module["HEAPU8"] = HEAPU8 = new Uint8Array(b);
+    HEAPU16 = new Uint16Array(b);
+    HEAP32 = new Int32Array(b);
+    HEAPU32 = new Uint32Array(b);
+    HEAPF32 = new Float32Array(b);
+    HEAPF64 = new Float64Array(b);
+    HEAP64 = new BigInt64Array(b);
+    HEAPU64 = new BigUint64Array(b);
+  }
+  function preRun() {
+    if (Module["preRun"]) {
+      if (typeof Module["preRun"] == "function") Module["preRun"] = [Module["preRun"]];
+      while (Module["preRun"].length) {
+        addOnPreRun(Module["preRun"].shift());
+      }
+    }
+    callRuntimeCallbacks(onPreRuns);
+  }
+  function initRuntime() {
+    runtimeInitialized = true;
+    wasmExports["g"]();
+  }
+  function postRun() {
+    if (Module["postRun"]) {
+      if (typeof Module["postRun"] == "function") Module["postRun"] = [Module["postRun"]];
+      while (Module["postRun"].length) {
+        addOnPostRun(Module["postRun"].shift());
+      }
+    }
+    callRuntimeCallbacks(onPostRuns);
+  }
+  function abort(what) {
+    Module["onAbort"]?.(what);
+    what = "Aborted(" + what + ")";
+    err(what);
+    ABORT = true;
+    what += ". Build with -sASSERTIONS for more info.";
+    var e = new WebAssembly.RuntimeError(what);
+    readyPromiseReject?.(e);
+    throw e;
+  }
+  var wasmBinaryFile;
+  function findWasmBinary() {
+    if (Module["locateFile"]) {
+      return locateFile("zstd-simd-module.wasm");
+    }
+    return new URL("zstd-simd-module.wasm", import.meta.url).href;
+  }
+  function getBinarySync(file) {
+    if (file == wasmBinaryFile && wasmBinary) {
+      return new Uint8Array(wasmBinary);
+    }
+    if (readBinary) {
+      return readBinary(file);
+    }
+    throw "both async and sync fetching of the wasm failed";
+  }
+  async function getWasmBinary(binaryFile) {
+    if (!wasmBinary) {
+      try {
+        var response = await readAsync(binaryFile);
+        return new Uint8Array(response);
+      } catch {
+      }
+    }
+    return getBinarySync(binaryFile);
+  }
+  async function instantiateArrayBuffer(binaryFile, imports) {
+    try {
+      var binary = await getWasmBinary(binaryFile);
+      var instance = await WebAssembly.instantiate(binary, imports);
+      return instance;
+    } catch (reason) {
+      err(`failed to asynchronously prepare wasm: ${reason}`);
+      abort(reason);
+    }
+  }
+  async function instantiateAsync(binary, binaryFile, imports) {
+    if (!binary) {
+      try {
+        var response = fetch(binaryFile, { credentials: "same-origin" });
+        var instantiationResult = await WebAssembly.instantiateStreaming(response, imports);
+        return instantiationResult;
+      } catch (reason) {
+        err(`wasm streaming compile failed: ${reason}`);
+        err("falling back to ArrayBuffer instantiation");
+      }
+    }
+    return instantiateArrayBuffer(binaryFile, imports);
+  }
+  function getWasmImports() {
+    var imports = { a: wasmImports };
+    return imports;
+  }
+  async function createWasm() {
+    function receiveInstance(instance, module) {
+      wasmExports = instance.exports;
+      assignWasmExports(wasmExports);
+      updateMemoryViews();
+      return wasmExports;
+    }
+    function receiveInstantiationResult(result2) {
+      return receiveInstance(result2["instance"]);
+    }
+    var info = getWasmImports();
+    if (Module["instantiateWasm"]) {
+      return new Promise((resolve, reject) => {
+        Module["instantiateWasm"](info, (inst, mod) => {
+          resolve(receiveInstance(inst, mod));
+        });
+      });
+    }
+    wasmBinaryFile ?? (wasmBinaryFile = findWasmBinary());
+    var result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
+    var exports = receiveInstantiationResult(result);
+    return exports;
+  }
+  class ExitStatus {
+    constructor(status) {
+      __publicField(this, "name", "ExitStatus");
+      this.message = `Program terminated with exit(${status})`;
+      this.status = status;
+    }
+  }
+  var callRuntimeCallbacks = (callbacks) => {
+    while (callbacks.length > 0) {
+      callbacks.shift()(Module);
+    }
+  };
+  var onPostRuns = [];
+  var addOnPostRun = (cb) => onPostRuns.push(cb);
+  var onPreRuns = [];
+  var addOnPreRun = (cb) => onPreRuns.push(cb);
+  var noExitRuntime = true;
+  var __abort_js = () => abort("");
+  var runtimeKeepaliveCounter = 0;
+  var __emscripten_runtime_keepalive_clear = () => {
+    noExitRuntime = false;
+    runtimeKeepaliveCounter = 0;
+  };
+  var timers = {};
+  var handleException = (e) => {
+    if (e instanceof ExitStatus || e == "unwind") {
+      return EXITSTATUS;
+    }
+    quit_(1, e);
+  };
+  var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
+  var _proc_exit = (code) => {
+    EXITSTATUS = code;
+    if (!keepRuntimeAlive()) {
+      Module["onExit"]?.(code);
+      ABORT = true;
+    }
+    quit_(code, new ExitStatus(code));
+  };
+  var exitJS = (status, implicit) => {
+    EXITSTATUS = status;
+    _proc_exit(status);
+  };
+  var _exit = exitJS;
+  var maybeExit = () => {
+    if (!keepRuntimeAlive()) {
+      try {
+        _exit(EXITSTATUS);
+      } catch (e) {
+        handleException(e);
+      }
+    }
+  };
+  var callUserCallback = (func) => {
+    if (ABORT) {
+      return;
+    }
+    try {
+      return func();
+    } catch (e) {
+      handleException(e);
+    } finally {
+      maybeExit();
+    }
+  };
+  var _emscripten_get_now = () => performance.now();
+  var __setitimer_js = (which, timeout_ms) => {
+    if (timers[which]) {
+      clearTimeout(timers[which].id);
+      delete timers[which];
+    }
+    if (!timeout_ms) return 0;
+    var id = setTimeout(() => {
+      delete timers[which];
+      callUserCallback(() => __emscripten_timeout(which, _emscripten_get_now()));
+    }, timeout_ms);
+    timers[which] = { id, timeout_ms };
+    return 0;
+  };
+  var getHeapMax = () => 2147483648;
+  var alignMemory = (size, alignment) => Math.ceil(size / alignment) * alignment;
+  var growMemory = (size) => {
+    var oldHeapSize = wasmMemory.buffer.byteLength;
+    var pages = (size - oldHeapSize + 65535) / 65536 | 0;
+    try {
+      wasmMemory.grow(pages);
+      updateMemoryViews();
+      return 1;
+    } catch (e) {
+    }
+  };
+  var _emscripten_resize_heap = (requestedSize) => {
+    var oldSize = HEAPU8.length;
+    requestedSize >>>= 0;
+    var maxHeapSize = getHeapMax();
+    if (requestedSize > maxHeapSize) {
+      return false;
+    }
+    for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+      var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
+      overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
+      var newSize = Math.min(maxHeapSize, alignMemory(Math.max(requestedSize, overGrownHeapSize), 65536));
+      var replacement = growMemory(newSize);
+      if (replacement) {
+        return true;
+      }
+    }
+    return false;
+  };
+  {
+    if (Module["noExitRuntime"]) noExitRuntime = Module["noExitRuntime"];
+    if (Module["print"]) out = Module["print"];
+    if (Module["printErr"]) err = Module["printErr"];
+    if (Module["wasmBinary"]) wasmBinary = Module["wasmBinary"];
+    if (Module["arguments"]) arguments_ = Module["arguments"];
+    if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
+    if (Module["preInit"]) {
+      if (typeof Module["preInit"] == "function") Module["preInit"] = [Module["preInit"]];
+      while (Module["preInit"].length > 0) {
+        Module["preInit"].shift()();
+      }
+    }
+  }
+  var _ZSTD_isError, _ZSTD_compressBound, _ZSTD_createCCtx, _ZSTD_freeCCtx, _ZSTD_compress_usingDict, _ZSTD_compress, _ZSTD_createDCtx, _ZSTD_freeDCtx, _ZSTD_getFrameContentSize, _ZSTD_decompress_usingDict, _ZSTD_decompress, _malloc, _free, _manabitan_write_block_envelope, __emscripten_timeout, memory, __indirect_function_table, wasmMemory;
+  function assignWasmExports(wasmExports2) {
+    _ZSTD_isError = Module["_ZSTD_isError"] = wasmExports2["h"];
+    _ZSTD_compressBound = Module["_ZSTD_compressBound"] = wasmExports2["i"];
+    _ZSTD_createCCtx = Module["_ZSTD_createCCtx"] = wasmExports2["j"];
+    _ZSTD_freeCCtx = Module["_ZSTD_freeCCtx"] = wasmExports2["k"];
+    _ZSTD_compress_usingDict = Module["_ZSTD_compress_usingDict"] = wasmExports2["l"];
+    _ZSTD_compress = Module["_ZSTD_compress"] = wasmExports2["m"];
+    _ZSTD_createDCtx = Module["_ZSTD_createDCtx"] = wasmExports2["n"];
+    _ZSTD_freeDCtx = Module["_ZSTD_freeDCtx"] = wasmExports2["o"];
+    _ZSTD_getFrameContentSize = Module["_ZSTD_getFrameContentSize"] = wasmExports2["p"];
+    _ZSTD_decompress_usingDict = Module["_ZSTD_decompress_usingDict"] = wasmExports2["q"];
+    _ZSTD_decompress = Module["_ZSTD_decompress"] = wasmExports2["r"];
+    _malloc = Module["_malloc"] = wasmExports2["s"];
+    _free = Module["_free"] = wasmExports2["t"];
+    _manabitan_write_block_envelope = Module["_manabitan_write_block_envelope"] = wasmExports2["u"];
+    __emscripten_timeout = wasmExports2["v"];
+    memory = wasmMemory = wasmExports2["f"];
+    __indirect_function_table = wasmExports2["__indirect_function_table"];
+  }
+  var wasmImports = { c: __abort_js, b: __emscripten_runtime_keepalive_clear, d: __setitimer_js, e: _emscripten_resize_heap, a: _proc_exit };
+  function run() {
+    preRun();
+    function doRun() {
+      Module["calledRun"] = true;
+      if (ABORT) return;
+      initRuntime();
+      readyPromiseResolve?.(Module);
+      Module["onRuntimeInitialized"]?.();
+      postRun();
+    }
+    if (Module["setStatus"]) {
+      Module["setStatus"]("Running...");
+      setTimeout(() => {
+        setTimeout(() => Module["setStatus"](""), 1);
+        doRun();
+      }, 1);
+    } else {
+      doRun();
+    }
+  }
+  var wasmExports;
+  wasmExports = await createWasm();
+  run();
+  if (runtimeInitialized) {
+    moduleRtn = Module;
+  } else {
+    moduleRtn = new Promise((resolve, reject) => {
+      readyPromiseResolve = resolve;
+      readyPromiseReject = reject;
+    });
+  }
+  ;
+  return moduleRtn;
+}
+var zstd_simd_module_default = createZstdModule;
+
+// dev/lib/zstd-wasm.js
+var moduleInstance = null;
+var initialization = null;
+var compiledModule = null;
+var contextBuffers = /* @__PURE__ */ new Map();
+var TERM_CONTENT_BLOCK_ENVELOPE_BYTES = 12;
+async function instantiateZstdModule(path, imports) {
+  const response = await fetch(path, { credentials: "same-origin" });
+  if (!response.ok) {
+    throw new Error(`Failed to load Zstd WASM: ${response.status}`);
+  }
+  if (typeof WebAssembly.instantiateStreaming === "function") {
+    try {
+      return await WebAssembly.instantiateStreaming(response.clone(), imports);
+    } catch {
+    }
+  }
+  return await WebAssembly.instantiate(await response.arrayBuffer(), imports);
+}
+async function init(path = "/lib/zstd.wasm", suppliedModule) {
+  if (moduleInstance !== null) {
+    return compiledModule;
+  }
+  if (initialization !== null) {
+    return await initialization;
+  }
+  initialization = (async () => {
+    let initializedModule = null;
+    const failure = Promise.withResolvers();
+    const loading = zstd_simd_module_default({
+      locateFile(fileName) {
+        return fileName.endsWith(".wasm") ? path : fileName;
+      },
+      instantiateWasm(imports, receiveInstance) {
+        const pending = typeof suppliedModule === "undefined" ? instantiateZstdModule(path, imports) : WebAssembly.instantiate(suppliedModule, imports).then((instance) => ({ instance, module: suppliedModule }));
+        void pending.then(({ instance, module }) => {
+          initializedModule = module;
+          receiveInstance(instance, module);
+        }).catch(failure.reject);
+        return {};
+      }
+    });
+    moduleInstance = await Promise.race([loading, failure.promise]);
+    compiledModule = initializedModule;
+    return compiledModule;
+  })();
+  try {
+    return await initialization;
+  } catch (error) {
+    initialization = null;
+    throw error;
+  }
+}
+function getModule() {
+  if (moduleInstance === null) {
+    throw new Error("Zstd WASM is not initialized");
+  }
+  return moduleInstance;
+}
+function checkResult(code) {
+  if (getModule()._ZSTD_isError(code) !== 0) {
+    throw new Error(`Zstd operation failed with code ${code}`);
+  }
+}
+function ensureContextBuffers(context, sourceSize, destinationSize, dictionarySize) {
+  const module = getModule();
+  let buffers = contextBuffers.get(context);
+  if (typeof buffers === "undefined") {
+    buffers = { source: 0, sourceCapacity: 0, destination: 0, destinationCapacity: 0, dictionary: 0, dictionaryCapacity: 0, prepared: null };
+    contextBuffers.set(context, buffers);
+  }
+  buffers.prepared = null;
+  if (buffers.sourceCapacity < sourceSize) {
+    if (buffers.source !== 0) {
+      module._free(buffers.source);
+    }
+    buffers.source = 0;
+    buffers.sourceCapacity = 0;
+    buffers.source = module._malloc(sourceSize);
+    if (buffers.source === 0) {
+      throw new Error("Failed to allocate Zstd source buffer");
+    }
+    buffers.sourceCapacity = sourceSize;
+  }
+  if (buffers.destinationCapacity < destinationSize) {
+    if (buffers.destination !== 0) {
+      module._free(buffers.destination);
+    }
+    buffers.destination = 0;
+    buffers.destinationCapacity = 0;
+    buffers.destination = module._malloc(destinationSize);
+    if (buffers.destination === 0) {
+      throw new Error("Failed to allocate Zstd destination buffer");
+    }
+    buffers.destinationCapacity = destinationSize;
+  }
+  if (buffers.dictionaryCapacity < dictionarySize) {
+    if (buffers.dictionary !== 0) {
+      module._free(buffers.dictionary);
+    }
+    buffers.dictionary = 0;
+    buffers.dictionaryCapacity = 0;
+    buffers.dictionary = module._malloc(dictionarySize);
+    if (buffers.dictionary === 0) {
+      throw new Error("Failed to allocate Zstd dictionary buffer");
+    }
+    buffers.dictionaryCapacity = dictionarySize;
+  }
+  return buffers;
+}
+function releaseContextBuffers(context) {
+  const buffers = contextBuffers.get(context);
+  if (typeof buffers === "undefined") {
+    return;
+  }
+  buffers.prepared = null;
+  const module = getModule();
+  if (buffers.source !== 0) {
+    module._free(buffers.source);
+  }
+  if (buffers.destination !== 0) {
+    module._free(buffers.destination);
+  }
+  if (buffers.dictionary !== 0) {
+    module._free(buffers.dictionary);
+  }
+  contextBuffers.delete(context);
+}
+function createCCtx() {
+  return getModule()._ZSTD_createCCtx();
+}
+function createDCtx() {
+  return getModule()._ZSTD_createDCtx();
+}
+function freeCCtx(context) {
+  releaseContextBuffers(context);
+  return getModule()._ZSTD_freeCCtx(context);
+}
+function freeDCtx(context) {
+  releaseContextBuffers(context);
+  return getModule()._ZSTD_freeDCtx(context);
+}
+function compress(content, level = 3) {
+  const module = getModule();
+  const bound = module._ZSTD_compressBound(content.byteLength);
+  const source = module._malloc(content.byteLength);
+  if (source === 0) {
+    throw new Error("Failed to allocate Zstd source buffer");
+  }
+  try {
+    const destination = module._malloc(bound);
+    if (destination === 0) {
+      throw new Error("Failed to allocate Zstd destination buffer");
+    }
+    try {
+      module.HEAPU8.set(content, source);
+      const size = module._ZSTD_compress(destination, bound, source, content.byteLength, level);
+      checkResult(size);
+      return module.HEAPU8.slice(destination, destination + size);
+    } finally {
+      module._free(destination);
+    }
+  } finally {
+    module._free(source);
+  }
+}
+function compressUsingDict(context, content, dictionary, level = 3) {
+  return compressUsingDictWithPrefix(context, content, dictionary, 0, level);
+}
+function compressUsingDictWithPrefix(context, content, dictionary, prefixBytes, level = 3, writeBlockEnvelope = false) {
+  if (!Number.isSafeInteger(prefixBytes) || prefixBytes < 0) {
+    throw new RangeError("Zstd output prefix must be a non-negative safe integer");
+  }
+  if (writeBlockEnvelope && prefixBytes !== TERM_CONTENT_BLOCK_ENVELOPE_BYTES) {
+    throw new RangeError("Zstd block integrity envelope requires a 12-byte prefix");
+  }
+  const module = getModule();
+  const bound = module._ZSTD_compressBound(content.byteLength);
+  const destinationSize = bound + prefixBytes;
+  if (!Number.isSafeInteger(destinationSize)) {
+    throw new RangeError("Zstd output buffer size exceeds the safe integer range");
+  }
+  const buffers = ensureContextBuffers(context, content.byteLength, destinationSize, dictionary.byteLength);
+  module.HEAPU8.set(content, buffers.source);
+  module.HEAPU8.set(dictionary, buffers.dictionary);
+  if (prefixBytes > 0) {
+    module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
+  }
+  const size = module._ZSTD_compress_usingDict(
+    context,
+    buffers.destination + prefixBytes,
+    buffers.destinationCapacity - prefixBytes,
+    buffers.source,
+    content.byteLength,
+    buffers.dictionary,
+    dictionary.byteLength,
+    level
+  );
+  checkResult(size);
+  if (writeBlockEnvelope && module._manabitan_write_block_envelope(buffers.destination, prefixBytes + size) !== 1) {
+    throw new Error("Failed to write Zstd block integrity envelope");
+  }
+  return module.HEAPU8.slice(
+    buffers.destination,
+    buffers.destination + prefixBytes + size
+  );
+}
+function compressSpansUsingDictWithPrefix(context, source, sourceOffsets, sourceLengths, contentBytes, dictionary, prefixBytes, level = 3, writeBlockEnvelope = false) {
+  return finishPreparedSpanCompression(prepareSpanCompression(
+    context,
+    source,
+    sourceOffsets,
+    sourceLengths,
+    contentBytes,
+    dictionary,
+    prefixBytes,
+    level,
+    writeBlockEnvelope
+  ));
+}
+function prepareSpanCompression(context, source, sourceOffsets, sourceLengths, contentBytes, dictionary, prefixBytes, level = 3, writeBlockEnvelope = false) {
+  if (sourceOffsets.length !== sourceLengths.length) {
+    throw new RangeError("Zstd source span offsets and lengths must have equal sizes");
+  }
+  if (!Number.isSafeInteger(contentBytes) || contentBytes < 0) {
+    throw new RangeError("Zstd gathered content size must be a non-negative safe integer");
+  }
+  if (!Number.isSafeInteger(prefixBytes) || prefixBytes < 0) {
+    throw new RangeError("Zstd output prefix must be a non-negative safe integer");
+  }
+  if (writeBlockEnvelope && prefixBytes !== TERM_CONTENT_BLOCK_ENVELOPE_BYTES) {
+    throw new RangeError("Zstd block integrity envelope requires a 12-byte prefix");
+  }
+  const module = getModule();
+  const bound = module._ZSTD_compressBound(contentBytes);
+  const destinationSize = bound + prefixBytes;
+  if (!Number.isSafeInteger(destinationSize)) {
+    throw new RangeError("Zstd output buffer size exceeds the safe integer range");
+  }
+  const useAlignedSharedCopy = contentBytes >= 1024 && sourceOffsets.length > 0 && typeof SharedArrayBuffer !== "undefined" && source.buffer instanceof SharedArrayBuffer && !(module.HEAPU8.buffer instanceof SharedArrayBuffer);
+  const sourceSize = contentBytes + (useAlignedSharedCopy ? 7 : 0);
+  if (sourceSize > 4294967295) {
+    throw new RangeError("Zstd source allocation exceeds the WASM address range");
+  }
+  const buffers = ensureContextBuffers(context, sourceSize, destinationSize, dictionary.byteLength);
+  const heap = module.HEAPU8;
+  const sourcePointer = buffers.source + (useAlignedSharedCopy ? source.byteOffset + sourceOffsets[0] - heap.byteOffset - buffers.source & 7 : 0);
+  let outputOffset = 0;
+  for (let i = 0; i < sourceOffsets.length; ) {
+    const runOffset = sourceOffsets[i];
+    let runLength = 0;
+    let runSpanCount = 0;
+    let runEnd = runOffset;
+    do {
+      const sourceOffset = sourceOffsets[i];
+      const sourceLength = sourceLengths[i];
+      if (sourceOffset > source.byteLength || sourceLength > source.byteLength - sourceOffset) {
+        throw new RangeError(`Zstd source span ${i} is out of bounds`);
+      }
+      if (sourceLength > contentBytes - outputOffset - runLength) {
+        throw new RangeError(`Zstd source span ${i} exceeds the gathered content size`);
+      }
+      if (runSpanCount > 0 && sourceOffset !== runEnd) {
+        break;
+      }
+      runLength += sourceLength;
+      runEnd = sourceOffset + sourceLength;
+      ++runSpanCount;
+      ++i;
+    } while (i < sourceOffsets.length);
+    const destinationOffset = sourcePointer + outputOffset;
+    const prefix = useAlignedSharedCopy && runLength >= 1024 ? heap.byteOffset + destinationOffset - source.byteOffset - runOffset & 7 : 0;
+    if (prefix === 0) {
+      heap.set(source.subarray(runOffset, runOffset + runLength), destinationOffset);
+    } else {
+      heap.set(source.subarray(runOffset + prefix, runOffset + runLength), destinationOffset);
+      heap.copyWithin(destinationOffset + prefix, destinationOffset, destinationOffset + runLength - prefix);
+      heap.set(source.subarray(runOffset, runOffset + prefix), destinationOffset);
+    }
+    outputOffset += runLength;
+  }
+  if (outputOffset !== contentBytes) {
+    throw new RangeError(`Zstd gathered ${outputOffset} bytes; expected ${contentBytes}`);
+  }
+  module.HEAPU8.set(dictionary, buffers.dictionary);
+  if (prefixBytes > 0) {
+    module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
+  }
+  const prepared = { context, buffers, sourcePointer, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope };
+  buffers.prepared = prepared;
+  return prepared;
+}
+function finishPreparedSpanCompression(prepared) {
+  const { context, buffers, sourcePointer, contentBytes, dictionaryBytes, prefixBytes, level, writeBlockEnvelope } = prepared;
+  const module = getModule();
+  if (contextBuffers.get(context) !== buffers || buffers.prepared !== prepared) {
+    throw new Error("Prepared Zstd span buffers are no longer active");
+  }
+  buffers.prepared = null;
+  const size = module._ZSTD_compress_usingDict(
+    context,
+    buffers.destination + prefixBytes,
+    buffers.destinationCapacity - prefixBytes,
+    sourcePointer,
+    contentBytes,
+    buffers.dictionary,
+    dictionaryBytes,
+    level
+  );
+  checkResult(size);
+  if (writeBlockEnvelope && module._manabitan_write_block_envelope(buffers.destination, prefixBytes + size) !== 1) {
+    throw new Error("Failed to write Zstd block integrity envelope");
+  }
+  return module.HEAPU8.slice(
+    buffers.destination,
+    buffers.destination + prefixBytes + size
+  );
+}
+function decompress(content, options = {}) {
+  return decompressUsingContext(
+    0,
+    content,
+    null,
+    options.defaultHeapSize ?? 1024 * 1024,
+    options.maxOutputSize ?? null
+  );
+}
+function decompressUsingDict(context, content, dictionary, options = {}) {
+  return decompressUsingContext(
+    context,
+    content,
+    dictionary,
+    options.defaultHeapSize ?? 1024 * 1024,
+    options.maxOutputSize ?? null
+  );
+}
+function decompressUsingContext(context, content, dictionary, defaultHeapSize, maxOutputSize) {
+  const module = getModule();
+  const source = module._malloc(content.byteLength);
+  if (source === 0) {
+    throw new Error("Failed to allocate Zstd input buffer");
+  }
+  try {
+    module.HEAPU8.set(content, source);
+    const frameSizeValue = module._ZSTD_getFrameContentSize(source, content.byteLength);
+    const frameSize = typeof frameSizeValue === "bigint" ? Number(frameSizeValue) : frameSizeValue;
+    const outputSize = frameSize < 0 ? defaultHeapSize : frameSize;
+    if (!Number.isSafeInteger(outputSize) || outputSize <= 0) {
+      throw new Error(`Invalid Zstd frame content size: ${frameSizeValue}`);
+    }
+    if (maxOutputSize !== null && (!Number.isSafeInteger(maxOutputSize) || maxOutputSize <= 0)) {
+      throw new RangeError(`Invalid Zstd output limit: ${String(maxOutputSize)}`);
+    }
+    if (maxOutputSize !== null && outputSize > maxOutputSize) {
+      throw new RangeError(
+        `Zstd frame output size ${outputSize} exceeds configured output limit ${maxOutputSize}`
+      );
+    }
+    const destination = module._malloc(outputSize);
+    if (destination === 0) {
+      throw new Error("Failed to allocate Zstd destination buffer");
+    }
+    let dictionaryPointer = 0;
+    try {
+      dictionaryPointer = dictionary === null ? 0 : module._malloc(dictionary.byteLength);
+      if (dictionary !== null && dictionaryPointer === 0) {
+        throw new Error("Failed to allocate Zstd dictionary buffer");
+      }
+      if (dictionary !== null) {
+        module.HEAPU8.set(dictionary, dictionaryPointer);
+      }
+      const size = dictionary === null && context === 0 ? module._ZSTD_decompress(destination, outputSize, source, content.byteLength) : module._ZSTD_decompress_usingDict(
+        context,
+        destination,
+        outputSize,
+        source,
+        content.byteLength,
+        dictionaryPointer,
+        dictionary === null ? 0 : dictionary.byteLength
+      );
+      checkResult(size);
+      return module.HEAPU8.slice(destination, destination + size);
+    } finally {
+      if (dictionaryPointer !== 0) {
+        module._free(dictionaryPointer);
+      }
+      module._free(destination);
+    }
+  } finally {
+    module._free(source);
+  }
+}
+export {
+  compress,
+  compressSpansUsingDictWithPrefix,
+  compressUsingDict,
+  compressUsingDictWithPrefix,
+  createCCtx,
+  createDCtx,
+  decompress,
+  decompressUsingDict,
+  finishPreparedSpanCompression,
+  freeCCtx,
+  freeDCtx,
+  init,
+  prepareSpanCompression
+};
+//# sourceMappingURL=zstd-wasm.js.map

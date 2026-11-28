@@ -78,7 +78,15 @@ async function loadWorker(failFirstContext = false) {
     })
     const workerUrl = new URL('../ext/js/dictionary/zstd-term-content-compression-worker.js', import.meta.url).href
     // eslint-disable-next-line no-unsanitized/method -- The URL names a fixed repository-owned worker entry.
-    const initialization = import(workerUrl).then(() => ready)
+    const initialization = import(workerUrl).then(async () => {
+        if (bridge.listener === null) { throw new Error('Worker listener was not installed') }
+        bridge.listener(/** @type {MessageEvent} */ ({data: {
+            type: 'initialize',
+            module: await WebAssembly.compile(wasmBinary),
+            dictionary: Uint8Array.from(dictionary),
+        }}))
+        return await ready
+    })
     workerInitializations.push(initialization)
     const initialized = await initialization
     expect(bridge.messages).toHaveLength(1)
@@ -175,5 +183,55 @@ describe('compression worker native contexts', {timeout: 10_000}, () => {
         const compressed = api.compressTermContentZstd(content, 'jmdict')
         expect(api.decompressTermContentZstd(compressed, 'jmdict')).toEqual(content)
         expect(createDecoder).toHaveBeenCalledOnce()
+    })
+
+    test('observes a module import failure before a delayed initialization message', async () => {
+        vi.doMock('../ext/js/dictionary/zstd-term-content.js', () => { throw new Error('injected codec import failure') })
+        vi.stubGlobal('__manabitanTermContentCompressionWorker', false)
+        const bridge = {
+            listener: /** @type {((event: MessageEvent) => void)|null} */ (null),
+            messages: /** @type {WorkerResponse[]} */ ([]),
+        }
+        vi.stubGlobal('self', {
+            /**
+             * @param {string} type
+             * @param {(event: MessageEvent) => void} listener
+             */
+            addEventListener(type, listener) {
+                if (type === 'message') { bridge.listener = listener }
+            },
+            /** @param {WorkerResponse} message */
+            postMessage(message) { bridge.messages.push(message) },
+        })
+        try {
+            // Vitest wraps a failed mock factory. Compare the actual rejection
+            // delivered by import so the worker must preserve that same reason.
+            const expectedError = await import('../ext/js/dictionary/zstd-term-content.js').then(
+                () => '',
+                (/** @type {unknown} */ error) => `${error}`,
+            )
+            expect(expectedError).not.toBe('')
+            const workerUrl = new URL('../ext/js/dictionary/zstd-term-content-compression-worker.js', import.meta.url).href
+            // eslint-disable-next-line no-unsanitized/method -- The URL names the fixed production worker.
+            await import(workerUrl)
+            // Let a complete turn pass before handshaking; an unobserved import
+            // rejection would be reported by the runner during this interval.
+            await new Promise((resolve) => { setTimeout(resolve, 0) })
+            expect(bridge.messages).toEqual([])
+            if (bridge.listener === null) { throw new Error('Worker listener was not installed') }
+            bridge.listener(/** @type {MessageEvent} */ ({data: {
+                type: 'initialize',
+                module: new WebAssembly.Module(Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0)),
+                dictionary: Uint8Array.of(1),
+            }}))
+            await vi.waitFor(() => {
+                expect(bridge.messages).toEqual([{
+                    type: 'initialization-error',
+                    error: expectedError,
+                }])
+            })
+        } finally {
+            vi.doUnmock('../ext/js/dictionary/zstd-term-content.js')
+        }
     })
 })

@@ -1,0 +1,60 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {createRequire} from 'node:module'
+import path from 'node:path'
+
+const root = process.argv[2]
+const evidence = path.join(root, 'dev/perf/zstd-shared-startup-20261128')
+const require = createRequire(path.join(root, 'package.json'))
+const {parse} = require('acorn')
+const measured = JSON.parse(await readFile(path.join(evidence, 'source-manifest.json'), 'utf8'))
+const hash = (value) => createHash('sha256').update(value).digest('hex')
+const observer = '// Observe an early import failure while waiting for the initialization message.\n// The original promise retains its rejection for the initialization response.\nvoid modulePromise.catch(() => {})\n'
+const normalizations = {
+    'ext/js/dictionary/zstd-term-content.js': [[
+        'const initializedModule = /** @type {unknown} */ (moduleResult.value)\n        compiledModule = /** @type {WebAssembly.Module|null} */ (initializedModule)',
+        'compiledModule = moduleResult.value',
+    ]],
+    'ext/js/dictionary/zstd-term-content-compression-worker.js': [[
+        'const rawData = /** @type {unknown} */ (event.data)\n    const data = /** @type {{type?: unknown, module?: unknown, dictionary?: unknown}|null} */ (rawData)',
+        'const data = /** @type {{type?: unknown, module?: unknown, dictionary?: unknown}|null} */ (event.data)',
+    ], [observer, '']],
+}
+const ast = (source) => JSON.stringify(parse(source, {sourceType: 'module', ecmaVersion: 'latest'}), (key, value) => (
+    key === 'start' || key === 'end' ? undefined : value
+))
+const files = {}
+for (const file of Object.keys(measured.B.files)) {
+    const finalBytes = await readFile(path.join(root, file))
+    const result = {measuredSha256: measured.B.files[file], finalSha256: hash(finalBytes)}
+    if (file.endsWith('.js')) {
+        const original = await readFile(path.join(evidence, 'measured-candidate', file + '.txt'), 'utf8')
+        if (hash(original) !== result.measuredSha256) { throw new Error(`Measured snapshot hash mismatch: ${file}`) }
+        let normalized = finalBytes.toString()
+        for (const [before, after] of normalizations[file] ?? []) {
+            if (normalized.split(before).length !== 2) { throw new Error(`Unexpected normalization count: ${file}`) }
+            normalized = normalized.replace(before, after)
+        }
+        result.astEqualAfterDeclaredNormalizations = ast(original) === ast(normalized)
+        if (!result.astEqualAfterDeclaredNormalizations) { throw new Error(`Additional executable change in ${file}`) }
+    }
+    files[file] = result
+}
+for (const file of ['ext/lib/zstd.wasm', 'ext/lib/zstd-dicts/jmdict.zdict']) {
+    if (files[file].finalSha256 !== measured.A.files[file]) { throw new Error(`Native asset changed: ${file}`) }
+}
+if (files['ext/lib/zstd-wasm.js'].finalSha256 !== files['ext/lib/zstd-wasm.js'].measuredSha256) {
+    throw new Error('The built codec changed after annotation-only source edits')
+}
+await writeFile(path.join(evidence, 'final-source-manifest.json'), JSON.stringify({
+    baselineCommit: measured.baseCommit,
+    note: 'Content hashes bind the review source after the measured cohort. Successful workload was not retimed after these disclosed edits; hosted qualification uses the final PR head.',
+    declaredPostMeasurementChanges: [
+        'Remove semicolons from two new declarations and add local lint style comments.',
+        'Add one unknown local alias before each of two existing boundary casts; each property is still read exactly once.',
+        'Immediately observe the worker module import promise rejection while waiting for initialization; the original rejection is preserved for the eventual initialization response.',
+    ],
+    astComparison: 'Remove only the two declared aliases and the immediate rejection observer, then compare Acorn ASTs after stripping source positions. No other executable differences are present.',
+    files,
+}, null, 2) + '\n')
+console.log('Verified measured snapshots, declared final-source differences, byte-identical built codec, and unchanged native assets')

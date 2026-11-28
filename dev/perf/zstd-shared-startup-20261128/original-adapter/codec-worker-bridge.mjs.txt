@@ -1,0 +1,31 @@
+import {parentPort, workerData} from 'node:worker_threads'
+import {readFile} from 'node:fs/promises'
+
+const work = {wasmFetches: 0, dictionaryFetches: 0, fetchedBytes: 0, streamingInstantiations: 0, moduleInstantiations: 0, bufferInstantiations: 0}
+const nativeStreaming = WebAssembly.instantiateStreaming
+const nativeInstantiate = WebAssembly.instantiate
+WebAssembly.instantiateStreaming = (...args) => {
+    ++work.streamingInstantiations
+    return Reflect.apply(nativeStreaming, WebAssembly, args)
+}
+WebAssembly.instantiate = (...args) => {
+    if (args[0] instanceof WebAssembly.Module) { ++work.moduleInstantiations } else { ++work.bufferInstantiations }
+    return Reflect.apply(nativeInstantiate, WebAssembly, args)
+}
+globalThis.fetch = async (input) => {
+    const url = new URL(String(input))
+    if (url.pathname.endsWith('.wasm')) { ++work.wasmFetches } else if (url.pathname.endsWith('.zdict')) { ++work.dictionaryFetches }
+    else { throw new Error(`Unexpected codec asset: ${url}`) }
+    const bytes = await readFile(url)
+    work.fetchedBytes += bytes.byteLength
+    return new Response(bytes, {headers: {'Content-Type': 'application/wasm'}})
+}
+globalThis.self = {
+    addEventListener(type, listener) {
+        if (type === 'message') { parentPort.on('message', (data) => listener({data})) }
+    },
+    postMessage(message, transfer = []) {
+        parentPort.postMessage(message.type === 'ready' ? {...message, work} : message, transfer)
+    },
+}
+await import(workerData.moduleUrl)

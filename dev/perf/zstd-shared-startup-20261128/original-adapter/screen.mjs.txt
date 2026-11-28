@@ -1,0 +1,41 @@
+import {spawnSync} from 'node:child_process'
+import {appendFile, readFile, writeFile} from 'node:fs/promises'
+
+const [baseline, candidate, fixture, output, countString = '9', mode = 'pool'] = process.argv.slice(2)
+const pairs = Number(countString)
+const roots = {A: baseline, B: candidate, C: baseline}
+const rotations = [['A', 'B', 'C'], ['C', 'B', 'A'], ['B', 'A', 'C'], ['C', 'A', 'B'], ['A', 'C', 'B'], ['B', 'C', 'A']]
+const observations = []
+await writeFile(output, '')
+for (let pair = 0; pair < pairs; ++pair) {
+    for (const arm of rotations[pair % rotations.length]) {
+        const child = spawnSync(process.execPath, [new URL('./measure.mjs', import.meta.url).pathname, roots[arm], fixture, mode], {
+            encoding: 'utf8', env: {...process.env, NODE_OPTIONS: '--max-old-space-size=512'}, timeout: 60_000,
+        })
+        if (child.status !== 0) { throw new Error(`pair${pair} ${arm}: ${child.stdout}\n${child.stderr}`) }
+        const result = JSON.parse(child.stdout.trim().split('\n').at(-1))
+        const observation = {pair, arm, result}
+        observations.push(observation)
+        await appendFile(output, JSON.stringify(observation) + '\n')
+    }
+    console.log(`Completed ${mode} triplet ${pair + 1}/${pairs}`)
+}
+const median = (values) => {
+    const sorted = values.slice().sort((a, b) => a - b)
+    return sorted.length % 2 === 1 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+}
+const metrics = ['firstJobMs', 'parentInitializedMs', 'warmJobMs', 'firstCpuMs', 'warmCpuMs', 'peakRssKiB']
+const summary = {mode, pairs, metrics: {}, hashes: [...new Set(observations.map(({result}) => result.outputSha256))], work: {}}
+for (const arm of Object.keys(roots)) { summary.work[arm] = [...new Set(observations.filter((x) => x.arm === arm).map(({result}) => JSON.stringify(result.totalWork)))].map((x) => JSON.parse(x)) }
+for (const metric of metrics) {
+    const values = Object.fromEntries(Object.keys(roots).map((arm) => [arm, observations.filter((x) => x.arm === arm).map(({result}) => result[metric])]))
+    summary.metrics[metric] = {
+        medians: Object.fromEntries(Object.entries(values).map(([arm, entries]) => [arm, median(entries)])),
+        candidatePairedDeltaPct: median(values.B.map((value, pair) => (value / values.A[pair] - 1) * 100)),
+        controlPairedDeltaPct: median(values.C.map((value, pair) => (value / values.A[pair] - 1) * 100)),
+        candidateWins: values.B.filter((value, pair) => value < values.A[pair]).length,
+        controlWins: values.C.filter((value, pair) => value < values.A[pair]).length,
+    }
+}
+await writeFile(output + '.summary.json', JSON.stringify(summary, null, 2) + '\n')
+console.log(JSON.stringify(summary))

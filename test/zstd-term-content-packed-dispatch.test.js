@@ -46,6 +46,7 @@ class ControlledWorker {
      * @param {Transferable[]} transfer
      */
     postMessage(message, transfer) {
+        if (message.type === 'initialize') { return }
         if (this.throwOnDispatch) { throw new Error('injected dispatch failure') }
         this.calls.push(structuredClone(message, {transfer}))
     }
@@ -203,6 +204,7 @@ describe('packed source snapshot boundary', () => {
              * @param {Transferable[]} transfer
              */
             postMessage(message, transfer) {
+                if (message.type === 'initialize') { return }
                 super.postMessage(message, transfer)
                 const data = this.calls[this.calls.length - 1]
                 const result = api.compressWrappedTermContentZstd(/** @type {Uint8Array} */ (data.content), 'jmdict')
@@ -261,11 +263,16 @@ describe('actual compression worker block equivalence', () => {
                 },
                 postMessage(message, transfer = []) { parentPort.postMessage(message, transfer) }
             }
-            globalThis.fetch = async (input) => new Response(await readFile(new URL(String(input))), {headers: {'Content-Type': 'application/wasm'}})
+            globalThis.fetch = async () => { throw new Error('Compression worker must reuse the parent assets') }
             await import(workerData.moduleUrl)
         `
-        const nativeWorkers = Array.from({length: 3}, () => new NodeWorker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`), {workerData: {moduleUrl}}))
+        const nativeWorkers = Array.from({length: 3}, () => new NodeWorker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`), {
+            workerData: {moduleUrl},
+            resourceLimits: {maxOldGenerationSizeMb: 64},
+        }))
         try {
+            const module = await WebAssembly.compile(await readFile(new URL('../dev/data/zstd-simd.wasm', import.meta.url)))
+            const dictionary = Uint8Array.from(await readFile(new URL('../dev/data/zstd-dicts/jmdict.zdict', import.meta.url)))
             await Promise.all(nativeWorkers.map((worker) => /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
                 worker.once('error', reject)
                 worker.once('message', (message) => {
@@ -275,7 +282,9 @@ describe('actual compression worker block equivalence', () => {
                         reject(new Error(JSON.stringify(message)))
                     }
                 })
+                worker.postMessage({type: 'initialize', module, dictionary})
             }))))
+            dictionary.fill(0)
             const workers = nativeWorkers.map((worker) => ({
                 addEventListener(/** @type {string} */ type, /** @type {(event: unknown) => void} */ listener) {
                     worker.on(type, (data) => listener(type === 'message' ? {data} : data))
