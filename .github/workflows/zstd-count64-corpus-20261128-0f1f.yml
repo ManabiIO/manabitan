@@ -1,0 +1,196 @@
+name: Frozen Zstd count64 corpus experiment 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/zstd-count64-study-20261128-0f1f']
+    paths:
+      - '.github/workflows/zstd-count64-corpus-20261128-0f1f.yml'
+      - 'dev/perf/zstd-count64-20261128/corpus-oracle.mjs'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  corpus:
+    name: Compression corpus / ${{ matrix.dictionary }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: builds/perf/zstd-count64-corpus-20261128-0f1f
+      PERF_COMPILER_ARTIFACT_ID: 15247811157
+      PERF_COMPILER_ARTIFACT_SHA256: 6e7339e0587bbc2c54793f9091ef9d7474624e3963abe1fcda241270af33c203
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Record source and create frozen product worktree
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/tooling-source.txt"
+          sha256sum dev/perf/zstd-count64-20261128/corpus-oracle.mjs \
+            dev/perf/zstd-count64-20261128/source-binding.json \
+            dev/perf/zstd-count64-20261128/zstd-count64.patch \
+            package-lock.json test/perf/dictionaries.lock.json > "$PERF_EVIDENCE/input-sha256.txt"
+          {
+            uname -a
+            lscpu
+            free -b
+            df -B1 .
+          } > "$PERF_EVIDENCE/host.txt"
+          git fetch --no-tags --depth 1 origin "$PERF_BASELINE"
+          git worktree add --detach "$RUNNER_TEMP/zstd-count64-product" "$PERF_BASELINE"
+          printf 'PERF_PRODUCT=%s\n' "$RUNNER_TEMP/zstd-count64-product" >> "$GITHUB_ENV"
+          test "$(git -C "$RUNNER_TEMP/zstd-count64-product" rev-parse HEAD)" = "$PERF_BASELINE"
+          git -C "$RUNNER_TEMP/zstd-count64-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source.txt"
+          git -C "$RUNNER_TEMP/zstd-count64-product" status --porcelain=v1 > "$PERF_EVIDENCE/product-status-before.txt"
+          test ! -s "$PERF_EVIDENCE/product-status-before.txt"
+          cmp package-lock.json "$RUNNER_TEMP/zstd-count64-product/package-lock.json"
+          cmp test/perf/dictionaries.lock.json "$RUNNER_TEMP/zstd-count64-product/test/perf/dictionaries.lock.json"
+          cmp .github/actions/setup/action.yml "$RUNNER_TEMP/zstd-count64-product/.github/actions/setup/action.yml"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Prepare frozen runtime libraries without duplicating dependencies
+        run: |
+          test "$(node --version)" = 'v22.22.0'
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$PERF_PRODUCT/node_modules"
+          node --version > "$PERF_EVIDENCE/node-version.txt"
+          npm --version > "$PERF_EVIDENCE/npm-version.txt"
+          npm --prefix "$PERF_PRODUCT" run build:libs > "$PERF_EVIDENCE/product-libraries.log" 2>&1
+          git -C "$PERF_PRODUCT" diff --exit-code > "$PERF_EVIDENCE/product-build-diff.txt"
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify selected fixture
+        run: |
+          node --input-type=module <<'JS' > "$PERF_EVIDENCE/fixture.json"
+          import {pathToFileURL} from 'node:url'
+          import path from 'node:path'
+          const {ensureSelectedPinnedDictionaryCache} = await import(pathToFileURL(path.join(process.env.PERF_PRODUCT, 'dev/perf/dictionary-fixtures.js')))
+          const cache = path.join(process.env.GITHUB_WORKSPACE, 'builds/e2e-dictionary-cache')
+          const result = await ensureSelectedPinnedDictionaryCache(cache, [process.env.PERF_DICTIONARY])
+          console.log(JSON.stringify({node: process.version, fixture: result.fixtures[process.env.PERF_DICTIONARY], paths: result.paths}, null, 2))
+          JS
+      - name: Fetch immutable compiler artifact with read-only credentials
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [[ "$PERF_COMPILER_ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$PERF_COMPILER_ARTIFACT_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          artifact_api="https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$PERF_COMPILER_ARTIFACT_ID"
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            "$artifact_api" > "$PERF_EVIDENCE/compiler-artifact.json"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            "$artifact_api/zip" --output "$RUNNER_TEMP/zstd-count64-compiler.zip"
+          printf '%s  %s\n' "$PERF_COMPILER_ARTIFACT_SHA256" "$RUNNER_TEMP/zstd-count64-compiler.zip" > "$PERF_EVIDENCE/compiler-artifact.sha256"
+          sha256sum --check "$PERF_EVIDENCE/compiler-artifact.sha256" > "$PERF_EVIDENCE/compiler-artifact-check.txt"
+      - name: Validate compiler receipt and retain all input logs
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import shutil
+          import zipfile
+
+          evidence = Path(os.environ['PERF_EVIDENCE'])
+          artifact = json.loads((evidence / 'compiler-artifact.json').read_text())
+          assert artifact['id'] == int(os.environ['PERF_COMPILER_ARTIFACT_ID'])
+          assert artifact['name'] == 'zstd-count64-build-20261128-0f1f'
+          assert artifact['expired'] is False
+          root = Path(os.environ['RUNNER_TEMP']) / 'zstd-count64-compiler'
+          root.mkdir()
+          with zipfile.ZipFile(root.parent / 'zstd-count64-compiler.zip') as archive:
+              for entry in archive.infolist():
+                  name = PurePosixPath(entry.filename)
+                  assert not name.is_absolute() and '..' not in name.parts
+                  assert (entry.external_attr >> 16) & 0o170000 != 0o120000
+              archive.extractall(root)
+          assert (root / 'product-source.txt').read_text().splitlines()[0] == os.environ['PERF_BASELINE']
+          compiler = root / 'compiler'
+          reports = json.loads((compiler / 'build-report.json').read_text())
+          assert [entry['arm'] for entry in reports] == ['baseline', 'count64']
+          assert reports[0]['checkedInWasmEqual'] and reports[0]['checkedInJsEqual']
+          for report in reports:
+              arm = compiler / report['arm']
+              assert hashlib.sha256((arm / 'zstd-simd-module.wasm').read_bytes()).hexdigest() == report['wasmSha256']
+              assert hashlib.sha256((arm / 'zstd-simd-module.js').read_bytes()).hexdigest() == report['jsSha256']
+          records = []
+          for file in sorted(root.rglob('*')):
+              if not file.is_file():
+                  continue
+              relative = file.relative_to(root)
+              records.append({'path': str(relative), 'bytes': file.stat().st_size, 'sha256': hashlib.sha256(file.read_bytes()).hexdigest()})
+              if file.suffix in {'.json', '.txt', '.log'}:
+                  target = evidence / 'compiler-input' / relative
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(file, target)
+          (evidence / 'compiler-input-manifest.json').write_text(json.dumps(records, indent=2) + '\n')
+          specification = {
+              'sourceHead': os.environ['PERF_BASELINE'],
+              'dictionary': os.environ['PERF_DICTIONARY'],
+              'artifactId': int(os.environ['PERF_COMPILER_ARTIFACT_ID']),
+              'artifactZipSha256': os.environ['PERF_COMPILER_ARTIFACT_SHA256'],
+              'coldSweeps': 1, 'warmupSweeps': 1, 'pairedSweeps': 12, 'controlSweeps': 4,
+              'scope': 'Component feasibility only; native calls timed after parser workers settle, with exact full-output parity. No full-import claim.',
+          }
+          (evidence / 'acquisition-specification.json').write_text(json.dumps(specification, indent=2) + '\n')
+          with Path(os.environ['GITHUB_ENV']).open('a') as env:
+              env.write('PERF_COMPILER_ROOT=' + str(compiler) + '\n')
+          PY
+      - name: Run exact corpus oracle and prescribed paired observations
+        run: |
+          node --expose-gc dev/perf/zstd-count64-20261128/corpus-oracle.mjs \
+            --project-root "$PERF_PRODUCT" \
+            --build-dir "$PERF_COMPILER_ROOT" \
+            --fixtures "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --output "$GITHUB_WORKSPACE/$PERF_EVIDENCE/observations" \
+            --dictionary "$PERF_DICTIONARY" > "$PERF_EVIDENCE/corpus-oracle.log" 2>&1
+      - name: Preserve final identities and every completed observation
+        if: always()
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          if test -d "$RUNNER_TEMP/zstd-count64-product"; then
+            git -C "$RUNNER_TEMP/zstd-count64-product" rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/product-source-after.txt"
+            git -C "$RUNNER_TEMP/zstd-count64-product" status --porcelain=v1 --untracked-files=no > "$PERF_EVIDENCE/product-status-after.txt"
+          fi
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ['PERF_EVIDENCE'])
+          files = []
+          for file in sorted(root.rglob('*')):
+              if not file.is_file() or file.name == 'manifest.json' or 'corpus' in file.relative_to(root).parts:
+                  continue
+              files.append({'path': str(file.relative_to(root)), 'bytes': file.stat().st_size, 'sha256': hashlib.sha256(file.read_bytes()).hexdigest()})
+          (root / 'manifest.json').write_text(json.dumps({'baseline': os.environ['PERF_BASELINE'], 'dictionary': os.environ['PERF_DICTIONARY'], 'compilerArtifactId': os.environ['PERF_COMPILER_ARTIFACT_ID'], 'compilerArtifactZipSha256': os.environ['PERF_COMPILER_ARTIFACT_SHA256'], 'files': files}, indent=2) + '\n')
+          PY
+      - name: Upload logs, receipts, and full partial reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: zstd-count64-corpus-20261128-0f1f-${{ matrix.dictionary }}
+          path: |
+            builds/perf/zstd-count64-corpus-20261128-0f1f
+            !builds/perf/zstd-count64-corpus-20261128-0f1f/observations/corpus/**
+          if-no-files-found: error
+          retention-days: 14
