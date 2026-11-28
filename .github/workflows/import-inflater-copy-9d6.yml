@@ -1,0 +1,125 @@
+name: Inflater match-copy component 9d6
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['perf/import-components-9d6-20261128']
+    paths:
+      - '.github/workflows/import-inflater-copy-9d6.yml'
+      - 'dev/perf/inflater-copy-9d6/**'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  COMPONENT_BASELINE_REF: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CAPTURE_RUN_ID: '46103338197'
+  CAPTURE_HEAD_SHA: d4470d35a684a8c37628123d7740ec2fa3375f4b
+  CAPTURE_ARTIFACT_NAME: jmdict-source-capture-9d6-46103338197-1
+
+jobs:
+  screen:
+    name: Inflater match copy / ${{ matrix.order }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      COMPONENT_ORDER: ${{ matrix.order }}
+      COMPONENT_OUTPUT: builds/perf/import-inflater-copy-9d6/${{ matrix.order }}
+      CAPTURE_DIRECTORY: builds/perf/import-components-9d6/capture
+    steps:
+      - name: Create evidence directory
+        run: mkdir -p "$COMPONENT_OUTPUT"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.COMPONENT_BASELINE_REF }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: scripts
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.22.3'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - name: Install the pinned native toolchain family
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Record and verify the immutable source capture identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CAPTURE_RUN_ID" > "$COMPONENT_OUTPUT/capture-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CAPTURE_RUN_ID/artifacts?per_page=100" > "$COMPONENT_OUTPUT/capture-artifacts.json"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import {readFile, writeFile} from 'node:fs/promises'
+          import {join} from 'node:path'
+          const output = process.env.COMPONENT_OUTPUT
+          const expected = JSON.parse(await readFile('scripts/dev/perf/inflater-copy-9d6/capture.json', 'utf8'))
+          const run = JSON.parse(await readFile(join(output, 'capture-run.json'), 'utf8'))
+          assert.equal(run.id, Number(process.env.CAPTURE_RUN_ID))
+          assert.equal(run.head_sha, process.env.CAPTURE_HEAD_SHA)
+          const listing = JSON.parse(await readFile(join(output, 'capture-artifacts.json'), 'utf8'))
+          const artifacts = listing.artifacts.filter(({name}) => name === process.env.CAPTURE_ARTIFACT_NAME)
+          assert.equal(artifacts.length, 1)
+          const artifact = artifacts[0]
+          assert.equal(artifact.expired, false)
+          assert.equal(artifact.workflow_run.id, run.id)
+          assert.equal(artifact.workflow_run.head_sha, run.head_sha)
+          const identity = {runId: run.id, runAttempt: run.run_attempt, headSha: run.head_sha, artifactId: artifact.id, artifactName: artifact.name, artifactDigest: artifact.digest, artifactSize: artifact.size_in_bytes}
+          assert.deepEqual(identity, expected)
+          await writeFile(join(output, 'capture-identity.json'), JSON.stringify(identity, null, 2) + '\n', {flag: 'wx'})
+          NODE
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ env.CAPTURE_ARTIFACT_NAME }}
+          run-id: ${{ env.CAPTURE_RUN_ID }}
+          github-token: ${{ github.token }}
+          path: ${{ env.CAPTURE_DIRECTORY }}
+      - name: Prepare frozen baseline dependencies and runtime assets
+        working-directory: baseline
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Restore pinned JMdict archive cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: baseline/builds/e2e-dictionary-cache
+          key: import-components-9d6-jmdict-${{ runner.os }}-${{ hashFiles('baseline/test/perf/dictionaries.lock.json') }}
+      - name: Acquire and verify the exact JMdict archive
+        working-directory: baseline
+        run: node dev/perf/prepare-dictionaries.js jmdict
+      - name: Rebuild exact native modules and execute the fixed protocol
+        run: |
+          node scripts/dev/perf/inflater-copy-9d6/run.mjs \
+            baseline "$CAPTURE_DIRECTORY" baseline/builds/e2e-dictionary-cache \
+            "$COMPONENT_OUTPUT" "$COMPONENT_ORDER" \
+            > "$COMPONENT_OUTPUT/run.stdout.log" 2> "$COMPONENT_OUTPUT/run.stderr.log"
+      - name: Verify inflater boundaries and malformed inputs after timing
+        if: matrix.order == 'AB'
+        run: |
+          cd "$COMPONENT_OUTPUT/source-candidate"
+          node node_modules/vitest/vitest.mjs run \
+            test/term-bank-inflater.test.js test/term-bank-inflate-matches.test.js \
+            --maxWorkers=1 --no-file-parallelism > ../focused-tests.log 2>&1
+      - name: Retain every prescribed observation, failure, and native identity
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-inflater-copy-${{ matrix.order }}-9d6-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.COMPONENT_OUTPUT }}/*.json
+            ${{ env.COMPONENT_OUTPUT }}/*.log
+            ${{ env.COMPONENT_OUTPUT }}/cohort/*.json
+            ${{ env.COMPONENT_OUTPUT }}/cohort/*.log
+            ${{ env.COMPONENT_OUTPUT }}/measurement/*.json
+            ${{ env.COMPONENT_OUTPUT }}/measurement/*/*.wasm
+          if-no-files-found: error
+          retention-days: 14

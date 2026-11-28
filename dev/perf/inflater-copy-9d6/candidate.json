@@ -1,0 +1,29 @@
+{
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "files": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-inflate.c",
+      "baselineSha256": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+      "candidateSha256": "dbc32bff7e54d8ab1bd7acfa813198045613076b4c7459fe34b917a1bb930817"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+      "baselineSha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+      "candidateSha256": "0282147d955bf4a1c17a6bd92d0dfc99ee9876e22878149ec909a6f5d6ec2563"
+    },
+    {
+      "path": "test/term-bank-inflate-matches.test.js",
+      "baselineSha256": "94eb7cc5d80b9fa9896a52fa895a8c30b1efdb966ed4ead3589daee8cdac73a6",
+      "candidateSha256": "a54e53af9d4d8a4d0debf9b8c334bc29ceab86a6daab10e12a67e6ae2bc0ee33"
+    }
+  ],
+  "patchSha256": "562b9b57c95d378b26e810687971b962e663c2da4ec0d0c5b546117a0a6a9b76",
+  "baselineProductionWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "baselineTestWasmSha256": "674741af5e0ee70afa9f902b52870041ffd95a20dccc6e898f03f49dba339c31",
+  "candidateTestWasmSha256": "f2a8aac2961b6ee806a5fe33f23ccff6fc240fad64ec528ce1f20d2780a0c3d5",
+  "compilerVersion": "21.1.8",
+  "linkerVersion": "21.1.8",
+  "screenSha256": "9a31f50ee9c26656d3e764d6e255b015ae0b3d46ae40d7ba7d71249621c899ab",
+  "childSha256": "055cbbb1252e4edeb107a87d95ffaa68ca51ca11d3a59cb69bc7ce853ffa8a89",
+  "sourceGroupsSha256": "48c3954ae5104f72bcb2a2c80577991576d2a4e38a8001020538debed9e53689"
+}

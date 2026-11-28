@@ -1,0 +1,98 @@
+--- a/ext/js/dictionary/wasm/term-bank-inflate.c
++++ b/ext/js/dictionary/wasm/term-bank-inflate.c
+@@ -8,6 +8,10 @@
+  * Each parser worker owns a separate module instance. Calls within an instance
+  * are synchronous and non-reentrant, as for the parser's existing heap arena.
+  */
++#if defined(__wasm_simd128__)
++#include <wasm_simd128.h>
++#endif
++
+ #define FREESTANDING
+ #include "vendor/libdeflate/lib/deflate_decompress.c"
+ 
+--- a/ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h
++++ b/ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h
+@@ -587,6 +587,20 @@
+ 		 * overrun.  FASTLOOP_MAX_BYTES_WRITTEN needs to be updated if
+ 		 * the maximum possible overrun here is changed.
+ 		 */
++#if defined(__wasm_simd128__)
++		if (offset >= 16) {
++			/* Preserve the existing forty-byte write bound and forward
++			 * overlap expansion, using wider native WASM transfers. */
++			STATIC_ASSERT(WORDBYTES == 8);
++			do {
++				wasm_v128_store(dst, wasm_v128_load(src));
++				wasm_v128_store(dst + 16, wasm_v128_load(src + 16));
++				store_word_unaligned(load_word_unaligned(src + 32), dst + 32);
++				src += 40;
++				dst += 40;
++			} while (dst < out_next);
++		} else
++#endif
+ 		if (UNALIGNED_ACCESS_IS_FAST && offset >= WORDBYTES) {
+ 			store_word_unaligned(load_word_unaligned(src), dst);
+ 			src += WORDBYTES;
+--- a/test/term-bank-inflate-matches.test.js
++++ b/test/term-bank-inflate-matches.test.js
+@@ -34,9 +34,10 @@
+  * @param {number} distance
+  * @param {number} length
+  * @param {number} padding
++ * @param {number} [suffix=0]
+  * @returns {{compressed: Uint8Array, expected: Uint8Array}}
+  */
+-function fixedMatch(distance, length, padding) {
++function fixedMatch(distance, length, padding, suffix = 0) {
+     /** @type {number[]} */
+     const output = []
+     /** @type {number[]} */
+@@ -96,6 +97,7 @@
+     codeBits(code, 5)
+     bits(distance - distanceBase(code), code < 4 ? 0 : (code >>> 1) - 1)
+     for (let i = 0; i < length; ++i) { output.push(output[output.length - distance]) }
++    for (let i = 0; i < suffix; ++i) { literal(97 + i % 26) }
+     literal(34)
+     literal(93)
+     symbol(256)
+@@ -168,3 +170,39 @@
+         expect(inflate(compressed, expected, {capacity: expected.length}).status).toBeLessThan(0)
+     })
+ })
++
++
++describe('WASM sixteen-byte fastloop match copies', () => {
++    test.each([15, 16, 17, 23, 31, 32, 33, 39, 40, 41, 63, 64, 65, 127, 257, 32768])('preserves exact forward expansion for distance %i with fastloop slack', (distance) => {
++        for (const length of [3, 15, 16, 17, 31, 32, 33, 39, 40, 41, 63, 79, 80, 81, 127, 159, 160, 161, 239, 240, 241, 257, 258]) {
++            for (const padding of [0, 1, 7, 15]) {
++                const fixture = fixedMatch(distance, length, padding, 400)
++                expect(inflateRawSync(fixture.compressed).equals(Buffer.from(fixture.expected))).toBe(true)
++                const result = inflate(fixture.compressed, fixture.expected)
++                expect(result.status).toBe(fixture.expected.length)
++                expect(Buffer.from(result.output).equals(Buffer.from(fixture.expected))).toBe(true)
++            }
++        }
++    })
++
++    test.each([15, 16, 17, 31, 32, 33, 39, 40, 41, 257, 32768])('keeps the final output inside physical WASM memory for distance %i', (distance) => {
++        for (const length of [3, 31, 39, 40, 41, 79, 80, 81, 239, 240, 241, 258]) {
++            const {compressed, expected} = fixedMatch(distance, length, 7, 400)
++            wasm.wasm_reset_heap()
++            const input = wasm.wasm_alloc(compressed.length)
++            const metadata = wasm.wasm_alloc(20)
++            const spans = wasm.wasm_alloc(8)
++            wasm.wasm_alloc(expected.length + 65536)
++            const heap = new Uint8Array(wasm.memory.buffer)
++            const output = heap.byteLength - expected.length
++            expect(output - 16).toBeGreaterThan(spans + 8)
++            heap.set(compressed, input)
++            heap.fill(0xa5, output - 16)
++            new Uint32Array(wasm.memory.buffer, metadata, 5).set([0, compressed.length, expected.length, 8, crc32(expected)])
++            const status = wasm.inflate_and_join_term_banks(input, compressed.length, metadata, metadata + 4, metadata + 8, metadata + 12, metadata + 16, 1, output, expected.length, spans)
++            expect(status).toBe(expected.length)
++            expect([...heap.subarray(output - 16, output)]).toEqual(new Array(16).fill(0xa5))
++            expect(Buffer.compare(heap.subarray(output), expected)).toBe(0)
++        }
++    })
++})
