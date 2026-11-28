@@ -13,6 +13,10 @@ parser.add_argument('--project-root', required=True, type=Path)
 parser.add_argument('--output', required=True, type=Path)
 parser.add_argument('--emcc', default='emcc')
 parser.add_argument('--source', type=Path)
+parser.add_argument(
+    '--diagnostic-symbol-map', action=argparse.BooleanOptionalAction, default=True,
+    help='Build a separately named diagnostic baseline after both production builds (default: enabled)',
+)
 args = parser.parse_args()
 root = Path(__file__).resolve().parent
 project = args.project_root.resolve()
@@ -55,6 +59,21 @@ exports = [
     '_ZSTD_getFrameContentSize', '_ZSTD_decompress_usingDict', '_ZSTD_decompress',
     '_manabitan_write_block_envelope', '_malloc', '_free',
 ]
+
+def compiler_command(arm_source, js_output, *, symbol_map=False):
+    command = [args.emcc, str(arm_source / 'build/single_file_libs/zstd.c'), str(project / 'dev/data/zstd-block-envelope.c'),
+               '-O3', '-flto', '-msimd128']
+    if symbol_map:
+        command.append('--emit-symbol-map')
+    command.extend([
+        '-o', str(js_output),
+        '-s', 'EXPORTED_FUNCTIONS=' + json.dumps(exports, separators=(',', ':')),
+        '-s', 'EXPORTED_RUNTIME_METHODS=["HEAPU8"]',
+        '-s', 'FILESYSTEM=0', '-s', 'ALLOW_MEMORY_GROWTH=1', '-s', 'MODULARIZE=1',
+        '-s', 'EXPORT_ES6=1', '-s', 'EXPORT_NAME=createZstdModule', '-s', 'ENVIRONMENT=web,worker',
+    ])
+    return command
+
 reports = []
 for arm in ['baseline', 'count64']:
     arm_source = output / f'source-{arm}'
@@ -63,12 +82,7 @@ for arm in ['baseline', 'count64']:
     begin = time.monotonic()
     with (arm_output / 'build.log').open('w') as log:
         subprocess.run(['./create_single_file_library.sh'], cwd=arm_source / 'build/single_file_libs', stdout=log, stderr=subprocess.STDOUT, check=True)
-        command = [args.emcc, str(arm_source / 'build/single_file_libs/zstd.c'), str(project / 'dev/data/zstd-block-envelope.c'),
-                   '-O3', '-flto', '-msimd128', '--emit-symbol-map', '-o', str(arm_output / 'zstd-simd-module.js'),
-                   '-s', 'EXPORTED_FUNCTIONS=' + json.dumps(exports, separators=(',', ':')),
-                   '-s', 'EXPORTED_RUNTIME_METHODS=["HEAPU8"]',
-                   '-s', 'FILESYSTEM=0', '-s', 'ALLOW_MEMORY_GROWTH=1', '-s', 'MODULARIZE=1',
-                   '-s', 'EXPORT_ES6=1', '-s', 'EXPORT_NAME=createZstdModule', '-s', 'ENVIRONMENT=web,worker']
+        command = compiler_command(arm_source, arm_output / 'zstd-simd-module.js')
         (arm_output / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
         subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
     report = {
@@ -88,3 +102,38 @@ for arm in ['baseline', 'count64']:
     if arm == 'baseline':
         assert report['checkedInWasmEqual'], 'Pinned baseline WASM is not reproducible; stop before measuring'
         assert report['checkedInJsEqual'], 'Pinned baseline JS is not reproducible; stop before measuring'
+
+if args.diagnostic_symbol_map:
+    # Symbol-map emission retains names through Binaryen optimization, which can
+    # change function ordering. It must never alter either production asset or
+    # supply function indices to the production profile without separate proof.
+    diagnostic_root = output / 'baseline'
+    diagnostic_js = diagnostic_root / 'zstd-simd-module.diagnostic.js'
+    diagnostic_wasm = diagnostic_js.with_suffix('.wasm')
+    diagnostic_symbols = diagnostic_js.with_name(diagnostic_js.name + '.symbols')
+    command = compiler_command(source, diagnostic_js, symbol_map=True)
+    (diagnostic_root / 'diagnostic-command.json').write_text(json.dumps(command, indent=2) + '\n')
+    begin = time.monotonic()
+    with (diagnostic_root / 'diagnostic-build.log').open('w') as log:
+        subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
+    diagnostic_report = {
+        'purpose': 'Separate symbolization build; never used for timing or as a production replacement',
+        'seconds': time.monotonic() - begin,
+        'wasmFile': str(diagnostic_wasm.relative_to(output)),
+        'wasmBytes': diagnostic_wasm.stat().st_size,
+        'wasmSha256': sha(diagnostic_wasm),
+        'jsFile': str(diagnostic_js.relative_to(output)),
+        'jsSha256': sha(diagnostic_js),
+        'symbolMapFile': str(diagnostic_symbols.relative_to(output)),
+        'symbolMapSha256': sha(diagnostic_symbols),
+        'productionBaselineWasmSha256': reports[0]['wasmSha256'],
+        'productionBaselineJsSha256': reports[0]['jsSha256'],
+        'productionWasmEqual': diagnostic_wasm.read_bytes() == (output / 'baseline/zstd-simd-module.wasm').read_bytes(),
+        'productionJsEqual': diagnostic_js.read_bytes() == (output / 'baseline/zstd-simd-module.js').read_bytes(),
+    }
+    (output / 'diagnostic-build-report.json').write_text(json.dumps(diagnostic_report, indent=2) + '\n')
+    for report in reports:
+        arm_output = output / report['arm']
+        assert sha(arm_output / 'zstd-simd-module.wasm') == report['wasmSha256']
+        assert sha(arm_output / 'zstd-simd-module.js') == report['jsSha256']
+    print(json.dumps(diagnostic_report), flush=True)
