@@ -531,6 +531,9 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
     return {packedChunks, packedRowStarts, packedRowCounts};
 }
 
+/** @type {WeakSet<object>} */
+const artifactTermContentSpanOrigins = new WeakSet();
+
 /**
  * Check before reading properties that the general registration path need not
  * access. Shadowed or subclass getters stay on that established path.
@@ -6983,6 +6986,21 @@ void 0 :
     }
 
     /**
+     * Creates ordinary span objects for the ordered persistence path. Only
+     * these exact objects may use descriptor reads as a proof of stable fields;
+     * a Proxy wrapper or caller-created object keeps ordinary property access.
+     * @param {Uint8Array} buffer
+     * @param {Uint32Array} offsets
+     * @param {Uint32Array} lengths
+     * @returns {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}}
+     */
+    _createArtifactTermContentSpans(buffer, offsets, lengths) {
+        const spans = {buffer, offsets, lengths};
+        artifactTermContentSpanOrigins.add(spans);
+        return spans;
+    }
+
+    /**
      * Keeps byte-exact verification available after reserved metadata becomes
      * visible but before its OPFS block is durable.
      * @param {number[]|Float64Array} pendingOffsets
@@ -7008,7 +7026,7 @@ void 0 :
         // Validate that shape once, retaining every per-span bounds/equality check.
         // Unordered or overlapping reservations retain the general path below.
         if (
-            count > 0 && pendingContentSpans !== null &&
+            count > 0 && pendingContentSpans !== null && artifactTermContentSpanOrigins.has(pendingContentSpans) &&
             hasPlainTypedArrayProperties(pendingOffsets, Float64Array.prototype) && pendingOffsets.buffer instanceof ArrayBuffer &&
             hasPlainTypedArrayProperties(pendingLengths, Uint32Array.prototype) && pendingLengths.buffer instanceof ArrayBuffer &&
             typeof pendingResolvedDictNames === 'string'
@@ -9017,11 +9035,11 @@ null :
             contentDedupPlan.nextUnresolvedUniqueIndex = nextPendingUniqueIndex;
             const pendingContentCount = nextPendingUniqueIndex - firstPendingUniqueIndex;
             const pendingContentSpans = useContentSpans ?
-                {
-                    buffer: contentBytesBuffer,
-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-                } :
+                this._createArtifactTermContentSpans(
+                    contentBytesBuffer,
+                    pendingSpanOffsets.subarray(0, pendingContentCount),
+                    pendingSpanLengths.subarray(0, pendingContentCount),
+                ) :
                 null;
             return {
                 contentOffsets,
@@ -9356,11 +9374,11 @@ null :
                 pendingContentDictNames,
                 pendingRowToUniqueIndex: null,
                 pendingContentCount,
-                pendingContentSpans: {
-                    buffer: contentBytesBuffer,
-                    offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                    lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-                },
+                pendingContentSpans: this._createArtifactTermContentSpans(
+                    contentBytesBuffer,
+                    pendingSpanOffsets.subarray(0, pendingContentCount),
+                    pendingSpanLengths.subarray(0, pendingContentCount),
+                ),
                 uniformContentDictName,
                 pendingHitCount,
                 persistedHitCount,
@@ -9593,11 +9611,11 @@ null :
             }
         }
         if (usePendingContentSpans) {
-            pendingContentSpans = {
-                buffer: contentBytesBuffer,
-                offsets: pendingSpanOffsets.subarray(0, pendingContentCount),
-                lengths: pendingSpanLengths.subarray(0, pendingContentCount),
-            };
+            pendingContentSpans = this._createArtifactTermContentSpans(
+                contentBytesBuffer,
+                pendingSpanOffsets.subarray(0, pendingContentCount),
+                pendingSpanLengths.subarray(0, pendingContentCount),
+            );
         }
         return {
             contentOffsets,
