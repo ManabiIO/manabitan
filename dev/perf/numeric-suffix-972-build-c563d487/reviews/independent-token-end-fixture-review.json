@@ -1,0 +1,23 @@
+{
+  "scope": "Independent read-only review of numeric-suffix #972 token-end regression source; no fixture/native/test/model execution",
+  "status": "pass",
+  "files": {
+    "numeric-suffix-on-dcfc02a0.c": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+    "qualification/term-bank-row-suffix-token-end-fixtures.js": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+    "qualification/term-bank-row-suffix-token-ends.test.js": "60c7d16be1b59b41b9a4a11f8858a4ded849558690935c8e41b07d93def3963a"
+  },
+  "findings": [
+    "Four three-row positive fixtures use short glossaries and a preceding exact-content match with equal numeric fields; original long-glossary/four-match admission cannot account for the required positive reuse count.",
+    "Changed key lengths and UTF8 text move the current suffix offsets; exact semantic values and attempts=1/fallbacks=0/reuses=1 catch omitted or stale numeric token ends.",
+    "Null sentinel, trailing whitespace, int32 endpoints and compact structured list cases are consistent with the composed C.",
+    "Null-to-integer mismatch must take the normal strict path with no suffix/glossary proof; negative-zero/fraction/exponent cases preserve ordinary fallback and compare complete results with reuse disabled.",
+    "Object.is explicitly verifies negative-zero preservation.",
+    "Malformed later score after a successful suffix must publish no prefix; a fresh independent call must again succeed natively.",
+    "Snapshot checks decoded keys/numerics/content, canonical bytes, unique indexes and prepared lookup bytes; mandatory fused-attempt and fallback assertions prevent silent fallback from passing positives."
+  ],
+  "blockingIssueFound": false,
+  "limitations": [
+    "Static fixture/expectation review only. No type/lint, native, corpus or runtime qualification was performed by this reviewer.",
+    "Current-base source/WASM identities remain the responsibility of the separately authorized correctness acquisition."
+  ]
+}

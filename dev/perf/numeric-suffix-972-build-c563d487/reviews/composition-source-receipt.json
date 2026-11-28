@@ -1,0 +1,42 @@
+{
+  "scope": "Two separate source-only compositions for dcfc02a0; no compiler, native execution, timing, artifact generation, branch or PR",
+  "mergedSourceSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+  "numericOriginalSourceSha256": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+  "selectorOriginalSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+  "duplicateConceptCheck": {
+    "mergedContainsSuffixHelper": false,
+    "mergedContainsSuffixAdmission": false,
+    "mergedContainsSelectorHelper": false,
+    "mergedContainsPrefixSelector": false
+  },
+  "changes": [
+    {
+      "candidate": "numeric-suffix",
+      "sourceFile": "numeric-suffix-on-dcfc02a0.c",
+      "sourceSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+      "patchFile": "numeric-suffix-on-dcfc02a0.patch",
+      "patchSha256": "f87e01929bdea92dfd1d501ab024e1f88829b5b02e77cc833dc3435937ba0ff5",
+      "patchAppliesToExactMergedSource": true,
+      "compactListFunctionUnchanged": true,
+      "lateInternerAndNumericBlockUnchanged": true,
+      "addedLines": 64,
+      "removedLines": 10
+    },
+    {
+      "candidate": "prior-streak-selector",
+      "sourceFile": "prior-streak-selector-on-dcfc02a0.c",
+      "sourceSha256": "d8b10138464073dd7aee42857f51735777ffeb507973030e8c0dfa1fc09ea2f4",
+      "patchFile": "prior-streak-selector-on-dcfc02a0.patch",
+      "patchSha256": "1af142b3fec0c96068de49753f5331e0a74ffa5e728b414530c67d51ce29b290",
+      "patchAppliesToExactMergedSource": true,
+      "compactListFunctionUnchanged": true,
+      "lateInternerAndNumericBlockUnchanged": true,
+      "addedLines": 51,
+      "removedLines": 5
+    }
+  ],
+  "numericComposition": "After exact full-row suffix proof only, scan current score and non-null sequence token bounds into existing out-pointers; preserve normal merged number writes and compact-list path; unchanged suffix proof/admission",
+  "selectorComposition": "Only context/call-signature adaptation; exact frozen helper/selector and caller old-budget isolation; retain merged normal token-end writes and compact-list path",
+  "lateInternerAndNumericBlockSha256": "a0193d242d379735a15676ff5cb9fd59eab5614fa294609957890b5f21fc850c",
+  "compactListFunctionSha256": "7c2e304dc20822797e1d3dcdfedd8db9d25a8193f75101741f4c620bdb4bfa9a"
+}
