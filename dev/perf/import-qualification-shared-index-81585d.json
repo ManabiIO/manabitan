@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "nodeVersion": "v22.22.0",
+  "browserVersion": "153.0.8010.12",
+  "orders": [
+    [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ],
+    [
+      "BAC",
+      "CBA",
+      "ACB",
+      "CAB",
+      "BCA",
+      "ABC"
+    ]
+  ],
+  "warmups": [
+    "ABC",
+    "CBA"
+  ],
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ],
+  "parserPolicy": {
+    "jmdict": {
+      "parserWorkerCount": 3,
+      "parserPipelineGroupsPerWorker": 4,
+      "parserGroupCount": 12
+    },
+    "jitendex": {
+      "parserWorkerCount": 3,
+      "parserPipelineGroupsPerWorker": 3,
+      "parserGroupCount": 22
+    },
+    "vndb": {
+      "parserWorkerCount": 3,
+      "parserPipelineGroupsPerWorker": 3,
+      "parserGroupCount": 170
+    }
+  },
+  "thresholds": {
+    "targetMinimumReductionPercent": 5,
+    "targetMinimumFasterPairs": 5,
+    "nonTargetMaximumRegressionPercent": 3
+  },
+  "criterion": {
+    "primary": "Browser monotonic file-input event to sequenced post-UI completion; release package, fresh profile and unchanged production defaults.",
+    "target": "At least 5% median paired reduction against both A and byte-identical C, at least five of six faster pairs, and equal-work change <=0% against each control on each independently scheduled host.",
+    "nonTarget": "No more than 3% median paired regression against either control on either host. Report every fixed observation, including failed screens.",
+    "correctness": "Existing strict qualification_receipts binds each raw report to source, package, fixture, browser, harness, complete import boundary, output digest, all 72 lookup results, restart and exact normalized OPFS file sizes. Separate exhaustive A/B media must agree.",
+    "observations": "Three warmups, six balanced ABC blocks, then separate full-media A/B per host. Stop on the first invalid observation. No exclusions, replacement observations, pooling hosts or statistics on incomplete/invalid cohorts.",
+    "memory": "Separate prospectively fixed ABBA on host 0 and BAAB on host 1, only after ordinary observations. Existing import-window process-tree PSS/private helpers and raw scan audit; each metric median paired change <=5% and worst pair <=10%. No sampled timing enters ordinary comparison.",
+    "storage": "VNDB active SAH allocation fixed prospectively at37 4096-byte units from both current-baseline diagnostic receipts. Random SAH and media-generation basenames alone normalize; exact per-file sizes still match across every observation.",
+    "control": "Report all six C/A paired changes, median, equal-work and worst pair on each host. Interpret both B/control effects alongside this identical-code run-order drift; never pool hosts.",
+    "treatmentPresence": "For every JMdict observation, preserve existing raw source eligibility and lookup-index worker-file count. Exact53-bank171617523-byte sub1GiB source and A/C count0, B count>=1 are required; inactive or missing treatment cannot qualify."
+  },
+  "candidates": {
+    "shared-codec-index-io": {
+      "commit": "dc482f58e9d84ff984ca615530b196fa24d56725",
+      "targetDictionaries": [
+        "jmdict"
+      ],
+      "sourceDelta": [
+        "eslint.config.js",
+        "ext/js/dictionary/term-record-import-index-worker-client.js",
+        "ext/js/dictionary/term-record-import-index-worker-server.js",
+        "ext/js/dictionary/term-record-import-index-worker.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "ext/js/dictionary/zstd-term-content-compression-worker.js",
+        "ext/js/dictionary/zstd-term-content.js",
+        "test/term-record-shared-index-worker-lifecycle.test.js",
+        "test/util/shared-index-test-worker.js"
+      ],
+      "packagedDelta": [
+        "js/dictionary/term-record-import-index-worker-client.js",
+        "js/dictionary/term-record-import-index-worker-server.js",
+        "js/dictionary/term-record-import-index-worker.js",
+        "js/dictionary/term-record-opfs-store.js",
+        "js/dictionary/zstd-term-content-compression-worker.js",
+        "js/dictionary/zstd-term-content.js"
+      ],
+      "packagedSha256": {
+        "js/dictionary/term-record-import-index-worker-client.js": "8a25cdad168432be92acd631231db140a6ff08a68046b43ae47459d0d8f91474",
+        "js/dictionary/term-record-import-index-worker-server.js": "165f99cfb0a2f943a41e60f8cacf3d2a6b705b2cd4d27835b00a869b64794fea",
+        "js/dictionary/term-record-import-index-worker.js": "4f42bf6fdeb5b8bc6b667270c37fb2eef1cb30a8fc64255a09961f4a63688b36",
+        "js/dictionary/term-record-opfs-store.js": "ed01cbfb304398cc2eb931bd91cdbff22184a326cdff2ca72ee953abcb3e3c4c",
+        "js/dictionary/zstd-term-content-compression-worker.js": "b743d8e081de14a05aa764e72c9f5a5df61ecbea5887f7bbbeb4a261722736ce",
+        "js/dictionary/zstd-term-content.js": "7c2b4cb4206772c12e588b3c2ae1982504514e66e7620cd3dbbcced71ba015cd"
+      },
+      "packageInventorySha256": "34edfa2272cb68a5d7fac54a4f435574064cdb3a78af4503ebbda2a21d410446",
+      "packagedAdditions": [
+        "js/dictionary/term-record-import-index-worker-server.js"
+      ],
+      "packagedRemovals": []
+    }
+  },
+  "acquisitionStage": 1,
+  "study": "81585d-shared-index-v1",
+  "templateOnly": false,
+  "derivation": {
+    "timingCommit": "bc8b16e0228c71e12b0cb560182bdbc2bc83ca73",
+    "sourceValidationCommit": "2cfa2db591105847bcb8b0bfe9e8c3ad7438ff34",
+    "separateStudy": true,
+    "predecessorObservationsEligible": false,
+    "admission": "Exact approved source/tree, complete source/package allowlists, changed-member digests and full package/harness inventories are bound before acquisition. Missing source or full-inventory bindings fail before any external runner command.",
+    "baselineRebinding": {
+      "previousBase": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "approvedBase": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "approvedTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+      "priorStudyUnchanged": true,
+      "ordinaryEndpointUnchanged": true,
+      "onlyChangedHarness": "dev/perf/import-lookup-screen.js",
+      "localPreparatoryInventoryOnly": true,
+      "hostedLockedRuntimePreflightRequired": true
+    }
+  },
+  "baselinePackageInventorySha256": "5182f3e1c1537bd28efddac89003b834b76c9519483a66b152d347a34bf09c9f",
+  "frozenHarnessInventorySha256": "6d6c88fac55c680946080abfe67b9c6ddcbbbb2931be932717074f11289ed17e",
+  "mechanismPresence": {
+    "jmdict": {
+      "sourceUncompressedBytes": 171617523,
+      "sourceBankCount": 53,
+      "dedicatedWorkerMinimumSourceBytes": 1073741824,
+      "baselineWorkerFileCount": 0,
+      "candidateMinimumWorkerFileCount": 1
+    }
+  }
+}

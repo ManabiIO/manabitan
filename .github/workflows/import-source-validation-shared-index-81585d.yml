@@ -1,0 +1,116 @@
+name: Frozen import source validation shared-index-81585d
+
+on:
+  push:
+    branches: [perf/shared-index-probe-20261128-81585d]
+    paths:
+      - .github/workflows/import-source-validation-shared-index-81585d.yml
+      - dev/perf/validate-import-source-shared-index-81585d.py
+      - dev/perf/import-source-validation-shared-index-81585d.json
+
+permissions:
+  contents: read
+
+# Explicit bash selects GitHub's fail-fast shell including pipefail. Commands
+# also use a direct subprocess wrapper, retaining the actual process exit code.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate:
+    if: "github.event.head_commit.message == 'test: acquire shared-index import qualification 81585d v1'"
+    name: Frozen source gates (${{ matrix.candidate }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [shared-codec-index-io]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve validation inputs and check out approved source
+        id: identity
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qualification-validation
+          cp dev/perf/validate-import-source-shared-index-81585d.py builds/qualification-validation/validate-source.py
+          cp dev/perf/import-source-validation-shared-index-81585d.json builds/qualification-validation/validation-plan.json
+          cp .github/workflows/import-source-validation-shared-index-81585d.yml builds/qualification-validation/executed-workflow.yml
+          cp dev/perf/import-qualification-shared-index-81585d.json builds/qualification-validation/protocol.json
+          cp dev/perf/qualify-import-shared-index-81585d.py builds/qualification-validation/timing-runner.py
+          cp .github/workflows/import-qualification-shared-index-81585d.yml builds/qualification-validation/timing-workflow.yml
+          git rev-parse HEAD 'HEAD^{tree}' > builds/qualification-validation/orchestration-identity.txt
+          python3 -c 'import os, pathlib; pathlib.Path("builds/qualification-validation/candidate-name.txt").write_text(os.environ["CANDIDATE_NAME"] + "\n")'
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("builds/qualification-validation/validation-plan.json"))["sources"][os.environ["CANDIDATE_NAME"]]["commit"]; assert re.fullmatch("[a-f0-9]{40}", sha); print(sha)')
+          git fetch origin "$candidate_sha"
+          git checkout --detach "$candidate_sha"
+          python3 builds/qualification-validation/validate-source.py identity
+      - uses: ./.github/actions/setup
+        id: setup
+      - name: Verify locked runtime
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run runtime python3 builds/qualification-validation/validate-source.py runtime
+      - name: Full unit suite
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run unit npm run test:unit
+      - name: Options unit suite
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run options-unit npm run test:unit:options
+      - name: Full JavaScript lint
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run javascript npm run test:js
+      - name: Main TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run types-main npm run test:ts:main
+      - name: Dev TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run types-dev npm run test:ts:dev
+      - name: Test TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run types-test npm run test:ts:test
+      - name: Bench TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run types-bench npm run test:ts:bench
+      - name: All target dry builds
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run build npm run test:build
+      - name: Refresh pinned toolchain package metadata
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run native-apt-update sudo apt-get update
+      - name: Install pinned native toolchain as in existing CI
+        if: always() && steps.setup.outcome == 'success'
+        id: native_toolchain
+        run: python3 builds/qualification-validation/validate-source.py run native-apt-install sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Record actual Clang identity
+        if: always() && steps.native_toolchain.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run native-clang /usr/bin/clang-21 --version
+      - name: Record actual linker identity
+        if: always() && steps.native_toolchain.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run native-ld /usr/bin/wasm-ld-21 --version
+      - name: Verify native rebuild byte equality
+        if: always() && steps.native_toolchain.outcome == 'success'
+        env:
+          MANABITAN_CLANG: /usr/bin/clang-21
+          MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+        run: python3 builds/qualification-validation/validate-source.py run native-rebuild npm run build:dictionary-wasm -- --check
+      - name: Capture package identity with the frozen timing packager
+        if: always() && steps.setup.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py run package python3 builds/qualification-validation/validate-source.py package
+      - name: Require every exit receipt and unchanged source
+        if: always() && steps.identity.outcome == 'success'
+        run: python3 builds/qualification-validation/validate-source.py conclude
+      - name: Preserve source gates, failures and exact identities
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-source-validation-shared-index-81585d-${{ matrix.candidate }}
+          path: builds/qualification-validation
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9

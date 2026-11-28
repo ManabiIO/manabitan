@@ -1,0 +1,122 @@
+name: Import qualification shared-index-81585d
+
+on:
+  push:
+    branches: [perf/shared-index-probe-20261128-81585d]
+    paths:
+      - .github/workflows/import-qualification-shared-index-81585d.yml
+      - dev/perf/qualify-import-shared-index-81585d.py
+      - dev/perf/import-qualification-shared-index-81585d.json
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+# Acquisition revisions share this study group. Bookkeeping commits use their
+# unique run ID, so their skipped jobs cannot cancel an active acquisition.
+concurrency:
+  group: >-
+    import-qualification-shared-index-81585d-${{ github.ref }}-${{ github.event.head_commit.message == 'test: acquire shared-index import qualification 81585d v1' && 'acquisition' || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    # Only this deliberately named acquisition commit can start the fixed study.
+    # Evidence and scaffold follow-ups use different commit messages.
+    if: "github.event.head_commit.message == 'test: acquire shared-index import qualification 81585d v1'"
+    name: Package preflight (${{ matrix.candidate }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [shared-codec-index-io]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch exact candidate source
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("dev/perf/import-qualification-shared-index-81585d.json"))["candidates"][os.environ["CANDIDATE_NAME"]]["commit"]; assert isinstance(sha,str) and re.fullmatch("[a-f0-9]{40}",sha); print(sha)')
+          git fetch origin "$candidate_sha"
+      - name: Verify source checkout, dependencies, manifest-bound native assets and package allowlist
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        run: python3 dev/perf/qualify-import-shared-index-81585d.py "$CANDIDATE_NAME" jmdict 0 --prepare-only
+      - name: Preserve preflight packages and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-preflight-shared-index-81585d-${{ matrix.candidate }}
+          path: builds/qualification
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
+
+
+  qualify:
+    if: "github.event.head_commit.message == 'test: acquire shared-index import qualification 81585d v1'"
+    needs: preflight
+    name: ${{ matrix.candidate }} ${{ matrix.dictionary }} host ${{ matrix.replica }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        candidate: [shared-codec-index-io]
+        dictionary: [jmdict, jitendex, vndb]
+        replica: [0, 1]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch exact candidate source
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("dev/perf/import-qualification-shared-index-81585d.json"))["candidates"][os.environ["CANDIDATE_NAME"]]["commit"]; assert isinstance(sha,str) and re.fullmatch("[a-f0-9]{40}",sha); print(sha)')
+          git fetch origin "$candidate_sha"
+      - name: Acquire fixed uninstrumented cohort and separate memory observations
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+          DICTIONARY_NAME: ${{ matrix.dictionary }}
+          REPLICA_NUMBER: ${{ matrix.replica }}
+        run: python3 dev/perf/qualify-import-shared-index-81585d.py "$CANDIDATE_NAME" "$DICTIONARY_NAME" "$REPLICA_NUMBER"
+      - name: Preserve exact packages, every observation and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-qualification-shared-index-81585d-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.replica }}
+          path: builds/qualification
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
+

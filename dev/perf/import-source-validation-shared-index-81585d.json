@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "study": "81585d-shared-index-v1-source-validation",
+  "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "nodeVersion": "v22.22.0",
+  "sources": {
+    "shared-codec-index-io": {
+      "commit": "dc482f58e9d84ff984ca615530b196fa24d56725",
+      "tree": "be13f1d8ca40ee3b754f3db5ef824f46609015b6"
+    }
+  },
+  "preservedTimingInputs": {
+    "protocol.json": "ef995d2577d4d79eeefd405061e96bec97f5378791ceb5f13bb3c97521b7cca0",
+    "timing-runner.py": "b4d69a97b7baa82376bd7eeb3a9d402339773ae6c50e4b15b42657e1adb08a82",
+    "timing-workflow.yml": "5a9b9969aeed0d3549a14d60e33183b6eb94946c808c6962ad0002794e0a119a"
+  },
+  "gates": {
+    "runtime": [
+      "python3",
+      "builds/qualification-validation/validate-source.py",
+      "runtime"
+    ],
+    "unit": [
+      "npm",
+      "run",
+      "test:unit"
+    ],
+    "options-unit": [
+      "npm",
+      "run",
+      "test:unit:options"
+    ],
+    "javascript": [
+      "npm",
+      "run",
+      "test:js"
+    ],
+    "types-main": [
+      "npm",
+      "run",
+      "test:ts:main"
+    ],
+    "types-dev": [
+      "npm",
+      "run",
+      "test:ts:dev"
+    ],
+    "types-test": [
+      "npm",
+      "run",
+      "test:ts:test"
+    ],
+    "types-bench": [
+      "npm",
+      "run",
+      "test:ts:bench"
+    ],
+    "build": [
+      "npm",
+      "run",
+      "test:build"
+    ],
+    "native-apt-update": [
+      "sudo",
+      "apt-get",
+      "update"
+    ],
+    "native-apt-install": [
+      "sudo",
+      "apt-get",
+      "install",
+      "-y",
+      "--no-install-recommends",
+      "clang-21",
+      "lld-21"
+    ],
+    "native-clang": [
+      "/usr/bin/clang-21",
+      "--version"
+    ],
+    "native-ld": [
+      "/usr/bin/wasm-ld-21",
+      "--version"
+    ],
+    "native-rebuild": [
+      "npm",
+      "run",
+      "build:dictionary-wasm",
+      "--",
+      "--check"
+    ],
+    "package": [
+      "python3",
+      "builds/qualification-validation/validate-source.py",
+      "package"
+    ]
+  },
+  "templateOnly": false,
+  "derivation": {
+    "sourceValidationCommit": "2cfa2db591105847bcb8b0bfe9e8c3ad7438ff34",
+    "requiredGateCommandsUnchanged": true,
+    "note": "Explicit bash, direct subprocess return codes, all fifteen gates and final clean-source aggregate are retained. Timing acquisition and source validation are independently scheduled under the same new acquisition commit; neither reuses predecessor results."
+  }
+}
