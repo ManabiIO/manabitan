@@ -105,7 +105,7 @@ async function loadWorker(failFirstContext = false) {
 }
 
 describe('compression worker native contexts', {timeout: 10_000}, () => {
-    test.each(['owned', 'shared'])('does not allocate a decoder while compressing %s input, then supports later decoding', async (route) => {
+    test.each(['owned', 'shared', 'shared-deferred-ack'])('does not allocate a decoder while compressing %s input, then supports later decoding', async (route) => {
         const {api, native, dictionary, createDecoder, createEncoder, send, bridge} = await loadWorker()
         expect(createEncoder).toHaveBeenCalledOnce()
         expect(createDecoder).not.toHaveBeenCalled()
@@ -131,8 +131,9 @@ describe('compression worker native contexts', {timeout: 10_000}, () => {
                 contentBytes: content.byteLength,
                 dictName: 'jmdict',
                 wrap: true,
+                acknowledgeSourceConsumed: route === 'shared' ? undefined : false,
             })
-            expect(bridge.messages).toContainEqual({type: 'source-consumed', id: 1})
+            expect(bridge.messages.some(({type, id}) => type === 'source-consumed' && id === 1)).toBe(route === 'shared')
         }
         expect(compressed).toEqual(expected)
         expect(createDecoder).not.toHaveBeenCalled()

@@ -31,11 +31,13 @@ self.addEventListener('message', (event) => {
     void compressContent(event);
 });
 
+/* eslint-disable @stylistic/semi */
 /** @param {MessageEvent} event */
 async function compressContent(event) {
     const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
+    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, acknowledgeSourceConsumed?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
+    let sourceConsumed = false
     try {
         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
@@ -65,7 +67,12 @@ async function compressContent(event) {
                 dictName,
                 options,
             );
-            self.postMessage({type: 'source-consumed', id});
+            if (data.acknowledgeSourceConsumed !== false) {
+                self.postMessage({type: 'source-consumed', id})
+            }
+            // Preserve failure before an explicitly requested acknowledgment.
+            // A suppressed acknowledgment must survive a later codec/post error.
+            sourceConsumed = true
             result = finishWrappedTermContentZstdSpans(prepared);
         } else {
             if (!(data.content instanceof Uint8Array)) {
@@ -85,6 +92,7 @@ async function compressContent(event) {
             Uint8Array.from(bytes).buffer;
         self.postMessage({id, compressed, envelopeMs}, [compressed]);
     } catch (error) {
-        self.postMessage({id, error: `${error}`});
+        self.postMessage({id, error: `${error}`, ...(sourceConsumed ? {sourceConsumed: true} : {})})
     }
 }
+/* eslint-enable @stylistic/semi */

@@ -256,6 +256,9 @@ export class TermContentCompressionPool {
                     dictName,
                     wrap: true,
                     compressionExperiments,
+                    // Earlier jobs finish before this worker copies its final
+                    // block, so only the final block needs an early response.
+                    acknowledgeSourceConsumed: blockIndex + this._workers.length >= blockLengths.length,
                 },
             );
         });
@@ -403,16 +406,17 @@ export class TermContentCompressionPool {
     /** @param {MessageEvent} event */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
-        const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
+        const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown, sourceConsumed?: unknown}} */ (rawData);
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);
         if (typeof pending === 'undefined') { return; }
-        if (data.type === 'source-consumed') {
+        if (data.type === 'source-consumed' || data.sourceConsumed === true) {
             if (!pending.sourceConsumedSettled) {
                 pending.sourceConsumedSettled = true;
                 pending.resolveSourceConsumed?.();
             }
-            return;
+            // eslint-disable-next-line @stylistic/semi
+            if (data.type === 'source-consumed') { return }
         }
         this._pending.delete(id);
         clearTimeout(pending.timeoutId);

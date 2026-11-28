@@ -181,3 +181,156 @@ describe('shared compression job draining', () => {
         expect(Reflect.get(pool, '_pending').size).toBe(0);
     });
 });
+
+/* eslint-disable @stylistic/semi */
+/**
+ * @param {TermContentCompressionPool} pool
+ * @param {number} count
+ * @returns {{source: Uint8Array, operation: ReturnType<TermContentCompressionPool['beginCompressWrappedSpans']>}}
+ */
+function startBlocks(pool, count) {
+    const source = new Uint8Array(new SharedArrayBuffer(Math.max(1, count)))
+    source.set(Array.from({length: count}, (_, i) => i + 1))
+    const operation = pool.beginCompressWrappedSpans(
+        source,
+        Uint32Array.from({length: count}, (_, i) => i),
+        new Uint32Array(count).fill(1),
+        Uint32Array.from({length: count + 1}, (_, i) => i),
+        new Uint32Array(count).fill(1),
+        'jmdict',
+    )
+    return {source, operation}
+}
+
+describe('per-worker final source acknowledgments', () => {
+    test.each([1, 2, 3])('marks each batch independently with %i workers and accepts legacy acknowledgments', async (workerCount) => {
+        const workers = Array.from({length: workerCount}, () => new ControlledWorker())
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)))
+        try {
+            for (const count of [1, 2, 8, 3]) {
+                const starts = workers.map(({calls}) => calls.length)
+                const {operation} = startBlocks(pool, count)
+                for (let workerIndex = 0; workerIndex < workers.length; ++workerIndex) {
+                    const worker = workers[workerIndex]
+                    const calls = worker.calls.slice(starts[workerIndex])
+                    expect(calls.map(({acknowledgeSourceConsumed}) => acknowledgeSourceConsumed))
+                        .toEqual(calls.map((_, index) => index === calls.length - 1))
+                    for (let i = 0; i < calls.length; ++i) {
+                        // Existing/custom workers may ignore the new request field.
+                        worker.reply(starts[workerIndex] + i, {type: 'source-consumed'})
+                        worker.reply(starts[workerIndex] + i, {compressed: Uint8Array.of(1).buffer})
+                    }
+                }
+                await expect(operation.sourceConsumed).resolves.toBeUndefined()
+                await expect(operation.completion).resolves.toMatchObject({chunks: Array.from({length: count}, () => Uint8Array.of(1))})
+            }
+        } finally { pool.close() }
+    })
+
+    test('keeps the aggregate source barrier early after intermediate completions', async () => {
+        const workers = [new ControlledWorker(), new ControlledWorker()]
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)))
+        const {source, operation} = startBlocks(pool, 5)
+        let sourceSettled = false
+        let completed = false
+        void operation.sourceConsumed.then(() => { sourceSettled = true }).catch(() => {})
+        void operation.completion.then(() => { completed = true }).catch(() => {})
+        try {
+            workers[0].reply(0, {compressed: Uint8Array.of(1).buffer})
+            workers[1].reply(0, {compressed: Uint8Array.of(2).buffer})
+            workers[0].reply(1, {compressed: Uint8Array.of(3).buffer})
+            workers[0].reply(2, {type: 'source-consumed'})
+            await flush()
+            expect(sourceSettled).toBe(false)
+            expect(completed).toBe(false)
+            workers[1].reply(1, {type: 'source-consumed'})
+            await expect(operation.sourceConsumed).resolves.toBeUndefined()
+            source.fill(0)
+            expect(completed).toBe(false)
+            workers[0].reply(2, {compressed: Uint8Array.of(5).buffer})
+            workers[1].reply(1, {compressed: Uint8Array.of(4).buffer})
+            expect((await operation.completion).chunks.map((bytes) => bytes[0])).toEqual([1, 2, 3, 4, 5])
+        } finally { pool.close() }
+    })
+
+    test('preserves a consumed source on an intermediate terminal error and drains the final job', async () => {
+        const worker = new ControlledWorker()
+        const {pool, operation} = start([worker])
+        let completed = false
+        void operation.completion.finally(() => { completed = true }).catch(() => {})
+        try {
+            worker.reply(0, {error: 'failure after suppressed acknowledgment', sourceConsumed: true})
+            await flush()
+            expect(completed).toBe(false)
+            worker.reply(1, {type: 'source-consumed'})
+            await expect(operation.sourceConsumed).resolves.toBeUndefined()
+            expect(completed).toBe(false)
+            worker.reply(1, {compressed: Uint8Array.of(2).buffer})
+            await expect(operation.completion).rejects.toThrow('failure after suppressed acknowledgment')
+        } finally { pool.close() }
+    })
+
+    test('keeps overlapping batches separate while their final results are delayed', async () => {
+        const workers = [new ControlledWorker(), new ControlledWorker()]
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)))
+        const first = startBlocks(pool, 5)
+        const second = startBlocks(pool, 3)
+        let secondSourceSettled = false
+        void second.operation.sourceConsumed.then(() => { secondSourceSettled = true }).catch(() => {})
+        try {
+            workers[0].reply(0, {compressed: Uint8Array.of(1).buffer})
+            workers[0].reply(1, {compressed: Uint8Array.of(1).buffer})
+            workers[1].reply(0, {compressed: Uint8Array.of(1).buffer})
+            workers[0].reply(2, {type: 'source-consumed'})
+            workers[1].reply(1, {type: 'source-consumed'})
+            await first.operation.sourceConsumed
+            expect(secondSourceSettled).toBe(false)
+            workers[0].reply(2, {compressed: Uint8Array.of(1).buffer})
+            workers[1].reply(1, {compressed: Uint8Array.of(1).buffer})
+            await first.operation.completion
+            workers[0].reply(3, {compressed: Uint8Array.of(1).buffer})
+            workers[0].reply(4, {type: 'source-consumed'})
+            await flush()
+            expect(secondSourceSettled).toBe(false)
+            workers[1].reply(2, {type: 'source-consumed'})
+            await second.operation.sourceConsumed
+            workers[0].reply(4, {compressed: Uint8Array.of(1).buffer})
+            workers[1].reply(2, {compressed: Uint8Array.of(1).buffer})
+            await second.operation.completion
+            expect(Reflect.get(pool, '_pending').size).toBe(0)
+        } finally { pool.close() }
+    })
+
+    test('uses no batch-global acknowledgment state during reentrant custom dispatch', async () => {
+        const worker = new ControlledWorker()
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ ([worker])))
+        const nested = /** @type {{value: ReturnType<typeof startBlocks>|null}} */ ({value: null})
+        const postMessage = worker.postMessage.bind(worker)
+        vi.spyOn(worker, 'postMessage').mockImplementation((message) => {
+            postMessage(message)
+            if (worker.calls.length === 1) { nested.value = startBlocks(pool, 2) }
+        })
+        try {
+            const first = startBlocks(pool, 3)
+            expect(worker.calls.map(({acknowledgeSourceConsumed}) => acknowledgeSourceConsumed)).toEqual([false, false, true, false, true])
+            for (let i = 0; i < worker.calls.length; ++i) {
+                if (worker.calls[i].acknowledgeSourceConsumed === true) { worker.reply(i, {type: 'source-consumed'}) }
+                worker.reply(i, {compressed: Uint8Array.of(1).buffer})
+            }
+            if (nested.value === null) { throw new Error('Nested batch was not dispatched') }
+            await Promise.all([first.operation.sourceConsumed, first.operation.completion, nested.value.operation.sourceConsumed, nested.value.operation.completion])
+            expect(Reflect.get(pool, '_pending').size).toBe(0)
+        } finally { pool.close() }
+    })
+
+    test('rejects both barriers when a worker stops during a suppressed-ack job', async () => {
+        const worker = new ControlledWorker()
+        const {pool, operation} = start([worker])
+        expect(worker.calls[0].acknowledgeSourceConsumed).toBe(false)
+        pool.close()
+        await expect(operation.sourceConsumed).rejects.toThrow('pool closed')
+        await expect(operation.completion).rejects.toThrow('pool closed')
+        expect(worker.terminateCount).toBe(1)
+    })
+})
+/* eslint-enable @stylistic/semi */
