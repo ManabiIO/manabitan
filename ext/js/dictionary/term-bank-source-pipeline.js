@@ -37,6 +37,38 @@ export const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
+/** @typedef {{files: TermBankSourceFile[], loaders: Array<() => Promise<CompressedTermBankSource>>, estimatedByteLengths: number[]}} CompressedTermBankSourcePlan */
+
+/* eslint-disable @stylistic/semi */
+/** @type {WeakMap<CompressedTermBankSourcePlan, {loaders: CompressedTermBankSourcePlan['loaders'], expectedLoaders: CompressedTermBankSourcePlan['loaders'], estimatedByteLengths: number[], metadata: Array<{uncompressedSize: number}>, abortAndJoin: () => Promise<void>}>} */
+const ownedCompressedSourcePlans = new WeakMap()
+
+/**
+ * The importer can overlap only an unchanged producer-owned compressed plan.
+ * Compare the parser's synchronous snapshot, never caller arrays after an await.
+ * @param {CompressedTermBankSourcePlan} plan
+ * @param {CompressedTermBankSourcePlan['loaders']} loaders
+ * @param {number[]} estimatedByteLengths
+ * @param {Array<{load: unknown, estimatedBytes: number}>} sources
+ * @returns {{abortAndJoin: () => Promise<void>}|null}
+ */
+export function getOwnedCompressedTermBankSourcePlan(plan, loaders, estimatedByteLengths, sources) {
+    const owned = ownedCompressedSourcePlans.get(plan)
+    if (
+        typeof owned === 'undefined' ||
+        loaders !== owned.loaders ||
+        estimatedByteLengths !== owned.estimatedByteLengths ||
+        sources.length !== owned.expectedLoaders.length
+    ) { return null }
+    for (let i = 0; i < sources.length; ++i) {
+        if (
+            sources[i].load !== owned.expectedLoaders[i] ||
+            sources[i].estimatedBytes !== owned.metadata[i].uncompressedSize
+        ) { return null }
+    }
+    return {abortAndJoin: owned.abortAndJoin}
+}
+/* eslint-enable @stylistic/semi */
 
 /** @typedef {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[], readAll: () => Promise<Uint8Array[]>}} DeferredTermBankSourceBatch */
 /** @typedef {{bytes: Uint8Array, shared: boolean}} ZipRangeRead */
@@ -811,12 +843,13 @@ export class TermBankSourcePipeline {
         return {files, loaders, estimatedByteLengths};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Builds a lazy raw-ZIP plan with complete validation metadata. On a
      * low-memory device, preserve ordinary single-batch imports and admit only
      * the current batch of multi-batch imports. The parser's independent source-size guard still applies.
      * @param {number} startIndex
-     * @returns {{files: TermBankSourceFile[], loaders: Array<() => Promise<CompressedTermBankSource>>, estimatedByteLengths: number[]}|null}
+     * @returns {CompressedTermBankSourcePlan|null}
      */
     createCompressedImportRunPlan(startIndex) {
         if (!this._enabled || this._compressedReadPool === null) { return null; }
@@ -833,6 +866,9 @@ export class TermBankSourcePipeline {
         if (files.length < 4) { return null; }
         /** @type {Array<{compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number}>} */
         const metadata = [];
+        const compressedReadPool = this._compressedReadPool
+        /** @type {CompressedTermBankSourcePlan['loaders']} */
+        const loaders = []
         let compressedBytes = 0;
         for (const file of files) {
             const value = this._getCompressedSourceMetadata(file);
@@ -844,18 +880,31 @@ export class TermBankSourcePipeline {
             if (value.compressedSize > compressedBudget - compressedBytes) { return null; }
             compressedBytes += value.compressedSize;
             metadata.push(value);
+            // Construct the owned callback ourselves; a caller's Array species
+            // or map override must not supply an unowned function to this plan.
+            loaders.push(async () => {
+                const bytes = await compressedReadPool.read(file)
+                if (!(bytes instanceof Uint8Array) || bytes.byteLength !== value.compressedSize) {
+                    throw new DictionarySourceIntegrityError(`Compressed term-bank ZIP size mismatch in '${file.filename}'`)
+                }
+                return {bytes, ...value, filename: file.filename}
+            })
         }
         const estimatedByteLengths = metadata.map(({uncompressedSize}) => uncompressedSize);
-        const loaders = files.map((file, index) => async () => {
-            const bytes = await /** @type {AbortableZipReadPool<Uint8Array>} */ (this._compressedReadPool).read(file);
-            const sourceMetadata = metadata[index];
-            if (!(bytes instanceof Uint8Array) || bytes.byteLength !== sourceMetadata.compressedSize) {
-                throw new DictionarySourceIntegrityError(`Compressed term-bank ZIP size mismatch in '${file.filename}'`);
-            }
-            return {bytes, ...sourceMetadata, filename: file.filename};
-        });
-        return {files, loaders, estimatedByteLengths};
+        /** @type {CompressedTermBankSourcePlan['loaders']} */
+        const expectedLoaders = []
+        for (let i = 0; i < loaders.length; ++i) { expectedLoaders.push(loaders[i]) }
+        const plan = {files, loaders, estimatedByteLengths}
+        ownedCompressedSourcePlans.set(plan, {
+            loaders,
+            expectedLoaders,
+            estimatedByteLengths,
+            metadata,
+            abortAndJoin: compressedReadPool.abortAndJoin.bind(compressedReadPool),
+        })
+        return plan
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {TermBankSourceFile[]} batch

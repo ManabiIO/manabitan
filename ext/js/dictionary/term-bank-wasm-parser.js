@@ -27,7 +27,7 @@ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-
 import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
-import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
+import {getOwnedCompressedTermBankSourcePlan, RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;
@@ -2705,6 +2705,7 @@ null :
     };
 }
 
+/* eslint-disable @stylistic/semi */
 class ParallelTermBankParserPool {
     constructor() {
         /** @type {Promise<{workers: Worker[]}>|null} */
@@ -2749,7 +2750,7 @@ class ParallelTermBankParserPool {
 
     /**
      * @param {number} workerCount
-     * @returns {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}|null}
+     * @returns {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean, abortSourceReads?: (() => Promise<void>)|null) => Promise<void>}|null}
      */
     acquireRun(workerCount) {
         if (this._activeRun !== null || this._disposalPromise !== null) { return null; }
@@ -2768,10 +2769,14 @@ class ParallelTermBankParserPool {
                 }
                 return await this._getWorkers(workerCount);
             },
-            release: async (keepWorkers) => {
+            release: async (keepWorkers, abortSourceReads = null) => {
                 if (released) { return; }
                 released = true;
                 if (this._activeRun !== owner) { return; }
+                if (!keepWorkers && abortSourceReads !== null) {
+                    await this._releaseRunWithSourceReads(owner, abortSourceReads)
+                    return
+                }
                 this._activeRun = null;
                 owner.resolveDone();
                 if (!keepWorkers || this._disposalRequested) {
@@ -2780,6 +2785,53 @@ class ParallelTermBankParserPool {
                 }
             },
         };
+    }
+
+    /**
+     * Retire startup workers promptly while keeping admission closed until all
+     * owned ZIP reads finish. A noninterruptible Blob read can outlive workers.
+     * @param {{done: Promise<void>, resolveDone: (value: void|PromiseLike<void>) => void}} owner
+     * @param {() => Promise<void>} abortSourceReads
+     * @returns {Promise<void>}
+     */
+    async _releaseRunWithSourceReads(owner, abortSourceReads) {
+        const workersPromise = this._workersPromise
+        const abortController = this._workerCreationAbortController
+        this._workersPromise = null
+        this._workerCount = 0
+        this._workerCreationAbortController = null
+        this._disposalRequested = false
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let finishDisposal = () => {}
+        /** @type {Promise<void>} */
+        const disposalPromise = new Promise((resolve) => { finishDisposal = resolve })
+        // Publish both barriers before abort listeners can reenter the pool.
+        this._disposalPromise = disposalPromise
+        try {
+            const workerRetirement = (async () => {
+                abortController?.abort()
+                if (workersPromise === null) { return }
+                try {
+                    const {workers} = await workersPromise
+                    for (const worker of workers) { worker.terminate() }
+                } catch (_) {
+                    // Creation retires initialized peers when startup fails.
+                }
+            })()
+            const sourceJoin = (async () => { await abortSourceReads() })()
+            // Neither cleanup failure may replace the original parse failure.
+            await Promise.allSettled([workerRetirement, sourceJoin])
+        } finally {
+            if (this._disposalPromise === disposalPromise) { this._disposalPromise = null }
+            // Requests that arrived during the owned read join concern the
+            // retired generation, not the next import's reusable workers.
+            this._disposalRequested = false
+            if (this._activeRun === owner) {
+                this._activeRun = null
+                owner.resolveDone()
+            }
+            finishDisposal()
+        }
     }
 
     /** Releases parser heaps without terminating an active run. */
@@ -2885,10 +2937,11 @@ class ParallelTermBankPipelineRun {
      * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
      * @param {Record<string, unknown>} options
      * @param {() => boolean} shouldCancel
-     * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} poolLease
+     * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean, abortSourceReads?: (() => Promise<void>)|null) => Promise<void>}} poolLease
      * @param {number} pipelineGroupsPerWorker
+     * @param {{abortAndJoin: () => Promise<void>, maxLeadGroups: number}|null} ownedSourceStartup
      */
-    constructor(sources, groups, totalBytes, version, onChunk, options, shouldCancel, poolLease, pipelineGroupsPerWorker) {
+    constructor(sources, groups, totalBytes, version, onChunk, options, shouldCancel, poolLease, pipelineGroupsPerWorker, ownedSourceStartup) {
         /** @type {ParallelTermBankSource[]} */
         this._sources = sources;
         /** @type {ParallelTermBankSource[][]} */
@@ -2909,8 +2962,10 @@ class ParallelTermBankPipelineRun {
         };
         /** @type {() => boolean} */
         this._shouldCancel = shouldCancel;
-        /** @type {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} */
+        /** @type {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean, abortSourceReads?: (() => Promise<void>)|null) => Promise<void>}} */
         this._poolLease = poolLease;
+        /** @type {{abortAndJoin: () => Promise<void>, maxLeadGroups: number}|null} */
+        this._ownedSourceStartup = ownedSourceStartup
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
         /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
@@ -2948,7 +3003,12 @@ class ParallelTermBankPipelineRun {
     /** @returns {Promise<boolean>} */
     async run() {
         try {
-            const [{workers}] = await waitForParallelWork([this._poolLease.getWorkers()], this._shouldCancel);
+            const ownedSourceStartup = this._ownedSourceStartup
+            const [{workers}] = await waitForParallelWork(
+                [this._poolLease.getWorkers()],
+                this._shouldCancel,
+                ownedSourceStartup === null ? null : () => this._startSourceWindow(ownedSourceStartup.maxLeadGroups),
+            )
             this._throwIfStopped();
             await this._runPipeline(workers);
             this._keepWorkers = true;
@@ -2960,18 +3020,16 @@ class ParallelTermBankPipelineRun {
             }
             throw normalizedError;
         } finally {
-            await this._poolLease.release(this._keepWorkers);
+            await this._poolLease.release(this._keepWorkers, this._ownedSourceStartup?.abortAndJoin ?? null)
         }
     }
 
     /** @param {Worker[]} workers */
     async _runPipeline(workers) {
         this._createSlots();
-        this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
-        if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
-            this._nextSourceActivationGroupIndex = 0;
+        if (this._ownedSourceStartup === null) {
+            this._startSourceWindow(Math.max(1, workers.length * this._pipelineGroupsPerWorker))
         }
-        this._activateLeadSources();
         this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
         try {
             // Start the ordered sink as soon as group zero is available. Waiting
@@ -3198,6 +3256,15 @@ class ParallelTermBankPipelineRun {
         for (const wake of waiters) { wake(); }
     }
 
+    /** @param {number} maxLeadGroups */
+    _startSourceWindow(maxLeadGroups) {
+        this._maxLeadGroups = maxLeadGroups
+        if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
+            this._nextSourceActivationGroupIndex = 0
+        }
+        this._activateLeadSources()
+    }
+
     /** Starts ZIP reads for the bounded source window independently of parser workers. */
     _activateLeadSources() {
         const end = Math.min(
@@ -3215,6 +3282,7 @@ class ParallelTermBankPipelineRun {
         }
     }
 }
+/* eslint-enable @stylistic/semi */
 
 const parallelTermBankParserPool = new ParallelTermBankParserPool();
 
@@ -3327,6 +3395,34 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
     return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * The importer's owned compressed plan can read its existing bounded lead while
+ * workers initialize. Generic lazy callbacks retain their serial startup path.
+ * @param {import('./term-bank-source-pipeline.js').CompressedTermBankSourcePlan} plan
+ * @param {number} version
+ * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {TermBankColumnParserOptions} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+export async function parseTermBankWithWasmColumnChunksParallelCompressedPlan(plan, version, onChunk, options = {}, shouldCancel = () => false) {
+    const {loaders, estimatedByteLengths} = plan
+    const sourceCount = loaders.length
+    if (sourceCount !== estimatedByteLengths.length) {
+        throw new Error('Compressed lazy term-bank source metadata length mismatch')
+    }
+    /** @type {ParallelTermBankSource[]} */
+    const sources = []
+    // Construct private records directly, without invoking a caller's map or
+    // array species. No caller-owned source metadata is read after this point.
+    for (let index = 0; index < sourceCount; ++index) {
+        sources.push({promise: null, load: loaders[index], estimatedBytes: estimatedByteLengths[index], resolvedAt: 0})
+    }
+    const ownedSourcePlan = getOwnedCompressedTermBankSourcePlan(plan, loaders, estimatedByteLengths, sources)
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true, ownedSourcePlan)
+}
+
 /**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
@@ -3334,9 +3430,10 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
+ * @param {{abortAndJoin: () => Promise<void>}|null} [ownedSourcePlan=null]
  * @returns {Promise<boolean>}
  */
-async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, lazy = false) {
+async function parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, lazy = false, ownedSourcePlan = null) {
     lastParallelParserSkipReason = null;
     if (sources.length < 4) {
         lastParallelParserSkipReason = 'source-count';
@@ -3402,9 +3499,16 @@ async function parseTermBankWithWasmColumnChunksParallelSources(sources, version
         shouldCancel,
         poolLease,
         pipelineGroupsPerWorker,
+        ownedSourcePlan === null ?
+            null :
+            {
+                abortAndJoin: ownedSourcePlan.abortAndJoin,
+                maxLeadGroups: Math.max(1, workerCount * pipelineGroupsPerWorker),
+            },
     );
     return await run.run();
 }
+/* eslint-enable @stylistic/semi */
 
 /** @typedef {{promise: Promise<ParallelTermBankSourceValue>|null, load: (() => Promise<ParallelTermBankSourceValue>)|null, estimatedBytes: number, resolvedAt: number}} ParallelTermBankSource */
 
@@ -3812,6 +3916,7 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
     });
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * Keeps cancellation responsive during worker startup and source ZIP reads.
  * Pending promises remain observed after cancellation. The run's pool lease
@@ -3819,9 +3924,10 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
  * @template T
  * @param {Promise<T>[]} promises
  * @param {() => boolean} shouldCancel
+ * @param {(() => void)|null} [onStarted=null]
  * @returns {Promise<T[]>}
  */
-function waitForParallelWork(promises, shouldCancel) {
+function waitForParallelWork(promises, shouldCancel, onStarted = null) {
     return new Promise((resolve, reject) => {
         let settled = false;
         const cleanup = () => { clearInterval(cancellationIntervalId); };
@@ -3849,8 +3955,16 @@ function waitForParallelWork(promises, shouldCancel) {
         const cancellationIntervalId = setInterval(pollCancellation, PARALLEL_WORKER_CANCELLATION_POLL_MS);
         void Promise.all(promises).then(settleResolve, settleReject);
         pollCancellation();
+        if (!settled && onStarted !== null) {
+            try {
+                onStarted()
+            } catch (error) {
+                settleReject(error)
+            }
+        }
     });
 }
+/* eslint-enable @stylistic/semi */
 
 /** @returns {Error} */
 function createParallelParserCancellationError() {

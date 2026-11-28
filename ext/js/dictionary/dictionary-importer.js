@@ -59,6 +59,7 @@ import {
     parseTermBankWithWasmColumnChunksOverlapped,
     parseTermBankWithWasmColumnChunksParallel,
     parseTermBankWithWasmColumnChunksParallelCompressedLazy,
+    parseTermBankWithWasmColumnChunksParallelCompressedPlan,
     parseTermBankWithWasmColumnChunksParallelDeferred,
     parseTermBankWithWasmColumnChunksParallelLazy,
     prewarmParallelTermBankParser,
@@ -2304,6 +2305,7 @@ export class DictionaryImporter {
                                 loaders: importRunPlan.loaders,
                                 estimatedByteLengths: importRunPlan.estimatedByteLengths,
                                 compressed: importRunPlan === compressedSourcePlan,
+                                compressedPlan: importRunPlan === compressedSourcePlan ? compressedSourcePlan : void 0,
                             };
                         sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         if (preloadedTermFileBytes === null) {
@@ -5071,7 +5073,7 @@ export class DictionaryImporter {
      * @param {boolean} enableTermEntryContentDedup
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
-     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
+     * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean, compressedPlan?: import('./term-bank-source-pipeline.js').CompressedTermBankSourcePlan}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @param {boolean} [allowNativeImageProjection]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
@@ -5080,7 +5082,7 @@ export class DictionaryImporter {
         this._lastFastTermBankReadProfile = null;
         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
         let deferredSourceBatch = null;
-        /** @type {{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} */
+        /** @type {{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean, compressedPlan?: import('./term-bank-source-pipeline.js').CompressedTermBankSourcePlan}|null} */
         let lazySourceBatch = null;
         if (
             typeof preloadedBytes === 'object' &&
@@ -5452,14 +5454,22 @@ export class DictionaryImporter {
             if (useDirectArtifactChunkImport && (!useMediaPipeline || useMediaDirectArtifactChunkImport)) {
                 if (lazySourceBatch !== null) {
                     usedParallelParser = lazySourceBatch.compressed === true ?
-                        await parseTermBankWithWasmColumnChunksParallelCompressedLazy(
-                            /** @type {Array<() => Promise<{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>} */ (lazySourceBatch.loaders),
-                            lazySourceBatch.estimatedByteLengths,
-                            version,
-                            handleParsedChunk,
-                            parserOptions,
-                            () => this._isCancelled(),
-                        ) :
+                        (typeof lazySourceBatch.compressedPlan === 'undefined' ?
+                            await parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                                /** @type {Array<() => Promise<{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>} */ (lazySourceBatch.loaders),
+                                lazySourceBatch.estimatedByteLengths,
+                                version,
+                                handleParsedChunk,
+                                parserOptions,
+                                () => this._isCancelled(),
+                            ) :
+                            await parseTermBankWithWasmColumnChunksParallelCompressedPlan(
+                                lazySourceBatch.compressedPlan,
+                                version,
+                                handleParsedChunk,
+                                parserOptions,
+                                () => this._isCancelled(),
+                            )) :
                         await parseTermBankWithWasmColumnChunksParallelLazy(
                             /** @type {Array<() => Promise<Uint8Array>>} */ (lazySourceBatch.loaders),
                             lazySourceBatch.estimatedByteLengths,

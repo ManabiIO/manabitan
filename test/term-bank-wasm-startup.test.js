@@ -20,13 +20,20 @@ import {afterEach, expect, test, vi} from 'vitest';
 
 const nativeCompile = WebAssembly.compile;
 
+/* eslint-disable @stylistic/semi */
+
 afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
 });
 
-for (const outcome of ['resolve', 'reject']) {
-    test(`cancels startup without abandoning shared module work that will ${outcome}`, async () => {
+for (const {outcome, owned} of [
+    {outcome: 'resolve', owned: false},
+    {outcome: 'reject', owned: false},
+    {outcome: 'resolve', owned: true},
+    {outcome: 'reject', owned: true},
+]) {
+    test(`cancels ${owned ? 'owned' : 'generic'} startup without abandoning shared module work that will ${outcome}`, async () => {
         vi.resetModules();
         const bytes = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url));
         const module = await nativeCompile(bytes);
@@ -79,19 +86,53 @@ for (const outcome of ['resolve', 'reject']) {
         vi.stubGlobal('Worker', ReadyWorker);
         vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval']});
         const parser = await import('../ext/js/dictionary/term-bank-wasm-parser.js');
+        const {TermBankSourcePipeline} = await import('../ext/js/dictionary/term-bank-source-pipeline.js')
         let cancelled = false;
         let settled = false;
         let sourceLoads = 0;
+        const sourceBytes = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
+        const sourcePipeline = owned ?
+new TermBankSourcePipeline({
+    termFiles: Array.from({length: 4}, (_, index) => ({
+        filename: `term_bank_${index + 1}.json`,
+        offset: index * 64,
+        compressionMethod: 0,
+        compressedSize: 2,
+        uncompressedSize: 2,
+        signature: 0,
+        getData() {},
+    })),
+    enabled: true,
+    deviceMemory: 8,
+    read: async () => { throw new Error('Unexpected uncompressed read') },
+    readCompressed: async () => {
+        ++sourceLoads
+        await sourceBytes.promise
+        return new TextEncoder().encode('[]')
+    },
+}) :
+null
+        const sourcePlan = sourcePipeline?.createCompressedImportRunPlan(0) ?? null
+        if (owned && sourcePlan === null) { throw new Error('Expected owned compressed plan') }
         /** @type {unknown} */
         let failure = null;
-        const pending = parser.parseTermBankWithWasmColumnChunksParallelLazy(
-            Array.from({length: 4}, () => async () => { ++sourceLoads; return new TextEncoder().encode('[]'); }),
-            [2, 2, 2, 2],
-            3,
-            () => { throw new Error('Unexpected sink call'); },
-            {emitContentSlab: true},
-            () => cancelled,
-        ).then(() => { settled = true; }, (error) => {
+        const parsing = sourcePlan === null ?
+            parser.parseTermBankWithWasmColumnChunksParallelLazy(
+                Array.from({length: 4}, () => async () => { ++sourceLoads; return new TextEncoder().encode('[]'); }),
+                [2, 2, 2, 2],
+                3,
+                () => { throw new Error('Unexpected sink call'); },
+                {emitContentSlab: true},
+                () => cancelled,
+            ) :
+            parser.parseTermBankWithWasmColumnChunksParallelCompressedPlan(
+                sourcePlan,
+                3,
+                () => { throw new Error('Unexpected owned sink call') },
+                {emitContentSlab: true},
+                () => cancelled,
+            )
+        const pending = parsing.then(() => { settled = true; }, (error) => {
             settled = true;
             failure = error;
         });
@@ -101,10 +142,18 @@ for (const outcome of ['resolve', 'reject']) {
             await started;
             cancelled = true;
             await vi.advanceTimersByTimeAsync(250);
+            if (owned) {
+                expect(settled).toBe(false)
+                expect(sourceLoads).toBe(4)
+                expect(workers).toHaveLength(0)
+                expect(vi.getTimerCount()).toBe(0)
+                sourceBytes.resolve()
+                await pending
+            }
             expect(settled).toBe(true);
             expect(failure).toMatchObject({name: 'AbortError'});
             expect(workers).toHaveLength(0);
-            expect(sourceLoads).toBe(0);
+            expect(sourceLoads).toBe(owned ? 4 : 0);
             expect(vi.getTimerCount()).toBe(0);
             await parser.disposeParallelTermBankParser();
             replacement = parser.prewarmParallelTermBankParser();
@@ -126,11 +175,15 @@ for (const outcome of ['resolve', 'reject']) {
             expect(vi.getTimerCount()).toBe(0);
         } finally {
             // Also settle the original implementation when this is run as a red test.
+            sourceBytes.resolve()
             rejectFetch(new Error('Test cleanup'));
             await pending;
             if (replacement !== null) { await replacement; }
             await parser.disposeParallelTermBankParser();
+            await sourcePipeline?.dispose()
             vi.clearAllTimers();
         }
     });
 }
+
+/* eslint-enable @stylistic/semi */
