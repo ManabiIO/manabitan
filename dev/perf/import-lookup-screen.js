@@ -30,7 +30,7 @@ import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'
 /** @typedef {import('dictionary-importer').ImportExperiments} Flags */
 /** @typedef {Parameters<Parameters<typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunks>[2]>[0] & {preparedLookupIndexes?: Map<string, import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>}} Chunk */
 /** @typedef {{cacheFile: string, sha256: string, termRows: number}} Lock */
-/** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, ownedCompactExpressionRows: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
+/** @typedef {{elapsedMs: number, wasmParserMs: number, wasmContentEncodeMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, ownedCompactExpressionRows: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
 /** @typedef {Measurement & {flags: Flags, validateGlossaryTypes: boolean, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
 /** @typedef {{pair: number, arm: string, result: ScreenResult}} Observation */
 const root = fileURLToPath(new URL('../../', import.meta.url))
@@ -129,6 +129,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {
      */
     const execute = async (verify) => {
         let elapsedMs = 0
+        let wasmParserMs = 0
+        let wasmContentEncodeMs = 0
         let lookupMs = 0
         let rows = 0
         let nativeSegments = 0
@@ -159,6 +161,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {
             elapsedMs += safePerformance.now() - before
             const profile = parser.consumeLastTermBankWasmParseProfile()
             if (resultChunk === null || !profile) { throw new Error('Missing parser results') }
+            wasmParserMs += profile.parseBankMs
+            wasmContentEncodeMs += profile.encodeContentMs
             const chunk = /** @type {Chunk} */ (resultChunk)
             const indexes = chunk.preparedLookupIndexes
             if (!indexes || !prep.hasCompletePreparedTermLookupIndexes(indexes, chunk.rowCount)) { throw new Error('Incomplete indexes') }
@@ -204,6 +208,8 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         return {scratchReusedBytes,
             scratchReuseMisses,
             elapsedMs,
+            wasmParserMs,
+            wasmContentEncodeMs,
             lookupMs,
             rows,
             nativeSegments,
