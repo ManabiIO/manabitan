@@ -6809,25 +6809,8 @@ void 0 :
             this._recentTermContentSourceBatchBytes -= previousBoundary.buffer.byteLength
         }
         this._recentTermContentBoundaryBatchId = 0
-        const averageSampleCount = Math.min(
-            staged.indexes.length,
-            TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
-        );
-        let sampledPublishedCount = 0;
-        let sampledContentBytes = 0;
-        for (let i = 0; i < averageSampleCount; ++i) {
-            const sourceIndex = averageSampleCount === 1 ?
-                0 :
-                Math.floor(i * (staged.indexes.length - 1) / (averageSampleCount - 1));
-            const index = staged.indexes[sourceIndex];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-            ++sampledPublishedCount;
-            sampledContentBytes += spans.lengths[sourceIndex];
-        }
-        let retainBoundaryOnly = (
-            sampledPublishedCount >= Math.min(16, averageSampleCount) &&
-            sampledContentBytes > sampledPublishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
-        )
+        // Study: measure the cost of retaining entire recent source slabs.
+        let retainBoundaryOnly = true
         let sourceStart = 0
         let sourceEnd = staged.indexes.length
         if (retainBoundaryOnly) {
