@@ -61,7 +61,7 @@ import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 import {TermContentIntegrityError, TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
-import {createTermImportMetrics} from './term-import-metrics.js';
+import {addTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
 import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
@@ -763,6 +763,10 @@ export class DictionaryDatabase {
         });
         /** @type {import('./term-content-block-store.js').TermContentBlockImportSession|null} */
         this._termContentBlockImportSession = null;
+        /** @type {{completion: Promise<Record<string, number>>, rollback: () => void}|null} */
+        this._deferredArtifactContentPersistence = null;
+        /** @type {Promise<void>|null} */
+        this._activeArtifactTermImportWrite = null;
         /** @type {TermRecordOpfsStore} */
         this._termRecordStore = new TermRecordOpfsStore();
         this._termRecordStore.setDictionaryHealthChangeHandler(
@@ -905,6 +909,9 @@ export class DictionaryDatabase {
             if (this._bulkImportJournalRecord !== null) {
                 await this._rollbackBulkImport(db, errors, true, true);
             } else {
+                if (this._activeArtifactTermImportWrite !== null || this._deferredArtifactContentPersistence !== null) {
+                    await this._joinArtifactTermImportWriteOwners(errors);
+                }
                 this._rollbackBulkImportSqlite(db, errors);
                 await this._endBulkImportStoreSessions(errors, true, true);
             }
@@ -1090,6 +1097,9 @@ export class DictionaryDatabase {
      * @returns {Promise<boolean>}
      */
     async _endBulkImportStoreSessions(errors, endTermContentSession, endTermRecordSession) {
+        if (this._activeArtifactTermImportWrite !== null || this._deferredArtifactContentPersistence !== null) {
+            await this._joinArtifactTermImportWriteOwners(errors);
+        }
         const operations = [];
         if (endTermContentSession) {
             operations.push(Promise.resolve().then(() => this._termContentStore.endImportSession()));
@@ -1114,6 +1124,10 @@ export class DictionaryDatabase {
      * @returns {Promise<boolean>}
      */
     async _rollbackBulkImport(db, errors, rollbackTermContent, rollbackTermRecords) {
+        // No checkpoint or cache can retire a resolver or compression owner.
+        if (this._activeArtifactTermImportWrite !== null || this._deferredArtifactContentPersistence !== null) {
+            await this._joinArtifactTermImportWriteOwners(errors);
+        }
         const sqliteRollbackSucceeded = this._rollbackBulkImportSqlite(db, errors);
         const journalRecord = this._bulkImportJournalRecord;
         if (journalRecord === null) {
@@ -1473,7 +1487,7 @@ export class DictionaryDatabase {
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
+     * @returns {Promise<{commitMs: number, deferredTermContentMetrics?: Record<string, number>|null, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
@@ -1534,7 +1548,15 @@ export class DictionaryDatabase {
             let termContentSessionEnded = false;
             let termRecordSessionEnded = false;
             let sqlitePublished = false;
+            /** @type {Record<string, number>|null} */
+            let deferredTermContentMetrics = null;
             try {
+                if (this._activeArtifactTermImportWrite !== null) {
+                    await this._activeArtifactTermImportWrite;
+                }
+                if (this._deferredArtifactContentPersistence !== null) {
+                    deferredTermContentMetrics = await this._drainDeferredArtifactContentPersistence();
+                }
                 const generationMedia = publication?.summary.generationMedia;
                 if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
                     await this._awaitGenerationMediaPublication(generationMedia);
@@ -1729,6 +1751,7 @@ export class DictionaryDatabase {
                 }
                 result = {
                     commitMs,
+                    deferredTermContentMetrics,
                     termContentEndImportSessionMs,
                     termContentEndImportSessionFlushPendingWritesMs,
                     termContentEndImportSessionAwaitQueuedWritesMs,
@@ -1940,6 +1963,9 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
+            if (this._activeArtifactTermImportWrite !== null || this._deferredArtifactContentPersistence !== null) {
+                await this._joinArtifactTermImportWriteOwners(errors);
+            }
             // An early media writer may still be waiting for the index the
             // abandoned import will never supply. Cancel before joining it.
             const mediaWrite = this._generationMediaWrite;
@@ -5013,6 +5039,12 @@ void 0 :
         }
         if (count <= 0) { return; }
         if (objectStoreName === 'terms') {
+            if (this._activeArtifactTermImportWrite !== null) {
+                throw new Error('An artifact term import write is already active');
+            }
+            if (this._bulkImportState === BULK_IMPORT_STATE_FINALIZING) {
+                throw new Error('Dictionary bulk import finalization is already active');
+            }
             for (const dictionaryName of new Set(
                 items.slice(start, start + count).map((item) => /** @type {import('dictionary-database').DatabaseTermEntry} */ (item).dictionary),
             )) {
@@ -5027,7 +5059,17 @@ void 0 :
         }
 
         if (objectStoreName === 'terms') {
+            const initialImportState = this._bulkImportState;
+            const deferredMetrics = this._deferredArtifactContentPersistence === null ?
+                null :
+                await this._drainDeferredArtifactContentPersistence();
+            if (this._bulkImportState !== initialImportState) {
+                throw new Error('Dictionary bulk import session ownership changed');
+            }
             await this._bulkAddTerms(/** @type {import('dictionary-database').ObjectStoreData<'terms'>[]} */ (items), start, count);
+            if (deferredMetrics !== null && this._lastBulkAddTermsMetrics !== null) {
+                addTermImportMetrics(this._lastBulkAddTermsMetrics, deferredMetrics);
+            }
             return;
         }
         const descriptor = this._getBulkInsertDescriptor(objectStoreName);
@@ -5074,6 +5116,28 @@ void 0 :
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
+        if (this._activeArtifactTermImportWrite !== null) {
+            throw new Error('An artifact term import write is already active');
+        }
+        if (this._bulkImportState === BULK_IMPORT_STATE_FINALIZING) {
+            throw new Error('Dictionary bulk import finalization is already active');
+        }
+        const operation = this._bulkAddArtifactTermsChunkNow(chunk);
+        this._activeArtifactTermImportWrite = operation;
+        try {
+            await operation;
+        } finally {
+            if (this._activeArtifactTermImportWrite === operation) {
+                this._activeArtifactTermImportWrite = null;
+            }
+        }
+    }
+
+    /**
+     * @param {Parameters<DictionaryDatabase['bulkAddArtifactTermsChunk']>[0]} chunk
+     * @returns {Promise<void>}
+     */
+    async _bulkAddArtifactTermsChunkNow(chunk) {
         this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
@@ -5095,11 +5159,23 @@ void 0 :
                 await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
                 return;
             }
+            const deferredMetrics = this._deferredArtifactContentPersistence === null ?
+                null :
+                await this._drainDeferredArtifactContentPersistence();
             const rows = this._materializeArtifactChunkTermEntries(chunk);
             await this._bulkAddTerms(rows, 0, rows.length);
+            if (deferredMetrics !== null && this._lastBulkAddTermsMetrics !== null) {
+                addTermImportMetrics(this._lastBulkAddTermsMetrics, deferredMetrics);
+            }
             return;
         }
+        const deferredMetrics = this._deferredArtifactContentPersistence === null ?
+            null :
+            await this._drainDeferredArtifactContentPersistence();
         await this._bulkAddArtifactTermsChunkWithoutContentDedup(chunk);
+        if (deferredMetrics !== null && this._lastBulkAddTermsMetrics !== null) {
+            addTermImportMetrics(this._lastBulkAddTermsMetrics, deferredMetrics);
+        }
     }
 
     /**
@@ -8388,6 +8464,17 @@ this._readTermContentSignature(
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
         }
         const importMetrics = createTermImportMetrics();
+        const precedingPersistence = this._deferredArtifactContentPersistence;
+        const overlappingPlan = precedingPersistence !== null && chunk.contentDedupPlan?.resolvedFlags instanceof Uint8Array ?
+            chunk.contentDedupPlan :
+            null;
+        // Exact matches may publish references into this plan before the
+        // predecessor is durable. Preserve only its small resolution bitmap;
+        // the immutable content itself stays in the existing source cache.
+        let overlappingPlanFlags = overlappingPlan?.resolvedFlags.slice() ?? null;
+        const overlappingPlanCursor = overlappingPlan?.nextUnresolvedUniqueIndex;
+        const overlappingPlanDictNames = overlappingPlan?.resolvedDictNames ?? null;
+        const overlappingPlanUniformDictName = overlappingPlan?.resolvedUniformDictName;
         /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */
         let stagedContentMetadata = null;
         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
@@ -8451,6 +8538,13 @@ this._readTermContentSignature(
                     previousResolvedUniformDictName: contentDedupPlan.resolvedUniformDictName,
                 };
             }
+            // Only deduplication overlaps the preceding compression. Join it
+            // before admitting another content write or publishing this plan.
+            if (this._deferredArtifactContentPersistence !== null) {
+                const deferredMetrics = await this._drainDeferredArtifactContentPersistence();
+                if (deferredMetrics !== null) { addTermImportMetrics(importMetrics, deferredMetrics); }
+            }
+            overlappingPlanFlags = null;
             const tContentStoreStart = safePerformance.now();
             let preparedLookupIndexes = null;
             let recordAppended = false;
@@ -8478,12 +8572,14 @@ this._readTermContentSignature(
                 /** @type {(() => void)|null} */
                 let unregisterInFlightContentSources = null;
                 let borrowedContentReleased = false;
+                let contentCompletionDeferred = false;
+                const releaseBorrowedContent = chunk.releaseBorrowedContent;
                 const releaseInFlightContentSources = () => {
                     unregisterInFlightContentSources?.();
                     unregisterInFlightContentSources = null;
                     if (!borrowedContentReleased) {
                         borrowedContentReleased = true;
-                        chunk.releaseBorrowedContent?.();
+                        releaseBorrowedContent?.();
                     }
                 };
                 try {
@@ -8594,35 +8690,93 @@ this._readTermContentSignature(
                         );
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
+                        /** @type {Error|null} */
+                        let contentFailure = null;
                         const measuredContentCompletion = earlyContentPersistence.completion
                             .then((blockProfile) => {
                                 contentCompletedAt = safePerformance.now();
                                 return blockProfile;
+                            }, (error) => {
+                                contentFailure = toError(error);
+                                throw contentFailure;
                             })
                             .finally(releaseInFlightContentSources);
-                        const concurrentResults = await Promise.allSettled([
-                            measuredContentCompletion,
-                            pendingRecordAppend,
-                        ]);
-                        const concurrentErrors = concurrentResults
-                            .filter((result) => result.status === 'rejected')
-                            .map((result) => toError(result.reason));
-                        if (concurrentErrors.length === 1) {
-                            throw concurrentErrors[0];
-                        }
-                        if (concurrentErrors.length > 1) {
-                            throw new AggregateError(
-                                concurrentErrors,
-                                'Term content and record persistence both failed',
+                        void measuredContentCompletion.catch(() => {});
+                        if (
+                            importMetrics.dedupRecentSourceAdoptedBytes > 0 &&
+                            typeof releaseBorrowedContent !== 'function' &&
+                            contentDedupPlan?.sourceRowCount === count
+                        ) {
+                            // Adoption proves these bytes are an immutable,
+                            // independently owned parser result already charged
+                            // to the bounded recent-source cache. Borrowed WASM
+                            // and partial groups retain the ordinary sink lease.
+                            try {
+                                await pendingRecordAppend;
+                            } catch (error) {
+                                const [contentResult] = await Promise.allSettled([measuredContentCompletion]);
+                                if (contentResult.status === 'rejected') {
+                                    throw new AggregateError(
+                                        [toError(contentResult.reason), toError(error)],
+                                        'Term content and record persistence both failed',
+                                    );
+                                }
+                                throw error;
+                            }
+                            // Do not compete with shared-source gathering. The
+                            // successor can scan while the workers compress
+                            // their already-copied private input buffers.
+                            try {
+                                await earlyContentPersistence.sourceConsumed;
+                            } catch (error) {
+                                await measuredContentCompletion;
+                                throw error;
+                            }
+                            if (contentFailure !== null) { throw toError(contentFailure); }
+                            const metadataForRollback = stagedContentMetadata;
+                            const planForRollback = dedupPlanRollbackState;
+                            const completion = measuredContentCompletion.then((blockProfile) => {
+                                const metrics = createTermImportMetrics();
+                                this._addTermContentBlockProfile(metrics, blockProfile);
+                                metrics.contentStoreMs = contentCompletedAt - tContentStoreStart;
+                                metrics.contentAppendMs = Math.max(metadataPublishedAt, contentCompletedAt) - tContentAppendStart;
+                                return metrics;
+                            });
+                            void completion.catch(() => {});
+                            this._deferredArtifactContentPersistence = {
+                                completion,
+                                rollback: () => {
+                                    this._rollbackStagedArtifactTermContentMetadata(metadataForRollback);
+                                    this._rollbackArtifactTermContentDedupPlan(planForRollback);
+                                },
+                            };
+                            contentCompletionDeferred = true;
+                            importMetrics.contentDeferredPersistenceCount += 1;
+                        } else {
+                            const concurrentResults = await Promise.allSettled([
+                                measuredContentCompletion,
+                                pendingRecordAppend,
+                            ]);
+                            const concurrentErrors = concurrentResults
+                                .filter((result) => result.status === 'rejected')
+                                .map((result) => toError(result.reason));
+                            if (concurrentErrors.length === 1) {
+                                throw concurrentErrors[0];
+                            }
+                            if (concurrentErrors.length > 1) {
+                                throw new AggregateError(
+                                    concurrentErrors,
+                                    'Term content and record persistence both failed',
+                                );
+                            }
+                            this._addTermContentBlockProfile(
+                                importMetrics,
+                                concurrentResults[0].status === 'fulfilled' ? concurrentResults[0].value : null,
                             );
+                            importMetrics.contentStoreMs += contentCompletedAt - tContentStoreStart;
+                            importMetrics.contentAppendMs +=
+                                Math.max(metadataPublishedAt, contentCompletedAt) - tContentAppendStart;
                         }
-                        this._addTermContentBlockProfile(
-                            importMetrics,
-                            concurrentResults[0].status === 'fulfilled' ? concurrentResults[0].value : null,
-                        );
-                        importMetrics.contentStoreMs += contentCompletedAt - tContentStoreStart;
-                        importMetrics.contentAppendMs +=
-                            Math.max(metadataPublishedAt, contentCompletedAt) - tContentAppendStart;
                         recordAppended = true;
                     }
                 } catch (error) {
@@ -8639,7 +8793,7 @@ this._readTermContentSignature(
                     await Promise.allSettled(pendingOperations);
                     throw error;
                 } finally {
-                    if (earlyContentPersistence !== null) {
+                    if (earlyContentPersistence !== null && !contentCompletionDeferred) {
                         releaseInFlightContentSources();
                     }
                 }
@@ -8670,12 +8824,91 @@ this._readTermContentSignature(
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
+            // A resolver can fail while its predecessor still owns compressed
+            // output. Drain before rollback, retaining both independent errors.
+            let precedingError = null;
+            if (this._deferredArtifactContentPersistence !== null) {
+                try {
+                    await this._drainDeferredArtifactContentPersistence();
+                } catch (error) {
+                    precedingError = toError(error);
+                }
+            }
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
+            if (overlappingPlan !== null && overlappingPlanFlags !== null) {
+                for (let i = 0; i < overlappingPlan.resolvedFlags.length; ++i) {
+                    if (overlappingPlanFlags[i] === 1) { continue; }
+                    overlappingPlan.resolvedFlags[i] = 0;
+                    overlappingPlan.resolvedOffsets[i] = 0;
+                    overlappingPlan.resolvedLengths[i] = 0;
+                    if (Array.isArray(overlappingPlan.resolvedDictNames)) {
+                        overlappingPlan.resolvedDictNames[i] = void 0;
+                    }
+                }
+                if (!Array.isArray(overlappingPlanDictNames)) {
+                    overlappingPlan.resolvedDictNames = overlappingPlanDictNames;
+                }
+                overlappingPlan.resolvedUniformDictName = overlappingPlanUniformDictName;
+                overlappingPlan.nextUnresolvedUniqueIndex = overlappingPlanCursor;
+            }
             if (useLocalTransaction) {
                 try { this._requireDb().exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
+            if (precedingError !== null && precedingError !== e) {
+                throw new AggregateError([toError(e), precedingError], 'Term deduplication and preceding content persistence failed');
+            }
             throw e;
+        }
+    }
+
+    /**
+     * Cleanup joins the active resolver before retiring its predecessor's
+     * cache entries, then joins the content operation left by that write.
+     * @param {Error[]} errors
+     * @returns {Promise<void>}
+     */
+    async _joinArtifactTermImportWriteOwners(errors) {
+        if (this._activeArtifactTermImportWrite !== null) {
+            try {
+                await this._activeArtifactTermImportWrite;
+            } catch (error) {
+                errors.push(toError(error));
+            }
+        }
+        if (this._deferredArtifactContentPersistence !== null) {
+            try {
+                await this._drainDeferredArtifactContentPersistence();
+            } catch (error) {
+                errors.push(toError(error));
+            }
+        }
+    }
+
+    /**
+     * Joins the single deferred content operation before a successor writes or
+     * the import publishes/rolls back. Its metrics travel with the next chunk;
+     * the final drain is reported separately in bulk-finalization diagnostics.
+     * @returns {Promise<Record<string, number>|null>}
+     */
+    async _drainDeferredArtifactContentPersistence() {
+        const pending = this._deferredArtifactContentPersistence;
+        if (pending === null) { return null; }
+        const startedAt = safePerformance.now();
+        try {
+            const metrics = await pending.completion;
+            // Concurrent cleanup must see and join this owner until it
+            // settles. Only the first join claims its metrics or rollback.
+            if (this._deferredArtifactContentPersistence !== pending) { return null; }
+            this._deferredArtifactContentPersistence = null;
+            metrics.contentDeferredWaitMs += safePerformance.now() - startedAt;
+            return metrics;
+        } catch (error) {
+            if (this._deferredArtifactContentPersistence === pending) {
+                this._deferredArtifactContentPersistence = null;
+                pending.rollback();
+            }
+            throw error;
         }
     }
 
@@ -9565,7 +9798,7 @@ null :
      * import. A null result means the caller must use normal persistence.
      * @param {string} dictionary
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, sourceConsumed: Promise<void>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      */
     _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans) {
         if (
@@ -9610,7 +9843,7 @@ null :
         }));
         void storage.catch(() => {});
         void completion.catch(() => {});
-        return {storage, completion, initialSelection: operation.initialSelection};
+        return {storage, sourceConsumed: operation.sourceConsumed, completion, initialSelection: operation.initialSelection};
     }
 
     /**

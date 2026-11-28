@@ -224,6 +224,364 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     };
 }
 
+/** @returns {ReturnType<typeof createArtifactOverlapHarness>} */
+function createOwnedArtifactOverlapHarness() {
+    const harness = createArtifactOverlapHarness();
+    const source = harness.chunk.contentBytesBuffer;
+    if (!(source instanceof Uint8Array)) { throw new Error('Expected a content slab'); }
+    registerOwnedTermContent(source);
+    Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent');
+    harness.run = async () => await harness.database.bulkAddArtifactTermsChunk(harness.chunk);
+    return harness;
+}
+
+/**
+ * @param {ReturnType<typeof createArtifactOverlapHarness>} harness
+ * @returns {{exec: ReturnType<typeof vi.fn>, endContent: ReturnType<typeof vi.fn>, endRecords: ReturnType<typeof vi.fn>, rollbackContent: ReturnType<typeof vi.fn>, rollbackRecords: ReturnType<typeof vi.fn>}}
+ */
+function configureArtifactOverlapLifecycle(harness) {
+    const exec = vi.fn();
+    const endContent = vi.fn(async () => {});
+    const endRecords = vi.fn(async () => {});
+    const rollbackContent = vi.fn(async () => {});
+    const rollbackRecords = vi.fn(async () => {});
+    Reflect.set(harness.database, '_db', {exec, close: vi.fn()});
+    Reflect.set(harness.database, '_bulkImportState', 'active');
+    Reflect.set(harness.database, '_bulkImportJournalRecord', {
+        version: 1, sessionId: 'owned-overlap', contentCheckpoint: {segments: []}, recordCheckpoint: {shards: []}, createdAt: 0,
+    });
+    Reflect.set(harness.database, '_importJournal', {clear: vi.fn(async () => {})});
+    Reflect.set(harness.database, '_termContentStore', {
+        endImportSession: endContent, rollbackImportSession: rollbackContent, getLastEndImportSessionMetrics: () => null,
+    });
+    Object.assign(Reflect.get(harness.database, '_termRecordStore'), {
+        endImportSession: endRecords, rollbackImportSession: rollbackRecords, getLastEndImportSessionMetrics: () => null,
+    });
+    Reflect.set(Reflect.get(harness.database, '_termContentBlockImportSession'), 'close', vi.fn());
+    Reflect.set(harness.database, '_applyRuntimePragmas', vi.fn());
+    Reflect.set(harness.database, '_syncTermsVirtualTableFromRecordStore', vi.fn(async () => {}));
+    Reflect.set(harness.database, '_rollbackGenerationMedia', vi.fn(async () => {}));
+    Reflect.set(harness.database, '_createIndexesSql', () => []);
+    return {exec, endContent, endRecords, rollbackContent, rollbackRecords};
+}
+
+describe('DictionaryDatabase bounded owned-content persistence overlap', () => {
+    test('waits for gathering before returning an owned chunk while compression continues', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        const begin = Reflect.get(harness.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const originalBegin = begin.getMockImplementation();
+        /** @type {() => void} */
+        let resolveGather = () => {};
+        const sourceConsumed = new Promise((resolve) => { resolveGather = () => resolve(void 0); });
+        begin.mockImplementation(() => ({...originalBegin(), sourceConsumed}));
+        harness.resolveRecords();
+        let returned = false;
+        const writing = harness.run().then(() => { returned = true; });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(returned).toBe(false);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+        resolveGather();
+        await writing;
+        expect(returned).toBe(true);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).not.toBeNull();
+        harness.resolveContent();
+        await Reflect.get(harness.database, '_drainDeferredArtifactContentPersistence').call(harness.database);
+    });
+
+    test('joins the terminal content operation when gathering fails', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        const begin = Reflect.get(harness.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const originalBegin = begin.getMockImplementation();
+        /** @type {(error: Error) => void} */
+        let rejectGather = () => {};
+        const sourceConsumed = new Promise((_resolve, reject) => { rejectGather = reject; });
+        void sourceConsumed.catch(() => {});
+        begin.mockImplementation(() => ({...originalBegin(), sourceConsumed}));
+        harness.resolveRecords();
+        let returned = false;
+        const writing = harness.run().then(() => null, (error) => {
+            returned = true;
+            return error;
+        });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        rejectGather(new Error('source gather failed'));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(returned).toBe(false);
+        expect(getMeta(harness.database, 10, 20)).toBeDefined();
+        harness.rejectContent(new Error('terminal content failed'));
+        expect(await writing).toMatchObject({message: 'terminal content failed'});
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.plan.resolvedFlags[0]).toBe(0);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+    });
+
+    test('returns after records are copied and drains the one remaining content owner exactly once', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        harness.resolveRecords();
+        await harness.run();
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({contentDeferredPersistenceCount: 1, contentCompressMs: 0});
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(1);
+        const drain = Reflect.get(harness.database, '_drainDeferredArtifactContentPersistence').bind(harness.database);
+        let drained = false;
+        const completion = drain().then((metrics) => {
+            drained = true;
+            return metrics;
+        });
+        await Promise.resolve();
+        expect(drained).toBe(false);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).not.toBeNull();
+        harness.resolveContent();
+        expect(await completion).toMatchObject({contentPackMs: 1, contentCompressMs: 2, contentEnvelopeMs: 3});
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+        expect(await drain()).toBeNull();
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+    });
+
+    test.each(['borrowed', 'unowned', 'partial'])('joins content before returning for a %s source', async (kind) => {
+        const harness = createArtifactOverlapHarness();
+        const source = harness.chunk.contentBytesBuffer;
+        if (!(source instanceof Uint8Array)) { throw new Error('Expected a content slab'); }
+        if (kind !== 'unowned') { registerOwnedTermContent(source); }
+        if (kind !== 'borrowed') { Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent'); }
+        if (kind === 'partial') { harness.plan.sourceRowCount = 2; }
+        harness.resolveRecords();
+        let settled = false;
+        const completion = harness.run().then(() => { settled = true; });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(settled).toBe(false);
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+        harness.resolveContent();
+        await completion;
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({contentDeferredPersistenceCount: 0, contentCompressMs: 2});
+    });
+
+    test('resolves a successor duplicate from immutable bytes while its predecessor still compresses', async () => {
+        const first = createOwnedArtifactOverlapHarness();
+        first.resolveRecords();
+        await first.run();
+        const second = createArtifactOverlapHarness();
+        second.plan.persistedLookupRequired = true;
+        const persistedRead = vi.fn(() => { throw new Error('Deferred source must not require a persisted read'); });
+        Reflect.set(first.database, '_readTermEntryContentBytesDetailed', persistedRead);
+        const completion = first.database.bulkAddArtifactTermsChunk(second.chunk);
+        await vi.waitFor(() => expect(second.plan.resolvedFlags[0]).toBe(1));
+        expect(second.plan.resolvedOffsets[0]).toBe(100);
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        expect(persistedRead).not.toHaveBeenCalled();
+        first.resolveContent();
+        await completion;
+        expect(first.appendRecords).toHaveBeenCalledTimes(2);
+        expect(first.database.getLastBulkAddTermsMetrics()).toMatchObject({dedupPersistedHitCount: 1, contentCompressMs: 2});
+    });
+
+    test('admits no second reservation until the preceding content operation settles', async () => {
+        const first = createOwnedArtifactOverlapHarness();
+        first.resolveRecords();
+        await first.run();
+        const second = createArtifactOverlapHarness([4, 5, 6], 30, 40);
+        second.plan.persistedLookupRequired = true;
+        second.plan.uniqueRowIndexes = new Uint32Array([0]);
+        second.chunk.contentRowStart = 0;
+        const reserve = Reflect.get(first.database, '_termContentBlockImportSession').tryBeginAppendSpans;
+        const completion = first.database.bulkAddArtifactTermsChunk(second.chunk);
+        await vi.waitFor(() => expect(Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1));
+        expect(reserve).toHaveBeenCalledOnce();
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        first.resolveContent();
+        await completion;
+        expect(reserve).toHaveBeenCalledTimes(2);
+        expect(first.appendRecords).toHaveBeenCalledTimes(2);
+        expect(Reflect.get(first.database, '_deferredArtifactContentPersistence')).toBeNull();
+    });
+
+    test.each([false, true])('rolls back successor resolution when deferred content fails; duplicate=%s', async (duplicate) => {
+        const first = createOwnedArtifactOverlapHarness();
+        first.resolveRecords();
+        await first.run();
+        const second = duplicate ? createArtifactOverlapHarness() : createArtifactOverlapHarness([4, 5, 6], 30, 40);
+        second.plan.persistedLookupRequired = true;
+        second.plan.uniqueRowIndexes = new Uint32Array([0]);
+        second.chunk.contentRowStart = 0;
+        const outcome = first.database.bulkAddArtifactTermsChunk(second.chunk).then(() => null, (error) => error);
+        await vi.waitFor(() => {
+            expect(duplicate ? second.plan.resolvedFlags[0] : Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        });
+        first.rejectContent(new Error('predecessor compression failed'));
+        expect(await outcome).toMatchObject({message: 'predecessor compression failed'});
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        expect(getMeta(first.database, 10, 20)).toBeUndefined();
+        expect(getMeta(first.database, 30, 40)).toBeUndefined();
+        expect(Reflect.get(first.database, '_termEntryContentMetaHashPairCount')).toBe(0);
+        expect(Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(first.database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(first.plan.resolvedFlags[0]).toBe(0);
+        expect(second.plan.resolvedFlags[0]).toBe(0);
+        expect(second.plan.resolvedOffsets[0]).toBe(0);
+    });
+
+    test('retains the immutable owner until an awaiting exact matcher has returned', async () => {
+        const first = createOwnedArtifactOverlapHarness();
+        first.resolveRecords();
+        await first.run();
+        const second = createArtifactOverlapHarness();
+        second.plan.persistedLookupRequired = true;
+        const matcher = Reflect.get(first.database, '_findMatchingPersistedTermEntryContentMeta').bind(first.database);
+        /** @type {() => void} */
+        let releaseMatcher = () => {};
+        const matcherGate = new Promise((resolve) => { releaseMatcher = () => resolve(void 0); });
+        let matcherWaiting = false;
+        Reflect.set(first.database, '_findMatchingPersistedTermEntryContentMeta', async (...args) => {
+            const result = await matcher(...args);
+            matcherWaiting = true;
+            await matcherGate;
+            return result;
+        });
+        const outcome = first.database.bulkAddArtifactTermsChunk(second.chunk).then(() => null, (error) => error);
+        await vi.waitFor(() => expect(matcherWaiting).toBe(true));
+        first.rejectContent(new Error('late content failure'));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(Reflect.get(first.database, '_recentTermContentSourceBatches').size).toBe(1);
+        expect(getMeta(first.database, 10, 20)).toBeDefined();
+        releaseMatcher();
+        expect(await outcome).toMatchObject({message: 'late content failure'});
+        expect(Reflect.get(first.database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(second.plan.resolvedFlags[0]).toBe(0);
+    });
+
+    test('preserves both record and content failures on an otherwise eligible owned source', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        const outcome = harness.run().then(() => null, (error) => error);
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        harness.rejectRecords(new Error('record append failed'));
+        await Promise.resolve();
+        harness.rejectContent(new Error('content append failed'));
+        const error = await outcome;
+        expect(error).toBeInstanceOf(AggregateError);
+        expect(error.errors.map((/** @type {Error} */ item) => item.message)).toEqual(['content append failed', 'record append failed']);
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+    });
+
+    test('keeps concurrent cleanup behind the same pending owner and rolls it back once', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        harness.resolveRecords();
+        await harness.run();
+        const pending = Reflect.get(harness.database, '_deferredArtifactContentPersistence');
+        const rollback = vi.fn(pending.rollback);
+        pending.rollback = rollback;
+        const endContent = vi.fn(async () => {});
+        const endRecords = vi.fn(async () => {});
+        Reflect.set(harness.database, '_termContentStore', {endImportSession: endContent});
+        Reflect.set(Reflect.get(harness.database, '_termRecordStore'), 'endImportSession', endRecords);
+        const drain = Reflect.get(harness.database, '_drainDeferredArtifactContentPersistence').bind(harness.database);
+        const first = drain().then(() => null, (error) => error);
+        /** @type {Error[]} */
+        const errors = [];
+        const cleanup = Reflect.get(harness.database, '_endBulkImportStoreSessions').call(harness.database, errors, true, true);
+        await Promise.resolve();
+        expect(endContent).not.toHaveBeenCalled();
+        expect(endRecords).not.toHaveBeenCalled();
+        harness.rejectContent(new Error('deferred write failed'));
+        expect(await first).toMatchObject({message: 'deferred write failed'});
+        await cleanup;
+        expect(errors.map((error) => error.message)).toEqual(['deferred write failed']);
+        expect(endContent).toHaveBeenCalledOnce();
+        expect(endRecords).toHaveBeenCalledOnce();
+        expect(rollback).toHaveBeenCalledOnce();
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+    });
+
+    test.each([false, true])('joins the final content operation before publication; failure=%s', async (failure) => {
+        const harness = createOwnedArtifactOverlapHarness();
+        const lifecycle = configureArtifactOverlapLifecycle(harness);
+        harness.resolveRecords();
+        await harness.run();
+        const outcome = harness.database.finishBulkImport().then((result) => ({result}), (error) => ({error}));
+        await vi.waitFor(() => expect(Reflect.get(harness.database, '_bulkImportState')).toBe('finalizing'));
+        expect(lifecycle.endContent).not.toHaveBeenCalled();
+        expect(lifecycle.endRecords).not.toHaveBeenCalled();
+        expect(lifecycle.exec).not.toHaveBeenCalledWith('COMMIT');
+        if (failure) {
+            harness.rejectContent(new Error('final content failed'));
+        } else {
+            harness.resolveContent();
+        }
+        const settled = await outcome;
+        if ('error' in settled) {
+            expect(failure).toBe(true);
+            expect(settled.error).toMatchObject({message: 'final content failed'});
+            expect(lifecycle.exec).not.toHaveBeenCalledWith('COMMIT');
+            expect(lifecycle.exec).toHaveBeenCalledWith('ROLLBACK');
+            expect(lifecycle.rollbackContent).toHaveBeenCalledOnce();
+            expect(lifecycle.rollbackRecords).toHaveBeenCalledOnce();
+        } else {
+            expect(failure).toBe(false);
+            expect(settled.result).toMatchObject({deferredTermContentMetrics: {contentCompressMs: 2}});
+            expect(lifecycle.exec).toHaveBeenCalledWith('COMMIT');
+            expect(lifecycle.rollbackContent).not.toHaveBeenCalled();
+        }
+        expect(Reflect.get(harness.database, '_deferredArtifactContentPersistence')).toBeNull();
+        expect(Reflect.get(harness.database, '_bulkImportState')).toBe('idle');
+    });
+
+    test.each(['close', 'abortBulkImport'])('joins an active exact matcher before %s retires metadata or checkpoints', async (operation) => {
+        const first = createOwnedArtifactOverlapHarness();
+        const lifecycle = configureArtifactOverlapLifecycle(first);
+        first.resolveRecords();
+        await first.run();
+        const second = createArtifactOverlapHarness();
+        second.plan.persistedLookupRequired = true;
+        const matcher = Reflect.get(first.database, '_findMatchingPersistedTermEntryContentMeta').bind(first.database);
+        /** @type {() => void} */
+        let releaseMatcher = () => {};
+        const matcherGate = new Promise((resolve) => { releaseMatcher = () => resolve(void 0); });
+        let matcherWaiting = false;
+        Reflect.set(first.database, '_findMatchingPersistedTermEntryContentMeta', async (...args) => {
+            const result = await matcher(...args);
+            matcherWaiting = true;
+            await matcherGate;
+            return result;
+        });
+        const writeOutcome = first.database.bulkAddArtifactTermsChunk(second.chunk).then(() => null, (error) => error);
+        await vi.waitFor(() => expect(matcherWaiting).toBe(true));
+        const cleanupOutcome = Reflect.get(first.database, operation).call(first.database).then(() => null, (error) => error);
+        await vi.waitFor(() => expect(Reflect.get(first.database, '_bulkImportState')).toBe('finalizing'));
+        first.rejectContent(new Error('owned content failed during cleanup'));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(getMeta(first.database, 10, 20)).toBeDefined();
+        expect(lifecycle.rollbackContent).not.toHaveBeenCalled();
+        expect(lifecycle.rollbackRecords).not.toHaveBeenCalled();
+        expect(lifecycle.exec).not.toHaveBeenCalledWith('ROLLBACK');
+        releaseMatcher();
+        expect(await writeOutcome).toMatchObject({message: 'owned content failed during cleanup'});
+        expect(await cleanupOutcome).toMatchObject({message: 'owned content failed during cleanup'});
+        expect(lifecycle.rollbackContent).toHaveBeenCalledOnce();
+        expect(lifecycle.rollbackRecords).toHaveBeenCalledOnce();
+        expect(second.plan.resolvedFlags[0]).toBe(0);
+        expect(Reflect.get(first.database, '_activeArtifactTermImportWrite')).toBeNull();
+    });
+
+    test('drains deferred content before switching to the artifact fallback writer', async () => {
+        const harness = createOwnedArtifactOverlapHarness();
+        harness.resolveRecords();
+        await harness.run();
+        harness.database.setTermEntryContentDedupEnabled(false);
+        const fallback = vi.fn(async () => { Reflect.set(harness.database, '_lastBulkAddTermsMetrics', {}); });
+        Reflect.set(harness.database, '_bulkAddArtifactTermsChunkWithoutContentDedup', fallback);
+        const completion = harness.database.bulkAddArtifactTermsChunk(harness.chunk);
+        await Promise.resolve();
+        expect(fallback).not.toHaveBeenCalled();
+        harness.resolveContent();
+        await completion;
+        expect(fallback).toHaveBeenCalledOnce();
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({contentCompressMs: 2});
+    });
+});
+
 describe('DictionaryDatabase term content hash validation', () => {
     test.each([
         'deadbeeX0000000Y',

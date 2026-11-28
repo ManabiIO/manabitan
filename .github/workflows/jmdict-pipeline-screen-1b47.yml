@@ -1,0 +1,220 @@
+name: JMdict pipeline browser screen (1b47)
+
+on:
+  push:
+    branches: [perf/jmdict-pipeline-screen-20261127-1b47]
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    name: Validate pipeline source and unchanged native assets
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    env:
+      PERF_VALIDATION: builds/perf/pipeline-validation-1b47
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Initialize validation evidence
+        run: |
+          mkdir -p "$PERF_VALIDATION"
+          git rev-parse HEAD > "$PERF_VALIDATION/source-sha.txt"
+          git diff --stat 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 HEAD > "$PERF_VALIDATION/source-diff-stat.txt"
+
+      - name: Install pinned dictionary WASM toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          clang-21 --version | tee "$PERF_VALIDATION/clang-version.txt"
+          wasm-ld-21 --version | tee "$PERF_VALIDATION/lld-version.txt"
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Verify native bytes against pinned compiler and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:dictionary-wasm -- --check 2>&1 | tee "$PERF_VALIDATION/native-check.log"
+
+      - name: Run full unit suite with bounded workers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:unit -- --maxWorkers=2 2>&1 | tee "$PERF_VALIDATION/unit.log"
+
+      - name: Test all build targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:build 2>&1 | tee "$PERF_VALIDATION/build.log"
+
+      - name: Lint changed runtime and focused regression tests
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          npx eslint --no-cache \
+            ext/js/dictionary/dictionary-database.js \
+            ext/js/dictionary/term-import-metrics.js \
+            test/dictionary-database-content-dedup.test.js \
+            2>&1 | tee "$PERF_VALIDATION/lint.log"
+
+      - name: Validate runtime and test types
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          npm run test:ts:main 2>&1 | tee "$PERF_VALIDATION/types-main.log"
+          npm run test:ts:test 2>&1 | tee "$PERF_VALIDATION/types-test.log"
+
+      - name: Preserve validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pipeline-1b47-validation
+          path: builds/perf/pipeline-validation-1b47
+          if-no-files-found: error
+          retention-days: 14
+
+  browser-screen:
+    name: Complete import screen (${{ matrix.dictionary }})
+    needs: validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE_SHA: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE_PARENT: builds/perf/pipeline-screen-1b47
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Initialize frozen screen identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE_PARENT"
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE_SHA"
+          git cat-file -e "${PERF_BASELINE_SHA}^{commit}"
+          git rev-parse HEAD > "$PERF_EVIDENCE_PARENT/candidate-sha.txt"
+          git rev-parse "${PERF_BASELINE_SHA}^{tree}" > "$PERF_EVIDENCE_PARENT/baseline-tree.txt"
+          git diff --exit-code "$PERF_BASELINE_SHA" HEAD -- \
+            dev/perf/import-qualification-20261125-a7f7.py \
+            dev/perf/import-memory-20261125-a7f7 \
+            .github/actions/setup/action.yml \
+            package.json package-lock.json test/perf/dictionaries.lock.json
+          git diff --name-status "$PERF_BASELINE_SHA" HEAD > "$PERF_EVIDENCE_PARENT/source-diff.txt"
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install the lockfile-pinned Chromium revision
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Run unchanged complete-import qualification with six pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Independent exact-9e10 baseline run 46100401987 recorded 151552
+            # active SAH bytes = 37 x 4096. Freeze that prospective cohort value.
+            # This is receipt validation only; import flags remain empty.
+            # The unchanged harness still compares exact bytes across all runs.
+            policy=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE_SHA" \
+            --candidate "$PERF_CANDIDATE_SHA" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order AB \
+            --pairs 6 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/term-import-metrics.js \
+            --evidence "$GITHUB_WORKSPACE/$PERF_EVIDENCE_PARENT/$PERF_DICTIONARY" \
+            "${policy[@]}" \
+            2>&1 | tee "$PERF_EVIDENCE_PARENT/$PERF_DICTIONARY-driver.log"
+
+      - name: Print observations and qualification results for remote inspection
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE_PARENT"
+          python3 - <<'PY' | tee "$PERF_EVIDENCE_PARENT/$PERF_DICTIONARY-summary.log"
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_EVIDENCE_PARENT"]) / os.environ["PERF_DICTIONARY"]
+          def emit(label, value):
+              print(label + " " + json.dumps(value, ensure_ascii=False, separators=(",", ":")))
+          for name in (
+              "registered-plan.json", "browser-identity.json", "observations.json",
+              "analysis.json", "memory/memory-comparison.json", "memory/memory-audit.json",
+              "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
+              path = root / name
+              if not path.exists():
+                  emit("MISSING", name)
+                  continue
+              try:
+                  emit(name, json.loads(path.read_text()))
+              except Exception as error:
+                  emit("UNREADABLE", {"path": name, "error": str(error)})
+          identity = root / "source-identities.json"
+          if identity.exists():
+              data = json.loads(identity.read_text())
+              emit("SOURCE_IDENTITIES", {
+                  "changedPackageEntries": data.get("changedPackageEntries"),
+                  "arms": {label: {key: arm.get(key) for key in (
+                      "sha", "tree", "packageSha256", "lockSha256", "fixtureLockSha256")}
+                      for label, arm in data.get("arms", {}).items()}})
+          reports = sorted(root.rglob("run-1.json")) if root.exists() else []
+          for path in reports:
+              try:
+                  data = json.loads(path.read_text())
+                  emit("RUN_STATUS", {"path": str(path.relative_to(root)),
+                      "status": data.get("status"), "failureReason": data.get("failureReason"),
+                      "browserVersion": data.get("browserVersion")})
+              except Exception as error:
+                  emit("UNREADABLE", {"path": str(path), "error": str(error)})
+          if not (root / "analysis.json").exists() and root.exists():
+              logs = sorted(root.rglob("*.log"), key=lambda p: p.stat().st_mtime)[-4:]
+              for path in logs:
+                  emit("FAILURE_LOG_TAIL", {"path": str(path.relative_to(root)),
+                      "lines": path.read_text(errors="replace").splitlines()[-80:]})
+          PY
+
+      - name: Preserve every raw observation and failed-run record
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pipeline-1b47-screen-${{ matrix.dictionary }}
+          path: |
+            builds/perf/pipeline-screen-1b47
+            !builds/perf/pipeline-screen-1b47/*-sources/**
+          if-no-files-found: error
+          retention-days: 14
