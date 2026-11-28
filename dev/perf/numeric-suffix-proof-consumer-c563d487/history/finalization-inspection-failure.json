@@ -1,0 +1,14 @@
+{
+  "recordedAtUtc": "2026-11-28T10:27:44.395818+00:00",
+  "scope": "Untimed staging-only syntax/structure check; no acquisition or source change",
+  "scriptSha256": "0899c3f144e56e9e08b73f0ff931a10a46b6dbcffb509560b0b8923c0222d5c4",
+  "exitCode": 1,
+  "line": 69,
+  "assertion": "set(workflow['jobs']) == {'prepare', 'component'}",
+  "actualJobs": [
+    "prepare",
+    "screen"
+  ],
+  "bindingUnchanged": true,
+  "newStageExists": false
+}

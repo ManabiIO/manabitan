@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:05:33.605667+00:00",
+  "scope": "Independent root source-only audit; no compiler, native execution, tests, or timings.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baselineCSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+  "priorClosedCandidateCSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "candidateCSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "checks": {
+    "completeSuffixEqualityAndMetadataRebasing": {
+      "byteIdentical": true,
+      "bytes": 1725,
+      "sha256": "c68580796e6fcf0b0d5051beffa5e0812cbea7e7211af7d648a1e110a1a2b60a"
+    },
+    "admission": {
+      "byteIdentical": true,
+      "bytes": 268,
+      "sha256": "049bc04d8bced5e67eca941fcaa5a15452a461e90fcf0a881761857251f40840"
+    },
+    "currentKeysAndMetadataFlags": {
+      "byteIdentical": true,
+      "bytes": 6054,
+      "sha256": "636751de714e8ddcc7eded7fe5083887e1b4810ede2a3a66ea83824c08f5f0f8"
+    },
+    "globalExactContentBranch": {
+      "byteIdentical": true,
+      "bytes": 1178,
+      "sha256": "ddc478ed70ee1490205bf420d0ada509b4a8dd32df56cc1f7265197e880fc071"
+    },
+    "publicationAndRowAdvance": {
+      "byteIdentical": true,
+      "bytes": 4924,
+      "sha256": "b276549bb8efc4975c6b3a85e6528323fa27ff00fb756601dacd813cf5ce0608"
+    },
+    "ordinaryNumericConversionAndNegativeZeroGuard": {
+      "identicalAfterSingleIndent": true,
+      "sha256": "861f4ce997036da499a25fa463c00423ef7155ab8a402f212181f771aa12ace6"
+    }
+  },
+  "reasoning": [
+    "Only strict full-suffix byte equality returns named status2; normal parse returns1 and failure0.",
+    "The fused caller supplies the glossary-witness pointer whenever suffix reuse is enabled, so status2 has the immediate predecessor witness. A glossary-only match cannot authorize numeric copying.",
+    "Every prior row crossed numeric conversion and score negative-zero rejection before row_count advanced; unsupported numeric values would have already returned.",
+    "Sequence negative zero retains accepted integer0 and its metadata span; null sequence retains the sentinel and prior -1.",
+    "Current keys complete validation and interning before numeric copying. Later malformed rows and capacity/fallback outcomes retain publication ordering.",
+    "All content fields lie inside the complete suffix proof; the ordinary recent-match witness remains the same predecessor with unchanged signature/canonical metadata/hit accounting.",
+    "The global exact-content branch is unchanged. No persistent cache, allocation, ABI/export or admission change is proposed."
+  ],
+  "priorReadOnlyFailure": "root-source-review-attempt-1.json",
+  "decision": "No source blocker identified; focused tests, exact compilation/reproduction and prospective source-bound component screen still required. No performance claim or PR approval."
+}

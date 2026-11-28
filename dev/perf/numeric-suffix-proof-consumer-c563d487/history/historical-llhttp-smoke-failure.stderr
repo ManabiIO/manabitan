@@ -1,0 +1,13 @@
+(node:17) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-corrected/hosted/smoke.mjs:30
+    diagnosticExports ? Number(diagnosticExports.row_suffix_diag_get(index)) : 0]));
+                                                 ^
+
+TypeError: diagnosticExports.row_suffix_diag_get is not a function
+    at file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-corrected/hosted/smoke.mjs:30:50
+    at Array.map (<anonymous>)
+    at counters (file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-corrected/hosted/smoke.mjs:29:60)
+    at file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-corrected/hosted/smoke.mjs:120:20
+
+Node.js v22.22.0

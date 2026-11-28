@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:03:08.082551+00:00",
+  "status": "Prospective thresholds frozen before any new-candidate acquisition; exact candidate/tooling identities must be separately reviewed and bound before publication.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "sourceScope": "A separately reviewed positive full-suffix proof consumer, applied directly to this baseline. The completed dcfc\u21924cd full cohort remains rejected and is not rerun or pooled.",
+  "componentPlan": {
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "measuredObservations": 48,
+    "freshChildrenPerDictionary": 16,
+    "candidatePairsPerDictionary": 4,
+    "identicalCodePairsPerDictionary": 4,
+    "orders": [
+      "ABCD",
+      "DCBA",
+      "ABCD",
+      "DCBA"
+    ],
+    "armSources": {
+      "A": "baseline",
+      "B": "candidate",
+      "C": "baseline",
+      "D": "baseline"
+    },
+    "warmupPassesPerChild": 2,
+    "measuredPassesPerChild": 1,
+    "nodeVersion": "v22.22.0",
+    "nodeArguments": [
+      "--expose-gc",
+      "--max-old-space-size=512"
+    ],
+    "filesPerGroup": {
+      "jmdict": 7,
+      "jitendex": 10,
+      "vndb": 4
+    },
+    "flags": {
+      "jmdict": {},
+      "jitendex": {},
+      "vndb": {
+        "experimentalNativeEscapedKeys": true
+      }
+    },
+    "timingBoundary": "Unchanged completed numeric-corrected component screen: native compressed inflation+CRC+strict parse+completed lookup. Source reads, module compilation, two warmups, explicit GC and full output digest remain outside elapsed clocks.",
+    "syntheticPerformanceObservations": 0
+  },
+  "componentTargetPromotion": {
+    "dictionary": "vndb",
+    "metric": "elapsedMs",
+    "minimumMedianPairedReductionPercent": 2,
+    "requiredFasterPairs": 4,
+    "minimumEffectVsControl": "The magnitude of median candidate paired reduction must exceed the largest absolute paired A/A percent change in the same corpus.",
+    "requiredGates": [
+      "All48 planned observations complete without replacement",
+      "Exact source/binary/tool/fixture/runtime bindings",
+      "Full correctness and adversarial parity",
+      "Every-row rich content/dedup/index/media output equality",
+      "Separate untimed diagnostic proves actual positive suffix proofs and their numeric/content consumers"
+    ],
+    "decision": "Passing permits consideration of separately frozen full-browser qualification; it makes no import or memory claim."
+  },
+  "componentNonTargetRisk": {
+    "dictionaries": [
+      "jmdict",
+      "jitendex"
+    ],
+    "metric": "elapsedMs",
+    "strictlyGreaterMedianPairedSlowdownPercent": 3,
+    "requiredSlowerPairs": 4,
+    "minimumEffectVsControl": "The median candidate paired slowdown must exceed the largest absolute paired A/A percent change in the same corpus.",
+    "decision": "A trigger holds or rejects this exact candidate. Ambiguous adverse outcomes are reported and may hold qualification; absence of the trigger is not equivalence/nonregression proof."
+  },
+  "futureFullQualification": {
+    "observations": 252,
+    "targetDictionary": "vndb",
+    "independentJobsPerDictionary": 2,
+    "candidatePairsPerJob": 12,
+    "minimumMedianReductionPercentEachTargetJob": 2,
+    "minimumFasterPairsEachTargetJob": 9,
+    "descriptivePairedBootstrap95UpperBoundBelowPercent": 0,
+    "identicalCodeVariation": "Materially smaller than each target effect; no control subtraction.",
+    "requiredGates": [
+      "Exact source and release package identity",
+      "All correctness/storage/persisted-lookup/media checks",
+      "Exact expected changed package entry set and size accounting",
+      "Separate fixed whole-process-tree sampled PSS/private memory qualification"
+    ],
+    "memory": {
+      "maximumCoverageGapMs": 250,
+      "minimumStableFullyReadImportSamples": 5,
+      "maximumMedianPairedGrowthPercent": 5,
+      "maximumAnyPairGrowthPercent": 10
+    },
+    "sourceBinding": "New full source/tooling/fixture/observer identities must be frozen before acquisition. No gain transfer from component or prior baselines."
+  },
+  "failurePolicy": "No selected retries, overwrite or resume. Preserve every successful, failed and partial child stdout/stderr/status and all unattempted schedule entries. A correctness/source failure blocks that cell; matrix fail-fast is false. No result is promoted from an incomplete48 plan.",
+  "interpretation": [
+    "Each corpus and its identical-code controls is reported separately.",
+    "No pooling hosts/corpora or prior studies, subtracting controls, selecting repetitions, removing outliers or changing admission from timing.",
+    "Diagnostic counters are compiled into a distinct module and never measured.",
+    "External host contention is uncontrolled and assessed descriptively through adjacent A/A controls.",
+    "Component native/lookup work excludes browser workers, storage/compression/UI and does not qualify process memory."
+  ]
+}

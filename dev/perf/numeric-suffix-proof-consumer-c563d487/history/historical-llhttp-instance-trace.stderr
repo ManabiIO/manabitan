@@ -1,0 +1,15 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+INSTANCE_EXPORTS ["memory","_initialize","__indirect_function_table","llhttp_init","llhttp_should_keep_alive","llhttp_alloc","malloc","llhttp_free","free","llhttp_get_type","llhttp_get_http_major","llhttp_get_http_minor","llhttp_get_method","llhttp_get_status_code","llhttp_get_upgrade","llhttp_reset","llhttp_execute","llhttp_settings_init","llhttp_finish","llhttp_pause","llhttp_resume","llhttp_resume_after_upgrade","llhttp_get_errno","llhttp_get_error_reason","llhttp_set_error_reason","llhttp_get_error_pos","llhttp_errno_name","llhttp_method_name","llhttp_status_name","llhttp_set_lenient_headers","llhttp_set_lenient_chunked_length","llhttp_set_lenient_keep_alive","llhttp_set_lenient_transfer_encoding","llhttp_message_needs_eof"]
+CASE equal-numerics-cross-bank-escaped-keys
+file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-original-preflight/smoke-hook-trace.mjs:31
+    diagnosticExports ? Number(diagnosticExports.row_suffix_diag_get(index)) : 0]));
+                                                 ^
+
+TypeError: diagnosticExports.row_suffix_diag_get is not a function
+    at file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-original-preflight/smoke-hook-trace.mjs:31:50
+    at Array.map (<anonymous>)
+    at counters (file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-original-preflight/smoke-hook-trace.mjs:30:60)
+    at file:///workspace/scratch/c563d487c718/experiments/row-suffix-numeric-original-preflight/smoke-hook-trace.mjs:122:20
+
+Node.js v22.22.0

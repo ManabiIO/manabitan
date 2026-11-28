@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:13:34.601500+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent source-byte/span comparison and manual proof review; no native/compiler/test/timing execution.",
+  "oldCandidateCSha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+  "candidateCSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "checks": {
+    "fullSuffixEqualityAndRebasing": {
+      "bytes": 1725,
+      "sha256": "c68580796e6fcf0b0d5051beffa5e0812cbea7e7211af7d648a1e110a1a2b60a",
+      "byteIdentical": true
+    },
+    "admissionExpression": {
+      "bytes": 268,
+      "sha256": "049bc04d8bced5e67eca941fcaa5a15452a461e90fcf0a881761857251f40840",
+      "byteIdentical": true
+    },
+    "currentKeyValidationAndInterning": {
+      "bytes": 6054,
+      "sha256": "636751de714e8ddcc7eded7fe5083887e1b4810ede2a3a66ea83824c08f5f0f8",
+      "byteIdentical": true
+    },
+    "globalExactContentBranch": {
+      "bytes": 1178,
+      "sha256": "ddc478ed70ee1490205bf420d0ada509b4a8dd32df56cc1f7265197e880fc071",
+      "byteIdentical": true
+    },
+    "completedRowPublicationAndAdvance": {
+      "bytes": 4921,
+      "sha256": "751f37de8051c12cb0f7d965170e7d0eb4fbf9bf2151053f028f095d39e87ed5",
+      "byteIdentical": true
+    },
+    "ordinaryNumericConversionAndScoreNegativeZeroGuard": {
+      "identicalIgnoringIndentation": true,
+      "normalizedSha256": "a375a9a19f5e989bf4a8ba050fd30899a2beb1fc7eb76909f3ead3a75ece22c2"
+    }
+  },
+  "uniqueFullSuffixStatusReturnSite": true,
+  "metadataOnlyCallersKeepReuseDisabled": [
+    "if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0, 0)) {",
+    "if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0, 0)) {"
+  ],
+  "reviewNotes": [
+    "A successful full suffix is stronger than a glossary witness; status2 is the sole new consumer authority.",
+    "Current key validation, decoding, interning and their fallback exits still precede copied numeric columns.",
+    "Previous row_count advancement proves prior native numeric conversion and score negative-zero rejection completed. Unsupported strict numeric values cannot acquire a prior accepted witness.",
+    "Strict score grammar rejects null. Generic parse_int32_token null-to-zero support does not make null score an accepted status2 case.",
+    "Null sequence keeps its sentinel and integer -1; accepted non-null sequence negative zero keeps integer0.",
+    "Ordinary content reuse keeps the same immediate-predecessor witness and signature slot. Global exact-content behavior and counters remain byte-identical."
+  ],
+  "decision": "No source blocker identified; focused-test source review remains open for the requested sequence-negative-zero and invalid-null-score cases.",
+  "newMeasurements": false
+}

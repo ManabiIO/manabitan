@@ -1,0 +1,12 @@
+--- smoke-before-getter-guard.mjs
++++ smoke.mjs
+@@ -17,7 +17,8 @@
+     const instantiate = WebAssembly.instantiate.bind(WebAssembly);
+     WebAssembly.instantiate = async (...args) => {
+         const result = await instantiate(...args);
+-        diagnosticExports = result instanceof WebAssembly.Instance ? result.exports : result.instance.exports;
++        const instance = result instanceof WebAssembly.Instance ? result : result.instance;
++        if (typeof instance.exports.row_suffix_diag_get === 'function') { diagnosticExports = instance.exports; }
+         return result;
+     };
+ }

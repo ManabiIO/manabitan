@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:27:50.748426+00:00",
+  "scope": "Prospective source/tooling finalization and exact staging only; no native build, candidate execution, corpus pass or timing.",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "manifestSha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+  },
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "candidatePatchSha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
+  "oldBinding": {
+    "bytes": 3203,
+    "sha256": "e8be653d5a594fc5327d7aff1b4302c288634245cef62b91fdc93b6b43931812",
+    "gitBlobSha1": "4f8dc4ddb39743d45b7cc5ce39a7acd58b3bf499"
+  },
+  "finalBinding": {
+    "bytes": 3817,
+    "sha256": "0377604a2f6856801770e1b8b02e1b07c9caf3165b1ace1c82732cc715954da8",
+    "gitBlobSha1": "c02adbaa0ffc50157ad861a29142ab646a99229a"
+  },
+  "bindingDiff": {
+    "bytes": 4130,
+    "sha256": "4d46dbbdebe82e935fa88aa34a495e00d6091db950b496d17ba31e84b80ad097",
+    "gitBlobSha1": "0f3aca94da8032e8254fa1ed6c6533407ee3da1b"
+  },
+  "coreReview": {
+    "bytes": 5769,
+    "sha256": "9d646be9734e0fd9fdb24657ef1be7b869cc8956c93fbf57ff358519802d4def",
+    "gitBlobSha1": "e298ec7a5ca4338bc1865cbb45cdd7695a6a37f4"
+  },
+  "workflow": {
+    "bytes": 4992,
+    "sha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+    "gitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+  },
+  "criteria": {
+    "bytes": 5506,
+    "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
+  },
+  "syntaxChecks": [
+    {
+      "file": "run.py",
+      "check": "python ast.parse",
+      "passed": true
+    },
+    {
+      "file": "prepare-and-validate.py",
+      "check": "python ast.parse",
+      "passed": true
+    },
+    {
+      "file": "prepare-component.py",
+      "check": "python ast.parse",
+      "passed": true
+    },
+    {
+      "file": "prepare-diagnostic.py",
+      "check": "python ast.parse",
+      "passed": true
+    },
+    {
+      "file": "emit-build-evidence.py",
+      "check": "python ast.parse",
+      "passed": true
+    },
+    {
+      "file": "screen.mjs",
+      "argv": [
+        "node",
+        "--check",
+        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/screen.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "smoke.mjs",
+      "argv": [
+        "node",
+        "--check",
+        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/smoke.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "native-oracle.mjs",
+      "argv": [
+        "node",
+        "--check",
+        "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/native-oracle.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "workflow.yml",
+      "check": "yaml.safe_load and required prepare dependency / fail-fast assertions",
+      "passed": true
+    }
+  ],
+  "checks": {
+    "all17CoreFilesMatchIndependentReview": true,
+    "allFiveQualificationFilesMatchSourceOwner": true,
+    "sourceAndPatchUnchanged": true,
+    "criteriaAndWorkflowUnchanged": true,
+    "finalBindingHasNoPendingFields": true,
+    "allPreFreezeFailuresPreserved": true
+  },
+  "limitations": [
+    "Source-only diagnostic text was generated and independently reversed; no diagnostic/native module has been compiled or executed.",
+    "Prior local fixture lint/types used the disclosed old 9e10 context and do not replace exact f28 hosted correctness gates.",
+    "The candidate WASM and generated manifest are unknown until the source-bound hosted build; no compiled identity is invented.",
+    "The 48-observation component screen remains unacquired and cannot establish full-browser or memory gains.",
+    "The closed dcfc-to-4cd full cohort is unchanged and failed its prospective target latency criteria."
+  ],
+  "nativeBuilds": 0,
+  "candidateExecutions": 0,
+  "newMeasuredObservations": 0
+}

@@ -1,0 +1,18 @@
+[
+  "attempts",
+  "boundedRanges",
+  "tailRejected",
+  "fullRejected",
+  "hits",
+  "hitBytes",
+  "potentialRangeBytes",
+  "eligibleStreakRows",
+  "numericRejected",
+  "actualSuffixSuccessRows",
+  "scoreTokenEndScansAvoided",
+  "sequenceTokenEndScansAvoided",
+  "numericCopyRows",
+  "scoreConversionsAvoided",
+  "sequenceConversionsAvoided",
+  "ordinaryContentComparisonsAvoided"
+]

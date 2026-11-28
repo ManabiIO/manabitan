@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T10:17:03.117703+00:00",
+  "scope": "Source, fixture-data and static JS QA only; no native parser, candidate module, test execution, corpus or timing",
+  "candidateBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateC": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "original41CasesRetainedByteExactly": true,
+  "newFocusedCases": 17,
+  "testFiles": 3,
+  "fixtureFiles": 2,
+  "finalChecks": {
+    "syntax": {
+      "files": 5,
+      "exitCodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "scopedRepositoryEslint": {
+      "files": 5,
+      "errors": 0,
+      "warnings": 0
+    },
+    "strictTargetedTestTypes": {
+      "exitCode": 0,
+      "entryFiles": 5,
+      "sameStrictOptions": true,
+      "includesAmbientAndTransitiveTypes": true
+    },
+    "fixtureData": {
+      "scope": "Fixture-data import and assertions only; no test module, native parser, corpus or timing execution",
+      "existing15FixtureInputsAndCountsUnchangedAfterNames": true,
+      "acceptedNegativeZeroSequenceRows": 3,
+      "strictInvalidNullScoreAfterCompletedPrefixRows": 4,
+      "newFocusedCases": 17,
+      "retainedOriginalCases": 41,
+      "genericExpectedRowsUnchanged": true,
+      "nativeExpectationsStillUnexecuted": true,
+      "fixtureSha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510"
+    }
+  },
+  "initialStaticFailures": [],
+  "nativeExecution": "pending exact-f28 hosted preparation",
+  "staticContextCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "staticScopeLimitation": "Existing read-only prior JS/config/dependencies used for preparatory static checks. Full exact-f28 lint/types/unit/native correctness remains required, including current #981 runtime changes.",
+  "files": {
+    "candidate.c": {
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc"
+    },
+    "candidate.patch": {
+      "bytes": 11918,
+      "sha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77"
+    },
+    "delta-from-4cd.patch": {
+      "bytes": 6504,
+      "sha256": "be581cfbbf76ba9a3b93aa2d68e716d1b56181221a21d48130f2becd4d6d1a94"
+    },
+    "source-proof-receipt.json": {
+      "bytes": 2978,
+      "sha256": "1d79d35fac6cfc664a96233dfcccff69ed4170dbe3f0cae59f971a768da74ffe"
+    },
+    "history-and-safety-assessment.json": {
+      "bytes": 13079,
+      "sha256": "4e790139ca19a82b4b64a9e74bdd1fd5ac747e8074d6312e765300430fb6717e"
+    },
+    "root-source-review.json": {
+      "bytes": 2956,
+      "sha256": "1d6eb264a4028ed965f5f839c8119c991ebcaa863566f3d078dd1839d003e3d7"
+    },
+    "qualification/term-bank-row-suffix-proof-consumer.test.js": {
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f"
+    },
+    "qualification/term-bank-row-suffix-proof-fixtures.js": {
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510"
+    },
+    "qualification/term-bank-row-suffix-reuse.test.js": {
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f"
+    },
+    "qualification/term-bank-row-suffix-token-end-fixtures.js": {
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc"
+    },
+    "qualification/term-bank-row-suffix-token-ends.test.js": {
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd"
+    },
+    "static-preflight-reports/eslint-initial.json": {
+      "bytes": 1587,
+      "sha256": "bf8fe1a5366c66fee0e291620759e959cff72047974cea7d592f8a81cdcd3037"
+    },
+    "static-preflight-reports/eslint-initial.status.json": {
+      "bytes": 1138,
+      "sha256": "e8cd38c5e5a42a596448091ee1bbaaaab9de2128ad8945e6497b6274efa78e40"
+    },
+    "static-preflight-reports/eslint-initial.stderr": {
+      "bytes": 1148,
+      "sha256": "467dbb6ab2c58fa18e2f5c09e0d47db126f1962cb306cdcafde58d50ef478d85"
+    },
+    "static-preflight-reports/eslint-initial.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/fixture-data-check-initial.json": {
+      "bytes": 458,
+      "sha256": "f57528129173ff0bd7e1628fd3ddf7cf826b9997ca8f5b6562f6ea4bc05b999e"
+    },
+    "static-preflight-reports/fixture-data-check-initial.status.json": {
+      "bytes": 570,
+      "sha256": "9b6f460ee4f3053bacef9ab4d7d059a50f1efb7a820af30648ab37714aa2f4c7"
+    },
+    "static-preflight-reports/fixture-data-check-initial.stderr": {
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    "static-preflight-reports/fixture-data-check-initial.stdout": {
+      "bytes": 425,
+      "sha256": "35d7728e2f0d60570a90995669e9b3b4636ff372a27696c9f0d3d3c297e29d9f"
+    },
+    "static-preflight-reports/fixture-data-check.json": {
+      "bytes": 503,
+      "sha256": "46d0cdbef9320dbbc0e92750d60a0434c28e7999228e66cd9c04d8f0c189600b"
+    },
+    "static-preflight-reports/fixture-data-check.status.json": {
+      "bytes": 570,
+      "sha256": "33251b7b11fc26599b738d20a0e1aabbd9cd99f8424889f6bb2ad3ac52c197e6"
+    },
+    "static-preflight-reports/fixture-data-check.stderr": {
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    "static-preflight-reports/fixture-data-check.stdout": {
+      "bytes": 466,
+      "sha256": "d9cb3c0008bc07b4d6deb7a7f9883b16821324f0ff8aadad4e530036ee4fb4f2"
+    },
+    "static-preflight-reports/setup.json": {
+      "bytes": 1673,
+      "sha256": "a9e104a565b77b99e5f1134f4c67333b61efb23ffd13ac33de8dceb965e8f8e3"
+    },
+    "static-preflight-reports/strict-targeted-types.status.json": {
+      "bytes": 792,
+      "sha256": "dba58e994ec8e71bae2167a879e853532f5ffd9dfaf56a82f9bac3c4ae0266bd"
+    },
+    "static-preflight-reports/strict-targeted-types.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/strict-targeted-types.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/syntax-initial-0.status.json": {
+      "bytes": 649,
+      "sha256": "26c14b7cdfa9697ea4a54a40a04421c1f514f7f8ef5a484f6e12d9aba7ab4945"
+    },
+    "static-preflight-reports/syntax-initial-0.stderr": {
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    "static-preflight-reports/syntax-initial-0.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/syntax-initial-1.status.json": {
+      "bytes": 657,
+      "sha256": "19f0a1fa295cbbd367da55c23a0a21e72694ec2259d2e7eb89d9fee52794d510"
+    },
+    "static-preflight-reports/syntax-initial-1.stderr": {
+      "bytes": 175,
+      "sha256": "84336e09f9c0a345a4a73eca39b2d51e444ce40180e89f516a0d99adc233b163"
+    },
+    "static-preflight-reports/syntax-initial-1.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/syntax-initial-2.status.json": {
+      "bytes": 654,
+      "sha256": "ecf297e2d81236af810ed53c847490fff8bcc6faff8aadc658cf5b3174f8b32c"
+    },
+    "static-preflight-reports/syntax-initial-2.stderr": {
+      "bytes": 175,
+      "sha256": "e36aac0ec25f0df90bec7253e7660583368ffc4ba4765c22cf5519dda8bb96be"
+    },
+    "static-preflight-reports/syntax-initial-2.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/syntax-initial-3.status.json": {
+      "bytes": 653,
+      "sha256": "98c2bf8e9bfdc8c0899ade5dcbc94d526e13743e154f93579d7734bd0e7e1512"
+    },
+    "static-preflight-reports/syntax-initial-3.stderr": {
+      "bytes": 175,
+      "sha256": "4bab9aebb28c30e50cf26b894915105f7422518f071df726227981b4d63b39dc"
+    },
+    "static-preflight-reports/syntax-initial-3.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "static-preflight-reports/syntax-initial-4.status.json": {
+      "bytes": 658,
+      "sha256": "6319038ffe88d33b614f16f4e72b94a770cf1aeeab02ea54db1df7585b41236c"
+    },
+    "static-preflight-reports/syntax-initial-4.stderr": {
+      "bytes": 175,
+      "sha256": "0d5d67f1b9c5fb3ff11dd2ee455a8343b3b569eb21461af1dd0ad224462b3c0d"
+    },
+    "static-preflight-reports/syntax-initial-4.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

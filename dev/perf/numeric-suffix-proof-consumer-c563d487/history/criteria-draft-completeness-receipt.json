@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:03:27.946570+00:00",
+  "scope": "Draft completeness correction before source freeze, publication or any new-candidate observations.",
+  "oldSha256": "ba15187e9bb71e14907d9652b64b1093ac1433ce910ea454029709c736a0a55f",
+  "newSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "change": "Added the explicitly unchanged existing full-browser non-target replicated1%/9-of-12/below-control/positive95% hold rule; all existing threshold fields unchanged.",
+  "newCandidateObservations": 0,
+  "published": false
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:30:48.563303+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Narrow source-only review of the authorized untimed smoke observer export guard; no native/build/test/corpus/timing execution.",
+  "oldSmokeSha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f",
+  "newSmokeSha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42",
+  "patchSha256": "19d60786ea351518c010b1908978f11eae207666cf5119b5b01ebda40c01e18b",
+  "amendmentSha256": "c232705d99151c042a2c18e2c296231012d789f2430c0d98c14eb859cd9d8813",
+  "historicalWitnessSha256": "d452afa0e447a5d2a9b8bbe4ff6d1698e0451188c8dbf20b2917f1666f243075",
+  "checks": {
+    "exactSingleAssignmentReplacedByInstanceAndGetterGuard": true,
+    "samePredicateAndInstanceSelectionAsUnchangedTimedChild": true,
+    "everyOtherReviewedCoreFileByteIdentical": true,
+    "original56FileStageAndManifestPreservedExactly": true,
+    "oldCore9d646AndIdentity19d8Retained": true,
+    "noSourceFixtureCriteriaClockOrStatisticalChange": true
+  },
+  "reasoning": [
+    "The prior smoke hook captured every WebAssembly instance, so a separate llhttp module could supply exports lacking row_suffix_diag_get. The retained historical trace and failure demonstrate that collision.",
+    "The new hook stores exports only when row_suffix_diag_get is a function, while returning every original instantiation result unchanged. Before the diagnostic parser instantiates, counters continue to report zero as designed.",
+    "Only counter ownership in the untimed synthetic smoke changes. The timed child already uses this exact guard and remains byte-identical."
+  ],
+  "decision": "PASS for the exact guard delta. Refresh core review and final binding; the original final identity review is historical and does not approve refreshed publication bytes.",
+  "newMeasurements": false
+}

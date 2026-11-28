@@ -1,0 +1,104 @@
+{
+  "name": "develop",
+  "commit": {
+    "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "node_id": "C_kwDORX5CfNoAKGYyOGMyODAxZmNmZDk0MTZmMjIwYjQ2YjljYmFmZWVlOTAxYzFjYjI",
+    "commit": {
+      "author": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com",
+        "date": "2026-11-28T09:49:28Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-11-28T09:49:28Z"
+      },
+      "message": "Merge pull request #981 from ManabiIO/codex/manabitan-source-integration-978-980-20261128\n\nperf: integrate dictionary lookup and import components",
+      "tree": {
+        "sha": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCqOoCRC1aQ7uu5UhlAAAuA0QAIlx9bLVHdEMhCUfM/t9Vu/+\n5CYOxZmZXQ4nz8qOxW5NRiRqo6VhmSHeh716qnJRkz2Um/VhAZ6YmAfTGu4ia2hT\nfBQeo9cOjjfvtJF5iikQHpfacpvemGw2v64hbAFmwjddIE2NWC/SAy7BbouH29Jr\nZiUdwbqFIeqSH8ZylzD4TXIes+RHzY/PjfHi/VFMIAhsnv966B+xxK5et/0rxFW+\nSKJfyRfpk2mYnJaf8Q4jfhEsQD1yAvRPxAfNQZ/l3NlM9zqbfE97y94NpReeB5JB\nSejzk/44oCft7HzVpATp/QeUt33aZkM3E6TLQwjcfo7Kn5LHHJ8fRIzCz9gdx7eG\n15fiR1eTO9E04wXhtOSLq95SZ2KHlWe+6sYo3BdujdvrM7Kh7Io0im/qs9dSd0Sh\ncSrAyhpABzVxb9+RzalfR0/SjHxd98fzkVFnnqZOdk6SmvyDnJrpH2NOUiayjsBC\nBFJjxFNy17EQ0KuFLky21w6ResPf5TSVjEVW8LBF6f9+yAkQikGHofUAymwu/FzO\nD/oc/W9mHbaAKRag6NYTZN2bSlrJMsNdiN46I6ViwzKaAXJZAWDSPXUE4oossiQG\nK21JFRc/JemVJp69FxvA3JmDNpEgXUa5C19Ghiq8fNQlCAHbDAIyc4vvCbAa/8fv\nA+ujJYJ+004WPGrwh198\n=6/9h\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree b428d0c9fa18e4956f3e2b182cae934de78e8f63\nparent dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16\nparent 81692f1df4db660f9c8e81269bd5e26ed241363c\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795859368 -0500\ncommitter GitHub <noreply@github.com> 1795859368 -0500\n\nMerge pull request #981 from ManabiIO/codex/manabitan-source-integration-978-980-20261128\n\nperf: integrate dictionary lookup and import components",
+        "verified_at": "2026-11-28T09:49:28Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/comments",
+    "author": {
+      "login": "aehlke",
+      "id": 71601,
+      "node_id": "MDQ6VXNlcjcxNjAx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/aehlke",
+      "html_url": "https://github.com/aehlke",
+      "followers_url": "https://api.github.com/users/aehlke/followers",
+      "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+      "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+      "organizations_url": "https://api.github.com/users/aehlke/orgs",
+      "repos_url": "https://api.github.com/users/aehlke/repos",
+      "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/aehlke/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+      },
+      {
+        "sha": "81692f1df4db660f9c8e81269bd5e26ed241363c",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/81692f1df4db660f9c8e81269bd5e26ed241363c",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/81692f1df4db660f9c8e81269bd5e26ed241363c"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/ManabiIO/manabitan/branches/develop",
+    "html": "https://github.com/ManabiIO/manabitan/tree/develop"
+  },
+  "protected": true,
+  "protection": {
+    "enabled": false,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [],
+      "checks": []
+    }
+  },
+  "protection_url": "https://api.github.com/repos/ManabiIO/manabitan/branches/develop/protection"
+}

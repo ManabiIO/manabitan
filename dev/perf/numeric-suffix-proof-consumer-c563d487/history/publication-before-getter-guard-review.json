@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:28:51.354146+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Final independent publication identity and inventory review only. No native/build/test/corpus/timing run, no remote publication or ref update.",
+  "parentCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "parentTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "manifest": {
+    "path": "manifest.json",
+    "bytes": 24548,
+    "sha256": "2fc5cdd66786d45cadfb133412cd2611bcb4eb13d3415e5cec9f490a59390660"
+  },
+  "binding": {
+    "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+    "sha256": "0377604a2f6856801770e1b8b02e1b07c9caf3165b1ace1c82732cc715954da8",
+    "finalized": true,
+    "pending": []
+  },
+  "preparationRecordSha256": "8e7d75c60f6e33ddff1a7ae5a87b92582ad6b14a075b08538436cc5422927405",
+  "fileCount": 56,
+  "totalBytes": 796010,
+  "workflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "candidatePatchSha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "coreReviewSha256": "9d646be9734e0fd9fdb24657ef1be7b869cc8956c93fbf57ff358519802d4def",
+  "checks": {
+    "all56StagedFilesMatchOriginalSourceBytes": true,
+    "all56SizesAndSha256MatchManifest": true,
+    "all56GitBlobSha1MatchManifest": true,
+    "exactListedFileSetNoUnlistedFiles": true,
+    "noSymlinksAndAllPortableRelativePaths": true,
+    "allFilesUtf8": true,
+    "onlyOneNewWorkflowAndIsolatedDevPerfTooling": true,
+    "all17CoreFilesExactlyMatchIndependentReview": true,
+    "allFiveQualificationFilesExactlyMatchFrozenOwnerCopies": true,
+    "allSixBoundReviewsMatchExactHashes": true,
+    "baselineSourceLocksPatchCriteriaWorkflowUnchangedByFinalization": true,
+    "onlyReviewedRuntimeFixtureHashesAndFinalizationReviewMetadataChangedInBinding": true,
+    "allPriorFalseBindingAndPreFreezeCorrectionsRetained": true,
+    "noUnresolvedRuntimeOrBindingPlaceholder": true,
+    "candidateBinaryIntentionallyUnknownUntilHostedBuild": true,
+    "noProductTreeChanges": true
+  },
+  "readOnlyInspectionCorrection": {
+    "failedLookup": "A preliminary read looked for preparation-record.json at the publication directory root. The manifest correctly places it under the isolated tooling tree; the subsequent read and hash check used that declared location.",
+    "failedBeforeAnyFileWrite": true,
+    "sourceObservationOrStageChanged": false
+  },
+  "decision": "PASS: ready for parent review/publication of this exact56-file payload on the stated f28 baseline. This is experiment preparation, not product promotion or a performance claim.",
+  "newMeasurements": false
+}

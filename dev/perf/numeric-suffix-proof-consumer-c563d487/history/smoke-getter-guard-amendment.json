@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:29:59.243350+00:00",
+  "scope": "Narrow untimed observer correction before any new candidate build/execution/acquisition",
+  "oldSmoke": {
+    "bytes": 13814,
+    "sha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f"
+  },
+  "newSmoke": {
+    "bytes": 13909,
+    "sha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42"
+  },
+  "diff": {
+    "bytes": 593,
+    "sha256": "19d60786ea351518c010b1908978f11eae207666cf5119b5b01ebda40c01e18b"
+  },
+  "exactChange": "Capture exports only from a WebAssembly instance with the diagnostic row_suffix_diag_get function, matching the existing unchanged component screen guard.",
+  "historicalFailureEvidence": {
+    "historical-llhttp-smoke-failure.stderr": {
+      "bytes": 870,
+      "sha256": "1aff0e142b3b870c869fcf3ab431cb0fa03ab92d9e5f157e88d05f8eb53fb7bc"
+    },
+    "historical-llhttp-instance-trace.stderr": {
+      "bytes": 1704,
+      "sha256": "b9470e62d1208cfc502e76ecb83f3fdcff871f23108ac2dbbdbd0efb0696d341"
+    },
+    "historical-llhttp-guarded-qa.json": {
+      "bytes": 515,
+      "sha256": "3772459799f2f2b7164f5eaea641887887d8df16ba0d69e7ced4136c9d8e493e"
+    }
+  },
+  "syntax": {
+    "argv": [
+      "node",
+      "--check",
+      "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/smoke.mjs"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "unchanged": {
+    "screen.mjs": {
+      "bytes": 18924,
+      "sha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c"
+    },
+    "candidate.patch": {
+      "bytes": 11918,
+      "sha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77"
+    },
+    "prospective-review-criteria.json": {
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+    },
+    "workflow.yml": {
+      "bytes": 4992,
+      "sha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8"
+    }
+  },
+  "newNativeBuilds": 0,
+  "newCandidateExecutions": 0,
+  "newMeasuredObservations": 0,
+  "priorPublicationManifestSha256": "2fc5cdd66786d45cadfb133412cd2611bcb4eb13d3415e5cec9f490a59390660"
+}

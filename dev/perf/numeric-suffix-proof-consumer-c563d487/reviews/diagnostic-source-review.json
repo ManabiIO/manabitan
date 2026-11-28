@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T10:18:44.616812+00:00",
+  "scope": "Independent read-only source/instrumentation review and literal edit replay only; no preparer execution, compiler, native parser, corpus or timing",
+  "review": "PASS",
+  "sourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "preparerSha256": "cf376b5320b8d1f3a7808f97f7b0ecc59b699e83f0d8e1614b81035ab60eff13",
+  "diagnosticSourceSha256": "a73b93ab2e55ac68508663b13544ba51d310230a3c3801df5fbf9817bf1ffef8",
+  "fieldSchemaSha256": "1a2f2012ce72e72c5d5338e7e96bb5cbb439820a4c84934be490ecd72d52c2f5",
+  "literalEditBlocks": 7,
+  "uniqueAnchorsAndForwardReplayExact": true,
+  "reverseEditsRestoreProductSourceExact": true,
+  "globalExactBranchByteIdentical": true,
+  "attribution": {
+    "slots0Through8": "Existing suffix admission/proof counters; tail comparison remains before full equality with the same short circuit return results.",
+    "actualSuffixSuccessRows": "Status2 observed immediately after successful row parse, before current-key interning.",
+    "scoreTokenEndScansAvoided": "Every status2 avoids one former score boundary scan.",
+    "sequenceTokenEndScansAvoided": "Only status2 rows with non-null sequence metadata avoid the former sequence boundary scan.",
+    "numericCopyRows": "Only status2 rows surviving current-key interning reach the numeric-copy branch.",
+    "scoreConversionsAvoided": "One per numeric-copy row.",
+    "sequenceConversionsAvoided": "Non-null sequence rows reaching numeric-copy branch only.",
+    "ordinaryContentComparisonsAvoided": "Increment only for status2 in ordinary recent-window branch; no global-exact increment."
+  },
+  "partialCases": {
+    "escapedCurrentKeyFallback": "Two proofs/end-scan skips but one numeric/ordinary consumer in the fixture; preserved by counter placement.",
+    "nullSequence": "Numeric rows are copied, but no non-null sequence boundary/conversion skip is counted.",
+    "sequenceNegativeZero": "Non-null metadata counts one skipped conversion even though accepted integer output is0.",
+    "globalExact": "Proof/numeric counters still operate; ordinary skip remains0."
+  },
+  "guardReview": [
+    "Product C SHA bound before transformations and checked unchanged afterwards.",
+    "Source-only mode cannot compile; native mode requires finalized binding.",
+    "All seven anchors require exactly one occurrence.",
+    "Refuses to overwrite existing diagnostic source.",
+    "Native compiler/linker version must contain pinned21.1.8; original target arguments retained, only diagnostic getter export added.",
+    "Every diagnostic duration excluded from performance comparisons."
+  ],
+  "nativeValidation": "Pending hosted execution and smoke; source review is not a correctness or speed result."
+}

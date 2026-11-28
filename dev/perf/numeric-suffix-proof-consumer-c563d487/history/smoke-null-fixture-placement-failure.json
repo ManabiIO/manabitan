@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:22:35.759557+00:00",
+  "oldSha256": "1aea93b362c4da856d18d744976b05ea9a686cfe2841f5923fd09e2ae478452a",
+  "newSha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f",
+  "diffSha256": "a54802dc966b534b7537842884d76c2583f4064dfbe288281bd0296096ef7c4f",
+  "finding": "The draft inserted malformed.push inside parse(), so parsing mutated the later malformed-case iteration. Independent source review caught this before any execution or acquisition.",
+  "correction": "Move the same one-line insertion to the top-level malformed fixture setup, once before all loops.",
+  "sourceChanged": false,
+  "qualificationFixturesChanged": false,
+  "timedChildChanged": false,
+  "criteriaChanged": false,
+  "newCandidateObservations": 0,
+  "nativeExecution": false,
+  "bindingFinalized": false
+}

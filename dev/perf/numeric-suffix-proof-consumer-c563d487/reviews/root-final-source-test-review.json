@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:18:31.902611+00:00",
+  "scope": "Root final source/test read and hash review; no compiler/native execution or timings",
+  "candidateCSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "rootSourceReviewSha256": "1d6eb264a4028ed965f5f839c8119c991ebcaa863566f3d078dd1839d003e3d7",
+  "qualificationFiles": {
+    "term-bank-row-suffix-reuse.test.js": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+    "term-bank-row-suffix-token-end-fixtures.js": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+    "term-bank-row-suffix-token-ends.test.js": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+    "term-bank-row-suffix-proof-fixtures.js": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+    "term-bank-row-suffix-proof-consumer.test.js": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f"
+  },
+  "retainedCases": 41,
+  "newCases": 17,
+  "totalFocusedCases": 58,
+  "review": [
+    "The inherited41 cases remain byte-identical.",
+    "Glossary-only equality cases preserve distinct numeric/content fields and cannot be mistaken for full-suffix proofs.",
+    "Later changed/unsupported values after an actual success exercise per-row status and fallback boundaries; independently decoded JSON content and enabled/disabled output/index parity are required.",
+    "Ring, separate banks and empty-bank transitions cover carried predecessor metadata; global and disabled modes verify unchanged branch behavior.",
+    "Current escaped-key fallback observes two proofs but only one numeric reuse, checking that key validation remains before numeric copying.",
+    "Accepted sequence negative zero explicitly checks pre-existing int32 zero semantics while preserving the generic JSON oracle for fallback cases.",
+    "Strict-invalid null score after a reused prefix rejects with no callback publication in both reuse modes; subsequent fresh parse succeeds.",
+    "Diagnostic names distinguish reused numeric rows, avoided non-null sequence conversions and skipped ordinary comparisons from physical copies or actual comparison calls."
+  ],
+  "staticReceiptSha256": "896542b76c044e398000fd3e8ac5dd9ca2d63d72bbc576224578ff7d24c01df6",
+  "staticScope": "Preparatory syntax/scoped lint/targeted types used prior9e10 read-only JS context; exact-f28 hosted full gates remain required.",
+  "decision": "No source/test blocker to the separately bound hosted correctness/component experiment after tooling review. No gain or PR conclusion."
+}

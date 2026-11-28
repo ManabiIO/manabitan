@@ -1,0 +1,29 @@
+{
+  "scope": "Separate counter-only module. All diagnostic durations excluded from performance comparisons.",
+  "sourceOnly": true,
+  "productSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "diagnosticSourceSha256": "a73b93ab2e55ac68508663b13544ba51d310230a3c3801df5fbf9817bf1ffef8",
+  "diagnosticFieldsSha256": "1a2f2012ce72e72c5d5338e7e96bb5cbb439820a4c84934be490ecd72d52c2f5",
+  "diagnosticFields": [
+    "attempts",
+    "boundedRanges",
+    "tailRejected",
+    "fullRejected",
+    "hits",
+    "hitBytes",
+    "potentialRangeBytes",
+    "eligibleStreakRows",
+    "numericRejected",
+    "actualSuffixSuccessRows",
+    "scoreTokenEndScansAvoided",
+    "sequenceTokenEndScansAvoided",
+    "numericCopyRows",
+    "scoreConversionsAvoided",
+    "sequenceConversionsAvoided",
+    "ordinaryContentComparisonsAvoided"
+  ],
+  "command": null,
+  "compiler": null,
+  "linker": null,
+  "diagnosticWasmSha256": null
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "Untimed preparation diff against the completed numeric-corrected child. No source/runtime/corpus execution.",
+  "originalScreenSha256": "5873393e76535146a49d0b18a4e77d3038b014c884556f9e1ecf4c9d5ac4d60d",
+  "screenSha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c",
+  "onlyScreenChange": "The diagnostic-only result field-name array is extended from9 to16; the entire timing/execute/warmup/options/flags/heap/source workload implementation is byte-identical.",
+  "defaultDiagnosticNullPathUnchanged": true,
+  "fields": [
+    "attempts",
+    "boundedRanges",
+    "tailRejected",
+    "fullRejected",
+    "hits",
+    "hitBytes",
+    "potentialRangeBytes",
+    "eligibleStreakRows",
+    "numericRejected",
+    "actualSuffixSuccessRows",
+    "scoreTokenEndScansAvoided",
+    "sequenceTokenEndScansAvoided",
+    "numericCopyRows",
+    "scoreConversionsAvoided",
+    "sequenceConversionsAvoided",
+    "ordinaryContentComparisonsAvoided"
+  ]
+}

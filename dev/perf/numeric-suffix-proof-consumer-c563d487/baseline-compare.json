@@ -1,0 +1,876 @@
+{
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/compare/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16...f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "html_url": "https://github.com/ManabiIO/manabitan/compare/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16...f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "permalink_url": "https://github.com/ManabiIO/manabitan/compare/ManabiIO:dcfc02a...ManabiIO:f28c280",
+  "diff_url": "https://github.com/ManabiIO/manabitan/compare/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16...f28c2801fcfd9416f220b46b9cbafeee901c1cb2.diff",
+  "patch_url": "https://github.com/ManabiIO/manabitan/compare/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16...f28c2801fcfd9416f220b46b9cbafeee901c1cb2.patch",
+  "base_commit": {
+    "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "node_id": "C_kwDORX5CfNoAKGRjZmMwMmEwYTU1MzQ5MjliMWU5ZmExZjI4MDFlYzdhMDc4NGVhMTY",
+    "commit": {
+      "author": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "message": "Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+      "tree": {
+        "sha": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d911260f1a57f518d59b3a12127fcc3b2293c918"
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCokmCRC1aQ7uu5UhlAAAgGEQAG1Dz8u/g+ETemEkUpAsVbqi\nIAjNBBjCIt3S4gg9r4VkyV6jwCMUUixE+gVdQj0bGLeHd/WP6T4XrEEj4B5yLbec\nyfiOQkVyA7w3G1pl2KaLtpRNpji2Co6LejpSkEOSJfe6AFQ8+S67j39fNDVxoXuA\n6vmIHYTO+qZk8YVrtXJ4shA9SSDogd3FUlOtnEIk9QDasFlzzmsJcwFBD4sk/bXo\n9PlARWXW2D9GELu8nDdzWNNZodE6E7eBkutFZ1+TU5uLuECRX/AUEDTdJ5hTKIsQ\nJbAnt9sZ/Ue3xNt8DOPLRAcLskmiblrdF5gUwAFy+5Y5JIETNEk6192Pv2gADz1C\nKzgbXPx65VM9qL+0TFUBVzGX2Uvecgd4Vp8ZxdSKSlNuVGvQjx24g7eJfzj2moz4\nZNESLJGBNRXjQqz1ZcsATFyphAQZmGd/BJdSIMMK8Lw+nO6jJldLz8mNYOMBI0pO\nzQavJCQJmmzUxWI4YcHMSjGkIYuGkxmNYMx73XF5bJigNCH3d3QBQ7NROT0SST4L\nwT9y0ayRuzeHidqRSBFihhDQZYB8vmKioWIdPgt+yx9ourQoJRDZHDRJfUh5taiT\n6rX7MRqBijw23seMt7Ol5zRhNcgmq8JXw2vsVBuUC2GITALpQnKaKLdypCPVikFS\n43COmHgLzyGehTJvChP8\n=HqNE\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree d911260f1a57f518d59b3a12127fcc3b2293c918\nparent 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\nparent 32c643f9be41f04a6e824ca40d3a0649da87a050\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795852582 -0500\ncommitter GitHub <noreply@github.com> 1795852582 -0500\n\nMerge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+        "verified_at": "2026-11-28T07:56:23Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/comments",
+    "author": {
+      "login": "aehlke",
+      "id": 71601,
+      "node_id": "MDQ6VXNlcjcxNjAx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/aehlke",
+      "html_url": "https://github.com/aehlke",
+      "followers_url": "https://api.github.com/users/aehlke/followers",
+      "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+      "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+      "organizations_url": "https://api.github.com/users/aehlke/orgs",
+      "repos_url": "https://api.github.com/users/aehlke/repos",
+      "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/aehlke/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+      },
+      {
+        "sha": "32c643f9be41f04a6e824ca40d3a0649da87a050",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/32c643f9be41f04a6e824ca40d3a0649da87a050",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/32c643f9be41f04a6e824ca40d3a0649da87a050"
+      }
+    ]
+  },
+  "merge_base_commit": {
+    "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "node_id": "C_kwDORX5CfNoAKGRjZmMwMmEwYTU1MzQ5MjliMWU5ZmExZjI4MDFlYzdhMDc4NGVhMTY",
+    "commit": {
+      "author": {
+        "name": "Alex Ehlke",
+        "email": "alex.ehlke@gmail.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-11-28T07:56:22Z"
+      },
+      "message": "Merge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+      "tree": {
+        "sha": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/d911260f1a57f518d59b3a12127fcc3b2293c918"
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCokmCRC1aQ7uu5UhlAAAgGEQAG1Dz8u/g+ETemEkUpAsVbqi\nIAjNBBjCIt3S4gg9r4VkyV6jwCMUUixE+gVdQj0bGLeHd/WP6T4XrEEj4B5yLbec\nyfiOQkVyA7w3G1pl2KaLtpRNpji2Co6LejpSkEOSJfe6AFQ8+S67j39fNDVxoXuA\n6vmIHYTO+qZk8YVrtXJ4shA9SSDogd3FUlOtnEIk9QDasFlzzmsJcwFBD4sk/bXo\n9PlARWXW2D9GELu8nDdzWNNZodE6E7eBkutFZ1+TU5uLuECRX/AUEDTdJ5hTKIsQ\nJbAnt9sZ/Ue3xNt8DOPLRAcLskmiblrdF5gUwAFy+5Y5JIETNEk6192Pv2gADz1C\nKzgbXPx65VM9qL+0TFUBVzGX2Uvecgd4Vp8ZxdSKSlNuVGvQjx24g7eJfzj2moz4\nZNESLJGBNRXjQqz1ZcsATFyphAQZmGd/BJdSIMMK8Lw+nO6jJldLz8mNYOMBI0pO\nzQavJCQJmmzUxWI4YcHMSjGkIYuGkxmNYMx73XF5bJigNCH3d3QBQ7NROT0SST4L\nwT9y0ayRuzeHidqRSBFihhDQZYB8vmKioWIdPgt+yx9ourQoJRDZHDRJfUh5taiT\n6rX7MRqBijw23seMt7Ol5zRhNcgmq8JXw2vsVBuUC2GITALpQnKaKLdypCPVikFS\n43COmHgLzyGehTJvChP8\n=HqNE\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree d911260f1a57f518d59b3a12127fcc3b2293c918\nparent 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\nparent 32c643f9be41f04a6e824ca40d3a0649da87a050\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795852582 -0500\ncommitter GitHub <noreply@github.com> 1795852582 -0500\n\nMerge pull request #972 from ManabiIO/perf/jmdict-token-end-structured-list-20261127\n\nperf(import): fast path compact structured glossary lists",
+        "verified_at": "2026-11-28T07:56:23Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16/comments",
+    "author": {
+      "login": "aehlke",
+      "id": 71601,
+      "node_id": "MDQ6VXNlcjcxNjAx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/aehlke",
+      "html_url": "https://github.com/aehlke",
+      "followers_url": "https://api.github.com/users/aehlke/followers",
+      "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+      "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+      "organizations_url": "https://api.github.com/users/aehlke/orgs",
+      "repos_url": "https://api.github.com/users/aehlke/repos",
+      "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/aehlke/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+      },
+      {
+        "sha": "32c643f9be41f04a6e824ca40d3a0649da87a050",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/32c643f9be41f04a6e824ca40d3a0649da87a050",
+        "html_url": "https://github.com/ManabiIO/manabitan/commit/32c643f9be41f04a6e824ca40d3a0649da87a050"
+      }
+    ]
+  },
+  "status": "ahead",
+  "ahead_by": 7,
+  "behind_by": 0,
+  "total_commits": 7,
+  "commits": [
+    {
+      "sha": "c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+      "node_id": "C_kwDORX5CfNoAKGM1ZTc2MzJiMWUxODRkZDVlNzQ1OGZlOWY3YTQ4YzU0YzdkOWVkY2E",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T06:06:05Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T08:41:51Z"
+        },
+        "message": "Restore indexed compact score-key validation\n\n(cherry picked from commit b15bad43acdfd54d541895cac1109c0e5ba51b2f)",
+        "tree": {
+          "sha": "4a632857a1250fd0a716f700f8d8997f7560cb68",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/4a632857a1250fd0a716f700f8d8997f7560cb68"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        }
+      ]
+    },
+    {
+      "sha": "e44210d8b7adf77a05921a697becdd3f491d0501",
+      "node_id": "C_kwDORX5CfNoAKGU0NDIxMGQ4YjdhZGY3N2EwNTkyMWE2OTdiZWNkZDNmNDkxZDA1MDE",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T05:55:06Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T08:41:51Z"
+        },
+        "message": "Avoid allocating zero-only dictionary content ID columns\n\n(cherry picked from commit 1cf97f9333f4e08df91d893be5a4927b870359d4)",
+        "tree": {
+          "sha": "aed12a99e37e5fb6e0876522fbb1d88e91368fe3",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/aed12a99e37e5fb6e0876522fbb1d88e91368fe3"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/e44210d8b7adf77a05921a697becdd3f491d0501",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/e44210d8b7adf77a05921a697becdd3f491d0501",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/e44210d8b7adf77a05921a697becdd3f491d0501",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/e44210d8b7adf77a05921a697becdd3f491d0501/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/c5e7632b1e184dd5e7458fe9f7a48c54c7d9edca"
+        }
+      ]
+    },
+    {
+      "sha": "c2088255fe1a362ea048a7d62110dbd5e029f87a",
+      "node_id": "C_kwDORX5CfNoAKGMyMDg4MjU1ZmUxYTM2MmVhMDQ4YTdkNjIxMTBkYmQ1ZTAyOWY4N2E",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T05:12:14Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:10:33Z"
+        },
+        "message": "perf(lookup): prefetch encoded block reference spans\n\n(cherry picked from commit 8448ac0c3be8a4fc6ad51c1f33925f4094ef2ddb)",
+        "tree": {
+          "sha": "b95008cf00bab93737705eb3ffbf147b9cd36a95",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/b95008cf00bab93737705eb3ffbf147b9cd36a95"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/c2088255fe1a362ea048a7d62110dbd5e029f87a",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c2088255fe1a362ea048a7d62110dbd5e029f87a",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/c2088255fe1a362ea048a7d62110dbd5e029f87a",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c2088255fe1a362ea048a7d62110dbd5e029f87a/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "e44210d8b7adf77a05921a697becdd3f491d0501",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/e44210d8b7adf77a05921a697becdd3f491d0501",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/e44210d8b7adf77a05921a697becdd3f491d0501"
+        }
+      ]
+    },
+    {
+      "sha": "59e72a26051d07c64c435814301fd0a07a236475",
+      "node_id": "C_kwDORX5CfNoAKDU5ZTcyYTI2MDUxZDA3YzY0YzQzNTgxNDMwMWZkMGEwN2EyMzY0NzU",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T05:18:41Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:10:33Z"
+        },
+        "message": "fix(lookup): share block reference format sizing\n\n(cherry picked from commit 8be3268d26887bf26a93e7a3b84519bf22754c9f)",
+        "tree": {
+          "sha": "93cbbc1e35c4c9714bc35481ada992ea5739c200",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/93cbbc1e35c4c9714bc35481ada992ea5739c200"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/59e72a26051d07c64c435814301fd0a07a236475",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/59e72a26051d07c64c435814301fd0a07a236475",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/59e72a26051d07c64c435814301fd0a07a236475",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/59e72a26051d07c64c435814301fd0a07a236475/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "c2088255fe1a362ea048a7d62110dbd5e029f87a",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/c2088255fe1a362ea048a7d62110dbd5e029f87a",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/c2088255fe1a362ea048a7d62110dbd5e029f87a"
+        }
+      ]
+    },
+    {
+      "sha": "5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+      "node_id": "C_kwDORX5CfNoAKDVjN2MzNDY4NDg1ZWE1ODgxMTYzY2MxOGI4YjgwYTM5YmQ0MGM3Zjc",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T07:52:05Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:10:33Z"
+        },
+        "message": "perf: trust validated single-slab content spans\n\n(cherry picked from commit 56ae57fcb5fb1225617cc7e3115754f8a3a71354)",
+        "tree": {
+          "sha": "ae79655ee61708a83d1e3e958805abc0a71ddfd5",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/ae79655ee61708a83d1e3e958805abc0a71ddfd5"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/5c7c3468485ea5881163cc18b8b80a39bd40c7f7/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "59e72a26051d07c64c435814301fd0a07a236475",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/59e72a26051d07c64c435814301fd0a07a236475",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/59e72a26051d07c64c435814301fd0a07a236475"
+        }
+      ]
+    },
+    {
+      "sha": "81692f1df4db660f9c8e81269bd5e26ed241363c",
+      "node_id": "C_kwDORX5CfNoAKDgxNjkyZjFkZjRkYjY2MGY5YzhlODEyNjliZDVlMjZlZDI0MTM2M2M",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:31:12Z"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:31:12Z"
+        },
+        "message": "test: type producer witness coverage",
+        "tree": {
+          "sha": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/81692f1df4db660f9c8e81269bd5e26ed241363c",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/81692f1df4db660f9c8e81269bd5e26ed241363c",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/81692f1df4db660f9c8e81269bd5e26ed241363c",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/81692f1df4db660f9c8e81269bd5e26ed241363c/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/5c7c3468485ea5881163cc18b8b80a39bd40c7f7",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/5c7c3468485ea5881163cc18b8b80a39bd40c7f7"
+        }
+      ]
+    },
+    {
+      "sha": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "node_id": "C_kwDORX5CfNoAKGYyOGMyODAxZmNmZDk0MTZmMjIwYjQ2YjljYmFmZWVlOTAxYzFjYjI",
+      "commit": {
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com",
+          "date": "2026-11-28T09:49:28Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "email": "noreply@github.com",
+          "date": "2026-11-28T09:49:28Z"
+        },
+        "message": "Merge pull request #981 from ManabiIO/codex/manabitan-source-integration-978-980-20261128\n\nperf: integrate dictionary lookup and import components",
+        "tree": {
+          "sha": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees/b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+        },
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+        "comment_count": 0,
+        "verification": {
+          "verified": true,
+          "reason": "valid",
+          "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrCqOoCRC1aQ7uu5UhlAAAuA0QAIlx9bLVHdEMhCUfM/t9Vu/+\n5CYOxZmZXQ4nz8qOxW5NRiRqo6VhmSHeh716qnJRkz2Um/VhAZ6YmAfTGu4ia2hT\nfBQeo9cOjjfvtJF5iikQHpfacpvemGw2v64hbAFmwjddIE2NWC/SAy7BbouH29Jr\nZiUdwbqFIeqSH8ZylzD4TXIes+RHzY/PjfHi/VFMIAhsnv966B+xxK5et/0rxFW+\nSKJfyRfpk2mYnJaf8Q4jfhEsQD1yAvRPxAfNQZ/l3NlM9zqbfE97y94NpReeB5JB\nSejzk/44oCft7HzVpATp/QeUt33aZkM3E6TLQwjcfo7Kn5LHHJ8fRIzCz9gdx7eG\n15fiR1eTO9E04wXhtOSLq95SZ2KHlWe+6sYo3BdujdvrM7Kh7Io0im/qs9dSd0Sh\ncSrAyhpABzVxb9+RzalfR0/SjHxd98fzkVFnnqZOdk6SmvyDnJrpH2NOUiayjsBC\nBFJjxFNy17EQ0KuFLky21w6ResPf5TSVjEVW8LBF6f9+yAkQikGHofUAymwu/FzO\nD/oc/W9mHbaAKRag6NYTZN2bSlrJMsNdiN46I6ViwzKaAXJZAWDSPXUE4oossiQG\nK21JFRc/JemVJp69FxvA3JmDNpEgXUa5C19Ghiq8fNQlCAHbDAIyc4vvCbAa/8fv\nA+ujJYJ+004WPGrwh198\n=6/9h\n-----END PGP SIGNATURE-----\n",
+          "payload": "tree b428d0c9fa18e4956f3e2b182cae934de78e8f63\nparent dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16\nparent 81692f1df4db660f9c8e81269bd5e26ed241363c\nauthor Alex Ehlke <alex.ehlke@gmail.com> 1795859368 -0500\ncommitter GitHub <noreply@github.com> 1795859368 -0500\n\nMerge pull request #981 from ManabiIO/codex/manabitan-source-integration-978-980-20261128\n\nperf: integrate dictionary lookup and import components",
+          "verified_at": "2026-11-28T09:49:28Z"
+        }
+      },
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/commits/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/comments",
+      "author": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/web-flow",
+        "html_url": "https://github.com/web-flow",
+        "followers_url": "https://api.github.com/users/web-flow/followers",
+        "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+        "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+        "organizations_url": "https://api.github.com/users/web-flow/orgs",
+        "repos_url": "https://api.github.com/users/web-flow/repos",
+        "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/web-flow/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        },
+        {
+          "sha": "81692f1df4db660f9c8e81269bd5e26ed241363c",
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/81692f1df4db660f9c8e81269bd5e26ed241363c",
+          "html_url": "https://github.com/ManabiIO/manabitan/commit/81692f1df4db660f9c8e81269bd5e26ed241363c"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "sha": "b77dd9804f7b037f010d3e83996e63bb2f19bf18",
+      "filename": "ext/js/dictionary/dictionary-database.js",
+      "status": "modified",
+      "additions": 92,
+      "deletions": 15,
+      "changes": 107,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fdictionary-database.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fdictionary-database.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/ext%2Fjs%2Fdictionary%2Fdictionary-database.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -44,6 +44,7 @@ import {\n     decodeRawTermContentHeader,\n     decodeRawTermContentTokenHeader,\n     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,\n+    getRawTermContentBlockReferenceBytes,\n     decodeRawTermContentSharedGlossaryHeader,\n     encodeRawTermContentBinary,\n     getRawTermContentGlossaryJsonBytes,\n@@ -52,8 +53,8 @@ import {\n     isRawTermContentSharedGlossaryBinary,\n     isRawTermContentTokenBinary,\n     isValidRawTermContentSharedGlossaryBinary,\n-    getRawTermContentBlockCompressionDictName,\n     RAW_TERM_CONTENT_DICT_NAME,\n+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,\n     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,\n     RAW_TERM_CONTENT_TOKEN_DICT_NAME,\n } from './raw-term-content.js';\n@@ -123,6 +124,7 @@ const BULK_IMPORT_STATE_IDLE = 'idle';\n const BULK_IMPORT_STATE_ACTIVE = 'active';\n const BULK_IMPORT_STATE_FINALIZING = 'finalizing';\n const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');\n+const IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS = Symbol('inFlightTermContentSourceWitness');\n \n /**\n  * @typedef {object} InFlightTermContentSourceBatch\n@@ -583,7 +585,7 @@ export class DictionaryDatabase {\n         this._termEntryContentMetaHash2Table = new Uint32Array(0);\n         /** @type {Uint8Array} */\n         this._termEntryContentMetaStateTable = new Uint8Array(0);\n-        /** @type {Float64Array} */\n+        /** @type {Float64Array} Empty until an ID differs from the import default zero. */\n         this._termEntryContentMetaIdTable = new Float64Array(0);\n         /** @type {Float64Array} */\n         this._termEntryContentMetaOffsetTable = new Float64Array(0);\n@@ -6515,7 +6517,7 @@ void 0 :\n             dictName === RAW_TERM_CONTENT_DICT_NAME ||\n             dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||\n             dictName === RAW_TERM_CONTENT_TOKEN_DICT_NAME ||\n-            typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'\n+            typeof getRawTermContentBlockReferenceBytes(dictName) !== 'undefined'\n         );\n     }\n \n@@ -6974,6 +6976,7 @@ void 0 :\n      * @param {string|string[]} pendingResolvedDictNames\n      * @param {Uint8Array[]} pendingContentBytes\n      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans\n+     * @param {{offsets: Float64Array, lengths: Uint32Array, spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}, dictName: string}|null} [producerWitness]\n      * @returns {() => void}\n      * @throws {Error} If source metadata is inconsistent or aliases an active reservation.\n      */\n@@ -6983,11 +6986,47 @@ void 0 :\n         pendingResolvedDictNames,\n         pendingContentBytes,\n         pendingContentSpans,\n+        producerWitness = null,\n     ) {\n         const count = pendingOffsets.length;\n         if (pendingLengths.length !== count) {\n             throw new RangeError('In-flight term content offset and length counts do not match');\n         }\n+        if (\n+            count > 0 &&\n+            this._inFlightTermContentSourceBatches.size === 0 &&\n+            producerWitness !== null &&\n+            producerWitness.offsets === pendingOffsets &&\n+            producerWitness.lengths === pendingLengths &&\n+            producerWitness.spans === pendingContentSpans &&\n+            pendingContentSpans !== null &&\n+            pendingContentSpans.lengths === pendingLengths &&\n+            producerWitness.dictName === pendingResolvedDictNames &&\n+            typeof pendingResolvedDictNames === 'string'\n+        ) {\n+            const start = pendingOffsets[0];\n+            const end = pendingOffsets[count - 1];\n+            const expectedEnd = start + (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;\n+            if (\n+                Number.isSafeInteger(start) && start >= 0 &&\n+                Number.isSafeInteger(end) && end === expectedEnd\n+            ) {\n+                const batch = {\n+                    offsets: pendingOffsets,\n+                    lengths: pendingLengths,\n+                    dictNames: pendingResolvedDictNames,\n+                    contentBytes: pendingContentBytes,\n+                    contentSpans: pendingContentSpans,\n+                    sortedOffsets: true,\n+                    minimumOffset: start,\n+                    maximumOffset: end,\n+                };\n+                this._inFlightTermContentSourceBatches.add(batch);\n+                return () => {\n+                    this._inFlightTermContentSourceBatches.delete(batch);\n+                };\n+            }\n+        }\n         let sortedOffsets = true;\n         let minimumOffset = Infinity;\n         let maximumOffset = -Infinity;\n@@ -7183,13 +7222,16 @@ void 0 :\n         return id;\n     }\n \n+    /* eslint-disable @stylistic/semi */\n     /**\n      * @param {number} index\n      * @returns {{id: number, offset: number, length: number, dictName: string, hash2: number, signature1?: number, signature2?: number, signature3?: number, tableIndex: number}}\n      */\n     _readTermEntryContentMetaHashPairIndex(index) {\n         const meta = {\n-            id: this._termEntryContentMetaIdTable[index],\n+            id: this._termEntryContentMetaIdTable.length === 0 && typeof this._termEntryContentMetaStateTable[index] !== 'undefined' ?\n+                0 :\n+                this._termEntryContentMetaIdTable[index],\n             offset: this._termEntryContentMetaOffsetTable[index],\n             length: this._termEntryContentMetaLengthTable[index] === TERM_CONTENT_META_U32_NULL ?\n                 -1 :\n@@ -7212,8 +7254,9 @@ void 0 :\n      * @throws {RangeError} If the metadata cannot be represented by the typed tables.\n      */\n     _writeTermEntryContentMetaHashPairIndex(index, meta) {\n-        if (!Number.isSafeInteger(meta.id) || meta.id < 0) {\n-            throw new RangeError(`Invalid term content metadata id: ${meta.id}`);\n+        const id = meta.id\n+        if (!Number.isSafeInteger(id) || id < 0) {\n+            throw new RangeError(`Invalid term content metadata id: ${id}`)\n         }\n         if (!Number.isSafeInteger(meta.offset) || meta.offset < 0) {\n             throw new RangeError(`Invalid term content metadata offset: ${meta.offset}`);\n@@ -7224,10 +7267,16 @@ void 0 :\n         ) {\n             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);\n         }\n-        // Interning can allocate and fail; retain an existing entry unchanged\n-        // until its replacement is ready to write.\n+        // Normal import IDs are implicitly zero. Allocate the legacy column\n+        // only for a distinct value, including signed zero, and publish it only\n+        // after interning succeeds so either allocation failure remains atomic.\n+        let idTable = this._termEntryContentMetaIdTable\n+        if (idTable.length === 0 && !Object.is(id, 0)) {\n+            idTable = new Float64Array(this._termEntryContentMetaStateTable.length)\n+        }\n         const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);\n-        this._termEntryContentMetaIdTable[index] = meta.id;\n+        this._termEntryContentMetaIdTable = idTable\n+        idTable[index] = id\n         this._termEntryContentMetaOffsetTable[index] = meta.offset;\n         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;\n         this._termEntryContentMetaDictNameIdTable[index] = dictNameId;\n@@ -7243,6 +7292,7 @@ void 0 :\n             this._termEntryContentMetaSignature3Table[index] = meta.signature3;\n         }\n     }\n+    /* eslint-enable @stylistic/semi */\n \n     /**\n      * @param {number} requiredCount\n@@ -7275,7 +7325,8 @@ void 0 :\n         }\n         /* eslint-enable @stylistic/semi */\n         const growDense = capacity !== oldCapacity;\n-        const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;\n+        // eslint-disable-next-line @stylistic/semi\n+        const idTable = growDense && this._termEntryContentMetaIdTable.length > 0 ? new Float64Array(capacity) : this._termEntryContentMetaIdTable\n         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;\n         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;\n         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;\n@@ -8550,6 +8601,7 @@ this._readTermContentSignature(\n                             pendingResolvedDictNames,\n                             pendingContentBytes,\n                             pendingContentSpans,\n+                            persistenceResult[IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS] ?? null,\n                         );\n                     }\n                     resolvedContentDictNames = this._publishArtifactTermContentMetadata({\n@@ -9599,6 +9651,22 @@ null :\n             pendingLengths: blockStorage.contentLengths,\n             pendingResolvedDictNames: blockStorage.contentDictName,\n             [VALIDATED_TERM_CONTENT_METADATA]: true,\n+            [IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS]: (\n+                blockStorage.singleReferenceSlab === true &&\n+                blockStorage.contentLengths === pendingContentSpans.lengths &&\n+                pendingContentSpans.offsets.buffer instanceof ArrayBuffer &&\n+                pendingContentSpans.offsets.buffer.resizable !== true &&\n+                pendingContentSpans.lengths.buffer instanceof ArrayBuffer &&\n+                pendingContentSpans.lengths.buffer.resizable !== true &&\n+                pendingContentSpans.offsets.length === pendingContentSpans.lengths.length ?\n+                    {\n+                        offsets: blockStorage.contentOffsets,\n+                        lengths: blockStorage.contentLengths,\n+                        spans: pendingContentSpans,\n+                        dictName: blockStorage.contentDictName,\n+                    } :\n+                    null\n+            ),\n         }));\n         const completion = operation.completion.then((blockStorage) => ({\n             packMs: blockStorage.packMs,\n@@ -9817,7 +9885,7 @@ null :\n             endIndex > this._termEntryContentMetaHash1Table.length ||\n             endIndex > this._termEntryContentMetaHash2Table.length ||\n             endIndex > this._termEntryContentMetaLengthTable.length ||\n-            endIndex > this._termEntryContentMetaIdTable.length ||\n+            (this._termEntryContentMetaIdTable.length > 0 && endIndex > this._termEntryContentMetaIdTable.length) ||\n             endIndex > this._termEntryContentMetaOffsetTable.length ||\n             endIndex > this._termEntryContentMetaDictNameIdTable.length\n         ) {\n@@ -9850,6 +9918,7 @@ null :\n         ]\n         for (let i = 0; i < writes.length; ++i) {\n             const target = writes[i]\n+            if (target.length === 0) { continue }\n             const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT\n             const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT\n             for (const {values, start} of reads) {\n@@ -11511,13 +11580,21 @@ null :\n     }\n \n     /**\n-     * @param {Iterable<import('./term-record-opfs-store.js').TermRecord>} records\n+     * @param {Iterable<Pick<import('./term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>} records\n      * @yields {{offset: number, length: number}}\n      * @returns {IterableIterator<{offset: number, length: number}>}\n      */\n     *_iterateTermRecordContentSpans(records) {\n-        for (const {entryContentOffset: offset, entryContentLength: length} of records) {\n-            yield {offset, length};\n+        for (const {entryContentOffset: offset, entryContentLength: length, entryContentDictName} of records) {\n+            let prefetchLength = length;\n+            if (offset >= 0 && length > 0) {\n+                const dictName = typeof entryContentDictName === 'string' ? entryContentDictName : '';\n+                const referenceBytes = getRawTermContentBlockReferenceBytes(dictName);\n+                if (typeof referenceBytes !== 'undefined') {\n+                    prefetchLength = referenceBytes;\n+                }\n+            }\n+            yield {offset, length: prefetchLength};\n         }\n     }\n \n@@ -11698,7 +11775,7 @@ null :\n                                 // Block references describe their container compression; the\n                                 // extracted entry is the original raw payload and must not be\n                                 // decompressed a second time.\n-                                const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';\n+                                const isBlockContent = typeof getRawTermContentBlockReferenceBytes(contentDictName) !== 'undefined';\n                                 let decodedContentBytes = contentBytes;\n                                 if (contentDictName !== 'raw' && !isBlockContent) {\n                                     try {"
+    },
+    {
+      "sha": "c64bb389a58ccc0102562b81eb070a3bda3c4399",
+      "filename": "ext/js/dictionary/raw-term-content.js",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0,
+      "changes": 23,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fraw-term-content.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fraw-term-content.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/ext%2Fjs%2Fdictionary%2Fraw-term-content.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -80,6 +80,29 @@ export function getRawTermContentBlockCompressionDictName(contentDictName) {\n     return void 0;\n }\n \n+/**\n+ * Gets the physical reference width for a recognized block content format.\n+ * Codec suffixes do not affect the reference layout.\n+ * @param {string} contentDictName\n+ * @returns {number|undefined} Undefined when the name is not a recognized block format.\n+ */\n+export function getRawTermContentBlockReferenceBytes(contentDictName) {\n+    if (typeof getRawTermContentBlockCompressionDictName(contentDictName) === 'undefined') { return void 0; }\n+    if (\n+        contentDictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX ||\n+        contentDictName.startsWith(`${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`)\n+    ) {\n+        return RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;\n+    }\n+    if (\n+        contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||\n+        contentDictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`)\n+    ) {\n+        return RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;\n+    }\n+    return void 0;\n+}\n+\n /**\n  * @param {string|null} compressionDictName\n  * @returns {string}"
+    },
+    {
+      "sha": "561a7469d474fde1796824e3bba65e3c3aa53dee",
+      "filename": "ext/js/dictionary/term-content-block-store.js",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fterm-content-block-store.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fterm-content-block-store.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/ext%2Fjs%2Fdictionary%2Fterm-content-block-store.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -128,7 +128,7 @@ export class TermContentBlockImportSession {\n      * @param {Uint32Array} sourceOffsets\n      * @param {Uint32Array} sourceLengths\n      * @param {string|null} compressionDictName\n-     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}\n+     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, singleReferenceSlab?: boolean}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}\n      * @throws {Error} If the session is closed or the source spans are invalid.\n      */\n     tryBeginAppendSpans(dictionary, sourceBytes, sourceOffsets, sourceLengths, compressionDictName) {\n@@ -916,6 +916,7 @@ export class TermContentBlockStore {\n             ),\n             contentLengths: sourceLengths,\n             contentDictName: createRawTermContentCompactBlockDictName(compressionDictName),\n+            singleReferenceSlab: sourceLengths.length <= referenceLayout.entriesPerSlab,\n         }));\n         void storage.catch(() => {});\n         const completion = (async () => {"
+    },
+    {
+      "sha": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+      "filename": "ext/js/dictionary/term-record-opfs-store.js",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "changes": 4,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fterm-record-opfs-store.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/ext%2Fjs%2Fdictionary%2Fterm-record-opfs-store.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/ext%2Fjs%2Fdictionary%2Fterm-record-opfs-store.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -204,8 +204,8 @@ function parseCompactRecordFields(bytes, count) {\n     const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);\n     cursor += count * 2;\n     const scoreKeys = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);\n-    for (const scoreKey of scoreKeys) {\n-        if (scoreKey >= scoreCount) {\n+    for (let i = 0; i < scoreKeys.length; ++i) {\n+        if (scoreKeys[i] >= scoreCount) {\n             throw new Error('Compact term-record score key is invalid');\n         }\n     }"
+    },
+    {
+      "sha": "b9c68c8645ba844d31a10fe23460fabe06351124",
+      "filename": "test/dictionary-content-lazy-ids.test.js",
+      "status": "added",
+      "additions": 204,
+      "deletions": 0,
+      "changes": 204,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-content-lazy-ids.test.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-content-lazy-ids.test.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fdictionary-content-lazy-ids.test.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -0,0 +1,204 @@\n+/*\n+ * Copyright (C) 2026 Manabitan authors\n+ * SPDX-License-Identifier: GPL-3.0-or-later\n+ */\n+/* eslint @stylistic/semi: [\"error\", \"never\"] */\n+\n+import {describe, expect, test, vi} from 'vitest'\n+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'\n+\n+/**\n+ * @param {DictionaryDatabase} database\n+ * @param {number} hash\n+ * @param {number} id\n+ */\n+function set(database, hash, id) {\n+    database._setTermEntryContentMetaByHashPair(hash, hash, {id, offset: 1000 + hash, length: 1, dictName: 'raw'})\n+}\n+\n+/**\n+ * @param {DictionaryDatabase} database\n+ * @param {number} hash\n+ * @returns {ReturnType<DictionaryDatabase['_getTermEntryContentMetaByHashPair']>}\n+ */\n+function get(database, hash) {\n+    return database._getTermEntryContentMetaByHashPair(hash, hash)\n+}\n+\n+/**\n+ * @param {DictionaryDatabase} database\n+ * @param {number[]} values\n+ * @returns {{hashes: Uint32Array, lengths: Uint32Array, staged: ReturnType<DictionaryDatabase['_stageArtifactTermContentMetadata']>, state: Parameters<DictionaryDatabase['_publishArtifactTermContentMetadata']>[0]}}\n+ */\n+function prepare(database, values) {\n+    const hashes = Uint32Array.from(values)\n+    const lengths = new Uint32Array(values.length).fill(1)\n+    const spans = {buffer: Uint8Array.from(values), offsets: Uint32Array.from(values, (_, i) => i), lengths}\n+    const staged = database._stageArtifactTermContentMetadata(hashes, hashes, [], spans)\n+    const state = {\n+        count: values.length,\n+        contentOffsets: new Float64Array(values.length),\n+        contentLengths: new Uint32Array(values.length),\n+        resolvedContentDictNames: 'raw',\n+        pendingRowToUniqueIndex: Int32Array.from(values, (_, i) => i),\n+        pendingContentBytes: [],\n+        pendingContentHash1s: hashes,\n+        pendingContentHash2s: hashes,\n+        pendingOffsets: Float64Array.from(values, (hash) => 1000 + hash),\n+        pendingLengths: lengths,\n+        pendingResolvedDictNames: 'raw',\n+        pendingContentSpans: spans,\n+        stagedContentMetadata: staged,\n+    }\n+    return {hashes, lengths, staged, state}\n+}\n+\n+/** @returns {() => void} */\n+function failIdAllocation() {\n+    vi.stubGlobal('Float64Array', new Proxy(Float64Array, {\n+        construct() { throw new RangeError('injected ID allocation failure') },\n+    }))\n+    return () => { vi.unstubAllGlobals() }\n+}\n+\n+describe('implicit zero content metadata IDs', () => {\n+    test.each([false, true])('preserves typed-column reads for malformed or missing indexes with a populated arena=%s', (populated) => {\n+        const database = new DictionaryDatabase()\n+        if (populated) { set(database, 10, 0) }\n+        const capacity = database._termEntryContentMetaStateTable.length\n+        const emptyColumn = database._termEntryContentMetaIdTable\n+        const denseColumn = new Float64Array(capacity)\n+        for (const index of [-1, -0, 0, 0.5, 1, Number.NaN, Infinity, capacity - 1, capacity, capacity + 1, Number.MAX_SAFE_INTEGER]) {\n+            database._termEntryContentMetaIdTable = denseColumn\n+            const expected = database._readTermEntryContentMetaHashPairIndex(index)\n+            database._termEntryContentMetaIdTable = emptyColumn\n+            expect(database._readTermEntryContentMetaHashPairIndex(index)).toEqual(expected)\n+        }\n+    })\n+\n+    test('keeps normal typed, scalar and direct publication IDs implicit across growth', () => {\n+        const database = new DictionaryDatabase()\n+        const contiguous = vi.spyOn(database, '_tryPublishContiguousArtifactTermContentMetadata')\n+        database._publishArtifactTermContentMetadata(prepare(database, [10, 20, 30]).state)\n+        expect(contiguous).toHaveLastReturnedWith(true)\n+        const scalar = prepare(database, [40, 50])\n+        database._publishArtifactTermContentMetadata({...scalar.state, pendingOffsets: [...scalar.state.pendingOffsets]})\n+        expect(contiguous).toHaveLastReturnedWith(false)\n+        database._ensureTermEntryContentMetaHashPairCapacity(6)\n+        database._insertTermEntryContentMetaByHashPairFast(60, 60, 1060, 1, 'raw', 0, Uint8Array.of(60))\n+        set(database, 70, 0)\n+        expect(database._termEntryContentMetaIdTable.byteLength).toBe(0)\n+        database._ensureTermEntryContentMetaDenseCapacity(8192)\n+        expect(database._termEntryContentMetaIdTable.byteLength).toBe(0)\n+        for (const hash of [10, 20, 30, 40, 50, 60, 70]) { expect(get(database, hash)?.id).toBe(0) }\n+    })\n+\n+    test.each([1, 0x100000001, Number.MAX_SAFE_INTEGER, -0])('materializes and preserves legacy ID %s including growth and reset', (id) => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 0)\n+        set(database, 20, id)\n+        expect(database._termEntryContentMetaIdTable.length).toBe(database._termEntryContentMetaStateTable.length)\n+        expect(get(database, 10)?.id).toBe(0)\n+        expect(Object.is(get(database, 20)?.id, id)).toBe(true)\n+        database._ensureTermEntryContentMetaDenseCapacity(4096)\n+        expect(Object.is(get(database, 20)?.id, id)).toBe(true)\n+        set(database, 20, 0)\n+        expect(get(database, 20)?.id).toBe(0)\n+        database._clearTermEntryContentMetaCaches()\n+        set(database, 30, 0)\n+        expect(database._termEntryContentMetaIdTable.byteLength).toBe(0)\n+        expect(get(database, 20)).toBeUndefined()\n+    })\n+\n+    test.each([-1, 0.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rejects invalid legacy ID %s without allocation or partial replacement', (id) => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 0)\n+        const previous = get(database, 10)\n+        expect(() => set(database, 10, id)).toThrow('Invalid term content metadata id')\n+        expect(get(database, 10)).toEqual(previous)\n+        expect(database._termEntryContentMetaIdTable.byteLength).toBe(0)\n+    })\n+\n+    test('failed first allocation leaves an existing entry unchanged and zero updates usable', () => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 0)\n+        const previous = get(database, 10)\n+        const column = database._termEntryContentMetaIdTable\n+        const restore = failIdAllocation()\n+        try {\n+            expect(() => set(database, 10, 7)).toThrow('injected ID allocation failure')\n+            expect(get(database, 10)).toEqual(previous)\n+            expect(database._termEntryContentMetaIdTable).toBe(column)\n+            set(database, 10, 0)\n+        } finally { restore() }\n+        set(database, 10, 7)\n+        expect(get(database, 10)?.id).toBe(7)\n+    })\n+\n+    test('failed first allocation returns a new dense index for zero-ID reuse', () => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 0)\n+        const restore = failIdAllocation()\n+        try {\n+            expect(() => set(database, 20, 7)).toThrow('injected ID allocation failure')\n+            expect(get(database, 20)).toBeUndefined()\n+            expect(database._termEntryContentMetaFreeIndexes).toEqual([1])\n+            set(database, 30, 0)\n+        } finally { restore() }\n+        expect(get(database, 30)?.id).toBe(0)\n+        expect(database._termEntryContentMetaFreeIndexes).toEqual([])\n+        expect(database._termEntryContentMetaDenseCount).toBe(2)\n+        expect(database._termEntryContentMetaIdTable.byteLength).toBe(0)\n+    })\n+\n+    test('interning failure does not publish a newly allocated legacy column', () => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 0)\n+        const previous = get(database, 10)\n+        const column = database._termEntryContentMetaIdTable\n+        const fault = vi.spyOn(database, '_internTermEntryContentMetaDictName').mockImplementationOnce(() => { throw new Error('intern failure') })\n+        try {\n+            expect(() => set(database, 10, 7)).toThrow('intern failure')\n+        } finally {\n+            fault.mockRestore()\n+        }\n+        expect(get(database, 10)).toEqual(previous)\n+        expect(database._termEntryContentMetaIdTable).toBe(column)\n+        set(database, 10, 7)\n+        expect(get(database, 10)?.id).toBe(7)\n+    })\n+\n+    test.each(['typed', 'scalar', 'direct'])('clears a nonzero legacy ID when rollback reuses it for %s import publication', (mode) => {\n+        const database = new DictionaryDatabase()\n+        set(database, 10, 99)\n+        database._rollbackStagedArtifactTermContentMetadata({indexes: Int32Array.of(0), active: true})\n+        if (mode === 'direct') {\n+            database._insertTermEntryContentMetaByHashPairFast(20, 20, 1020, 1, 'raw', 0, Uint8Array.of(20))\n+        } else {\n+            const {state} = prepare(database, [20])\n+            database._publishArtifactTermContentMetadata(mode === 'scalar' ? {...state, pendingOffsets: [...state.pendingOffsets]} : state)\n+        }\n+        expect(get(database, 10)).toBeUndefined()\n+        expect(get(database, 20)).toMatchObject({id: 0, tableIndex: 0})\n+    })\n+\n+    test.each(['short', 'input alias', 'destination alias'])('declines contiguous publication with a materialized ID column that has %s', (mode) => {\n+        const database = new DictionaryDatabase()\n+        const {hashes, lengths, staged, state} = prepare(database, [10, 20, 30])\n+        let offsets = state.pendingOffsets\n+        if (mode === 'short') {\n+            database._termEntryContentMetaIdTable = new Float64Array(2)\n+        } else if (mode === 'input alias') {\n+            database._termEntryContentMetaIdTable = new Float64Array(16)\n+            offsets = database._termEntryContentMetaIdTable.subarray(0, 3)\n+            offsets.set(state.pendingOffsets)\n+        } else {\n+            database._termEntryContentMetaIdTable = database._termEntryContentMetaOffsetTable\n+        }\n+        const previous = new Float64Array(database._termEntryContentMetaIdTable)\n+        const states = new Uint8Array(database._termEntryContentMetaStateTable)\n+        expect(database._tryPublishContiguousArtifactTermContentMetadata(staged, hashes, hashes, offsets, lengths, 0, false)).toBe(false)\n+        expect(database._termEntryContentMetaIdTable).toEqual(previous)\n+        expect(database._termEntryContentMetaStateTable).toEqual(states)\n+    })\n+})"
+    },
+    {
+      "sha": "a5cb1387c61f7b21d98976c903228336cd64411b",
+      "filename": "test/dictionary-content-publication-range.test.js",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 1,
+      "changes": 7,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-content-publication-range.test.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-content-publication-range.test.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fdictionary-content-publication-range.test.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -123,7 +123,8 @@ describe('contiguous content metadata publication', () => {\n         {name: 'disjoint ranges in one backing buffer',\n             expectedFast: true,\n             change: ({database, state}) => {\n-                const ids = /** @type {Float64Array} */ (Reflect.get(database, '_termEntryContentMetaIdTable'))\n+                const ids = new Float64Array(Reflect.get(database, '_termEntryContentMetaStateTable').length)\n+                Reflect.set(database, '_termEntryContentMetaIdTable', ids)\n                 const values = state.pendingOffsets\n                 state.pendingOffsets = ids.subarray(5, 8)\n                 state.pendingOffsets.set(values)\n@@ -278,6 +279,10 @@ describe('contiguous content metadata publication', () => {\n     test.each(aliasCases)('preserves scalar read/write ordering when $name', (fixture) => {\n         const scalar = createHarness()\n         const candidate = createHarness()\n+        // These cases exercise physical overlaps after legacy IDs materialize.\n+        for (const {database} of [scalar, candidate]) {\n+            Reflect.set(database, '_termEntryContentMetaIdTable', new Float64Array(Reflect.get(database, '_termEntryContentMetaStateTable').length))\n+        }\n         fixture.change(scalar)\n         fixture.change(candidate)\n         vi.spyOn(scalar.database, '_tryPublishContiguousArtifactTermContentMetadata').mockReturnValue(false)"
+    },
+    {
+      "sha": "c6e56876a3047853de709b89a6f996e2e1f6955f",
+      "filename": "test/dictionary-database-content-dedup.test.js",
+      "status": "modified",
+      "additions": 75,
+      "deletions": 0,
+      "changes": 75,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-database-content-dedup.test.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-database-content-dedup.test.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fdictionary-database-content-dedup.test.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -19,10 +19,13 @@ import {describe, expect, test, vi} from 'vitest';\n import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';\n import {\n     encodeRawTermContentSharedGlossaryBinary,\n+    RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,\n+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,\n     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,\n } from '../ext/js/dictionary/raw-term-content.js';\n import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';\n import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';\n+import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';\n import {registerOwnedTermContent, takeOwnedTermContent} from '../ext/js/dictionary/term-content-ownership.js';\n \n /**\n@@ -410,6 +413,11 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {\n             const database = new DictionaryDatabase();\n             const source = new Uint8Array([1, 2, 3, 4]);\n             const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);\n+            // Include the optional legacy-ID column in this allocation matrix.\n+            // eslint-disable-next-line @stylistic/semi\n+            meta.id = 1\n+            // eslint-disable-next-line @stylistic/semi\n+            Reflect.get(database, '_setTermEntryContentMetaByHashPair').call(database, 10, 20, meta)\n             const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);\n             const pending = stage([30], [40], [source], null);\n             const tableNames = [\n@@ -2875,6 +2883,73 @@ describe('DictionaryDatabase artifact term content dedup import', () => {\n });\n \n describe('DictionaryDatabase term lookup warming', () => {\n+    test('warms physical block-reference spans for recognized storage formats only', async () => {\n+        const database = new DictionaryDatabase();\n+        const iterateSpans = /** @type {(records: Iterable<Pick<import('../ext/js/dictionary/term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>) => IterableIterator<{offset: number, length: number}>} */ (\n+            Reflect.get(database, '_iterateTermRecordContentSpans').bind(database)\n+        );\n+        const logicalLength = 972;\n+        const records = [\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v1'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v1:jmdict'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v3:jmdict'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:unknown-codec'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-v2'},\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: ''},\n+            {entryContentOffset: -1, entryContentLength: 0, entryContentDictName: 'raw-block-v2:jmdict'},\n+            {entryContentOffset: 64_640, entryContentLength: 0, entryContentDictName: 'raw-block-v2:jmdict'},\n+        ];\n+\n+        expect([...iterateSpans(records)]).toStrictEqual([\n+            {offset: 64_640, length: RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: logicalLength},\n+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},\n+            {offset: 64_640, length: logicalLength},\n+            {offset: 64_640, length: logicalLength},\n+            {offset: -1, length: 0},\n+            {offset: 64_640, length: 0},\n+        ]);\n+\n+        const pageSize = 64 * 1024;\n+        const contentStore = new TermContentOpfsStore();\n+        const pageReads = vi.fn(/** @type {(start: number, end: number) => Promise<ArrayBuffer>} */ (\n+            async (start, end) => new ArrayBuffer(end - start)\n+        ));\n+        const file = {size: pageSize * 2, slice: (/** @type {number} */ start, /** @type {number} */ end) => ({arrayBuffer: () => pageReads(start, end)})};\n+        const fileHandle = {getFile: vi.fn(async () => file)};\n+        Reflect.set(contentStore, '_fileHandle', fileHandle);\n+        Reflect.set(contentStore, '_loadedForRead', true);\n+        Reflect.set(contentStore, '_length', file.size);\n+        Reflect.set(contentStore, '_segmentStates', [{\n+            index: 0,\n+            fileName: 'manabitan-term-content.bin',\n+            fileHandle,\n+            fileLength: file.size,\n+            startOffset: 0,\n+            readFile: file,\n+        }]);\n+        await contentStore.warmSlices(iterateSpans([\n+            {entryContentOffset: 65_526, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},\n+        ]));\n+        expect(pageReads).toHaveBeenCalledTimes(2);\n+        expect(pageReads.mock.calls).toStrictEqual([[0, pageSize], [pageSize, pageSize * 2]]);\n+\n+        pageReads.mockClear();\n+        Reflect.get(contentStore, '_readPageCache').clear();\n+        await contentStore.warmSlices(iterateSpans([\n+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},\n+        ]));\n+        expect(pageReads).toHaveBeenCalledTimes(1);\n+        expect(pageReads).toHaveBeenCalledWith(0, pageSize);\n+    });\n+\n     test('does not reload direct term indexes already cached for lookup', async () => {\n         const database = new DictionaryDatabase();\n         Reflect.get(database, '_directTermIndexByDictionary').set('JMdict', {"
+    },
+    {
+      "sha": "611b5e9cc15b803903580b6052378a0cf51f4a4e",
+      "filename": "test/dictionary-database-in-flight-content-source.test.js",
+      "status": "added",
+      "additions": 165,
+      "deletions": 0,
+      "changes": 165,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-database-in-flight-content-source.test.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fdictionary-database-in-flight-content-source.test.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fdictionary-database-in-flight-content-source.test.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -0,0 +1,165 @@\n+/*\n+ * Copyright (C) 2026 Manabitan authors\n+ *\n+ * This program is free software: you can redistribute it and/or modify\n+ * it under the terms of the GNU General Public License as published by\n+ * the Free Software Foundation, either version 3 of the License, or\n+ * (at your option) any later version.\n+ *\n+ * This program is distributed in the hope that it will be useful,\n+ * but WITHOUT ANY WARRANTY; without even the implied warranty of\n+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n+ * GNU General Public License for more details.\n+ *\n+ * You should have received a copy of the GNU General Public License\n+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.\n+ */\n+\n+import {describe, expect, test} from 'vitest';\n+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';\n+\n+function fixture(offsets = [100, 120, 140], lengths = [1, 2, 1]) {\n+    const pendingOffsets = Float64Array.from(offsets);\n+    const pendingLengths = Uint32Array.from(lengths);\n+    const sourceOffsets = new Uint32Array(lengths.length);\n+    let byteLength = 0;\n+    for (let i = 0; i < lengths.length; ++i) {\n+        sourceOffsets[i] = byteLength;\n+        byteLength += lengths[i];\n+    }\n+    return {\n+        pendingOffsets,\n+        pendingLengths,\n+        pendingResolvedDictNames: 'jmdict',\n+        pendingContentBytes: [],\n+        pendingContentSpans: {\n+            buffer: new Uint8Array(byteLength),\n+            offsets: sourceOffsets,\n+            lengths: pendingLengths,\n+        },\n+    };\n+}\n+\n+/**\n+ * @param {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} database\n+ * @param {ReturnType<typeof fixture>} value\n+ * @param {{offsets: Float64Array, lengths: Uint32Array, spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}, dictName: string}|null} [witness]\n+ * @returns {() => void}\n+ */\n+function register(database, value, witness = null) {\n+    return Reflect.get(database, '_registerInFlightTermContentSources').call(\n+        database,\n+        value.pendingOffsets,\n+        value.pendingLengths,\n+        value.pendingResolvedDictNames,\n+        value.pendingContentBytes,\n+        value.pendingContentSpans,\n+        witness,\n+    );\n+}\n+\n+describe('DictionaryDatabase in-flight term-content producer witness', () => {\n+    test('uses an identity-matched witness on the uncontended single-reference slab', () => {\n+        const database = new DictionaryDatabase();\n+        const value = fixture();\n+        const spans = value.pendingContentSpans;\n+        const unregister = register(database, value, {\n+            offsets: value.pendingOffsets,\n+            lengths: value.pendingLengths,\n+            spans,\n+            dictName: 'jmdict',\n+        });\n+        const [batch] = Reflect.get(database, '_inFlightTermContentSourceBatches');\n+        expect(batch.minimumOffset).toBe(100);\n+        expect(batch.maximumOffset).toBe(140);\n+        expect(batch.sortedOffsets).toBe(true);\n+        expect(Reflect.get(database, '_findInFlightTermContentSource').call(database, 120, 2, 'jmdict')).toEqual({\n+            buffer: spans.buffer,\n+            offset: 1,\n+            length: 2,\n+        });\n+        unregister();\n+        expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0);\n+    });\n+\n+    test('falls back for overlapping batches and a mismatched producer identity', () => {\n+        const database = new DictionaryDatabase();\n+        const first = fixture([100], [1]);\n+        const unregisterFirst = register(database, first);\n+        const second = fixture([120, 140], [1, 1]);\n+        const unregisterSecond = register(database, second, {\n+            offsets: second.pendingOffsets,\n+            lengths: second.pendingLengths,\n+            spans: second.pendingContentSpans,\n+            dictName: 'jmdict',\n+        });\n+        const [batch] = [...Reflect.get(database, '_inFlightTermContentSourceBatches')].slice(1);\n+        expect(batch.minimumOffset).toBe(120);\n+        unregisterSecond();\n+        unregisterFirst();\n+\n+        const third = fixture();\n+        const unregisterThird = register(database, third, {\n+            offsets: Float64Array.from(third.pendingOffsets),\n+            lengths: third.pendingLengths,\n+            spans: third.pendingContentSpans,\n+            dictName: 'jmdict',\n+        });\n+        expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(1);\n+        unregisterThird();\n+    });\n+\n+    test.each([\n+        ['single fixed metadata slab', true, false],\n+        ['multiple reference slabs', false, false],\n+        ['shared mutable source offsets', true, true],\n+    ])('producer witness eligibility: %s', async (_name, singleReferenceSlab, sharedOffsets) => {\n+        const database = new DictionaryDatabase();\n+        const lengths = Uint32Array.of(1, 2, 1);\n+        const offsets = sharedOffsets ? new Uint32Array(new SharedArrayBuffer(lengths.byteLength)) : Uint32Array.of(0, 1, 3);\n+        if (sharedOffsets) { offsets.set([0, 1, 3]); }\n+        const spans = {\n+            buffer: new Uint8Array(new SharedArrayBuffer(4)),\n+            offsets,\n+            lengths,\n+        };\n+        Reflect.set(database, '_termContentZstdInitialized', true);\n+        Reflect.set(database, '_termContentBlockImportSession', {\n+            tryBeginAppendSpans: () => ({\n+                storage: Promise.resolve({\n+                    contentOffsets: Float64Array.of(100, 120, 140),\n+                    contentLengths: lengths,\n+                    contentDictName: 'raw-block-v2:jmdict',\n+                    singleReferenceSlab,\n+                }),\n+                completion: Promise.resolve({\n+                    packMs: 0,\n+                    compressMs: 0,\n+                    envelopeMs: 0,\n+                    referenceMs: 0,\n+                    opfsAppendMs: 0,\n+                    initialSelectionSavingsMiss: false,\n+                }),\n+                initialSelection: false,\n+            }),\n+        });\n+        const begin = Reflect.get(database, '_tryBeginPersistArtifactTermContent');\n+        const persistence = begin.call(database, 'jmdict', spans);\n+        if (persistence === null) { throw new Error('Expected persistence operation'); }\n+        const result = await persistence.storage;\n+        const witnessSymbol = Object.getOwnPropertySymbols(result).find(\n+            (symbol) => symbol.description === 'inFlightTermContentSourceWitness',\n+        );\n+        if (typeof witnessSymbol !== 'symbol') { throw new Error('Expected private producer witness slot'); }\n+        if (singleReferenceSlab && !sharedOffsets) {\n+            expect(Reflect.get(result, witnessSymbol)).toMatchObject({\n+                offsets: result.pendingOffsets,\n+                lengths,\n+                spans,\n+                dictName: 'raw-block-v2:jmdict',\n+            });\n+        } else {\n+            expect(Reflect.get(result, witnessSymbol)).toBeNull();\n+        }\n+    });\n+});"
+    },
+    {
+      "sha": "365173cf01a584f2384dc44555d9ac57e5463a3e",
+      "filename": "test/raw-term-content-block.test.js",
+      "status": "modified",
+      "additions": 14,
+      "deletions": 0,
+      "changes": 14,
+      "blob_url": "https://github.com/ManabiIO/manabitan/blob/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fraw-term-content-block.test.js",
+      "raw_url": "https://github.com/ManabiIO/manabitan/raw/f28c2801fcfd9416f220b46b9cbafeee901c1cb2/test%2Fraw-term-content-block.test.js",
+      "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/test%2Fraw-term-content-block.test.js?ref=f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "patch": "@@ -16,6 +16,7 @@ import {\n     encodeRawTermContentBlockReference,\n     encodeRawTermContentCompactBlockReference,\n     getRawTermContentBlockCompressionDictName,\n+    getRawTermContentBlockReferenceBytes,\n     RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,\n     RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,\n     writeRawTermContentBlockReference,\n@@ -92,6 +93,19 @@ describe('raw term content block references', () => {\n         expect(getRawTermContentBlockCompressionDictName('raw-v2')).toBeUndefined();\n     });\n \n+    test('selects reference width from the block version regardless of codec suffix', () => {\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1:jmdict')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1:unknown-codec')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:jmdict')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:unknown-codec')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);\n+        expect(getRawTermContentBlockReferenceBytes('raw-block-v3:jmdict')).toBeUndefined();\n+        expect(getRawTermContentBlockReferenceBytes('raw-v2')).toBeUndefined();\n+        expect(getRawTermContentBlockReferenceBytes('')).toBeUndefined();\n+    });\n+\n     test('round trips compact references with uint64 offsets', () => {\n         const bytes = encodeRawTermContentCompactBlockReference(\n             Number.MAX_SAFE_INTEGER - 123,"
+    }
+  ]
+}

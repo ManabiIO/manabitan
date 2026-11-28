@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:21:25.500725+00:00",
+  "scope": "Pre-acquisition host-language provenance only, requested by independent auditor to replay unchanged Python sum arithmetic.",
+  "files": [
+    {
+      "path": "run.py",
+      "oldSha256": "4cd1c2e728b7624118099e529a3ffba2b24ea0ec50cf5788063b755e0ae758d0",
+      "newSha256": "c35901deca2f042aab22c0756dad08f5458593cd500a4cfe099c9bd6aa3c03f4"
+    },
+    {
+      "path": "prepare-and-validate.py",
+      "oldSha256": "4bef9eae629fb037d33cf85c1594535b10989650684f3e44a06a3c593372e4dd",
+      "newSha256": "8bd9aec058cfe2e4b358cc3a004531ec47ea6b694609cdf6dbf6e0b948a83505"
+    },
+    {
+      "path": "prepare-component.py",
+      "oldSha256": "961efa9f6d7a06a177a032f095a3b690daaf5c1beb86a6cd2af51262192f3816",
+      "newSha256": "1d3677cbd8d21d71a1b6f23c69942dc34ad15337b78b0dd868d9e1b9664480af"
+    }
+  ],
+  "childOrClocksChanged": false,
+  "summaryArithmeticChanged": false,
+  "criteriaChanged": false,
+  "newCandidateObservations": 0
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:21:37.572652+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent final source and focused-test review only. No native compilation, test execution, corpus pass, or timing.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "files": {
+    "candidate.c": {
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc"
+    },
+    "qualification/term-bank-row-suffix-proof-fixtures.js": {
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510"
+    },
+    "qualification/term-bank-row-suffix-proof-consumer.test.js": {
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f"
+    },
+    "pipeline-source-span-review.json": {
+      "bytes": 3031,
+      "sha256": "afd788ecce016c3442db3911a75f66a36006bc3fc4454092b971d9ec07dabd80"
+    },
+    "static-preflight-reports/static-preflight-receipt.json": {
+      "bytes": 8836,
+      "sha256": "896542b76c044e398000fd3e8ac5dd9ca2d63d72bbc576224578ff7d24c01df6"
+    }
+  },
+  "unchangedOriginal41Cases": {
+    "term-bank-row-suffix-reuse.test.js": {
+      "source": "experiments/numeric-suffix-972-composition/preflight-root/test/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "byteIdentical": true
+    },
+    "term-bank-row-suffix-token-end-fixtures.js": {
+      "source": "experiments/numeric-suffix-972-composition/preflight-root/test/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "byteIdentical": true
+    },
+    "term-bank-row-suffix-token-ends.test.js": {
+      "source": "experiments/numeric-suffix-972-composition/preflight-root/test/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "byteIdentical": true
+    }
+  },
+  "newCases": 17,
+  "totalFocusedCases": 58,
+  "sourceReview": "The prior bound source/span review remains valid: exact suffix helper, admission, current key validation, global-exact branch, completed row publication and ordinary numeric conversion (apart from indentation) are unchanged. Only strict full-suffix success returns status2 and authorizes numeric and ordinary-content consumers.",
+  "reviewedCoverage": [
+    "Four glossary-only witnesses vary numbers/rules/definition tags/term tags and do not authorize the new consumers.",
+    "A successful suffix followed by changed numeric values checks current-row ownership.",
+    "Six later unsupported numeric cases retain fallback: score negative zero/overflow/fraction/exponent and sequence overflow/exponent.",
+    "Ring wrap spans four banks including an empty bank and null sequences; latest content/index/lookup identity is compared to an independent JS semantic oracle and disabled-reuse output.",
+    "Global exact-content mode retains its existing path and counters; disabled reuse suppresses the suffix status.",
+    "Escaped-current-key fallback occurs after two suffix proofs but before the second numeric consumer; the distinct diagnostic expectation preserves this ordering.",
+    "Dedicated accepted sequence negative-zero fixture verifies source -0 and expected int32 output +0, without changing the generic expectedRows oracle.",
+    "Strict-invalid null score after a proven prefix rejects with zero publications in both reuse modes; a fresh subsequent parse verifies cleanup. Null score is not an accepted strict suffix case.",
+    "All existing32 suffix-reuse cases and9 token-end cases remain byte-identical, retaining malformed/CRC/ownership/bank-boundary coverage."
+  ],
+  "testMechanism": [
+    "Tests load the real committed WASM module, use compressed sources with CRC, force at least two banks and assert one fused attempt.",
+    "Published chunks are copied before reused WASM memory can be overwritten. Full semantic rows, exact content bytes, unique IDs and prepared lookup index bytes are checked.",
+    "Production tests protect outputs and failure/publication behavior, while separate untimed diagnostic smoke will verify internal proof/consumer counts."
+  ],
+  "qualificationLimits": [
+    "The owner static receipt used the prior9e10 JS/config context. Exact-f28 lint/types/full unit/native reproduction remain required in hosted preparation.",
+    "New17 cases and all58 total focused tests have not yet executed against the new candidate. No performance or PR approval is implied."
+  ],
+  "decision": "No source or focused-test design blocker identified. Ready for the exact-source hosted correctness gate; final hosted protocol/binding review remains separate.",
+  "newMeasurements": false
+}

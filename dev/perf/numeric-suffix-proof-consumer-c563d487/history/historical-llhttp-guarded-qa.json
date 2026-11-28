@@ -1,0 +1,7 @@
+{
+  "allFourOutputsMatchExistingBaseline": true,
+  "originalSmokeSha256": "155a9ae2b50b6a4886ee815f7d9cb65712374623b957e074492e564ac07d7515",
+  "localHookSmokeSha256": "9d5f870d59641561d955bf710186df72607aef7581877a23a8a89e71c3cce24c",
+  "onlyObserverChange": "Ignore unrelated llhttp WebAssembly instance injected by local HTTP runtime; matches existing filtered component-screen hook. Frozen CI smoke unchanged.",
+  "scope": "Untimed source-bound production and diagnostic correctness; no performance evidence"
+}

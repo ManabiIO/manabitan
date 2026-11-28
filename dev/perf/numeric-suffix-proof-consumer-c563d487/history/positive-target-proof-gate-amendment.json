@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:20:06.295632+00:00",
+  "oldSha256": "8c352524078559a2d91995677504cfd563218fa62985a2da1a3b3725a6bea663",
+  "newSha256": "4cd1c2e728b7624118099e529a3ffba2b24ea0ec50cf5788063b755e0ae758d0",
+  "change": "Require positive VNDB suffix hits and numeric consumers, enforcing the existing prospective diagnostic gate rather than accepting an all-zero identity.",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "criteriaChanged": false,
+  "timedChildChanged": false,
+  "sourceChanged": false,
+  "newCandidateObservations": 0,
+  "published": false
+}

@@ -1,0 +1,20 @@
+--- smoke-before-null-fixture-placement-fix.mjs
++++ smoke.mjs
+@@ -77,8 +77,7 @@
+         mediaHintFastScan: true, validateGlossaryTypes: true, ...experiments,
+         ...(disabledReuse ? {experimentalValidatedGlossaryReuse: false} : {})};
+     const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, options, true);
+-    malformed.push({name: 'strict-null-score-after-positive-proof', banks: invalidNullScoreAfterProof});
+-const results = [];
++    const results = [];
+     await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => results.push(snapshot(chunk)), 2048, {...options, preloadedSource});
+     assert.equal(parser.consumeLastTermBankWasmParseProfile()?.fusedParseAttempts, 1, 'Synthetic input must exercise the default multi-bank fused route');
+     return results;
+@@ -125,6 +124,7 @@
+     {name: 'malformed-reading-after-equal-pair', banks: [prefix, `[["last","bad\\x",${body()}]]`]},
+     {name: 'malformed-sequence-after-equal-pair', banks: [prefix, bank(row('last', {sequence: '17e'}))]},
+ ];
++malformed.push({name: 'strict-null-score-after-positive-proof', banks: invalidNullScoreAfterProof});
+ const results = [];
+ const diagnostics = [];
+ for (const test of valid) {

@@ -1,0 +1,131 @@
+name: Numeric suffix proof-consumer component c563d487
+
+on:
+  push:
+    branches: [perf/numeric-suffix-proof-consumer-screen-20261128-c563d487]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prepare:
+    name: Build and validate exact proof-consumer source
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    env:
+      TOOL_ROOT: ${{ github.workspace }}/dev/perf/numeric-suffix-proof-consumer-c563d487
+      BASE_ROOT: ${{ github.workspace }}/../suffix-proof-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../suffix-proof-candidate
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/suffix-proof-build
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      artifact-digest: ${{ steps.upload.outputs.artifact-digest }}
+    steps:
+      - name: Check out the frozen experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up pinned source dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install pinned native compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+
+      - name: Reproduce native source and run all correctness gates
+        run: python3 "$TOOL_ROOT/prepare-and-validate.py"
+
+      - name: Preserve exact compiled product bytes after correctness
+        run: python3 "$TOOL_ROOT/emit-build-evidence.py" "$OUTPUT_ROOT"
+
+      - name: Retain all original build and correctness evidence
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suffix-proof-built-source-${{ github.run_attempt }}
+          path: builds/suffix-proof-build
+          if-no-files-found: error
+          retention-days: 14
+
+  screen:
+    name: ${{ matrix.dictionary }} fixed component cohort
+    needs: prepare
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      TOOL_ROOT: ${{ github.workspace }}/dev/perf/numeric-suffix-proof-consumer-c563d487
+      BASE_ROOT: ${{ github.workspace }}/../suffix-proof-baseline
+      CANDIDATE_ROOT: ${{ github.workspace }}/../suffix-proof-candidate
+      BUILT_ROOT: ${{ github.workspace }}/../suffix-proof-built-evidence
+      OUTPUT_ROOT: ${{ github.workspace }}/builds/suffix-proof-component
+      SOURCE_ARTIFACT_ID: ${{ needs.prepare.outputs.artifact-id }}
+      SOURCE_ARTIFACT_DIGEST: ${{ needs.prepare.outputs.artifact-digest }}
+    steps:
+      - name: Check out the exact experiment tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the same pinned dependencies
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Retrieve the exact successful correctness artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: suffix-proof-built-source-${{ github.run_attempt }}
+          path: ${{ env.BUILT_ROOT }}
+
+      - name: Verify and restore the tested native product
+        run: python3 "$TOOL_ROOT/prepare-component.py"
+
+      - name: Fetch only the locked selected corpus
+        run: |
+          node --input-type=module -e "import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.DICTIONARY]);"
+          node --version
+          uname -a
+          lscpu
+
+      - name: Verify every raw native metadata word outside timing
+        run: |
+          node "$TOOL_ROOT/native-oracle.mjs" \
+            --baseline "$BASE_ROOT" --candidate "$CANDIDATE_ROOT" \
+            --dictionary "$DICTIONARY" --cache "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --output "$OUTPUT_ROOT/native-oracle"
+
+      - name: Acquire the unchanged fixed four-pair and four-control schedule
+        run: |
+          python3 "$TOOL_ROOT/run.py" "$DICTIONARY" "$BASE_ROOT" "$CANDIDATE_ROOT" \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$OUTPUT_ROOT"
+
+      - name: Preserve every raw observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suffix-proof-component-${{ matrix.dictionary }}-${{ github.run_attempt }}
+          path: builds/suffix-proof-component
+          if-no-files-found: warn
+          retention-days: 14
