@@ -254,7 +254,9 @@ export function hasCompletePreparedTermLookupIndexes(value, rowCount) {
 
 const U16_NULL = 0xffff
 const INLINE_SCORE_RADIUS = 256
+// eslint-disable-next-line @typescript-eslint/unbound-method -- Invoke this intrinsic only with an explicit typed-array receiver.
 const typedArrayName = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)?.get
+// eslint-disable-next-line @typescript-eslint/unbound-method -- Invoke this intrinsic only with an explicit ArrayBuffer receiver.
 const arrayBufferByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get
 
 /**

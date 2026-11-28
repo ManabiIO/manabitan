@@ -1,0 +1,50 @@
+name: Prepared score intrinsic lint 4a779
+
+on:
+  push:
+    branches: [perf/prepared-scores-lint-20261128-4a779]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prepared-scores-intrinsic-lint-4a779-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  javascript:
+    name: Intrinsic getter annotations and JavaScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Prove runtime AST equivalence and run scoped typed lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {createHash} from 'node:crypto'
+          import {readFile} from 'node:fs/promises'
+          import {parse} from 'espree'
+          const filename = 'ext/js/dictionary/term-lookup-index-preparation.js'
+          const previous = execFileSync('git', ['show', `943fda06a15d7cd5ed9fc77d6daea0113eff28d7:${filename}`], {encoding: 'utf8'})
+          const current = await readFile(filename, 'utf8')
+          const normalize = (value) => {
+              if (Array.isArray(value)) { return value.map(normalize) }
+              if (value !== null && typeof value === 'object') {
+                  return Object.fromEntries(Object.entries(value).filter(([key]) => !['start', 'end', 'range', 'loc'].includes(key)).map(([key, item]) => [key, normalize(item)]))
+              }
+              return value
+          }
+          const ast = (source) => normalize(parse(source, {ecmaVersion: 'latest', sourceType: 'module'}))
+          assert.deepEqual(ast(current), ast(previous))
+          const digest = (source) => createHash('sha256').update(source).digest('hex')
+          console.log(JSON.stringify({runtimeAstIdentical: true, previousSha256: digest(previous), currentSha256: digest(current), astSha256: digest(JSON.stringify(ast(current)))}))
+          JS
+          npx eslint ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/term-lookup-index-preparation.js ext/js/dictionary/term-record-opfs-store.js test/term-record-prepared-scores.test.js
