@@ -188,5 +188,25 @@
     "attemptedLocalRunnerPatch": "Interrupted tool call; local write state unknown; no acquisition used it.",
     "fixtureMove": "Root attempted a verified byte-preserving tmpfs-to-disk fixture move but no successful command receipt was returned. State unknown; no memory improvement or path change assumed.",
     "sourceOfTruth": "These exact uploaded blobs and the frozen source manifest, not inaccessible possibly partial local files."
+  },
+  "runtimeSourceBindingAmendment": {
+    "prospective": true,
+    "reason": "Attempt 3 stopped before any import because the natural inventory included esbuild dependency source paths from a shared local dependency layout, while clean hosted release builds use stock real dependency directories.",
+    "failedAttempt": {
+      "runId": 46131421197,
+      "commit": "cfa026b01684ff4815e2fbfe12c70a8448a6637a",
+      "outcomeBlob": "933320b54c93c583e60395c86d30884ae237aad3",
+      "acquiredImports": 0
+    },
+    "fixedProofBlob": "39ff962eeeffb8aa0d482d6801fd8b53033e8e7c",
+    "fixedProofSha256": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e",
+    "reconstructionArchiveBlob": "3f6ce2445dc31be2d58cf2917c6bdf96a48b1618",
+    "reconstructionArchiveSha256": "5ec8554b30563a370f06b929c752e06101a2c83d01cdf46a34961bf731e23344",
+    "admission": "Exactly 18 known historical/current raw SHA-256 pairs and 645 predeclared byte spans. Reconstruct the complete historical file from unchanged hosted bytes, then require its exact prior hash. Any other byte or unknown path/hash pair fails.",
+    "runtimeFiles": "Do not rewrite any generated library, source, release package, or natural oracle. Preserve the clean stock dependency/build setup. Runtime manifests and all later source guards bind every actual hosted file hash.",
+    "proofInterpretation": "Zip and resvg, the mismatched generated libraries reachable in the natural component, have identical executable ASTs. Other changes are source comments, sourcemap sources paths and 70 esbuild CommonJS source-label method keys; diagnostic function names/stacks can differ. All non-label AST fields and all other sourcemap fields are identical. A/B/C browser arms use the same stock library bytes.",
+    "validation": "Run the 28 focused acceptance/mutation checks against the actual first stock-built ext/lib directory before setup acceptance. The shared source guard is used by setup and by the full browser verifier before/after decoding.",
+    "unchanged": "Product commits/trees, fixture bytes, Git cleanliness, exact package delta, full logical/physical/media/restart proof, all schedules/statistical/memory gates and no-retry rule are unchanged.",
+    "sourceScope": "These controls intentionally remain pinned to dcfc02a and 2c02336. Later develop changes, including #981, are outside this cohort; no result transfers to a rebased combination without separate validation."
   }
 }

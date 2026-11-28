@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "proofSha256": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e",
+  "naturalSourceHashes": {
+    "ext/lib/handlebars.js": "691429be5a0d86e84c13de4083c53da47f02b6aa451da5a85346721ea6518e1d",
+    "ext/lib/handlebars.js.map": "6e7e3a17818657e2ad4c71d9f6e1a071b2baacef5c7715e26fdd4d3edf9715e9",
+    "ext/lib/hangul-js.js": "b502ecd41a13474800ba6f5927ca5034d2a60760a0af5acfd4c7c3f69c05e7ab",
+    "ext/lib/hangul-js.js.map": "4bb7fbdce5497a1fdf9ee703f38d2c91687685b9677d65c3a03ef80b8db7fb03",
+    "ext/lib/kanji-processor.js": "58b02d0065f7e87284a970d7ed53bd64373e78528dde60a71d9b1325fe44b4de",
+    "ext/lib/kanji-processor.js.map": "f3bc307b6b055da9e16536eca1eebd048c92c153f2dd25188fbe8d6dbd4901f7",
+    "ext/lib/linkedom.js": "622a36f7daef69024459cefe7d5893b592d829b6b6e938e87740aa1df4fbe147",
+    "ext/lib/linkedom.js.map": "ed841a77f81a342b4ffa28c0cd8ff75f0188c07958dc907a1827cc26260c60e3",
+    "ext/lib/parse5.js": "390643db239d5ee1a5f332a34ec7d5ec256eb041188e1d8215cda98a09683c13",
+    "ext/lib/parse5.js.map": "513ca791a3ed589d555a44c224fbe6dcb3146e70b81d62f83d41ab61d23368a9",
+    "ext/lib/resvg-wasm.js": "fcede82a0615c28850e3c6a99e5180b7aa1e064ee4deecd781e1e519ceac4edd",
+    "ext/lib/resvg-wasm.js.map": "f3d38657bff5f97de3d03d9fc2342157b2b0a427dabd8d779132f40c9e50681b",
+    "ext/lib/ucs2length.js": "9e6022a65c17dff69c8ebe0c17f569b38b191a98e80eaeca3f578aa8a9a39e76",
+    "ext/lib/ucs2length.js.map": "ab1f0ef9b18cf0316224a3c789a9c50b1518e95afbc5e56c6e29d6e0f8b68354",
+    "ext/lib/z-worker.js": "699fd93541c04cc79b2a53d6cffd3a72811972c3059b665ea1d6fa078ca6f1e2",
+    "ext/lib/z-worker.js.map": "c9a7b6d1f2e198a66f51bf5e4bed7baae2b575a68d787cbbe2028ecab55bf896",
+    "ext/lib/zip.js": "a917201677eb8eac5c86de5d4e64825d8a2b7acf193d84a8f26fc0072a56e211",
+    "ext/lib/zip.js.map": "bbd10e8ce1c419186ee2998b257d33fa416ff458c70f85ce6d34b5766b9babab",
+    "ext/js/exact.js": "18fd5eff3fed9c8e3094fd0746f17ce3aafd22a9ac33f225ba961332066f98f2"
+  },
+  "actualSourceHashes": {
+    "ext/js/exact.js": "18fd5eff3fed9c8e3094fd0746f17ce3aafd22a9ac33f225ba961332066f98f2",
+    "ext/lib/handlebars.js": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2",
+    "ext/lib/handlebars.js.map": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706",
+    "ext/lib/hangul-js.js": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62",
+    "ext/lib/hangul-js.js.map": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1",
+    "ext/lib/kanji-processor.js": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a",
+    "ext/lib/kanji-processor.js.map": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446",
+    "ext/lib/linkedom.js": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e",
+    "ext/lib/linkedom.js.map": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c",
+    "ext/lib/parse5.js": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7",
+    "ext/lib/parse5.js.map": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6",
+    "ext/lib/resvg-wasm.js": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988",
+    "ext/lib/resvg-wasm.js.map": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3",
+    "ext/lib/ucs2length.js": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513",
+    "ext/lib/ucs2length.js.map": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f",
+    "ext/lib/z-worker.js": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c",
+    "ext/lib/z-worker.js.map": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a",
+    "ext/lib/zip.js": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+    "ext/lib/zip.js.map": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb"
+  },
+  "exactFiles": 1,
+  "fixedPathPairs": 18,
+  "replacedSpans": 645,
+  "files": [
+    {
+      "path": "ext/js/exact.js",
+      "naturalSha256": "18fd5eff3fed9c8e3094fd0746f17ce3aafd22a9ac33f225ba961332066f98f2",
+      "actualSha256": "18fd5eff3fed9c8e3094fd0746f17ce3aafd22a9ac33f225ba961332066f98f2",
+      "mode": "exact",
+      "replacedSpans": 0
+    },
+    {
+      "path": "ext/lib/handlebars.js",
+      "naturalSha256": "691429be5a0d86e84c13de4083c53da47f02b6aa451da5a85346721ea6518e1d",
+      "actualSha256": "a6f91e334e2fdce1435d2bd99617f205aa8b5dbdb23f4451fdb82a4af0a226b2",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 90
+    },
+    {
+      "path": "ext/lib/handlebars.js.map",
+      "naturalSha256": "6e7e3a17818657e2ad4c71d9f6e1a071b2baacef5c7715e26fdd4d3edf9715e9",
+      "actualSha256": "f8e7997a45a507be169fa3a13884bf174c755c5a6da47163f94d067c2b152706",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 46
+    },
+    {
+      "path": "ext/lib/hangul-js.js",
+      "naturalSha256": "b502ecd41a13474800ba6f5927ca5034d2a60760a0af5acfd4c7c3f69c05e7ab",
+      "actualSha256": "9019030075e90cd6bceaf605673e0c0c6870fac6d17d4cb45564a968c41d9f62",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 2
+    },
+    {
+      "path": "ext/lib/hangul-js.js.map",
+      "naturalSha256": "4bb7fbdce5497a1fdf9ee703f38d2c91687685b9677d65c3a03ef80b8db7fb03",
+      "actualSha256": "f09719ae49d30261d9f487ad18b64d8ec82d60f883b8209603b6dc47120e62f1",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 1
+    },
+    {
+      "path": "ext/lib/kanji-processor.js",
+      "naturalSha256": "58b02d0065f7e87284a970d7ed53bd64373e78528dde60a71d9b1325fe44b4de",
+      "actualSha256": "47e39b0608091493b2861322bd4246c089d960688b8429f001503169c728756a",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 3
+    },
+    {
+      "path": "ext/lib/kanji-processor.js.map",
+      "naturalSha256": "f3bc307b6b055da9e16536eca1eebd048c92c153f2dd25188fbe8d6dbd4901f7",
+      "actualSha256": "8d0f916429e5086a923a373724358a8a5d1b49f9cec9012b0bc3438bb3a0d446",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 3
+    },
+    {
+      "path": "ext/lib/linkedom.js",
+      "naturalSha256": "622a36f7daef69024459cefe7d5893b592d829b6b6e938e87740aa1df4fbe147",
+      "actualSha256": "40c78e194111aae99c8c11ad3736bac654c25438d9d1a1536424a21c131f042e",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 221
+    },
+    {
+      "path": "ext/lib/linkedom.js.map",
+      "naturalSha256": "ed841a77f81a342b4ffa28c0cd8ff75f0188c07958dc907a1827cc26260c60e3",
+      "actualSha256": "b9ec5fab69ba3e3088253f21ccf9355260ce655d453bb26f6f15a232cc7b619c",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 163
+    },
+    {
+      "path": "ext/lib/parse5.js",
+      "naturalSha256": "390643db239d5ee1a5f332a34ec7d5ec256eb041188e1d8215cda98a09683c13",
+      "actualSha256": "03dc22097cc42d94583ab8cd075d86008cbaee9509e70b71c88793310fe048c7",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 19
+    },
+    {
+      "path": "ext/lib/parse5.js.map",
+      "naturalSha256": "513ca791a3ed589d555a44c224fbe6dcb3146e70b81d62f83d41ab61d23368a9",
+      "actualSha256": "35fb9a06cbf52fdb54fcac594291d81adafa7221606d4d6b4fc8a11e9e7041d6",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 14
+    },
+    {
+      "path": "ext/lib/resvg-wasm.js",
+      "naturalSha256": "fcede82a0615c28850e3c6a99e5180b7aa1e064ee4deecd781e1e519ceac4edd",
+      "actualSha256": "74552aeb98a5cc193bed2a30546389e67fab8b0899eca366cbcbdd65c1388988",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 1
+    },
+    {
+      "path": "ext/lib/resvg-wasm.js.map",
+      "naturalSha256": "f3d38657bff5f97de3d03d9fc2342157b2b0a427dabd8d779132f40c9e50681b",
+      "actualSha256": "54885d1f38cc0e0a718ff1841bfddd4f0d3e411c9190a378586e9e9ce502cbf3",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 1
+    },
+    {
+      "path": "ext/lib/ucs2length.js",
+      "naturalSha256": "9e6022a65c17dff69c8ebe0c17f569b38b191a98e80eaeca3f578aa8a9a39e76",
+      "actualSha256": "34cb9e4e5ba3a45835137b4a1ff4b5dbd5f70a4c0f9bf98465459f4a8a214513",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 2
+    },
+    {
+      "path": "ext/lib/ucs2length.js.map",
+      "naturalSha256": "ab1f0ef9b18cf0316224a3c789a9c50b1518e95afbc5e56c6e29d6e0f8b68354",
+      "actualSha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 1
+    },
+    {
+      "path": "ext/lib/z-worker.js",
+      "naturalSha256": "699fd93541c04cc79b2a53d6cffd3a72811972c3059b665ea1d6fa078ca6f1e2",
+      "actualSha256": "3b67a43aa240a61a4374a106f5a307484981edffc9e5004c4a7a20762104f90c",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 15
+    },
+    {
+      "path": "ext/lib/z-worker.js.map",
+      "naturalSha256": "c9a7b6d1f2e198a66f51bf5e4bed7baae2b575a68d787cbbe2028ecab55bf896",
+      "actualSha256": "349032e18f836abfc499d666a9374f62270cdf6622295de5a78d04ccff4a6d2a",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 15
+    },
+    {
+      "path": "ext/lib/zip.js",
+      "naturalSha256": "a917201677eb8eac5c86de5d4e64825d8a2b7acf193d84a8f26fc0072a56e211",
+      "actualSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 24
+    },
+    {
+      "path": "ext/lib/zip.js.map",
+      "naturalSha256": "bbd10e8ce1c419186ee2998b257d33fa416ff458c70f85ce6d34b5766b9babab",
+      "actualSha256": "131e16d2d70301a87628ed1eca26f4703a6ac3a73e01abe2720a1cdc6646efbb",
+      "mode": "fixed-source-path-pair",
+      "replacedSpans": 24
+    }
+  ],
+  "scope": "Fixed raw-byte pair proof only. Actual release/runtime files are unchanged and remain individually hashed."
+}

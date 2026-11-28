@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "scope": "Root independent source review before prospective qualification repair",
+  "qualificationParent": "cfa026b01684ff4815e2fbfe12c70a8448a6637a",
+  "sourceFiles": [
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/run.py",
+      "blob": "1915aecc47c954b42dff2d0786dcaf5d4295c89b",
+      "bytes": 43038,
+      "sha256": "3adcd6da4a6cedc353b7c4a8e23bc0a11304896c945545dd56c492d22603ccaa"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
+      "blob": "2b5b7808b00aa7661fb8f7973131a256fd0932ba",
+      "bytes": 24309,
+      "sha256": "c5ab510afa69ecda6daf19beb01e95dbf2fc3f9e8d6f13b22c120740945dae24"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs",
+      "blob": "76caa7463c73f9eb10cd26b30cc1494751520436",
+      "bytes": 5613,
+      "sha256": "8135a8acae03281afbf418ed1c790f1e544e3d1685ff5e20fa41655a178d70dc"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/generated-runtime-source-proof.json",
+      "blob": "39ff962eeeffb8aa0d482d6801fd8b53033e8e7c",
+      "bytes": 20140,
+      "sha256": "158ae77608da6f774aa6c0187c486d7621c8e82063637ebd9220df4895107c2e"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/test-runtime-source-guard.mjs",
+      "blob": "36c0a5cfc5d0edb1c3ec7e7d00075f8cba6c6966",
+      "bytes": 4119,
+      "sha256": "e9cd531bc93345fa32d231179045c7e164e0b5effe6f7c33bc6d5897195b2c47"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/plan.json",
+      "blob": "14fd7314a4fbc52bbdb5432fb784388ec54bd24c",
+      "bytes": 14770,
+      "sha256": "0645b1d830d38057e2ac568c24766c0d9503d3f30963be0f9e2cb51c138278af"
+    },
+    {
+      "path": "dev/perf/native-record-alias-qualification-da6c4/source-manifest.json",
+      "blob": "7eab718413091e556ee70690209533fd75c8718b",
+      "bytes": 7740,
+      "sha256": "5f4dcfe857d701081a6d08287a7100f09c98dc885e02cc9a6ff2806632e40815"
+    }
+  ],
+  "findings": [
+    "All seven blob contents independently SHA256-checked against the source manifest and handoff.",
+    "Plan is structurally identical to attempt3 after removing the explicit prospective runtimeSourceBindingAmendment; numerical gates, corpora, source commits, timing/media/memory schedules and no-retry policy unchanged.",
+    "Guard pins exact proof bytes, fixed18 known paths, natural/hosted SHA pairs and645 exact byte positions; reconstructs the entire natural file and requires its original byte length/hash.",
+    "Any other file still requires exact bytes. No runtime or package rewrite; actual hosted hashes are retained and rechecked by the browser verifier before/after persisted decoding.",
+    "Manifest delta is exactly run.py, browser-verify.mjs, plan.json and three new guard/proof/test files; workflow and oracles unchanged.",
+    "Reviewed28 acceptance/mutation cases cover altered executable JS, comments/source paths, map sourcesContent/mappings/sources, unknown file/pair, altered proof bytes and strict unchanged runtime behavior."
+  ],
+  "disposition": "APPROVE_NARROW_SETUP_REPAIR_ONLY; all hosted functional, full persisted browser proof, timing and memory gates remain required. Frozen dcfc source does not transfer to later #981 runtime."
+}

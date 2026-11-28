@@ -252,16 +252,32 @@ class Study:
             if self.original_harness is None:
                 self.original_harness = original
             same(original, self.original_harness, 'A/B stock harness differs')
-            runtime = self.native[arm]['configuration']['sourceHashes']
-            for relative, expected in runtime.items():
-                same(digest(target / relative), expected, 'Current natural/browser runtime differs: ' + relative)
+            if arm == 'A':
+                self.run(['node', str(HERE / 'test-runtime-source-guard.mjs'), str(target / 'ext/lib')],
+                         self.root, self.evidence / 'runtime-source-guard-tests.log')
+            natural_runtime = self.native[arm]['configuration']['sourceHashes']
+            compatibility_config = self.evidence / f'runtime-source-proof-config-{arm}.json'
+            compatibility_path = self.evidence / f'runtime-source-proof-{arm}.json'
+            write_json(compatibility_config, {'root': str(target), 'naturalSourceHashes': natural_runtime})
+            self.run(['node', str(HERE / 'runtime-source-guard.mjs'), str(compatibility_config), str(compatibility_path)],
+                     self.root, self.evidence / f'runtime-source-proof-{arm}.log')
+            compatibility = json.loads(compatibility_path.read_text())
+            same(compatibility['complete'], True, 'Runtime source proof incomplete')
+            same(compatibility['naturalSourceHashes'], natural_runtime, 'Wrong natural source proof inputs')
+            same(compatibility['proofSha256'], digest(HERE / 'generated-runtime-source-proof.json'), 'Wrong fixed source proof')
+            runtime = compatibility['actualSourceHashes']
             archive = target / 'builds/manabitan-chrome.zip'
-            runtime_manifest = {'commit': commit, 'tree': TREES[arm], 'files': runtime}
+            runtime_manifest = {'commit': commit, 'tree': TREES[arm], 'files': runtime,
+                                'naturalSourceHashes': natural_runtime,
+                                'generatedRuntimeSourceProofSha256': compatibility['proofSha256'],
+                                'runtimeSourceProofReceiptSha256': digest(compatibility_path)}
             manifest_path = self.evidence / f'runtime-manifest-{arm}.json'
             write_json(manifest_path, runtime_manifest)
             identity = {'commit': commit, 'tree': TREES[arm], 'runtimeHashes': runtime,
                         'toolingHashes': {relative: digest(target / relative) for relative in tooling if relative != HARNESS},
                         'sourceManifestPath': str(manifest_path), 'sourceManifestSha256': digest(manifest_path),
+                        'generatedRuntimeSourceProofSha256': compatibility['proofSha256'],
+                        'runtimeSourceProofReceiptSha256': digest(compatibility_path),
                         'packageSha256': digest(archive), 'entries': package_entries(archive),
                         'sourceHashes': {relative: digest(target / relative) if (target / relative).is_file() else None for relative in PROVENANCE_PATHS}}
             self.sources[arm] = target
@@ -480,7 +496,8 @@ class Study:
                 'harnessOverlaySha256': hashlib.sha256(self.overlay.encode()).hexdigest(),
                 'exporterSha256': digest(HERE / 'browser-layout-export.mjs'), 'fixtureSha256': self.fixture['sha256'],
                 'verifierSourceSha256': digest(HERE / 'browser-verify.mjs'),
-                'dependencyHashes': {name: digest(HERE / name) for name in ('product-common.mjs', 'archived/raw-alias-node-opfs.mjs')},
+                'dependencyHashes': {name: digest(HERE / name) for name in ('product-common.mjs', 'archived/raw-alias-node-opfs.mjs',
+                                                                          'runtime-source-guard.mjs', 'generated-runtime-source-proof.json')},
             }
             write_json(output / 'browser-verifier-config.json', config)
             self.run(['node', '--expose-gc', str(HERE / 'browser-verify.mjs'), str(output / 'browser-verifier-config.json')],
@@ -633,3 +650,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

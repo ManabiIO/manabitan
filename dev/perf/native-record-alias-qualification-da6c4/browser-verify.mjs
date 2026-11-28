@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Streaming full-row/definition proof. Also accepts a cold browser OPFS export.
 import assert from 'node:assert/strict';
+import {verifyRuntimeSources} from './runtime-source-guard.mjs';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {readFile, stat} from 'node:fs/promises';
@@ -92,10 +93,16 @@ async function verifyBrowserBindings() {
     assert.equal(git('rev-parse', 'HEAD'), config.expectedCommit);
     assert.equal(git('rev-parse', 'HEAD^{tree}'), config.expectedTree);
     assert.equal(git('status', '--porcelain'), config.expectedGitStatus);
-    assert.equal(sha(await readFile(config.sourceManifestPath)), config.sourceManifestSha256);
-    for (const [relative, expected] of Object.entries(pipeline.configuration.sourceHashes)) {
-        assert.equal(sha(await readFile(path.join(root, relative))), expected, 'Natural/browser runtime changed: ' + relative);
-    }
+    const runtimeManifestBytes = await readFile(config.sourceManifestPath);
+    assert.equal(sha(runtimeManifestBytes), config.sourceManifestSha256);
+    const runtimeManifest = JSON.parse(runtimeManifestBytes);
+    assert.deepEqual(runtimeManifest.naturalSourceHashes, pipeline.configuration.sourceHashes);
+    const runtimeSourceProof = await verifyRuntimeSources(root, pipeline.configuration.sourceHashes);
+    assert.equal(runtimeSourceProof.proofSha256, runtimeManifest.generatedRuntimeSourceProofSha256);
+    assert.deepEqual(runtimeSourceProof.actualSourceHashes, runtimeManifest.files);
+    report.runtimeSourceProof = {proofSha256: runtimeSourceProof.proofSha256,
+        exactFiles: runtimeSourceProof.exactFiles, fixedPathPairs: runtimeSourceProof.fixedPathPairs,
+        replacedSpans: runtimeSourceProof.replacedSpans};
     for (const [relative, expected] of Object.entries(config.dependencyHashes)) {
         assert.equal(sha(await readFile(new URL(relative, import.meta.url))), expected, 'Verifier dependency changed: ' + relative);
     }
@@ -322,3 +329,4 @@ assert(report.complete, 'Verifier did not finish cleanly');
 console.log(JSON.stringify({complete: report.complete, rows: report.verifiedRows, logicalSha256: report.inputLogicalSha256,
     groups: report.groups.length, nativePreparedGroups: report.nativePreparedGroups, aliases: report.aliasProofs.length,
     coldLookupProbes: report.coldLookupProbes, coldRecordProbes: report.coldRecordProbes, maximumRssKiB: report.maximumRssKiB}));
+

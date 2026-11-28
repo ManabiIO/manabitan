@@ -1,0 +1,36 @@
+✔ fixed pair accepts exact bytes: ext/lib/handlebars.js (8.359871ms)
+✔ fixed pair accepts exact bytes: ext/lib/handlebars.js.map (5.960789ms)
+✔ fixed pair accepts exact bytes: ext/lib/hangul-js.js (1.443189ms)
+✔ fixed pair accepts exact bytes: ext/lib/hangul-js.js.map (2.175112ms)
+✔ fixed pair accepts exact bytes: ext/lib/kanji-processor.js (2.891491ms)
+✔ fixed pair accepts exact bytes: ext/lib/kanji-processor.js.map (6.520546ms)
+✔ fixed pair accepts exact bytes: ext/lib/linkedom.js (7.387645ms)
+✔ fixed pair accepts exact bytes: ext/lib/linkedom.js.map (10.108766ms)
+✔ fixed pair accepts exact bytes: ext/lib/parse5.js (2.508036ms)
+✔ fixed pair accepts exact bytes: ext/lib/parse5.js.map (5.907253ms)
+✔ fixed pair accepts exact bytes: ext/lib/resvg-wasm.js (0.76058ms)
+✔ fixed pair accepts exact bytes: ext/lib/resvg-wasm.js.map (0.722791ms)
+✔ fixed pair accepts exact bytes: ext/lib/ucs2length.js (0.518405ms)
+✔ fixed pair accepts exact bytes: ext/lib/ucs2length.js.map (0.448182ms)
+✔ fixed pair accepts exact bytes: ext/lib/z-worker.js (0.934593ms)
+✔ fixed pair accepts exact bytes: ext/lib/z-worker.js.map (4.975546ms)
+✔ fixed pair accepts exact bytes: ext/lib/zip.js (2.934916ms)
+✔ fixed pair accepts exact bytes: ext/lib/zip.js.map (4.643528ms)
+✔ executable JavaScript mutation is rejected (6.880066ms)
+✔ comment/source-path mutation is rejected (1.425851ms)
+✔ source map sourcesContent mutation is rejected (8.211441ms)
+✔ source map mappings mutation is rejected (5.701408ms)
+✔ source map sources mutation is rejected (3.801304ms)
+✔ known bytes at an unknown runtime path are rejected (1.28429ms)
+✔ unknown natural pair is rejected even when it equals the current bytes (1.047687ms)
+✔ all other runtime files retain strict equality (0.812113ms)
+✔ proof source-byte mutation is rejected (0.524579ms)
+✔ proof unknown path/pair amendment is rejected (0.344212ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.61949
