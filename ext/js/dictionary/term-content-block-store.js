@@ -128,7 +128,7 @@ export class TermContentBlockImportSession {
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
-     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+     * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, singleReferenceSlab?: boolean}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      * @throws {Error} If the session is closed or the source spans are invalid.
      */
     tryBeginAppendSpans(dictionary, sourceBytes, sourceOffsets, sourceLengths, compressionDictName) {
@@ -916,6 +916,7 @@ export class TermContentBlockStore {
             ),
             contentLengths: sourceLengths,
             contentDictName: createRawTermContentCompactBlockDictName(compressionDictName),
+            singleReferenceSlab: sourceLengths.length <= referenceLayout.entriesPerSlab,
         }));
         void storage.catch(() => {});
         const completion = (async () => {

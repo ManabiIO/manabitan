@@ -54,6 +54,7 @@ import {
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
     RAW_TERM_CONTENT_DICT_NAME,
+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
@@ -123,6 +124,7 @@ const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
 const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
 const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
+const IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS = Symbol('inFlightTermContentSourceWitness');
 
 /**
  * @typedef {object} InFlightTermContentSourceBatch
@@ -6974,6 +6976,7 @@ void 0 :
      * @param {string|string[]} pendingResolvedDictNames
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
+     * @param {{offsets: Float64Array, lengths: Uint32Array, spans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}, dictName: string}|null} [producerWitness]
      * @returns {() => void}
      * @throws {Error} If source metadata is inconsistent or aliases an active reservation.
      */
@@ -6983,10 +6986,46 @@ void 0 :
         pendingResolvedDictNames,
         pendingContentBytes,
         pendingContentSpans,
+        producerWitness = null,
     ) {
         const count = pendingOffsets.length;
         if (pendingLengths.length !== count) {
             throw new RangeError('In-flight term content offset and length counts do not match');
+        }
+        if (
+            count > 0 &&
+            this._inFlightTermContentSourceBatches.size === 0 &&
+            producerWitness !== null &&
+            producerWitness.offsets === pendingOffsets &&
+            producerWitness.lengths === pendingLengths &&
+            producerWitness.spans === pendingContentSpans &&
+            pendingContentSpans !== null &&
+            pendingContentSpans.lengths === pendingLengths &&
+            producerWitness.dictName === pendingResolvedDictNames &&
+            typeof pendingResolvedDictNames === 'string'
+        ) {
+            const start = pendingOffsets[0];
+            const end = pendingOffsets[count - 1];
+            const expectedEnd = start + (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            if (
+                Number.isSafeInteger(start) && start >= 0 &&
+                Number.isSafeInteger(end) && end === expectedEnd
+            ) {
+                const batch = {
+                    offsets: pendingOffsets,
+                    lengths: pendingLengths,
+                    dictNames: pendingResolvedDictNames,
+                    contentBytes: pendingContentBytes,
+                    contentSpans: pendingContentSpans,
+                    sortedOffsets: true,
+                    minimumOffset: start,
+                    maximumOffset: end,
+                };
+                this._inFlightTermContentSourceBatches.add(batch);
+                return () => {
+                    this._inFlightTermContentSourceBatches.delete(batch);
+                };
+            }
         }
         let sortedOffsets = true;
         let minimumOffset = Infinity;
@@ -8562,6 +8601,7 @@ this._readTermContentSignature(
                             pendingResolvedDictNames,
                             pendingContentBytes,
                             pendingContentSpans,
+                            persistenceResult[IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS] ?? null,
                         );
                     }
                     resolvedContentDictNames = this._publishArtifactTermContentMetadata({
@@ -9611,6 +9651,22 @@ null :
             pendingLengths: blockStorage.contentLengths,
             pendingResolvedDictNames: blockStorage.contentDictName,
             [VALIDATED_TERM_CONTENT_METADATA]: true,
+            [IN_FLIGHT_TERM_CONTENT_SOURCE_WITNESS]: (
+                blockStorage.singleReferenceSlab === true &&
+                blockStorage.contentLengths === pendingContentSpans.lengths &&
+                pendingContentSpans.offsets.buffer instanceof ArrayBuffer &&
+                pendingContentSpans.offsets.buffer.resizable !== true &&
+                pendingContentSpans.lengths.buffer instanceof ArrayBuffer &&
+                pendingContentSpans.lengths.buffer.resizable !== true &&
+                pendingContentSpans.offsets.length === pendingContentSpans.lengths.length ?
+                    {
+                        offsets: blockStorage.contentOffsets,
+                        lengths: blockStorage.contentLengths,
+                        spans: pendingContentSpans,
+                        dictName: blockStorage.contentDictName,
+                    } :
+                    null
+            ),
         }));
         const completion = operation.completion.then((blockStorage) => ({
             packMs: blockStorage.packMs,
