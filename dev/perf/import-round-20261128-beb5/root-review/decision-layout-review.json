@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "scope": "Arithmetic-only replay of the documented command against the durable nested directory layout, reading each original CI audit from the retained ZIP; no import, browser or performance run.",
+  "command": [
+    "python3",
+    "recompute.py",
+    "--input-root",
+    "../current-browser",
+    "--out",
+    "recomputed-inputs.json"
+  ],
+  "workingDirectory": "/tmp/manabitan-beb5/final-decision-layout-check/final-decision",
+  "scriptSha256": "befe00d118a6f3ce42eff98c29791cd47af27a6c5aac222ff75a96bef16955b7",
+  "retainedArchiveFallbackUsedForAllSixCorpora": true,
+  "dataEqualExceptExplicitInputPathStrings": true,
+  "exitCode": 0,
+  "stdout": "{\"complete\": true, \"path\": \"recomputed-inputs.json\", \"sha256\": \"ce010953a35f49258fb192c6b2836366757f11bb092d3b1f0b1a0c250ead6cfd\", \"corpora\": 6}\n",
+  "stderr": ""
+}

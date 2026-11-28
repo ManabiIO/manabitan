@@ -1,0 +1,37 @@
+{
+  "complete": true,
+  "aggregatePath": "/tmp/manabitan-beb5/aggregate-report-draft.md",
+  "aggregateBytes": 32893,
+  "aggregateSha256": "498f49156e1d20f758105ec55dd0e0013d595d4f47def99fa72e09bec52727e8",
+  "arithmeticInputsSha256": "54ee8687ef06252e67f8b29bd65f625bcbc8e87b2f6ee27838e7179be3e7cd0a",
+  "checks": [
+    "Six current candidate/corpus medians, equal-work estimates, faster-pair counts, descriptive intervals, absolute differences and same-code controls agree with independently reconstructed raw-audit observations.",
+    "Original canonical table and original/current baseline attribution remain separate and match retained evidence.",
+    "Current source/unit counts, raw-module size distinction, retained-tail explanation and all three current memory gaps are accurate.",
+    "No stale pending/queued/awaiting study wording found.",
+    "Owning-phase counters are distinguished from complete imports, and ordinary/trace profile values are explicitly not added or subtracted.",
+    "No pooled, trimmed, control-subtracted or replacement result is claimed.",
+    "The old101-file/104-entry/313-member statement now explicitly names the original-cohort publication.",
+    "Final HOLD wording and aggregate rejection of the tested CRC variant both mean no product PR; neither rules out every possible future mechanism."
+  ],
+  "relativeLinkCheck": {
+    "count": 27,
+    "treeRefsChecked": [
+      "d32c3f68",
+      "624c689e401559f8169bb46a72384c4c4bddb6b8",
+      "744a"
+    ],
+    "unavailableTreeRefs": [
+      "c872"
+    ],
+    "missingFromCheckedTreesAndManifests": [
+      "canonical-current-source/hosted-source-audit.json"
+    ],
+    "scope": "Existing Git trees plus exact current publication manifests and the sealed decision files; final remote tree readback remains owned by root."
+  },
+  "remainingSubstantiveCorrections": [],
+  "decisionReproductionReceipt": {
+    "path": "/tmp/manabitan-beb5/final-decision-layout-review.json",
+    "sha256": "04e7a4684a0cd8a57fc14e5a69f1c979f01f3d44a03932dc5acab02aa2b0ba9a"
+  }
+}
