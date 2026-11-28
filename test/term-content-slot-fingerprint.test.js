@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/* eslint-disable no-underscore-dangle -- Exercise the shared native/database metadata-owner ABI. */
-
 import fs from 'node:fs/promises';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
@@ -13,7 +11,7 @@ import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metada
 import {CANONICAL_SCAN_ABI_VERSION, TERM_CONTENT_METADATA_SLOT_INDEX_MASK} from '../ext/js/dictionary/term-content-canonical-layout.js';
 
 const nativeModule = await WebAssembly.compile(await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)));
-const previousModule = await WebAssembly.compile(await fs.readFile(new URL('./data/term-content-canonical-scan-v1.wasm', import.meta.url)));
+const previousModule = await WebAssembly.compile(await fs.readFile(new URL('data/term-content-canonical-scan-v1.wasm', import.meta.url)));
 
 /**
  * @param {number} index
@@ -67,7 +65,7 @@ function chunkFor(pairs) {
         contentDedupPlan: {
             uniqueCount: count,
             sourceRowCount: count,
-            uniqueRowIndexes: identities.slice(),
+            uniqueRowIndexes: new Uint32Array(identities),
             uniqueSignatures: new Uint32Array(count * 3),
             resolvedFlags: new Uint8Array(count),
             resolvedOffsets: new Float64Array(count),
@@ -125,7 +123,7 @@ describe('fingerprinted metadata probe slots', () => {
         const pairs = Array.from({length: 32}, (_, i) => [(0x80000000 + i * 0x100001) >>> 0, i + 1]);
         for (const [i, pair] of pairs.entries()) { database._setTermEntryContentMetaByHashPair(...pair, metadata(i)); }
         database._rollbackStagedArtifactTermContentMetadata({
-            indexes: Int32Array.from({length: 29}, (_, i) => i < 14 ? i + 1 : i + 2), active: true,
+            indexes: Int32Array.from({length: 29}, (_, i) => (i < 14 ? i + 1 : i + 2)), active: true,
         });
         expect(database._termEntryContentMetaHashPairCount).toBe(3);
         expect(database._termEntryContentMetaHashPairTable.length).toBe(16);
@@ -166,11 +164,21 @@ describe('native and JavaScript fingerprint interoperability', () => {
         const offsets = Float64Array.of(300, 400);
         const lengths = Uint32Array.of(4, 4);
         database._publishResolvedArtifactTermContentPlan(
-            chunk.contentDedupPlan, resolved.pendingPlanUniqueStart, resolved.pendingPlanUniqueIndexes, offsets, lengths, 'raw',
+            chunk.contentDedupPlan,
+            resolved.pendingPlanUniqueStart,
+            resolved.pendingPlanUniqueIndexes,
+            offsets,
+            lengths,
+            'raw',
         );
         database._publishArtifactTermContentMetadata({
-            ...resolved, count: 4, pendingOffsets: offsets, pendingLengths: lengths, pendingResolvedDictNames: 'raw',
-            contentUniqueIndexList: chunk.contentUniqueIndexList, useResolvedContentReferences: true,
+            ...resolved,
+            count: 4,
+            pendingOffsets: offsets,
+            pendingLengths: lengths,
+            pendingResolvedDictNames: 'raw',
+            contentUniqueIndexList: chunk.contentUniqueIndexList,
+            useResolvedContentReferences: true,
         });
         for (const [i, pair] of pairs.entries()) {
             expect(database._getTermEntryContentMetaByHashPair(...pair)).toMatchObject({offset: [100, 300, 108, 400][i]});
@@ -187,12 +195,15 @@ describe('native and JavaScript fingerprint interoperability', () => {
     test.each([0xf0000000, 0xf0000011])('rejects malformed packed slot %s before fingerprint filtering', async (word) => {
         const database = new DictionaryDatabase();
         const chunk = chunkFor([[17, 29]]);
-        database._nativeCanonicalScanner = new NativeCanonicalScanner({loadModule: async () => nativeModule, hooks: {
-            beforeNative: ({a}) => {
-                const slot = database._getTermEntryContentMetaHashPairSlot(17, 29, a.slots.length - 1);
-                a.slots[slot] = word;
+        database._nativeCanonicalScanner = new NativeCanonicalScanner({
+            loadModule: async () => nativeModule,
+            hooks: {
+                beforeNative: ({a}) => {
+                    const slot = database._getTermEntryContentMetaHashPairSlot(17, 29, a.slots.length - 1);
+                    a.slots[slot] = word;
+                },
             },
-        }});
+        });
         await expect(database._resolveArtifactTermContentDedup(chunk, true)).rejects.toThrow('Native canonical scan error -4');
         expect(database._termEntryContentMetaDenseCount).toBe(0);
         expect(database._termEntryContentMetaHashPairPendingCount).toBe(0);
@@ -200,9 +211,12 @@ describe('native and JavaScript fingerprint interoperability', () => {
 
     test('rejects an oversized native identity capacity before mutation', async () => {
         const database = new DictionaryDatabase();
-        database._nativeCanonicalScanner = new NativeCanonicalScanner({loadModule: async () => nativeModule, hooks: {
-            beforeNative: ({a}) => { new Uint32Array(a.memory.buffer, 1088, 22)[10] = TERM_CONTENT_METADATA_SLOT_INDEX_MASK + 1; },
-        }});
+        database._nativeCanonicalScanner = new NativeCanonicalScanner({
+            loadModule: async () => nativeModule,
+            hooks: {
+                beforeNative: ({a}) => { new Uint32Array(a.memory.buffer, 1088, 22)[10] = TERM_CONTENT_METADATA_SLOT_INDEX_MASK + 1; },
+            },
+        });
         await expect(database._resolveArtifactTermContentDedup(chunkFor([[0xf0000011, 29]]), true)).rejects.toThrow('Native canonical scan error -1');
         expect(database._termEntryContentMetaDenseCount).toBe(0);
         expect(database._termEntryContentMetaHashPairPendingCount).toBe(0);
@@ -212,7 +226,7 @@ describe('native and JavaScript fingerprint interoperability', () => {
         const database = new DictionaryDatabase();
         database._setTermEntryContentMetaByHashPair(0x80000001, 9, metadata(0));
         database._ensureTermEntryContentMetaHashPairCapacity(8);
-        const before = database._termEntryContentMetaHashPairTable.slice();
+        const before = new Uint32Array(database._termEntryContentMetaHashPairTable);
         const chunk = chunkFor([[0xf0000011, 29], [0x70000011, 31]]);
         database._nativeCanonicalScanner = new NativeCanonicalScanner({loadModule: async () => nativeModule, hooks: {trapAfter: 1}});
         await expect(database._resolveArtifactTermContentDedup(chunk, true)).rejects.toThrow();

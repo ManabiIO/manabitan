@@ -5,7 +5,7 @@ on:
     branches: [perf/import-slot-fingerprints-20261128]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -25,24 +25,16 @@ jobs:
           npm ci
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends clang-21 lld-21
-      - name: Regenerate exact native artifacts
+      - name: Verify exact native artifacts
         run: |
-          npm run build:dictionary-wasm -- --write
           npm run build:dictionary-wasm -- --check
-          git diff --exit-code -- dev/data/dictionary-wasm/term-bank-parser.wasm
-          git add dev/data/dictionary-wasm/manifest.json dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm
-          if ! git diff --cached --quiet; then
-            test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
-            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'build: regenerate tagged content scanner'
-            git push origin "HEAD:$GITHUB_REF"
-          fi
-          git rev-parse HEAD
+          git diff --exit-code -- dev/data/dictionary-wasm
       - name: Prepare generated libraries
         run: |
           npm run build:libs
           npm run license-report:html
       - name: Focused fingerprint and canonical scanner tests
-        run: node node_modules/vitest/vitest.mjs run test/term-content-slot-fingerprint.test.js test/native-canonical-scan.test.js test/term-content-metadata-arena.test.js --maxWorkers=2
+        run: node node_modules/vitest/vitest.mjs run test/term-content-slot-fingerprint.test.js test/term-content-canonical-scan.test.js test/term-content-metadata-arena.test.js --maxWorkers=2
       - name: JavaScript lint
         run: npm run test:js
       - name: Type checking

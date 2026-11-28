@@ -25,6 +25,7 @@ export const CANONICAL_SCAN_ABI_VERSION = 2;
 // valid capacity is below 2^28, and index + 1 fits in the low 28 bits. The high
 // nibble filters probe collisions; both complete hashes still decide matches.
 export const TERM_CONTENT_METADATA_SLOT_INDEX_MASK = 0x0fffffff;
+
 export const TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK = 0xf0000000;
 
 export const CANONICAL_SCAN_MAX_ROWS = 100000;
