@@ -1,0 +1,193 @@
+name: Local lookup index screening d2d1
+
+on:
+  push:
+    branches: [lab/import-local-index-screen-20261128-d2d1-r1]
+    paths:
+      - .github/workflows/import-local-index-screen-d2d1.yml
+      - dev/perf/import-qualification-20261125-a7f7.py
+      - dev/perf/import-memory-20261125-a7f7/package_identity.py
+      - test/perf/import-package-identity-d2d1.test.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-index-screen-d2d1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  CANDIDATE_SHA: e7d818f8fac3d6c0bb340759fc932119c1e74302
+
+jobs:
+  validate:
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/lab/import-local-index-screen-20261128-d2d1-r1'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - name: Install pinned native test compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check changed JavaScript
+        run: |
+          npx eslint \
+            ext/js/dictionary/term-bank-wasm-parser.js \
+            ext/js/dictionary/term-record-opfs-store.js \
+            ext/js/dictionary/term-lookup-index-ownership.js \
+            test/term-record-opfs-store.test.js \
+            test/term-record-local-index-parts.test.js \
+            test/term-record-local-index-parser-ownership.test.js \
+            test/util/import-index-chunk-fixture.js
+      - name: Validate types
+        run: npm run test:ts
+      - name: Run complete unit tests
+        run: npm run test:unit
+      - name: Validate all build targets
+        run: npm run test:build
+
+  validate-tooling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Test exact package additions and file types
+        run: python3 test/perf/import-package-identity-d2d1.test.py
+      - name: Verify existing qualification receipt tests
+        run: python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+
+  screen:
+    needs: [validate, validate-tooling]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run six alternating pairs and identical controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_root=builds/perf/20261128-d2d1-local-parts
+          mkdir -p "$evidence_root"
+          git rev-parse HEAD HEAD^{tree} > "$evidence_root/workflow-source.txt"
+          sha256sum \
+            .github/workflows/import-local-index-screen-d2d1.yml \
+            dev/perf/import-qualification-20261125-a7f7.py \
+            dev/perf/import-memory-20261125-a7f7/package_identity.py \
+            test/perf/import-package-identity-d2d1.test.py > "$evidence_root/tooling-sha256.txt"
+          local_index_extra_args=()
+          if [[ "$DICTIONARY" == vndb ]]; then
+            local_index_extra_args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$BASE_SHA" \
+            --candidate "$CANDIDATE_SHA" \
+            --dictionary "$DICTIONARY" \
+            --initial-order AB \
+            --pairs 6 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --expected-package-entry js/dictionary/term-lookup-index-ownership.js \
+            --expected-added-package-entry js/dictionary/term-lookup-index-ownership.js \
+            --evidence "$evidence_root/$DICTIONARY-AB" \
+            "${local_index_extra_args[@]}" \
+            2>&1 | tee "$evidence_root/$DICTIONARY-acquisition.log"
+      - name: Print compact evidence receipts
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          folder = pathlib.Path("builds/perf/20261128-d2d1-local-parts") / (os.environ["DICTIONARY"] + "-AB")
+          def emit(name, value):
+              print("LOCAL_INDEX_EVIDENCE " + json.dumps({"file": name, "value": value}, sort_keys=True, separators=(",", ":")))
+          for name in [
+              "registered-plan.json", "analysis.json", "observations.json",
+              "memory/plan.json", "memory/observations.json",
+              "memory/memory-comparison.json", "memory/memory-audit.json",
+              "memory/semantic-failures.json", "memory/memory-audit-failure.json",
+          ]:
+              path = folder / name
+              if path.is_file():
+                  value = json.loads(path.read_text())
+                  if name == "memory/plan.json":
+                      for arm in value.get("sourceHashes", {}).values():
+                          arm.pop("entries", None)
+                  emit(name, value)
+          source_path = folder / "source-identities.json"
+          if source_path.is_file():
+              source = json.loads(source_path.read_text())
+              emit("source-identities.json", {
+                  "changedPackageEntries": source["changedPackageEntries"],
+                  "arms": {
+                      key: {
+                          **{field: arm[field] for field in ["sha", "tree", "packageSha256", "lockSha256", "fixtureLockSha256", "sourceHashes"]},
+                          "changedEntries": {name: arm["entries"].get(name) for name in source["changedPackageEntries"]},
+                      }
+                      for key, arm in source["arms"].items()
+                  },
+              })
+          browser = folder / "browser-identity.json"
+          if browser.is_file():
+              emit("browser-identity.json", json.loads(browser.read_text()))
+          seen_receipts = set()
+          for receipt in sorted(folder.rglob("canonical-receipt.json")):
+              content = receipt.read_bytes()
+              signature = hashlib.sha256(content).hexdigest()
+              value = {"sha256": signature}
+              if signature not in seen_receipts:
+                  value["receipt"] = json.loads(content)
+                  seen_receipts.add(signature)
+              emit(str(receipt.relative_to(folder)), value)
+          for summary in sorted(folder.glob("*/summary.json")):
+              value = json.loads(summary.read_text())
+              keys = ["totalImportMs", "step4Breakdown", "phaseTimings", "phaseDurationsMs"]
+              emit(str(summary.relative_to(folder)), {
+                  "runs": [{key: run[key] for key in keys if key in run} for run in value.get("runs", [])],
+              })
+          for name in ["libs-A.log", "libs-B.log", "build-A.log", "build-B.log"]:
+              path = folder / name
+              if path.is_file():
+                  emit(name, {"tail": path.read_text(errors="replace").splitlines()[-12:]})
+          for path in sorted(folder.glob("*/run.log")):
+              if not (path.parent / "canonical-receipt.json").is_file():
+                  emit(str(path.relative_to(folder)), {"incomplete": True, "tail": path.read_text(errors="replace").splitlines()[-25:]})
+          PY
+      - name: Preserve every completed or failed receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: local-index-screen-d2d1-${{ matrix.dictionary }}-AB-${{ github.run_id }}
+          path: builds/perf/20261128-d2d1-local-parts
+          if-no-files-found: error
+          retention-days: 90

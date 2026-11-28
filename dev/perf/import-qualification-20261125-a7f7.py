@@ -17,7 +17,6 @@ import statistics
 import subprocess
 import sys
 import time
-import zipfile
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--baseline", required=True)
@@ -29,6 +28,8 @@ parser.add_argument("--evidence", type=pathlib.Path, required=True)
 parser.add_argument("--flags", default="{}")
 parser.add_argument("--expected-workers", type=int)
 parser.add_argument("--expected-package-entry", action="append", required=True)
+parser.add_argument("--expected-added-package-entry", action="append", default=[],
+                    help="Prospective exact allowed package additions; default: none. Removals remain forbidden.")
 parser.add_argument("--vndb-sah-allocation-units", type=int, nargs=2, metavar=("MIN", "MAX"),
                     help="Prospective VNDB active SAH allocation range in 4096-byte units; default: historical 129–131")
 args = parser.parse_args()
@@ -46,6 +47,7 @@ sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
 from chromium_memory import run_with_sampling, summarize_import_window
 from protocol import memory_overlay, memory_comparison, schedule as memory_schedule
 from audit_memory import audit_cell
+from package_identity import package_entries, changed_package_entries
 from qualification_receipts import (
     SAH_ALLOCATION_UNIT_BYTES, validate_import_summary, require_matching_receipts,
     validate_vndb_sah_allocation_units,
@@ -88,16 +90,6 @@ def digest(path):
         for block in iter(lambda: data.read(1024 * 1024), b""):
             result.update(block)
     return result.hexdigest()
-
-def package_entries(path):
-    with zipfile.ZipFile(path) as package:
-        names = [item.filename for item in package.infolist()]
-        if len(names) != len(set(names)):
-            raise RuntimeError(f"Duplicate package member names: {path}")
-        return {
-            item.filename: hashlib.sha256(package.read(item)).hexdigest()
-            for item in package.infolist() if not item.is_dir()
-        }
 
 sources = {}
 identities = {}
@@ -157,12 +149,9 @@ for label, sha in (("A", args.baseline), ("B", args.candidate)):
         raise RuntimeError(f"Unexpected source changes after building arm {label}")
     sources[label] = target
     shutil.copyfile(archive, evidence / f"package-{label}.zip")
-if identities["A"]["entries"].keys() != identities["B"]["entries"].keys():
-    raise RuntimeError("Candidate changes the set of packaged files")
-changed_entries = [
-    name for name in identities["A"]["entries"]
-    if identities["A"]["entries"][name] != identities["B"]["entries"][name]
-]
+changed_entries = changed_package_entries(
+    identities["A"]["entries"], identities["B"]["entries"], args.expected_added_package_entry,
+)
 write_json(evidence / "source-identities.json", {
     "arms": identities, "changedPackageEntries": changed_entries,
     "controlC": "Same A source, package, runtime, and flags under a distinct observation label",
@@ -195,6 +184,7 @@ write_json(evidence / "registered-plan.json", {
     "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
     "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
     "expectedPackageEntries": args.expected_package_entry,
+    "expectedAddedPackageEntries": args.expected_added_package_entry,
     "expectedWorkers": args.expected_workers,
     "vndbSahAllocationPolicy": {
         "unitBytes": SAH_ALLOCATION_UNIT_BYTES,
