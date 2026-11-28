@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "preparedUtc": "2026-11-28T05:56:01.979244+00:00",
+  "status": "Offline reader draft awaiting root independent review before any artifact analysis",
+  "sourceReader": {
+    "path": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-owned-columns-83b3-analysis-source/analyze-cell.py",
+    "bytes": 27145,
+    "sha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9"
+  },
+  "newReader": {
+    "path": "/workspace/scratch/83b3b3bfba02/manabitan/builds/perf/import-inflight-validation-830-83b3-analysis-source/analyze-cell.py",
+    "bytes": 22009,
+    "sha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c"
+  },
+  "patchSha256": "088543f440ef9c40382d8f3659dd1e13107092d216e56d2345a4eec985f389ff",
+  "sourceIds": {
+    "runId": 46114139837,
+    "head": "049cb11e6963604435998aa060e1400cc00365cb",
+    "tree": "a47cc23bcfa039a9defe66db2b15d79ea2198072",
+    "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "workflowSha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5"
+  },
+  "changes": [
+    "Candidate commit/tree, run ID and evidence directory updated to the published #830 qualification.",
+    "Runtime whitelist and exact A/B hashes changed to the single dictionary-database.js entry.",
+    "Removed only the owned-columns-specific replay constants and allGroupingPolicies gate because this acquisition does not run that replay.",
+    "Removed mention of a separate trace from the descriptive exclusion sentence because this workflow acquires no trace."
+  ],
+  "unchangedFunctionAsts": [
+    "canonical",
+    "check_driver_analysis",
+    "check_media",
+    "check_memory",
+    "check_observation",
+    "check_plan",
+    "check_sources",
+    "finite",
+    "inventory_attempts",
+    "load",
+    "remember",
+    "require",
+    "same",
+    "schedule",
+    "sha_file",
+    "stage",
+    "statistics_for",
+    "tooling",
+    "unique_object",
+    "validate_one",
+    "verify_packages"
+  ],
+  "validation": "Python parse/compile passed. Every surviving function except main has exactly the same AST as the frozen #820 reader; main changes are recorded in the complete diff.",
+  "acquisitions": 0,
+  "artifactsAnalyzed": 0,
+  "artifactTransportBoundary": "As with the original reader, GitHub artifact ID/name/run/head/attempt and selective extraction bindings must be verified separately before invocation. The derived runId label is not a substitute for that transport receipt.",
+  "browserGateOrThresholdChanges": false,
+  "removedInapplicableGate": "allGroupingPolicies (owned-columns replay only; absent from #830 acquisition)"
+}

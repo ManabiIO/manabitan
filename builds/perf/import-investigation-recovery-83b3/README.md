@@ -1,3 +1,13 @@
+# Current import investigation evidence
+
+The [three completed ownership browser cells](../import-owned-columns-83b3-hosted/README.md) now have durable raw observations and independent readbacks. Neither independent JMdict host demonstrates a latency improvement; Jitendex leans slower. VNDB is still pending in this snapshot. All controls, slow tails, memory scans and original non-package artifact members are preserved. PR #820 remains draft/HOLD, with its deterministic allocation benefit kept separate from latency and peak-memory claims.
+
+The separate [current-source #830 update](https://github.com/ManabiIO/manabitan/pull/830) is published at `049cb11e6963604435998aa060e1400cc00365cb`. Its [complete component evidence](https://github.com/ManabiIO/manabitan/tree/049cb11e6963604435998aa060e1400cc00365cb/dev/perf/inflight-validation-830-20261128-83b3) supports a 16.9997 ms paired median direct-registration saving, faster than both controls in all twelve rounds. Its broader sink timing is inconclusive and its separate browser qualification is pending. The [reviewed offline reader](../import-inflight-validation-830-83b3-analysis-source/README.md) is frozen before the first artifact analysis.
+
+All additions on this branch are evidence under `builds/perf/`. Product bytes still match PR #820 head `f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963`; neither PR head is changed by this publication. Dated recovery and profiling snapshots below retain their original history and are superseded only where this current index says so.
+
+---
+
 # Current profiling evidence and interpretation
 
 The [complete offline browser readback](../20261128-browser-jmdict-profile-83b3/README.md) is now available. Its compact archive preserves the full previously acquired JMdict baseline trace, original receipts, exact source bindings, all 37,824 samples, failed first analysis and independent recomputation. This is a baseline diagnostic, not a new acquisition or candidate timing result.

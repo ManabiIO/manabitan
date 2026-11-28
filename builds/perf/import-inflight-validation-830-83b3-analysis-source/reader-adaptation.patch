@@ -1,0 +1,127 @@
+--- owned-columns/analyze-cell.py
++++ inflight-validation-830/analyze-cell.py
+@@ -12,11 +12,10 @@
+ import zipfile
+ 
+ BASELINE = '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+-CANDIDATE = 'f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963'
+-TREES = {'A': 'd99ea4d04658f7ec1c76acdc5f3684594212a471', 'B': '9c34079709e7b8f6cae6b61c9ef537bb965ebcee'}
++CANDIDATE = '049cb11e6963604435998aa060e1400cc00365cb'
++TREES = {'A': 'd99ea4d04658f7ec1c76acdc5f3684594212a471', 'B': 'a47cc23bcfa039a9defe66db2b15d79ea2198072'}
+ PACKAGE_LOCK = '01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96'
+ FIXTURE_LOCK = '60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89'
+-COMPONENT_RUNNER = 'cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf'
+ WASM = '8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee'
+ TOOLING = {
+     'dev/perf/import-qualification-20261125-a7f7.py': 'cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef',
+@@ -26,9 +25,7 @@
+     'dev/perf/import-memory-20261125-a7f7/chromium_memory.py': '8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7',
+ }
+ RUNTIME = {
+-    'js/dictionary/term-bank-wasm-parser.js': {'A': '31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca', 'B': 'a7e5d0049502926806faa3511dc93a79653816c8054ac2ef78c304b7327ef917'},
+-    'js/dictionary/term-bank-wasm-parser-worker.js': {'A': '47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1', 'B': '1bd76c4d227ca4bd0c3c63b15d918d5ae57052c478b19709b35bbac87c318d56'},
+-    'js/dictionary/term-record-opfs-store.js': {'A': '7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594', 'B': '345eceec81c279a5db791294d410b54c80a9af3bef47b02a48faa13aeed63fbd'},
++    'js/dictionary/dictionary-database.js': {'A': '75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b', 'B': '12569a57197d4923fff7ed74fe6da071b4fff6d7a01bb9112e848c2a9d25cbbd'},
+ }
+ PROVENANCE_PATHS = {
+     'package-lock.json', 'test/perf/dictionaries.lock.json', 'dev/perf/benchmark-support.js',
+@@ -36,16 +33,6 @@
+     'test/chromium/import-flags-ab-benchmark.js', 'test/chromium/extension-two-dictionary-import.e2e.js',
+     'test/e2e/import-timing.js', 'ext/js/pages/settings/dictionary-import-controller.js',
+     'builds/manabitan-chrome-dev.zip', 'builds/manabitan-chrome.zip',
+-}
+-COMPONENT_PATHS = {
+-    'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-bank-wasm-parser-worker.js',
+-    'ext/js/dictionary/term-bank-experiments.js', 'ext/js/dictionary/term-content-ownership.js',
+-    'ext/js/dictionary/term-record-preinterned-plan.js', 'ext/js/dictionary/term-lookup-index-preparation.js',
+-    'ext/js/dictionary/term-lookup-index.js', 'ext/js/dictionary/term-lookup-route.js',
+-    'ext/js/dictionary/dictionary-importer.js', 'ext/js/dictionary/dense-zip-directory.js',
+-    'ext/js/dictionary/term-bank-source-pipeline.js', 'ext/js/dictionary/term-key-hash.js',
+-    'ext/js/media/media-util.js', 'ext/lib/term-bank-parser.wasm',
+-    'ext/js/dictionary/wasm/term-bank-parser.c', 'dev/data/dictionary-wasm/manifest.json',
+ }
+ 
+ 
+@@ -138,7 +125,7 @@
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--evidence', required=True, type=Path, help='The single import-owned-columns-83b3 directory from one artifact')
++    parser.add_argument('--evidence', required=True, type=Path, help='The single import-inflight-validation-830-83b3 directory from one artifact')
+     parser.add_argument('--repo', required=True, type=Path, help='Local frozen baseline checkout providing verified auditors and fixture lock')
+     parser.add_argument('--cell', required=True, choices=['jmdict-AB', 'jmdict-BA', 'jitendex-AB', 'vndb-AB'])
+     parser.add_argument('--output', required=True, type=Path)
+@@ -149,13 +136,13 @@
+     dictionary, first = args.cell.rsplit('-', 1)
+     pairs = 12 if dictionary == 'jmdict' else 6
+     expected = schedule(first, pairs)
+-    report = {'schemaVersion': 1, 'cell': args.cell, 'runId': 46103918280, 'baseline': BASELINE, 'candidate': CANDIDATE,
++    report = {'schemaVersion': 1, 'cell': args.cell, 'runId': 46114139837, 'baseline': BASELINE, 'candidate': CANDIDATE,
+               'acquisitionChanged': False, 'timingClaim': False, 'hostPooling': False, 'controlSubtraction': False,
+               'expectedCounts': {'ordinary': len(expected), 'warmup': 4, 'candidate': pairs * 2, 'control': pairs // 3 * 2, 'exhaustiveMedia': 2, 'memory': 4},
+               'issues': [], 'gates': {}, 'inputFiles': {}, 'readbacks': [], 'allRecordedObservations': [],
+               'limits': ['Descriptive per-host statistics; complete qualification is not itself a latency claim.',
+                          'Incomplete schedules retain all recorded values and complete-pair statistics are provisional.',
+-                         'Warmup, identical controls, exhaustive media, memory and separate trace never enter the candidate estimate.']}
++                         'Warmup, identical controls, exhaustive media and memory never enter the candidate estimate.']}
+ 
+     def remember(file):
+         require(file.is_file() and not file.is_symlink(), 'Missing or linked input: ' + str(file))
+@@ -351,57 +338,6 @@
+ 
+     stage('independentStatistics', check_driver_analysis)
+ 
+-    def check_components():
+-        component_root = evidence.parent / 'import-owned-columns-83b3-components'
+-        require(sha_file(remember(component_root / 'owned-column-replay.mjs')) == COMPONENT_RUNNER, 'Component runner differs')
+-        component_rows = []
+-        for policy in [2, 3, 5]:
+-            value = load(component_root / f'{dictionary}-policy-{policy}.json')
+-            same(value['schemaVersion'], 3, 'component schema')
+-            same(value['complete'], True, 'component completion')
+-            same(value['node'], 'v22.22.0', 'component Node')
+-            same(value['runnerSha256'], COMPONENT_RUNNER, 'component source')
+-            same(value['lockSha256'], FIXTURE_LOCK, 'component fixture lock')
+-            same(value['pairs'], 1, 'component observation count')
+-            same(value['grouping'], {'parserWorkers': policy, 'targetBytes': 24 * 1024 * 1024, 'executionConcurrency': 1}, 'component grouping')
+-            sources = value['sources']
+-            for arm, label in [('baseline', 'A'), ('candidate', 'B')]:
+-                same(sorted(sources[arm]['hashes']), sorted(COMPONENT_PATHS), 'component source path set')
+-                for relative, recorded in sources[arm]['hashes'].items():
+-                    expected_sha = RUNTIME[relative[4:]][label] if relative in ['ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-bank-wasm-parser-worker.js'] else sha_file(remember(repo / relative))
+-                    same(recorded, expected_sha, 'component source ' + arm + ' ' + relative)
+-            same(len(value['dictionaries']), 1, 'component dictionary count')
+-            data = value['dictionaries'][0]
+-            same(data['dictionary'], dictionary, 'component dictionary')
+-            same(data['archiveSha256'], fixture['sha256'], 'component archive')
+-            same(data['rows'], fixture['termRows'], 'component total rows')
+-            rows = saved = banks = source_bytes = 0
+-            for index, group in enumerate(data['groups']):
+-                same(group['index'], index, 'component group index')
+-                same(group['firstBank'], f'term_bank_{banks + 1}.json', 'component first bank')
+-                banks += group['banks']
+-                same(group['lastBank'], f'term_bank_{banks}.json', 'component last bank')
+-                same(len(group['observations']), 1, 'component group observations')
+-                observation = group['observations'][0]
+-                a, b = observation['baseline'], observation['candidate']
+-                for key in ['rows', 'digest', 'stableDigest', 'wholeIndex', 'potentialOwnedColumnBytes', 'nativeSegments', 'nativeFallbacks', 'contentMetaByUniqueIndex', 'contentMetaBytes', 'borrowedContent']:
+-                    same(a.get(key), b.get(key), 'component parity ' + key)
+-                same(a['reusedOwnedColumnBytes'], 0, 'baseline reuse')
+-                same(b['reusedOwnedColumnBytes'], b['potentialOwnedColumnBytes'] if b['wholeIndex'] else 0, 'candidate reuse')
+-                for key in ['transferBytes', 'ownedOutputBufferBytes']:
+-                    same(a[key] - b[key], b['reusedOwnedColumnBytes'], 'component byte delta ' + key)
+-                rows += b['rows']
+-                saved += b['reusedOwnedColumnBytes']
+-                source_bytes += group['sourceBytes']
+-            same(rows, fixture['termRows'], 'component group row sum')
+-            same(banks, data['banks'], 'component complete bank coverage')
+-            same(source_bytes, data['totalSourceBytes'], 'component source byte coverage')
+-            same(saved, data['summary']['reusedColumnBytes'], 'component saved byte sum')
+-            component_rows.append({'policy': policy, 'rows': rows, 'banks': banks, 'groups': len(data['groups']), 'savedOwnedResultBytes': saved})
+-        report['components'] = component_rows
+-
+-    stage('allGroupingPolicies', check_components)
+-
+     def verify_packages():
+         for arm in 'AB':
+             file = remember(evidence / f'package-{arm}.zip')

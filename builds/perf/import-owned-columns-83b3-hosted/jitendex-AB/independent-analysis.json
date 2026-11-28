@@ -1,0 +1,2322 @@
+{
+  "acquisitionChanged": false,
+  "allRecordedObservations": [
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 1592.4000000000087
+    },
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 1584.800000000003
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1960.8999999999942
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1601.6999999999825
+    },
+    {
+      "arm": "A",
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 1567.3999999999942
+    },
+    {
+      "arm": "B",
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 1573.7000000000116
+    },
+    {
+      "arm": "B",
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 1623.7999999999884
+    },
+    {
+      "arm": "A",
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 1563.3999999999942
+    },
+    {
+      "arm": "A",
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 1581.2999999999884
+    },
+    {
+      "arm": "B",
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 1555.3999999999942
+    },
+    {
+      "arm": "A",
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 1581.6000000000058
+    },
+    {
+      "arm": "C",
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 1551.6999999999825
+    },
+    {
+      "arm": "B",
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 1608.4000000000233
+    },
+    {
+      "arm": "A",
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 1547.2000000000116
+    },
+    {
+      "arm": "A",
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 1580.899999999965
+    },
+    {
+      "arm": "B",
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 1601.7000000000116
+    },
+    {
+      "arm": "B",
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 1618.5
+    },
+    {
+      "arm": "A",
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 1550
+    },
+    {
+      "arm": "C",
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 1614.7999999999884
+    },
+    {
+      "arm": "A",
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 1610
+    }
+  ],
+  "allRequiredGatesPassed": true,
+  "analyzerSha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "candidateVsBaseline": {
+    "driverComparable": {
+      "count": 6,
+      "descriptiveBootstrap95Percent": [
+        -0.6179766776392981,
+        4.187443706842275
+      ],
+      "equalWorkChangePercent": 2.0372303039347006,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": 2.589540469728391,
+      "ratios": [
+        1.0040193951767369,
+        1.0386337469617464,
+        0.9836210712704773,
+        1.0395553257497487,
+        1.0131570624328212,
+        1.0441935483870968
+      ],
+      "worstPairChangePercent": 4.419354838709677
+    },
+    "incompletePairs": [],
+    "kind": "candidate",
+    "medianPairedDeltaMs": 40.60000000002037,
+    "orderStrata": {
+      "AB": {
+        "count": 3,
+        "medianPairedChangePercent": 0.4019395176736884,
+        "pairIds": [
+          1,
+          3,
+          5
+        ]
+      },
+      "BA": {
+        "count": 3,
+        "medianPairedChangePercent": 3.9555325749748738,
+        "pairIds": [
+          2,
+          4,
+          6
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 1567.3999999999942,
+        "changePercent": 0.4019395176736884,
+        "deltaMs": 6.300000000017462,
+        "observationIds": [
+          "pair-01-A",
+          "pair-01-B"
+        ],
+        "order": "AB",
+        "pair": 1,
+        "ratio": 1.0040193951767369,
+        "rightMs": 1573.7000000000116
+      },
+      {
+        "baselineMs": 1563.3999999999942,
+        "changePercent": 3.8633746961746374,
+        "deltaMs": 60.39999999999418,
+        "observationIds": [
+          "pair-02-B",
+          "pair-02-A"
+        ],
+        "order": "BA",
+        "pair": 2,
+        "ratio": 1.0386337469617464,
+        "rightMs": 1623.7999999999884
+      },
+      {
+        "baselineMs": 1581.2999999999884,
+        "changePercent": -1.6378928729522735,
+        "deltaMs": -25.89999999999418,
+        "observationIds": [
+          "pair-03-A",
+          "pair-03-B"
+        ],
+        "order": "AB",
+        "pair": 3,
+        "ratio": 0.9836210712704773,
+        "rightMs": 1555.3999999999942
+      },
+      {
+        "baselineMs": 1547.2000000000116,
+        "changePercent": 3.9555325749748738,
+        "deltaMs": 61.20000000001164,
+        "observationIds": [
+          "pair-04-B",
+          "pair-04-A"
+        ],
+        "order": "BA",
+        "pair": 4,
+        "ratio": 1.0395553257497487,
+        "rightMs": 1608.4000000000233
+      },
+      {
+        "baselineMs": 1580.899999999965,
+        "changePercent": 1.315706243282122,
+        "deltaMs": 20.800000000046566,
+        "observationIds": [
+          "pair-05-A",
+          "pair-05-B"
+        ],
+        "order": "AB",
+        "pair": 5,
+        "ratio": 1.0131570624328212,
+        "rightMs": 1601.7000000000116
+      },
+      {
+        "baselineMs": 1550,
+        "changePercent": 4.419354838709677,
+        "deltaMs": 68.5,
+        "observationIds": [
+          "pair-06-B",
+          "pair-06-A"
+        ],
+        "order": "BA",
+        "pair": 6,
+        "ratio": 1.0441935483870968,
+        "rightMs": 1618.5
+      }
+    ],
+    "rightArm": "B"
+  },
+  "cell": "jitendex-AB",
+  "completeTimingScheduleVerified": true,
+  "components": [
+    {
+      "banks": 219,
+      "groups": 22,
+      "policy": 2,
+      "rows": 436555,
+      "savedOwnedResultBytes": 11477248
+    },
+    {
+      "banks": 219,
+      "groups": 22,
+      "policy": 3,
+      "rows": 436555,
+      "savedOwnedResultBytes": 11477248
+    },
+    {
+      "banks": 219,
+      "groups": 22,
+      "policy": 5,
+      "rows": 436555,
+      "savedOwnedResultBytes": 11477248
+    }
+  ],
+  "controlSubtraction": false,
+  "driverAnalysis": {
+    "candidateVsBaseline": {
+      "count": 6,
+      "descriptiveBootstrap95Percent": [
+        -0.6179766776392981,
+        4.187443706842275
+      ],
+      "equalWorkChangePercent": 2.0372303039347006,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": 2.589540469728391,
+      "ratios": [
+        1.0040193951767369,
+        1.0386337469617464,
+        0.9836210712704773,
+        1.0395553257497487,
+        1.0131570624328212,
+        1.0441935483870968
+      ],
+      "worstPairChangePercent": 4.419354838709677
+    },
+    "identicalCodeControl": {
+      "count": 2,
+      "descriptiveBootstrap95Percent": [
+        -1.89049064238892,
+        0.2981366459620105
+      ],
+      "equalWorkChangePercent": -0.7864394034351019,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": -0.7961769982134603,
+      "ratios": [
+        0.9810950935761108,
+        1.00298136645962
+      ],
+      "worstPairChangePercent": 0.2981366459620105
+    },
+    "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+    "memoryPassed": true,
+    "status": "correctness-memory-passed",
+    "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+    "timingScope": "File input change through post-UI completion; fresh profile per observation"
+  },
+  "expectedAttemptInventory": [
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/host-after.json",
+          "sha256": "2820aeda138e0611e7f06a19c1cb029db044f07e9db3537989f60ee0caa393b8"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/host-before.json",
+          "sha256": "57c226792b80b5ed2ba9db4dbe40cf2fb51b8820b266a5495537fe36a41b704a"
+        },
+        {
+          "bytes": 150667,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/run-1.json",
+          "sha256": "9edebe1cc0028d4beaddf70963eb60c018c190fe92cf3055fd37ad5f25ebac8e"
+        },
+        {
+          "bytes": 1723,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/run.log",
+          "sha256": "2fc9b62bd82308d6424281d46a28482d5d8cd06770fa6626a35312a57d868126"
+        },
+        {
+          "bytes": 59185,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/summary.json",
+          "sha256": "8abc61fb3091d510f97987aebdf71581c6d3bd69134f72738b4709a07475b88a"
+        }
+      ],
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/host-after.json",
+          "sha256": "8876671b3daa5fe27d82116024f5c248a8c63812194762b3a8c12f6cb46aeda2"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/host-before.json",
+          "sha256": "dbfa9470c43296390387e239cdeb13d17efd5633f9b92189e3ee225413be4bf3"
+        },
+        {
+          "bytes": 151094,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/run-1.json",
+          "sha256": "204dea22ac09c723b17bed5b0eef2a014ee295b3d43db76530ce9c03b1ca4b18"
+        },
+        {
+          "bytes": 1723,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/run.log",
+          "sha256": "da4ef1222a73d6bae9d81f19e03876a3bbee5f8fe1c9f1405835d05868b0a00b"
+        },
+        {
+          "bytes": 59282,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/summary.json",
+          "sha256": "0aeece291bec4ee5fa06dab9e5597bc83a4dcdb3246f381482a6d276d1b3f818"
+        }
+      ],
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/host-after.json",
+          "sha256": "e8c8259d556d9d4cd3fba132e25172ceb0a8fe023f2d2faa55a8997eb747befb"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/host-before.json",
+          "sha256": "5b67ffe23f698879b44daf11b2ec26c34d5de84d2790610f5d3603d98c381030"
+        },
+        {
+          "bytes": 151406,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/run-1.json",
+          "sha256": "ab5611e150558c5296f54055b3e51d44708ed6e0e32fc68cc8080e19328d01b9"
+        },
+        {
+          "bytes": 1813,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/run.log",
+          "sha256": "c6d52a5ad7fe135d0042f31e866cf0b02eab5fd0022847b599a3a1a341f236e4"
+        },
+        {
+          "bytes": 59255,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/summary.json",
+          "sha256": "7d93db9078103e369804aedda7926e3f82372b240cba74493c496639b93a5a91"
+        }
+      ],
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/host-after.json",
+          "sha256": "38949e180890327faadd42ac939acb3f30e8285003294a3b434fffaaf6c8b241"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/host-before.json",
+          "sha256": "3f4d0fc96d440c70df9276195b5d3952735ccd8c4b26775fafb61e8fb430c517"
+        },
+        {
+          "bytes": 151561,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/run-1.json",
+          "sha256": "ba5f5e05c9852449638e5fd9d6502c0fbd5f221362fb826a119c81cee7653802"
+        },
+        {
+          "bytes": 1723,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/run.log",
+          "sha256": "a11cb06cbc0057b11722960db3ee2d03aadae35e208913cd34dff20ca4d99eeb"
+        },
+        {
+          "bytes": 59387,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/summary.json",
+          "sha256": "9bec34f0c8f8fb20f9bde88e8660ff8f92a3e00271213ffad6e9d1854dbe1bb0"
+        }
+      ],
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/host-after.json",
+          "sha256": "7666fd71c7c0e01c81f9a97db919a280803cc073faa009143f65b764bac7f873"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/host-before.json",
+          "sha256": "b58d04039e19db90470d271d156fb88f5961b58e7b2c76bcd1aff6c484d5b30a"
+        },
+        {
+          "bytes": 151331,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/run-1.json",
+          "sha256": "173ebcca04864f5a7c6730bf23687d09f780995685ffb8b793540b856c035b07"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/run.log",
+          "sha256": "684751c620bfc59960233093c40ae98744c2e7e1152ce0e33a9119442fd536d6"
+        },
+        {
+          "bytes": 59409,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/summary.json",
+          "sha256": "ead5374749b9a0dfdb30adbf54644ae2a5e10942e5e232e05e2fa614a002ddb3"
+        }
+      ],
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/host-after.json",
+          "sha256": "ee69ab85d471e3894defdb2b43ee98b2bf8b51036412d30579b57aa3f7ca8bc2"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/host-before.json",
+          "sha256": "5911ce27c64417d67ff4b931df6e2e339ff300bdd38cf2fee154e2b57250be58"
+        },
+        {
+          "bytes": 151714,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/run-1.json",
+          "sha256": "8cc0a8c3d0c67ebdf2b403d57a2349e1e1c665c1559fbd5efcbcef79b932647d"
+        },
+        {
+          "bytes": 1809,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/run.log",
+          "sha256": "45d5d82bb7a7afccd53b776bfdb522f361484ff5a7a80c53f676653037bd68c5"
+        },
+        {
+          "bytes": 59298,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/summary.json",
+          "sha256": "dcf0917640fe3ab86c8be0e91bb69ade1937f0a34f35e2bd0b509c01cd934f7c"
+        }
+      ],
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/host-after.json",
+          "sha256": "4f79cdf512736e7979ca629d4dfd66150a8673960af710577b075ac88adbc1a3"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/host-before.json",
+          "sha256": "68f108ac41474bff18d39d770fae53fa4561a0e9f058e01c37f4a992ac11a546"
+        },
+        {
+          "bytes": 151336,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/run-1.json",
+          "sha256": "0fcc43c9fe2338896c42af566772ee795cb75d671a892c31067d61382d39a69d"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/run.log",
+          "sha256": "5c8e34bc8b6b2aa5ea1cf798c9a178ec934cd9410ddbc8e3ee13e74f82fcbdb4"
+        },
+        {
+          "bytes": 59357,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/summary.json",
+          "sha256": "601332ca5387dc93db44d9e6a29423f93de097e05adf5f23d50db1bc3643b2f4"
+        }
+      ],
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/host-after.json",
+          "sha256": "c693d5a2d776aff600b8c8d0fb4fe49de94ff669dc84be7de2bb091616c81fbc"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/host-before.json",
+          "sha256": "f679da60a7009120c4f09ad65026396a0397678fded4d33b3d6dfbd7fb96cd80"
+        },
+        {
+          "bytes": 151712,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/run-1.json",
+          "sha256": "6009f3a1854300aa1a5381c62c0f8713beabdafbf23bf7039ff173ec85049858"
+        },
+        {
+          "bytes": 1809,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/run.log",
+          "sha256": "0a37ebf527b008bd35eab219cae268b270dd978bd4bbf0ded3bf00cc734a79c1"
+        },
+        {
+          "bytes": 59352,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/summary.json",
+          "sha256": "27d1d373520048648b1af78eae57d9e41aa7ac797dc982f104c5e182865dd85c"
+        }
+      ],
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/host-after.json",
+          "sha256": "b7e2aaa622ca9ee96bb62d237330f76633cb0bbb60bcd1f1d171efd6faf0b149"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/host-before.json",
+          "sha256": "a4e5a03ef23a4c185b5e3a1f4b43ff868ff7cd432fc4408749d4f6221c3e6cb4"
+        },
+        {
+          "bytes": 151030,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/run-1.json",
+          "sha256": "1359ad63b3ae6181ec6a494834241cb3a671e8c30f1feabc8a4f9d8e0f60d4c3"
+        },
+        {
+          "bytes": 1719,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/run.log",
+          "sha256": "99ff00dc9232b8a3b7802ad0cb219ea6d5e8aeb98efb215a873fd5ab7d00101e"
+        },
+        {
+          "bytes": 59231,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/summary.json",
+          "sha256": "3f22f6baa3bf919de8bb4a742a06acb8b555a37d6a755a0247c63d0ca1d7f6bc"
+        }
+      ],
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/host-after.json",
+          "sha256": "8cd9d75c2dca90c882b13d03de73280651a18b55952dca47e45edb8220101d83"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/host-before.json",
+          "sha256": "3858061e44105ca19149748b0605104c4155e9949144604b0eb4f9ecab2c2f43"
+        },
+        {
+          "bytes": 150593,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/run-1.json",
+          "sha256": "8b9a4c2a3563b9c96bcbeed618f86e33e6dcb35b874619f794a0a7c452bbd55d"
+        },
+        {
+          "bytes": 1719,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/run.log",
+          "sha256": "175df71f71fa5eb9e8d3fb0fbd912c24df4d85f77322b77b72f038b82e7444b8"
+        },
+        {
+          "bytes": 59124,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/summary.json",
+          "sha256": "463b01d79bedaab6ae7e36f88ebbc232674c7d2cf0b64c490c57a765343401d3"
+        }
+      ],
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/host-after.json",
+          "sha256": "d70def24936753f9c246f6545915fbf32dadde811a7913bbfedde312e90c33ed"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/host-before.json",
+          "sha256": "ee48db9e8c97a9651357b5325b006e9c4f28f026eefb0ab29688729067e2f393"
+        },
+        {
+          "bytes": 151388,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/run-1.json",
+          "sha256": "eee64795545f69573699d3ca38def8928149bfa766bc803f15d85d2f76aee234"
+        },
+        {
+          "bytes": 1729,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/run.log",
+          "sha256": "970e0386bcb9e83fab73ecebd18d72a46cdf1f52ba0903b0b8ab20b2a50ed3d8"
+        },
+        {
+          "bytes": 59385,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/summary.json",
+          "sha256": "968b0e60c6b34a8159ad0238bfd0568be688b716b12b395b73a889c600e36561"
+        }
+      ],
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 501,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/host-after.json",
+          "sha256": "2d46403db2438339e16a2a2f89d543d20ca80ce7c89f5b88167607cb5455fc06"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/host-before.json",
+          "sha256": "f2926cf838c7c04615326c94adcb5d2e89ed0619beb6d8aba2df2c92d55e5d6f"
+        },
+        {
+          "bytes": 150930,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/run-1.json",
+          "sha256": "5af229996cd007b5eebffee03209cee65aeabda6df59de20c6f25a8d57bcb4dd"
+        },
+        {
+          "bytes": 1729,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/run.log",
+          "sha256": "117304e3e3b6889ed1cbbe0bd0c746cd3deab4668b108a26f868943932e621a1"
+        },
+        {
+          "bytes": 59377,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/summary.json",
+          "sha256": "e28f7bd0a98fb95fae5d55c2ec3d00db7c08361be18cceba3b29f55d2b44ba72"
+        }
+      ],
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/host-after.json",
+          "sha256": "4648f7cd2faad1016227f597a43f1f3493afad64f1a18e1ccc45c0ca987f1b7e"
+        },
+        {
+          "bytes": 501,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/host-before.json",
+          "sha256": "7743cb5d4ada69e8c74b4c256246c29e1ea2cd169d65e17044f00cd7c878dd17"
+        },
+        {
+          "bytes": 151017,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/run-1.json",
+          "sha256": "708e3fe03892216ecbb7d4102d9796ae277364652bc8781c29586c716537e083"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/run.log",
+          "sha256": "962483f7559143bd95ecd831f95baf0db1315587c5779484119c65bd70ea9f41"
+        },
+        {
+          "bytes": 59374,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/summary.json",
+          "sha256": "55c954170541a02b199e6d3e4a983d81ba43b34759e82ff5bddedd7b2e1b2f33"
+        }
+      ],
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/host-after.json",
+          "sha256": "288ea8ce17eb121247b461129654dce7ff96c98e3187152ca1686a117d2509a6"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/host-before.json",
+          "sha256": "576822e264f33c52b87e3f464d54c604f51ebc398eb573f005f087add75cb01f"
+        },
+        {
+          "bytes": 151306,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/run-1.json",
+          "sha256": "2af14d73bc450f159c4f4077df43257ff093116de244c864f686e889d81ca423"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/run.log",
+          "sha256": "7fc79c1d1d1016a8bcd2b945e0d4c895fd3f639ca87c53fd6c881e87215d349a"
+        },
+        {
+          "bytes": 59350,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/summary.json",
+          "sha256": "3119a5c7a1ea20ea00123d29967b66dbe2d38d8bb53a6f692f305427acfa311a"
+        }
+      ],
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/host-after.json",
+          "sha256": "1ec0e4bef63271b8d3946b69ed2a8cb7cf39d4405ee5cde467baa9e34d1dc949"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/host-before.json",
+          "sha256": "5343d1d0c398ec052e6849bd9f41fea75c46609d9edb8e3792bd6f594bd8f7dd"
+        },
+        {
+          "bytes": 151278,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/run-1.json",
+          "sha256": "7b17ed9e11ef2f1e2b966431648cafbd22528386542a5ea6f9ba42293400682b"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/run.log",
+          "sha256": "5235f4419b170dc62dfc5f0d11e820a31c36499ecbaa37ae3c1bb106974d456c"
+        },
+        {
+          "bytes": 59337,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/summary.json",
+          "sha256": "09c9bf220c4291d349ca40853ef213ccec3088ebeba471511dd9e5f6509023b8"
+        }
+      ],
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/host-after.json",
+          "sha256": "ab0b84d817af384d11fa29709525d8b6164d59f263e87daf6784de55c2d27e0a"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/host-before.json",
+          "sha256": "a46afb921c138e53ae4733c0d179544fd31392ee87454e722fc52d27d86eedf2"
+        },
+        {
+          "bytes": 151156,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/run-1.json",
+          "sha256": "0e890ed75037430da236cdd4a440485b8fc84b830ac1a41ba81bcb1a2044c9ae"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/run.log",
+          "sha256": "07d9b1b5a3f7dce274ca85f72d9bd963bcd2f23e25d9e251a14137128cfe091c"
+        },
+        {
+          "bytes": 59286,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/summary.json",
+          "sha256": "99fa5e817f757d8a2ff1cc0f5115ab89e36ee107d83054a055f4e9bf3671529e"
+        }
+      ],
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/host-after.json",
+          "sha256": "5192fbb6f16036a281cbb15680186e59a74f3204b16e208ae38c4d7115586271"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/host-before.json",
+          "sha256": "d04ecc75df0dc21a7d0bc3dea3372750d1b7f3f740cc4e73d7e2250d31b3ac67"
+        },
+        {
+          "bytes": 151285,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/run-1.json",
+          "sha256": "db9e3ed5830e16595881d65e6bdce9648955e5532321a80115a1e395585722f4"
+        },
+        {
+          "bytes": 1719,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/run.log",
+          "sha256": "31f891d0ff9cd9a0e3af3d992e035fa185c9e939161aa2b428a32d3a08b98498"
+        },
+        {
+          "bytes": 59123,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/summary.json",
+          "sha256": "b421b1bd5fc9414870fae548df7dc17fd80ff39b05a3b8cd9c06de078b56ca5d"
+        }
+      ],
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/host-after.json",
+          "sha256": "c0154748c317e4c2ff2ea5113435d82f3956ee71702eeb208c023d68789f87af"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/host-before.json",
+          "sha256": "efe17df82d83a44906254bd390d682e8c7e1fc75bbb0fc53b43c2559a8da48d1"
+        },
+        {
+          "bytes": 151308,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/run-1.json",
+          "sha256": "91806074a665642131dea06664fa9d98495b69951b77590d05698b0e2c7f359f"
+        },
+        {
+          "bytes": 1720,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/run.log",
+          "sha256": "9a12745730a1daffa9a57e0a741c9ae4e9acfcbd4b29c41f23e0585cd9c06b16"
+        },
+        {
+          "bytes": 59297,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/summary.json",
+          "sha256": "62b802598fb1dea69f6c37830d7717af39bbcb35db80ab3a48e45001ccdf024b"
+        }
+      ],
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/host-after.json",
+          "sha256": "f14a708c24e8fb97303ae3a8e6873459eeea89b7f3265e7978cb2b41dd6bc4bb"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/host-before.json",
+          "sha256": "0cb1f58a1463d60cc69218d307659cc57445c9d57039e4469fc186d7a47b23d7"
+        },
+        {
+          "bytes": 151039,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/run-1.json",
+          "sha256": "add608fc80cef474ca5b43bdb1521a5c0635edbff79c5057c3e39dcb3c52f03c"
+        },
+        {
+          "bytes": 1729,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/run.log",
+          "sha256": "b02d931ef5545c14203f0c6523e6e29eba792da343cfb4087bd7289b1787ed0b"
+        },
+        {
+          "bytes": 59232,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/summary.json",
+          "sha256": "33b7e3a6129856c098a33e15b74a875f4fd1eee3640c1d2f6c9ab0ace578d463"
+        }
+      ],
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25139,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/canonical-receipt.json",
+          "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/host-after.json",
+          "sha256": "008f018236e0d6a0edd2b5b295af998287a68ec1803db45c2d9890597c4043e9"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/host-before.json",
+          "sha256": "cdd5dd88a5515d78e7d11c98af79728be8c8d30f213fd609947d866085eeb9e3"
+        },
+        {
+          "bytes": 151207,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/run-1.json",
+          "sha256": "285e47bc21192ac334f94f5a412fba024ef282ccff3de5f0f470e89a84003ab6"
+        },
+        {
+          "bytes": 1728,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/run.log",
+          "sha256": "504cf1d9365297931f710a32da9f3cee03dac1f6fa3c1b0cc4c18b212bddf899"
+        },
+        {
+          "bytes": 59312,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/summary.json",
+          "sha256": "dfd9d5c25a0f619a01812d235b7da419a060d1adeb3e1d167910c5b43aab8b4b"
+        }
+      ],
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    }
+  ],
+  "expectedCounts": {
+    "candidate": 12,
+    "control": 4,
+    "exhaustiveMedia": 2,
+    "memory": 4,
+    "ordinary": 20,
+    "warmup": 4
+  },
+  "gates": {
+    "allGroupingPolicies": "passed",
+    "attemptInventory": "passed",
+    "browserIdentityRead": "passed",
+    "exhaustiveMedia:A": "passed",
+    "exhaustiveMedia:B": "passed",
+    "frozenAuditors": "passed",
+    "independentStatistics": "passed",
+    "observationsRead": "passed",
+    "ordinary:control-01-A": "passed",
+    "ordinary:control-01-C": "passed",
+    "ordinary:control-02-A": "passed",
+    "ordinary:control-02-C": "passed",
+    "ordinary:pair-01-A": "passed",
+    "ordinary:pair-01-B": "passed",
+    "ordinary:pair-02-A": "passed",
+    "ordinary:pair-02-B": "passed",
+    "ordinary:pair-03-A": "passed",
+    "ordinary:pair-03-B": "passed",
+    "ordinary:pair-04-A": "passed",
+    "ordinary:pair-04-B": "passed",
+    "ordinary:pair-05-A": "passed",
+    "ordinary:pair-05-B": "passed",
+    "ordinary:pair-06-A": "passed",
+    "ordinary:pair-06-B": "passed",
+    "ordinary:warmup-1-A": "passed",
+    "ordinary:warmup-1-B": "passed",
+    "ordinary:warmup-2-A": "passed",
+    "ordinary:warmup-2-B": "passed",
+    "packageBytes": "passed",
+    "planRead": "passed",
+    "registeredSchedule": "passed",
+    "separateMemory": "passed",
+    "sourceFixtureRuntimeBindings": "passed",
+    "sourceIdentitiesRead": "passed"
+  },
+  "hostPooling": false,
+  "identicalCodeControl": {
+    "driverComparable": {
+      "count": 2,
+      "descriptiveBootstrap95Percent": [
+        -1.89049064238892,
+        0.2981366459620105
+      ],
+      "equalWorkChangePercent": -0.7864394034351019,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": -0.7961769982134603,
+      "ratios": [
+        0.9810950935761108,
+        1.00298136645962
+      ],
+      "worstPairChangePercent": 0.2981366459620105
+    },
+    "incompletePairs": [],
+    "kind": "control",
+    "medianPairedDeltaMs": -12.550000000017462,
+    "orderStrata": {
+      "AC": {
+        "count": 1,
+        "medianPairedChangePercent": -1.89049064238892,
+        "pairIds": [
+          1
+        ]
+      },
+      "CA": {
+        "count": 1,
+        "medianPairedChangePercent": 0.2981366459620105,
+        "pairIds": [
+          2
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 1581.6000000000058,
+        "changePercent": -1.89049064238892,
+        "deltaMs": -29.900000000023283,
+        "observationIds": [
+          "control-01-A",
+          "control-01-C"
+        ],
+        "order": "AC",
+        "pair": 1,
+        "ratio": 0.9810950935761108,
+        "rightMs": 1551.6999999999825
+      },
+      {
+        "baselineMs": 1610,
+        "changePercent": 0.2981366459620105,
+        "deltaMs": 4.7999999999883585,
+        "observationIds": [
+          "control-02-C",
+          "control-02-A"
+        ],
+        "order": "CA",
+        "pair": 2,
+        "ratio": 1.00298136645962,
+        "rightMs": 1614.7999999999884
+      }
+    ],
+    "rightArm": "C"
+  },
+  "inputFiles": {
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3-components/jitendex-policy-2.json": {
+      "bytes": 63634,
+      "sha256": "0fd5e48124f5afe0fe9bcae7e9730523016b297c9729bebd0182c23c4ec38342"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3-components/jitendex-policy-3.json": {
+      "bytes": 63644,
+      "sha256": "ca836879b5d338a2a12a02d0e8e259536bd939fe202c444c76fac7823c9680fd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3-components/jitendex-policy-5.json": {
+      "bytes": 63579,
+      "sha256": "f3165a485b379a2134d70281fafef67e7d5c74c3b9f131e2b903a3b6ff8c9c6c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3-components/owned-column-replay.mjs": {
+      "bytes": 21730,
+      "sha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/analysis.json": {
+      "bytes": 1311,
+      "sha256": "6d50eeb1954adb48290a38125cac965d37437c768f64a7578d0f21bfd8ebc8c6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/browser-identity.json": {
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "d70def24936753f9c246f6545915fbf32dadde811a7913bbfedde312e90c33ed"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "ee48db9e8c97a9651357b5325b006e9c4f28f026eefb0ab29688729067e2f393"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/run-1.json": {
+      "bytes": 151388,
+      "sha256": "eee64795545f69573699d3ca38def8928149bfa766bc803f15d85d2f76aee234"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/run.log": {
+      "bytes": 1729,
+      "sha256": "970e0386bcb9e83fab73ecebd18d72a46cdf1f52ba0903b0b8ab20b2a50ed3d8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-A/summary.json": {
+      "bytes": 59385,
+      "sha256": "968b0e60c6b34a8159ad0238bfd0568be688b716b12b395b73a889c600e36561"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/host-after.json": {
+      "bytes": 501,
+      "sha256": "2d46403db2438339e16a2a2f89d543d20ca80ce7c89f5b88167607cb5455fc06"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/host-before.json": {
+      "bytes": 504,
+      "sha256": "f2926cf838c7c04615326c94adcb5d2e89ed0619beb6d8aba2df2c92d55e5d6f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/run-1.json": {
+      "bytes": 150930,
+      "sha256": "5af229996cd007b5eebffee03209cee65aeabda6df59de20c6f25a8d57bcb4dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/run.log": {
+      "bytes": 1729,
+      "sha256": "117304e3e3b6889ed1cbbe0bd0c746cd3deab4668b108a26f868943932e621a1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-01-C/summary.json": {
+      "bytes": 59377,
+      "sha256": "e28f7bd0a98fb95fae5d55c2ec3d00db7c08361be18cceba3b29f55d2b44ba72"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "008f018236e0d6a0edd2b5b295af998287a68ec1803db45c2d9890597c4043e9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "cdd5dd88a5515d78e7d11c98af79728be8c8d30f213fd609947d866085eeb9e3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/run-1.json": {
+      "bytes": 151207,
+      "sha256": "285e47bc21192ac334f94f5a412fba024ef282ccff3de5f0f470e89a84003ab6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/run.log": {
+      "bytes": 1728,
+      "sha256": "504cf1d9365297931f710a32da9f3cee03dac1f6fa3c1b0cc4c18b212bddf899"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-A/summary.json": {
+      "bytes": 59312,
+      "sha256": "dfd9d5c25a0f619a01812d235b7da419a060d1adeb3e1d167910c5b43aab8b4b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/host-after.json": {
+      "bytes": 503,
+      "sha256": "f14a708c24e8fb97303ae3a8e6873459eeea89b7f3265e7978cb2b41dd6bc4bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/host-before.json": {
+      "bytes": 504,
+      "sha256": "0cb1f58a1463d60cc69218d307659cc57445c9d57039e4469fc186d7a47b23d7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/run-1.json": {
+      "bytes": 151039,
+      "sha256": "add608fc80cef474ca5b43bdb1521a5c0635edbff79c5057c3e39dcb3c52f03c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/run.log": {
+      "bytes": 1729,
+      "sha256": "b02d931ef5545c14203f0c6523e6e29eba792da343cfb4087bd7289b1787ed0b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/control-02-C/summary.json": {
+      "bytes": 59232,
+      "sha256": "33b7e3a6129856c098a33e15b74a875f4fd1eee3640c1d2f6c9ab0ace578d463"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-A/canonical-receipt.json": {
+      "bytes": 25137,
+      "sha256": "c4f3c22f8819f58494ec1095bc4834206c2d5a7a77b8468e0f5e16bee5395587"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-A/run-1.json": {
+      "bytes": 151127,
+      "sha256": "0b7d1c052afa34cbc3d5045ad4cf33ae766456f6c5240e5364180e55a9309ed4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-A/summary.json": {
+      "bytes": 59292,
+      "sha256": "2a4a70fac2c65f035c215e4fcd33a8ddaa38716b6d941b123bd7565b013c2418"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-B/canonical-receipt.json": {
+      "bytes": 25137,
+      "sha256": "c4f3c22f8819f58494ec1095bc4834206c2d5a7a77b8468e0f5e16bee5395587"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-B/run-1.json": {
+      "bytes": 150841,
+      "sha256": "5638084fd121e465d4c5732ff6f435872cde362092749d529e19c9f85f88cd0e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/exhaustive-media-B/summary.json": {
+      "bytes": 59190,
+      "sha256": "ff49af47228c981e5b2e342353dfa6f22307ceec3775fc4ae5b7017be71a3ff8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A1/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "c33bc8890059966dda023a396981f8e5e073d42680b49c810c9eec359e20f387"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A1/memory.json": {
+      "bytes": 2270385,
+      "sha256": "14385436a25e671da3c6094a6ea01b6907c99630589c01f45f270b30e400b293"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A1/run-1.json": {
+      "bytes": 151038,
+      "sha256": "071aa8881e91b2cbb77e3a7dc6cd222876f2967f2b5ca37ee4e5ed248c1c3b8f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A1/summary.json": {
+      "bytes": 59310,
+      "sha256": "ddebe4c37eef7dd1b90388270375c88e8a04ea8d495a9493bd9313ebe700ee13"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A2/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "640f84a1433761af60a033b778dbbe069e38d12fb4136294f0f12ed359af452d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A2/memory.json": {
+      "bytes": 2131880,
+      "sha256": "751c41ddc7a2a7e58b1582f28f480adc0ae0ee09cffe8df135b936af9d5c407d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A2/run-1.json": {
+      "bytes": 151036,
+      "sha256": "30e0f709e69280d952df035b16940ebe4122807305faf413e7e25410f284be75"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/A2/summary.json": {
+      "bytes": 59215,
+      "sha256": "2c692751eaf138a47156f351d529d2c479074a3e464d9fc23751fba3f0e6f822"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B1/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "ef9cfb099041a2170f28a62570af322369cccd1b72fa61a5c1e3171c651414fd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B1/memory.json": {
+      "bytes": 2226285,
+      "sha256": "32812ef3943588d3b841324e90461ac5b97faa3d8ae28780f009431cd4702e2e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B1/run-1.json": {
+      "bytes": 150974,
+      "sha256": "e1a7b4a998109db566d013cc0c5a92dd6cae2f0dbe9e43be4a3d06724577543e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B1/summary.json": {
+      "bytes": 59221,
+      "sha256": "b52de45dbbd1cd79a1314e4cc86986fd05b5757bafc006362402273582e8f7fc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B2/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "bec0f31d45a618bcb073f5b5526c431bb1f22a036c9eb419f2d87f2547f7bbfa"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B2/memory.json": {
+      "bytes": 2274640,
+      "sha256": "c10e88b6cf94327fceaa68ba47b108d6798e32a38f40d66fc793ee0efa35f675"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B2/run-1.json": {
+      "bytes": 151281,
+      "sha256": "bb204e116498193df843d9b7dcf2af924a7be42861566f30d63dbfe920d90c6a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/B2/summary.json": {
+      "bytes": 59349,
+      "sha256": "4872a2076a6751f5d3043bbe7d1dfccd49c8831be9a840ad4663de51ec5f7b47"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/harness-instrumented.js": {
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/harness-original.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/memory-audit.json": {
+      "bytes": 458,
+      "sha256": "1d4bff3965fa1c08064cf7ef550624f2aca7e9fcf61caec918a580ef9095a3a4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/memory-comparison.json": {
+      "bytes": 10145,
+      "sha256": "a4ce658e6829f7a1c7dd1498beff8f57946dab83933be12621628ef7221fbb46"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/observations.json": {
+      "bytes": 8514,
+      "sha256": "9ccf4a7be0383c84df09e31bf0bd30b93be02dcc3a2278c887b7fa14c4085ec3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/plan.json": {
+      "bytes": 129298,
+      "sha256": "18377c43ca103745f45c702148012c52d103cf9c11d61d9f25b74613817b873a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/memory/semantic-failures.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/observations.json": {
+      "bytes": 2517,
+      "sha256": "180f4bd6e28e764d6bd2e0966c73228bb4f4277c5f32e439ee91145b34ae3006"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/package-A.zip": {
+      "bytes": 16805714,
+      "sha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/package-B.zip": {
+      "bytes": 16807149,
+      "sha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "7666fd71c7c0e01c81f9a97db919a280803cc073faa009143f65b764bac7f873"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "b58d04039e19db90470d271d156fb88f5961b58e7b2c76bcd1aff6c484d5b30a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/run-1.json": {
+      "bytes": 151331,
+      "sha256": "173ebcca04864f5a7c6730bf23687d09f780995685ffb8b793540b856c035b07"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/run.log": {
+      "bytes": 1720,
+      "sha256": "684751c620bfc59960233093c40ae98744c2e7e1152ce0e33a9119442fd536d6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-A/summary.json": {
+      "bytes": 59409,
+      "sha256": "ead5374749b9a0dfdb30adbf54644ae2a5e10942e5e232e05e2fa614a002ddb3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/host-after.json": {
+      "bytes": 503,
+      "sha256": "ee69ab85d471e3894defdb2b43ee98b2bf8b51036412d30579b57aa3f7ca8bc2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "5911ce27c64417d67ff4b931df6e2e339ff300bdd38cf2fee154e2b57250be58"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/run-1.json": {
+      "bytes": 151714,
+      "sha256": "8cc0a8c3d0c67ebdf2b403d57a2349e1e1c665c1559fbd5efcbcef79b932647d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/run.log": {
+      "bytes": 1809,
+      "sha256": "45d5d82bb7a7afccd53b776bfdb522f361484ff5a7a80c53f676653037bd68c5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-01-B/summary.json": {
+      "bytes": 59298,
+      "sha256": "dcf0917640fe3ab86c8be0e91bb69ade1937f0a34f35e2bd0b509c01cd934f7c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "c693d5a2d776aff600b8c8d0fb4fe49de94ff669dc84be7de2bb091616c81fbc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "f679da60a7009120c4f09ad65026396a0397678fded4d33b3d6dfbd7fb96cd80"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/run-1.json": {
+      "bytes": 151712,
+      "sha256": "6009f3a1854300aa1a5381c62c0f8713beabdafbf23bf7039ff173ec85049858"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/run.log": {
+      "bytes": 1809,
+      "sha256": "0a37ebf527b008bd35eab219cae268b270dd978bd4bbf0ded3bf00cc734a79c1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-A/summary.json": {
+      "bytes": 59352,
+      "sha256": "27d1d373520048648b1af78eae57d9e41aa7ac797dc982f104c5e182865dd85c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "4f79cdf512736e7979ca629d4dfd66150a8673960af710577b075ac88adbc1a3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "68f108ac41474bff18d39d770fae53fa4561a0e9f058e01c37f4a992ac11a546"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/run-1.json": {
+      "bytes": 151336,
+      "sha256": "0fcc43c9fe2338896c42af566772ee795cb75d671a892c31067d61382d39a69d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/run.log": {
+      "bytes": 1720,
+      "sha256": "5c8e34bc8b6b2aa5ea1cf798c9a178ec934cd9410ddbc8e3ee13e74f82fcbdb4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-02-B/summary.json": {
+      "bytes": 59357,
+      "sha256": "601332ca5387dc93db44d9e6a29423f93de097e05adf5f23d50db1bc3643b2f4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "b7e2aaa622ca9ee96bb62d237330f76633cb0bbb60bcd1f1d171efd6faf0b149"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "a4e5a03ef23a4c185b5e3a1f4b43ff868ff7cd432fc4408749d4f6221c3e6cb4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/run-1.json": {
+      "bytes": 151030,
+      "sha256": "1359ad63b3ae6181ec6a494834241cb3a671e8c30f1feabc8a4f9d8e0f60d4c3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/run.log": {
+      "bytes": 1719,
+      "sha256": "99ff00dc9232b8a3b7802ad0cb219ea6d5e8aeb98efb215a873fd5ab7d00101e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-A/summary.json": {
+      "bytes": 59231,
+      "sha256": "3f22f6baa3bf919de8bb4a742a06acb8b555a37d6a755a0247c63d0ca1d7f6bc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "8cd9d75c2dca90c882b13d03de73280651a18b55952dca47e45edb8220101d83"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "3858061e44105ca19149748b0605104c4155e9949144604b0eb4f9ecab2c2f43"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/run-1.json": {
+      "bytes": 150593,
+      "sha256": "8b9a4c2a3563b9c96bcbeed618f86e33e6dcb35b874619f794a0a7c452bbd55d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/run.log": {
+      "bytes": 1719,
+      "sha256": "175df71f71fa5eb9e8d3fb0fbd912c24df4d85f77322b77b72f038b82e7444b8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-03-B/summary.json": {
+      "bytes": 59124,
+      "sha256": "463b01d79bedaab6ae7e36f88ebbc232674c7d2cf0b64c490c57a765343401d3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "288ea8ce17eb121247b461129654dce7ff96c98e3187152ca1686a117d2509a6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "576822e264f33c52b87e3f464d54c604f51ebc398eb573f005f087add75cb01f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/run-1.json": {
+      "bytes": 151306,
+      "sha256": "2af14d73bc450f159c4f4077df43257ff093116de244c864f686e889d81ca423"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/run.log": {
+      "bytes": 1720,
+      "sha256": "7fc79c1d1d1016a8bcd2b945e0d4c895fd3f639ca87c53fd6c881e87215d349a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-A/summary.json": {
+      "bytes": 59350,
+      "sha256": "3119a5c7a1ea20ea00123d29967b66dbe2d38d8bb53a6f692f305427acfa311a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "4648f7cd2faad1016227f597a43f1f3493afad64f1a18e1ccc45c0ca987f1b7e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/host-before.json": {
+      "bytes": 501,
+      "sha256": "7743cb5d4ada69e8c74b4c256246c29e1ea2cd169d65e17044f00cd7c878dd17"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/run-1.json": {
+      "bytes": 151017,
+      "sha256": "708e3fe03892216ecbb7d4102d9796ae277364652bc8781c29586c716537e083"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/run.log": {
+      "bytes": 1720,
+      "sha256": "962483f7559143bd95ecd831f95baf0db1315587c5779484119c65bd70ea9f41"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-04-B/summary.json": {
+      "bytes": 59374,
+      "sha256": "55c954170541a02b199e6d3e4a983d81ba43b34759e82ff5bddedd7b2e1b2f33"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "1ec0e4bef63271b8d3946b69ed2a8cb7cf39d4405ee5cde467baa9e34d1dc949"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "5343d1d0c398ec052e6849bd9f41fea75c46609d9edb8e3792bd6f594bd8f7dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/run-1.json": {
+      "bytes": 151278,
+      "sha256": "7b17ed9e11ef2f1e2b966431648cafbd22528386542a5ea6f9ba42293400682b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/run.log": {
+      "bytes": 1720,
+      "sha256": "5235f4419b170dc62dfc5f0d11e820a31c36499ecbaa37ae3c1bb106974d456c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-A/summary.json": {
+      "bytes": 59337,
+      "sha256": "09c9bf220c4291d349ca40853ef213ccec3088ebeba471511dd9e5f6509023b8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "ab0b84d817af384d11fa29709525d8b6164d59f263e87daf6784de55c2d27e0a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "a46afb921c138e53ae4733c0d179544fd31392ee87454e722fc52d27d86eedf2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/run-1.json": {
+      "bytes": 151156,
+      "sha256": "0e890ed75037430da236cdd4a440485b8fc84b830ac1a41ba81bcb1a2044c9ae"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/run.log": {
+      "bytes": 1720,
+      "sha256": "07d9b1b5a3f7dce274ca85f72d9bd963bcd2f23e25d9e251a14137128cfe091c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-05-B/summary.json": {
+      "bytes": 59286,
+      "sha256": "99fa5e817f757d8a2ff1cc0f5115ab89e36ee107d83054a055f4e9bf3671529e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "c0154748c317e4c2ff2ea5113435d82f3956ee71702eeb208c023d68789f87af"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "efe17df82d83a44906254bd390d682e8c7e1fc75bbb0fc53b43c2559a8da48d1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/run-1.json": {
+      "bytes": 151308,
+      "sha256": "91806074a665642131dea06664fa9d98495b69951b77590d05698b0e2c7f359f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/run.log": {
+      "bytes": 1720,
+      "sha256": "9a12745730a1daffa9a57e0a741c9ae4e9acfcbd4b29c41f23e0585cd9c06b16"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-A/summary.json": {
+      "bytes": 59297,
+      "sha256": "62b802598fb1dea69f6c37830d7717af39bbcb35db80ab3a48e45001ccdf024b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "5192fbb6f16036a281cbb15680186e59a74f3204b16e208ae38c4d7115586271"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "d04ecc75df0dc21a7d0bc3dea3372750d1b7f3f740cc4e73d7e2250d31b3ac67"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/run-1.json": {
+      "bytes": 151285,
+      "sha256": "db9e3ed5830e16595881d65e6bdce9648955e5532321a80115a1e395585722f4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/run.log": {
+      "bytes": 1719,
+      "sha256": "31f891d0ff9cd9a0e3af3d992e035fa185c9e939161aa2b428a32d3a08b98498"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/pair-06-B/summary.json": {
+      "bytes": 59123,
+      "sha256": "b421b1bd5fc9414870fae548df7dc17fd80ff39b05a3b8cd9c06de078b56ca5d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/registered-plan.json": {
+      "bytes": 3416,
+      "sha256": "c9e9ca38ac1f8291aec140e6b1e9d297e845a182c2a78e98a98ad90cf89dc458"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/source-identities.json": {
+      "bytes": 129037,
+      "sha256": "3e5969be73cfe2592826167d8635fc7971859cea7ae53cdd58018ba9aea514d9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "2820aeda138e0611e7f06a19c1cb029db044f07e9db3537989f60ee0caa393b8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "57c226792b80b5ed2ba9db4dbe40cf2fb51b8820b266a5495537fe36a41b704a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/run-1.json": {
+      "bytes": 150667,
+      "sha256": "9edebe1cc0028d4beaddf70963eb60c018c190fe92cf3055fd37ad5f25ebac8e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/run.log": {
+      "bytes": 1723,
+      "sha256": "2fc9b62bd82308d6424281d46a28482d5d8cd06770fa6626a35312a57d868126"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-A/summary.json": {
+      "bytes": 59185,
+      "sha256": "8abc61fb3091d510f97987aebdf71581c6d3bd69134f72738b4709a07475b88a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "8876671b3daa5fe27d82116024f5c248a8c63812194762b3a8c12f6cb46aeda2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "dbfa9470c43296390387e239cdeb13d17efd5633f9b92189e3ee225413be4bf3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/run-1.json": {
+      "bytes": 151094,
+      "sha256": "204dea22ac09c723b17bed5b0eef2a014ee295b3d43db76530ce9c03b1ca4b18"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/run.log": {
+      "bytes": 1723,
+      "sha256": "da4ef1222a73d6bae9d81f19e03876a3bbee5f8fe1c9f1405835d05868b0a00b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-1-B/summary.json": {
+      "bytes": 59282,
+      "sha256": "0aeece291bec4ee5fa06dab9e5597bc83a4dcdb3246f381482a6d276d1b3f818"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "38949e180890327faadd42ac939acb3f30e8285003294a3b434fffaaf6c8b241"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "3f4d0fc96d440c70df9276195b5d3952735ccd8c4b26775fafb61e8fb430c517"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/run-1.json": {
+      "bytes": 151561,
+      "sha256": "ba5f5e05c9852449638e5fd9d6502c0fbd5f221362fb826a119c81cee7653802"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/run.log": {
+      "bytes": 1723,
+      "sha256": "a11cb06cbc0057b11722960db3ee2d03aadae35e208913cd34dff20ca4d99eeb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-A/summary.json": {
+      "bytes": 59387,
+      "sha256": "9bec34f0c8f8fb20f9bde88e8660ff8f92a3e00271213ffad6e9d1854dbe1bb0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json": {
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "e8c8259d556d9d4cd3fba132e25172ceb0a8fe023f2d2faa55a8997eb747befb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "5b67ffe23f698879b44daf11b2ec26c34d5de84d2790610f5d3603d98c381030"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/run-1.json": {
+      "bytes": 151406,
+      "sha256": "ab5611e150558c5296f54055b3e51d44708ed6e0e32fc68cc8080e19328d01b9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/run.log": {
+      "bytes": 1813,
+      "sha256": "c6d52a5ad7fe135d0042f31e866cf0b02eab5fd0022847b599a3a1a341f236e4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jitendex-AB/import-owned-columns-83b3/warmup-2-B/summary.json": {
+      "bytes": 59255,
+      "sha256": "7d93db9078103e369804aedda7926e3f82372b240cba74493c496639b93a5a91"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/data/dictionary-wasm/manifest.json": {
+      "bytes": 2588,
+      "sha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/benchmark-support.js": {
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/dictionary-fixtures.js": {
+      "bytes": 6765,
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-benchmark.js": {
+      "bytes": 11064,
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/audit_memory.py": {
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/protocol.py": {
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": {
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-qualification-20261125-a7f7.py": {
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dense-zip-directory.js": {
+      "bytes": 9309,
+      "sha256": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dictionary-importer.js": {
+      "bytes": 345457,
+      "sha256": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-experiments.js": {
+      "bytes": 3523,
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-source-pipeline.js": {
+      "bytes": 47175,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-content-ownership.js": {
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-key-hash.js": {
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index-preparation.js": {
+      "bytes": 11139,
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index.js": {
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-route.js": {
+      "bytes": 4192,
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-record-preinterned-plan.js": {
+      "bytes": 25435,
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/wasm/term-bank-parser.c": {
+      "bytes": 158441,
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/media/media-util.js": {
+      "bytes": 6039,
+      "sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/pages/settings/dictionary-import-controller.js": {
+      "bytes": 187268,
+      "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/lib/term-bank-parser.wasm": {
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/package-lock.json": {
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/extension-two-dictionary-import.e2e.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/import-flags-ab-benchmark.js": {
+      "bytes": 25889,
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/e2e/import-timing.js": {
+      "bytes": 3293,
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/perf/dictionaries.lock.json": {
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "issues": [],
+  "limits": [
+    "Descriptive per-host statistics; complete qualification is not itself a latency claim.",
+    "Incomplete schedules retain all recorded values and complete-pair statistics are provisional.",
+    "Warmup, identical controls, exhaustive media, memory and separate trace never enter the candidate estimate."
+  ],
+  "memoryAudit": {
+    "everyObservationQualified": true,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": -0.5649744091524966,
+        "medianPairedChangePercent": -2.438449631549405
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": -0.5829804539892014,
+        "medianPairedChangePercent": -1.964669075179759
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": true,
+    "rawScanCount": 304,
+    "schemaVersion": 1
+  },
+  "readbacks": [
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "warmup-1-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1592.4000000000087,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1592.4000000000087
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "warmup-1-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1584.800000000003,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1584.800000000003
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "warmup-2-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1960.8999999999942,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1960.8999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "warmup-2-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1601.6999999999825,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1601.6999999999825
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-01-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1567.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1567.3999999999942
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-01-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1573.7000000000116,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1573.7000000000116
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-02-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1623.7999999999884,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1623.7999999999884
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-02-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1563.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1563.3999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-03-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1581.2999999999884,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1581.2999999999884
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-03-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1555.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1555.3999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "control-01-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1581.6000000000058,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1581.6000000000058
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "control-01-C",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1551.6999999999825,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1551.6999999999825
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-04-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1608.4000000000233,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1608.4000000000233
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-04-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1547.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1547.2000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-05-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1580.899999999965,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1580.899999999965
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-05-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1601.7000000000116,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1601.7000000000116
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-06-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1618.5,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1618.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "pair-06-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1550,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1550
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "control-02-C",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1614.7999999999884,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1614.7999999999884
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "control-02-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1610.0,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1610
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "06d6f53ed55c6aa8e667a186b13ccec6409536ba49b381b48ed5032c8b712d7a",
+      "id": "exhaustive-media-A",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1562.5,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1562.5
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "06d6f53ed55c6aa8e667a186b13ccec6409536ba49b381b48ed5032c8b712d7a",
+      "id": "exhaustive-media-B",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1566.5,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1566.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "memory/A1",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1913.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1913.2000000000116
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "memory/B1",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1887.1999999999534,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1887.1999999999534
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "memory/B2",
+      "packageSha256": "4cd93c2e69387e7f16dc369488fc3bf4ec0efc99786a023f3d5ebfff0dde2b18",
+      "rawBrowserDurationMs": 1890.9000000000233,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1890.9000000000233
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "be8cd71db5b0d43eb00dd4304eab0bf7a00c351235c4d08f5b28badde5483adf",
+      "id": "memory/A2",
+      "packageSha256": "2835d7ddf6ffcaee7a7315832ec2c4b78500a428693fe356c0d162dd29219c4a",
+      "rawBrowserDurationMs": 1882.0,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 1882
+    }
+  ],
+  "runId": 46103918280,
+  "schemaVersion": 1,
+  "timingClaim": false,
+  "unrecordedAttempts": [],
+  "warmups": [
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 1592.4000000000087
+    },
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 1584.800000000003
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1960.8999999999942
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1601.6999999999825
+    }
+  ]
+}

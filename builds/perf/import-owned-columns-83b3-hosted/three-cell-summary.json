@@ -1,0 +1,276 @@
+{
+  "completeStudy": false,
+  "pending": [
+    "vndb-AB"
+  ],
+  "hostPooling": false,
+  "controlSubtraction": false,
+  "sourceHead": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "artifactId": 15250427758,
+      "artifactSha256": "98fe348b30a57ebe1eb3adced9c0cde94bc1fb907c9a39fc228ead5b58fe9255",
+      "allRequiredGatesPassed": true,
+      "completeTimingScheduleVerified": true,
+      "expectedCounts": {
+        "candidate": 24,
+        "control": 8,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 36,
+        "warmup": 4
+      },
+      "candidate": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.1639688272249815,
+          2.2056142301287274
+        ],
+        "equalWorkChangePercent": 0.44991878089470916,
+        "fasterPairs": 6,
+        "medianPairedChangePercent": 0.25842791443480007,
+        "ratios": [
+          1.0277142857143189,
+          0.9876251390433494,
+          1.0163979988882557,
+          1.016009148084637,
+          1.0300130491517372,
+          0.9942196531792235,
+          0.990924092409193,
+          0.9890954844121509,
+          0.9752283420979485,
+          1.0109489051094724,
+          0.9875495963880461,
+          1.0309292844088294
+        ],
+        "worstPairChangePercent": 3.092928440882936
+      },
+      "medianPairedDeltaMs": 1.8500000000058208,
+      "control": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -3.502699709260526,
+          2.390495276276905
+        ],
+        "equalWorkChangePercent": 0.23740529972582358,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 1.0746525548737562,
+        "ratios": [
+          0.9986231584744596,
+          1.0228698926230153,
+          0.9649730029073947,
+          1.023904952762769
+        ],
+        "worstPairChangePercent": 2.390495276276905
+      },
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 1.0792337898473559,
+          "medianPairedChangePercent": 0.04157304270797635
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.0362047686055087,
+          "medianPairedChangePercent": 0.18613916710494838
+        }
+      },
+      "components": [
+        {
+          "banks": 53,
+          "groups": 8,
+          "policy": 2,
+          "rows": 528299,
+          "savedOwnedResultBytes": 3068084
+        },
+        {
+          "banks": 53,
+          "groups": 12,
+          "policy": 3,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10434868
+        },
+        {
+          "banks": 53,
+          "groups": 20,
+          "policy": 5,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10451462
+        }
+      ]
+    },
+    {
+      "cell": "jmdict-BA",
+      "artifactId": 15250683242,
+      "artifactSha256": "c0338f08f186542919e16082e21120d13bc2e66c0fa4a12f99d2878c82dba457",
+      "allRequiredGatesPassed": true,
+      "completeTimingScheduleVerified": true,
+      "expectedCounts": {
+        "candidate": 24,
+        "control": 8,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 36,
+        "warmup": 4
+      },
+      "candidate": {
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -1.4772294104653305,
+          6.120122401122097
+        ],
+        "equalWorkChangePercent": 2.2434617972784565,
+        "fasterPairs": 6,
+        "medianPairedChangePercent": 0.04867760906206442,
+        "ratios": [
+          1.0521859819569621,
+          1.001523229245998,
+          1.066999583853501,
+          0.9787839586028536,
+          0.9731525784157593,
+          0.9916714531878398,
+          0.9994503229352435,
+          0.9917287014061207,
+          1.1122334455668215,
+          1.1016013252346415,
+          0.9544279689838103,
+          1.055402864168941
+        ],
+        "worstPairChangePercent": 11.223344556682147
+      },
+      "medianPairedDeltaMs": 0.3999999999869033,
+      "control": {
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -7.478687677601825,
+          6.211092246749295
+        ],
+        "equalWorkChangePercent": 0.13705670721260166,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 1.2052069175137126,
+        "ratios": [
+          1.062110922467493,
+          0.980649717514149,
+          0.9252131232239817,
+          1.0434544208361254
+        ],
+        "worstPairChangePercent": 6.211092246749295
+      },
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 2.076523162580135,
+          "medianPairedChangePercent": 0.3660188488135707
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.7587273962758498,
+          "medianPairedChangePercent": 0.34965096258973705
+        }
+      },
+      "components": [
+        {
+          "banks": 53,
+          "groups": 8,
+          "policy": 2,
+          "rows": 528299,
+          "savedOwnedResultBytes": 3068084
+        },
+        {
+          "banks": 53,
+          "groups": 12,
+          "policy": 3,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10434868
+        },
+        {
+          "banks": 53,
+          "groups": 20,
+          "policy": 5,
+          "rows": 528299,
+          "savedOwnedResultBytes": 10451462
+        }
+      ]
+    },
+    {
+      "cell": "jitendex-AB",
+      "artifactId": 15250472765,
+      "artifactSha256": "90665c03115ed16bbdfaf4cc30002a0667642a2eaae8c34559c836f27e4837fb",
+      "allRequiredGatesPassed": true,
+      "completeTimingScheduleVerified": true,
+      "expectedCounts": {
+        "candidate": 12,
+        "control": 4,
+        "exhaustiveMedia": 2,
+        "memory": 4,
+        "ordinary": 20,
+        "warmup": 4
+      },
+      "candidate": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -0.6179766776392981,
+          4.187443706842275
+        ],
+        "equalWorkChangePercent": 2.0372303039347006,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 2.589540469728391,
+        "ratios": [
+          1.0040193951767369,
+          1.0386337469617464,
+          0.9836210712704773,
+          1.0395553257497487,
+          1.0131570624328212,
+          1.0441935483870968
+        ],
+        "worstPairChangePercent": 4.419354838709677
+      },
+      "medianPairedDeltaMs": 40.60000000002037,
+      "control": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.89049064238892,
+          0.2981366459620105
+        ],
+        "equalWorkChangePercent": -0.7864394034351019,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": -0.7961769982134603,
+        "ratios": [
+          0.9810950935761108,
+          1.00298136645962
+        ],
+        "worstPairChangePercent": 0.2981366459620105
+      },
+      "memory": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.5649744091524966,
+          "medianPairedChangePercent": -2.438449631549405
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -0.5829804539892014,
+          "medianPairedChangePercent": -1.964669075179759
+        }
+      },
+      "components": [
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 2,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        },
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 3,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        },
+        {
+          "banks": 219,
+          "groups": 22,
+          "policy": 5,
+          "rows": 436555,
+          "savedOwnedResultBytes": 11477248
+        }
+      ]
+    }
+  ]
+}

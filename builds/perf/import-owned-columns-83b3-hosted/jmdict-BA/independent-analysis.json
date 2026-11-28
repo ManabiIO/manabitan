@@ -1,0 +1,3746 @@
+{
+  "acquisitionChanged": false,
+  "allRecordedObservations": [
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 831.3999999999942
+    },
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 816.1999999999971
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 994.9000000000087
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1515.3999999999942
+    },
+    {
+      "arm": "B",
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 758.0999999999913
+    },
+    {
+      "arm": "A",
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "totalImportMs": 720.5
+    },
+    {
+      "arm": "A",
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 787.8000000000029
+    },
+    {
+      "arm": "B",
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "totalImportMs": 789
+    },
+    {
+      "arm": "B",
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 769.1999999999825
+    },
+    {
+      "arm": "A",
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "totalImportMs": 720.8999999999942
+    },
+    {
+      "arm": "C",
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 750.7000000000116
+    },
+    {
+      "arm": "A",
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "totalImportMs": 706.7999999999884
+    },
+    {
+      "arm": "A",
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 773
+    },
+    {
+      "arm": "B",
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "totalImportMs": 756.6000000000058
+    },
+    {
+      "arm": "B",
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 732.2000000000116
+    },
+    {
+      "arm": "A",
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "totalImportMs": 752.3999999999942
+    },
+    {
+      "arm": "A",
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 696.3999999999942
+    },
+    {
+      "arm": "B",
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "totalImportMs": 690.6000000000058
+    },
+    {
+      "arm": "A",
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 708
+    },
+    {
+      "arm": "C",
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "totalImportMs": 694.3000000000175
+    },
+    {
+      "arm": "B",
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "totalImportMs": 727.2999999999884
+    },
+    {
+      "arm": "A",
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "totalImportMs": 727.7000000000116
+    },
+    {
+      "arm": "A",
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "totalImportMs": 725.3999999999942
+    },
+    {
+      "arm": "B",
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "totalImportMs": 719.3999999999942
+    },
+    {
+      "arm": "B",
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "totalImportMs": 792.8000000000175
+    },
+    {
+      "arm": "A",
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "totalImportMs": 712.7999999999884
+    },
+    {
+      "arm": "C",
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "totalImportMs": 716.3000000000175
+    },
+    {
+      "arm": "A",
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "totalImportMs": 774.2000000000116
+    },
+    {
+      "arm": "A",
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "totalImportMs": 724.4000000000233
+    },
+    {
+      "arm": "B",
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "totalImportMs": 798
+    },
+    {
+      "arm": "B",
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "totalImportMs": 701.5999999999767
+    },
+    {
+      "arm": "A",
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "totalImportMs": 735.0999999999767
+    },
+    {
+      "arm": "A",
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "totalImportMs": 691.2999999999884
+    },
+    {
+      "arm": "B",
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "totalImportMs": 729.5999999999767
+    },
+    {
+      "arm": "A",
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "totalImportMs": 729.5
+    },
+    {
+      "arm": "C",
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "totalImportMs": 761.1999999999534
+    }
+  ],
+  "allRequiredGatesPassed": true,
+  "analyzerSha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "candidateVsBaseline": {
+    "driverComparable": {
+      "count": 12,
+      "descriptiveBootstrap95Percent": [
+        -1.4772294104653305,
+        6.120122401122097
+      ],
+      "equalWorkChangePercent": 2.2434617972784565,
+      "fasterPairs": 6,
+      "medianPairedChangePercent": 0.04867760906206442,
+      "ratios": [
+        1.0521859819569621,
+        1.001523229245998,
+        1.066999583853501,
+        0.9787839586028536,
+        0.9731525784157593,
+        0.9916714531878398,
+        0.9994503229352435,
+        0.9917287014061207,
+        1.1122334455668215,
+        1.1016013252346415,
+        0.9544279689838103,
+        1.055402864168941
+      ],
+      "worstPairChangePercent": 11.223344556682147
+    },
+    "incompletePairs": [],
+    "kind": "candidate",
+    "medianPairedDeltaMs": 0.3999999999869033,
+    "orderStrata": {
+      "AB": {
+        "count": 6,
+        "medianPairedChangePercent": -0.3374034673940707,
+        "pairIds": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          12
+        ]
+      },
+      "BA": {
+        "count": 6,
+        "medianPairedChangePercent": 2.581815244610275,
+        "pairIds": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          11
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 720.5,
+        "changePercent": 5.218598195696211,
+        "deltaMs": 37.59999999999127,
+        "observationIds": [
+          "pair-01-B",
+          "pair-01-A"
+        ],
+        "order": "BA",
+        "pair": 1,
+        "ratio": 1.0521859819569621,
+        "rightMs": 758.0999999999913
+      },
+      {
+        "baselineMs": 787.8000000000029,
+        "changePercent": 0.15232292459979035,
+        "deltaMs": 1.1999999999970896,
+        "observationIds": [
+          "pair-02-A",
+          "pair-02-B"
+        ],
+        "order": "AB",
+        "pair": 2,
+        "ratio": 1.001523229245998,
+        "rightMs": 789
+      },
+      {
+        "baselineMs": 720.8999999999942,
+        "changePercent": 6.699958385350091,
+        "deltaMs": 48.29999999998836,
+        "observationIds": [
+          "pair-03-B",
+          "pair-03-A"
+        ],
+        "order": "BA",
+        "pair": 3,
+        "ratio": 1.066999583853501,
+        "rightMs": 769.1999999999825
+      },
+      {
+        "baselineMs": 773,
+        "changePercent": -2.121604139714639,
+        "deltaMs": -16.39999999999418,
+        "observationIds": [
+          "pair-04-A",
+          "pair-04-B"
+        ],
+        "order": "AB",
+        "pair": 4,
+        "ratio": 0.9787839586028536,
+        "rightMs": 756.6000000000058
+      },
+      {
+        "baselineMs": 752.3999999999942,
+        "changePercent": -2.6847421584240694,
+        "deltaMs": -20.199999999982538,
+        "observationIds": [
+          "pair-05-B",
+          "pair-05-A"
+        ],
+        "order": "BA",
+        "pair": 5,
+        "ratio": 0.9731525784157593,
+        "rightMs": 732.2000000000116
+      },
+      {
+        "baselineMs": 696.3999999999942,
+        "changePercent": -0.832854681216022,
+        "deltaMs": -5.7999999999883585,
+        "observationIds": [
+          "pair-06-A",
+          "pair-06-B"
+        ],
+        "order": "AB",
+        "pair": 6,
+        "ratio": 0.9916714531878398,
+        "rightMs": 690.6000000000058
+      },
+      {
+        "baselineMs": 727.7000000000116,
+        "changePercent": -0.05496770647565041,
+        "deltaMs": -0.40000000002328306,
+        "observationIds": [
+          "pair-07-B",
+          "pair-07-A"
+        ],
+        "order": "BA",
+        "pair": 7,
+        "ratio": 0.9994503229352435,
+        "rightMs": 727.2999999999884
+      },
+      {
+        "baselineMs": 725.3999999999942,
+        "changePercent": -0.8271298593879317,
+        "deltaMs": -6.0,
+        "observationIds": [
+          "pair-08-A",
+          "pair-08-B"
+        ],
+        "order": "AB",
+        "pair": 8,
+        "ratio": 0.9917287014061207,
+        "rightMs": 719.3999999999942
+      },
+      {
+        "baselineMs": 712.7999999999884,
+        "changePercent": 11.223344556682147,
+        "deltaMs": 80.0000000000291,
+        "observationIds": [
+          "pair-09-B",
+          "pair-09-A"
+        ],
+        "order": "BA",
+        "pair": 9,
+        "ratio": 1.1122334455668215,
+        "rightMs": 792.8000000000175
+      },
+      {
+        "baselineMs": 724.4000000000233,
+        "changePercent": 10.16013252346415,
+        "deltaMs": 73.59999999997672,
+        "observationIds": [
+          "pair-10-A",
+          "pair-10-B"
+        ],
+        "order": "AB",
+        "pair": 10,
+        "ratio": 1.1016013252346415,
+        "rightMs": 798
+      },
+      {
+        "baselineMs": 735.0999999999767,
+        "changePercent": -4.557203101618967,
+        "deltaMs": -33.5,
+        "observationIds": [
+          "pair-11-B",
+          "pair-11-A"
+        ],
+        "order": "BA",
+        "pair": 11,
+        "ratio": 0.9544279689838103,
+        "rightMs": 701.5999999999767
+      },
+      {
+        "baselineMs": 691.2999999999884,
+        "changePercent": 5.540286416894102,
+        "deltaMs": 38.29999999998836,
+        "observationIds": [
+          "pair-12-A",
+          "pair-12-B"
+        ],
+        "order": "AB",
+        "pair": 12,
+        "ratio": 1.055402864168941,
+        "rightMs": 729.5999999999767
+      }
+    ],
+    "rightArm": "B"
+  },
+  "cell": "jmdict-BA",
+  "completeTimingScheduleVerified": true,
+  "components": [
+    {
+      "banks": 53,
+      "groups": 8,
+      "policy": 2,
+      "rows": 528299,
+      "savedOwnedResultBytes": 3068084
+    },
+    {
+      "banks": 53,
+      "groups": 12,
+      "policy": 3,
+      "rows": 528299,
+      "savedOwnedResultBytes": 10434868
+    },
+    {
+      "banks": 53,
+      "groups": 20,
+      "policy": 5,
+      "rows": 528299,
+      "savedOwnedResultBytes": 10451462
+    }
+  ],
+  "controlSubtraction": false,
+  "driverAnalysis": {
+    "candidateVsBaseline": {
+      "count": 12,
+      "descriptiveBootstrap95Percent": [
+        -1.4772294104653305,
+        6.120122401122097
+      ],
+      "equalWorkChangePercent": 2.2434617972784565,
+      "fasterPairs": 6,
+      "medianPairedChangePercent": 0.04867760906206442,
+      "ratios": [
+        1.0521859819569621,
+        1.001523229245998,
+        1.066999583853501,
+        0.9787839586028536,
+        0.9731525784157593,
+        0.9916714531878398,
+        0.9994503229352435,
+        0.9917287014061207,
+        1.1122334455668215,
+        1.1016013252346415,
+        0.9544279689838103,
+        1.055402864168941
+      ],
+      "worstPairChangePercent": 11.223344556682147
+    },
+    "identicalCodeControl": {
+      "count": 4,
+      "descriptiveBootstrap95Percent": [
+        -7.478687677601825,
+        6.211092246749295
+      ],
+      "equalWorkChangePercent": 0.13705670721260166,
+      "fasterPairs": 2,
+      "medianPairedChangePercent": 1.2052069175137126,
+      "ratios": [
+        1.062110922467493,
+        0.980649717514149,
+        0.9252131232239817,
+        1.0434544208361254
+      ],
+      "worstPairChangePercent": 6.211092246749295
+    },
+    "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+    "memoryPassed": true,
+    "status": "correctness-memory-passed",
+    "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+    "timingScope": "File input change through post-UI completion; fresh profile per observation"
+  },
+  "expectedAttemptInventory": [
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/host-after.json",
+          "sha256": "2a1e7fd5c13cee1924a05ad5527107f17f7a7cd9ff86fb4294ae43ee1a36708f"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/host-before.json",
+          "sha256": "4c6819f0d6f5c4abdeb73ae06efbd1de914ee2a6f519475882913a058b1266d1"
+        },
+        {
+          "bytes": 151190,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/run-1.json",
+          "sha256": "df4a6c0a636a0c0673e941eec6e772e306516e548a3c6ddf6afce21987ce21e1"
+        },
+        {
+          "bytes": 1708,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/run.log",
+          "sha256": "ff0c0b2af186734602325381a5f835a3411a074f128538052ec404471552da69"
+        },
+        {
+          "bytes": 59039,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/summary.json",
+          "sha256": "33c7cf686901a539e8a9d4273c5554e79fd44b4b2014a9dfc05a8fbc36d5bb95"
+        }
+      ],
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/host-after.json",
+          "sha256": "232cf946795ca86d0b1af5e7acbf41238b3d6844b1a774b6cf9e759f713a4247"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/host-before.json",
+          "sha256": "8b7fbbd47db05112de1d1c4edea50c3242d574e265de03b02272b4c0eccfdab3"
+        },
+        {
+          "bytes": 151344,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/run-1.json",
+          "sha256": "32eaae7d11e62e9bd3be741056ec2f71e2c5e337284a41fe03bb08ad1052a915"
+        },
+        {
+          "bytes": 1708,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/run.log",
+          "sha256": "d50e185044bbfb0e949e99c0eedfc47803cb9983ce8391fa5a1854933b0c076d"
+        },
+        {
+          "bytes": 58973,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/summary.json",
+          "sha256": "a5c9e99ea7458281058e91eca1e65e35f9dc77a929b6b2c41a472f0121f628c7"
+        }
+      ],
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/host-after.json",
+          "sha256": "03a3ab23a98dc52d0d8618476ceb777e83bf4d0cd9a64727e13cddfcecad3bbe"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/host-before.json",
+          "sha256": "ba05ff8f997e72dbe639b454996f69dabe98df3d705482f1d360477470323156"
+        },
+        {
+          "bytes": 151094,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/run-1.json",
+          "sha256": "ce92ac7acf2223b711a7c28078ab12b4075a47a1b14d32221e96faa6356bc680"
+        },
+        {
+          "bytes": 1709,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/run.log",
+          "sha256": "95071b665bd2d80612879a09c9ff63f32ea21a018af5ad6688a4c3391966c7ed"
+        },
+        {
+          "bytes": 58857,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/summary.json",
+          "sha256": "780bff6616793e6baaffed146ccfb196dad58e97eea880a6565fb0ad33eef900"
+        }
+      ],
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/host-after.json",
+          "sha256": "fa0c777ce1126b89343f7c08c3ea8844ad0d7f9c35a1f2bac5b843487a22d37c"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/host-before.json",
+          "sha256": "0358fcad9cecb388c411cb98c31c915d645e9e77d1837ac0f7ba9d3fb4e87cfb"
+        },
+        {
+          "bytes": 151041,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/run-1.json",
+          "sha256": "4bba091a2d4edc5b189ff76df07bebb90c3ff73301f55ee11d13f4e5b0689f34"
+        },
+        {
+          "bytes": 1712,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/run.log",
+          "sha256": "ce4159fa6ee5a600aa00effd983ce7658eaae3a1f8d27eb3bb08f733889ff968"
+        },
+        {
+          "bytes": 58985,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/summary.json",
+          "sha256": "805c1b7cacb46949bf84b243f1d04b01032923eab0b61eb83e65c8924f13b806"
+        }
+      ],
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/host-after.json",
+          "sha256": "d5da088492dfc9f7a941c39f46be858f07d916da64158e0462f5efe4ef5437ec"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/host-before.json",
+          "sha256": "e9826f61e583819decbea78b529a892c24c6dd02b0d7f14b862e44057ab58b3b"
+        },
+        {
+          "bytes": 151246,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/run-1.json",
+          "sha256": "bdab4c05fb123d27553df8ca48696c11e260fd0d5c49559e3cb63d5965e5462b"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/run.log",
+          "sha256": "89a411be397d013cb6d2b2d8f94d8ee29794643d91aeb1ea9533a53973f31f95"
+        },
+        {
+          "bytes": 59051,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/summary.json",
+          "sha256": "26e7a409c217ad20c7c2335d8a2feea90280ff76b59d0225e064c6cb8334156f"
+        }
+      ],
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/host-after.json",
+          "sha256": "50e7466b7b8bbd47a4a21f55b36b1e5c04dfbeac061bba6a5b0de3c1649a46f6"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/host-before.json",
+          "sha256": "a46bd5b2af81e792ab4798b42409fea13e4aeb6186525ad607d1ac7c75339d0f"
+        },
+        {
+          "bytes": 151240,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/run-1.json",
+          "sha256": "50d55dc8e04dfc237ff77863062720f75c92e0626f27501e68d20f72651253fc"
+        },
+        {
+          "bytes": 1793,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/run.log",
+          "sha256": "b66420f17a3e3dd4613570d954a08fbce1b043ff3fb558f37a8f0c267d588e02"
+        },
+        {
+          "bytes": 58931,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/summary.json",
+          "sha256": "d5fb2829a173ec54dd151dc9f2fe53e262b84cdea0f09eaca39dd8618a2a45ad"
+        }
+      ],
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/host-after.json",
+          "sha256": "1d18fb9dae9a0fd43f6dce8d6f33032416d673938979cceb38db1eb09b3dca87"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/host-before.json",
+          "sha256": "1cbf9b241c48025805bf400215f6dcf1a24069d132add447399aaf187760cb77"
+        },
+        {
+          "bytes": 151116,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/run-1.json",
+          "sha256": "c2af25c4bc35b12aab34384516cf89dd49876e11e7aea7902363a601c622a4fd"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/run.log",
+          "sha256": "08ebab8ae43345ee6832b17ec57b249fa90c25b45b11e3dec885dc6e3012f556"
+        },
+        {
+          "bytes": 58969,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/summary.json",
+          "sha256": "fd14dc8c5368e713391ae3e9eb8a29b819c0488ff910c89126f192212a7a2811"
+        }
+      ],
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/host-after.json",
+          "sha256": "04ee7c2e8ddbc4ecd1ba3d4009f460ba112b219330ca0688f5ed01022f0b869a"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/host-before.json",
+          "sha256": "b6a5bd032133524648b356ea5c789f503c3e31d25b25a9ab6cacd9aaf4388555"
+        },
+        {
+          "bytes": 151223,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/run-1.json",
+          "sha256": "b86279f3408b9ee62f053526b5f4dfef66a80b25f6a3bea682712c820a84f7a4"
+        },
+        {
+          "bytes": 1705,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/run.log",
+          "sha256": "a95e0f3119282893b8f00aeb932d8c430ffeb68cee1dd0a12a47b61a3effd02f"
+        },
+        {
+          "bytes": 58904,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/summary.json",
+          "sha256": "99c0642bed7f53b12c3e0337c523b7b1f3fb1fa2338c71909e01fb76137de79a"
+        }
+      ],
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/host-after.json",
+          "sha256": "4f500b537a155a3d7b9ed791bd60d05ec9b715c0c9339b39a25ff09e46589e2d"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/host-before.json",
+          "sha256": "960187dbea4dfb4f7baa955614a2d4b26b9fde3ebe20ff1838d205b76dec6a32"
+        },
+        {
+          "bytes": 151017,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/run-1.json",
+          "sha256": "6965f765ce3571f9b96f1f8cd464b963a7ed43fd26d0aead964dce01b2932a9d"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/run.log",
+          "sha256": "ca008fa2847f129a385e8e7f761585976c95cbba606cd0ab837f27c87b13359e"
+        },
+        {
+          "bytes": 59042,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/summary.json",
+          "sha256": "3fbe8ed00b8bd9eb4b05ce2c7ae36a0ac1cd05f9cd3b1e57c3b3cf6d59f4b4bd"
+        }
+      ],
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/host-after.json",
+          "sha256": "a39eab3c6a4c0e7b5b28df0e9a4f248df3f6de5e1fe9bbe2f37f27966cc82f06"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/host-before.json",
+          "sha256": "683786dfc068165312c7f386213d5f180377d04305c9680a253c2ee16c4475d4"
+        },
+        {
+          "bytes": 150638,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/run-1.json",
+          "sha256": "ff3fd5cd1a0b4b3d027f3761e5be37e6384daafb55f320ee64262443633f01ad"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/run.log",
+          "sha256": "62965a6046150f220c5860a1cec538ff85c8dc86b613cd33449a38d2b8fc3a42"
+        },
+        {
+          "bytes": 59092,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/summary.json",
+          "sha256": "2bf19e65e2e96b8f4cea48662aaf249d1d2ff868a104d3cfcd10b58a9c043a91"
+        }
+      ],
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/host-after.json",
+          "sha256": "1bb78d92e0326d836432dd5160906f470c2c4bf7fe1ead88379de27bf7e9d644"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/host-before.json",
+          "sha256": "dad44ee5ee593159c50bf00e47d57293dd08d7ee7ab087135943d84a2b2216ba"
+        },
+        {
+          "bytes": 151006,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/run-1.json",
+          "sha256": "fc0636f2a15a15fca5827be58eff1eef5d677c8930b1827f6b92b3d0e7a19104"
+        },
+        {
+          "bytes": 1714,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/run.log",
+          "sha256": "3ea314b1c3bcbe87b7d7351cacf8d1cfa020426ae7ff785915c33c0034202a96"
+        },
+        {
+          "bytes": 59033,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/summary.json",
+          "sha256": "c623609141af99cb3a7bdc846cdfa21ba52b08d6e2eb4e0dbfbd4402879f7ab6"
+        }
+      ],
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/host-after.json",
+          "sha256": "08d233fc64d534e5955039a157cc26d90d4c5930409e7b7addd8cb8d0e10279b"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/host-before.json",
+          "sha256": "8e70601bbaa0147150b926a6a95eb54431d2c5ca5028ab4037a15e675b4ffd41"
+        },
+        {
+          "bytes": 151451,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/run-1.json",
+          "sha256": "181a507ef5cc837e2ad9be50fae6237322575e69b47fb1f27baf04fc8141078a"
+        },
+        {
+          "bytes": 1695,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/run.log",
+          "sha256": "22964c3c62ecd3e7a199871e9478b004461611a56aa6210546121b93d7415cb5"
+        },
+        {
+          "bytes": 59218,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/summary.json",
+          "sha256": "3fcf4f15be0407b8d8a8a61e0cc27e1c37132372f099e07c4f6cdae8521bec76"
+        }
+      ],
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/host-after.json",
+          "sha256": "52ecdff53eb3b88b347407f0ee5ead157e8f3495b7a19f4f73810af472bbcb5c"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/host-before.json",
+          "sha256": "ee7547620c932ca08b0ed1b33ffee0229eaf9da8caa3ac46b1e445d6a68f1840"
+        },
+        {
+          "bytes": 150777,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/run-1.json",
+          "sha256": "2a781f9e49d8c2a7a42e9735fce0e52d7b76abd3d3eee57311e8adc4661204d1"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/run.log",
+          "sha256": "f955c38469357def29d2f32a97b89b1f0c684f9d269a007f1bc4006c6f02dbf7"
+        },
+        {
+          "bytes": 59074,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/summary.json",
+          "sha256": "1801de9be0a51098411ae51197223bc015e55d3205ca53496873f3b8acb86768"
+        }
+      ],
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 502,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/host-after.json",
+          "sha256": "29668d4283cb8778722bf6b2eb5cd4f126cfdd933457a1972ecd92e1658e08cc"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/host-before.json",
+          "sha256": "64c86bbe6302103c74bf8fff2611d49b44a67b21f1da417e53448ccc6b5b3c42"
+        },
+        {
+          "bytes": 151448,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/run-1.json",
+          "sha256": "9b2646d6538248a7e0e66132beca44a3c805925a132f8d3bc1927678c7ba2984"
+        },
+        {
+          "bytes": 1705,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/run.log",
+          "sha256": "b69046d84456af02c185e9a92b25fdfe33a494f311589edd8fa1efb1c6b5d997"
+        },
+        {
+          "bytes": 59120,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/summary.json",
+          "sha256": "42b3a8164fc8c22a0a536d4e71cc44257979f8464e7be2e4bab6493319aa46a3"
+        }
+      ],
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/host-after.json",
+          "sha256": "58614ab40c8b970d07c3410e69848aca41ee73d725f22f58d6a72416224947ee"
+        },
+        {
+          "bytes": 502,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/host-before.json",
+          "sha256": "ada9e76c4c03714145a8761e9bad333a21b86e7cd6243ca75da40fd342102061"
+        },
+        {
+          "bytes": 151151,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/run-1.json",
+          "sha256": "69248baba83cbb9e7810a6d53ce3f764014e68a20fe5cf44cb77d51eedd0b131"
+        },
+        {
+          "bytes": 1686,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/run.log",
+          "sha256": "31c37a8a11ff03cf5a0e4c7da7f1666f08ce5dd56e81ca2d72531ea44b56f466"
+        },
+        {
+          "bytes": 59075,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/summary.json",
+          "sha256": "e71e13f45bd16f88ef0e695d14a550760cfa8c2d05d4d4709face99d2907a904"
+        }
+      ],
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/host-after.json",
+          "sha256": "7facb8eb3d12e6e1a7956b446743924fc58fc9667cb7c4a403bd4e17cbb13c4b"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/host-before.json",
+          "sha256": "f5ec92510f55cf7023f1de86e3cefa6984cbde29c46ced9735b3176c465f39fd"
+        },
+        {
+          "bytes": 151501,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/run-1.json",
+          "sha256": "988e6ce4ae209c11efe9495141e3e857c59dd1371ef3a252120c3074a26f75b4"
+        },
+        {
+          "bytes": 1793,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/run.log",
+          "sha256": "46e1a10af2afc7df6897a64f7b8f55c5773948ba4cc4086afcd48d50d2d458fb"
+        },
+        {
+          "bytes": 59134,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/summary.json",
+          "sha256": "f4f5a8f625f70ad786f333f0474a5144cf1ddcb18e16cc76ee2973019ca4fa99"
+        }
+      ],
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/host-after.json",
+          "sha256": "e8ee84e1cc7765e46c4bce9bf2c3180a0034187c7b83b31778411a86b73261dc"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/host-before.json",
+          "sha256": "d1de94c8fcc0811e24a6d716b3fc19d1c990c1441811da0fe06a8956b0c7dc5a"
+        },
+        {
+          "bytes": 151106,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/run-1.json",
+          "sha256": "26aea85387c364e6b4ff681d7d9460bfb33dc96b00f6d9386f68870499711aa1"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/run.log",
+          "sha256": "dfa91157f648315fb3949ef6e0f27c01189f7a0cc73afe583f605b67d098acc2"
+        },
+        {
+          "bytes": 59055,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/summary.json",
+          "sha256": "86169c285fdfd029a0b4f4401e663847cf5296418088e2a9c7cc8ef9894721b8"
+        }
+      ],
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/host-after.json",
+          "sha256": "9e0efda568c8d8a9623b6574f18892f605940b9b702543bda5819acee8b98726"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/host-before.json",
+          "sha256": "fc743bfaddba2b0e6b4946becd3f898603f54e8f2525d25b4976243f17b91bfe"
+        },
+        {
+          "bytes": 150597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/run-1.json",
+          "sha256": "d662997e1ea569403157e215097c78734adadf51b7f7d187478f636619cd70b6"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/run.log",
+          "sha256": "9e8c139a15f35352db65392fc8632c8359a88326a1633a408fd298bf2041ec06"
+        },
+        {
+          "bytes": 59065,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/summary.json",
+          "sha256": "df451b43be35eeeb82e0be25f884c9d23bb0461f1e0ba3565e511ffc69b75575"
+        }
+      ],
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/host-after.json",
+          "sha256": "a52379038daa4e42fb0f89a958d7308435c89d288a245b4cb5cc8f72180b71a7"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/host-before.json",
+          "sha256": "835aefc0637fbd3399ac9ad28528faf933b1d49a0025f5278f550f155273c9f9"
+        },
+        {
+          "bytes": 150660,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/run-1.json",
+          "sha256": "a7259875966f76b694d423b0858abb0d110e3761eab6813998dae70dd19daff5"
+        },
+        {
+          "bytes": 1606,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/run.log",
+          "sha256": "3aa8066f9d6ea54cc5d70a800d2dd43deb73f7b2c2089ffeccd6ade116443cf4"
+        },
+        {
+          "bytes": 59059,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/summary.json",
+          "sha256": "90b963fa259334a7f9ec3544d21c9aa895f19faed23e3334dc3e770946cee9da"
+        }
+      ],
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/host-after.json",
+          "sha256": "709dcdf1086677b28a4fbfb6337cdd55cea532d5270aeab65eb9e355fb4fc8e0"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/host-before.json",
+          "sha256": "e404a11b62122ec0d9279359afdb3756df026765163c36828b706e590046ff05"
+        },
+        {
+          "bytes": 150894,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/run-1.json",
+          "sha256": "b0e5dad46e7d9a421501709d96e7d9c614ebd17e28f7196b65496179d1b07a70"
+        },
+        {
+          "bytes": 1606,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/run.log",
+          "sha256": "b8b570fb399728d346476e5ac2387e81e8f1c2f09684e93fe9385cc0fabb4932"
+        },
+        {
+          "bytes": 59079,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/summary.json",
+          "sha256": "2587392d840898041d7dfee2a458900889569d82f18b0203f45d62759a8cc931"
+        }
+      ],
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/host-after.json",
+          "sha256": "5cea5989d3c1dd448b5f5450e5e06b5a38218966368ad2e83c2b34963f3734bd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/host-before.json",
+          "sha256": "e83cf813669af169b2b4a86f73e38befb5a2d05daedf156763d217a182b93191"
+        },
+        {
+          "bytes": 151698,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/run-1.json",
+          "sha256": "fbe4b2893091a4478b1123a2a33eeaf87a34cef9bd481a0663507c2fdc3f0faf"
+        },
+        {
+          "bytes": 1793,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/run.log",
+          "sha256": "9c461537292fc4cb06a8ff068aae2234867f5e5039634f87b1a1ee1be0362426"
+        },
+        {
+          "bytes": 59143,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/summary.json",
+          "sha256": "29b9490bba3d42268724013480b25201a849b6bcc0b4a724a83e06bf3169788b"
+        }
+      ],
+      "id": "pair-07-B",
+      "kind": "candidate",
+      "pair": 7,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/host-after.json",
+          "sha256": "160369993c3ec112a3dfc9485a972c0f1bd41555e89e1253ee1881dd7962b80e"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/host-before.json",
+          "sha256": "ccf931f50ada1e32a57845dfdf7f7c1894eae7de9312ff1119f10031e4333ff9"
+        },
+        {
+          "bytes": 151081,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/run-1.json",
+          "sha256": "9a7ef9eb0aa0b4bf22818feee026b905c8a44325718b9327c5bdef2d15c738bb"
+        },
+        {
+          "bytes": 1686,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/run.log",
+          "sha256": "005b98cfab82eced3bb1231c1cfe0e1910ee9dbe066ac44709a33204f943fa71"
+        },
+        {
+          "bytes": 59052,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/summary.json",
+          "sha256": "5e821252b8ac280cbf8a152178d3942426c828cff11cb7bc3b68e018c176fbfe"
+        }
+      ],
+      "id": "pair-07-A",
+      "kind": "candidate",
+      "pair": 7,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/host-after.json",
+          "sha256": "c7b219bee7cd534a7b5dcaa3b6b73c422ef12ee82ff71a03770f1ef17394bb23"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/host-before.json",
+          "sha256": "bf9ce9f47f5b79ce4318bfbf49e86ac0001d5009830a216e65b72846fec957fc"
+        },
+        {
+          "bytes": 151198,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/run-1.json",
+          "sha256": "411adae9aeaa875c540ed513c3cd7dcbfd042c78fb5d8d0958a3b70cce511dbb"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/run.log",
+          "sha256": "dbc27627b5cda0e53bae53fb662c9af4cda36e6307626c3d044816673b1d5d5a"
+        },
+        {
+          "bytes": 59053,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/summary.json",
+          "sha256": "4ab2cf98a896259288811612deedb3cac7ff441d14b0101b8adf8c58423b8e01"
+        }
+      ],
+      "id": "pair-08-A",
+      "kind": "candidate",
+      "pair": 8,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/host-after.json",
+          "sha256": "0b5637f7f6aa384e560b68dada2132957399dfe1435ab0e37cbdcc432ac5b3c7"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/host-before.json",
+          "sha256": "56b7e5cea43c386e748c42eadd119c3768adf9efd138445de2b9f3d8c6abd0f1"
+        },
+        {
+          "bytes": 151094,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/run-1.json",
+          "sha256": "ddb6e6c061bc0a9dcb810b23d89e9eed259c844926a42c8b94fbef2dfa0d6130"
+        },
+        {
+          "bytes": 1704,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/run.log",
+          "sha256": "c1b190fb74d5710d709fd54fd381dc5b3b2e83983e699d35dbb073b8c2779e59"
+        },
+        {
+          "bytes": 59149,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/summary.json",
+          "sha256": "d5e9a3297354780bdc4762c0473849e3d0530fbb682141364db2e206a34cd84e"
+        }
+      ],
+      "id": "pair-08-B",
+      "kind": "candidate",
+      "pair": 8,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/host-after.json",
+          "sha256": "dd6dffed523959cfbf719040688c28488ceeb1706d5af9546205a7e5dc887916"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/host-before.json",
+          "sha256": "be7cfee9e7b3685fb0fa29e06bbf616d097864a06eb84a9e7712d9a132df18b0"
+        },
+        {
+          "bytes": 151004,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/run-1.json",
+          "sha256": "0c00686d1199fdaae12fba2a7fddbde35343ab84219e34f84ca9916ab7e9edf3"
+        },
+        {
+          "bytes": 1686,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/run.log",
+          "sha256": "01335b93a2ea3c9d7d547236a5d1d4bc375a3ad58df0f8fbc2e348780f1ee5c8"
+        },
+        {
+          "bytes": 59084,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/summary.json",
+          "sha256": "bdae25f57051d8e72e6c972e4d44c3f8295a0649d88a6f1ccef36d64c1147667"
+        }
+      ],
+      "id": "pair-09-B",
+      "kind": "candidate",
+      "pair": 9,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/host-after.json",
+          "sha256": "c8f8420c0fa3a2fa96cd586ad78eb201756975fbee10f461205e9fb9e9d5cef4"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/host-before.json",
+          "sha256": "aa2af01368c14af919262ee409b860d6222965d42fb4e8842ba0aca10ed7f5ac"
+        },
+        {
+          "bytes": 150374,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/run-1.json",
+          "sha256": "1b20d50475b3d5f188a4282d72db50366f96fec6abff386714570461d9d3188e"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/run.log",
+          "sha256": "5aff5715fe3c4acf3fc476ba5ff60449cb73ce98834b8ba527dba6772071cfba"
+        },
+        {
+          "bytes": 58982,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/summary.json",
+          "sha256": "9cfc62a699b14f3c4af8c72eabe6ad68e424de5f2ec41b444d97fdc0d5561dac"
+        }
+      ],
+      "id": "pair-09-A",
+      "kind": "candidate",
+      "pair": 9,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/host-after.json",
+          "sha256": "bf4c8108abe6b66ef608cdee414fe3cb4e2ee968d081c993927c0b7b496fb4b6"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/host-before.json",
+          "sha256": "0d11fddef136418e423f922f9a8d4fe6c0af8b6466a1598c8eb60d4046b84b8b"
+        },
+        {
+          "bytes": 150410,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/run-1.json",
+          "sha256": "8f9ff0c26a6f9bbd3562b15e8830fa1221a48f6e56cdf4e4184883ee4e96b8c0"
+        },
+        {
+          "bytes": 1606,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/run.log",
+          "sha256": "6158edf0c06369f32468d855358772e8f2cf5407feddad3ba63133894c11eb8f"
+        },
+        {
+          "bytes": 58960,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/summary.json",
+          "sha256": "ea6b7036667f9847e91f17db26e4a104a68d6e7d34669fa44eefbf31ab6049bc"
+        }
+      ],
+      "id": "control-03-C",
+      "kind": "control",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/host-after.json",
+          "sha256": "d06768a2cda0d8b9206f9d166bccb828aabd77db6a7d3f14eb6e38fe5fc59972"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/host-before.json",
+          "sha256": "60a79dd5361affde618e9209da3f8d9ee4a14ff549d86314fc9ccc964e218b22"
+        },
+        {
+          "bytes": 150871,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/run-1.json",
+          "sha256": "92a2298b2562b4429d894ab4cc0c7e0dd8d806890e792a1d51684408d6d019ef"
+        },
+        {
+          "bytes": 1606,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/run.log",
+          "sha256": "7aa36d90e793e9ee169838efbac00790e9f8f0a7f8d427bc418537b1df6ac4b1"
+        },
+        {
+          "bytes": 59102,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/summary.json",
+          "sha256": "845d842364e6d521ac97858185f0f51e256a268c88ba8f2fb8987448c40f0ad1"
+        }
+      ],
+      "id": "control-03-A",
+      "kind": "control",
+      "pair": 3,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/host-after.json",
+          "sha256": "0278e07d2f7d4d625013268f47eead9ed094fc2279468378a0cdcc9dda4d78c1"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/host-before.json",
+          "sha256": "6efa7a3b78393556e5730bbe7b3c3433c2fca2271bd197bdec57dc4b8e752da8"
+        },
+        {
+          "bytes": 150517,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/run-1.json",
+          "sha256": "d583bc86a5c5895623313270f13bd1c04ca6269b9bf1bb77d6131acddd8b306f"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/run.log",
+          "sha256": "996fd10408d90167146cd71e03e4e0f73dafa382d18ec5903c1319ae8aea9b72"
+        },
+        {
+          "bytes": 59025,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/summary.json",
+          "sha256": "aa66cdfe0db9ad9936179fee52b1adbe8780aa83b483996a1066e8e81156bff6"
+        }
+      ],
+      "id": "pair-10-A",
+      "kind": "candidate",
+      "pair": 10,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/host-after.json",
+          "sha256": "b3051b447259a986f076be70d51363bcf8d35b1ec3e1457e591f1e054b545433"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/host-before.json",
+          "sha256": "23e8647b15540b6f9955b0422f2f84dabc7f32cb3d422fa648b4e5123f43a00a"
+        },
+        {
+          "bytes": 150729,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/run-1.json",
+          "sha256": "29c271512754714a8c3e8ad545a64575e4c467baf9e1164179a889d4c8d41f28"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/run.log",
+          "sha256": "11872335f297f748db0bf576b0270e029d74a7e73035f8cf307d3d06cfd59310"
+        },
+        {
+          "bytes": 58965,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/summary.json",
+          "sha256": "a1e2e4e5edc424ac2a36b65a017647838dd8dade42fdd593ad80e46aa39a9adf"
+        }
+      ],
+      "id": "pair-10-B",
+      "kind": "candidate",
+      "pair": 10,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/host-after.json",
+          "sha256": "31ddf1cdc489e532f7ae173dc37465195784559656e4c4df93d26381ab880ede"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/host-before.json",
+          "sha256": "10d72361fa34afdf427a5c7893191573f3200e1d019d8902c24e3e2cc0c366d5"
+        },
+        {
+          "bytes": 150687,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/run-1.json",
+          "sha256": "fcc2fdbdf9358f33f2d45e04dc876bc499c9b6e29132e96f7eed29047c8874a3"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/run.log",
+          "sha256": "c81a44b0d96750a17806c92baeab87c073cbca586588a61e0c075e10a50cda1c"
+        },
+        {
+          "bytes": 59155,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/summary.json",
+          "sha256": "0ecc2c1f3a27c6e1b10baabd27f944dc7096491f84aebc42c40054129ee24e9f"
+        }
+      ],
+      "id": "pair-11-B",
+      "kind": "candidate",
+      "pair": 11,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/host-after.json",
+          "sha256": "a26afba500132a90a44348e1553e48194249fa97ae1bd9c341e371371d14ecef"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/host-before.json",
+          "sha256": "a66d584f6b61aa44e6ba8913bdcc2e92fa5b4a8c5e743ecb379ccca6782eeb71"
+        },
+        {
+          "bytes": 150682,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/run-1.json",
+          "sha256": "7b1cd7468cdaf0492d34a7739adc927757ede11840a1a861fb249c012fe7d911"
+        },
+        {
+          "bytes": 1597,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/run.log",
+          "sha256": "2499e6f771e9732e7372727e6644b5620ffcc3e650ea9a5aad136aaec682d0c4"
+        },
+        {
+          "bytes": 59034,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/summary.json",
+          "sha256": "4abca4431a7c11be465d2c41189a7d142fc4637bef531b1891e211ddd28c0824"
+        }
+      ],
+      "id": "pair-11-A",
+      "kind": "candidate",
+      "pair": 11,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/host-after.json",
+          "sha256": "f7acb60204139f939e960e6d97c1556fe2676a68f80c757313736e0f0f0265e4"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/host-before.json",
+          "sha256": "ae01e9406207ffc13c47ba70988538e6e901f1da6e26270fa3d75c8554d4e616"
+        },
+        {
+          "bytes": 151200,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/run-1.json",
+          "sha256": "2d30b78ade7075732622594a915bb1ce907199427f34f5bc07f01b7456dc719c"
+        },
+        {
+          "bytes": 1686,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/run.log",
+          "sha256": "0fefc5bcb1548246e317202316b0636991503cd88c9aa22c4a5c767975ebd99b"
+        },
+        {
+          "bytes": 59140,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/summary.json",
+          "sha256": "bc8716659f32547eb91e1d152b5ddabd932e95e62200ddbcbf79ca0c08ec3fa9"
+        }
+      ],
+      "id": "pair-12-A",
+      "kind": "candidate",
+      "pair": 12,
+      "state": "recorded"
+    },
+    {
+      "arm": "B",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/host-after.json",
+          "sha256": "bcf948aa844c4edf63749ad30ae46492ed874cb6810c711c5558af30f91e2fb7"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/host-before.json",
+          "sha256": "007eb22e5663f350988475873ac9d97412f457184d7b1f80b28184da5ac57b9c"
+        },
+        {
+          "bytes": 151352,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/run-1.json",
+          "sha256": "3a7916771705cbf8f9192ea3224aa6118bc21adbc99cd71036cc9dae24777c8a"
+        },
+        {
+          "bytes": 1686,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/run.log",
+          "sha256": "a62da9d84c4f50b56a9444cbb72f52e5bf59d475cd8bbdeb8f1800ee71bf10f8"
+        },
+        {
+          "bytes": 59163,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/summary.json",
+          "sha256": "8fc201e29da4026f71699d03427fb8e02e4261530d8a78a0fe6e156ef49da6ee"
+        }
+      ],
+      "id": "pair-12-B",
+      "kind": "candidate",
+      "pair": 12,
+      "state": "recorded"
+    },
+    {
+      "arm": "A",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/host-after.json",
+          "sha256": "cd8ae284734a33bc413af83a1ee0da4ad1be79d93c43bc8b0ad3a3d3340af549"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/host-before.json",
+          "sha256": "60477b208d117689517131c03e48074f406d56000a38f262e06257478ffce2db"
+        },
+        {
+          "bytes": 151255,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/run-1.json",
+          "sha256": "788475a1dcc82de9b214d69e447740551b0d06b24e44556f78f9fb401b325f7a"
+        },
+        {
+          "bytes": 1713,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/run.log",
+          "sha256": "c2d06e4e1889e3b1e76bfa43b6e9771a3108e902f223e5a647bef9c33b47fef7"
+        },
+        {
+          "bytes": 58946,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/summary.json",
+          "sha256": "6c8fde348b2528e69d65e5e0bb97524c569f482dee8efb2cdbcb7f15f4f25d03"
+        }
+      ],
+      "id": "control-04-A",
+      "kind": "control",
+      "pair": 4,
+      "state": "recorded"
+    },
+    {
+      "arm": "C",
+      "availableEvidence": [
+        {
+          "bytes": 25069,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/canonical-receipt.json",
+          "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        {
+          "bytes": 504,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/host-after.json",
+          "sha256": "0e227f84c98f14784e932b9a1e875ecb99e65e0a33c5362bace8ad5bc06924ab"
+        },
+        {
+          "bytes": 503,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/host-before.json",
+          "sha256": "a877d371507177c7f4584f2b0b075064834e8a96bd033f3fe411603877872bec"
+        },
+        {
+          "bytes": 150788,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/run-1.json",
+          "sha256": "15109d9295f9bcd466a0fabd22e4689cacc07bce4923083007d9bb10e1f05914"
+        },
+        {
+          "bytes": 1695,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/run.log",
+          "sha256": "5d6af4531c8ea82e99da32e385f617e06e0d547d052d5a1420fc5f4379902541"
+        },
+        {
+          "bytes": 59036,
+          "path": "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/summary.json",
+          "sha256": "a6d90dc6e7f0286e833cba6bb491f274895d31e50e5b6075b2654577737ac778"
+        }
+      ],
+      "id": "control-04-C",
+      "kind": "control",
+      "pair": 4,
+      "state": "recorded"
+    }
+  ],
+  "expectedCounts": {
+    "candidate": 24,
+    "control": 8,
+    "exhaustiveMedia": 2,
+    "memory": 4,
+    "ordinary": 36,
+    "warmup": 4
+  },
+  "gates": {
+    "allGroupingPolicies": "passed",
+    "attemptInventory": "passed",
+    "browserIdentityRead": "passed",
+    "exhaustiveMedia:A": "passed",
+    "exhaustiveMedia:B": "passed",
+    "frozenAuditors": "passed",
+    "independentStatistics": "passed",
+    "observationsRead": "passed",
+    "ordinary:control-01-A": "passed",
+    "ordinary:control-01-C": "passed",
+    "ordinary:control-02-A": "passed",
+    "ordinary:control-02-C": "passed",
+    "ordinary:control-03-A": "passed",
+    "ordinary:control-03-C": "passed",
+    "ordinary:control-04-A": "passed",
+    "ordinary:control-04-C": "passed",
+    "ordinary:pair-01-A": "passed",
+    "ordinary:pair-01-B": "passed",
+    "ordinary:pair-02-A": "passed",
+    "ordinary:pair-02-B": "passed",
+    "ordinary:pair-03-A": "passed",
+    "ordinary:pair-03-B": "passed",
+    "ordinary:pair-04-A": "passed",
+    "ordinary:pair-04-B": "passed",
+    "ordinary:pair-05-A": "passed",
+    "ordinary:pair-05-B": "passed",
+    "ordinary:pair-06-A": "passed",
+    "ordinary:pair-06-B": "passed",
+    "ordinary:pair-07-A": "passed",
+    "ordinary:pair-07-B": "passed",
+    "ordinary:pair-08-A": "passed",
+    "ordinary:pair-08-B": "passed",
+    "ordinary:pair-09-A": "passed",
+    "ordinary:pair-09-B": "passed",
+    "ordinary:pair-10-A": "passed",
+    "ordinary:pair-10-B": "passed",
+    "ordinary:pair-11-A": "passed",
+    "ordinary:pair-11-B": "passed",
+    "ordinary:pair-12-A": "passed",
+    "ordinary:pair-12-B": "passed",
+    "ordinary:warmup-1-A": "passed",
+    "ordinary:warmup-1-B": "passed",
+    "ordinary:warmup-2-A": "passed",
+    "ordinary:warmup-2-B": "passed",
+    "packageBytes": "passed",
+    "planRead": "passed",
+    "registeredSchedule": "passed",
+    "separateMemory": "passed",
+    "sourceFixtureRuntimeBindings": "passed",
+    "sourceIdentitiesRead": "passed"
+  },
+  "hostPooling": false,
+  "identicalCodeControl": {
+    "driverComparable": {
+      "count": 4,
+      "descriptiveBootstrap95Percent": [
+        -7.478687677601825,
+        6.211092246749295
+      ],
+      "equalWorkChangePercent": 0.13705670721260166,
+      "fasterPairs": 2,
+      "medianPairedChangePercent": 1.2052069175137126,
+      "ratios": [
+        1.062110922467493,
+        0.980649717514149,
+        0.9252131232239817,
+        1.0434544208361254
+      ],
+      "worstPairChangePercent": 6.211092246749295
+    },
+    "incompletePairs": [],
+    "kind": "control",
+    "medianPairedDeltaMs": 8.999999999985448,
+    "orderStrata": {
+      "AC": {
+        "count": 2,
+        "medianPairedChangePercent": 1.2052069175137126,
+        "pairIds": [
+          2,
+          4
+        ]
+      },
+      "CA": {
+        "count": 2,
+        "medianPairedChangePercent": -0.6337977154262653,
+        "pairIds": [
+          1,
+          3
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "baselineMs": 706.7999999999884,
+        "changePercent": 6.211092246749295,
+        "deltaMs": 43.90000000002328,
+        "observationIds": [
+          "control-01-C",
+          "control-01-A"
+        ],
+        "order": "CA",
+        "pair": 1,
+        "ratio": 1.062110922467493,
+        "rightMs": 750.7000000000116
+      },
+      {
+        "baselineMs": 708,
+        "changePercent": -1.9350282485851023,
+        "deltaMs": -13.699999999982538,
+        "observationIds": [
+          "control-02-A",
+          "control-02-C"
+        ],
+        "order": "AC",
+        "pair": 2,
+        "ratio": 0.980649717514149,
+        "rightMs": 694.3000000000175
+      },
+      {
+        "baselineMs": 774.2000000000116,
+        "changePercent": -7.478687677601825,
+        "deltaMs": -57.89999999999418,
+        "observationIds": [
+          "control-03-C",
+          "control-03-A"
+        ],
+        "order": "CA",
+        "pair": 3,
+        "ratio": 0.9252131232239817,
+        "rightMs": 716.3000000000175
+      },
+      {
+        "baselineMs": 729.5,
+        "changePercent": 4.3454420836125385,
+        "deltaMs": 31.699999999953434,
+        "observationIds": [
+          "control-04-A",
+          "control-04-C"
+        ],
+        "order": "AC",
+        "pair": 4,
+        "ratio": 1.0434544208361254,
+        "rightMs": 761.1999999999534
+      }
+    ],
+    "rightArm": "C"
+  },
+  "inputFiles": {
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3-components/jmdict-policy-2.json": {
+      "bytes": 26702,
+      "sha256": "75169ced1574e110c6c514fd514a9f7cf921c3fab62b56b25edbd4c416344055"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3-components/jmdict-policy-3.json": {
+      "bytes": 37303,
+      "sha256": "01bb32053ab0fb4df4eaa722b31880fc14c4003b86a2f19b229110ea1a561c61"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3-components/jmdict-policy-5.json": {
+      "bytes": 58312,
+      "sha256": "7ed5b579ce11664fc973d7c843b89bdb3a97bc13fab6fff3872d25597d86cb0e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3-components/owned-column-replay.mjs": {
+      "bytes": 21730,
+      "sha256": "cee15f1242da2c2a5e73f030f6bf2a5f4a54f292a723319a3924105c6f10eaaf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/analysis.json": {
+      "bytes": 1518,
+      "sha256": "c15585a3875b370fb7d0d68e26a819dff4f8ada2faaa58f6b3ac2815bc0c2802"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/browser-identity.json": {
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "08d233fc64d534e5955039a157cc26d90d4c5930409e7b7addd8cb8d0e10279b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "8e70601bbaa0147150b926a6a95eb54431d2c5ca5028ab4037a15e675b4ffd41"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/run-1.json": {
+      "bytes": 151451,
+      "sha256": "181a507ef5cc837e2ad9be50fae6237322575e69b47fb1f27baf04fc8141078a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/run.log": {
+      "bytes": 1695,
+      "sha256": "22964c3c62ecd3e7a199871e9478b004461611a56aa6210546121b93d7415cb5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-A/summary.json": {
+      "bytes": 59218,
+      "sha256": "3fcf4f15be0407b8d8a8a61e0cc27e1c37132372f099e07c4f6cdae8521bec76"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/host-after.json": {
+      "bytes": 503,
+      "sha256": "1bb78d92e0326d836432dd5160906f470c2c4bf7fe1ead88379de27bf7e9d644"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/host-before.json": {
+      "bytes": 503,
+      "sha256": "dad44ee5ee593159c50bf00e47d57293dd08d7ee7ab087135943d84a2b2216ba"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/run-1.json": {
+      "bytes": 151006,
+      "sha256": "fc0636f2a15a15fca5827be58eff1eef5d677c8930b1827f6b92b3d0e7a19104"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/run.log": {
+      "bytes": 1714,
+      "sha256": "3ea314b1c3bcbe87b7d7351cacf8d1cfa020426ae7ff785915c33c0034202a96"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-01-C/summary.json": {
+      "bytes": 59033,
+      "sha256": "c623609141af99cb3a7bdc846cdfa21ba52b08d6e2eb4e0dbfbd4402879f7ab6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "a52379038daa4e42fb0f89a958d7308435c89d288a245b4cb5cc8f72180b71a7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "835aefc0637fbd3399ac9ad28528faf933b1d49a0025f5278f550f155273c9f9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/run-1.json": {
+      "bytes": 150660,
+      "sha256": "a7259875966f76b694d423b0858abb0d110e3761eab6813998dae70dd19daff5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/run.log": {
+      "bytes": 1606,
+      "sha256": "3aa8066f9d6ea54cc5d70a800d2dd43deb73f7b2c2089ffeccd6ade116443cf4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-A/summary.json": {
+      "bytes": 59059,
+      "sha256": "90b963fa259334a7f9ec3544d21c9aa895f19faed23e3334dc3e770946cee9da"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/host-after.json": {
+      "bytes": 504,
+      "sha256": "709dcdf1086677b28a4fbfb6337cdd55cea532d5270aeab65eb9e355fb4fc8e0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/host-before.json": {
+      "bytes": 504,
+      "sha256": "e404a11b62122ec0d9279359afdb3756df026765163c36828b706e590046ff05"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/run-1.json": {
+      "bytes": 150894,
+      "sha256": "b0e5dad46e7d9a421501709d96e7d9c614ebd17e28f7196b65496179d1b07a70"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/run.log": {
+      "bytes": 1606,
+      "sha256": "b8b570fb399728d346476e5ac2387e81e8f1c2f09684e93fe9385cc0fabb4932"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-02-C/summary.json": {
+      "bytes": 59079,
+      "sha256": "2587392d840898041d7dfee2a458900889569d82f18b0203f45d62759a8cc931"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "d06768a2cda0d8b9206f9d166bccb828aabd77db6a7d3f14eb6e38fe5fc59972"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "60a79dd5361affde618e9209da3f8d9ee4a14ff549d86314fc9ccc964e218b22"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/run-1.json": {
+      "bytes": 150871,
+      "sha256": "92a2298b2562b4429d894ab4cc0c7e0dd8d806890e792a1d51684408d6d019ef"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/run.log": {
+      "bytes": 1606,
+      "sha256": "7aa36d90e793e9ee169838efbac00790e9f8f0a7f8d427bc418537b1df6ac4b1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-A/summary.json": {
+      "bytes": 59102,
+      "sha256": "845d842364e6d521ac97858185f0f51e256a268c88ba8f2fb8987448c40f0ad1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/host-after.json": {
+      "bytes": 504,
+      "sha256": "bf4c8108abe6b66ef608cdee414fe3cb4e2ee968d081c993927c0b7b496fb4b6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/host-before.json": {
+      "bytes": 504,
+      "sha256": "0d11fddef136418e423f922f9a8d4fe6c0af8b6466a1598c8eb60d4046b84b8b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/run-1.json": {
+      "bytes": 150410,
+      "sha256": "8f9ff0c26a6f9bbd3562b15e8830fa1221a48f6e56cdf4e4184883ee4e96b8c0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/run.log": {
+      "bytes": 1606,
+      "sha256": "6158edf0c06369f32468d855358772e8f2cf5407feddad3ba63133894c11eb8f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-03-C/summary.json": {
+      "bytes": 58960,
+      "sha256": "ea6b7036667f9847e91f17db26e4a104a68d6e7d34669fa44eefbf31ab6049bc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "cd8ae284734a33bc413af83a1ee0da4ad1be79d93c43bc8b0ad3a3d3340af549"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "60477b208d117689517131c03e48074f406d56000a38f262e06257478ffce2db"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/run-1.json": {
+      "bytes": 151255,
+      "sha256": "788475a1dcc82de9b214d69e447740551b0d06b24e44556f78f9fb401b325f7a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/run.log": {
+      "bytes": 1713,
+      "sha256": "c2d06e4e1889e3b1e76bfa43b6e9771a3108e902f223e5a647bef9c33b47fef7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-A/summary.json": {
+      "bytes": 58946,
+      "sha256": "6c8fde348b2528e69d65e5e0bb97524c569f482dee8efb2cdbcb7f15f4f25d03"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/host-after.json": {
+      "bytes": 504,
+      "sha256": "0e227f84c98f14784e932b9a1e875ecb99e65e0a33c5362bace8ad5bc06924ab"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/host-before.json": {
+      "bytes": 503,
+      "sha256": "a877d371507177c7f4584f2b0b075064834e8a96bd033f3fe411603877872bec"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/run-1.json": {
+      "bytes": 150788,
+      "sha256": "15109d9295f9bcd466a0fabd22e4689cacc07bce4923083007d9bb10e1f05914"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/run.log": {
+      "bytes": 1695,
+      "sha256": "5d6af4531c8ea82e99da32e385f617e06e0d547d052d5a1420fc5f4379902541"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/control-04-C/summary.json": {
+      "bytes": 59036,
+      "sha256": "a6d90dc6e7f0286e833cba6bb491f274895d31e50e5b6075b2654577737ac778"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-A/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-A/run-1.json": {
+      "bytes": 151201,
+      "sha256": "37566fde07d7767115a4ca3c3c4333bbdbb40fb09006def7fb15f1ec6bfbd586"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-A/summary.json": {
+      "bytes": 59131,
+      "sha256": "96a11c880190dc97354f8e2270fca9cf70f4d68a123993f22dd923fcde0e13bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-B/canonical-receipt.json": {
+      "bytes": 25066,
+      "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-B/run-1.json": {
+      "bytes": 150696,
+      "sha256": "fc12b097e85fddf64ff4fab3e70ccd78679f7b3f28e8c29e0e35ddf4c651439b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/exhaustive-media-B/summary.json": {
+      "bytes": 58924,
+      "sha256": "8bcdd0f14e61cf1f35f1f0669829cb3a46ba8f8456e6dd12d26c17e12b25b1a7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "2b153923b951235804186b2f8b84843f4580f94fc298892eaf313cdc2f9a4277"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A1/memory.json": {
+      "bytes": 2043199,
+      "sha256": "ea227f171b421e3b466abd6890ab40dca0e0aa537656135e2541c270c3ecd357"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A1/run-1.json": {
+      "bytes": 151351,
+      "sha256": "0d38cbd0875be89c9c58a3916130e62c1da54b0a33d8c5d0849ea16263f225df"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A1/summary.json": {
+      "bytes": 59141,
+      "sha256": "0444a609487fda35f3da2bb40e690d9789563ab42f07c886c41ea4c8d8c24b80"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "cf081361bfd55aef57f9c674d08f319b3f933510b11d32e0fa10101de6eb3200"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A2/memory.json": {
+      "bytes": 1995058,
+      "sha256": "ba945d8a269b9326425211f0510a4fab138d0805416751e2a997e6a41d05d9ba"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A2/run-1.json": {
+      "bytes": 151138,
+      "sha256": "e0bb4aa0914eff0741ffbe63c436a35e904959d593fcd24459f9c1a6c4ce48c8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/A2/summary.json": {
+      "bytes": 59093,
+      "sha256": "63feb530ea7c13599510bb7120ed5a7a14c8934e8ff30f4f32af8950a24c6981"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B1/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B1/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "0b8e0dbedb541c346169cf10fe2064dee89a4be4707b745c61f75efb9e009cd8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B1/memory.json": {
+      "bytes": 1940025,
+      "sha256": "99ffa8c6a96c08dc8398e8e22a0bab93376db82bc8548f2d157f1033f97281dc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B1/run-1.json": {
+      "bytes": 151245,
+      "sha256": "2b1978954a4ec1c9d1abe2536571198a4bd0d89533ea3c30ea3886e86dc68430"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B1/summary.json": {
+      "bytes": 59026,
+      "sha256": "bd7dfc0a2bc7436b862565c44a4bcff34c510e19aaa51b60e335550ec3483daf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B2/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B2/markers.jsonl": {
+      "bytes": 140,
+      "sha256": "d091707dbdb786eeb6fa90594f87806fb702d0faed7ef06f76e49b5092ad9a03"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B2/memory.json": {
+      "bytes": 1980111,
+      "sha256": "466239ae79e74d3036a57f831f9be4b0424242cdb74582116f398661d267a156"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B2/run-1.json": {
+      "bytes": 151168,
+      "sha256": "c066079d9ebaf1f559d5db41032daf89ce1c49eaa26d4ad54e598053d02d463b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/B2/summary.json": {
+      "bytes": 58991,
+      "sha256": "c575bf3150b2e462c832eaf18b3d438d7baec4ba149b6d813fecaa82f9106407"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/harness-instrumented.js": {
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/harness-original.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/memory-audit.json": {
+      "bytes": 456,
+      "sha256": "37e211e1a79968e4e10bfbc5a0c5930af46b89b2b124e7f3f1b6fd89bea26680"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/memory-comparison.json": {
+      "bytes": 10112,
+      "sha256": "07db62a206a8679f777906ab7c51598503eb562748b9d6b95a8872d5bee9f805"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/observations.json": {
+      "bytes": 8487,
+      "sha256": "f68e749287ee97b670416be02e072f61cda98eaf02d152edb36d2a227ff48088"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/plan.json": {
+      "bytes": 129296,
+      "sha256": "d1ab3409d369d5d306a6cb103055dd4be2d1a172e6e8ab0260a58c2e12830b5b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/memory/semantic-failures.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/observations.json": {
+      "bytes": 4502,
+      "sha256": "2cb0c5dce1b15289cc16b319d585f940831ce417073e7e285a0a2cc37b70280d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/package-A.zip": {
+      "bytes": 16805714,
+      "sha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/package-B.zip": {
+      "bytes": 16807149,
+      "sha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "50e7466b7b8bbd47a4a21f55b36b1e5c04dfbeac061bba6a5b0de3c1649a46f6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "a46bd5b2af81e792ab4798b42409fea13e4aeb6186525ad607d1ac7c75339d0f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/run-1.json": {
+      "bytes": 151240,
+      "sha256": "50d55dc8e04dfc237ff77863062720f75c92e0626f27501e68d20f72651253fc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/run.log": {
+      "bytes": 1793,
+      "sha256": "b66420f17a3e3dd4613570d954a08fbce1b043ff3fb558f37a8f0c267d588e02"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-A/summary.json": {
+      "bytes": 58931,
+      "sha256": "d5fb2829a173ec54dd151dc9f2fe53e262b84cdea0f09eaca39dd8618a2a45ad"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "d5da088492dfc9f7a941c39f46be858f07d916da64158e0462f5efe4ef5437ec"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "e9826f61e583819decbea78b529a892c24c6dd02b0d7f14b862e44057ab58b3b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/run-1.json": {
+      "bytes": 151246,
+      "sha256": "bdab4c05fb123d27553df8ca48696c11e260fd0d5c49559e3cb63d5965e5462b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/run.log": {
+      "bytes": 1704,
+      "sha256": "89a411be397d013cb6d2b2d8f94d8ee29794643d91aeb1ea9533a53973f31f95"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-01-B/summary.json": {
+      "bytes": 59051,
+      "sha256": "26e7a409c217ad20c7c2335d8a2feea90280ff76b59d0225e064c6cb8334156f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "1d18fb9dae9a0fd43f6dce8d6f33032416d673938979cceb38db1eb09b3dca87"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "1cbf9b241c48025805bf400215f6dcf1a24069d132add447399aaf187760cb77"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/run-1.json": {
+      "bytes": 151116,
+      "sha256": "c2af25c4bc35b12aab34384516cf89dd49876e11e7aea7902363a601c622a4fd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/run.log": {
+      "bytes": 1704,
+      "sha256": "08ebab8ae43345ee6832b17ec57b249fa90c25b45b11e3dec885dc6e3012f556"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-A/summary.json": {
+      "bytes": 58969,
+      "sha256": "fd14dc8c5368e713391ae3e9eb8a29b819c0488ff910c89126f192212a7a2811"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/host-after.json": {
+      "bytes": 503,
+      "sha256": "04ee7c2e8ddbc4ecd1ba3d4009f460ba112b219330ca0688f5ed01022f0b869a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "b6a5bd032133524648b356ea5c789f503c3e31d25b25a9ab6cacd9aaf4388555"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/run-1.json": {
+      "bytes": 151223,
+      "sha256": "b86279f3408b9ee62f053526b5f4dfef66a80b25f6a3bea682712c820a84f7a4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/run.log": {
+      "bytes": 1705,
+      "sha256": "a95e0f3119282893b8f00aeb932d8c430ffeb68cee1dd0a12a47b61a3effd02f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-02-B/summary.json": {
+      "bytes": 58904,
+      "sha256": "99c0642bed7f53b12c3e0337c523b7b1f3fb1fa2338c71909e01fb76137de79a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "a39eab3c6a4c0e7b5b28df0e9a4f248df3f6de5e1fe9bbe2f37f27966cc82f06"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "683786dfc068165312c7f386213d5f180377d04305c9680a253c2ee16c4475d4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/run-1.json": {
+      "bytes": 150638,
+      "sha256": "ff3fd5cd1a0b4b3d027f3761e5be37e6384daafb55f320ee64262443633f01ad"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/run.log": {
+      "bytes": 1597,
+      "sha256": "62965a6046150f220c5860a1cec538ff85c8dc86b613cd33449a38d2b8fc3a42"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-A/summary.json": {
+      "bytes": 59092,
+      "sha256": "2bf19e65e2e96b8f4cea48662aaf249d1d2ff868a104d3cfcd10b58a9c043a91"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "4f500b537a155a3d7b9ed791bd60d05ec9b715c0c9339b39a25ff09e46589e2d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "960187dbea4dfb4f7baa955614a2d4b26b9fde3ebe20ff1838d205b76dec6a32"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/run-1.json": {
+      "bytes": 151017,
+      "sha256": "6965f765ce3571f9b96f1f8cd464b963a7ed43fd26d0aead964dce01b2932a9d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/run.log": {
+      "bytes": 1704,
+      "sha256": "ca008fa2847f129a385e8e7f761585976c95cbba606cd0ab837f27c87b13359e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-03-B/summary.json": {
+      "bytes": 59042,
+      "sha256": "3fbe8ed00b8bd9eb4b05ce2c7ae36a0ac1cd05f9cd3b1e57c3b3cf6d59f4b4bd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "52ecdff53eb3b88b347407f0ee5ead157e8f3495b7a19f4f73810af472bbcb5c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "ee7547620c932ca08b0ed1b33ffee0229eaf9da8caa3ac46b1e445d6a68f1840"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/run-1.json": {
+      "bytes": 150777,
+      "sha256": "2a781f9e49d8c2a7a42e9735fce0e52d7b76abd3d3eee57311e8adc4661204d1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/run.log": {
+      "bytes": 1597,
+      "sha256": "f955c38469357def29d2f32a97b89b1f0c684f9d269a007f1bc4006c6f02dbf7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-A/summary.json": {
+      "bytes": 59074,
+      "sha256": "1801de9be0a51098411ae51197223bc015e55d3205ca53496873f3b8acb86768"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/host-after.json": {
+      "bytes": 502,
+      "sha256": "29668d4283cb8778722bf6b2eb5cd4f126cfdd933457a1972ecd92e1658e08cc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "64c86bbe6302103c74bf8fff2611d49b44a67b21f1da417e53448ccc6b5b3c42"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/run-1.json": {
+      "bytes": 151448,
+      "sha256": "9b2646d6538248a7e0e66132beca44a3c805925a132f8d3bc1927678c7ba2984"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/run.log": {
+      "bytes": 1705,
+      "sha256": "b69046d84456af02c185e9a92b25fdfe33a494f311589edd8fa1efb1c6b5d997"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-04-B/summary.json": {
+      "bytes": 59120,
+      "sha256": "42b3a8164fc8c22a0a536d4e71cc44257979f8464e7be2e4bab6493319aa46a3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "7facb8eb3d12e6e1a7956b446743924fc58fc9667cb7c4a403bd4e17cbb13c4b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "f5ec92510f55cf7023f1de86e3cefa6984cbde29c46ced9735b3176c465f39fd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/run-1.json": {
+      "bytes": 151501,
+      "sha256": "988e6ce4ae209c11efe9495141e3e857c59dd1371ef3a252120c3074a26f75b4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/run.log": {
+      "bytes": 1793,
+      "sha256": "46e1a10af2afc7df6897a64f7b8f55c5773948ba4cc4086afcd48d50d2d458fb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-A/summary.json": {
+      "bytes": 59134,
+      "sha256": "f4f5a8f625f70ad786f333f0474a5144cf1ddcb18e16cc76ee2973019ca4fa99"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "58614ab40c8b970d07c3410e69848aca41ee73d725f22f58d6a72416224947ee"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/host-before.json": {
+      "bytes": 502,
+      "sha256": "ada9e76c4c03714145a8761e9bad333a21b86e7cd6243ca75da40fd342102061"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/run-1.json": {
+      "bytes": 151151,
+      "sha256": "69248baba83cbb9e7810a6d53ce3f764014e68a20fe5cf44cb77d51eedd0b131"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/run.log": {
+      "bytes": 1686,
+      "sha256": "31c37a8a11ff03cf5a0e4c7da7f1666f08ce5dd56e81ca2d72531ea44b56f466"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-05-B/summary.json": {
+      "bytes": 59075,
+      "sha256": "e71e13f45bd16f88ef0e695d14a550760cfa8c2d05d4d4709face99d2907a904"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "e8ee84e1cc7765e46c4bce9bf2c3180a0034187c7b83b31778411a86b73261dc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "d1de94c8fcc0811e24a6d716b3fc19d1c990c1441811da0fe06a8956b0c7dc5a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/run-1.json": {
+      "bytes": 151106,
+      "sha256": "26aea85387c364e6b4ff681d7d9460bfb33dc96b00f6d9386f68870499711aa1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/run.log": {
+      "bytes": 1704,
+      "sha256": "dfa91157f648315fb3949ef6e0f27c01189f7a0cc73afe583f605b67d098acc2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-A/summary.json": {
+      "bytes": 59055,
+      "sha256": "86169c285fdfd029a0b4f4401e663847cf5296418088e2a9c7cc8ef9894721b8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "9e0efda568c8d8a9623b6574f18892f605940b9b702543bda5819acee8b98726"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "fc743bfaddba2b0e6b4946becd3f898603f54e8f2525d25b4976243f17b91bfe"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/run-1.json": {
+      "bytes": 150597,
+      "sha256": "d662997e1ea569403157e215097c78734adadf51b7f7d187478f636619cd70b6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/run.log": {
+      "bytes": 1597,
+      "sha256": "9e8c139a15f35352db65392fc8632c8359a88326a1633a408fd298bf2041ec06"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-06-B/summary.json": {
+      "bytes": 59065,
+      "sha256": "df451b43be35eeeb82e0be25f884c9d23bb0461f1e0ba3565e511ffc69b75575"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "160369993c3ec112a3dfc9485a972c0f1bd41555e89e1253ee1881dd7962b80e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "ccf931f50ada1e32a57845dfdf7f7c1894eae7de9312ff1119f10031e4333ff9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/run-1.json": {
+      "bytes": 151081,
+      "sha256": "9a7ef9eb0aa0b4bf22818feee026b905c8a44325718b9327c5bdef2d15c738bb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/run.log": {
+      "bytes": 1686,
+      "sha256": "005b98cfab82eced3bb1231c1cfe0e1910ee9dbe066ac44709a33204f943fa71"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-A/summary.json": {
+      "bytes": 59052,
+      "sha256": "5e821252b8ac280cbf8a152178d3942426c828cff11cb7bc3b68e018c176fbfe"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "5cea5989d3c1dd448b5f5450e5e06b5a38218966368ad2e83c2b34963f3734bd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "e83cf813669af169b2b4a86f73e38befb5a2d05daedf156763d217a182b93191"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/run-1.json": {
+      "bytes": 151698,
+      "sha256": "fbe4b2893091a4478b1123a2a33eeaf87a34cef9bd481a0663507c2fdc3f0faf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/run.log": {
+      "bytes": 1793,
+      "sha256": "9c461537292fc4cb06a8ff068aae2234867f5e5039634f87b1a1ee1be0362426"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-07-B/summary.json": {
+      "bytes": 59143,
+      "sha256": "29b9490bba3d42268724013480b25201a849b6bcc0b4a724a83e06bf3169788b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "c7b219bee7cd534a7b5dcaa3b6b73c422ef12ee82ff71a03770f1ef17394bb23"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "bf9ce9f47f5b79ce4318bfbf49e86ac0001d5009830a216e65b72846fec957fc"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/run-1.json": {
+      "bytes": 151198,
+      "sha256": "411adae9aeaa875c540ed513c3cd7dcbfd042c78fb5d8d0958a3b70cce511dbb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/run.log": {
+      "bytes": 1704,
+      "sha256": "dbc27627b5cda0e53bae53fb662c9af4cda36e6307626c3d044816673b1d5d5a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-A/summary.json": {
+      "bytes": 59053,
+      "sha256": "4ab2cf98a896259288811612deedb3cac7ff441d14b0101b8adf8c58423b8e01"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "0b5637f7f6aa384e560b68dada2132957399dfe1435ab0e37cbdcc432ac5b3c7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "56b7e5cea43c386e748c42eadd119c3768adf9efd138445de2b9f3d8c6abd0f1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/run-1.json": {
+      "bytes": 151094,
+      "sha256": "ddb6e6c061bc0a9dcb810b23d89e9eed259c844926a42c8b94fbef2dfa0d6130"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/run.log": {
+      "bytes": 1704,
+      "sha256": "c1b190fb74d5710d709fd54fd381dc5b3b2e83983e699d35dbb073b8c2779e59"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-08-B/summary.json": {
+      "bytes": 59149,
+      "sha256": "d5e9a3297354780bdc4762c0473849e3d0530fbb682141364db2e206a34cd84e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "c8f8420c0fa3a2fa96cd586ad78eb201756975fbee10f461205e9fb9e9d5cef4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "aa2af01368c14af919262ee409b860d6222965d42fb4e8842ba0aca10ed7f5ac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/run-1.json": {
+      "bytes": 150374,
+      "sha256": "1b20d50475b3d5f188a4282d72db50366f96fec6abff386714570461d9d3188e"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/run.log": {
+      "bytes": 1597,
+      "sha256": "5aff5715fe3c4acf3fc476ba5ff60449cb73ce98834b8ba527dba6772071cfba"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-A/summary.json": {
+      "bytes": 58982,
+      "sha256": "9cfc62a699b14f3c4af8c72eabe6ad68e424de5f2ec41b444d97fdc0d5561dac"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "dd6dffed523959cfbf719040688c28488ceeb1706d5af9546205a7e5dc887916"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "be7cfee9e7b3685fb0fa29e06bbf616d097864a06eb84a9e7712d9a132df18b0"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/run-1.json": {
+      "bytes": 151004,
+      "sha256": "0c00686d1199fdaae12fba2a7fddbde35343ab84219e34f84ca9916ab7e9edf3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/run.log": {
+      "bytes": 1686,
+      "sha256": "01335b93a2ea3c9d7d547236a5d1d4bc375a3ad58df0f8fbc2e348780f1ee5c8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-09-B/summary.json": {
+      "bytes": 59084,
+      "sha256": "bdae25f57051d8e72e6c972e4d44c3f8295a0649d88a6f1ccef36d64c1147667"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "0278e07d2f7d4d625013268f47eead9ed094fc2279468378a0cdcc9dda4d78c1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "6efa7a3b78393556e5730bbe7b3c3433c2fca2271bd197bdec57dc4b8e752da8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/run-1.json": {
+      "bytes": 150517,
+      "sha256": "d583bc86a5c5895623313270f13bd1c04ca6269b9bf1bb77d6131acddd8b306f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/run.log": {
+      "bytes": 1597,
+      "sha256": "996fd10408d90167146cd71e03e4e0f73dafa382d18ec5903c1319ae8aea9b72"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-A/summary.json": {
+      "bytes": 59025,
+      "sha256": "aa66cdfe0db9ad9936179fee52b1adbe8780aa83b483996a1066e8e81156bff6"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "b3051b447259a986f076be70d51363bcf8d35b1ec3e1457e591f1e054b545433"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "23e8647b15540b6f9955b0422f2f84dabc7f32cb3d422fa648b4e5123f43a00a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/run-1.json": {
+      "bytes": 150729,
+      "sha256": "29c271512754714a8c3e8ad545a64575e4c467baf9e1164179a889d4c8d41f28"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/run.log": {
+      "bytes": 1597,
+      "sha256": "11872335f297f748db0bf576b0270e029d74a7e73035f8cf307d3d06cfd59310"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-10-B/summary.json": {
+      "bytes": 58965,
+      "sha256": "a1e2e4e5edc424ac2a36b65a017647838dd8dade42fdd593ad80e46aa39a9adf"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "a26afba500132a90a44348e1553e48194249fa97ae1bd9c341e371371d14ecef"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/host-before.json": {
+      "bytes": 503,
+      "sha256": "a66d584f6b61aa44e6ba8913bdcc2e92fa5b4a8c5e743ecb379ccca6782eeb71"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/run-1.json": {
+      "bytes": 150682,
+      "sha256": "7b1cd7468cdaf0492d34a7739adc927757ede11840a1a861fb249c012fe7d911"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/run.log": {
+      "bytes": 1597,
+      "sha256": "2499e6f771e9732e7372727e6644b5620ffcc3e650ea9a5aad136aaec682d0c4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-A/summary.json": {
+      "bytes": 59034,
+      "sha256": "4abca4431a7c11be465d2c41189a7d142fc4637bef531b1891e211ddd28c0824"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/host-after.json": {
+      "bytes": 503,
+      "sha256": "31ddf1cdc489e532f7ae173dc37465195784559656e4c4df93d26381ab880ede"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "10d72361fa34afdf427a5c7893191573f3200e1d019d8902c24e3e2cc0c366d5"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/run-1.json": {
+      "bytes": 150687,
+      "sha256": "fcc2fdbdf9358f33f2d45e04dc876bc499c9b6e29132e96f7eed29047c8874a3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/run.log": {
+      "bytes": 1597,
+      "sha256": "c81a44b0d96750a17806c92baeab87c073cbca586588a61e0c075e10a50cda1c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-11-B/summary.json": {
+      "bytes": 59155,
+      "sha256": "0ecc2c1f3a27c6e1b10baabd27f944dc7096491f84aebc42c40054129ee24e9f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/host-after.json": {
+      "bytes": 503,
+      "sha256": "f7acb60204139f939e960e6d97c1556fe2676a68f80c757313736e0f0f0265e4"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "ae01e9406207ffc13c47ba70988538e6e901f1da6e26270fa3d75c8554d4e616"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/run-1.json": {
+      "bytes": 151200,
+      "sha256": "2d30b78ade7075732622594a915bb1ce907199427f34f5bc07f01b7456dc719c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/run.log": {
+      "bytes": 1686,
+      "sha256": "0fefc5bcb1548246e317202316b0636991503cd88c9aa22c4a5c767975ebd99b"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-A/summary.json": {
+      "bytes": 59140,
+      "sha256": "bc8716659f32547eb91e1d152b5ddabd932e95e62200ddbcbf79ca0c08ec3fa9"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "bcf948aa844c4edf63749ad30ae46492ed874cb6810c711c5558af30f91e2fb7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "007eb22e5663f350988475873ac9d97412f457184d7b1f80b28184da5ac57b9c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/run-1.json": {
+      "bytes": 151352,
+      "sha256": "3a7916771705cbf8f9192ea3224aa6118bc21adbc99cd71036cc9dae24777c8a"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/run.log": {
+      "bytes": 1686,
+      "sha256": "a62da9d84c4f50b56a9444cbb72f52e5bf59d475cd8bbdeb8f1800ee71bf10f8"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/pair-12-B/summary.json": {
+      "bytes": 59163,
+      "sha256": "8fc201e29da4026f71699d03427fb8e02e4261530d8a78a0fe6e156ef49da6ee"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/registered-plan.json": {
+      "bytes": 5009,
+      "sha256": "a6ea10d695f9af1d85ebf87001fd80ecd7a8401f2bb7a6add322fc7da8d1ffba"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/source-identities.json": {
+      "bytes": 129037,
+      "sha256": "7dff0435320f2b6764636dd972c2682ed29f373238b55b95c48516acf91ab9e2"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "232cf946795ca86d0b1af5e7acbf41238b3d6844b1a774b6cf9e759f713a4247"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "8b7fbbd47db05112de1d1c4edea50c3242d574e265de03b02272b4c0eccfdab3"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/run-1.json": {
+      "bytes": 151344,
+      "sha256": "32eaae7d11e62e9bd3be741056ec2f71e2c5e337284a41fe03bb08ad1052a915"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/run.log": {
+      "bytes": 1708,
+      "sha256": "d50e185044bbfb0e949e99c0eedfc47803cb9983ce8391fa5a1854933b0c076d"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-A/summary.json": {
+      "bytes": 58973,
+      "sha256": "a5c9e99ea7458281058e91eca1e65e35f9dc77a929b6b2c41a472f0121f628c7"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "2a1e7fd5c13cee1924a05ad5527107f17f7a7cd9ff86fb4294ae43ee1a36708f"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/host-before.json": {
+      "bytes": 503,
+      "sha256": "4c6819f0d6f5c4abdeb73ae06efbd1de914ee2a6f519475882913a058b1266d1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/run-1.json": {
+      "bytes": 151190,
+      "sha256": "df4a6c0a636a0c0673e941eec6e772e306516e548a3c6ddf6afce21987ce21e1"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/run.log": {
+      "bytes": 1708,
+      "sha256": "ff0c0b2af186734602325381a5f835a3411a074f128538052ec404471552da69"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-1-B/summary.json": {
+      "bytes": 59039,
+      "sha256": "33c7cf686901a539e8a9d4273c5554e79fd44b4b2014a9dfc05a8fbc36d5bb95"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/host-after.json": {
+      "bytes": 504,
+      "sha256": "03a3ab23a98dc52d0d8618476ceb777e83bf4d0cd9a64727e13cddfcecad3bbe"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/host-before.json": {
+      "bytes": 504,
+      "sha256": "ba05ff8f997e72dbe639b454996f69dabe98df3d705482f1d360477470323156"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/run-1.json": {
+      "bytes": 151094,
+      "sha256": "ce92ac7acf2223b711a7c28078ab12b4075a47a1b14d32221e96faa6356bc680"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/run.log": {
+      "bytes": 1709,
+      "sha256": "95071b665bd2d80612879a09c9ff63f32ea21a018af5ad6688a4c3391966c7ed"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-A/summary.json": {
+      "bytes": 58857,
+      "sha256": "780bff6616793e6baaffed146ccfb196dad58e97eea880a6565fb0ad33eef900"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/canonical-receipt.json": {
+      "bytes": 25069,
+      "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/host-after.json": {
+      "bytes": 504,
+      "sha256": "fa0c777ce1126b89343f7c08c3ea8844ad0d7f9c35a1f2bac5b843487a22d37c"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/host-before.json": {
+      "bytes": 504,
+      "sha256": "0358fcad9cecb388c411cb98c31c915d645e9e77d1837ac0f7ba9d3fb4e87cfb"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/run-1.json": {
+      "bytes": 151041,
+      "sha256": "4bba091a2d4edc5b189ff76df07bebb90c3ff73301f55ee11d13f4e5b0689f34"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/run.log": {
+      "bytes": 1712,
+      "sha256": "ce4159fa6ee5a600aa00effd983ce7658eaae3a1f8d27eb3bb08f733889ff968"
+    },
+    "/tmp/manabitan-qual-artifacts-83b3/jmdict-BA/import-owned-columns-83b3/warmup-2-B/summary.json": {
+      "bytes": 58985,
+      "sha256": "805c1b7cacb46949bf84b243f1d04b01032923eab0b61eb83e65c8924f13b806"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/data/dictionary-wasm/manifest.json": {
+      "bytes": 2588,
+      "sha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/benchmark-support.js": {
+      "bytes": 16788,
+      "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/dictionary-fixtures.js": {
+      "bytes": 6765,
+      "sha256": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-benchmark.js": {
+      "bytes": 11064,
+      "sha256": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/audit_memory.py": {
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/chromium_memory.py": {
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/protocol.py": {
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": {
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/dev/perf/import-qualification-20261125-a7f7.py": {
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dense-zip-directory.js": {
+      "bytes": 9309,
+      "sha256": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/dictionary-importer.js": {
+      "bytes": 345457,
+      "sha256": "a99e3cb99ad92383e4ec4d83b025b15add7b0552f14da3c777773cb6b8ae17bb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-experiments.js": {
+      "bytes": 3523,
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-bank-source-pipeline.js": {
+      "bytes": 47175,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-content-ownership.js": {
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-key-hash.js": {
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index-preparation.js": {
+      "bytes": 11139,
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-index.js": {
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-lookup-route.js": {
+      "bytes": 4192,
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/term-record-preinterned-plan.js": {
+      "bytes": 25435,
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/dictionary/wasm/term-bank-parser.c": {
+      "bytes": 158441,
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/media/media-util.js": {
+      "bytes": 6039,
+      "sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/js/pages/settings/dictionary-import-controller.js": {
+      "bytes": 187268,
+      "sha256": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/ext/lib/term-bank-parser.wasm": {
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/package-lock.json": {
+      "bytes": 333801,
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/extension-two-dictionary-import.e2e.js": {
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/chromium/import-flags-ab-benchmark.js": {
+      "bytes": 25889,
+      "sha256": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/e2e/import-timing.js": {
+      "bytes": 3293,
+      "sha256": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c"
+    },
+    "/workspace/scratch/83b3b3bfba02/manabitan/test/perf/dictionaries.lock.json": {
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "issues": [],
+  "limits": [
+    "Descriptive per-host statistics; complete qualification is not itself a latency claim.",
+    "Incomplete schedules retain all recorded values and complete-pair statistics are provisional.",
+    "Warmup, identical controls, exhaustive media, memory and separate trace never enter the candidate estimate."
+  ],
+  "memoryAudit": {
+    "everyObservationQualified": true,
+    "metrics": {
+      "maxSampledPrivateKiB": {
+        "maximumPairedChangePercent": 2.076523162580135,
+        "medianPairedChangePercent": 0.3660188488135707
+      },
+      "maxSampledPssKiB": {
+        "maximumPairedChangePercent": 1.7587273962758498,
+        "medianPairedChangePercent": 0.34965096258973705
+      }
+    },
+    "observations": 4,
+    "passesProspectiveMemoryScreen": true,
+    "rawScanCount": 267,
+    "schemaVersion": 1
+  },
+  "readbacks": [
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "warmup-1-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 831.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 831.3999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "warmup-1-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 816.1999999999971,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 816.1999999999971
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "warmup-2-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 994.9000000000087,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 994.9000000000087
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "warmup-2-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 1515.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 1515.3999999999942
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-01-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 758.0999999999913,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 758.0999999999913
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-01-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 720.5,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 720.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-02-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 787.8000000000029,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 787.8000000000029
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-02-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 789.0,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 789
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-03-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 769.1999999999825,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 769.1999999999825
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-03-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 720.8999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 720.8999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-01-C",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 750.7000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 750.7000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-01-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 706.7999999999884,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 706.7999999999884
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-04-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 773,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 773
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-04-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 756.6000000000058,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 756.6000000000058
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-05-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 732.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 732.2000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-05-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 752.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 752.3999999999942
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-06-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 696.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 696.3999999999942
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-06-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 690.6000000000058,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 690.6000000000058
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-02-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 708.0,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 708
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-02-C",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 694.3000000000175,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 694.3000000000175
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-07-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 727.2999999999884,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 727.2999999999884
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-07-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 727.7000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 727.7000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-08-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 725.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 725.3999999999942
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-08-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 719.3999999999942,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 719.3999999999942
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-09-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 792.8000000000175,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 792.8000000000175
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-09-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 712.7999999999884,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 712.7999999999884
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-03-C",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 716.3000000000175,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 716.3000000000175
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-03-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 774.2000000000116,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 774.2000000000116
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-10-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 724.4000000000233,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 724.4000000000233
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-10-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 798.0,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 798
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-11-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 701.5999999999767,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 701.5999999999767
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-11-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 735.0999999999767,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 735.0999999999767
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-12-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 691.2999999999884,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 691.2999999999884
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "pair-12-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 729.5999999999767,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 729.5999999999767
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-04-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 729.5,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 729.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "control-04-C",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 761.1999999999534,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 761.1999999999534
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "5b2d1cbf9a2496510577094ea355ff9027e54b46727c380784a2e3f775cd11a9",
+      "id": "exhaustive-media-B",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 696.8000000000466,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 696.8000000000466
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "5b2d1cbf9a2496510577094ea355ff9027e54b46727c380784a2e3f775cd11a9",
+      "id": "exhaustive-media-A",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 750.3999999999651,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 750.3999999999651
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "memory/B1",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 900.5,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 900.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "memory/A1",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 920.5,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 920.5
+    },
+    {
+      "arm": "A",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "memory/A2",
+      "packageSha256": "6620c89e2d6d4ee3a411fc02ec9401bfd8e786bb2ca758a196cb3af8c30ab52a",
+      "rawBrowserDurationMs": 958.5999999999767,
+      "receiptValidated": true,
+      "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "totalImportMs": 958.5999999999767
+    },
+    {
+      "arm": "B",
+      "canonicalSha256": "7da3a46dbe2bd3ac7c3ec0e4b1af8be881230352990646be974cf9e4a77a5a15",
+      "id": "memory/B2",
+      "packageSha256": "9e884dd96ba72db9a59f4fae21551b392529ee2d67d70a7e043badd7c4c2f5b3",
+      "rawBrowserDurationMs": 867.6000000000349,
+      "receiptValidated": true,
+      "sourceSha": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "totalImportMs": 867.6000000000349
+    }
+  ],
+  "runId": 46103918280,
+  "schemaVersion": 1,
+  "timingClaim": false,
+  "unrecordedAttempts": [],
+  "warmups": [
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 831.3999999999942
+    },
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1,
+      "totalImportMs": 816.1999999999971
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 994.9000000000087
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2,
+      "totalImportMs": 1515.3999999999942
+    }
+  ]
+}

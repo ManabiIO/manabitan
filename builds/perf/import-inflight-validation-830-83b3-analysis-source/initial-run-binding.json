@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "observedRun": {
+    "id": 46114139837,
+    "name": "Import in-flight validation qualification 830 83b3",
+    "path": ".github/workflows/import-inflight-validation-830-83b3.yml",
+    "headBranch": "perf/jmdict-inflight-validation-20261123-71149",
+    "headSha": "049cb11e6963604435998aa060e1400cc00365cb",
+    "headTree": "a47cc23bcfa039a9defe66db2b15d79ea2198072",
+    "event": "pull_request",
+    "attempt": 1,
+    "createdAt": "2026-11-28T05:53:46Z",
+    "updatedAt": "2026-11-28T05:53:46Z",
+    "status": "queued",
+    "conclusion": null,
+    "workflowId": 433451382,
+    "htmlUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46114139837",
+    "prNumber": 830,
+    "baseRef": "develop",
+    "baseSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  },
+  "jobs": [
+    {
+      "id": 140884032353,
+      "runId": 46114139837,
+      "name": "select",
+      "status": "queued",
+      "conclusion": null
+    }
+  ],
+  "sourceUrls": {
+    "run": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46114139837",
+    "workflow": "https://raw.githubusercontent.com/ManabiIO/manabitan/049cb11e6963604435998aa060e1400cc00365cb/.github/workflows/import-inflight-validation-830-83b3.yml"
+  },
+  "state": "No browser cell has been observed to start and no artifact has been analyzed. Four matrix jobs are prospective until select completes."
+}

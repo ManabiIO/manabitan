@@ -1,13 +1,13 @@
 {
-  "schemaVersion": 3,
-  "kind": "complete-import-evidence-and-browser-profile-readback",
+  "schemaVersion": 4,
+  "kind": "complete-current-import-evidence-and-three-hosted-cells",
   "repository": "ManabiIO/manabitan",
   "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
   "runtimeUnchanged": true,
-  "previousSnapshotCommit": "bc26b191ba38d3b5cfd90d4c88584883720d267c",
+  "previousSnapshotCommit": "cf43df9f197b729085950dc9f2f7b3ee7a773e35",
   "selfExcluded": true,
-  "payloadFiles": 57,
-  "payloadBytes": 12754875,
+  "payloadFiles": 78,
+  "payloadBytes": 20652943,
   "entries": [
     {
       "path": "builds/perf/20261128-compressed-worker-profile-83b3/attribution.json.txt",
@@ -333,9 +333,9 @@
       "path": "builds/perf/import-investigation-recovery-83b3/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "90a1281cf3cf12f3d4cbad564c72727141e1b0a4",
-      "size": 6798,
-      "sha256": "67984bdec6181395e3fbd4bd5f7f137df51258c55766eb81c2e3cea34cd50caf"
+      "sha": "e717f6b46a734e1e7518623d51ab787be4e10184",
+      "size": 8338,
+      "sha256": "3f68436b044151843ea6d62f7350105e77399e97cf8cfecfb637b678fb1b9aca"
     },
     {
       "path": "builds/perf/import-investigation-recovery-83b3/recovery-status.json.txt",
@@ -464,6 +464,174 @@
       "sha": "6a2aae7fd61a2dee03892e7075b2a2911588303d",
       "size": 4471,
       "sha256": "a7ef020157b9a3e4ab190f8942a08ed91577437f59e0adb8ebf4743fb9c02294"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-AB/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3c355b46ce2de026f07c787d23b933dd5bbd18b",
+      "size": 2877521,
+      "sha256": "3b31cd0bf6d4c35c882b76f941c18ef3402271552a65a47abeaeb9649f57d73b"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-AB/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71f9f7c785ed1e74d93d782ced35594c63a419dc",
+      "size": 94252,
+      "sha256": "a3b663305a9f0357311050cc944a8c50243b9a33846d1254f05e457255fe121d"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-AB/independent-analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a375bb24fa220d2b180f34c5a53d3509947706b9",
+      "size": 158730,
+      "sha256": "fb826895e8e2f259145edc3909d5f6dd9764d4f7d37547221f5bd63f6f27a8c2"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-BA/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d16b88d22bbb3fa637a8d46b6f3689127bca9974",
+      "size": 2397382,
+      "sha256": "59ef18682da60c78b976da74a4ff23d448a467fea69839bfb981d246eb444e61"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-BA/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b15e36ffdf67874e41b9f3fae49cc62e79712402",
+      "size": 92948,
+      "sha256": "d186ce4bc94d245033ce5de87a7d5ab10b684df8435e0a50fb738f28b644b898"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jmdict-BA/independent-analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "059a9916d722cada9facf6724a798cdbc3ce33b3",
+      "size": 158618,
+      "sha256": "b4c4755ecba6029423f520279a1cc2d1f2bf76f5f060e7d82c0f0c62f0edb28c"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jitendex-AB/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1f573f03a9adf954936a25d9c2294c1bfb4778a",
+      "size": 1858492,
+      "sha256": "11af28bf85a51b9e3fbc722470d269234c68257099f082572f33ee893c31f505"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jitendex-AB/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aad289a2e52e72254dc4ffad1cf88f93023dbf4e",
+      "size": 64025,
+      "sha256": "6f572c353c0c39c25a4729e7743ddebb6c1fdde173fbc929599f63e851a130b6"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/jitendex-AB/independent-analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2ea3c1f33c0cc8a7ea868a052101710e15659478",
+      "size": 98955,
+      "sha256": "1638eb36436491e55720c4511b55b4708a0641fd30c31cf3b8824600d5625fc4"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/three-cell-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "909d47dc48d7742a5e3fe83a94b13465324a138b",
+      "size": 7688,
+      "sha256": "e241fc53fbda81549a6697126b7230ec3151ec8371530495c5b50403d993382f"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bca0910a7f4ea7b88fa05e8a2a84603ca7d2f925",
+      "size": 5561,
+      "sha256": "60cec0cb516900857b44bf574d0fda2b6dee16240872c1d1fb02e2b4e6ef6242"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/root-archive-verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "397c31443f49552a176ecec183397a2cd7eb5049",
+      "size": 1219,
+      "sha256": "5892111445784735d664fca53d43a1d9ca9646fec57e78832e2ef5b92142e8f6"
+    },
+    {
+      "path": "builds/perf/import-owned-columns-83b3-hosted/verify-archive.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76360d2a159d6c1a72a1342f9783d910a2d81a38",
+      "size": 2412,
+      "sha256": "ae10ebfb4d5a4e44936a698fab51911451bc6d5a6e5a32bd35b6e6901667f632"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3ecb2a021537e1f1216719db48f0ed22becb071",
+      "size": 7654,
+      "sha256": "ddd4ff7de0efa69f4a53942ff2da3032318a4465b6ef0eb1c52b7216cd4a8a49"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/analyze-cell.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5da505a4cc7302e878b05393d98b330c07d864d1",
+      "size": 22009,
+      "sha256": "593ee1c210689d8e9844763e3f87996e15330b03c888593b3b66e0411765136c"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/initial-run-binding.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0572569820138f57619e6e39e1ae4850eb83d09a",
+      "size": 1377,
+      "sha256": "3a0ceb77809423b7968cdc393ddc68f171092e67af8c8459e455015a76da37d4"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/preparation.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9855cdeceb47c4d39c69194f61a3fb814d37f5cc",
+      "size": 2633,
+      "sha256": "0a36b3361f6d61f7307f81c0cdd31941c8441d4696cc031cdef28510422f5ea3"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/published-workflow.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49cb018a564a53d7d3b68bb80dc6000fafc7a026",
+      "size": 7153,
+      "sha256": "c329b82c708595ac6106610db86de7715a1886d31096609b4bc793c419208dc5"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/reader-adaptation.patch",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fef9e0b22ae83cc7fdef66289c2dbbaafa789311",
+      "size": 9353,
+      "sha256": "088543f440ef9c40382d8f3659dd1e13107092d216e56d2345a4eec985f389ff"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/root-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf0bcdcd5b139773c373d7d640351f0ca636e735",
+      "size": 1401,
+      "sha256": "72d77c65aba22381990050c4663db307aa2e959768612a4545b0f991e3cf4f17"
+    },
+    {
+      "path": "builds/perf/import-inflight-validation-830-83b3-analysis-source/source-analyze-cell-owned-columns.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8870544f842392e366c56831ab7cfe173c2db88c",
+      "size": 27145,
+      "sha256": "8c80a2ea267f4430d937efb56d4456bb6f11e60ea0465aa5bb3c2aead15239d9"
     }
   ]
 }

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "root",
+  "runId": 46103918280,
+  "candidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+  "completeStudy": false,
+  "pending": [
+    "vndb-AB"
+  ],
+  "cells": [
+    {
+      "cell": "jmdict-AB",
+      "complete": true,
+      "fileCount": 362,
+      "payloadBytes": 31476748,
+      "archiveBytes": 2877521,
+      "archiveSha256": "3b31cd0bf6d4c35c882b76f941c18ef3402271552a65a47abeaeb9649f57d73b",
+      "extracted": false
+    },
+    {
+      "cell": "jmdict-BA",
+      "complete": true,
+      "fileCount": 357,
+      "payloadBytes": 24864325,
+      "archiveBytes": 2397382,
+      "archiveSha256": "59ef18682da60c78b976da74a4ff23d448a467fea69839bfb981d246eb444e61",
+      "extracted": false
+    },
+    {
+      "cell": "jitendex-AB",
+      "complete": true,
+      "fileCount": 245,
+      "payloadBytes": 20678679,
+      "archiveBytes": 1858492,
+      "archiveSha256": "11af28bf85a51b9e3fbc722470d269234c68257099f082572f33ee893c31f505",
+      "extracted": false
+    }
+  ],
+  "note": "All archive members were rehashed against the full manifests and embedded contents. No payloads extracted or executed; semantic/statistical results are in the separate independent-analysis files."
+}
