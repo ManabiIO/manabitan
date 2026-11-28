@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "pipeline_audit",
+  "scope": "Independent read-only final source and retained focused-gate review; no reviewer product execution, import or performance acquisition",
+  "disposition": "GO for fresh complete correctness only; no performance or PR qualification",
+  "source": {
+    "parent": "663df294f40e1832ad3e3349d0e061681fed77cb",
+    "tree": "db8950675c04d4da1ed02c5dffe8f72c130ca515",
+    "paths": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "bytes": 3159,
+        "sha256": "604d2a05972b2f267fc4bf7bb5f3eadceaedacf9b356c1336021e136ae53e7da",
+        "blob": "7d620f3f4b0b9e68d453afcc154769bd78b5fab3"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+        "mode": "100644",
+        "bytes": 1860,
+        "sha256": "1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9",
+        "blob": "65df6fb046036fc710a621665d72084809055c07"
+      },
+      {
+        "path": "eslint.config.js",
+        "mode": "100644",
+        "bytes": 41188,
+        "sha256": "9142cb7986949a7257979d81448f7755fca0c1ab828322f9f74931646cfc852e",
+        "blob": "d0ced0b6cb1ced0ffef0e2f924a327724c76b719"
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "mode": "100644",
+        "bytes": 216058,
+        "sha256": "5bf828411612b3e81284de88332868b2ffa367be045baa41ee6df6fec1ddb315",
+        "blob": "f77d7e39ec534b612921933480bbc63b78358e9f"
+      },
+      {
+        "path": "ext/js/dictionary/term-record-fields.js",
+        "mode": "100644",
+        "bytes": 22694,
+        "sha256": "f2db0af75f57e5a3cbd763c26901229cd8312f84c305efdab33a90362ee595cc",
+        "blob": "1dc674f2a1c2d08353a43a74ff83a06a25228a49"
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "mode": "100644",
+        "bytes": 399335,
+        "sha256": "363abaafc0bc0428479c65367bd01d8aceb1db4217c8b04d467123f03d7f2417",
+        "blob": "c4df83f6c6a9d305a3bf5ba74c9bb12b8712f471"
+      },
+      {
+        "path": "ext/js/dictionary/term-record-prepared-fields.js",
+        "mode": "100644",
+        "bytes": 9782,
+        "sha256": "63363069a4d2575600cd40de77f4ab955c465a5a76aae644e40902a8c4fff2b9",
+        "blob": "8ab3c644d918d9dd2a659f81f422cbff5b44560c"
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-record-fields.c",
+        "mode": "100644",
+        "bytes": 8765,
+        "sha256": "4cfe27aa54d537d8173d142a7b7c62964d020ec323861c270e80e1e486ffe591",
+        "blob": "db1f2c716e25a404dc2474daa1adddd81a75e0e8"
+      },
+      {
+        "path": "test/term-record-fields-fusion.test.js",
+        "mode": "100644",
+        "bytes": 31955,
+        "sha256": "95dd19f605d929f5affcb8b2a17ab7d7b1228dc4758102f468c39cd3f9d9c48f",
+        "blob": "74bb11ab7d327186a761f2251177e135a00c7b7a"
+      },
+      {
+        "path": "test/term-record-fields-native.test.js",
+        "mode": "100644",
+        "bytes": 40453,
+        "sha256": "23ea7f5f5fdb60a1bf07d8430fc09d43cd7618464eae578a3cfdebc651e8a3e6",
+        "blob": "7e58d6af3aa0011be8e0704ad79a8a9ce320a2bc"
+      }
+    ]
+  },
+  "findingsResolved": [
+    "Prepared metadata is registered only through fresh producer/receiver-created wrappers; arbitrary caller maps are never branded. Existing has/hasComplete callbacks run before current identity/descriptors/intrinsics are checked.",
+    "The whole-only selector checks the existing chunk/reference WeakMap, own data descriptors and actual typed views before the old instanceof path; ordinary fallback remains unchanged. Current rowCount must equal the planning count.",
+    "Concrete typed-array prototype/length/buffer guards precede selection and are renewed with current prepared metadata after selection. No new accessor or proxy callback is admitted before copies.",
+    "The fused output and scalar base are consumed synchronously before the original async _encodeArtifactChunkRecords returns its Promise. There is no intervening await or admitted chunk/map/plan callback from refreshed proof through field use. Late routeFilter access remains after the original await.",
+    "Normal post-encoding append/validation and owned output lifetime remain unchanged. No cached value validity crosses an await; every later run recomputes admission.",
+    "Pre-copy speculative declines retain normal field fallback. An authenticated copied decline suppresses a duplicate copy only for the exact unsplit chunk; real splits use ordinary per-run encoding.",
+    "Whole admission/copied decline maps are diagnostics, overlapping an eventual ordinary decline when committed; they must not be naively summed. Explicit wholeNativeCalls/Rows/Attempts distinguish fusion from ordinary native work.",
+    "The native minimum preserves Math.min signed zero. Referenced-only min/max, nullable offsets, compact score representation, span overflow fallback, private ninth output-base region, and unchanged persisted field format remain source-consistent."
+  ],
+  "gateEvidence": [
+    {
+      "name": "focused-006",
+      "receiptSha256": "1559d6a4bdf2faee72b7c0b80daba9c506405da5f5649b4b2ad4c1c816dc7492",
+      "logSha256": "ef6b0c7875879175a2ebee83c74fedcd54b57e8b86e26be8723463da46830c1b",
+      "logBytes": 240,
+      "exitCode": 0,
+      "node": "v24.22.3",
+      "workingSourcesUnchanged": true
+    },
+    {
+      "name": "scoped-lint-002",
+      "receiptSha256": "7d3c979c4c68ca78cfe7c47896b9b104e88602fbd2201b49b922e21e10921aef",
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "logBytes": 694,
+      "exitCode": 0,
+      "node": "v24.22.3",
+      "workingSourcesUnchanged": true
+    },
+    {
+      "name": "native-check-001",
+      "receiptSha256": "3d873780b3c4902c2b3fc77b0ad315081a26b7f54a1c2c264b9a4466a12a0bc3",
+      "logSha256": "af205ba84938a1586f42b3547e895ec0eebc59ccc9043a7dead2a3a666dbb843",
+      "logBytes": 547,
+      "exitCode": 0,
+      "node": "v24.22.3",
+      "workingSourcesUnchanged": true
+    }
+  ],
+  "limits": [
+    "165 focused cases, scoped lint, and pinned rebuild are retained native-agent executions under Node v24.22.3; they are not fresh full units/builds or all-corpus import qualification.",
+    "Actual producer/receiver registry coverage and successful whole-fusion activation for all three production corpora remain unobserved for this new source.",
+    "Future correctness must move native accounting to the enclosing encode-and-append owner: the previous field-hook delta excludes the new earlier work. Whole success output-copy bytes include the extra 8-byte scalar base.",
+    "Old f28 whole-import study is rejected and remains separate; no effect size transfers to this new a300 mechanism."
+  ]
+}
+

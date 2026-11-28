@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 12:51 UTC",
+  "observedAt": "2026-11-28 13:04:16 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -1365,16 +1365,16 @@
       "nativeIndependentReview": "403df36b26811cf6b562f1e5c27d5654ac45c26f"
     },
     "runPlannerPrototype": {
-      "status": "Isolated draft under focused adversarial correctness review; no new performance observations",
+      "status": "Frozen bounded implementation; independent source/focused review GO for fresh complete correctness only",
       "baseProduct": "663df294f40e1832ad3e3349d0e061681fed77cb",
       "baseUpstream": "a300da36d00df8e353c5679b1528b50a1299b75f",
-      "implementationOwner": "native_host_review",
+      "implementationOwner": "native_host_review (completed)",
       "reviewOwner": "pipeline_audit",
       "noNewTimings": true,
       "noPerformanceRef": true,
       "noPr": true,
       "originalStudyUnchanged": true,
-      "allowedValidation": "Focused tests for new admission/lifecycle/ABI boundaries and pinned native reproduction only; no broad suite until independent review",
+      "allowedValidation": "Fresh exact-source complete correctness and all3actualcorpus parity kit preparation authorized; publication pending root exact-source review; no performance execution",
       "sourceRequirements": [
         "Whole compact unsplit chunks only; min/max in existing C first pass with same input/output copies",
         "Owned result bytes and offset base; persisted format, existing append awaits and session ownership unchanged",
@@ -1387,7 +1387,7 @@
       "stopIf": "Safe admission requires broad provenance/transport/lifecycle redesign, copying payloads, another row scan or native run splitting",
       "performanceNomination": false,
       "localPath": "/tmp/manabitan-native-fields-fusion-1c413-20261128",
-      "pending": "Final exact-source focused tests and independent review, including proxy input callback parity and current proof at native encode boundary",
+      "pending": "Fresh complete correctness/source-bound actual whole-path activation; disabled full Node CPU screen harness source review",
       "harness": {
         "owner": "whole_owner_benchmark",
         "status": "Specialized replay declined in favor of complete actual Node-import boundary; source-only adaptation design authorized",
@@ -1396,13 +1396,63 @@
         "noTimings": true,
         "noPublicRef": true,
         "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
-        "candidate": null,
-        "control": null,
+        "candidate": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+        "control": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
         "design": "Reuse full actual source-bound import with real3workers, producer/receiver ownership, append and retirement. Start before first arm-specific import; move old field-counter hook to owner/directtotals because fused work precedes field wrapper. Defer output hashes until after CPU interval.",
-        "draftScreen": "Numerical CPU nomination gates remain unsealed; revise for full actual import boundary before any observations",
+        "draftScreen": "Selected prospectively: each2replications12ABCblocks,20ms AND1% B improvement vsbothA/C,10/12faster vsboth, C/Aabsolute pairedmedian+summedCPU<=3%;2warmupcycles6importseach. Noabsolute-mscontrolgate. Harness/order/workmanifest stillunsealed, no acquisition.",
         "correctnessOwner": "pipeline_audit",
-        "correctnessScope": "Fresh full native/lint/unit/options/types/all-target builds and all3current actual corpus A/B field/finaltermbyte parity, explicit wholeNativeCalls/Rows/Attempts; source-only kit prep pending finalproductbindings androotpublicationreview"
-      }
+        "correctnessScope": "Fresh full native/lint/unit/options/types/all-target builds and all3current actual corpus A/B field/finaltermbyte parity, explicit wholeNativeCalls/Rows/Attempts; source-only kit prep pending finalproductbindings androotpublicationreview",
+        "numericPolicy": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
+        "numericPolicySealedBeforeObservations": true,
+        "independentReviewer": "fusion_harness_review"
+      },
+      "candidate": {
+        "head": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+        "tree": "db8950675c04d4da1ed02c5dffe8f72c130ca515",
+        "parent": "663df294f40e1832ad3e3349d0e061681fed77cb",
+        "pathsVersusA300": 16
+      },
+      "control": {
+        "head": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+        "tree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+        "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "pathsVersusA300": 10,
+        "stockParserReceiverStoreAndDatabase": true
+      },
+      "nativeProof": "8e06962be86c6aa82d93c055a1f726d16cb1e650",
+      "nativeHandoff": "fac27898dd4ec5e0182ee0fdb95acda20adfd508",
+      "independentReview": "5a3f064b4b226e7362599a3802aea3f710decc0a",
+      "rootTreeReview": "cec427b3fc8b65c6687757ca3f2b5d87c829f57c",
+      "footprint": {
+        "incrementalPaths": 10,
+        "addedLines": 1189,
+        "removedLines": 75,
+        "newTestLines": 612,
+        "netExecutableJsLines": 455,
+        "netCLines": 46,
+        "addedWasmBytes": 107
+      },
+      "finalFocused": {
+        "tests": 165,
+        "files": 3,
+        "scopedLint": true,
+        "pinnedNativeModules": 3,
+        "node": "24.22.3",
+        "compiler": "LLVM/LLD21.1.8",
+        "sharedDependencies": true,
+        "fullUnitsTypesBuilds": false,
+        "actualCorpora": false
+      },
+      "archive": {
+        "blob": "b99934da9c41b83c3f364aa477e656a8cbe1ebe9",
+        "bytes": 426345,
+        "sha256": "626c21843bd3aac9dfd7c1835517f2efd6d754d6b6c9613acb6078ce92863f08",
+        "members": 58,
+        "receipt": "178b9423b0cd3b60d6d96a544d82948f66674b8c",
+        "rootCompleteReadback": "2ec084deea36f62f2ac2d4438ba78962591b24af",
+        "allAttemptsRetained": true
+      },
+      "sourceRetention": "Candidate and inactive-control commits are additional parents of this evidence checkpoint. No dedicated product or performance ref, PR or acquisition."
     },
     "originalJmdictPhaseCensus": {
       "scope": "Records-only descriptive phase census of all148 original JMdict raw reports, SHA matched to original independent auditor. No new execution, observations, qualification or timing transfer to new source.",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "scope": "Immutable evidence files; no product code, new imports or new timings",
+  "scope": "Immutable evidence; original closed study and distinct unmeasured prototype are separate",
   "files": {
     "current-correctness-result.json": "07161060078f96743419784e04ae5e33d407ddca",
     "current-correctness-completion.json": "af558285347a7e5e941509a5ee69def401bd0014",
@@ -67,6 +67,14 @@
     "browser-jmdict-AB-phase-census.json": "a90b4180aaa423b54cca894dcc950fb8e5b35ce1",
     "browser-jmdict-AB-phase-census.py": "02c3841ac2bf93d07b64e81f47fd3320a6930f2d",
     "browser-jmdict-BA-phase-census.json": "45e7e6a70bdc7736a8a3918fc9a4e7d7cc1663ac",
-    "browser-jmdict-BA-phase-census.py": "8e34386ece144f402b2ed549deea9621771145f2"
+    "browser-jmdict-BA-phase-census.py": "8e34386ece144f402b2ed549deea9621771145f2",
+    "fusion-native-source-proof.json": "8e06962be86c6aa82d93c055a1f726d16cb1e650",
+    "fusion-native-handoff.json": "fac27898dd4ec5e0182ee0fdb95acda20adfd508",
+    "fusion-pipeline-source-review.json": "5a3f064b4b226e7362599a3802aea3f710decc0a",
+    "fusion-root-tree-review.json": "cec427b3fc8b65c6687757ca3f2b5d87c829f57c",
+    "fusion-local-attempts.tar.gz": "b99934da9c41b83c3f364aa477e656a8cbe1ebe9",
+    "fusion-local-attempts-readback.json": "178b9423b0cd3b60d6d96a544d82948f66674b8c",
+    "fusion-local-attempts-root-readback.json": "2ec084deea36f62f2ac2d4438ba78962591b24af",
+    "fusion-node-numeric-policy.json": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408"
   }
 }

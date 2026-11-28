@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "prospective-complete-node-import-fusion-cpu-nomination-policy",
+  "selectedAt": "2026-11-28 13:01:05 UTC",
+  "performanceObservationsAcquired": 0,
+  "numericPolicySealed": true,
+  "harnessAndWorkPolicySealed": false,
+  "acquisitionAuthorized": false,
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+  "control": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+  "target": "jmdict",
+  "replications": 2,
+  "blocksPerReplication": 12,
+  "armsPerBlock": [
+    "A",
+    "B",
+    "C"
+  ],
+  "warmupCyclesPerReplication": 2,
+  "warmupImportsPerReplication": 6,
+  "orderRequirement": "All six ABC permutations exactly twice in each replication; second replication uses a fixed opposite sequence; exact sequence still to be sealed before acquisition",
+  "primary": "One enclosing process.cpuUsage user+system interval, microseconds, across the main thread and all three actual parser worker threads",
+  "boundary": "Starts before the first arm-specific module evaluation; includes actual complete import, fixed declared semantic probes and retirement. Newly introduced producer/receiver metadata, native startup, all copies and declines are included. Output hashes and report serialization are after timing.",
+  "cpuDocumentation": "https://nodejs.org/download/release/v22.22.0/docs/api/process.html#processcpuusagepreviousvalue",
+  "candidateGatesEachReplicationVsBothAAndC": {
+    "minimumMedianPairedSavedMs": 20,
+    "maximumMedianPairedChangePercent": -1,
+    "minimumFasterPairs": 10,
+    "totalPairs": 12
+  },
+  "controlGatesEachReplication": {
+    "maximumAbsoluteMedianPairedChangePercent": 3,
+    "maximumAbsoluteSummedCpuChangePercent": 3,
+    "absoluteMillisecondGate": null
+  },
+  "exactSourceCorrectnessActivationAndLifecycleRequired": true,
+  "runtime": "Node v22.22.0; fresh process per arm, no compile cache, no forced GC, no optional helper readiness wait",
+  "currentCorrectnessRequired": "Fresh exact-source full gates and all3actualcorpus parity, source-bound whole fusion activation/work accounting; currently pending",
+  "noRetriesReplacementsExclusionsPoolingOrControlSubtraction": true,
+  "wallTime": "Secondary descriptive only; cannot rescue a failed CPU nomination",
+  "interpretation": "Engineering budget for whether a separate complete browser study is worthwhile. No Chrome-to-Node conversion and no prediction of2% browser savings. This screen cannot authorize a product PR.",
+  "previousDrafts": "Earlier whole-owner20ms/2ms and later30ms suggestions were unsealed source-design suggestions, with zero observations; this policy is selected for the different complete actual Node import boundary.",
+  "originalStudy": "Original f28 fields browser study remains CLOSED/REJECTED without rerun or altered gates."
+}

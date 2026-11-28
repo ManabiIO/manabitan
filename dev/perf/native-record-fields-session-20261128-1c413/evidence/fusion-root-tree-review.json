@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent exact fusion/control trees, ancestry and inactive-callsite review; no new product execution",
+  "base": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidate": {
+    "commit": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "tree": "db8950675c04d4da1ed02c5dffe8f72c130ca515",
+    "parent": "663df294f40e1832ad3e3349d0e061681fed77cb"
+  },
+  "control": {
+    "commit": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+    "tree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+    "parent": "a300da36d00df8e353c5679b1528b50a1299b75f"
+  },
+  "candidatePaths": [
+    "dev/bin/audit-release-packages.js",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "eslint.config.js",
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/term-record-prepared-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/release-package-native-assets.test.js",
+    "test/term-record-fields-fusion.test.js",
+    "test/term-record-fields-native.test.js",
+    "test/term-record-import-fields.test.js"
+  ],
+  "controlPaths": [
+    "dev/bin/audit-release-packages.js",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "eslint.config.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/term-record-prepared-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/release-package-native-assets.test.js"
+  ],
+  "incrementalFusionPaths": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "eslint.config.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "ext/js/dictionary/term-record-prepared-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/term-record-fields-fusion.test.js",
+    "test/term-record-fields-native.test.js"
+  ],
+  "allCandidateControlDifferences": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "test/term-record-fields-fusion.test.js",
+    "test/term-record-fields-native.test.js",
+    "test/term-record-import-fields.test.js"
+  ],
+  "runtimeCandidateControlDifferences": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-record-opfs-store.js"
+  ],
+  "controlProducerReceiverStoreAndDatabaseExactlyStock": true,
+  "allOtherBasePathsPreserved": true,
+  "independentReview": "5a3f064b4b226e7362599a3802aea3f710decc0a",
+  "all10ReviewBindingsMatch": true,
+  "noPerformanceOrPrQualification": true,
+  "freshCompleteCorrectnessRequired": true
+}
