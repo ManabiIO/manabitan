@@ -92,6 +92,7 @@ function fixture(/** @type {{corrupt?: boolean, inline?: boolean}} */ {corrupt =
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         canWriteGenerationMedia: () => true,
         stageGenerationMediaPayload: vi.fn(() => { throw new Error('Declined preparation cannot stage') }),
         writeGenerationMedia: vi.fn(async () => { throw new Error('Sparse payloads cannot be packed') }),

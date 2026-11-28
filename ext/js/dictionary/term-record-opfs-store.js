@@ -1481,6 +1481,23 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Starts descriptor and lookup-index writes while later import work continues.
+     * The existing queue budget still applies; finalization writes the lookup
+     * header, drains the queued writes and closes each writer.
+     * @returns {Promise<void>}
+     */
+    async queuePendingImportWrites() {
+        /* eslint-disable @stylistic/semi */
+        if (!this._importSessionActive) { return }
+        for (const state of this._shardStateByFileName.values()) {
+            if (state.queuedWriteError !== null) { throw state.queuedWriteError }
+            await this._flushPendingWritesForShard(state)
+            await this._flushPendingLookupIndexChunks(state, false)
+        }
+        /* eslint-enable @stylistic/semi */
+    }
+
+    /**
      * @returns {Promise<void>}
      */
     async endImportSession() {
@@ -7014,7 +7031,7 @@ view.chunks :
         if (state.pendingWriteBytes <= 0 || state.pendingWriteChunks.length === 0) {
             return;
         }
-        if (state.writable === null) {
+        if (!this._importSessionActive && state.writable === null) {
             state.writable = await state.fileHandle.createWritable({keepExistingData: true});
             const seekOffset = state.fileLength - state.pendingWriteBytes;
             await state.writable.seek(Math.max(0, seekOffset));
@@ -7131,6 +7148,13 @@ view.chunks :
                 const writeStartOffset = state.fileLength - state.pendingWriteBytes - state.queuedWriteBytes;
                 state.queuedWriteChunks = [];
                 state.queuedWriteBytes = 0;
+                if (state.writable === null) {
+                    // The queue owns startup so finalization and rollback can
+                    // join it. Keep the offset captured before this await:
+                    // another append may already have admitted a later suffix.
+                    // eslint-disable-next-line @stylistic/semi
+                    await this._reopenShardWritable(state, writeStartOffset)
+                }
                 await this._writeChunksForShard(state, chunks, writeStartOffset);
             }
         } catch (error) {

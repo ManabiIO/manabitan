@@ -119,6 +119,8 @@ describe('importer reports durable publication to the settings UI', () => {
         const {database, connection} = createDatabase();
         // Only OPFS is mocked; summary writes, COMMIT, and retry detection use SQLite.
         Reflect.set(database, 'queuePendingTermContentImportWrites', resolveVoid);
+        // eslint-disable-next-line @stylistic/semi
+        Reflect.set(database, 'queuePendingTermRecordImportWrites', resolveVoid)
         Reflect.set(database, 'setImportOptimizationFlags', () => {});
         const failure = new Error(`injected ${failurePoint} failure`);
         const runtime = vi.fn(() => {});

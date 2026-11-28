@@ -37,11 +37,61 @@ function database() {
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: vi.fn(async () => {}),
         bulkAdd: vi.fn(/** @type {(store: string, entries: unknown[], start: number, count: number) => Promise<void>} */ (async () => {})),
     };
 }
 
 describe('embedded legacy dictionary tags', () => {
+    /* eslint-disable @stylistic/semi */
+    test('queues the lookup-index tail after terms and before auxiliary banks', async () => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0})
+        const options = {useWebWorkers: false}
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Lookup tail order', revision: '1', format: 1})), options)
+        await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+            ['term', 'term', '', '', 0, 'definition'],
+        ])), options)
+        await writer.add('tag_bank_1.json', new TextReader(JSON.stringify([
+            ['ordinary', 'misc', 0, 'Tag after terms', 0],
+        ])), options)
+        const content = new Uint8Array(await writer.close()).buffer
+        const db = database()
+        db.queuePendingTermRecordImportWrites.mockImplementation(async () => {
+            expect(db.bulkAdd.mock.calls.map(([store]) => store)).toEqual(['terms'])
+            expect(db.finishBulkImport).not.toHaveBeenCalled()
+        })
+        const result = await new DictionaryImporter(new DictionaryImporterMediaLoader()).importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            content,
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        )
+
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.terms.total).toBe(1)
+        expect(result.result?.counts?.tagMeta.total).toBe(1)
+        expect(db.queuePendingTermRecordImportWrites).toHaveBeenCalledOnce()
+        expect(db.bulkAdd.mock.calls.map(([store]) => store)).toEqual(['terms', 'tagMeta'])
+        expect(db.finishBulkImport).toHaveBeenCalledOnce()
+    })
+
+    test('aborts the import when queuing its lookup-index tail fails', async () => {
+        const db = database()
+        const failure = new Error('lookup-index tail failed')
+        db.queuePendingTermRecordImportWrites.mockRejectedValueOnce(failure)
+        const result = await new DictionaryImporter(new DictionaryImporterMediaLoader()).importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            await archive(1, false, 3),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        )
+
+        expect(result.result).toBeNull()
+        expect(result.errors).toContain(failure)
+        expect(db.bulkAdd).not.toHaveBeenCalled()
+        expect(db.finishBulkImport).not.toHaveBeenCalled()
+        expect(db.abortBulkImport).toHaveBeenCalledWith('legacy-tags-session')
+    })
+    /* eslint-enable @stylistic/semi */
+
     test.each([
         {format: 1, bankCount: 0},
         {format: 1, bankCount: 1},

@@ -136,6 +136,7 @@ async function audioArchive(withImage = false) {
  * deleteDictionaryImportPlaceholder: import('vitest').Mock<() => Promise<void>>,
  * getLastBulkAddTermsMetrics: () => null,
  * queuePendingTermContentImportWrites: () => Promise<void>,
+ * queuePendingTermRecordImportWrites: () => Promise<void>,
  * bulkAdd: import('vitest').Mock<(store: string, entries: unknown[]) => Promise<void>>,
  * }} TestDatabase
  */
@@ -155,6 +156,7 @@ function database() {
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         bulkAdd: vi.fn(/**
                         * @param {string} store
                         * @param {unknown[]} entries

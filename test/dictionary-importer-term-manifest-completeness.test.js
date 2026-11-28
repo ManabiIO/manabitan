@@ -90,6 +90,7 @@ function database() {
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         bulkAdd: vi.fn(async (/** @type {string} */ store, /** @type {import('core').SafeAny[]} */ entries, /** @type {number} */ start, /** @type {number} */ count) => {
             if (store === 'terms') { terms.push(...entries.slice(start, start + count).map((entry) => entry.expression)) }
         }),

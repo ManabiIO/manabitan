@@ -52,7 +52,7 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, beforeClose?: (name: string) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null), syncAccessHandleFactory?: (name: string) => import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle|Promise<import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle>}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeCreateWritable?: (name: string) => Promise<void>|void, beforeSeek?: (name: string, offset: number) => Promise<void>|void, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, beforeClose?: (name: string) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null), syncAccessHandleFactory?: (name: string) => import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle|Promise<import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle>}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
@@ -61,6 +61,8 @@ function createFakeDirectoryHandle(
         removeEntryFailures = new Map(),
         truncateFailures = new Map(),
         getFileFailures = new Map(),
+        beforeCreateWritable,
+        beforeSeek,
         beforeWrite = () => {},
         beforeClose = () => {},
         onGetFile = () => {},
@@ -109,10 +111,18 @@ function createFakeDirectoryHandle(
                 return /** @type {File} */ (file);
             },
             async createWritable() {
+                if (beforeCreateWritable !== undefined) {
+                    // eslint-disable-next-line @stylistic/semi
+                    await beforeCreateWritable(name)
+                }
                 let nextBytes = fileBytesByName.get(name) ?? new Uint8Array();
                 let cursor = nextBytes.byteLength;
                 return {
                     async seek(/** @type {number} */ position) {
+                        if (beforeSeek !== undefined) {
+                            // eslint-disable-next-line @stylistic/semi
+                            await beforeSeek(name, position)
+                        }
                         cursor = Math.max(0, position);
                     },
                     async truncate(/** @type {number} */ length) {
@@ -178,6 +188,220 @@ function createFakeDirectoryHandle(
 }
 
 describe('TermRecordOpfsStore', () => {
+    /* eslint-disable @stylistic/semi */
+    test.each(['create', 'seek'])('queues descriptor startup through a held %s and preserves a later suffix', async (stage) => {
+        const store = new TermRecordOpfsStore()
+        const fileName = store._getShardFileName('Queued descriptor startup', 'raw')
+        const files = new Map([[fileName, Uint8Array.of(7, 8)]])
+        /** @type {() => void} */
+        let release = () => {}
+        const gate = new Promise((resolve) => {
+            release = () => { resolve(void 0) }
+        })
+        let started = false
+        let opens = 0
+        /** @type {number[]} */
+        const seeks = []
+        const directory = createFakeDirectoryHandle(files, {
+            beforeCreateWritable: async (name) => {
+                if (name !== fileName) { return }
+                ++opens
+                if (stage === 'create') {
+                    started = true
+                    await gate
+                }
+            },
+            beforeSeek: async (name, offset) => {
+                if (name !== fileName) { return }
+                seeks.push(offset)
+                if (stage === 'seek') {
+                    started = true
+                    await gate
+                }
+            },
+        })
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        await store.beginImportSession()
+        const state = store._createShardState(fileName, await directory.getFileHandle(fileName), 2)
+        state.fileLength = 4
+        state.pendingWriteChunks = [Uint8Array.of(1, 2)]
+        state.pendingWriteBytes = 2
+        Reflect.get(store, '_shardStateByFileName').set(fileName, state)
+
+        await store.queuePendingImportWrites()
+        await vi.waitFor(() => expect(started).toBe(true))
+        expect(state.queuedWritePromise).not.toBeNull()
+        expect(files.get(fileName)).toStrictEqual(Uint8Array.of(7, 8))
+        state.pendingWriteChunks.push(Uint8Array.of(3, 4, 5))
+        state.pendingWriteBytes += 3
+        state.fileLength += 3
+        await store.queuePendingImportWrites()
+        expect(opens).toBe(1)
+        let finalized = false
+        const finalization = store.endImportSession().then(() => { finalized = true })
+        await new Promise((resolve) => {
+            setTimeout(() => { resolve(void 0) }, 0)
+        })
+        expect(finalized).toBe(false)
+        release()
+        await finalization
+
+        expect(opens).toBe(1)
+        expect(seeks).toEqual([2])
+        expect(files.get(fileName)).toStrictEqual(Uint8Array.of(7, 8, 1, 2, 3, 4, 5))
+        expect(store.getLastEndImportSessionMetrics()).toMatchObject({writeCallCount: 2, totalWriteBytes: 5})
+    })
+
+    test.each(['create', 'seek'])('rollback joins descriptor %s before discarding the import', async (stage) => {
+        const store = new TermRecordOpfsStore()
+        const fileName = store._getShardFileName('Rolled back descriptor startup', 'raw')
+        const files = new Map([[fileName, new Uint8Array()]])
+        /** @type {() => void} */
+        let release = () => {}
+        const gate = new Promise((resolve) => {
+            release = () => { resolve(void 0) }
+        })
+        let started = false
+        let aborts = 0
+        let closes = 0
+        const directory = createFakeDirectoryHandle(files, {
+            beforeCreateWritable: async (name) => {
+                if (name === fileName && stage === 'create') {
+                    started = true
+                    await gate
+                }
+            },
+            beforeSeek: async (name) => {
+                if (name === fileName && stage === 'seek') {
+                    started = true
+                    await gate
+                }
+            },
+            beforeClose: (name) => {
+                if (name === fileName) { ++closes }
+            },
+            onAbort: () => { ++aborts },
+        })
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        await store.beginImportSession()
+        const state = store._createShardState(fileName, await directory.getFileHandle(fileName), 0)
+        state.fileLength = 3
+        state.pendingWriteChunks = [Uint8Array.of(1, 2, 3)]
+        state.pendingWriteBytes = 3
+        Reflect.get(store, '_shardStateByFileName').set(fileName, state)
+
+        await store.queuePendingImportWrites()
+        await vi.waitFor(() => expect(started).toBe(true))
+        let rolledBack = false
+        const rollback = store.rollbackImportSession({shards: []}).then(() => { rolledBack = true })
+        await new Promise((resolve) => {
+            setTimeout(() => { resolve(void 0) }, 0)
+        })
+        expect(rolledBack).toBe(false)
+        expect(files.has(fileName)).toBe(true)
+        release()
+        await rollback
+
+        expect(aborts).toBe(1)
+        expect(closes).toBe(0)
+        expect(files.size).toBe(0)
+        expect(store.getDiagnostics().importSessionActive).toBe(false)
+    })
+
+    test.each(['create', 'seek'])('deletion joins descriptor %s before unlinking its file', async (stage) => {
+        const store = new TermRecordOpfsStore()
+        const dictionary = 'Deleted descriptor startup'
+        const fileName = store._getShardFileName(dictionary, 'raw')
+        const files = new Map([[fileName, new Uint8Array()]])
+        /** @type {() => void} */
+        let release = () => {}
+        const gate = new Promise((resolve) => {
+            release = () => { resolve(void 0) }
+        })
+        let started = false
+        let closes = 0
+        const directory = createFakeDirectoryHandle(files, {
+            beforeCreateWritable: async (name) => {
+                if (name === fileName && stage === 'create') {
+                    started = true
+                    await gate
+                }
+            },
+            beforeSeek: async (name) => {
+                if (name === fileName && stage === 'seek') {
+                    started = true
+                    await gate
+                }
+            },
+            beforeClose: (name) => {
+                if (name === fileName) { ++closes }
+            },
+        })
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        await store.beginImportSession()
+        const state = store._createShardState(fileName, await directory.getFileHandle(fileName), 0)
+        state.fileLength = 3
+        state.pendingWriteChunks = [Uint8Array.of(1, 2, 3)]
+        state.pendingWriteBytes = 3
+        Reflect.get(store, '_shardStateByFileName').set(fileName, state)
+
+        await store.queuePendingImportWrites()
+        await vi.waitFor(() => expect(started).toBe(true))
+        let deleted = false
+        const deletion = store._deleteShardByDictionary(dictionary).then(() => { deleted = true })
+        await new Promise((resolve) => {
+            setTimeout(() => { resolve(void 0) }, 0)
+        })
+        expect(deleted).toBe(false)
+        expect(files.has(fileName)).toBe(true)
+        release()
+        await deletion
+
+        expect(closes).toBe(1)
+        expect(files.size).toBe(0)
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0)
+        await store.endImportSession()
+        expect(files.size).toBe(0)
+    })
+
+    test.each(['create', 'seek'])('keeps descriptor %s failures sticky and rolls them back', async (stage) => {
+        const store = new TermRecordOpfsStore()
+        const fileName = store._getShardFileName('Failed descriptor startup', 'raw')
+        const files = new Map([[fileName, new Uint8Array()]])
+        const failure = new Error(`Descriptor ${stage} failed`)
+        let opens = 0
+        let aborts = 0
+        const directory = createFakeDirectoryHandle(files, {
+            beforeCreateWritable: (name) => {
+                if (name !== fileName) { return }
+                ++opens
+                if (stage === 'create') { throw failure }
+            },
+            beforeSeek: (name) => {
+                if (name === fileName && stage === 'seek') { throw failure }
+            },
+            onAbort: () => { ++aborts },
+        })
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        await store.beginImportSession()
+        const state = store._createShardState(fileName, await directory.getFileHandle(fileName), 0)
+        state.fileLength = 3
+        state.pendingWriteChunks = [Uint8Array.of(1, 2, 3)]
+        state.pendingWriteBytes = 3
+        Reflect.get(store, '_shardStateByFileName').set(fileName, state)
+
+        await store.queuePendingImportWrites()
+        await vi.waitFor(() => expect(state.queuedWriteError).toBe(failure))
+        await expect(store.queuePendingImportWrites()).rejects.toBe(failure)
+        await expect(store.endImportSession()).rejects.toBe(failure)
+        expect(opens).toBe(1)
+        await store.rollbackImportSession({shards: []})
+        expect(aborts).toBe(stage === 'seek' ? 1 : 0)
+        expect(files.size).toBe(0)
+        expect(store.getDiagnostics().importSessionActive).toBe(false)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('does not publish available-to-available health changes during append', async () => {
         const store = new TermRecordOpfsStore();
         const healthChanges = vi.fn();
@@ -1073,12 +1297,18 @@ describe('TermRecordOpfsStore', () => {
 
     test('keeps shard write failures sticky and does not restart queued writes', async () => {
         const store = new TermRecordOpfsStore();
+        /* eslint-disable @stylistic/semi */
+        const directory = createFakeDirectoryHandle(new Map())
+        const fileHandle = await directory.getFileHandle('records.mbt4', {create: true})
+        /* eslint-enable @stylistic/semi */
         const state = Reflect.get(store, '_createShardState').call(
             store,
             'records.mbt4',
-            /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({})),
+            fileHandle,
             0,
         );
+        // eslint-disable-next-line @stylistic/semi
+        state.writable = await fileHandle.createWritable()
         const writeError = new Error('injected shard write failure');
         const deferredWrite = {
             /** @type {(error: Error) => void} */
@@ -3195,7 +3425,10 @@ describe('TermRecordOpfsStore', () => {
             'raw',
         );
         const state = [...Reflect.get(writerStore, '_shardStateByFileName').values()][0];
-        await writerStore._flushPendingLookupIndexChunks(state);
+        /* eslint-disable @stylistic/semi */
+        await writerStore.queuePendingImportWrites()
+        await writerStore._awaitLookupIndexWritesForShard(state)
+        /* eslint-enable @stylistic/semi */
 
         expect(state.pendingLookupIndexChunks).toHaveLength(0);
         expect(state.lookupIndexWritable).not.toBeNull();
@@ -3218,6 +3451,8 @@ describe('TermRecordOpfsStore', () => {
             [16],
             'raw',
         );
+        // eslint-disable-next-line @stylistic/semi
+        await writerStore.queuePendingImportWrites()
         await writerStore.endImportSession();
 
         const finalizedIndexBytes = fileBytesByName.get(indexFileName);
@@ -3336,8 +3571,11 @@ describe('TermRecordOpfsStore', () => {
         state.pendingLookupIndexChunks = [new Uint8Array([1, 2, 3])];
         state.pendingLookupIndexBytes = 3;
         state.pendingLookupIndexRecordCount = 1;
+        // eslint-disable-next-line @stylistic/semi
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state)
 
-        await expect(store._flushPendingLookupIndexChunks(state, false)).resolves.toBeUndefined();
+        // eslint-disable-next-line @stylistic/semi
+        await expect(store.queuePendingImportWrites()).resolves.toBeUndefined()
         await vi.waitFor(() => expect(blockedWriteStarted).toBe(true));
         expect(state.pendingLookupIndexChunks).toHaveLength(0);
         expect(state.lookupIndexQueuedBytes).toBe(3);
@@ -3360,6 +3598,92 @@ describe('TermRecordOpfsStore', () => {
         });
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('keeps a queued lookup tail unpublished until finalization drains it', async () => {
+        const files = new Map()
+        /** @type {() => void} */
+        let releaseWrite = () => {}
+        const gate = new Promise((resolve) => {
+            releaseWrite = () => { resolve(void 0) }
+        })
+        let writeStarted = false
+        const directory = createFakeDirectoryHandle(files, {
+            beforeWrite: async (name, value) => {
+                if (!name.endsWith('.mbti') || !(value instanceof Blob)) { return }
+                writeStarted = true
+                await gate
+            },
+        })
+        const store = new TermRecordOpfsStore()
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        await store.beginImportSession()
+        const state = store._createShardState('tail.mbtr', await directory.getFileHandle('tail.mbtr', {create: true}), 0)
+        state.pendingLookupIndexChunks = [Uint8Array.of(1, 2, 3)]
+        state.pendingLookupIndexBytes = 3
+        state.pendingLookupIndexRecordCount = 1
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state)
+
+        await store.queuePendingImportWrites()
+        await vi.waitFor(() => expect(writeStarted).toBe(true))
+        let finalized = false
+        const finalization = store.endImportSession().then(() => { finalized = true })
+        await Promise.resolve()
+        expect(finalized).toBe(false)
+        expect(store.getDiagnostics().importSessionActive).toBe(true)
+        expect(files.get('tail.mbtr.mbti')?.byteLength).toBe(0)
+        releaseWrite()
+        await finalization
+
+        expect(store.getDiagnostics().importSessionActive).toBe(false)
+        const bytes = files.get('tail.mbtr.mbti')
+        expect(new TextDecoder().decode(bytes?.subarray(0, 8))).toBe('MBTIDX11')
+        expect(bytes?.subarray(40)).toStrictEqual(Uint8Array.of(1, 2, 3))
+        expect(store.getLastEndImportSessionMetrics()).toMatchObject({
+            lookupIndexWriteCallCount: 1,
+            lookupIndexWriteBytes: 3,
+        })
+    })
+
+    test('queues lookup tails only during import and honors the existing byte budget', async () => {
+        const files = new Map()
+        /** @type {() => void} */
+        let releaseWrite = () => {}
+        const gate = new Promise((resolve) => {
+            releaseWrite = () => { resolve(void 0) }
+        })
+        let writeStarted = false
+        const directory = createFakeDirectoryHandle(files, {
+            beforeWrite: async (name, value) => {
+                if (!name.endsWith('.mbti') || !(value instanceof Blob)) { return }
+                writeStarted = true
+                await gate
+            },
+        })
+        const store = new TermRecordOpfsStore()
+        Reflect.set(store, '_recordsDirectoryHandle', directory)
+        const state = store._createShardState('budget.mbtr', await directory.getFileHandle('budget.mbtr', {create: true}), 0)
+        state.pendingLookupIndexChunks = [Uint8Array.of(1, 2, 3)]
+        state.pendingLookupIndexBytes = 3
+        state.pendingLookupIndexRecordCount = 1
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state)
+
+        await store.queuePendingImportWrites()
+        expect(files.has('budget.mbtr.mbti')).toBe(false)
+        expect(state.pendingLookupIndexBytes).toBe(3)
+        Reflect.set(store, '_importSessionActive', true)
+        Reflect.set(store, '_queuedWriteBudgetBytes', 2)
+        let queued = false
+        const queueing = store.queuePendingImportWrites().then(() => { queued = true })
+        await vi.waitFor(() => expect(writeStarted).toBe(true))
+        expect(queued).toBe(false)
+        expect(state.lookupIndexQueuedBytes).toBe(3)
+        releaseWrite()
+        await queueing
+        await store.endImportSession()
+        expect(state.lookupIndexQueuedBytes).toBe(0)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('keeps asynchronous lookup sidecar write failures sticky through finalization', async () => {
         const writeError = new Error('injected lookup sidecar failure');
         const fileBytesByName = new Map();
@@ -3376,16 +3700,22 @@ describe('TermRecordOpfsStore', () => {
         state.pendingLookupIndexChunks = [new Uint8Array([1])];
         state.pendingLookupIndexBytes = 1;
         state.pendingLookupIndexRecordCount = 1;
+        // eslint-disable-next-line @stylistic/semi
+        Reflect.get(store, '_shardStateByFileName').set(state.fileName, state)
 
-        await store._flushPendingLookupIndexChunks(state, false);
+        // eslint-disable-next-line @stylistic/semi
+        await store.queuePendingImportWrites()
         await expect(store._awaitLookupIndexWritesForShard(state)).rejects.toBe(writeError);
         expect(state.lookupIndexWriteError).toBe(writeError);
 
         state.pendingLookupIndexChunks = [new Uint8Array([2])];
         state.pendingLookupIndexBytes = 1;
         state.pendingLookupIndexRecordCount = 1;
-        await expect(store._flushPendingLookupIndexChunks(state, false)).rejects.toBe(writeError);
+        // eslint-disable-next-line @stylistic/semi
+        await expect(store.queuePendingImportWrites()).rejects.toBe(writeError)
         expect(state.pendingLookupIndexChunks).toHaveLength(1);
+        // eslint-disable-next-line @stylistic/semi
+        await expect(store.endImportSession()).rejects.toBe(writeError)
     });
 
     test('finalizes record and lookup-index files concurrently and waits for both', async () => {
@@ -3800,7 +4130,8 @@ describe('TermRecordOpfsStore', () => {
             'raw',
         );
         const state = [...Reflect.get(store, '_shardStateByFileName').values()][0];
-        await store._flushPendingLookupIndexChunks(state, false);
+        // eslint-disable-next-line @stylistic/semi
+        await store.queuePendingImportWrites()
         await vi.waitFor(() => expect(blockedWriteStarted).toBe(true));
 
         let rollbackFinished = false;

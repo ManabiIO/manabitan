@@ -148,6 +148,7 @@ function fixture(/** @type {{compact?: boolean, missing?: boolean, failSeal?: bo
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         canWriteGenerationMedia: () => true,
         stageGenerationMediaPayload: vi.fn(() => staged),
         writeGenerationMedia: vi.fn(async (/** @type {Blob} */ payload, /** @type {MediaIndex} */ selected) => {

@@ -225,7 +225,8 @@ describe('production import index worker', () => {
         const {store, state} = storeWithPendingIndex(file, bytes);
         Reflect.set(store, '_queuedWriteBudgetBytes', 8 * 1024 * 1024);
         let finished = false;
-        const writing = store._flushPendingLookupIndexChunks(state, false).then(() => { finished = true; });
+        // eslint-disable-next-line @stylistic/semi
+        const writing = store.queuePendingImportWrites().then(() => { finished = true })
         await expect.poll(() => Atomics.load(file.counters, 4)).toBe(2);
         // The test's own event loop runs while the synchronous worker flush is
         // blocked. Neither ownership nor the existing byte budget is released.
@@ -254,7 +255,8 @@ describe('production import index worker', () => {
     test('publishes final headers only after acknowledged writes and uses one worker for the session', async () => {
         const file = fixture();
         const {store, state} = storeWithPendingIndex(file, patternedBytes(2 * 1024 * 1024));
-        await store._flushPendingLookupIndexChunks(state, false);
+        // eslint-disable-next-line @stylistic/semi
+        await store.queuePendingImportWrites()
         await state.lookupIndexWritePromise;
         const other = fixture();
         const otherName = store._getShardSegmentFileName('Worker test', 'raw', 1);
@@ -277,6 +279,8 @@ describe('production import index worker', () => {
     test('failed final durability acknowledgement keeps the import unpublished and closes the worker', async () => {
         const file = fixture({flushErrorAt: 1});
         const {store, state} = storeWithPendingIndex(file, patternedBytes(2 * 1024 * 1024));
+        // eslint-disable-next-line @stylistic/semi
+        await store.queuePendingImportWrites()
         await expect(store.endImportSession()).rejects.toMatchObject({message: 'Worker flush witness'});
         expect(Reflect.get(store, '_importSessionActive')).toBe(true);
         expect(store.getLastEndImportSessionMetrics()).toBeNull();

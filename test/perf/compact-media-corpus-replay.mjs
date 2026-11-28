@@ -181,6 +181,7 @@ async function runImporter() {
         deleteDictionaryImportPlaceholder: async () => {},
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         canWriteGenerationMedia: () => true,
         stageGenerationMediaPayload(blob) {
             stagedBlob = blob

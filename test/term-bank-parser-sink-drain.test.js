@@ -126,6 +126,7 @@ test('ordinary ZIP import keeps its session until a sink admitted before a later
         deleteDictionaryImportPlaceholder: vi.fn(async () => { events.push('placeholder'); }),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         bulkAddArtifactTermsChunk: vi.fn(async () => {
             events.push('sink-start');
             entered.resolve();

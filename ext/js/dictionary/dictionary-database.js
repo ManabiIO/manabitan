@@ -5526,6 +5526,15 @@ void 0 :
     }
 
     /**
+     * Starts pending term-record writes before media and metadata work.
+     * @returns {Promise<void>}
+     */
+    async queuePendingTermRecordImportWrites() {
+        // eslint-disable-next-line @stylistic/semi
+        await this._termRecordStore.queuePendingImportWrites()
+    }
+
+    /**
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} items
      * @returns {Promise<void>}
      */

@@ -2526,6 +2526,8 @@ export class DictionaryImporter {
                 this._logImport(`term file ${termFile.filename}: total elapsed=${termFileElapsedMs}ms`);
             }
 
+            // eslint-disable-next-line @stylistic/semi
+            await dictionaryDatabase.queuePendingTermRecordImportWrites()
             await dictionaryDatabase.queuePendingTermContentImportWrites();
 
             const mediaProgressStartIndex = this._progressData.index;

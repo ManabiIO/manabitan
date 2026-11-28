@@ -38,6 +38,7 @@ function database() {
         deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
         getLastBulkAddTermsMetrics: () => null,
         queuePendingTermContentImportWrites: async () => {},
+        queuePendingTermRecordImportWrites: async () => {},
         bulkAdd: vi.fn(async () => {}),
     };
 }
