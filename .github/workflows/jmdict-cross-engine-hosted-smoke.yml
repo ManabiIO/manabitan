@@ -17,8 +17,11 @@ jobs:
       - name: Check out frozen Manabitan source
         uses: actions/checkout@v6
         with:
-          ref: f28c2801fcfd9416f220b46b9cbafeee901c1cb2
+          ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Verify product tree matches the frozen Manabitan source
+        run: git diff --exit-code f28c2801fcfd9416f220b46b9cbafeee901c1cb2 -- ext dev test/chromium test/e2e package.json package-lock.json
 
       - name: Set up Manabitan build and Node dependencies
         uses: ./.github/actions/setup
@@ -123,7 +126,8 @@ jobs:
               selected.push(Object.fromEntries(['engine', 'dataset', 'pair', 'runnerSha256', 'archiveSha256', 'query', 'title', 'termCount', 'resultCount', 'configuredMaxResults', 'configuredScanLength', 'headwordPairs', 'orderedHeadwordPairs', 'sourcePairCoverage', 'resultSha256', 'importMs', 'completionMs', 'lookupStageMs', 'dispatchToResponseMs', 'totalMs', 'warm', 'afterRestart', 'packageSha256', 'commit', 'validation', 'status'].filter(key => key in receipt).map(key => [key, receipt[key]])));
             } catch {}
           }
-          writeFileSync(process.env.RUNNER_TEMP + '/jmdict-smoke/upload/summary.json', JSON.stringify({manabitanCommit:'f28c2801fcfd9416f220b46b9cbafeee901c1cb2', hoshidictsCommit:'c77b36201de0e86c8950dd1d3d88cbee36472fb1', archiveUrl:'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip', archiveSha256:'3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f', receipts:selected}, null, 2) + '\n');
+          if (selected.length !== 2 || !selected.every(receipt => receipt.status === 'passed')) throw new Error('Both pinned engine receipts must pass semantic validation');
+          writeFileSync(process.env.RUNNER_TEMP + '/jmdict-smoke/upload/summary.json', JSON.stringify({manabitanHarnessCommit:process.env.GITHUB_SHA, manabitanProductCommit:'f28c2801fcfd9416f220b46b9cbafeee901c1cb2', manabitanCommit:'f28c2801fcfd9416f220b46b9cbafeee901c1cb2', hoshidictsCommit:'c77b36201de0e86c8950dd1d3d88cbee36472fb1', archiveUrl:'https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip', archiveSha256:'3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f', receipts:selected}, null, 2) + '\n');
           NODE
           cp "${RUNNER_TEMP}/jmdict-smoke/qualification-manifest.sha256" "${RUNNER_TEMP}/jmdict-smoke/upload/qualification-manifest.sha256"
 
