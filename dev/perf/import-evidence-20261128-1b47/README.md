@@ -8,6 +8,10 @@ browser-import speedup. Product changes are on separate branches.
 Both product PRs remain held drafts. The completed browser results below retain
 the adverse timings and failed memory-coverage checks.
 
+All performance acquisition in this session is complete. The shared compression
+candidate is closed without a product PR. No JMdict whole-import speedup was
+established by these experiments.
+
 | Proposal                                                                                                                                            | Measured product version                   | Measured scope                                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | [Restore indexed compact score-key validation](https://github.com/ManabiIO/manabitan/commit/b15bad43acdfd54d541895cac1109c0e5ba51b2f)               | `b15bad43acdfd54d541895cac1109c0e5ba51b2f` | Approximately 1.57–1.60 ms saved per complete warm validation of 12 actual JMdict field buffers / 528,299 rows                         |
@@ -251,6 +255,50 @@ The archive, member manifest and checksum are stored here as
 `compression-proof-registration-20261128-1b47.*`: 115 members, 1,698,895 payload
 bytes. Archive SHA-256:
 `fd35ffbb2eb9ddb07e8f497f99982037bdceb2882491811d7b760225bc8a65e9`.
+
+## Corrected compression results and final decision
+
+The [complete corrected-compression readout](corrected-compression-results-README.md)
+preserves both fixed current-`dcfc02a0` cohorts from study
+`3256036ff8534ba6de7bc9ecd74ec74d3c705603`: 52 complete report/proof sets, all 624
+retained non-package artifact members, and all 547 raw memory scan rows. The unchanged
+frozen reader and separate original-ZIP reviews agree on each result.
+
+Positive timing changes are slower. Both corpora retain all six candidate pairs
+and two identical-code control pairs.
+
+| Corpus   | Candidate paired median / equal-work | Descriptive 95% paired-median interval | Identical-code median | Qualification                                                  |
+| -------- | -----------------------------------: | -------------------------------------- | --------------------: | -------------------------------------------------------------- |
+| JMdict   |                    +2.156% / +1.749% | [−0.481%, +3.592%]                     |               −1.835% | Original semantic, exact-storage and sampled-memory gates pass |
+| Jitendex |                    +4.484% / +6.804% | [−1.152%, +17.259%]                    |               −0.291% | Semantic and exact-storage gates pass; memory coverage fails   |
+
+Five of six candidate pairs are slower in each corpus. Neither supplies the
+registered useful signal, and both meet its adverse-corpus review condition.
+Jitendex also fails the required memory comparison because baseline A1's
+278.445886 ms covered-sample gap exceeds the unchanged 250 ms limit. Its aggregate
+memory comparisons remain null; insufficient sampling is not a demonstrated
+memory regression. JMdict retains all 256 scans and passes that bounded screen.
+
+Both exact storage tradeoffs remain within the fixed two-percent budget:
++312,404 bytes (+0.717832%) for JMdict and +750,018 bytes (+1.111692%) for
+Jitendex. All raw physical proofs, full decoded results for the original
+twelve-term lookup sample, restart checks, package/source bindings and final
+restoration checks pass. This is not exhaustive all-entry semantic verification.
+
+The final disposition is **no compression product PR**. Intervals spanning zero
+limit causal latency-regression claims; the prospectively fixed review rejection
+does not require such a claim. No unfavorable pair was replaced, no control drift
+was subtracted, and no old failed-trial observation was reused or retroactively
+qualified.
+
+Jitendex's explicitly post-outcome phase context shows a modest compression-owner
+reduction alongside the adverse import result. Those awaited/worker durations
+overlap and do not isolate codec CPU, prove a cause, or adjust the primary
+endpoint. No additional JMdict phase analysis or further variant was started.
+
+The archive, member manifest and checksum are stored here as
+`corrected-compression-results-20261128-1b47.*`. Archive SHA-256:
+`8faede5a03fb90c234000ebf8ab8007bd0dcb7125de369d3d64e34b50acf07b4`.
 
 ## Why JMdict gains stayed small
 
