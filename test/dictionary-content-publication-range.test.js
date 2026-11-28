@@ -123,7 +123,8 @@ describe('contiguous content metadata publication', () => {
         {name: 'disjoint ranges in one backing buffer',
             expectedFast: true,
             change: ({database, state}) => {
-                const ids = /** @type {Float64Array} */ (Reflect.get(database, '_termEntryContentMetaIdTable'))
+                const ids = new Float64Array(Reflect.get(database, '_termEntryContentMetaStateTable').length)
+                Reflect.set(database, '_termEntryContentMetaIdTable', ids)
                 const values = state.pendingOffsets
                 state.pendingOffsets = ids.subarray(5, 8)
                 state.pendingOffsets.set(values)
@@ -278,6 +279,10 @@ describe('contiguous content metadata publication', () => {
     test.each(aliasCases)('preserves scalar read/write ordering when $name', (fixture) => {
         const scalar = createHarness()
         const candidate = createHarness()
+        // These cases exercise physical overlaps after legacy IDs materialize.
+        for (const {database} of [scalar, candidate]) {
+            Reflect.set(database, '_termEntryContentMetaIdTable', new Float64Array(Reflect.get(database, '_termEntryContentMetaStateTable').length))
+        }
         fixture.change(scalar)
         fixture.change(candidate)
         vi.spyOn(scalar.database, '_tryPublishContiguousArtifactTermContentMetadata').mockReturnValue(false)

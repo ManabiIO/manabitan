@@ -410,6 +410,11 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             const database = new DictionaryDatabase();
             const source = new Uint8Array([1, 2, 3, 4]);
             const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+            // Include the optional legacy-ID column in this allocation matrix.
+            // eslint-disable-next-line @stylistic/semi
+            meta.id = 1
+            // eslint-disable-next-line @stylistic/semi
+            Reflect.get(database, '_setTermEntryContentMetaByHashPair').call(database, 10, 20, meta)
             const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
             const pending = stage([30], [40], [source], null);
             const tableNames = [
