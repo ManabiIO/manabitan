@@ -399,8 +399,17 @@ export class Backend {
         this._setDictionaryImportModePromise = null;
         /** @type {Set<string>} */
         this._termContentOptimizationHolds = new Set();
+        /**
+         *
+         */
         this._termContentOptimizationSessionId = crypto.randomUUID();
+        /**
+         *
+         */
         this._termContentOptimizationRevision = 0;
+        /**
+         *
+         */
         this._termContentOptimizationReady = false;
         /** @type {Set<string>} */
         this._dictionaryImportOwners = new Set();
@@ -492,7 +501,9 @@ export class Backend {
         chrome.runtime.onInstalled.addListener(this._onInstalled.bind(this));
     }
 
-    /** @param {chrome.runtime.Port} port */
+    /**
+     * @param {chrome.runtime.Port} port
+     */
     _onDictionaryImportOwnerConnect(port) {
         let details;
         try {
@@ -703,7 +714,9 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
-            /** @param {Error|Event|string} error */
+            /**
+             * @param {Error|Event|string} error
+             */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -853,7 +866,9 @@ export class Backend {
             responsePort.onmessageerror = null;
             closeDictionaryImportResponsePort(responsePort);
         };
-        /** @param {unknown} message */
+        /**
+         * @param {unknown} message
+         */
         const forward = (message) => {
             if (!observerDetached && !postDictionaryImportResponseMessage(responsePort, message)) { detachObserver(); }
         };
@@ -873,7 +888,9 @@ export class Backend {
                 delete operation.responseReconcile;
             }
         };
-        /** @param {import('offscreen').ImportOperationStatus} status */
+        /**
+         * @param {import('offscreen').ImportOperationStatus} status
+         */
         const reconcile = (status) => {
             if (closed) { return; }
             // A status lookup may beat the original terminal message. Preserve
@@ -1428,7 +1445,9 @@ export class Backend {
         return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
     }
 
-    /** @returns {void} */
+    /**
+     * @returns {void}
+     */
     _ensureSharedWorkerBridge() {
         if (this._sharedWorkerBridge !== null || this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
             return;
@@ -2169,7 +2188,9 @@ export class Backend {
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
-    /** @returns {Promise<unknown>} */
+    /**
+     * @returns {Promise<unknown>}
+     */
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
@@ -2237,7 +2258,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         };
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _awaitDictionaryRefreshSettled() {
         while (true) {
             const importModePromise = this._setDictionaryImportModePromise;
@@ -2287,7 +2310,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         }
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _awaitDictionaryMutationSettled() {
         while (true) {
             const promise = this._dictionaryMutationPromise;
@@ -4510,7 +4535,9 @@ null;
         let token = null;
         let invalidated = false;
         const eventListeners = new EventListenerCollection();
-        /** @returns {Promise<void>} */
+        /**
+         * @returns {Promise<void>}
+         */
         const assertCurrentTab = async () => {
             const currentTab = await this._getTabById(tabId);
             if (invalidated || !currentTab.active || currentTab.windowId !== windowId || currentTab.url !== tab.url) {
@@ -4529,7 +4556,9 @@ null;
                     invalidated = true;
                 }
             });
-            /** @param {number} removedTabId */
+            /**
+             * @param {number} removedTabId
+             */
             const onOwnerRemoved = (removedTabId) => {
                 if (removedTabId === tabId) { invalidated = true; }
             };
@@ -4918,7 +4947,9 @@ null;
         this._sendApplicationDatabaseUpdated(type, cause);
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _flushDictionaryCacheInvalidation() {
         const generation = this._dictionaryCacheInvalidationGeneration ?? 0;
         await Promise.resolve(this._translator.clearDatabaseCaches());
@@ -6440,10 +6471,18 @@ null;
         }
     }
 
-    /** @param {string} ownerId @param {boolean} active */
+    /**
+     * @param {string} ownerId
+     * @param {boolean} active
+     * @throws {TypeError} If synchronizing the desired runtime state fails.
+     */
     _setTermContentOptimizationHold(ownerId, active) {
         this._termContentOptimizationHolds ??= new Set();
-        if (active) { this._termContentOptimizationHolds.add(ownerId); } else { this._termContentOptimizationHolds.delete(ownerId); }
+        if (active) {
+            this._termContentOptimizationHolds.add(ownerId);
+        } else {
+            this._termContentOptimizationHolds.delete(ownerId);
+        }
         this._syncTermContentOptimizationState();
     }
 

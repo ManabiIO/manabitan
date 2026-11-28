@@ -141,7 +141,9 @@ test('an undelivered optimizer wake cannot delay import transitions and stale ho
     const {backend, snapshots, sendMessagePromise} = backendFixture();
     const lostDelivery = deferPromise();
     sendMessagePromise.mockImplementation(async () => { await lostDelivery.promise; });
-    /** @param {import('offscreen').TermContentOptimizationState|undefined} optimizationState */
+    /**
+     * @param {import('offscreen').TermContentOptimizationState|undefined} optimizationState
+     */
     const deliverNotification = (optimizationState) => {
         worker._onMessage(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
             data: {id: termContentOptimizationNotificationId, optimizationState}, ports: [],

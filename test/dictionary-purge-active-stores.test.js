@@ -140,7 +140,7 @@ test('startup validates storage before finishing an interrupted purge, then stop
     vi.mocked(openOpfsDatabase).mockImplementationOnce(async () => {
         events.push('open SQLite');
         return /** @type {import('@sqlite.org/sqlite-wasm').Database} */ (/** @type {unknown} */ ({
-            selectValue(sql) {
+            selectValue(/** @type {string} */ sql) {
                 if (sql === 'PRAGMA user_version') { return 10; }
                 if (sql.includes('sqlite_master')) { return 0; }
                 throw new Error('Unexpected startup query: ' + sql);

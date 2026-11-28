@@ -38,6 +38,9 @@ export class TermContentImmutableFileStore {
          *
          */
         this._directoryName = directoryName;
+        /**
+         *
+         */
         this._beforeWrite = beforeWrite;
     }
 
@@ -146,7 +149,9 @@ export class TermContentImmutableFileStore {
         }
     }
 
-    /** @param {string} fileId Removes only one deterministically named optimizer-owned file. */
+    /**
+     * @param {string} fileId Removes only one deterministically named optimizer-owned file.
+     */
     async remove(fileId) {
         const directory = await this._getDirectory(false);
         await directory.removeEntry(this._getFileName(fileId));
@@ -163,7 +168,6 @@ export class TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {boolean} create
      * @returns {Promise<FileSystemDirectoryHandle>}
      */
@@ -176,7 +180,6 @@ export class TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {string} fileId
      * @returns {string}
      * @throws {TypeError} If the file identity is unsafe.

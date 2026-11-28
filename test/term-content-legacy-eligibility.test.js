@@ -18,7 +18,10 @@
 import {expect, test} from 'vitest';
 import {probeLegacyTermContentFrame, skipLegacyEligibilitySelector} from '../ext/js/dictionary/term-content-legacy-eligibility.js';
 
-/** @param {Uint8Array} bytes */
+/**
+ * @param {Uint8Array} bytes
+ * @returns {{logicalHighWater: number, assertCurrent: () => void, readSlice: (offset: number, length: number) => Promise<Uint8Array>}}
+ */
 function source(bytes) {
     return {logicalHighWater: bytes.byteLength,
         assertCurrent: () => {},
@@ -50,9 +53,10 @@ test('skips preset and raw references but separately checks the shared artifact 
         const matched = {...legacy, reference: {...legacy.reference, entryContentDictName: name}};
         await expect(probeLegacyTermContentFrame(source(new Uint8Array(0)), matched, signal)).resolves.toEqual({kind: 'skip'});
     }
-    const artifact = {kind: /** @type {const} */ ('artifact'), artifact: {
-        contentOffset: 0, contentLength: generic.length, contentDictName: 'raw-v4', uncompressedLength: 3,
-    }};
+    const artifact = {kind: /** @type {const} */ ('artifact'),
+        artifact: {
+            contentOffset: 0, contentLength: generic.length, contentDictName: 'raw-v4', uncompressedLength: 3,
+        }};
     await expect(probeLegacyTermContentFrame(source(generic), artifact, signal)).resolves.toEqual({kind: 'eligible'});
     const withTrailingBytes = new Uint8Array([...generic, 255]);
     artifact.artifact.contentLength++;

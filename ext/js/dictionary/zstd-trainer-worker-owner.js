@@ -21,33 +21,55 @@
 /** @typedef {{id: number, samples: Uint8Array, lengths: Uint8Array, dictionaryCapacity: number, strategy: number, level: number, dictionary?: Uint8Array, initializeMs?: number, trainMs?: number, heapBytes?: number, error?: string, errorKind?: 'invalid-input'|'resource'|'corpus'|'invalid-output'|'unavailable'}} TrainerMessage */
 /** @typedef {{id: number, worker: Worker|null, timer: ReturnType<typeof setTimeout>|null, settled: boolean}} TrainerJob */
 export class ZstdTrainingUnavailableError extends Error {
-    /** @param {string} message @param {unknown} [cause] */
+    /**
+     * @param {string} message
+     * @param {unknown} [cause]
+     */
     constructor(message, cause) {
         super(message, {cause});
+        /**
+         *
+         */
         this.name = 'ZstdTrainingUnavailableError';
     }
 }
 
 export class ZstdTrainingResourceError extends ZstdTrainingUnavailableError {
-    /** @param {string} message @param {unknown} [cause] */
+    /**
+     * @param {string} message
+     * @param {unknown} [cause]
+     */
     constructor(message, cause) {
         super(message, cause);
+        /**
+         *
+         */
         this.name = 'ZstdTrainingResourceError';
     }
 }
 
 export class ZstdTrainingCorpusError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
+        /**
+         *
+         */
         this.name = 'ZstdTrainingCorpusError';
     }
 }
 
 export class ZstdTrainingOutputError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
+        /**
+         *
+         */
         this.name = 'ZstdTrainingOutputError';
     }
 }
@@ -56,13 +78,24 @@ let nextJobId = 0;
 
 export class ZstdTrainerWorkerOwner {
     // createWorker must synchronously return a dedicated Worker owned only by this job.
-    /** @param {{createWorker?: () => Worker, timeoutMs?: number}} [options] */
-    constructor({createWorker = () => new Worker(new URL('./trainer-worker.js', import.meta.url), {type: 'module'}), timeoutMs = 30000} = {}) {
+    /**
+     * @param {{createWorker?: () => Worker, timeoutMs?: number}} [options]
+     */
+    constructor({createWorker = () => new Worker(new URL('trainer-worker.js', import.meta.url), {type: 'module'}), timeoutMs = 30000} = {}) {
         if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 120000) {
             throw new RangeError('Training timeout must be between 1 and 120000 ms');
         }
+        /**
+         *
+         */
         this._createWorker = createWorker;
+        /**
+         *
+         */
         this._timeoutMs = timeoutMs;
+        /**
+         *
+         */
         this._used = false;
     }
 
@@ -84,7 +117,10 @@ export class ZstdTrainerWorkerOwner {
             }
             this._used = true;
             const job = /** @type {TrainerJob} */ ({id: nextJobId++, worker: null, timer: null, settled: false});
-            /** @param {Error|null} error @param {TrainerResult} [result] */
+            /**
+             * @param {Error|null} error
+             * @param {TrainerResult} [result]
+             */
             const finish = (error, result) => {
                 if (job.settled) { return; }
                 job.settled = true;
@@ -98,32 +134,39 @@ export class ZstdTrainerWorkerOwner {
                     try { worker.terminate(); } catch (e) { /* Settlement must still complete. */ }
                     job.worker = null;
                 }
-                if (error !== null) { reject(error); } else if (typeof result !== 'undefined') { resolve(result); }
+                if (error !== null) {
+                    reject(error);
+                } else if (typeof result !== 'undefined') {
+                    resolve(result);
+                }
             };
             const onAbort = () => {
                 const error = new Error('Optional Zstd training aborted');
                 error.name = 'AbortError';
                 finish(error);
             };
-            /** @param {ErrorEvent} event */
+            /**
+             * @param {ErrorEvent} event
+             */
             const onError = (event) => {
                 event.preventDefault();
                 finish(new ZstdTrainingUnavailableError('Optional Zstd training worker failed', event.error));
             };
-            /** @param {MessageEvent<TrainerMessage>} event */
+            /**
+             * @param {MessageEvent<TrainerMessage>} event
+             */
             const onMessage = ({data}) => {
                 // A queued callback cannot revive a settled job, even after listeners are removed.
                 if (job.settled || data?.id !== job.id) { return; }
                 if (typeof data.error === 'string') {
-                    const error = data.errorKind === 'corpus' ?
-new ZstdTrainingCorpusError(data.error) :
-                        data.errorKind === 'invalid-output' ?
-new ZstdTrainingOutputError(data.error) :
-                            data.errorKind === 'resource' ?
-new ZstdTrainingResourceError(data.error) :
-                                data.errorKind === 'invalid-input' ?
-new TypeError(data.error) :
-                                    new ZstdTrainingUnavailableError(data.error);
+                    let error;
+                    switch (data.errorKind) {
+                        case 'corpus': error = new ZstdTrainingCorpusError(data.error); break;
+                        case 'invalid-output': error = new ZstdTrainingOutputError(data.error); break;
+                        case 'resource': error = new ZstdTrainingResourceError(data.error); break;
+                        case 'invalid-input': error = new TypeError(data.error); break;
+                        default: error = new ZstdTrainingUnavailableError(data.error); break;
+                    }
                     finish(error);
                     return;
                 }
@@ -138,9 +181,7 @@ new TypeError(data.error) :
                     return;
                 }
                 try {
-                    const owned = dictionary.byteOffset === 0 && dictionary.byteLength === dictionary.buffer.byteLength ?
-                        dictionary :
-new Uint8Array(dictionary);
+                    const owned = dictionary.byteOffset === 0 && dictionary.byteLength === dictionary.buffer.byteLength ? dictionary : new Uint8Array(dictionary);
                     finish(null, {dictionary: owned, initializeMs, trainMs, heapBytes});
                 } catch (error) {
                     finish(new ZstdTrainingUnavailableError('Optional Zstd training output allocation failed', error));
@@ -149,9 +190,15 @@ new Uint8Array(dictionary);
             const onMessageError = () => { finish(new ZstdTrainingUnavailableError('Optional Zstd training message could not be decoded')); };
             let inputsValidated = false;
             try {
-                if (signal?.aborted) { onAbort(); return; }
+                if (signal?.aborted) {
+                    onAbort();
+                    return;
+                }
                 signal?.addEventListener('abort', onAbort, {once: true});
-                if (signal?.aborted) { onAbort(); return; }
+                if (signal?.aborted) {
+                    onAbort();
+                    return;
+                }
                 if (!(samples instanceof Uint8Array) || samples.byteLength === 0 || samples.byteLength > 32 * 1024 * 1024 ||
                 !(lengths instanceof Uint8Array) || lengths.byteLength < 32 || lengths.byteLength > 200000 || lengths.byteLength % 4 !== 0 ||
                 !Number.isInteger(dictionaryCapacity) || dictionaryCapacity < 1024 || dictionaryCapacity > 112640 ||

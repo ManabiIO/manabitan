@@ -41,7 +41,9 @@ const matchTitle = /** @type {(this: DictionaryController, title: unknown) => st
     Reflect.get(DictionaryController.prototype, '_getDictionaryTaskMatchTitle')
 );
 
-/** @returns {DictionaryDatabase} */
+/**
+ * @returns {DictionaryDatabase}
+ */
 function glossaryDatabase() {
     const database = new DictionaryDatabase();
     Reflect.set(database, '_getSharedGlossaryArtifactMeta', () => ({

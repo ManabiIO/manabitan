@@ -52,6 +52,8 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-content-training-sampler.js',
     'ext/js/dictionary/term-content-optimization-checkpoint.js',
     'ext/js/dictionary/term-content-optimization-controller.js',
+    'ext/js/dictionary/term-content-legacy-eligibility.js',
+    'ext/js/dictionary/term-content-optimization-headroom.js',
     'ext/js/dictionary/term-content-optimization-artifacts.js',
     'ext/js/dictionary/term-content-optimization-batch-store.js',
     'ext/js/dictionary/term-content-optimization-reclaimer.js',

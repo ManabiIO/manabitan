@@ -181,7 +181,9 @@ describe('term content zstd initialization', () => {
                     for (const listener of this.listeners.get(type) ?? []) { listener(event); }
                 }
 
-                /** @param {{id: number}} message */
+                /**
+                 * @param {{id: number}} message
+                 */
                 postMessage(message) {
                     queueMicrotask(() => this.emit('message', {
                         data: {id: message.id, compressed: Uint8Array.of(9).buffer, envelopeMs: 0},
@@ -430,8 +432,6 @@ describe('actual stored codec label routing', () => {
         const decodeOptions = label === 'trained' ? {...options, codecSource: /** @type {const} */ ('immutable-layout')} : options;
         expect(api.decompressTermContentZstd(input, label === 'trained' ? codecId : label, decodeOptions)).toBe(output);
         expect(low.decompress).not.toHaveBeenCalled();
-        expect(low.decompressUsingDict).toHaveBeenCalledWith(
-            22, input, label === 'trained' ? dictionary : (label === 'jmdict' ? new Uint8Array([1, 2, 3]) : null), decodeOptions,
-        );
+        expect(low.decompressUsingDict).toHaveBeenCalledWith(22, input, label === 'trained' ? dictionary : (label === 'jmdict' ? new Uint8Array([1, 2, 3]) : null), decodeOptions);
     });
 });

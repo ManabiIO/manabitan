@@ -32,7 +32,9 @@ let contextFactoryId = 0;
 function contextFactory(references, resolve, {referenceGate, isCurrentFrame, isCurrentFrameLayout, isCurrentRange} = {}) {
     const counts = {live: 0, acquired: 0, forks: 0, released: 0};
     const rootKey = `test-root-${++contextFactoryId}`;
-    /** @returns {ReadContext} */
+    /**
+     * @returns {ReadContext}
+     */
     const acquire = () => {
         ++counts.live;
         ++counts.acquired;
@@ -100,7 +102,9 @@ function frame(key) {
     return {bytes: new Uint8Array([1, 2, 3]), codecId: null, envelope: 'none', decodedLength: 3, physicalKey: key, release: vi.fn()};
 }
 
-/** @returns {TermContentBlockStore} */
+/**
+ * @returns {TermContentBlockStore}
+ */
 function blockStore() {
     const contentStore = new TermContentOpfsStore();
     vi.spyOn(contentStore, 'readSlice').mockRejectedValue(new Error('Unleased fallback used'));

@@ -73,7 +73,11 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     }),
     getDatabaseRuntimeStateOffscreen: Object.freeze({
         preemptsMaintenance: false,
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
+        concurrency: 'exclusive',
+        timeoutClass: 'standard',
+        retryable: false,
+        requiresDatabase: false,
+        rejectDuringImport: true,
     }),
     databaseSetSuspendedOffscreen: Object.freeze({
         concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: false, rejectDuringImport: true,

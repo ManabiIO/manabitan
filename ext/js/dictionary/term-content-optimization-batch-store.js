@@ -403,7 +403,9 @@ export class TermContentOptimizationBatchStore {
             this._file(job, write.fileId, signal);
         }
         const check = () => this._check(job, signal);
-        /** @yields {Uint8Array} */
+        /**
+         * @yields {Uint8Array}
+         */
         async function *sourceChunks() {
             for (const chunk of iterateContentRepackCopyChunks({writes: [write]}, COPY_CHUNK_BYTES)) {
                 check();

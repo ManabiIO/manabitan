@@ -69,7 +69,9 @@ function addSafeByteLength(offset, length) {
 
 /** Confirmed structural loss of a previously observed content byte range. */
 export class TermContentIntegrityError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
         /**
@@ -245,7 +247,10 @@ export class TermContentOpfsStore {
         });
     }
 
-    /** @param {{storageEpoch: number, logicalHighWater: number}} root @returns {Promise<void>} */
+    /**
+     * @param {{storageEpoch: number, logicalHighWater: number}} root
+     * @returns {Promise<void>}
+     */
     async activateCommittedRoot(root) {
         this._validateCommittedRoot(root);
         const admitted = {...root};
@@ -293,7 +298,9 @@ export class TermContentOpfsStore {
         }
     }
 
-    /** @param {{storageEpoch: number, logicalHighWater: number}} root */
+    /**
+     * @param {{storageEpoch: number, logicalHighWater: number}} root
+     */
     _setCommittedRoot(root) {
         this._committedRoot = Object.freeze({...root});
         this._logicalBase = root.logicalHighWater;
@@ -324,7 +331,9 @@ export class TermContentOpfsStore {
         }
     }
 
-    /** @returns {Promise<FileSystemDirectoryHandle>} */
+    /**
+     * @returns {Promise<FileSystemDirectoryHandle>}
+     */
     async _getStorageDirectory() {
         return this._arenaDirectory ?? await navigator.storage.getDirectory();
     }
@@ -419,7 +428,9 @@ export class TermContentOpfsStore {
         }));
     }
 
-    /** @returns {number} Logical high-water mark after prepare or import publication. */
+    /**
+     * @returns {number} Logical high-water mark after prepare or import publication.
+     */
     getLogicalLength() {
         return this._length;
     }
@@ -937,7 +948,10 @@ export class TermContentOpfsStore {
         await this.reset();
     }
 
-    /** @param {{purgeImmutable?: boolean}} [options] @returns {Promise<void>} */
+    /**
+     * @param {{purgeImmutable?: boolean}} [options]
+     * @returns {Promise<void>}
+     */
     async reset({purgeImmutable = false} = {}) {
         if (purgeImmutable) {
             await this.resetForPurge();
@@ -1347,7 +1361,9 @@ export class TermContentOpfsStore {
         await this._runMutationExclusive(() => this._ensureLoadedForRead());
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _ensureLoadedForRead() {
         if (this._committedRoot !== null && this._arenaCheckpoint === null) {
             this._loadedForRead = true;

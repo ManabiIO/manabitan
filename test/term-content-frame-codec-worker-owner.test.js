@@ -14,7 +14,10 @@ class FakeWorker {
         this.posts = [];
     }
 
-    /** @param {string} type @param {FakeWorkerListener} listener */
+    /**
+     * @param {string} type
+     * @param {FakeWorkerListener} listener
+     */
     addEventListener(type, listener) {
         let listeners = this.listeners.get(type);
         if (typeof listeners === 'undefined') {
@@ -24,22 +27,34 @@ class FakeWorker {
         listeners.add(listener);
     }
 
-    /** @param {string} type @param {FakeWorkerListener} listener */
+    /**
+     * @param {string} type
+     * @param {FakeWorkerListener} listener
+     */
     removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
-    /** @param {import('core').SafeAny} message @param {ArrayBuffer[]} [transfer] */
+    /**
+     * @param {import('core').SafeAny} message
+     * @param {ArrayBuffer[]} [transfer]
+     */
     postMessage(message, transfer = []) {
         const received = structuredClone(message, {transfer});
         this.posts.push({message, received, transfer});
     }
 
     terminate() { this.terminated = true; }
-    /** @param {string} type @param {import('core').SafeAny} data */
+    /**
+     * @param {string} type
+     * @param {import('core').SafeAny} data
+     */
     emit(type, data) {
         for (const listener of this.listeners.get(type) ?? []) { listener({data, message: 'Worker failed'}); }
     }
 }
 
-/** @param {ConstructorParameters<typeof TermContentFrameCodecWorkerOwner>[0]} [options] */
+/**
+ * @param {ConstructorParameters<typeof TermContentFrameCodecWorkerOwner>[0]} [options]
+ * @returns {{owner: TermContentFrameCodecWorkerOwner, worker: FakeWorker}}
+ */
 function setup(options = {}) {
     const worker = new FakeWorker();
     const owner = new TermContentFrameCodecWorkerOwner({
@@ -49,7 +64,10 @@ function setup(options = {}) {
     return {owner, worker};
 }
 
-/** @param {Partial<DecodeRequest>} [overrides] @returns {DecodeRequest} */
+/**
+ * @param {Partial<DecodeRequest>} [overrides]
+ * @returns {DecodeRequest}
+ */
 function decodeRequest(overrides = {}) {
     return {action: 'decode',
         id: 0,

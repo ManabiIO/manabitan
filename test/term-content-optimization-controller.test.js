@@ -33,7 +33,6 @@ const parameters = {dictionaryCapacity: 16384, strategy: 1, level: 1};
 const identity = 'generation:window64k-f18-d16-v1';
 
 /**
- *
  * @param {Uint8Array} bytes
  * @returns {Promise<string>}
  */
@@ -42,7 +41,6 @@ async function digest(bytes) {
 }
 
 /**
- *
  * @param {number} [offset]
  * @returns {Frame}
  */
@@ -63,7 +61,6 @@ function frame(offset = 0) {
 }
 
 /**
- *
  * @param {Phase} phase
  * @param {Partial<State>} [patch]
  * @returns {Job}
@@ -80,7 +77,6 @@ function makeJob(phase, patch = {}) {
 }
 
 /**
- *
  * @param {Phase} [phase]
  * @param {Partial<State>} [patch]
  * @returns {{state: {job: Job|null, current: boolean, now: number, reclaimDone: boolean, lateAck: boolean, published: number, closed: number, staged: number, writes: number}, host: Host, files: Map<string, Uint8Array>, intents: Set<string>, frames: Frame[], events: string[], controller: (trainer?: Trainer) => TermContentOptimizationController}}
@@ -192,7 +188,6 @@ function fixture(phase = 'discover', patch = {}) {
         },
     };
     /**
-     *
      * @param {Trainer} [trainer]
      * @returns {TermContentOptimizationController}
      */
@@ -205,7 +200,6 @@ function fixture(phase = 'discover', patch = {}) {
 }
 
 /**
- *
  * @param {ReturnType<typeof fixture>} f
  * @returns {Promise<CheckpointFile>}
  */
@@ -221,7 +215,6 @@ async function dictionary(f) {
 }
 
 /**
- *
  * @param {'write'|'verify'|'publish'} stage
  * @param {boolean} [last]
  * @returns {NonNullable<State['batch']>}
@@ -230,7 +223,9 @@ function batch(stage, last = false) {
     return {id: 'batch-1', fileIds: ['pack-1'], token: {sourceLayoutIds: ['layout-1']}, nextCursor: 1, last, stage, verifyCursor: null};
 }
 
-/** @returns {AbortSignal} */
+/**
+ * @returns {AbortSignal}
+ */
 function signal() { return new AbortController().signal; }
 
 test('a simultaneous idle step cannot reserve a second owner while discovery is awaiting I/O', async () => {
@@ -864,13 +859,15 @@ test('only a valid generic legacy frame requests activation', async () => {
     let legacy = true;
     f.host.isLegacyRoot = () => legacy;
     f.host.acquireLegacyProbe = () => ({
-        source: {logicalHighWater: bytes.length, assertCurrent: () => {},
+        source: {logicalHighWater: bytes.length,
+            assertCurrent: () => {},
             readSlice: async (offset, length) => bytes.slice(offset, offset + length)},
         activate: async () => { legacy = false; },
     });
     f.host.readDiscovery = async () => ({items: [{kind: 'reference',
         reference: {recordId: 1, entryContentOffset: 0, entryContentLength: 3, entryContentDictName: ''}}],
-    cursor: 2, done: true});
+    cursor: 2,
+    done: true});
     await f.controller().runStep(signal());
     expect(legacy).toBe(false);
     expect(f.state.job).toMatchObject({phase: 'discover', checkpoint: {legacyProbe: false, discoveryCursor: null}});
@@ -886,14 +883,17 @@ test('immutable block ranges coalesce duplicate references and block description
     f.host.acquireSource = () => ({source: {
         logicalHighWater: 4096,
         assertCurrent: () => {},
-        readSlice: async () => { ++reads; return encoded.slice(); },
+        readSlice: async () => { ++reads; return new Uint8Array(encoded); },
         describe: async (identity) => { ++described; return {...frame(2000), identity}; },
         findOverride: async () => null,
-    }, close: async () => {}});
+    },
+    close: async () => {}});
     f.host.readDiscovery = async () => ({
         items: Array.from({length: 1024}, (_, index) => ({kind: /** @type {const} */ ('reference'),
-            reference: {recordId: index + 1, entryContentOffset: index % 2 ? 20 : 0,
-                entryContentLength: 3, entryContentDictName: 'raw-block-v2'}})),
+            reference: {recordId: index + 1,
+                entryContentOffset: index % 2 ? 20 : 0,
+                entryContentLength: 3,
+                entryContentDictName: 'raw-block-v2'}})),
         cursor: 1024,
         done: false,
         resumeAfterBlockReference: () => { throw new Error('One shared block cannot exhaust the frame budget'); },
@@ -908,18 +908,23 @@ test('immutable block ranges coalesce duplicate references and block description
 test('an overfull immutable block range resumes immediately after its committed prefix', async () => {
     const f = fixture();
     const records = Array.from({length: 130}, (_, index) => ({kind: /** @type {const} */ ('reference'),
-        reference: {recordId: index * 2 + 1, entryContentOffset: index * 20,
-            entryContentLength: 3, entryContentDictName: 'raw-block-v2'}}));
+        reference: {recordId: index * 2 + 1,
+            entryContentOffset: index * 20,
+            entryContentLength: 3,
+            entryContentDictName: 'raw-block-v2'}}));
     f.host.acquireSource = () => ({source: {
         logicalHighWater: 50000,
         assertCurrent: () => {},
         readSlice: async (offset) => encodeRawTermContentCompactBlockReference(10000 + offset * 8, 100, 65536, 0),
         describe: async (identity) => ({...frame(identity.logicalOffset), identity}),
         findOverride: async () => null,
-    }, close: async () => {}});
+    },
+    close: async () => {}});
     f.host.readDiscovery = async (_job, cursor) => {
         const priorRecord = typeof cursor === 'number' ? cursor : 0;
-        return {items: records.filter((item) => item.reference.recordId > priorRecord), cursor: 299, done: true,
+        return {items: records.filter((item) => item.reference.recordId > priorRecord),
+            cursor: 299,
+            done: true,
             resumeAfterBlockReference: (recordId) => recordId};
     };
     await f.controller().runStep(signal());
@@ -941,11 +946,18 @@ test('conflicting metadata for the same block leaves the previous cursor intact'
         readSlice: async (offset) => encodeRawTermContentCompactBlockReference(2000, offset === 0 ? 100 : 101, 65536, 0),
         describe: async (identity) => ({...frame(2000), identity}),
         findOverride: async () => null,
-    }, close: async () => {}});
+    },
+    close: async () => {}});
     f.host.readDiscovery = async () => ({items: [0, 20].map((offset, index) => ({
-        kind: /** @type {const} */ ('reference'), reference: {recordId: index + 1, entryContentOffset: offset,
-            entryContentLength: 3, entryContentDictName: 'raw-block-v2'},
-    })), cursor: 2, done: true, resumeAfterBlockReference: (id) => id});
+        kind: /** @type {const} */ ('reference'),
+        reference: {recordId: index + 1,
+            entryContentOffset: offset,
+            entryContentLength: 3,
+            entryContentDictName: 'raw-block-v2'},
+    })),
+    cursor: 2,
+    done: true,
+    resumeAfterBlockReference: (id) => id});
     await expect(f.controller().runStep(signal())).rejects.toThrow(/conflicting immutable frame identities/);
     expect(f.frames).toEqual([]);
     expect(f.state.job?.checkpoint.discoveryCursor).toBeNull();
@@ -955,18 +967,26 @@ test('foreground abort inside a block range never persists a partly observed ran
     const f = fixture();
     const abort = new AbortController();
     f.host.acquireSource = () => ({source: {
-        logicalHighWater: 4096, assertCurrent: () => {},
+        logicalHighWater: 4096,
+        assertCurrent: () => {},
         readSlice: async (offset) => {
             if (offset > 0) { abort.abort(); }
             return encodeRawTermContentCompactBlockReference(2000 + offset * 8, 100, 65536, 0);
         },
         describe: async (identity) => ({...frame(identity.logicalOffset), identity}),
         findOverride: async () => null,
-    }, close: async () => { ++f.state.closed; }});
+    },
+    close: async () => { ++f.state.closed; }});
     f.host.readDiscovery = async () => ({items: [0, 20].map((offset, index) => ({
-        kind: /** @type {const} */ ('reference'), reference: {recordId: index + 1, entryContentOffset: offset,
-            entryContentLength: 3, entryContentDictName: 'raw-block-v2'},
-    })), cursor: 2, done: true, resumeAfterBlockReference: (id) => id});
+        kind: /** @type {const} */ ('reference'),
+        reference: {recordId: index + 1,
+            entryContentOffset: offset,
+            entryContentLength: 3,
+            entryContentDictName: 'raw-block-v2'},
+    })),
+    cursor: 2,
+    done: true,
+    resumeAfterBlockReference: (id) => id});
     await expect(f.controller().runStep(abort.signal)).rejects.toMatchObject({name: 'AbortError'});
     expect(f.frames).toEqual([]);
     expect(f.state.closed).toBe(1);

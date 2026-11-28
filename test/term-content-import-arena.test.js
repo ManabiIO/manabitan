@@ -7,7 +7,9 @@ import {afterEach, expect, test, vi} from 'vitest';
 import {DictionaryImportJournal} from '../ext/js/dictionary/dictionary-import-journal.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
-/** @returns {Error} */
+/**
+ * @returns {Error}
+ */
 function notFound() {
     const error = new Error('Not found');
     error.name = 'NotFoundError';
@@ -83,7 +85,9 @@ class Directory {
      */
     async removeEntry(name, _options = {}) { if (!this.children.delete(name)) { throw notFound(); } }
 
-    /** @yields {[string, unknown]} */
+    /**
+     * @yields {[string, unknown]}
+     */
     async *entries() {
         for (const [name, value] of this.children) {
             yield [name, value instanceof Directory ? value : await this.getFileHandle(name)];
@@ -91,7 +95,9 @@ class Directory {
     }
 }
 
-/** @returns {{root: Directory, store: TermContentOpfsStore}} */
+/**
+ * @returns {{root: Directory, store: TermContentOpfsStore}}
+ */
 function setup() {
     const root = new Directory();
     vi.stubGlobal('navigator', {storage: {getDirectory: async () => root}});

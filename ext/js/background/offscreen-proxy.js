@@ -42,7 +42,9 @@ class OffscreenControlTransportError extends Error {
 
 /** A local failure proven to precede transfer of an import to its runtime. */
 export class DictionaryImportNotAdmittedError extends Error {
-    /** @param {unknown} cause */
+    /**
+     * @param {unknown} cause
+     */
     constructor(cause) {
         super(cause instanceof Error ? cause.message : 'Dictionary import was not admitted', {cause});
         /** @type {string} */
@@ -109,7 +111,9 @@ export class OffscreenProxy {
         this._resetOffscreenPortReadyPromise();
     }
 
-    /** @param {import('offscreen').TermContentOptimizationState} state */
+    /**
+     * @param {import('offscreen').TermContentOptimizationState} state
+     */
     setTermContentOptimizationState(state) {
         this._termContentOptimizationState = state;
         // The ordinary startup/foreground paths own offscreen creation.
@@ -517,7 +521,9 @@ export class DictionaryRuntimeWorkerProxy {
         this._termContentOptimizationState = void 0;
     }
 
-    /** @param {import('offscreen').TermContentOptimizationState} state */
+    /**
+     * @param {import('offscreen').TermContentOptimizationState} state
+     */
     setTermContentOptimizationState(state) {
         this._termContentOptimizationState = state;
         this._client.notifyTermContentOptimizationState(state);

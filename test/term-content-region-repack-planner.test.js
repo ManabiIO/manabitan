@@ -16,23 +16,47 @@ import {iterateContentRepackCopyChunks, planContentRegionRepack} from '../ext/js
 const DIGEST = 'a'.repeat(64);
 const DICT_DIGEST = 'b'.repeat(64);
 
-/** @param {number} logicalOffset @param {number} [sourceStoredLength] @param {Partial<Frame>} [fields] @returns {Frame} */
+/**
+ * @param {number} logicalOffset
+ * @param {number} [sourceStoredLength]
+ * @param {Partial<Frame>} [fields]
+ * @returns {Frame}
+ */
 function frame(logicalOffset, sourceStoredLength = 20, fields = {}) {
     return {
-        kind: 'block', logicalOffset, recordLength: sourceStoredLength, sourceStoredLength,
-        originalCodecId: null, expectedDecodedLength: 40, originalEnvelope: 'none',
-        fileId: 'staged', physicalOffset: 0, storedLength: 16, codecId: 'custom',
-        envelope: 'none', decodedLength: 40, decodedDigest: DIGEST, ...fields,
+        kind: 'block',
+        logicalOffset,
+        recordLength: sourceStoredLength,
+        sourceStoredLength,
+        originalCodecId: null,
+        expectedDecodedLength: 40,
+        originalEnvelope: 'none',
+        fileId: 'staged',
+        physicalOffset: 0,
+        storedLength: 16,
+        codecId: 'custom',
+        envelope: 'none',
+        decodedLength: 40,
+        decodedDigest: DIGEST,
+        ...fields,
     };
 }
 
-/** @param {FrameIdentity} value @returns {FrameIdentity} */
+/**
+ * @param {FrameIdentity} value
+ * @returns {FrameIdentity}
+ */
 function identity(value) {
     const {kind, logicalOffset, recordLength, sourceStoredLength, originalCodecId, expectedDecodedLength, originalEnvelope} = value;
     return {kind, logicalOffset, recordLength, sourceStoredLength, originalCodecId, expectedDecodedLength, originalEnvelope};
 }
 
-/** @param {number} [start] @param {number} [length] @param {number} [count] @returns {ContentRepackWindow} */
+/**
+ * @param {number} [start]
+ * @param {number} [length]
+ * @param {number} [count]
+ * @returns {ContentRepackWindow}
+ */
 function source(start = 0, length = 100, count = 2) {
     /** @type {PhysicalFile[]} */
     const files = [
@@ -42,30 +66,42 @@ function source(start = 0, length = 100, count = 2) {
     ];
     return {
         manifests: Array.from({length: count}, (_, i) => ({
-            version: 1, regionId: 'region' + i,
-            logicalStart: start + i * length, logicalLength: length,
-            extents: [{logicalOffset: 0, length, fileId: 'old', physicalOffset: i * length}], blocks: [], removed: [],
+            version: 1,
+            regionId: 'region' + i,
+            logicalStart: start + i * length,
+            logicalLength: length,
+            extents: [{logicalOffset: 0, length, fileId: 'old', physicalOffset: i * length}],
+            blocks: [],
+            removed: [],
         })),
-        externalFrames: [], files, physicalFiles: structuredClone(files),
+        externalFrames: [],
+        files,
+        physicalFiles: structuredClone(files),
         codecs: [{codecId: 'custom', fileId: 'dictionary', formatVersion: 1, dictionaryBytes: 8, dictionarySha256: DICT_DIGEST}],
     };
 }
 
-/** @param {Map<string, Uint8Array>} bytes @param {string} fileId @returns {Uint8Array} */
+/**
+ * @param {Map<string, Uint8Array>} bytes
+ * @param {string} fileId
+ * @returns {Uint8Array}
+ */
 function requireFileBytes(bytes, fileId) {
     const value = bytes.get(fileId);
     if (typeof value === 'undefined') { throw new Error('Missing fixture bytes: ' + fileId); }
     return value;
 }
 
-/** @param {ContentRegionRepackPlan} plan @param {Map<string, Uint8Array>} bytes @returns {Map<string, Uint8Array>} */
+/**
+ * @param {ContentRegionRepackPlan} plan
+ * @param {Map<string, Uint8Array>} bytes
+ * @returns {Map<string, Uint8Array>}
+ */
 function executeSmallCopies(plan, bytes) {
     const result = new Map(bytes);
     for (const write of plan.writes) { result.set(write.fileId, new Uint8Array(write.byteLength)); }
     for (const copy of iterateContentRepackCopyChunks(plan, 7)) {
-        requireFileBytes(result, copy.targetFileId).set(
-            requireFileBytes(result, copy.sourceFileId).subarray(copy.sourceOffset, copy.sourceOffset + copy.length), copy.targetOffset,
-        );
+        requireFileBytes(result, copy.targetFileId).set(requireFileBytes(result, copy.sourceFileId).subarray(copy.sourceOffset, copy.sourceOffset + copy.length), copy.targetOffset);
     }
     return result;
 }
@@ -90,7 +126,8 @@ function logicalBytes(resolver, bytes, offset, length) {
 describe('bounded content region repack planning', () => {
     test('owns a crossing frame once and resolves unrelated bytes in its continuation window', () => {
         const replacement = frame(90);
-        const plan = planContentRegionRepack({source: source(), replacements: [replacement],
+        const plan = planContentRegionRepack({source: source(),
+            replacements: [replacement],
             packFiles: [{regionId: 'region0', fileId: 'pack0'}, {regionId: 'region1', fileId: 'pack1'}]});
         expect(plan.next.manifests[0].removed).toEqual([{logicalOffset: 90, length: 10, frameLogicalOffset: 90}]);
         expect(plan.next.manifests[1].removed).toEqual([{logicalOffset: 0, length: 10, frameLogicalOffset: 90}]);
@@ -107,7 +144,8 @@ describe('bounded content region repack planning', () => {
         const old = Uint8Array.from({length: 200}, (_, i) => (i * 13) % 256);
         const input = source();
         const before = structuredClone(input);
-        const plan = planContentRegionRepack({source: input, replacements: [frame(90)],
+        const plan = planContentRegionRepack({source: input,
+            replacements: [frame(90)],
             packFiles: [{regionId: 'region0', fileId: 'pack0'}, {regionId: 'region1', fileId: 'pack1'}]});
         const bytes = executeSmallCopies(plan, new Map([['old', old], ['staged', new Uint8Array(128)], ['dictionary', new Uint8Array(8)]]));
         const resolver = createContentLayoutResolver(plan.next);
@@ -121,7 +159,8 @@ describe('bounded content region repack planning', () => {
     test('flattens an existing override and relocates its actual stored bytes, with no redirect', () => {
         const first = planContentRegionRepack({source: source(), replacements: [frame(20)]});
         const second = planContentRegionRepack({source: first.next,
-            packFiles: [{regionId: 'region0', fileId: 'packed'}], relocateFrames: true});
+            packFiles: [{regionId: 'region0', fileId: 'packed'}],
+            relocateFrames: true});
         const block = second.next.manifests[0].blocks[0];
         expect(block).toEqual({...frame(20), fileId: 'packed', physicalOffset: 80});
         expect(second.writes[0].byteLength).toBe(96);
@@ -148,15 +187,29 @@ describe('bounded content region repack planning', () => {
     });
 
     test('rejects physical aliases and accessors before returning a relocation plan', () => {
-        expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {fileId: 'old', physicalOffset: 50})],
-            packFiles: [{regionId: 'region0', fileId: 'packed'}], relocateFrames: true})).toThrow(/physical spans overlap/i);
+        expect(() => planContentRegionRepack({source: source(),
+            replacements: [frame(10, 20, {fileId: 'old', physicalOffset: 50})],
+            packFiles: [{regionId: 'region0', fileId: 'packed'}],
+            relocateFrames: true})).toThrow(/physical spans overlap/i);
         let accessorCalls = 0;
         const replacement = frame(10);
-        Object.defineProperty(replacement, 'storedLength', {enumerable: true, get() { ++accessorCalls; return 16; }});
+        Object.defineProperty(replacement, 'storedLength', {
+            enumerable: true,
+            get() {
+                ++accessorCalls;
+                return 16;
+            },
+        });
         expect(() => planContentRegionRepack({source: source(), replacements: [replacement]})).toThrow(/own-data/);
         expect(accessorCalls).toBe(0);
         const targets = [{regionId: 'region0', fileId: 'packed'}];
-        Object.defineProperty(targets[0], 'fileId', {enumerable: true, get() { ++accessorCalls; return 'packed'; }});
+        Object.defineProperty(targets[0], 'fileId', {
+            enumerable: true,
+            get() {
+                ++accessorCalls;
+                return 'packed';
+            },
+        });
         expect(() => planContentRegionRepack({source: source(), packFiles: targets})).toThrow(/own-data/);
         expect(accessorCalls).toBe(0);
     });
@@ -189,8 +242,10 @@ describe('bounded content region repack planning', () => {
         input.files[1].byteLength = storedBytes;
         input.physicalFiles[1].byteLength = storedBytes;
         const replacement = frame(regionBytes - 64 * 1024, 1024 * 1024, {storedLength: storedBytes, expectedDecodedLength: 2 * 1024 * 1024, decodedLength: 2 * 1024 * 1024});
-        const plan = planContentRegionRepack({source: input, replacements: [replacement],
-            packFiles: [{regionId: 'region0', fileId: 'largepack'}], relocateFrames: true});
+        const plan = planContentRegionRepack({source: input,
+            replacements: [replacement],
+            packFiles: [{regionId: 'region0', fileId: 'largepack'}],
+            relocateFrames: true});
         expect(plan.writes[0].byteLength).toBe(regionBytes + 448 * 1024);
         let sum = 0;
         let count = 0;
@@ -219,11 +274,15 @@ describe('bounded content region repack planning', () => {
         expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {codecId: 'missing'})]})).toThrow(/codec closure/);
         expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {fileId: 'missing'})]})).toThrow(/Physical span|file closure/);
         expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {physicalOffset: 120})]})).toThrow(/Physical span/);
-        expect(() => planContentRegionRepack({source: source(), replacements: Array(16385).fill(frame(10))})).toThrow(/admission/);
+        expect(() => planContentRegionRepack({source: source(), replacements: new Array(16385).fill(frame(10))})).toThrow(/admission/);
         expect(() => [...iterateContentRepackCopyChunks({writes: []}, 4 * 1024 * 1024 + 1)]).toThrow(/chunk bound/);
-        expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {physicalOffset: 120})],
-            packFiles: [{regionId: 'region0', fileId: 'packed'}], relocateFrames: true})).toThrow(/source physical span/);
-        expect(() => planContentRegionRepack({source: source(), replacements: [frame(10, 20, {physicalOffset: -1})],
-            packFiles: [{regionId: 'region0', fileId: 'packed'}], relocateFrames: true})).toThrow(/Unsafe/);
+        expect(() => planContentRegionRepack({source: source(),
+            replacements: [frame(10, 20, {physicalOffset: 120})],
+            packFiles: [{regionId: 'region0', fileId: 'packed'}],
+            relocateFrames: true})).toThrow(/source physical span/);
+        expect(() => planContentRegionRepack({source: source(),
+            replacements: [frame(10, 20, {physicalOffset: -1})],
+            packFiles: [{regionId: 'region0', fileId: 'packed'}],
+            relocateFrames: true})).toThrow(/Unsafe/);
     });
 });

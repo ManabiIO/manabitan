@@ -35,6 +35,7 @@ const requiredNativeAssets = new Set([
     'lib/term-content-canonical-scan-v1.wasm',
     'js/dictionary/zstd-trainer.wasm',
 ]);
+const requiredLicenseAssets = new Set(['js/dictionary/zstd-trainer.LICENSE']);
 const manifestUtil = new ManifestUtil();
 /** @type {Map<string, string>} */
 const packageVariants = new Map();
@@ -59,6 +60,8 @@ for (const path of paths) {
     const tree = createHash('sha256');
     /** @type {Record<string, string>} */
     const nativeAssets = {};
+    /** @type {Record<string, string>} */
+    const licenseAssets = {};
     for (const file of files) {
         const content = await file.async('uint8array');
         const digest = hash(content);
@@ -67,8 +70,10 @@ for (const path of paths) {
             if (!WebAssembly.validate(content)) { throw new Error(`Invalid native asset: ${path}:${file.name}`); }
             nativeAssets[file.name] = digest;
         }
+        if (requiredLicenseAssets.has(file.name)) { licenseAssets[file.name] = digest; }
     }
     if (Object.keys(nativeAssets).length !== requiredNativeAssets.size) { throw new Error(`Package is missing a required native asset: ${path}`); }
-    packages.push({path, version, manifestVersion: 'manifest_version' in manifest ? manifest.manifest_version : null, sha256: hash(bytes), treeSha256: tree.digest('hex'), fileCount: files.length, nativeAssets});
+    if (Object.keys(licenseAssets).length !== requiredLicenseAssets.size) { throw new Error(`Package is missing a required third-party license notice: ${path}`); }
+    packages.push({path, version, manifestVersion: 'manifest_version' in manifest ? manifest.manifest_version : null, sha256: hash(bytes), treeSha256: tree.digest('hex'), fileCount: files.length, nativeAssets, licenseAssets});
 }
 process.stdout.write(JSON.stringify({version, sourceCommit: process.env.GITHUB_SHA ?? null, unsigned: true, packages}, null, 2) + '\n');

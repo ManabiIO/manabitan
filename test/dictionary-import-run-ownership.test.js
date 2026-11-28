@@ -25,7 +25,9 @@ afterEach(() => {
     Reflect.deleteProperty(globalThis, '__manabitanImportStepTimingHistory');
 });
 
-/** @returns {import('core').DeferredPromiseDetails<void>} */
+/**
+ * @returns {import('core').DeferredPromiseDetails<void>}
+ */
 function barrier() {
     return deferPromise();
 }

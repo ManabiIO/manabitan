@@ -25,7 +25,6 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
 /** @typedef {import('../ext/js/dictionary/term-content-block-store.js').TermContentFrameIdentity} Identity */
 
 /**
- *
  * @param {Uint8Array} payload
  * @returns {Uint8Array}
  */
@@ -40,7 +39,6 @@ function rawFrame(payload) {
 }
 
 /**
- *
  * @param {Uint8Array} bytes
  * @param {number} [logicalOffset]
  * @returns {Identity}
@@ -56,7 +54,6 @@ function legacyIdentity(bytes, logicalOffset = 0) {
 }
 
 /**
- *
  * @param {Uint8Array} bytes
  * @returns {Identity}
  */
@@ -78,7 +75,9 @@ function sharedIdentity(bytes) {
 function leasedContext(resolve, {identity, current} = {}) {
     const counts = {live: 0};
     const readSlice = vi.fn(async () => { throw new Error('Retired original frame was read'); });
-    /** @returns {ReadContext} */
+    /**
+     * @returns {ReadContext}
+     */
     const acquire = () => {
         ++counts.live;
         let released = false;
@@ -102,7 +101,6 @@ function leasedContext(resolve, {identity, current} = {}) {
 }
 
 /**
- *
  * @param {Uint8Array} bytes
  * @param {string} [physicalKey]
  * @returns {Frame}

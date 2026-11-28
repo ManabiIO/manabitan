@@ -17,7 +17,9 @@ class MemoryFileHandle {
         /** @type {Uint8Array[]} */
         const chunks = [];
         return {
-            /** @param {Uint8Array} value */
+            /**
+             * @param {Uint8Array} value
+             */
             write: async (value) => { chunks.push(new Uint8Array(value)); },
             close: async () => {
                 const joined = new Uint8Array(chunks.reduce((total, value) => total + value.byteLength, 0));
@@ -60,7 +62,9 @@ class MemoryDirectoryHandle {
         return this.files.get(name);
     }
 
-    /** @param {string} name */
+    /**
+     * @param {string} name
+     */
     async removeEntry(name) {
         if (!this.files.delete(name)) { throw new DOMException('Missing file', 'NotFoundError'); }
     }

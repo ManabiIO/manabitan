@@ -136,6 +136,7 @@ function run(command, args, options = {}) {
  * @param {string} command
  * @param {string[]} args
  * @returns {string}
+ * @throws {Error} If the compiler command fails.
  */
 function runCapture(command, args) {
     const result = spawnSync(command, args, {encoding: 'utf8', maxBuffer: 1024 * 1024});
@@ -168,7 +169,9 @@ function digest(fileName) {
     return crypto.createHash('sha256').update(fs.readFileSync(fileName)).digest('hex');
 }
 
-/** @param {string} directory */
+/**
+ * @param {string} directory
+ */
 function moveToTrash(directory) {
     const trashRoot = path.join(os.homedir(), '.Trash');
     const destination = path.join(trashRoot, `${path.basename(directory)}-${Date.now().toString(36)}`);

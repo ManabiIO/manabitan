@@ -8,6 +8,7 @@ import {afterEach, beforeAll, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {createTermContentOptimizationCheckpoint} from '../ext/js/dictionary/term-content-optimization-controller.js';
 import {TermContentOptimizationReclaimer} from '../ext/js/dictionary/term-content-optimization-reclaimer.js';
+import {ContentStorageSnapshots} from '../ext/js/dictionary/term-content-storage-snapshots.js';
 
 /** @typedef {import('@sqlite.org/sqlite-wasm').Database} Database */
 /** @typedef {import('../ext/js/dictionary/term-content-optimization-controller.js').OptimizationJob} Job */
@@ -98,7 +99,7 @@ function createFixture(next = 'completed') {
         jobId, dictionaryTitle, dictionaryGeneration, strategyVersion, phase, cursorJson, checkpointJson,
         checkpointVersion, retryAfter, updatedAt
     ) VALUES ('job', 'Fixture', 'generation', 'strategy', 'reclaim', 'null', ?, 4, NULL, 0)`,
-        bind: [JSON.stringify(checkpoint)]});
+    bind: [JSON.stringify(checkpoint)]});
     db.exec({sql: "INSERT INTO termContentOptimizationCheckpoints VALUES ('job', -1, 'retired-file', 'source', 0, 4, NULL, ?)",
         bind: [JSON.stringify({version: 1, sourceRootId: 'old-root', path: oldPath, ownerJobId: 'import-old'})]});
     const state = {leased: false};
@@ -136,6 +137,29 @@ test('waits for leases and durably claims one exact retired file before removing
     await expect(reclaimer.runStep(job, signal)).resolves.toEqual({job, done: true});
     expect(db.selectValues('SELECT rootId FROM termContentStorageRoots')).toEqual(['current-root']);
     expect(removeFile).toHaveBeenCalledTimes(1);
+});
+
+test('an old snapshot lease pins its retired file across root publication until the read finishes', async () => {
+    const {db, job, state, reclaimer, removeFile} = createFixture();
+    const snapshots = new ContentStorageSnapshots({epoch: 1,
+        logicalHighWater: 4,
+        regions: [{regionId: 'old-root-region', layoutId: 'old-root-layout', logicalStart: 0, logicalLength: 4}]});
+    const oldRead = snapshots.acquire();
+    snapshots.publish(snapshots.current, {epoch: 2,
+        logicalHighWater: 4,
+        regions: [{regionId: 'current-root-region', layoutId: 'current-root-layout', logicalStart: 0, logicalLength: 4}]});
+    Object.defineProperty(state, 'leased', {get: () => snapshots.hasActiveLeases});
+
+    expect(oldRead.root.regions[0].layoutId).toBe('old-root-layout');
+    expect(snapshots.isLayoutPinned('old-root-layout')).toBe(true);
+    await expect(reclaimer.runStep(job, new AbortController().signal)).resolves.toMatchObject({job, done: false});
+    expect(db.selectValue("SELECT state FROM termContentStorageFiles WHERE fileId = 'source'")).toBe('retired');
+    expect(removeFile).not.toHaveBeenCalled();
+
+    oldRead.release();
+    expect(snapshots.isLayoutPinned('old-root-layout')).toBe(false);
+    await expect(reclaimer.runStep(job, new AbortController().signal)).resolves.toEqual({job, done: false});
+    expect(removeFile).toHaveBeenCalledWith({fileId: 'source', path: oldPath, byteLength: 4});
 });
 
 
@@ -244,26 +268,24 @@ test('a committed cleanup with a lost acknowledgement does not unlink again', as
 });
 
 
-test.each(['no-files', 'intent', 'retired-receipt'])(
-    'only durable deferred physical ownership blocks another job reclamation: %s', async (mode) => {
-        const {db, job, reclaimer, removeFile} = createFixture();
-        db.exec(`INSERT INTO termContentOptimizationJobs (
+test.each(['no-files', 'intent', 'retired-receipt'])('only durable deferred physical ownership blocks another job reclamation: %s', async (mode) => {
+    const {db, job, reclaimer, removeFile} = createFixture();
+    db.exec(`INSERT INTO termContentOptimizationJobs (
             jobId, dictionaryTitle, dictionaryGeneration, strategyVersion, phase,
             cursorJson, checkpointJson, checkpointVersion, retryAfter, updatedAt
         ) VALUES ('parked', 'Parked', 'later-generation', 'strategy', 'deferred', 'null', '{}', 1, 50000, 0)`);
-        if (mode === 'intent') {
-            insertFile(db, 'parked-file', 'intent', 'parked');
-        } else if (mode === 'retired-receipt') {
-            db.exec("INSERT INTO termContentOptimizationCheckpoints VALUES ('parked', -2, 'retired-file', 'parked-source', 0, 4, NULL, '{}')");
-        }
-        const attempt = reclaimer.runStep(job, new AbortController().signal);
-        if (mode === 'no-files') {
-            await expect(attempt).resolves.toEqual({job, done: false});
-            expect(removeFile).toHaveBeenCalledOnce();
-            expect(db.selectValue("SELECT phase FROM termContentOptimizationJobs WHERE jobId = 'parked'")).toBe('deferred');
-        } else {
-            await expect(attempt).rejects.toThrow(/reclamation job is stale/);
-            expect(removeFile).not.toHaveBeenCalled();
-        }
-    },
-);
+    if (mode === 'intent') {
+        insertFile(db, 'parked-file', 'intent', 'parked');
+    } else if (mode === 'retired-receipt') {
+        db.exec("INSERT INTO termContentOptimizationCheckpoints VALUES ('parked', -2, 'retired-file', 'parked-source', 0, 4, NULL, '{}')");
+    }
+    const attempt = reclaimer.runStep(job, new AbortController().signal);
+    if (mode === 'no-files') {
+        await expect(attempt).resolves.toEqual({job, done: false});
+        expect(removeFile).toHaveBeenCalledOnce();
+        expect(db.selectValue("SELECT phase FROM termContentOptimizationJobs WHERE jobId = 'parked'")).toBe('deferred');
+    } else {
+        await expect(attempt).rejects.toThrow(/reclamation job is stale/);
+        expect(removeFile).not.toHaveBeenCalled();
+    }
+});

@@ -559,7 +559,9 @@ export class DictionaryImportController {
         );
     }
 
-    /** @param {PageTransitionEvent} event */
+    /**
+     * @param {PageTransitionEvent} event
+     */
     _onPageHide(event) {
         // beforeunload only requests a confirmation: choosing Stay must not
         // cancel an import or consume its eventual page-departure cleanup.
@@ -1042,7 +1044,6 @@ export class DictionaryImportController {
     }
 
     /**
-     *
      * @param {import('dictionary-recommended.js').RecommendedDictionary[]} recommendedDictionaries
      * @param {HTMLElement} dictionariesList
      * @param {Set<string>} installedDictionaryNames
@@ -1805,7 +1806,9 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
-            /** @param {unknown} error */
+            /**
+             * @param {unknown} error
+             */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -3833,7 +3836,9 @@ export class ImportProgressTracker {
         return this._stepTimingHistory.map((item) => ({...item}));
     }
 
-    /** @param {() => boolean} check */
+    /**
+     * @param {() => boolean} check
+     */
     setImportRunCheck(check) {
         this._isImportRunCurrent = check;
     }

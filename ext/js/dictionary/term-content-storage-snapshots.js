@@ -23,7 +23,11 @@
  * @property {() => ContentStorageLease} fork
  * @property {() => void} release
  */
-/** @param {ContentStorageRoot} root */
+/**
+ * @param {ContentStorageRoot} root
+ * @returns {OwnedContentStorageRoot}
+ * @throws {TypeError} If the root or its regions are invalid.
+ */
 function ownRoot(root) {
     if (!root || !Number.isSafeInteger(root.epoch) || root.epoch < 0 ||
     !Number.isSafeInteger(root.logicalHighWater) || root.logicalHighWater < 0 || !Array.isArray(root.regions)) {
@@ -49,13 +53,15 @@ function ownRoot(root) {
             logicalStart: region.logicalStart,
             logicalLength: region.logicalLength});
     });
-    if (cursor !== root.logicalHighWater) throw new TypeError('Content root directory does not cover high water');
+    if (cursor !== root.logicalHighWater) { throw new TypeError('Content root directory does not cover high water'); }
     return Object.freeze({epoch: root.epoch, logicalHighWater: root.logicalHighWater, regions: Object.freeze(regions)});
 }
 
 /** Owns immutable read roots only. Durable SQL publication and staged-file closure stay above this component. */
 export class ContentStorageSnapshots {
-    /** @param {ContentStorageRoot} root */
+    /**
+     * @param {ContentStorageRoot} root
+     */
     constructor(root) {
         /** @type {OwnedContentStorageRoot} */
         this._current = ownRoot(root);
@@ -65,53 +71,74 @@ export class ContentStorageSnapshots {
         this._currentLayoutIds = new Set(this._current.regions.map((/** @type {{layoutId: string}} */ region) => region.layoutId));
     }
 
-    /** @returns {OwnedContentStorageRoot} */
+    /**
+     * @returns {OwnedContentStorageRoot}
+     */
     get current() { return this._current; }
 
-    /** @returns {boolean} Whether any caller still owns physical read resources. */
+    /**
+     * @returns {boolean} Whether any caller still owns physical read resources.
+     */
     get hasActiveLeases() { return this._leases.size > 0; }
 
     /** Synchronous CAS after a successful durable SQL commit, never before it. */
-    /** @param {OwnedContentStorageRoot} expected @param {ContentStorageRoot} next @returns {OwnedContentStorageRoot} */
+    /**
+     * @param {OwnedContentStorageRoot} expected
+     * @param {ContentStorageRoot} next
+     * @returns {OwnedContentStorageRoot}
+     * @throws {Error} If the publication is stale or the next root is invalid.
+     */
     publish(expected, next) {
-        if (expected !== this._current) throw new Error('Stale content storage root publication');
+        if (expected !== this._current) { throw new Error('Stale content storage root publication'); }
         const owned = ownRoot(next);
-        if (owned.epoch <= expected.epoch) throw new Error('Content storage epoch did not advance');
-        if (owned.logicalHighWater < expected.logicalHighWater) throw new Error('Published logical content addresses cannot shrink');
+        if (owned.epoch <= expected.epoch) { throw new Error('Content storage epoch did not advance'); }
+        if (owned.logicalHighWater < expected.logicalHighWater) { throw new Error('Published logical content addresses cannot shrink'); }
         this._current = owned;
         this._currentLayoutIds = new Set(owned.regions.map((/** @type {{layoutId: string}} */ region) => region.layoutId));
         return owned;
     }
 
-    /** @returns {ContentStorageLease} */
+    /**
+     * @returns {ContentStorageLease}
+     */
     acquire() { return this._acquire(this._current); }
 
-    /** @param {OwnedContentStorageRoot} root @returns {ContentStorageLease} */
+    /**
+     * @param {OwnedContentStorageRoot} root
+     * @returns {ContentStorageLease}
+     * @throws {Error} If the root is invalid.
+     */
     _acquire(root) {
         this._leases.set(root, (this._leases.get(root) ?? 0) + 1);
         let released = false;
         return Object.freeze({root,
             fork: () => {
-                if (released) throw new Error('Content storage read lease already released');
+                if (released) { throw new Error('Content storage read lease already released'); }
                 return this._acquire(root);
             },
             release: () => {
-                if (released) return;
+                if (released) { return; }
                 released = true;
                 const current = this._leases.get(root);
                 if (typeof current === 'undefined') { throw new Error('Content storage lease ownership was lost'); }
                 const remaining = current - 1;
-                if (remaining === 0) this._leases.delete(root);
-                else this._leases.set(root, remaining);
+                if (remaining === 0) {
+                    this._leases.delete(root);
+                } else {
+                    this._leases.set(root, remaining);
+                }
             }});
     }
 
     /** GC must also check durable active/staged/recovery references under mutation admission. */
-    /** @param {string} layoutId */
+    /**
+     * @param {string} layoutId
+     * @returns {boolean}
+     */
     isLayoutPinned(layoutId) {
-        if (this._currentLayoutIds.has(layoutId)) return true;
+        if (this._currentLayoutIds.has(layoutId)) { return true; }
         for (const root of this._leases.keys()) {
-            if (root.regions.some((/** @type {{layoutId: string}} */ region) => region.layoutId === layoutId)) return true;
+            if (root.regions.some((/** @type {{layoutId: string}} */ region) => region.layoutId === layoutId)) { return true; }
         }
         return false;
     }

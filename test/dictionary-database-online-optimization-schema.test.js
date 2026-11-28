@@ -1017,8 +1017,11 @@ test('a deferred job with an unreclaimed artifact retains physical ownership', a
 
 test('deferral before any file intent leaves the next generation free to use the write slot', async () => {
     const {database, connection, job} = await createJobFixture();
-    database.saveOnlineContentOptimizationJob({...job, phase: 'deferred', expectedCheckpointVersion: 0,
-        retryAfter: Date.now() + 30000, checkpoint: {resumePhase: 'discover'}});
+    database.saveOnlineContentOptimizationJob({...job,
+        phase: 'deferred',
+        expectedCheckpointVersion: 0,
+        retryAfter: Date.now() + 30000,
+        checkpoint: {resumePhase: 'discover'}});
     connection.exec({
         sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES ($title, 1, $summary)',
         bind: {$title: 'Other', $summary: JSON.stringify({title: 'Other', importSuccess: true, storageGenerationId: 'other-generation'})},
@@ -1082,7 +1085,9 @@ async function privateSourceFixture() {
     return {...f, resources: f.database.createOnlineContentOptimizationReadResources()};
 }
 
-/** @returns {import('../ext/js/dictionary/term-content-layout.js').FrameIdentity} */
+/**
+ * @returns {import('../ext/js/dictionary/term-content-layout.js').FrameIdentity}
+ */
 function privateFrameIdentity() {
     return {kind: 'legacy-entry',
         logicalOffset: 0,
@@ -1677,7 +1682,9 @@ test.each(['truncated', 'transient'])('codec dictionary %s reads retain their au
 test('matched generations complete with no layout activation and a replacement generation is screened again', async () => {
     const {database, connection} = await createLayoutDatabase(0);
     connection.exec('PRAGMA user_version = 11');
-    /** @param {string} generation */
+    /**
+     * @param {string} generation
+     */
     const importFixtureGeneration = (generation) => {
         connection.exec({sql: 'DELETE FROM dictionaries'});
         connection.exec({sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES (?, 1, ?)',
@@ -1725,45 +1732,57 @@ test('a replaced dictionary invalidates its legacy proof inside the activation t
 });
 
 
-test.each(['missing-closure', 'missing-registry', 'missing-sidecar', 'wrong-bytes', 'valid'])(
-    'resolved private codec treats sidecar integrity strictly: %s', async (mode) => {
-        const {database, connection} = await createLayoutDatabase(4);
-        const payload = new Uint8Array([1, 2, 3]);
-        const dict = new Uint8Array(8).fill(7);
-        const sha = createHash('sha256').update(dict).digest('hex');
-        const codecId = 'manabitan-zstd-' + sha;
-        const codec = {codecId, fileId: 'private-dict', formatVersion: 1, dictionaryBytes: dict.length, dictionarySha256: sha};
-        const file = {fileId: 'private-dict', byteLength: dict.length, sha256: sha,
-            path: 'manabitan-online-content-v1/private-dict.bin'};
-        const payloadFile = {fileId: 'private-frame', byteLength: payload.length, sha256: null,
-            path: 'manabitan-online-content-v1/private-frame.bin'};
-        installPhysicalFixture(connection, file.fileId, file.byteLength, sha);
-        if (mode !== 'missing-registry') {
-            connection.exec({
-                sql: 'INSERT INTO termContentStorageCodecs VALUES (?, ?, 1, ?, ?, ?)',
-                bind: [codecId, file.fileId, dict.length, sha, '{}'],
-            });
-        }
-        const io = vi.spyOn(database, '_readOnlineContentPhysicalSlice').mockImplementation(async (locator) => {
-            if (locator.fileId === payloadFile.fileId) { return payload; }
-            if (mode === 'missing-sidecar') { throw new DOMException('Missing file', 'NotFoundError'); }
-            return mode === 'wrong-bytes' ? new Uint8Array(dict.length) : dict;
+test.each(['missing-closure', 'missing-registry', 'missing-sidecar', 'wrong-bytes', 'valid'])('resolved private codec treats sidecar integrity strictly: %s', async (mode) => {
+    const {database, connection} = await createLayoutDatabase(4);
+    const payload = new Uint8Array([1, 2, 3]);
+    const dict = new Uint8Array(8).fill(7);
+    const sha = createHash('sha256').update(dict).digest('hex');
+    const codecId = 'manabitan-zstd-' + sha;
+    const codec = {codecId, fileId: 'private-dict', formatVersion: 1, dictionaryBytes: dict.length, dictionarySha256: sha};
+    const file = {fileId: 'private-dict',
+        byteLength: dict.length,
+        sha256: sha,
+        path: 'manabitan-online-content-v1/private-dict.bin'};
+    const payloadFile = {fileId: 'private-frame',
+        byteLength: payload.length,
+        sha256: null,
+        path: 'manabitan-online-content-v1/private-frame.bin'};
+    installPhysicalFixture(connection, file.fileId, file.byteLength, sha);
+    if (mode !== 'missing-registry') {
+        connection.exec({
+            sql: 'INSERT INTO termContentStorageCodecs VALUES (?, ?, 1, ?, ?, ?)',
+            bind: [codecId, file.fileId, dict.length, sha, '{}'],
         });
-        const rootWindow = {rootId: 'root-fixture', epoch: 1,
-            fileLocators: new Map([[file.fileId, parseContentPhysicalFile(file)], [payloadFile.fileId, parseContentPhysicalFile(payloadFile)]]),
-            resolverData: {manifests: [], externalFrames: [], files: [file, payloadFile], physicalFiles: [file, payloadFile],
-                codecs: mode === 'missing-closure' ? [] : [codec]}};
+    }
+    const io = vi.spyOn(database, '_readOnlineContentPhysicalSlice').mockImplementation(async (locator) => {
+        if (locator.fileId === payloadFile.fileId) { return payload; }
+        if (mode === 'missing-sidecar') { throw new DOMException('Missing file', 'NotFoundError'); }
+        return mode === 'wrong-bytes' ? new Uint8Array(dict.length) : dict;
+    });
+    const rootWindow = {rootId: 'root-fixture',
+        epoch: 1,
+        fileLocators: new Map([[file.fileId, parseContentPhysicalFile(file)], [payloadFile.fileId, parseContentPhysicalFile(payloadFile)]]),
+        resolverData: {manifests: [],
+            externalFrames: [],
+            files: [file, payloadFile],
+            physicalFiles: [file, payloadFile],
+            codecs: mode === 'missing-closure' ? [] : [codec]}};
         /** @type {import('../ext/js/dictionary/term-content-layout.js').ResolvedContentFrame} */
-        const frame = {identity: {kind: 'block', logicalOffset: 0, recordLength: 3, sourceStoredLength: 3,
-            originalCodecId: null, expectedDecodedLength: 3, originalEnvelope: 'none'},
-        sourceStoredLength: 3, spans: [{fileId: payloadFile.fileId, physicalOffset: 0, length: payload.length}],
-        storedLength: payload.length, codecId, envelope: 'none', decodedLength: 3, decodedDigest: null};
-        const result = database._readOnlineContentResolvedFrame(rootWindow, frame, 'test-physical-key');
-        if (mode === 'valid') {
-            await expect(result).resolves.toMatchObject({codecId, bytes: payload});
-        } else {
-            await expect(result).rejects.toBeInstanceOf(TermContentIntegrityError);
-        }
-        if (mode === 'missing-closure') { expect(io).not.toHaveBeenCalled(); }
-    },
-);
+    const frame = {identity: {kind: 'block',
+        logicalOffset: 0,
+        recordLength: 3,
+        sourceStoredLength: 3,
+        originalCodecId: null,
+        expectedDecodedLength: 3,
+        originalEnvelope: 'none'},
+    sourceStoredLength: 3,
+    spans: [{fileId: payloadFile.fileId, physicalOffset: 0, length: payload.length}],
+    storedLength: payload.length,
+    codecId,
+    envelope: 'none',
+    decodedLength: 3,
+    decodedDigest: null};
+    const result = database._readOnlineContentResolvedFrame(rootWindow, frame, 'test-physical-key');
+    await (mode === 'valid' ? expect(result).resolves.toMatchObject({codecId, bytes: payload}) : expect(result).rejects.toBeInstanceOf(TermContentIntegrityError));
+    if (mode === 'missing-closure') { expect(io).not.toHaveBeenCalled(); }
+});

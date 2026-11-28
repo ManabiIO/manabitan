@@ -21,7 +21,9 @@ import {TermContentIdleScheduler} from '../ext/js/dictionary/term-content-idle-s
 /** @typedef {(signal: AbortSignal) => Promise<{pending: boolean, retryAt?: number}>} RunStep */
 /** @typedef {Partial<Omit<ConstructorParameters<typeof TermContentIdleScheduler>[0], 'runStep'>>} SchedulerOptions */
 
-/** @returns {{promise: Promise<void>, resolve: (value?: void|PromiseLike<void>) => void, reject: (reason?: unknown) => void}} */
+/**
+ * @returns {{promise: Promise<void>, resolve: (value?: void|PromiseLike<void>) => void, reject: (reason?: unknown) => void}}
+ */
 const deferred = () => {
     /** @type {(value?: void|PromiseLike<void>) => void} */
     let resolve = () => {};

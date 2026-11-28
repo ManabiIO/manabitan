@@ -7,7 +7,9 @@ import {afterEach, expect, test, vi} from 'vitest';
 import {API} from '../ext/js/comm/api.js';
 import {Backend} from '../ext/js/background/backend.js';
 
-/** @returns {{addListener: (callback: (...args: unknown[]) => void) => void, removeListener: (callback: (...args: unknown[]) => void) => void, emit: (...args: unknown[]) => void}} */
+/**
+ * @returns {{addListener: (callback: (...args: unknown[]) => void) => void, removeListener: (callback: (...args: unknown[]) => void) => void, emit: (...args: unknown[]) => void}}
+ */
 function browserEvent() {
     /** @type {Set<(...args: unknown[]) => void>} */
     const listeners = new Set();
@@ -18,7 +20,10 @@ function browserEvent() {
     };
 }
 
-/** @param {import('vitest').Mock<(message: {action?: string}) => Promise<unknown>>} sendMessagePromise */
+/**
+ * @param {import('vitest').Mock<(message: {action?: string}) => Promise<unknown>>} sendMessagePromise
+ * @returns {(message: {action?: string}) => Promise<unknown>}
+ */
 function withMaintenanceHoldAck(sendMessagePromise) {
     return async (/** @type {{action?: string}} */ message) => {
         if (message.action === 'setTermContentOptimizationHoldOffscreen') { return; }
@@ -34,6 +39,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
+/** @returns {Record<string, import('core').SafeAny>} */
 function fixture() {
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
     const cancel = /** @type {import('vitest').Mock<(message: {action?: string}) => Promise<void>>} */
@@ -41,8 +47,11 @@ function fixture() {
     const maintenanceHold = vi.fn();
     const sendMessagePromise = /** @type {import('vitest').Mock<(message: {action?: string}) => Promise<void>>} */
         (/** @type {unknown} */ (vi.fn(async (/** @type {{action?: string}} */ message) => {
-            if (message.action === 'setTermContentOptimizationHoldOffscreen') { await maintenanceHold(message); return; }
-            return await Reflect.apply(cancel, undefined, [message]);
+            if (message.action === 'setTermContentOptimizationHoldOffscreen') {
+                await maintenanceHold(message);
+                return;
+            }
+            return Reflect.apply(cancel, undefined, [message]);
         })));
     const refresh = vi.fn(async () => {});
     const notifications = vi.fn();

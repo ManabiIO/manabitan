@@ -22,7 +22,6 @@ class MemoryStore extends TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {string} fileId
      * @returns {Promise<number|null>}
      */
@@ -33,7 +32,6 @@ class MemoryStore extends TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {string} fileId
      * @param {number} expected
      * @param {number} offset
@@ -47,7 +45,6 @@ class MemoryStore extends TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {string} fileId
      * @param {AsyncIterable<Uint8Array>|Iterable<Uint8Array>} chunks
      * @param {{expectedByteLength: number}} options
@@ -68,7 +65,6 @@ class MemoryStore extends TermContentImmutableFileStore {
     }
 
     /**
-     *
      * @param {string} fileId
      * @returns {Promise<void>}
      */

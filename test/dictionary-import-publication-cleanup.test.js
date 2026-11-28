@@ -24,7 +24,9 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-/** @returns {Promise<void>} */
+/**
+ * @returns {Promise<void>}
+ */
 async function resolveVoid() {}
 
 /**
@@ -112,7 +114,9 @@ const summary = /** @type {import('dictionary-importer').Summary} */ ({
     title: 'Dictionary 42', version: 3, importSuccess: true,
 });
 
-/** @returns {Promise<ArrayBuffer>} */
+/**
+ * @returns {Promise<ArrayBuffer>}
+ */
 async function createArchive() {
     const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
     await writer.add('index.json', new TextReader(JSON.stringify({title: summary.title, revision: '1', format: 3})));

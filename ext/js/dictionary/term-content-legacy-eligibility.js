@@ -75,11 +75,12 @@ export async function probeLegacyTermContentFrame(source, item, signal, cursor =
         frameOffset = entryContentOffset;
         if (typeof getRawTermContentBlockCompressionDictName(entryContentDictName) !== 'undefined') {
             const compact = entryContentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||
-                entryContentDictName.startsWith(RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX + ':');
+            entryContentDictName.startsWith(RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX + ':');
             const reference = await source.readSlice(entryContentOffset, compact ?
                 RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES :
                 RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
-            const block = compact ? decodeRawTermContentCompactBlockReference(reference, entryContentLength) :
+            const block = compact ?
+decodeRawTermContentCompactBlockReference(reference, entryContentLength) :
                 decodeRawTermContentBlockReference(reference);
             if (block === null || block.entryLength !== entryContentLength ||
             block.blockCompressedLength <= TERM_CONTENT_BLOCK_ENVELOPE_BYTES) {

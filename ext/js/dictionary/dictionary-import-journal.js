@@ -119,7 +119,9 @@ export class DictionaryImportJournal {
         return this._runExclusive(async () => { await this._clear(); });
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _clear() {
         const root = await this._getRoot();
         if (root === null) {
@@ -181,7 +183,10 @@ export class DictionaryImportJournal {
         );
     }
 
-    /** @param {unknown} value @returns {boolean} */
+    /**
+     * @param {unknown} value
+     * @returns {boolean}
+     */
     _isContentCheckpoint(value) {
         if (typeof value !== 'object' || value === null) { return false; }
         const checkpoint = /** @type {Record<string, unknown>} */ (value);

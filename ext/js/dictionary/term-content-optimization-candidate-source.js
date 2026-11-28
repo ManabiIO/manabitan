@@ -33,7 +33,10 @@ import {advanceZstdFrameInspection, beginZstdFrameInspection, validateZstdFrameI
 /** @typedef {{kind: 'frame', frame: FrameDescriptor}|{kind: 'skip', reason: 'raw'|'custom'|'empty'}|{kind: 'pending', cursor: import('./term-content-zstd-frame-inspector.js').ZstdFrameInspectionCursor}} CandidateReferenceResult */
 const RAW_SELECTORS = new Set(['raw', 'raw-v2', 'raw-v3', 'raw-v4', 'raw-v6']);
 
-/** @param {string} selector */
+/**
+ * @param {string} selector
+ * @returns {boolean} Whether the selector denotes the raw stored block format.
+ */
 export function isRawTermContentTrainingSelector(selector) {
     return RAW_SELECTORS.has(selector);
 }

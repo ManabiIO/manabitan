@@ -135,7 +135,9 @@ export class OffscreenDictionaryWorkerHandler {
         return await run.call(this._dictionaryDatabase, signal);
     }
 
-    /** @param {import('offscreen').TermContentOptimizationState|undefined} state */
+    /**
+     * @param {import('offscreen').TermContentOptimizationState|undefined} state
+     */
     _applyTermContentOptimizationState(state) {
         if (!this._termContentOptimizationControl.accept(state)) { return; }
         const desired = new Set(state?.ownerIds);
@@ -532,7 +534,9 @@ export class OffscreenDictionaryWorkerHandler {
         /** @type {AbortController|null} */
         let abortController = null;
         let responsePortAvailable = true;
-        /** @param {import('dictionary-importer').ProgressData} progress */
+        /**
+         * @param {import('dictionary-importer').ProgressData} progress
+         */
         const onProgress = (progress) => {
             if (!responsePortAvailable) { return; }
             responsePortAvailable = this._postImportProgress(port, progress);

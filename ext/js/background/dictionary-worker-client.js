@@ -262,7 +262,9 @@ export class DictionaryWorkerClient {
         });
     }
 
-    /** @param {number} id */
+    /**
+     * @param {number} id
+     */
     _retireResponseId(id) {
         this._retiredResponseIds.add(id);
         while (this._retiredResponseIds.size > MAX_RETIRED_RESPONSE_IDS) {

@@ -281,7 +281,9 @@ export class TermContentFrameCodecWorkerOwner {
         active.resolve(new Uint8Array(data.bytes));
     }
 
-    /** @param {Error} error */
+    /**
+     * @param {Error} error
+     */
     _terminate(error) {
         const active = this._active;
         this._active = null;
@@ -312,7 +314,9 @@ export class TermContentFrameCodecWorkerOwner {
     }
 }
 
-/** @returns {Error} */
+/**
+ * @returns {Error}
+ */
 function createAbortError() {
     const error = new Error('Term-content codec work was preempted');
     error.name = 'AbortError';

@@ -3,7 +3,9 @@
 import {expect, test} from 'vitest';
 import {decodeOnlineContentFrameCheckpoint, encodeOnlineContentFrameCheckpoint, parseOnlineContentFrameDescriptor} from '../ext/js/dictionary/term-content-optimization-checkpoint.js';
 
-/** @returns {import('../ext/js/dictionary/term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor} */
+/**
+ * @returns {import('../ext/js/dictionary/term-content-optimization-checkpoint.js').OnlineContentFrameDescriptor}
+ */
 function frame() {
     return {identity: {kind: 'legacy-entry',
         logicalOffset: 2 ** 34,

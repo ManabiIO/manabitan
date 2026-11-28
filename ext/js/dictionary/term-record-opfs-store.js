@@ -19,7 +19,6 @@ import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-im
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {createTermKeyHashState, finishTermKeyHashState, updateTermKeyHashState} from './term-key-hash.js';
-import {getRawTermContentBlockCompressionDictName} from './raw-term-content.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -28,6 +27,7 @@ import {
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+    getRawTermContentBlockCompressionDictName,
 } from './raw-term-content.js';
 import {
     appendExactRowMatches,
@@ -1163,7 +1163,9 @@ export class TermRecordOpfsStore {
         }
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _awaitPersistentIndexRepairs() {
         while (this._persistentIndexRepairPromiseByDictionary.size > 0) {
             await Promise.allSettled(this._persistentIndexRepairPromiseByDictionary.values());
@@ -1301,7 +1303,9 @@ export class TermRecordOpfsStore {
         await this._runExclusiveStorageMutation(async () => await this._prepare());
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _prepare() {
         await this._closeAllWritables();
         this._recordsById.clear();
@@ -1336,7 +1340,9 @@ export class TermRecordOpfsStore {
         }
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _ensureRecordsDirectoryHandle() {
         if (this._recordsDirectoryHandle !== null) { return; }
         if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) { return; }
@@ -1695,7 +1701,9 @@ export class TermRecordOpfsStore {
         await this._runExclusiveStorageMutation(async () => await this._reset(), true);
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _reset() {
         await this._abandonImportWritesForRollback();
         await this._ensureRecordsDirectoryHandle();
@@ -3305,16 +3313,13 @@ export class TermRecordOpfsStore {
      * The .mbti container also holds derived lookup indexes; those bodies are
      * deliberately never read/parsed here. Corrupt derived sections do not hide
      * otherwise valid content references. No foreground caches/health are changed.
-     *
      * byteBudget bounds ranged input bytes plus a conservative per-descriptor
      * charge; memory is O(byteBudget). Large chunks first stream/verify their
      * authoritative record-fields checksum across empty resumable pages, then
      * reread only bounded row columns. Keep the OLD cursor until returned rows
      * and the new cursor are durably checkpointed together.
-     *
      * entryContentDictName is the original record selector; the content owner
      * resolves the actual frame codec separately through its immutable read root.
-     *
      * The database owner must supply a durable generation ID AND its synchronous
      * current-generation predicate. The store additionally checks its mutation
      * counters, state identity and import/mutation admission after every await.
@@ -3343,7 +3348,9 @@ export class TermRecordOpfsStore {
          * @throws {ContentReferenceIterationError} If metadata admission or source integrity fails.
          */
         const fail = (kind, message) => { throw new ContentReferenceIterationError(kind, message); };
-        /** @throws {Error} On preemption or a source/admission change. */
+        /**
+         * @throws {Error} On preemption or a source/admission change.
+         */
         const assertCurrent = () => {
             if (signal?.aborted) {
                 const error = new Error('Content-reference iteration aborted');
@@ -3387,7 +3394,9 @@ export class TermRecordOpfsStore {
         if (info === null || info.dictionaryName !== dictionaryName || !this._isCanonicalTermRecordStorageFileName(state.fileName)) {
             fail('invalid', 'Content-reference shard identity is invalid');
         }
-        /** @throws {Error} On mutation, deletion, or directory replacement. */
+        /**
+         * @throws {Error} On mutation, deletion, or directory replacement.
+         */
         const check = () => {
             assertCurrent();
             if (this._recordsDirectoryHandle !== directory || this._shardStateByFileName.get(state.fileName) !== state ||
@@ -3527,7 +3536,7 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                 (format === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE ? FLOAT64_SCORE_RECORD_FIELDS_BYTES : LOOKUP_INDEX_RECORD_FIELDS_BYTES);
             const descriptorCharge = 64 + info.contentDictName.length * 2;
             const blockRange = typeof maxBlockReferences !== 'undefined' &&
-                typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';
+            typeof getRawTermContentBlockCompressionDictName(info.contentDictName) !== 'undefined';
             const rowLimit = blockRange ? maxBlockReferences : maxReferences;
             const rows = Math.min(rowLimit, count - position.row, Math.floor((byteBudget - bytesRead) / (rowBytes + descriptorCharge)));
             if (rows <= 0) { fail('resource', 'Content-reference row has no admitted output budget'); }
@@ -3570,7 +3579,8 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
             // can advance to the next chunk or shard. An interior cursor never
             // grants ownership of the unconsumed suffix.
             const rangeStart = blockRange ? copyContentReferenceCursor(position, dictionaryName, generation) : null;
-            const cursorAfterBlockReference = rangeStart === null ? void 0 :
+            const cursorAfterBlockReference = rangeStart === null ?
+                void 0 :
                 (/** @type {number} */ recordId) => {
                     check();
                     const consumed = recordId - (firstId + rangeStart.row) + 1;
@@ -3602,7 +3612,10 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
                 }
             }
             check();
-            return {references, cursor: position, done: false, bytesRead,
+            return {references,
+                cursor: position,
+                done: false,
+                bytesRead,
                 ...(cursorAfterBlockReference ? {cursorAfterBlockReference} : {})};
         } catch (error) {
             // Optional discovery must never quarantine or initiate a whole-file
@@ -4746,7 +4759,9 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
         route.published = true;
     }
 
-    /** @returns {string|null} */
+    /**
+     * @returns {string|null}
+     */
     getExactLookupRouteOwner() {
         return this._exactLookupRoute?.published === true ? this._exactLookupRoute.dictionaryName : null;
     }
@@ -5080,7 +5095,9 @@ COMPACT_RECORD_FIELDS_BYTES_PER_ROW :
      * @throws {Error} If authoritative storage is invalid or the repair is superseded.
      */
     async _rebuildLookupIndexForShard(state, isCurrent = () => true) {
-        /** @throws {Error} If the repair no longer owns this dictionary generation. */
+        /**
+         * @throws {Error} If the repair no longer owns this dictionary generation.
+         */
         const assertCurrent = () => {
             if (!isCurrent()) { throw new Error('Term-record index repair was superseded'); }
         };
@@ -5919,7 +5936,9 @@ view.chunks :
         this._loadedDictionaryNames.delete(dictionaryName);
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async ensureAllDictionariesLoaded() {
         if (this._allShardContentsLoaded || this._recordsDirectoryHandle === null) {
             return;
@@ -6654,7 +6673,9 @@ view.chunks :
         return output;
     }
 
-    /** @returns {Uint8Array} */
+    /**
+     * @returns {Uint8Array}
+     */
     _createShardGenerationId() {
         const generationId = new Uint8Array(SHARD_GENERATION_BYTES);
         const crypto = globalThis.crypto;
@@ -6903,7 +6924,9 @@ view.chunks :
         return writable;
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _retireImportIndexWorker() {
         const promise = this._importIndexWorkerPromise;
         this._importIndexWorkerPromise = null;

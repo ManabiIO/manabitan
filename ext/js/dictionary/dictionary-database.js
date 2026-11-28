@@ -834,7 +834,7 @@ export class DictionaryDatabase {
         /**
          *
          */
-        this._onlineContentFileStore = new TermContentImmutableFileStore(undefined, assertTermContentOptimizationHeadroom);
+        this._onlineContentFileStore = new TermContentImmutableFileStore(void 0, assertTermContentOptimizationHeadroom);
         /**
          *
          */
@@ -1185,7 +1185,9 @@ export class DictionaryDatabase {
         return this._bulkImportState === BULK_IMPORT_STATE_ACTIVE || this._bulkImportState === BULK_IMPORT_STATE_FINALIZING;
     }
 
-    /** @returns {boolean} */
+    /**
+     * @returns {boolean}
+     */
     _hasUnresolvedImportJournal() {
         return this._bulkImportJournalRecord !== null || this._importJournalRecoveryPending;
     }
@@ -1300,7 +1302,9 @@ export class DictionaryDatabase {
         return rollbackSucceeded;
     }
 
-    /** @param {Error[]} errors */
+    /**
+     * @param {Error[]} errors
+     */
     _closeBulkImportBlockSession(errors) {
         try {
             this._termContentBlockImportSession?.close();
@@ -1343,7 +1347,9 @@ export class DictionaryDatabase {
         }
     }
 
-    /** @param {Error[]} errors */
+    /**
+     * @param {Error[]} errors
+     */
     _quarantineBulkImportConnection(errors) {
         this._releaseRuntimeConnection(errors);
     }
@@ -1489,7 +1495,9 @@ export class DictionaryDatabase {
         return this._startupCleanupMissingTermRecordShardsSummary;
     }
 
-    /** @returns {Promise<string>} The identity of the import session acquired by this call. */
+    /**
+     * @returns {Promise<string>} The identity of the import session acquired by this call.
+     */
     async startBulkImport() {
         if (this._isOpening || this._closingPromise !== null || this._purgingPromise !== null) {
             throw new Error('Cannot start a dictionary bulk import while the database lifecycle is busy');
@@ -4691,7 +4699,6 @@ void 0 :
             if (released) { throw new Error('Content read context has already been released'); }
         };
         /**
-         *
          * @param {number} offset
          * @param {number} length
          * @returns {Promise<Uint8Array|null>}
@@ -4941,7 +4948,9 @@ void 0 :
         }
     }
 
-    /** @throws {Error} If lifecycle ownership excludes maintenance. */
+    /**
+     * @throws {Error} If lifecycle ownership excludes maintenance.
+     */
     _assertOnlineContentMutationReady() {
         if (this._isBulkImportInProgress() || this._bulkImportTransactionOpen || this._hasUnresolvedImportJournal() ||
         this._onlineContentPublicationRecoveryRequired || this._closingPromise !== null || this._purgingPromise !== null) {
@@ -5072,7 +5081,6 @@ void 0 :
     }
 
     /**
-     *
      * @param {string} sessionId
      * @returns {boolean}
      */
@@ -5112,9 +5120,7 @@ void 0 :
                 return /** @type {Job|undefined} */ (this.getOnlineContentOptimizationJobs().find((job) => job.jobId === jobId)) ?? null;
             }
             const jobs = this.getOnlineContentOptimizationJobs(true);
-            const blocking = jobs.filter((job) =>
-                job.phase !== 'deferred' || this._hasUnreclaimedOnlineContentFiles(job.jobId),
-            );
+            const blocking = jobs.filter((job) => job.phase !== 'deferred' || this._hasUnreclaimedOnlineContentFiles(job.jobId));
             if (blocking.length > 1) { throw new Error('Multiple content optimization storage owners'); }
             const next = blocking[0] ?? jobs
                 .filter((job) => job.retryAfter === null || job.retryAfter <= Date.now())
@@ -5216,8 +5222,7 @@ void 0 :
                             await this.activateOnlineContentStorage(signal, source.assertCurrent);
                         }};
                 },
-                readDiscovery: (job, cursor, signal, legacyProbe) =>
-                    this.readOnlineContentOptimizationDiscoveryPage(job, cursor, signal, legacyProbe),
+                readDiscovery: (job, cursor, signal, legacyProbe) => this.readOnlineContentOptimizationDiscoveryPage(job, cursor, signal, legacyProbe),
                 framePage: (job, cursor) => {
                     if (cursor !== null && (typeof cursor !== 'number' || !Number.isSafeInteger(cursor) || cursor < 0)) {
                         throw new TypeError('Invalid content optimization frame cursor');
@@ -5579,7 +5584,9 @@ void 0 :
         let closePromise = null;
         /** @type {Set<Promise<unknown>>} */
         const inFlight = new Set();
-        /** @throws {Error} If optional ownership was preempted or replaced. */
+        /**
+         * @throws {Error} If optional ownership was preempted or replaced.
+         */
         const assertCurrent = () => {
             this._assertOnlineContentStepSignal(signal);
             if (closed) { throw new Error('Content optimization read source is closed'); }
@@ -5760,9 +5767,9 @@ void 0 :
             typeof Reflect.get(cursor, 'storageName') !== 'string') {
                 throw new TypeError('Invalid bounded discovery cursor');
             }
-            const savedBlockRows = Reflect.get(cursor, 'blockRangeRows');
+            const savedBlockRows = /** @type {unknown} */ (Reflect.get(cursor, 'blockRangeRows'));
             if (typeof savedBlockRows !== 'undefined') {
-                if (!Number.isSafeInteger(savedBlockRows) || savedBlockRows < 64 || savedBlockRows > MAX_BLOCK_DISCOVERY_REFERENCES) {
+                if (typeof savedBlockRows !== 'number' || !Number.isSafeInteger(savedBlockRows) || savedBlockRows < 64 || savedBlockRows > MAX_BLOCK_DISCOVERY_REFERENCES) {
                     throw new TypeError('Invalid discovery block-range size');
                 }
                 blockRangeRows = savedBlockRows;
@@ -5806,7 +5813,8 @@ null :
             byteBudget: 262144,
             maxReferences: 64,
             signal,
-            ...(legacyProbe ? {skipSelector: skipLegacyEligibilitySelector} :
+            ...(legacyProbe ?
+{skipSelector: skipLegacyEligibilitySelector} :
                 {skipSelector: isRawTermContentTrainingSelector, maxBlockReferences: blockRangeRows}),
             isGenerationCurrent: () => this._getOnlineContentOptimizationTarget({dictionaryTitle: target.title,
                 dictionaryGeneration: job.dictionaryGeneration}) !== null,
@@ -5891,7 +5899,6 @@ null :
         const cursorJson = JSON.stringify(job.cursor);
         const checkpointJson = JSON.stringify(job.checkpoint);
         /**
-         *
          * @param {import('./term-content-optimization-checkpoint.js').OnlineContentFrameCheckpoint} expected
          * @returns {boolean}
          */
@@ -5913,7 +5920,9 @@ null :
             });
             return encodeOnlineContentFrameCheckpoint(frame).metadataJson === expected.metadataJson;
         };
-        /** @returns {boolean} */
+        /**
+         * @returns {boolean}
+         */
         const matchesReceipt = () => {
             const receipt = db.selectObject('SELECT dictionaryTitle, dictionaryGeneration, strategyVersion, phase, checkpointVersion, cursorJson, checkpointJson, retryAfter FROM termContentOptimizationJobs WHERE jobId = $jobId', {$jobId: job.jobId});
             return typeof receipt !== 'undefined' && receipt.dictionaryTitle === job.dictionaryTitle &&
@@ -6018,7 +6027,10 @@ null :
         return {frames, cursor: hasMore && last ? {nextLogicalOffset: last.identity.logicalOffset} : null, hasMore};
     }
 
-    /** @param {string} jobId */
+    /**
+     * @param {string} jobId
+     * @returns {boolean} Whether the job still owns files or retired-file receipts.
+     */
     _hasUnreclaimedOnlineContentFiles(jobId) {
         return this._requireDb().selectValue(`
             SELECT 1 FROM termContentStorageFiles
@@ -6151,7 +6163,6 @@ null :
             throw new Error('Online content root does not cover the logical content address');
         }
         /**
-         *
          * @param {number} offset
          * @returns {number}
          */
@@ -6281,7 +6292,6 @@ db.selectObjects(
             {$rootId: rootId, $regionId: descriptor.regionId},
         );
         /**
-         *
          * @param {string} message
          * @returns {never}
          * @throws {TermContentIntegrityError} If immutable metadata is invalid.
@@ -6672,10 +6682,8 @@ frame.codecId ?? 'vanilla' :
             throw new RangeError('Online content optimization checkpoint metadata exceeds its bound');
         }
         const db = this._requireDb();
-        if (job.phase === 'completed' || job.phase === 'no-gain' || job.phase === 'failed') {
-            if (this._hasUnreclaimedOnlineContentFiles(job.jobId)) {
-                throw new Error('Online content job must reclaim its pending files before completion');
-            }
+        if ((job.phase === 'completed' || job.phase === 'no-gain' || job.phase === 'failed') && this._hasUnreclaimedOnlineContentFiles(job.jobId)) {
+            throw new Error('Online content job must reclaim its pending files before completion');
         }
         if (['discover', 'sample', 'train', 'recompress', 'reclaim'].includes(job.phase)) {
             const otherOwner = db.selectValue(`
@@ -7321,7 +7329,9 @@ db.selectObjects(`
         }
     }
 
-    /** @returns {typeof this._startupGenerationMediaHealth} */
+    /**
+     * @returns {typeof this._startupGenerationMediaHealth}
+     */
     getStartupGenerationMediaHealth() {
         return this._startupGenerationMediaHealth;
     }
@@ -8091,7 +8101,7 @@ db.selectObjects(`
                 originalEnvelope: 'none'}) :
             await this._termContentBlockStore.readDetailed(meta.contentOffset, meta.contentLength, 'raw');
         if (readResult.status !== 'ok') {
-            throw new TermContentLookupReadError(readResult.status, readResult.reason, 'cause' in readResult ? {cause: readResult.cause} : undefined);
+            throw new TermContentLookupReadError(readResult.status, readResult.reason, 'cause' in readResult ? {cause: readResult.cause} : {});
         }
         const inflatedBytes = readResult.bytes;
         if (meta.uncompressedLength > 0 && inflatedBytes.byteLength !== meta.uncompressedLength) {
@@ -8144,7 +8154,9 @@ db.selectObjects(`
         return span;
     }
 
-    /** @returns {boolean} */
+    /**
+     * @returns {boolean}
+     */
     canWriteGenerationMedia() {
         return !this._usesFallbackStorage && this._bulkImportState === BULK_IMPORT_STATE_ACTIVE &&
         this._bulkImportTransactionOpen && this._bulkImportJournalRecord !== null &&
@@ -8237,7 +8249,9 @@ db.selectObjects(`
         await write.promise;
     }
 
-    /** @param {string} generationId */
+    /**
+     * @param {string} generationId
+     */
     async _rollbackGenerationMedia(generationId) {
         const write = this._generationMediaWrite;
         if (write === null) {
@@ -12973,13 +12987,17 @@ null :
 
     // Private
 
-    /** @returns {Promise<FileSystemDirectoryHandle|null>} */
+    /**
+     * @returns {Promise<FileSystemDirectoryHandle|null>}
+     */
     async _getDictionaryPurgeRoot() {
         if (typeof navigator === 'undefined' || typeof navigator.storage?.getDirectory !== 'function') { return null; }
         return await navigator.storage.getDirectory();
     }
 
-    /** @returns {Promise<boolean>} Whether a previously authorized purge was completed. */
+    /**
+     * @returns {Promise<boolean>} Whether a previously authorized purge was completed.
+     */
     async _resumePersistentDictionaryPurge() {
         const root = await this._getDictionaryPurgeRoot();
         if (root === null) { return false; }
@@ -13013,7 +13031,10 @@ null :
         return result;
     }
 
-    /** Opens and checks the persisted format before reading or mutating payload files. */
+    /**
+     * Opens and checks the persisted format before reading or mutating payload files.
+     * @returns {Promise<void>}
+     */
     async _openSupportedDictionaryConnection() {
         try {
             this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
@@ -13040,7 +13061,9 @@ null :
         return {storageEpoch, logicalHighWater: this._asNumber(committedContent?.logicalHighWater, -1)};
     }
 
-    /** @returns {Promise<void>} */
+    /**
+     * @returns {Promise<void>}
+     */
     async _openConnection() {
         this._sqlite3 = await getSqlite3();
         let committedContent = await this._openSupportedDictionaryConnection();
@@ -13050,11 +13073,7 @@ null :
         // An interrupted rollback can leave gaps among unpublished segments.
         // Reconcile its journal before preparing the corresponding store.
         await this._recoverInterruptedImportSession();
-        if (committedContent.storageEpoch > 0) {
-            await this._termContentStore.activateCommittedRoot(committedContent);
-        } else {
-            await this._termContentStore.prepare();
-        }
+        await (committedContent.storageEpoch > 0 ? this._termContentStore.activateCommittedRoot(committedContent) : this._termContentStore.prepare());
         await this._termRecordStore.prepare();
         this._termContentBlockStore.clearCache();
         this._clearTermsVtabCursorState();
@@ -15191,7 +15210,9 @@ null :
         return memoryGiB !== null && memoryGiB <= 4 ? LOW_MEMORY_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES : DEFAULT_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES;
     }
 
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     _computeRecentTermContentSourceCacheMaxBytes() {
         const memoryGiB = this._getApproximateDeviceMemoryGiB();
         // Retaining short definitions can avoid loading and decoding whole

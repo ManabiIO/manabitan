@@ -12,7 +12,9 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 
 /** @typedef {{id: number, title: string, version: number, summaryJson: string}} DictionaryRow */
 
-/** @returns {Promise<void>} */
+/**
+ * @returns {Promise<void>}
+ */
 async function resolveVoid() {}
 
 /**
@@ -985,7 +987,9 @@ describe('DictionaryDatabase import cleanup', () => {
         /** @type {() => void} */
         let finishRecordRollback = () => {};
         const recordRollback = vi.fn(
-            /** @returns {Promise<void>} */
+            /**
+             * @returns {Promise<void>}
+             */
             () => new Promise((resolve) => {
                 finishRecordRollback = () => { resolve(); };
             }),
@@ -1262,7 +1266,9 @@ describe('DictionaryDatabase import cleanup', () => {
         /** @type {() => void} */
         let finishEndSession = () => {};
         const endImportSession = vi.fn(
-            /** @returns {Promise<void>} */
+            /**
+             * @returns {Promise<void>}
+             */
             () => new Promise((resolve) => {
                 finishEndSession = () => { resolve(); };
             }),
@@ -1419,7 +1425,9 @@ describe('DictionaryDatabase import cleanup', () => {
         /** @type {() => void} */
         let finishEndSession = () => {};
         const endImportSession = vi.fn(
-            /** @returns {Promise<void>} */
+            /**
+             * @returns {Promise<void>}
+             */
             () => new Promise((resolve) => {
                 finishEndSession = () => { resolve(); };
             }),

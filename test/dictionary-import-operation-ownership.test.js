@@ -319,7 +319,9 @@ describe('dictionary import operation ownership', () => {
         const invoke = vi.fn((action, params, transfers) => {
             const transferred = structuredClone(transfers[0], {transfer: [transfers[0]]});
             const port = {
-                /** @param {{type: string}} message */
+                /**
+                 * @param {{type: string}} message
+                 */
                 postMessage(message) {
                     if (message.type === 'complete') { throw new Error('Terminal delivery lost'); }
                     transferred.postMessage(message);

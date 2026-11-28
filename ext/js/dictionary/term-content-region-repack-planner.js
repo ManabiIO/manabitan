@@ -49,12 +49,10 @@ const encoder = new TextEncoder();
  * Replacement offsets are absolute ORIGINAL identities with independently
  * verified stored bytes, decoded equality and digests. Source catalogs include
  * observed staged replacement/dictionary files and external owner closure.
- *
  * Requested pack IDs must be fresh and durably reserved by the caller before
  * file creation. Frames remain in their immutable assets unless relocateFrames
  * copies start-region frames after retained extents in a requested pack.
  * Physical pack size may exceed logical region size; copy chunks stay bounded.
- *
  * Returned target sizes are expectations until writes/readback finish. The
  * caller owns source leases through all started copies, short-I/O handling,
  * independent readback/decode validation, actual file observations, manifest
@@ -63,6 +61,7 @@ const encoder = new TextEncoder();
  * staged/recovery/checkpoint/codec ownership and runtime leases still apply.
  * @param {ContentRegionRepackOptions} options
  * @returns {ContentRegionRepackPlan}
+ * @throws {TypeError|RangeError} If source metadata or copy admission limits are invalid.
  */
 export function planContentRegionRepack({source, replacements = [], packFiles = [], relocateFrames = false}) {
     const original = createContentLayoutResolver(source);
@@ -180,6 +179,7 @@ export function planContentRegionRepack({source, replacements = [], packFiles = 
              * @param {number} length
              * @param {ContentRepackCopyRole} role
              * @param {number} logicalOffset
+             * @throws {TypeError|RangeError} If the source file is missing or its copy span is invalid.
              */
             const copy = (row, length, role, logicalOffset) => {
                 if (++operationCount > MAX_OPERATIONS) { throw new RangeError('Copy operation admission exceeded'); }
@@ -213,7 +213,7 @@ export function planContentRegionRepack({source, replacements = [], packFiles = 
     // Relocation must never conceal malformed original physical descriptors or
     // aliases by replacing their offsets with valid fresh-pack coordinates.
     createContentLayoutResolver({...owned, manifests: sourceManifests, externalFrames});
-    const allNextFrames = nextManifests.flatMap((region) => region.blocks).concat(externalFrames);
+    const allNextFrames = [...nextManifests.flatMap((region) => region.blocks), ...externalFrames];
     const codecIds = new Set(allNextFrames.map((frame) => frame.codecId));
     const codecs = [...codecIds].map((id) => {
         const codec = codecCatalog.get(id);
@@ -260,6 +260,8 @@ export function planContentRegionRepack({source, replacements = [], packFiles = 
  * @param {Pick<ContentRegionRepackPlan, 'writes'>} plan
  * @param {number} [chunkBytes]
  * @returns {Generator<ContentRepackCopyChunk, void, unknown>}
+ * @yields {ContentRepackCopyChunk} One bounded physical copy operation.
+ * @throws {RangeError} If the requested chunk bound is invalid.
  */
 export function *iterateContentRepackCopyChunks(plan, chunkBytes = MAX_CHUNK_BYTES) {
     if (!Number.isSafeInteger(chunkBytes) || chunkBytes <= 0 || chunkBytes > MAX_CHUNK_BYTES) {
@@ -282,9 +284,15 @@ export function *iterateContentRepackCopyChunks(plan, chunkBytes = MAX_CHUNK_BYT
     }
 }
 
-/** @param {unknown} value @returns {Frame} */
+/**
+ * @param {unknown} value
+ * @returns {Frame}
+ * @throws {TypeError|RangeError} If a replacement descriptor contains invalid own data.
+ */
 function copyReplacement(value) {
-    if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) ||
+    const prototypeValue = /** @type {unknown} */ (Object.getPrototypeOf(/** @type {object} */ (value)));
+    const prototype = /** @type {object|null} */ (prototypeValue);
+    if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(prototype) ||
     Reflect.ownKeys(value).length !== FRAME_FIELDS.length) {
         throw new TypeError('Invalid replacement descriptor');
     }
@@ -306,9 +314,15 @@ function copyReplacement(value) {
     return /** @type {Frame} */ (/** @type {unknown} */ (copy));
 }
 
-/** @param {unknown} value @returns {ContentRepackTarget} */
+/**
+ * @param {unknown} value
+ * @returns {ContentRepackTarget}
+ * @throws {TypeError} If the pack descriptor is not plain own data.
+ */
 function copyPackTarget(value) {
-    if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) || Reflect.ownKeys(value).length !== 2) {
+    const prototypeValue = /** @type {unknown} */ (Object.getPrototypeOf(/** @type {object} */ (value)));
+    const prototype = /** @type {object|null} */ (prototypeValue);
+    if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(prototype) || Reflect.ownKeys(value).length !== 2) {
         throw new TypeError('Invalid pack descriptor');
     }
     const region = Object.getOwnPropertyDescriptor(value, 'regionId');
@@ -320,7 +334,12 @@ function copyPackTarget(value) {
     return {regionId: identifier(region.value), fileId: identifier(file.value)};
 }
 
-/** @param {number} offset @param {number} length @returns {number} */
+/**
+ * @param {number} offset
+ * @param {number} length
+ * @returns {number}
+ * @throws {RangeError} If the byte interval is outside safe bounds.
+ */
 function end(offset, length) {
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length < 0 || offset > Number.MAX_SAFE_INTEGER - length) {
         throw new RangeError('Unsafe planner byte interval');
@@ -328,7 +347,11 @@ function end(offset, length) {
     return offset + length;
 }
 
-/** @param {unknown} value @returns {string} */
+/**
+ * @param {unknown} value
+ * @returns {string}
+ * @throws {TypeError} If the value is not a permitted identity.
+ */
 function identifier(value) {
     if (typeof value !== 'string' || value.length > 128 || !/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(value)) {
         throw new TypeError('Invalid planner file identity');
@@ -336,7 +359,12 @@ function identifier(value) {
     return value;
 }
 
-/** @template T @param {T} value @returns {T} */
+/**
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ * @throws {TypeError} If an owned value cannot be traversed or frozen.
+ */
 function freezeOwned(value) {
     if (value && typeof value === 'object') {
         for (const child of Object.values(value)) { freezeOwned(child); }
@@ -345,10 +373,19 @@ function freezeOwned(value) {
     return value;
 }
 
-/** @param {FrameIdentity} a @param {FrameIdentity} b @returns {boolean} */
+/**
+ * @param {FrameIdentity} a
+ * @param {FrameIdentity} b
+ * @returns {boolean}
+ */
 function identityMatches(a, b) { return IDENTITY_FIELDS.every((key) => a[key] === b[key]); }
 
-/** @param {unknown} value @param {number} maximum @param {string} label */
+/**
+ * @param {unknown} value
+ * @param {number} maximum
+ * @param {string} label
+ * @throws {TypeError|RangeError} If the array is not a bounded plain data array.
+ */
 function assertBoundedArray(value, maximum, label) {
     if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype || value.length > maximum ||
     Reflect.ownKeys(value).length !== value.length + 1) {

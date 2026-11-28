@@ -45,7 +45,11 @@ self.addEventListener('message', (event) => {
     void handleMessage(event);
 });
 
-/** @param {MessageEvent<unknown>} event @returns {Promise<void>} @throws {Error} For invalid or unavailable codec operations. */
+/**
+ * @param {MessageEvent<unknown>} event
+ * @returns {Promise<void>}
+ * @throws {Error} For invalid or unavailable codec operations.
+ */
 async function handleMessage(event) {
     const data = /** @type {{id?: unknown, action?: unknown, bytes?: unknown, codecId?: unknown, dictionary?: unknown, envelope?: unknown, expectedDecodedLength?: unknown, maxOutputSize?: unknown, wrap?: unknown, level?: unknown}} */ (event.data);
     const id = data?.id;

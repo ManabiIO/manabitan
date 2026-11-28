@@ -139,6 +139,7 @@ import {ZstdTrainerWorkerOwner, ZstdTrainingCorpusError} from './zstd-trainer-wo
  */
 
 export const MAX_BLOCK_DISCOVERY_REFERENCES = 1024;
+
 const MAX_DISCOVERY_FRAMES = 64;
 const MAX_CHECKPOINT_BYTES = 32768;
 const MAX_SAMPLE_BYTES = 4 * 1024 * 1024;
@@ -148,7 +149,9 @@ const encoder = new TextEncoder();
 
 /** Optional capacity/transient errors are retryable, never measured no-gain. */
 export class TermContentOptimizationResourceError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
         /** @type {string} */
@@ -158,7 +161,9 @@ export class TermContentOptimizationResourceError extends Error {
 
 /** A fixed input exceeds this strategy's capabilities. Retrying cannot help. */
 export class TermContentOptimizationUnsupportedFrameError extends TermContentOptimizationResourceError {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
         /** @type {string} */
@@ -168,7 +173,9 @@ export class TermContentOptimizationUnsupportedFrameError extends TermContentOpt
 
 /** Confirmed private canonical/checkpoint damage; source storage remains healthy. */
 export class TermContentOptimizationIntegrityError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
         /** @type {string} */
@@ -177,7 +184,6 @@ export class TermContentOptimizationIntegrityError extends Error {
 }
 
 /**
- *
  * @param {string} identity
  * @param {{dictionaryCapacity: number, strategy: number, level: number}} parameters
  * @returns {OptimizationCheckpoint}
@@ -202,7 +208,6 @@ export function createTermContentOptimizationCheckpoint(identity, parameters) {
 }
 
 /**
- *
  * @param {Uint8Array} left
  * @param {Uint8Array} right
  * @throws {Error} If canonical bytes differ.
@@ -217,7 +222,6 @@ function equalBytes(left, right) {
 }
 
 /**
- *
  * @param {Uint8Array} bytes
  * @returns {Promise<string>}
  */
@@ -227,7 +231,6 @@ async function sha256(bytes) {
 }
 
 /**
- *
  * @param {string} value
  * @returns {boolean}
  */
@@ -612,7 +615,6 @@ export class TermContentOptimizationController {
     }
 
     /**
-     *
      * @param {AbortSignal} signal
      * @throws {DOMException} If foreground admitted.
      */
@@ -621,7 +623,6 @@ export class TermContentOptimizationController {
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {AbortSignal} signal
      * @param {boolean} [target]
@@ -634,7 +635,6 @@ export class TermContentOptimizationController {
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {OptimizationPhase} phase
      * @param {OptimizationCheckpoint} state
@@ -650,7 +650,6 @@ export class TermContentOptimizationController {
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {OptimizationCheckpoint} state
      * @param {AbortSignal} signal
@@ -670,10 +669,12 @@ export class TermContentOptimizationController {
             const page = await this._host.readDiscovery(job, state.discoveryCursor, signal, legacyProbe);
             this._check(job, signal);
             if (!page || typeof page.done !== 'boolean') { throw new TypeError('Invalid bounded discovery page'); }
-            const resumeBlockRange = 'items' in page ? page.resumeAfterBlockReference : undefined;
+            const resumeBlockRange = 'items' in page ? page.resumeAfterBlockReference : void 0;
             if (legacyProbe && resumeBlockRange) { throw new TypeError('Legacy discovery cannot use an immutable block range'); }
-            const items = discoveryItems('items' in page ? page.items : (page.item === null ? [] : [page.item]),
-                resumeBlockRange ? MAX_BLOCK_DISCOVERY_REFERENCES : MAX_DISCOVERY_FRAMES);
+            const items = discoveryItems(
+'items' in page ? page.items : (page.item === null ? [] : [page.item]),
+                resumeBlockRange ? MAX_BLOCK_DISCOVERY_REFERENCES : MAX_DISCOVERY_FRAMES,
+            );
             if (items.length === 0) {
                 if (legacyProbe && page.done) {
                     this._finishLegacyEligibilityNoOp(job, state);
@@ -811,9 +812,10 @@ nextPending === null && pending.done ? 'sample' : 'discover',
                 return;
             }
             if (result.kind === 'pending') {
-                this._save(job, 'discover', {...state, pendingDiscovery: {
-                    ...pending, item, remaining: items.slice(index + 1), inspection: result.cursor,
-                }});
+                this._save(job, 'discover', {...state,
+                    pendingDiscovery: {
+                        ...pending, item, remaining: items.slice(index + 1), inspection: result.cursor,
+                    }});
                 return;
             }
         }
@@ -834,7 +836,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {OptimizationCheckpoint} state
      * @param {AbortSignal} signal
@@ -893,7 +894,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {FrameDescriptor} frame
      * @returns {{key: string, offset: number, length: number}}
      * @throws {TermContentOptimizationResourceError} If private canonical inspection is required.
@@ -906,7 +906,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {OptimizationCheckpoint} state
      * @param {AbortSignal} signal
@@ -964,7 +963,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {OptimizationCheckpoint} state
      * @param {AbortSignal} signal
@@ -1039,7 +1037,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {string} suffix
      * @returns {string}
@@ -1052,7 +1049,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {CheckpointFile} file
      * @param {AbortSignal} signal
@@ -1070,7 +1066,6 @@ nextPending === null && pending.done ? 'sample' : 'discover',
     }
 
     /**
-     *
      * @param {OptimizationJob} job
      * @param {string} id
      * @param {Uint8Array} bytes

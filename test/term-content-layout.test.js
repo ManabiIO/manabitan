@@ -10,7 +10,9 @@ const DATA_SHA = 'a'.repeat(64);
 const DICTIONARY_SHA = 'b'.repeat(64);
 const DECODED_SHA = 'c'.repeat(64);
 
-/** @returns {import('core').SafeAny} Raw persisted JSON is deliberately mutated into invalid shapes below. */
+/**
+ * @returns {import('core').SafeAny} Raw persisted JSON is deliberately mutated into invalid shapes below.
+ */
 function fixture() {
     const files = [
         {fileId: 'data', byteLength: 100, sha256: DATA_SHA},
@@ -394,11 +396,23 @@ describe('bounded immutable content layout', () => {
         expect(() => createContentLayoutResolver(hidden)).toThrow(/hidden/);
         let reads = 0;
         const getter = fixture();
-        Object.defineProperty(getter.manifests[0], 'extents', {get() { ++reads; throw new Error('Unexpected getter'); }, enumerable: true});
+        Object.defineProperty(getter.manifests[0], 'extents', {
+            get() {
+                ++reads;
+                throw new Error('Unexpected getter');
+            },
+            enumerable: true,
+        });
         expect(() => createContentLayoutResolver(getter)).toThrow(/accessors/);
         expect(reads).toBe(0);
         const arrayGetter = fixture();
-        Object.defineProperty(arrayGetter.manifests[0].extents, '0', {get() { ++reads; throw new Error('Unexpected array getter'); }, enumerable: true});
+        Object.defineProperty(arrayGetter.manifests[0].extents, '0', {
+            get() {
+                ++reads;
+                throw new Error('Unexpected array getter');
+            },
+            enumerable: true,
+        });
         expect(() => createContentLayoutResolver(arrayGetter)).toThrow(/accessors/);
         expect(reads).toBe(0);
     });

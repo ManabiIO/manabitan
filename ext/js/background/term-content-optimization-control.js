@@ -34,6 +34,7 @@ export class TermContentOptimizationControl {
     /**
      * @param {import('offscreen').TermContentOptimizationState|undefined} state
      * @returns {boolean}
+     * @throws {TypeError} If the state does not match the bounded runtime control schema.
      */
     accept(state) {
         if (typeof state === 'undefined') { return false; }

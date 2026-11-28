@@ -503,7 +503,9 @@ export class Offscreen {
                 }
             }, structuredLookupAcceptanceDelayMs) :
             null;
-        /** @param {import('core').Response<unknown>} response */
+        /**
+         * @param {import('core').Response<unknown>} response
+         */
         const callback = (response) => {
             if (acceptanceTimeoutId !== null) {
                 globalThis.clearTimeout(acceptanceTimeoutId);

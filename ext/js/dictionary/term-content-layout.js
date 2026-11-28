@@ -30,7 +30,13 @@ const encoder = new TextEncoder();
 export class SupersededCompressedRangeError extends Error {
     constructor() {
         super('Logical range contains superseded compressed source bytes');
+        /**
+         *
+         */
         this.name = 'SupersededCompressedRangeError';
+        /**
+         *
+         */
         this.code = 'supersededCompressedRange';
     }
 }
@@ -52,11 +58,17 @@ export class SupersededCompressedRangeError extends Error {
  * SHA-256 values are physical-owner attestations; this pure function cannot hash files.
  * @param {unknown} input
  * @returns {{logicalStart: number, logicalEnd: number, resolveLogical: (offset: number, length: number) => ReadonlyArray<Readonly<PhysicalSpan>>, resolveFrame: (identity: unknown) => Readonly<ResolvedContentFrame>}}
+ * @throws {TypeError|RangeError} If any metadata closure, interval or admission bound is invalid.
  */
 export function createContentLayoutResolver(input) {
     const data = record(input, 'manifests externalFrames files physicalFiles codecs');
     let rowCount = 0;
-    /** @param {unknown} value @param {number} [maximum] */
+    /**
+     * @param {unknown} value
+     * @param {number} [maximum]
+     * @returns {unknown[]}
+     * @throws {TypeError|RangeError} If the table is malformed or exceeds an admission bound.
+     */
     function table(value, maximum = MAX_ROWS) {
         const rows = array(value, maximum);
         rowCount += rows.length;
@@ -107,7 +119,12 @@ export function createContentLayoutResolver(input) {
             throw new TypeError('Codec dictionary file identity closure is missing or inconsistent');
         }
     }
-    /** @param {string} fileId @param {number} offset @param {number} length */
+    /**
+     * @param {string} fileId
+     * @param {number} offset
+     * @param {number} length
+     * @throws {TypeError|RangeError} If the physical span is outside its immutable file.
+     */
     function validatePhysical(fileId, offset, length) {
         const file = fileMap.get(fileId);
         if (typeof file === 'undefined' || end(offset, length) > file.byteLength) {
@@ -116,10 +133,17 @@ export function createContentLayoutResolver(input) {
     }
     /** @type {Map<string, Array<{offset: number, length: number}>>} */
     const physicalRanges = new Map();
-    /** @param {string} fileId @param {number} offset @param {number} length */
+    /**
+     * @param {string} fileId
+     * @param {number} offset
+     * @param {number} length
+     */
     function retainPhysicalRange(fileId, offset, length) {
         let ranges = physicalRanges.get(fileId);
-        if (typeof ranges === 'undefined') { ranges = []; physicalRanges.set(fileId, ranges); }
+        if (typeof ranges === 'undefined') {
+            ranges = [];
+            physicalRanges.set(fileId, ranges);
+        }
         ranges.push({offset, length});
     }
     let previousEnd = manifests[0].logicalStart;
@@ -170,10 +194,10 @@ export function createContentLayoutResolver(input) {
     for (const codec of codecs) { retainPhysicalRange(codec.fileId, 0, codec.dictionaryBytes); }
     for (const ranges of physicalRanges.values()) {
         ranges.sort((a, b) => a.offset - b.offset);
-        let previousEnd = 0;
+        let previousRangeEnd = 0;
         for (const range of ranges) {
-            if (range.offset < previousEnd) { throw new TypeError('Immutable physical spans overlap'); }
-            previousEnd = end(range.offset, range.length);
+            if (range.offset < previousRangeEnd) { throw new TypeError('Immutable physical spans overlap'); }
+            previousRangeEnd = end(range.offset, range.length);
         }
     }
     for (const manifest of manifests) {
@@ -204,7 +228,12 @@ export function createContentLayoutResolver(input) {
         if (cursor !== manifest.logicalLength) { throw new TypeError('Retained and removed intervals leave an uncovered region suffix'); }
     }
 
-    /** @param {number} offset @param {number} length @returns {ReadonlyArray<Readonly<PhysicalSpan>>} */
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {ReadonlyArray<Readonly<PhysicalSpan>>}
+     * @throws {RangeError|SupersededCompressedRangeError} If the range is outside the loaded layout or its bytes were superseded.
+     */
     function resolveLogical(offset, length) {
         const limit = end(offset, length);
         if (offset < logicalStart || limit > logicalEnd) { throw new RangeError('Logical range lies outside the loaded region window'); }
@@ -221,9 +250,9 @@ export function createContentLayoutResolver(input) {
                 if (typeof extent === 'undefined' || relative < extent.logicalOffset || relative >= extent.logicalOffset + extent.length) {
                     throw new SupersededCompressedRangeError();
                 }
-                const length = Math.min(limit - cursor, extent.logicalOffset + extent.length - relative);
-                spans.push(Object.freeze({fileId: extent.fileId, physicalOffset: extent.physicalOffset + relative - extent.logicalOffset, length}));
-                cursor += length;
+                const spanLength = Math.min(limit - cursor, extent.logicalOffset + extent.length - relative);
+                spans.push(Object.freeze({fileId: extent.fileId, physicalOffset: extent.physicalOffset + relative - extent.logicalOffset, length: spanLength}));
+                cursor += spanLength;
                 ++extentIndex;
             }
             ++regionIndex;
@@ -231,7 +260,11 @@ export function createContentLayoutResolver(input) {
         return Object.freeze(spans);
     }
 
-    /** @param {unknown} value Persisted descriptors are validated before use. */
+    /**
+     * @param {unknown} value Persisted descriptors are validated before use.
+     * @returns {Readonly<ResolvedContentFrame>}
+     * @throws {TypeError|RangeError} If the frame identity conflicts with the loaded layout.
+     */
     function resolveFrame(value) {
         const identity = copyIdentity(record(value, IDENTITY_FIELDS));
         const index = floorIndex(frames, identity.logicalOffset, 'logicalOffset');
@@ -273,7 +306,12 @@ export function createContentLayoutResolver(input) {
     return Object.freeze({logicalStart, logicalEnd, resolveLogical, resolveFrame});
 }
 
-/** @param {unknown} value @param {string} fields @returns {Record<string, any>} */
+/**
+ * @param {unknown} value
+ * @param {string} fields
+ * @returns {Record<string, unknown>}
+ * @throws {TypeError} If the record does not contain the requested own data fields.
+ */
 function record(value, fields) {
     if (typeof value !== 'object' || value === null || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) {
         throw new TypeError('Layout record must be a plain own-data object');
@@ -283,19 +321,25 @@ function record(value, fields) {
     if (keys.length !== expected.length || keys.some((key) => typeof key !== 'string' || !expected.includes(key))) {
         throw new TypeError('Layout record has missing or unknown keys');
     }
-    /** @type {Record<string, any>} */
+    /** @type {Record<string, unknown>} */
     const result = {};
     for (const key of expected) {
         const descriptor = Object.getOwnPropertyDescriptor(value, key);
         if (typeof descriptor === 'undefined' || !Object.hasOwn(descriptor, 'value') || !descriptor.enumerable) {
             throw new TypeError('Layout records cannot contain accessors or hidden fields');
         }
-        result[key] = descriptor.value;
+        const fieldValue = /** @type {unknown} */ (descriptor.value);
+        result[key] = fieldValue;
     }
     return result;
 }
 
-/** @param {unknown} value @param {number} maximum @returns {unknown[]} */
+/**
+ * @param {unknown} value
+ * @param {number} maximum
+ * @returns {unknown[]}
+ * @throws {TypeError|RangeError} If the table is malformed or exceeds its row bound.
+ */
 function array(value, maximum) {
     if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) { throw new TypeError('Layout table must be a plain array'); }
     if (value.length > maximum) { throw new RangeError('Layout metadata table admission exceeded'); }
@@ -311,7 +355,12 @@ function array(value, maximum) {
     return result;
 }
 
-/** @param {unknown} value @param {boolean} [positive] @returns {number} */
+/**
+ * @param {unknown} value
+ * @param {boolean} [positive]
+ * @returns {number}
+ * @throws {RangeError} If the value is outside the permitted integer domain.
+ */
 function integer(value, positive = false) {
     if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < (positive ? 1 : 0)) {
         throw new RangeError('Layout byte coordinate must be a nonnegative safe integer');
@@ -319,7 +368,12 @@ function integer(value, positive = false) {
     return value;
 }
 
-/** @param {number} offset @param {number} length */
+/**
+ * @param {number} offset
+ * @param {number} length
+ * @returns {number}
+ * @throws {RangeError} If the range exceeds safe integer coordinates.
+ */
 function end(offset, length) {
     integer(offset);
     integer(length);
@@ -327,28 +381,45 @@ function end(offset, length) {
     return offset + length;
 }
 
-/** @param {unknown} value @returns {string} */
+/**
+ * @param {unknown} value
+ * @returns {string}
+ * @throws {TypeError} If the value is not an allowed identifier.
+ */
 function id(value) {
     if (typeof value !== 'string' || value.length > 128 || !/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(value)) { throw new TypeError('Invalid immutable layout identifier'); }
     return value;
 }
 
-/** @param {unknown} value @returns {string} */
+/**
+ * @param {unknown} value
+ * @returns {string}
+ * @throws {TypeError} If the value is not a lowercase SHA-256 digest.
+ */
 function digest(value) {
     if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) { throw new TypeError('Invalid SHA-256 identity'); }
     return value;
 }
 
-/** @param {unknown} value @returns {'mbc2'|'none'} */
+/**
+ * @param {unknown} value
+ * @returns {'mbc2'|'none'}
+ * @throws {TypeError} If the frame envelope is unsupported.
+ */
 function envelope(value) {
     if (value !== 'mbc2' && value !== 'none') { throw new TypeError('Unknown frame envelope'); }
     return value;
 }
 
-/** @param {Record<string, any>} row @returns {FrameIdentity} */
+/**
+ * @param {Record<string, unknown>} row
+ * @returns {FrameIdentity}
+ * @throws {TypeError|RangeError} If the original frame identity is invalid.
+ */
 function copyIdentity(row) {
     const kind = row.kind;
     if (kind !== 'block' && kind !== 'legacy-entry' && kind !== 'shared-glossary') { throw new TypeError('Unknown frame kind'); }
+    /** @type {FrameIdentity} */
     const result = {
         kind,
         logicalOffset: integer(row.logicalOffset),
@@ -364,7 +435,11 @@ function copyIdentity(row) {
     return result;
 }
 
-/** @param {unknown} value @returns {Frame} */
+/**
+ * @param {unknown} value
+ * @returns {Frame}
+ * @throws {TypeError|RangeError} If a replacement frame descriptor is invalid.
+ */
 function copyFrame(value) {
     const row = record(value, FRAME_FIELDS);
     const identity = copyIdentity(row);
@@ -384,7 +459,11 @@ function copyFrame(value) {
     return result;
 }
 
-/** @param {unknown} value @returns {Extent} */
+/**
+ * @param {unknown} value
+ * @returns {Extent}
+ * @throws {TypeError|RangeError} If the retained extent descriptor is invalid.
+ */
 function copyExtent(value) {
     const row = record(value, 'logicalOffset length fileId physicalOffset');
     const result = {logicalOffset: integer(row.logicalOffset), length: integer(row.length, true), fileId: id(row.fileId), physicalOffset: integer(row.physicalOffset)};
@@ -392,13 +471,21 @@ function copyExtent(value) {
     return result;
 }
 
-/** @param {unknown} value @returns {RemovedRange} */
+/**
+ * @param {unknown} value
+ * @returns {RemovedRange}
+ * @throws {TypeError|RangeError} If the removed interval descriptor is invalid.
+ */
 function copyRemoved(value) {
     const row = record(value, 'logicalOffset length frameLogicalOffset');
     return {logicalOffset: integer(row.logicalOffset), length: integer(row.length, true), frameLogicalOffset: integer(row.frameLogicalOffset)};
 }
 
-/** @param {unknown} value @returns {PhysicalFile} */
+/**
+ * @param {unknown} value
+ * @returns {PhysicalFile}
+ * @throws {TypeError|RangeError} If the immutable file descriptor is invalid.
+ */
 function copyFile(value) {
     const row = record(value, 'fileId byteLength sha256');
     return {
@@ -410,7 +497,11 @@ function copyFile(value) {
     };
 }
 
-/** @param {unknown} value @returns {Codec} */
+/**
+ * @param {unknown} value
+ * @returns {Codec}
+ * @throws {TypeError|RangeError} If codec metadata or its dictionary size is invalid.
+ */
 function copyCodec(value) {
     const row = record(value, 'codecId fileId formatVersion dictionaryBytes dictionarySha256');
     if (row.formatVersion !== 1) { throw new TypeError('Unsupported codec format version'); }
@@ -419,7 +510,14 @@ function copyCodec(value) {
     return {codecId: id(row.codecId), fileId: id(row.fileId), formatVersion: 1, dictionaryBytes, dictionarySha256: digest(row.dictionarySha256)};
 }
 
-/** @param {Array<any>} rows @param {string} key @returns {Map<string, any>} */
+/**
+ * @template {Record<string, unknown>} T
+ * @template {keyof T} K
+ * @param {T[]} rows
+ * @param {K} key
+ * @returns {Map<T[K], T>}
+ * @throws {TypeError} If metadata identities are duplicated.
+ */
 function uniqueMap(rows, key) {
     const result = new Map();
     for (const row of rows) {
@@ -429,23 +527,38 @@ function uniqueMap(rows, key) {
     return result;
 }
 
-/** @param {Array<{logicalOffset: number, length: number}>} rows @param {number} length */
+/**
+ * @param {Array<{logicalOffset: number, length: number}>} rows
+ * @param {number} length
+ * @throws {TypeError|RangeError} If intervals overlap or lie outside the region.
+ */
 function validateIntervals(rows, length) {
     let cursor = 0;
     for (const row of rows) {
         const limit = end(row.logicalOffset, row.length);
-        if (row.logicalOffset < cursor || limit > length) { throw new TypeError('Layout intervals overlap, are unsorted or exceed their region'); }
+        if (row.logicalOffset < cursor || limit > length) {
+            throw new TypeError('Layout intervals overlap, are unsorted or exceed their region');
+        }
         cursor = limit;
     }
 }
 
-/** @param {Array<any>} rows @param {number} offset @param {string} key */
+/**
+ * @param {Array<any>} rows
+ * @param {number} offset
+ * @param {string} key
+ * @returns {number}
+ */
 function floorIndex(rows, offset, key) {
     let first = 0;
     let last = rows.length;
     while (first < last) {
         const middle = first + Math.floor((last - first) / 2);
-        if (rows[middle][key] <= offset) { first = middle + 1; } else { last = middle; }
+        if (/** @type {number} */ (rows[middle][key]) <= offset) {
+            first = middle + 1;
+        } else {
+            last = middle;
+        }
     }
     return first - 1;
 }

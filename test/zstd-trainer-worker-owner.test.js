@@ -35,9 +35,12 @@ class FakeWorker {
      * @param {(event: import('core').SafeAny) => void} listener
      */
     removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
-    /** @param {string} type @param {import('core').SafeAny} event */
+    /**
+     * @param {string} type
+     * @param {import('core').SafeAny} event
+     */
     emit(type, event) {
-        for (const listener of [...(this.listeners.get(type) ?? [])]) { listener(event); }
+        for (const listener of (this.listeners.get(type) ?? [])) { listener(event); }
     }
 
     listenerCount() {
@@ -77,7 +80,10 @@ function trackedAbort() {
 }
 
 beforeEach(() => { vi.useFakeTimers(); });
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+});
 
 test('does not construct or load a worker before admission; invalid/preaborted jobs never start', async () => {
     const {owner, worker, createWorker} = setup();
@@ -101,8 +107,8 @@ test('does not construct or load a worker before admission; invalid/preaborted j
 test('transfers private exact copies of borrowed subarrays and returns owned output after disposal', async () => {
     const {owner, worker} = setup();
     const {source, table, request} = input();
-    const originalSource = source.slice();
-    const originalTable = table.slice();
+    const originalSource = [...source];
+    const originalTable = [...table];
     const {controller, add, remove} = trackedAbort();
     const promise = owner.train(request, {signal: controller.signal});
     const [posted, transfers] = worker.postMessage.mock.calls[0];
@@ -245,7 +251,7 @@ test('factory-triggered abort still terminates its just-created worker', async (
     expect(vi.getTimerCount()).toBe(0);
 });
 
-for (const bad of [{dictionary: new Uint8Array(2)}, {initializeMs: NaN}, {trainMs: -1}, {heapBytes: Infinity}]) {
+for (const bad of [{dictionary: new Uint8Array(2)}, {initializeMs: Number.NaN}, {trainMs: -1}, {heapBytes: Infinity}]) {
     test('invalid matching response cannot escape as trained dictionary: ' + Object.keys(bad)[0], async () => {
         const {owner, worker} = setup();
         const promise = owner.train(input().request);
@@ -280,7 +286,7 @@ test('one owner admits exactly one disposable job', async () => {
     expect(createWorker).toHaveBeenCalledTimes(1);
 });
 
-for (const timeoutMs of [0, -1, Infinity, NaN, 2147483648]) {
+for (const timeoutMs of [0, -1, Infinity, Number.NaN, 2147483648]) {
     test('rejects unbounded or unsafe timer option ' + timeoutMs, () => {
         expect(() => new ZstdTrainerWorkerOwner({timeoutMs})).toThrow(RangeError);
     });

@@ -77,7 +77,9 @@ function createDictionaryRuntimeImportRejectionState(shutdownRejectors, response
         /** @type {number|ReturnType<typeof globalThis.setTimeout>} */
         timeoutId: 0,
     };
-    /** @param {Error} error */
+    /**
+     * @param {Error} error
+     */
     const shutdownReject = (error) => {
         if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
         reject(error);
@@ -793,7 +795,6 @@ export class API {
      * media-drawing-worker on the frontend holds a MessagePort to the database-worker on the backend, which closes when the extension
      * sleeps, because the database-worker is killed and currently there is no way to detect a closed port due to
      * https://github.com/whatwg/html/issues/1766 / https://github.com/whatwg/html/issues/10201
-     *
      * So this is our only choice. We can remove this once there is a way to gracefully detect the closed MessagePort and rebuild it.
      * @returns {Promise<import('api').ApiReturn<'heartbeat'>>}
      */
@@ -936,7 +937,9 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
-            /** @returns {boolean} */
+            /**
+             * @returns {boolean}
+             */
             const finalizeRequest = () => {
                 if (settled) { return false; }
                 settled = true;
@@ -944,7 +947,9 @@ export class API {
                 globalThis.clearTimeout(timeoutId);
                 return true;
             };
-            /** @param {unknown} error */
+            /**
+             * @param {unknown} error
+             */
             const shutdownReject = (error) => {
                 if (finalizeRequest()) { reject(error); }
             };

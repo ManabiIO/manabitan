@@ -191,11 +191,17 @@ export class ByteBoundedLruCache {
         this._bytes = 0;
     }
 
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get size() { return this._values.size; }
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get bytes() { return this._bytes; }
-    /** @returns {number} */
+    /**
+     * @returns {number}
+     */
     get maxBytes() { return this._maxBytes; }
 
     /** */
@@ -270,7 +276,9 @@ export class TermContentBlockStore {
         this._lastError = null;
     }
 
-    /** @returns {TermContentBlockImportSession} */
+    /**
+     * @returns {TermContentBlockImportSession}
+     */
     beginImportSession() {
         return new TermContentBlockImportSession(this);
     }
@@ -323,7 +331,9 @@ export class TermContentBlockStore {
         this._blockTargetBytes = value;
     }
 
-    /** @returns {Record<string, unknown>} */
+    /**
+     * @returns {Record<string, unknown>}
+     */
     getDiagnostics() {
         return {
             compressionExperiments: this._compressionExperiments,
@@ -461,7 +471,6 @@ export class TermContentBlockStore {
     }
 
     /**
-     *
      * @param {number} length
      * @param {string} dictName
      * @returns {number}
@@ -769,7 +778,6 @@ await (readContext ?? this._contentStore).readSlicesDetailed(sliceRequests.map((
     }
 
     /**
-     *
      * @param {TermContentFrameIdentity} identity
      * @returns {string}
      */
@@ -784,7 +792,9 @@ await (readContext ?? this._contentStore).readSlicesDetailed(sliceRequests.map((
             identity.originalEnvelope]);
     }
 
-    /** @returns {{status: 'temporarilyUnavailable', reason: string}} */
+    /**
+     * @returns {{status: 'temporarilyUnavailable', reason: string}}
+     */
     _createInvalidatedReadFailure() {
         return {status: 'temporarilyUnavailable', reason: 'Term content changed during read'};
     }

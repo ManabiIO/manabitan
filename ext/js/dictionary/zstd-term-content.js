@@ -57,7 +57,9 @@ const JMDICT_COMPRESSION_LEVEL = -1;
 const EMPTY_COMPRESSION_DICTIONARY = new Uint8Array(0);
 
 export class ZstdDictionaryUnavailableError extends Error {
-    /** @param {string} message */
+    /**
+     * @param {string} message
+     */
     constructor(message) {
         super(message);
         /**
@@ -83,7 +85,9 @@ export function registerTermContentZstdDictionary(name, dictionary) {
     trainedDictionaryByName.set(name, new Uint8Array(dictionary));
 }
 
-/** @param {string} name */
+/**
+ * @param {string} name
+ */
 export function unregisterTermContentZstdDictionary(name) {
     trainedDictionaryByName.delete(name);
 }
@@ -141,7 +145,9 @@ function validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, b
 }
 
 export class TermContentCompressionPool {
-    /** @param {Worker[]} workers */
+    /**
+     * @param {Worker[]} workers
+     */
     constructor(workers) {
         if (workers.length === 0) { throw new RangeError('Term content compression pool requires a worker'); }
         /** @type {Worker[]} */
@@ -163,7 +169,9 @@ export class TermContentCompressionPool {
         }
     }
 
-    /** @returns {boolean} */
+    /**
+     * @returns {boolean}
+     */
     get failed() { return this._failed; }
 
     /**
@@ -448,7 +456,9 @@ export class TermContentCompressionPool {
         this._fail(new Error('Term content compression pool closed'));
     }
 
-    /** @param {MessageEvent} event */
+    /**
+     * @param {MessageEvent} event
+     */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
         const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
@@ -486,7 +496,9 @@ export class TermContentCompressionPool {
         });
     }
 
-    /** @param {Error} error */
+    /**
+     * @param {Error} error
+     */
     _fail(error) {
         if (this._failed) { return; }
         this._failed = true;
@@ -819,7 +831,9 @@ function discardCompressionPool(pool) {
     if (compressionPool === pool) { compressionPool = null; }
 }
 
-/** @returns {Promise<TermContentCompressionPool|null>} */
+/**
+ * @returns {Promise<TermContentCompressionPool|null>}
+ */
 async function initializeCompressionPool() {
     if (compressionPool !== null && !compressionPool.failed) { return compressionPool; }
     if (compressionPoolPromise !== null) { return await compressionPoolPromise; }
@@ -875,7 +889,9 @@ function waitForCompressionWorkerReady(worker, signal) {
             cleanup();
             reject(new Error(`Compression worker initialization timed out after ${COMPRESSION_WORKER_READY_TIMEOUT_MS}ms`));
         }, COMPRESSION_WORKER_READY_TIMEOUT_MS);
-        /** @param {MessageEvent<unknown>} event */
+        /**
+         * @param {MessageEvent<unknown>} event
+         */
         const onMessage = (event) => {
             const rawData = /** @type {unknown} */ (event.data);
             const data = /** @type {{type?: unknown, error?: unknown}} */ (rawData);
@@ -887,7 +903,9 @@ function waitForCompressionWorkerReady(worker, signal) {
                 reject(new Error(typeof data.error === 'string' ? data.error : 'Compression worker initialization failed'));
             }
         };
-        /** @param {ErrorEvent} event */
+        /**
+         * @param {ErrorEvent} event
+         */
         const onError = (event) => {
             cleanup();
             reject(new Error(event.message || 'Compression worker initialization failed'));
@@ -1058,7 +1076,8 @@ export function decompressTermContentZstd(content, dictName, options = {}) {
     // A record selector remains opaque even if its text equals a registered
     // codec ID. Only the resolved immutable layout may choose that dictionary.
     const codecId = options.codecSource === 'immutable-layout' ? dictName : getLegacyTermContentZstdCodecId(dictName)
-    const dictionary = codecId === 'jmdict' ? jmdictDict :
+    const dictionary = codecId === 'jmdict' ?
+jmdictDict :
         (codecId === null ? null : getTrainedDictionary(codecId))
     // A null dictionary clears any preceding dictionary in the shared context.
     return decompressUsingDict(dctx, content, dictionary, options)
