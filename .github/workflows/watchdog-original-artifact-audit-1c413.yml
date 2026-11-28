@@ -22,9 +22,26 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
+      - name: Preserve launcher inputs before Python setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/watchdog-original-artifact-audit/launcher-sources
+          git rev-parse HEAD > builds/perf/watchdog-original-artifact-audit/checked-out-head.txt
+          uname -a > builds/perf/watchdog-original-artifact-audit/launcher-host.txt
+          cp dev/perf/watchdog-artifact-audit-20261128/audit_transport.py \
+            dev/perf/watchdog-artifact-audit-20261128/audit_watchdog.py \
+            dev/perf/watchdog-artifact-audit-20261128/test_audit_watchdog.py \
+            dev/perf/watchdog-artifact-audit-20261128/manifest.json \
+            dev/perf/watchdog-artifact-audit-20261128/README.md \
+            dev/perf/watchdog-artifact-audit-20261128/source-binding.json \
+            builds/perf/watchdog-original-artifact-audit/launcher-sources/
+          cp .github/workflows/watchdog-original-artifact-audit-1c413.yml \
+            builds/perf/watchdog-original-artifact-audit/launcher-sources/workflow.yml
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: '3.12.12'
+          python-version: '3.12.10'
+          architecture: 'arm64'
       - name: Verify Python and the immutable auditor source
         shell: bash
         run: |

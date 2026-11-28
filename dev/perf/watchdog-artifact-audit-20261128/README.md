@@ -108,5 +108,29 @@ independent six-cell confirmation. It cannot by itself qualify a product PR.
 Local execution was unavailable when this reader was authored. The hosted job
 first verifies its own source and runs pure adversarial parser/identity/archive
 and statistical tests before reading the original artifacts. The workflow pins
-Python 3.12.12, requires Python 3.11 or newer with assertions enabled, and has no
+Python 3.12.10 for arm64, requires Python 3.11 or newer with assertions enabled, and has no
 third-party Python dependency.
+
+## Records-only launcher correction
+
+The original reader run 46121998730 at commit
+39b29ed91ea0ae26d8fc8f109ecef79c889827cf failed before source verification,
+pure tests, or artifact reading. Its setup action could not find Python
+3.12.12 for macOS 26.7.2 arm64. The official actions/python-versions manifest
+has no macOS distribution for that security-only version. No new import or
+original-artifact observation was acquired by the failed reader.
+
+The corrected launcher uses the same pinned setup-python action with Python
+3.12.10 and explicit arm64, whose official darwin-arm64 build is listed at
+https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-darwin-arm64.tar.gz.
+It creates and snapshots its own setup evidence directory before Python setup,
+so a future setup failure can still upload source and host evidence.
+
+The reader, pure tests, transport, immutable artifact manifest and mathematical
+policy are byte-identical. Only this documentation, the workflow and its source
+binding change. The original failed job log is retained as Git blob
+4abee12b114f9722ca6d666814d76577bfe5f0a9 (18094 bytes,
+SHA-256 c72a15ccb3e559cd0c5b47c04ade262d5d2cb3342662745793e9ef57a4d1e8a4);
+the complete failure and supported-build receipt is Git blob
+4fbf3a0bbcfdf4d7f72252bb3feed9293b102653. This is a new records-only audit
+attempt over the same original imports, not a repeated import experiment.
