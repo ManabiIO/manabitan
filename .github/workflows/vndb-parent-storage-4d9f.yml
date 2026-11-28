@@ -1,0 +1,108 @@
+name: Observe parent VNDB storage allocation 4d9f
+
+on:
+  push:
+    branches: [experiment/vndb-parent-storage-20261128-4d9f]
+    paths: [.github/workflows/vndb-parent-storage-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  observe:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Capture independent parent allocation with complete semantic checks
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, shutil, subprocess, zipfile
+          root = pathlib.Path.cwd()
+          output = root / 'builds/perf/vndb-a300-storage-calibration-4d9f'
+          output.mkdir(parents=True, exist_ok=False)
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          assert git('rev-parse', 'HEAD') == 'a300da36d00df8e353c5679b1528b50a1299b75f'
+          assert git('rev-parse', 'HEAD^{tree}') == '5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4'
+          assert not git('status', '--porcelain')
+          assert subprocess.check_output(['node', '--version'], text=True).strip() == 'v22.22.0'
+          def write(name, value):
+              (output / name).write_text(json.dumps(value, indent=2) + '\n')
+          write('registered-scope.json', {
+              'source': git('rev-parse', 'HEAD'), 'tree': git('rev-parse', 'HEAD^{tree}'),
+              'purpose': 'Independent parent-only storage observation to establish the new schema SAH allocation before a new exact functional contract.',
+              'timingEligible': False, 'memoryQualification': False, 'candidateComparison': False,
+              'observations': 1, 'mediaCheck': 'all', 'importFlags': None,
+              'priorFailedCohort': 46139342690,
+              'oldExpectation': '37 units belonged to the older f28 schema and failed both latest VN flag cells; those failures remain retained.',
+              'failurePolicy': 'One observation; retain any failure. No replacement or performance claim.',
+              'fixtureLockSha256': hashlib.sha256((root / 'test/perf/dictionaries.lock.json').read_bytes()).hexdigest(),
+          })
+          steps = [
+              ('libs', ['npm', 'run', 'build:libs']),
+              ('license', ['npm', 'run', 'license-report:html']),
+              ('build', ['npm', 'run', 'build', '--', '--target', 'chrome']),
+              ('fixture', ['node', 'dev/perf/prepare-dictionaries.js', 'vndb']),
+              ('import', ['node', 'dev/perf/import-benchmark.js', 'vndb', '--runs', '1',
+                          '--no-build', '--build-target', 'chrome', '--media-check', 'all',
+                          '--output', str(output / 'observation')]),
+          ]
+          outcomes = []
+          for name, command in steps:
+              with (output / (name + '.log')).open('wb') as log:
+                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+              outcomes.append({'name': name, 'command': command, 'returncode': result.returncode})
+              write('steps.json', outcomes)
+              print(json.dumps(outcomes[-1]), flush=True)
+              if result.returncode:
+                  raise SystemExit(result.returncode)
+          assert not git('status', '--porcelain')
+          package = root / 'builds/manabitan-chrome.zip'
+          with zipfile.ZipFile(package) as archive:
+              names = [item.filename for item in archive.infolist() if not item.is_dir()]
+              assert len(names) == len(set(names))
+              entries = {name: hashlib.sha256(archive.read(name)).hexdigest() for name in names}
+          shutil.copy2(package, output / 'package.zip')
+          write('package-identity.json', {'sha256': hashlib.sha256(package.read_bytes()).hexdigest(),
+                                        'bytes': package.stat().st_size, 'entries': entries})
+          raw = json.loads((output / 'observation/run-1.json').read_text())
+          assert raw['status'] == 'success' and raw['benchmark']['mediaCheck'] == 'all'
+          storage = raw['benchmark']['validation']['storage']
+          sizes = sorted(item['bytes'] for item in storage['files']
+                         if item['path'].startswith('manabitan/sqlite-sahpool-v1/.opaque/'))
+          assert len(sizes) == 8 and sizes.count(4096) == 7
+          active = [size for size in sizes if size != 4096]
+          assert len(active) == 1 and active[0] > 4096 and active[0] % 4096 == 0
+          result = {'schemaVersion': 1, 'source': git('rev-parse', 'HEAD'),
+                    'status': 'observed-parent-only', 'timingEligible': False,
+                    'activeSahBytes': active[0], 'activeSahUnits': active[0] // 4096,
+                    'allSahSizes': sizes, 'importFlags': raw['benchmark']['importFlags'],
+                    'rawReportSha256': hashlib.sha256((output / 'observation/run-1.json').read_bytes()).hexdigest(),
+                    'qualification': 'This measured baseline allocation must be registered before separate candidate off/on verification. It is not a retrospective pass of the failed37-unit cohort.'}
+          write('parent-allocation-observation.json', result)
+          print(json.dumps(result), flush=True)
+          PY
+      - name: Preserve observation and any failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vndb-a300-storage-calibration-4d9f
+          path: builds/perf/vndb-a300-storage-calibration-4d9f
+          if-no-files-found: error
+          retention-days: 30
