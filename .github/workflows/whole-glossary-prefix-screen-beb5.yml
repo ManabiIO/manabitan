@@ -52,7 +52,10 @@ jobs:
           git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
           node dev/perf/host-environment.js > "$evidence/host-before.json"
           git worktree add --detach "$baseline" "$BASELINE_COMMIT"
-          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          python - "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules" <<'PY'
+          import os, shutil, sys
+          shutil.copytree(sys.argv[1], sys.argv[2], copy_function=os.link, symlinks=True)
+          PY
           for arm in baseline candidate; do
             source="$GITHUB_WORKSPACE"
             if [ "$arm" = baseline ]; then source="$baseline"; fi
