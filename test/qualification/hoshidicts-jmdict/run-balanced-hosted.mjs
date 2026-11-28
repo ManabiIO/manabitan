@@ -46,7 +46,8 @@ for (const [dataset, spec] of Object.entries(specs)) {
             await execFileAsync(process.execPath,
                 [path.join(root, 'run-glossary.mjs'), engine, dataset, String(pair), oracle],
                 {env: environment, maxBuffer: 8 * 1024 * 1024})
-            const receiptPath = path.join(runDirectory, 'runs', `${dataset}-${pair}-${engine}`, 'receipt.json')
+            const receiptArm = engine === 'manabitan' ? 'candidate' : engine
+            const receiptPath = path.join(runDirectory, 'runs', `${dataset}-${pair}-${receiptArm}`, 'receipt.json')
             records.push(JSON.parse(await readFile(receiptPath, 'utf8')))
         }
     }

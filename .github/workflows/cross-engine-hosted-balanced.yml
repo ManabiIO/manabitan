@@ -83,6 +83,7 @@ jobs:
         shell: bash
         env:
           BENCH_RUN_DIR: ${{ runner.temp }}/cross-engine/evidence
+          BENCH_SCRATCH_DIR: ${{ runner.temp }}/cross-engine/scratch
           BENCH_ARCHIVE_ROOT: ${{ runner.temp }}/cross-engine/archives
           BENCH_HOSHIDICTS_DRIVER: ${{ runner.temp }}/cross-engine/hoshi-build/hoshidicts-import-lookup-bench
           BENCH_EXTENSION_DIR: ${{ runner.temp }}/cross-engine/manabitan-extension
@@ -96,6 +97,7 @@ jobs:
           export BENCH_PACKAGE_SHA256 BENCH_RUNNER_SHA256
           mkdir -p "${BENCH_EXTENSION_DIR}"
           mkdir -p "${BENCH_RUN_DIR}"
+          mkdir -p "${BENCH_SCRATCH_DIR}"
           unzip -q "${package}" -d "${BENCH_EXTENSION_DIR}"
           sha256sum \
             test/qualification/hoshidicts-jmdict/run-glossary.mjs \

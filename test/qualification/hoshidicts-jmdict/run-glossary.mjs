@@ -5,7 +5,7 @@ import {LOOKUP_CAP, validateBrowserGlossaries, validateNativeGlossaries, verifie
 import {promisify} from 'node:util'
 import {fileURLToPath} from 'node:url'
 import {execFile} from 'node:child_process'
-import {mkdir, mkdtemp, readFile, rename, open, writeFile} from 'node:fs/promises'
+import {mkdir, mkdtemp, readFile, writeFile} from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
 import {chromium} from 'playwright'
@@ -22,7 +22,7 @@ if (!runnerSha256 || !evidence || !(position >= 1 && position <= 6) || !['contro
 if (arm !== 'hoshidicts' && (!extensionDir || !process.env.BENCH_PACKAGE_SHA256 || !process.env.BENCH_COMMIT)) throw new Error('Set BENCH_EXTENSION_DIR, BENCH_PACKAGE_SHA256 and BENCH_COMMIT for browser runs')
 const hoshidictsDriver = process.env.BENCH_HOSHIDICTS_DRIVER
 if (!hoshidictsDriver) throw new Error('Set BENCH_HOSHIDICTS_DRIVER')
-const scratch = path.join(evidence, 'scratch')
+const scratch = process.env.BENCH_SCRATCH_DIR ?? path.join(evidence, 'scratch')
 await mkdir(scratch, {recursive:true})
 await mkdir(path.join(evidence,'runs'), {recursive:true})
 const specs = {
@@ -115,7 +115,7 @@ async function runHoshidicts(dataset, pair, spec, oracle, glossaryOracle) {
     }
 }
 
-async function inspectPersistedContent(page, runDirectory, capture) {
+async function inspectPersistedContent(page) {
     const files = await page.evaluate(async () => {
         const files = []
         async function walk(dir, prefix) {
@@ -128,32 +128,9 @@ async function inspectPersistedContent(page, runDirectory, capture) {
         await walk(await navigator.storage.getDirectory(), '')
         return files
     })
-    let content = null
-    if (capture) {
-        const name = 'manabitan-term-content.bin'
-        const size = files.find(({path}) => path === name)?.bytes
-        if (!Number.isSafeInteger(size) || size <= 0) throw new Error('Missing persisted VNDB content file')
-        const handle = await open(path.join(runDirectory, name), 'wx')
-        const hash = createHash('sha256')
-        try {
-            for (let offset = 0; offset < size; offset += 262144) {
-                const encoded = await page.evaluate(async ({name, offset}) => {
-                    const root = await navigator.storage.getDirectory()
-                    const file = await (await root.getFileHandle(name)).getFile()
-                    const bytes = new Uint8Array(await file.slice(offset, offset + 262144).arrayBuffer())
-                    let text = ''
-                    for (let at = 0; at < bytes.length; at += 8192) text += String.fromCharCode(...bytes.subarray(at, at + 8192))
-                    return btoa(text)
-                }, {name, offset})
-                const chunk = Buffer.from(encoded, 'base64')
-                if (chunk.length !== Math.min(size - offset, 262144)) throw new Error('Incomplete content-file read')
-                hash.update(chunk)
-                await handle.writeFile(chunk)
-            }
-        } finally { await handle.close() }
-        content = {name, bytes: size, sha256: hash.digest('hex')}
-    }
-    return {files, totalBytes: files.reduce((sum, item) => sum + item.bytes, 0), content}
+    const contentFile = files.find(({path}) => path === 'manabitan-term-content.bin') ?? null
+    return {fileCount: files.length, totalBytes: files.reduce((sum, item) => sum + item.bytes, 0),
+        contentFileBytes: contentFile?.bytes ?? null, fileSample: files.slice(0, 32)}
 }
 
 async function probeLookup(page, query, expectedDigest, title, glossaryOracle) {
@@ -347,7 +324,7 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
                     if (restartOptions.general.maxResults !== LOOKUP_CAP) errors.push('Browser result cap changed on restart')
                     record.afterRestart = await probeLookup(restartedPage, spec.query, record.resultSha256, spec.title, glossaryOracle)
                     if (!record.afterRestart.equal) errors.push('Restart lookup differs from the first lookup')
-                    record.storage = await inspectPersistedContent(restartedPage, runDirectory, dataset === 'vndb' && arm === 'candidate')
+                    record.storage = await inspectPersistedContent(restartedPage)
                     if (dataset === 'vndb' && arm === 'candidate') {
                         const mediaOracle = JSON.parse(await readFile(path.join(fixtureRoot, 'fixtures/vndb-media-oracle.json'), 'utf8'))
                         if (mediaOracle.archiveSha256 !== spec.sha || mediaOracle.dictionary !== spec.title ||
