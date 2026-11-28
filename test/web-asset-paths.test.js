@@ -25,7 +25,7 @@ import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 // module locations. This unit contract does not claim browser OPFS coverage.
 /** @type {Array<[string, RegExp, string]>} */
 const resources = [
-    ['dictionary/dictionary-database.js', /new Worker\((.+), \{type: 'module'\}\)/, 'js/dictionary/dictionary-database-worker-main.js'],
+    ['dictionary/dictionary-database.js', /new Worker\((.+), \{type: 'module'\}\)/, 'js/dictionary/dictionary-database-worker-main.js?opfs-disable'],
     ['dictionary/dictionary-media-renderer.js', /_fetchResource\((new URL\('[^']*resvg\.wasm', import\.meta\.url\))\)/, 'lib/resvg.wasm'],
     ['dictionary/dictionary-media-renderer.js', /_fetchResource\((new URL\('[^']*NotoSansJP-Regular\.ttf', import\.meta\.url\))\)/, 'fonts/NotoSansJP-Regular.ttf'],
     ['dictionary/zstd-term-content.js', /\binit\((new URL\('[^']*zstd\.wasm', import\.meta\.url\)\.href)\)/, 'lib/zstd.wasm'],
@@ -67,7 +67,8 @@ describe('relocatable dictionary assets', () => {
         vi.stubGlobal('Worker', workerConstructor);
         const client = new DictionaryWorker();
         const response = client.getMdxVersion();
-        expect(workerConstructor).toHaveBeenCalledWith(new URL('../ext/js/dictionary/dictionary-worker-main.js', import.meta.url), {type: 'module'});
+        // eslint-disable-next-line @stylistic/semi
+        expect(workerConstructor).toHaveBeenCalledWith(new URL('../ext/js/dictionary/dictionary-worker-main.js?opfs-disable', import.meta.url), {type: 'module'})
         const listener = listeners.get('message');
         if (typeof listener !== 'function') { throw new Error('Missing worker message listener'); }
         listener(new MessageEvent('message', {data: {action: 'complete', params: {result: 1}}}));

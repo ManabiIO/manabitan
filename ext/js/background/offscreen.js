@@ -87,7 +87,7 @@ export class Offscreen {
         this._prepareDatabasePromise = null;
         /** @type {DictionaryWorkerClient} */
         this._dictionaryWorkerClient = new DictionaryWorkerClient(
-            '/js/background/offscreen-dictionary-worker.js',
+            '/js/background/offscreen-dictionary-worker.js?opfs-disable',
             {
                 context: 'Offscreen dictionary worker',
                 onFatalError: (error) => { log.error(error); },

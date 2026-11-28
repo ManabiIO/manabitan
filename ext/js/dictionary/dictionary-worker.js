@@ -214,7 +214,9 @@ export class DictionaryWorker {
      */
     _invokeDirect(action, params, transfer, onProgress, formatResult) {
         return new Promise((resolve, reject) => {
-            const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js', import.meta.url), {type: 'module'});
+            // SAH-pool owns persistence; do not start SQLite's unused OPFS proxy.
+            // eslint-disable-next-line @stylistic/semi
+            const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js?opfs-disable', import.meta.url), {type: 'module'})
             if (this._reuseWorker && this._worker === null) {
                 this._worker = worker;
             }
