@@ -740,11 +740,11 @@ This candidate removes redundant physical backing for the common MBR6 first sign
 
 The completed full-corpus comparison uses parent `f28c2801fcfd9416f220b46b9cbafeee901c1cb2` and public candidate `68b29e5a959470e76ff67a93ec8b300cc53f1254`, exact tree `167af1110023e4febad62921e13244b2c8bcb93c`. All six acquisitions passed on their first attempt. Every parser row, field, frame, normalized final file and independently reconstructed logical metadata column matched. The only final-file normalization is the linked random generation identifier.
 
-| Corpus | Rows | Groups | S1 backing avoided | Name-ID backing avoided | Total backing avoided |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| JMdict | 528,299 | 12 | 2 MiB | 2 MiB | 4 MiB |
-| Jitendex | 436,555 | 22 | 2 MiB | 2 MiB | 4 MiB |
-| VNDB | 6,648,310 | 170 | 1 MiB | 0 | 1 MiB |
+| Corpus   |      Rows | Groups | S1 backing avoided | Name-ID backing avoided | Total backing avoided |
+| -------- | --------: | -----: | -----------------: | ----------------------: | --------------------: |
+| JMdict   |   528,299 |     12 |              2 MiB |                   2 MiB |                 4 MiB |
+| Jitendex |   436,555 |     22 |              2 MiB |                   2 MiB |                 4 MiB |
+| VNDB     | 6,648,310 |    170 |              1 MiB |                       0 |                 1 MiB |
 
 These figures describe allocated backing retained at the completed term-ingestion checkpoint. They are not elapsed-time, process-peak or steady-state memory improvements. VNDB materializes its name-ID column in group two. The upstream implicit record-ID saving is excluded. Generic S1 materialization can use less than one additional 64 KiB page at some capacities; this is not a universal allocation-neutral change.
 
