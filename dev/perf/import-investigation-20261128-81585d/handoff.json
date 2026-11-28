@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "study": "81585d-stage2",
-  "snapshotAtUtc": "2026-11-28 05:06:18 UTC",
-  "status": "pending",
+  "snapshotAtUtc": "2026-11-28T07:50:00Z",
+  "status": "lazy-rejected-early-pending",
   "promotionEligible": false,
   "productPrOpened": false,
-  "reason": "All twelve browser cells and both corrected source-validation jobs are queued; local executor is unavailable.",
+  "reason": "Recovered original frozen evidence: lazy signatures fails both JMdict target cells; early release passes source gates and its first non-target JMdict cell, while five browser cells remain required.",
   "elapsedWorkBeforeExecutorLoss": "Approximately 2 hours 16 minutes; requested several-hour investigation was interrupted.",
   "workModeUsed": false,
   "baseline": {
@@ -18,8 +18,8 @@
     "commit": "bc8b16e0228c71e12b0cb560182bdbc2bc83ca73",
     "tree": "f46516d61e6f6a7c6cdb850adf3e263b48cfbc29",
     "requiredBrowserCells": 12,
-    "startedBrowserCells": 0,
-    "completedBrowserCells": 0
+    "startedBrowserCells": 7,
+    "completedBrowserCells": 7
   },
   "authoritativeSourceValidation": {
     "runId": 46106649952,
@@ -28,8 +28,8 @@
     "tree": "bad9ef6f7fce89128dd5a88691cb7514b832328a",
     "requiredJobs": 2,
     "requiredGatesPerCandidate": 15,
-    "startedJobs": 0,
-    "completedJobs": 0
+    "startedJobs": 2,
+    "completedJobs": 2
   },
   "candidates": {
     "lazy-signatures": {
@@ -39,10 +39,24 @@
       "target": "jmdict",
       "promotionEligible": false,
       "completedPackagePreflight": true,
-      "completedTimingCells": 0,
+      "completedTimingCells": 6,
       "requiredTimingCells": 6,
-      "correctedSourceValidationComplete": false,
-      "preflightArtifactId": 15247733779
+      "correctedSourceValidationComplete": true,
+      "preflightArtifactId": 15247733779,
+      "status": "rejected",
+      "passedTimingCells": 3,
+      "passedSourceGates": 13,
+      "requiredSourceGates": 15,
+      "failedSourceGates": [
+        "unit",
+        "test-typescript"
+      ],
+      "failedQualification": [
+        "JMdict host0 target",
+        "JMdict host1 target",
+        "VNDB host0 memory observer coverage",
+        "two source validation gates"
+      ]
     },
     "early-borrowed-release": {
       "commit": "1de603b81a377391529c9e518a824ff00ac4cc04",
@@ -51,44 +65,57 @@
       "target": "jitendex",
       "promotionEligible": false,
       "completedPackagePreflight": true,
-      "completedTimingCells": 0,
+      "completedTimingCells": 1,
       "requiredTimingCells": 6,
-      "correctedSourceValidationComplete": false,
+      "correctedSourceValidationComplete": true,
       "preflightArtifactId": 15247777302,
-      "portedExistingPr": 955
+      "portedExistingPr": 955,
+      "status": "pending",
+      "passedTimingCells": 1,
+      "passedSourceGates": 15,
+      "firstTimingArtifactId": 15254520122,
+      "firstTimingArtifactArchivedAtThisSnapshot": false
     }
   },
   "aggregateChecker": {
     "location": "/workspace/scratch/81585d0a2901/qualification/promotion-checker",
-    "remotelyUploaded": false,
-    "currentlyAccessible": false,
+    "remotelyUploaded": true,
+    "currentlyAccessible": true,
     "freezeTimeUtc": "2026-11-28 04:58:28 UTC",
     "adversarialTestsPassed": 32,
     "lastExitCode": 2,
     "lastDisposition": {
-      "eachCandidatePassedArtifacts": 1,
-      "eachCandidateRequiredArtifacts": 8,
-      "eachCandidatePassedTimingCells": 0,
-      "eachCandidateRequiredTimingCells": 6,
-      "pendingArtifacts": 14,
-      "rejectedPresentArtifacts": 0
+      "lazySignatures": {
+        "passedArtifacts": 4,
+        "requiredArtifacts": 8,
+        "passedTimingCells": 3,
+        "requiredTimingCells": 6,
+        "promotionEligible": false
+      },
+      "earlyBorrowedRelease": {
+        "passedArtifacts": 3,
+        "requiredArtifacts": 8,
+        "passedTimingCells": 1,
+        "requiredTimingCells": 6,
+        "promotionEligible": false
+      }
     },
     "lastVerifiedSha256": {
       "check.py": "4e62bbdd4d4945b167c716778cbea76371b68cc34373676b379c65b521b03292",
       "test_check.py": "8b431981f1dd0748c17c60e9dd0bc48546d4dac9020566f9f391b8b1be0e549d",
       "freeze.json": "bf94bbcf30e7dc2a458abceb7d8aaa653a4ea8ca2e00b44f6a2842b338a03369"
     },
-    "provenance": "Last observed verified local state; not an executable replacement or authenticated copy of the frozen checker."
+    "provenance": "Exact original checker bytes recovered, rehashed, and included in verified raw archive; latest early-release cell postdates archive cutoff."
   },
   "composition": {
     "remote": false,
-    "committed": false,
+    "committed": true,
     "staged": false,
-    "testsStarted": false,
+    "testsStarted": true,
     "path": "/workspace/scratch/81585d0a2901/manabitan-lazy-early-composition",
     "branch": "perf/lazy-signatures-early-release-compose-20261128-81585d",
-    "head": "c3287e31ffabeae8dd85e2eb9801b7dc0594b11f",
-    "mergeHead": "dd7401e09877537247eb29807ade5bacfd6f3a5a",
+    "head": "22d9f72f1d9341549200fb1e98be973cb9978eef",
+    "mergeHead": null,
     "textConflictsResolved": 2,
     "preparedTests": 11,
     "addedTestLines": 320,
@@ -97,8 +124,11 @@
       "node --check ext/js/dictionary/dictionary-database.js",
       "node --check test/dictionary-database-content-dedup.test.js"
     ],
-    "runtimePreparationState": "Unknown after executor transport disconnection; inspect before resuming.",
-    "qualificationInherited": false
+    "runtimePreparationState": "Recovered and inspected; single planned focused run passed; independently reviewed. No full-source or combined browser qualification.",
+    "qualificationInherited": false,
+    "tree": "adf7be71bcb8da1054fcbf698d841ea8488fc57c",
+    "passedFocusedTests": 477,
+    "focusedTestFiles": 7
   },
   "localFullUnitAttempt": {
     "source": "c3287e31ffabeae8dd85e2eb9801b7dc0594b11f",
@@ -112,21 +142,27 @@
     "retried": false
   },
   "preservation": {
-    "researchRawArchiveUploaded": false,
-    "localExperimentArchivesCurrentlyAccessible": false,
+    "researchRawArchiveUploaded": true,
+    "localExperimentArchivesCurrentlyAccessible": true,
     "providerArtifactsArePermanent": false,
     "preflightExpiryUtc": {
       "earlyRelease": "2026-12-12T04:16:10Z",
       "lazySignatures": "2026-12-12T04:28:04Z"
     },
     "researchDocumentFormattingCheckRun": false,
-    "reasonFormattingNotRun": "Local executor unavailable; no product source changed by this research handoff."
+    "reasonFormattingNotRun": "Research-only Markdown/JSON/Python archive publication; product source is unchanged. Archive bytes and every member were verified.",
+    "archiveDirectory": "archive-20261128T0739",
+    "archiveSnapshotAtUtc": "2026-11-28T07:39:35.095626Z",
+    "archiveSha256": "b1801f36d21b233ae04dd7ea664b575658f5f3cd882d4ffc6d4ce11861df05e8",
+    "archiveFileCount": 3056,
+    "archiveRawBytes": 154129300
   },
   "nextActions": [
-    "Inspect the existing frozen runs without replacing observations.",
-    "Recover exact local archives and checker, verify hashes, and inspect interrupted composition preparation if the environment returns.",
-    "Ingest provider artifacts with exact run/head/attempt/archive/member checks before their expiry.",
-    "Apply independent frozen source/correctness/timing/memory gates; a successful acquisition job alone is insufficient.",
-    "Consider a product PR only after a demonstrated review-worthy gain and all required gates."
-  ]
+    "Finish ingesting the original early-release cells without replacing observations.",
+    "Complete and preserve the separate test-only lazy validation successor; do not revise the frozen source disposition.",
+    "Investigate shared existing compression-worker lookup I/O with explicit session, failure and rollback controls before freezing a fresh study.",
+    "Consider a product PR only after an ordinary-import gain worth reviewing and all required correctness/source/memory gates."
+  ],
+  "previousSnapshotFile": "handoff-20261128T050618.json",
+  "workspaceRecoveredAtUtcApproximate": "2026-11-28T07:27:00Z"
 }

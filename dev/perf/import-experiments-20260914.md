@@ -851,3 +851,45 @@ All eleven indexed checker files passed local checksum verification before disco
 This append, the [machine-readable handoff](import-investigation-20261128-81585d/handoff.json), and exact provider-response snapshots record only observed results, source identities and blockers. They do not replace raw experiment evidence. Original Actions artifacts remain authoritative remote inputs. Local raw directories are `E`, `/workspace/scratch/81585d0a2901/qualification/`, and `/workspace/scratch/81585d0a2901/manabitan-lazy-signatures/builds/perf/lazy-content-signatures-20261128/`. Preserve failures, warmups, control drift, exact protocols and source patches if the environment returns. The VNDB fixture cache alone was removed after verifying SHA-256 `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` to relieve disk pressure; its locked remote source is reproducible and it is not experiment evidence.
 
 Continue by inspecting the **existing frozen runs**, not launching replacements. Ingest exact provider artifacts, retain run/head/attempt identities and all failures, apply the frozen independent candidate gates, and update this disposition with actual results. Resolve and test the separate composition only after its worktree and interrupted runtime preparation are inspected. Do not open a product performance PR on package preflight, a component percentage, a queued job or another study's result. No product PR was opened by this round.
+
+## 2026-11-28 — 81585d recovered evidence and JMdict rejection
+
+This is an additive continuation after the user requested a stronger investigation. The workspace recovered around 07:27 UTC. The 05:06 handoff above remains a historical record of the outage, not the current qualification state. No Work mode or new product PR was used.
+
+### Frozen browser results now available
+
+All six lazy-signature browser cells from the original [run 46104094289](https://github.com/ManabiIO/manabitan/actions/runs/46104094289), attempt 1, have been downloaded and checked against the unchanged frozen protocol and aggregate checker. No benchmark cell was rerun, replaced, or pooled across hosts. Negative percentages mean shorter candidate elapsed time.
+
+| Corpus / host | B/A median | B/C median | Disposition |
+| --- | ---: | ---: | --- |
+| JMdict / 0 | −1.3531% | −0.6374% | Fails the frozen 5% target; faster in 5/6 and 3/6 blocks respectively |
+| JMdict / 1 | +0.1381% | +0.0610% | Fails the target; faster in 3/6 blocks against each control |
+| Jitendex / 0 | +0.6596% | +0.1471% | Non-target timing/memory guard passes |
+| Jitendex / 1 | +0.1398% | −0.8909% | Non-target timing/memory guard passes |
+| VNDB / 0 | +0.2625% | +0.5179% | Ordinary observations complete; memory-observer coverage fails |
+| VNDB / 1 | +1.8538% | +1.0301% | Frozen guard passes; retain the slower tails |
+
+Lazy signatures is **rejected as a JMdict performance improvement**. JMdict host 1 is effectively neutral. Host 0 also has substantial control variation: C/A individual blocks range from −20.2870% to +8.4425%. The actual JMdict result does not justify a PR on the eliminated sample-array bytes.
+
+The VNDB host-0 failure is an observer-coverage failure, not demonstrated increased memory use. The unchanged auditor reproduced gaps of 449.850820, 261.991615 and 283.292720 ms in A1/B2/A2, exceeding the 250 ms limit; B1 was valid. All four memory benchmark processes exited zero, semantic failures were empty, and qualified peaks remain null. VNDB host 1 retains B/A equal-work +3.9838% and worst +13.6719%; B/C equal-work +2.9408% and worst +17.5906%.
+
+Corrected [source-validation run 46106649952](https://github.com/ManabiIO/manabitan/actions/runs/46106649952) completed both candidates. Early release passes all fifteen gates. Lazy signatures passes thirteen gates and fails full unit and test TypeScript: one obsolete test still requires eagerly emitted native signatures, and one new test accesses a possibly absent staged reservation without an explicit narrowing guard. These are being repaired on a separate test-only successor; the frozen source result is not rewritten. Local successor evidence, including resource failures, is outside the archive snapshot below and will be preserved separately.
+
+Early release remains pending overall. Its first JMdict host-0 cell was admitted after the archive snapshot: B/A median −1.5102%, B/C −3.3805%, with a +10.5166% C/A control tail. It passes its non-target guard, including 329 raw memory scans. JMdict has zero borrowed groups on this source, so this is not evidence for the early-release mechanism. Both target Jitendex cells and the other guards remain required. Artifact 15254520122 is newer than the archived snapshot.
+
+### Recovered composition and preservation
+
+The previously interrupted composition is now committed locally as `22d9f72f1d9341549200fb1e98be973cb9978eef`, tree `adf7be71bcb8da1054fcbf698d841ea8488fc57c`, and remains unpushed. Its one planned focused run passes **477/477 tests across seven files**, including all eleven prepared lifetime/failure controls. Independent source review found no blocker in the completion-only guards or persistence/drain ordering. It has no combined browser qualification and inherits no performance result.
+
+The [archive directory](import-investigation-20261128-81585d/archive-20261128T0739/README.md) preserves **3,056 files / 154,129,300 raw bytes** from the recovered experiments, original frozen checker and tests, ten complete artifact ingestions, profiles, historical receipts, composition controls, and the interrupted local ingestion. The archive was frozen at 07:39:35 UTC; every member was hashed during packing and verified by full archive readback. The 26,222,875-byte compressed archive has SHA-256 `b1801f36d21b233ae04dd7ea664b575658f5f3cd882d4ffc6d4ce11861df05e8`. Seven numbered parts, their hashes, the full per-file manifest and a reconstruction verifier are committed together. These are research-only files, not product package inputs.
+
+The original checker bytes are recovered and unchanged, including the three hashes listed in the earlier handoff. The initial incomplete lazy component cohort, failed observations, warmups, control drift and historical acquisition-time status documents remain present. A local extraction interrupted by a later brief environment disconnect is retained separately; only the same original provider artifact was fetched again to complete ingestion, with no browser rerun.
+
+### Next distinct hypothesis
+
+Read-only source audit found no removable extra full-input inflation, JSON join, CRC or grammar pass in the successful JMdict path. The current 53 banks enter twelve successful fused groups; compressed bytes cross the required ownership boundaries and the 171,617,523 inflated bytes stay in native memory.
+
+A distinct experiment is now being implemented: reuse an already-ready compression worker through a private MessagePort for lookup-index writes. Current JMdict uses local synchronous I/O because its source is below the unchanged 1 GiB dedicated-worker gate. The recorded main-thread gaps total only about 20.6 ms, at most 3.5 ms each, before a roughly 121 ms final synchronous flush; local queue-idle flushing therefore lacks a credible budget. Existing compression workers have materially longer acknowledged idle windows, but moving I/O there may delay later compression. This is a hypothesis, not a predicted speedup.
+
+The proposed implementation adds no workers and changes no worker count, grouping, byte budget, compression setting, completion endpoint or final durability requirement. It must preserve session-scoped writer state, final header/flush acknowledgement, pool-death notification to idle I/O leases, rollback lock release and terminal failure after ambiguous mutating acquisition. Previous dedicated-worker and byte-triggered checkpoint studies do not establish the result of this shared-worker design. Only an exact-source ordinary-import study can establish whether it is worth review.
+

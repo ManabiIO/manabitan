@@ -1,0 +1,7 @@
+{
+  "temporaryRoot": "/tmp/manabitan-archive-readback-3lf9rueu",
+  "returnCode": 0,
+  "elapsedSeconds": 0.7014253740017011,
+  "stdout": "{\n  \"archive\": \"/tmp/manabitan-archive-readback-3lf9rueu/verified-final.tar.gz\",\n  \"bytes\": 26222875,\n  \"sha256\": \"b1801f36d21b233ae04dd7ea664b575658f5f3cd882d4ffc6d4ce11861df05e8\",\n  \"files\": 3056,\n  \"rawBytes\": 154129300\n}\n",
+  "stderr": ""
+}

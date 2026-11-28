@@ -1,0 +1,7 @@
+{
+  "temporaryRoot": "/tmp/manabitan-archive-readback-3lf9rueu",
+  "returnCode": 1,
+  "elapsedSeconds": 0.7788858450003318,
+  "stdout": "",
+  "stderr": "Unexpected archive member: ARCHIVE-MANIFEST.json\n"
+}

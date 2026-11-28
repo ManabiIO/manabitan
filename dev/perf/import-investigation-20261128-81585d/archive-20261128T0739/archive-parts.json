@@ -1,0 +1,55 @@
+{
+  "archive": "import-investigation-81585d-20261128T0739.tar.gz",
+  "sha256": "b1801f36d21b233ae04dd7ea664b575658f5f3cd882d4ffc6d4ce11861df05e8",
+  "parts": [
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part01",
+      "offset": 0,
+      "bytes": 4194304,
+      "sha256": "de9d17eebd686a5f0da5659d08af3789718d8996c8eda0e25567f500c8b3463f",
+      "gitBlobSha1": "a5e017ff5c709afb67e0bc8cb32ca218a7b35d9e"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part02",
+      "offset": 4194304,
+      "bytes": 4194304,
+      "sha256": "9e8b2ec3ccadb07f75106ec71e6891c05ae0ac2a139a28a54a03b59455a28226",
+      "gitBlobSha1": "1be02827d7ece0e9611b3c35e361190619ac5e56"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part03",
+      "offset": 8388608,
+      "bytes": 4194304,
+      "sha256": "5f4f2af959790f729f92f42ad27b0ebda1da2569ecb565a3fc706a7434e4f855",
+      "gitBlobSha1": "cef01962ebf0c0037d77b7e0546a02c50b7c7d67"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part04",
+      "offset": 12582912,
+      "bytes": 4194304,
+      "sha256": "79961d18a8a129bcb3459308ce748368fafbee6103f5f82091f9f4e76c63985f",
+      "gitBlobSha1": "3601a7e0338f68745d9dab8ee08de689a596424d"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part05",
+      "offset": 16777216,
+      "bytes": 4194304,
+      "sha256": "38c7d04a2cdfe9e00ba911a604ba8d19799a70f7a274a44312a667fca126a579",
+      "gitBlobSha1": "d4eeaa3d75b42907da83c31f4d50d2a1235a0bf1"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part06",
+      "offset": 20971520,
+      "bytes": 4194304,
+      "sha256": "3ca4f9f4cc7b225b25593362bd1458977914a96517beb72de8ea1e251bdd5552",
+      "gitBlobSha1": "8688c4b12643910649bfb9740531d58e13ae2d73"
+    },
+    {
+      "name": "import-investigation-81585d-20261128T0739.tar.gz.part07",
+      "offset": 25165824,
+      "bytes": 1057051,
+      "sha256": "11f29b27a046b8c525d6d4beef64e03cb67fb289b61dc93fcc868bfa4ab6ac08",
+      "gitBlobSha1": "28ac5716b39b1e825445e340e526c64f62d0052f"
+    }
+  ]
+}

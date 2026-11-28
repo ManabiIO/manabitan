@@ -1,0 +1,12 @@
+{
+  "archive": "import-investigation-81585d-20261128T0739.tar.gz",
+  "bytes": 26222875,
+  "sha256": "b1801f36d21b233ae04dd7ea664b575658f5f3cd882d4ffc6d4ce11861df05e8",
+  "gitBlobSha1": "02e997946e0897bcc1290f3bd30d554d5a8dd9c2",
+  "fileCount": 3056,
+  "rawBytes": 154129300,
+  "manifestSha256": "80a063ba925563f6946f21473f9438faac998e678879f66aacbaf41203c97aad",
+  "snapshotAtUtc": "2026-11-28T07:39:35.095626+00:00",
+  "allSourceBytesReverifiedWhilePacking": true,
+  "archiveReadbackVerified": true
+}
