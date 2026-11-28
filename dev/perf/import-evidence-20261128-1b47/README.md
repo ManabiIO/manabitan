@@ -1,13 +1,14 @@
 # Manabitan import component evidence — 2026-11-28 UTC
 
-This branch preserves reproducible evidence for two small product proposals
-against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
+This branch preserves historical performance evidence for two small product
+proposals measured against baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
+Their current integrations and correctness gates are documented separately below.
 The bundles support component improvements; neither establishes a complete
 browser-import speedup. Product changes are on separate branches.
 Both product PRs remain held drafts. The completed browser results below retain
 the adverse timings and failed memory-coverage checks.
 
-| Proposal                                                                                                                                            | Product commit                             | Measured scope                                                                                                                         |
+| Proposal                                                                                                                                            | Measured product version                   | Measured scope                                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | [Restore indexed compact score-key validation](https://github.com/ManabiIO/manabitan/commit/b15bad43acdfd54d541895cac1109c0e5ba51b2f)               | `b15bad43acdfd54d541895cac1109c0e5ba51b2f` | Approximately 1.57–1.60 ms saved per complete warm validation of 12 actual JMdict field buffers / 528,299 rows                         |
 | [Use existing CRC tables for eight- and four-byte gap tails](https://github.com/ManabiIO/manabitan/commit/5909db31ebe859fce1cc4b38324271ddf9f3dd59) | `5909db31ebe859fce1cc4b38324271ddf9f3dd59` | 6.82–8.65% lower summed CRC phase in two complete sequential VNDB parser cohorts; the direct verifier interval includes no improvement |
@@ -32,7 +33,7 @@ dependencies have explicit hashes and reconstruction instructions rather than
 being duplicated here. The CRC README discloses the missing exact-driver binding
 for one early rejected slicing32 exploration.
 
-## Hosted qualification
+## Historical hosted qualification
 
 - [Score restoration study, run 46106456744](https://github.com/ManabiIO/manabitan/actions/runs/46106456744)
 - [CRC study, run 46107723369](https://github.com/ManabiIO/manabitan/actions/runs/46107723369)
@@ -187,6 +188,37 @@ this original-trial archive.
 The archive, member manifest and checksum are stored here as
 `compression-original-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `bf0ea30f7c8faa7e3ff30b4207fc777ddc99b07c084830889add6bbeae56086a`.
+
+## Current product integrations and correctness gates
+
+The [current-integration correctness packet](current-integration-correctness-README.md)
+records the two held drafts after integration with common baseline
+`dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`, which includes merged PR #972.
+
+| Draft                                                                            | Current validated head                     | Product delta from the common baseline                             |
+| -------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------ |
+| [#978: indexed score validation](https://github.com/ManabiIO/manabitan/pull/978) | `dbaa4d72a5f6b4fcffeb92cefadb521e101df7df` | One file, original two-line change                                 |
+| [#979: short-gap CRC tails](https://github.com/ManabiIO/manabitan/pull/979)      | `961614e36859c529580fc034d6535ca89d119051` | Four files; same helper/test change with regenerated native assets |
+
+Both exact product commits passed their separate pinned correctness jobs and
+independent artifact reviews. Each passed all 669 unit files; score passed 15,139
+tests and CRC 15,140, with the same 47 conditional skips. Native byte reproduction,
+build, scoped lint, runtime/test types and final tracked cleanliness also passed.
+The source/tree/parent/file identities and original artifact bytes are retained.
+
+The packet keeps every incomplete local attempt, the reader-only skipped-status
+correction, the unchanged earlier preparation note and the later publication
+receipt. The draft refs and exact descriptions were verified at 09:18:55 UTC;
+the later byte snapshot and seal times are recorded separately.
+
+These are current-source correctness results only. No browser or performance
+cohort was acquired for either new combination. All historical component and
+browser timing remains tied to its original source, including unfavorable
+observations and failed coverage checks. Both drafts remain held and unmerged.
+
+The archive, member manifest and checksum are stored here as
+`current-integration-correctness-20261128-1b47.*`. Archive SHA-256:
+`2d69f80b6f42289d9de64e9e583f5447a0e4ac3e3c3a3be03d60e956694c43de`.
 
 ## Corrected compression study: prospective registration
 

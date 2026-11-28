@@ -1,0 +1,875 @@
+{
+  "format": 1,
+  "study": "Current-source integrations of held score and CRC drafts: correctness and publication only",
+  "scope": "Complete original correctness artifacts and all members; historical preparation, bounded local failures, reader correction, independent reviews and published ref/body snapshots. No new import-performance acquisition.",
+  "sourceBindings": {
+    "commonBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "scoreProduct": "dbaa4d72a5f6b4fcffeb92cefadb521e101df7df",
+    "crcProduct": "961614e36859c529580fc034d6535ca89d119051",
+    "workflowCommit": "dc6edcc01a6b9f387fb33e80aa47833a29334d14",
+    "workflowSha256": "c94be41ec1de28af2d2fd7bde82cf175b3dcfc210faf8de6581fd649ea7a28cf",
+    "runId": 46128395334,
+    "historicalPerformanceBaselineOnly": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "originalArtifacts": [
+      {
+        "artifactId": 15256363690,
+        "bytes": 594268,
+        "sha256": "f01eeef071ec4270402ad7b67bfcaa5396d8f7c431c7ea814a8260699aa4349e",
+        "members": 23,
+        "variant": "score",
+        "originalPath": "/home/agent/manabitan-import-capture-1b47/hosted-artifacts/current-integration-46128395334-score.zip",
+        "retainedArchivePath": "evidence/current-integration-correctness-20261128-1b47/original-artifacts/current-integration-46128395334-score.zip",
+        "allOriginalMembersRetained": true,
+        "allExtractedBytesEqualOriginalMembers": true,
+        "auditPath": "evidence/hosted-current-integration-46128395334/score/audit.json",
+        "auditSha256": "b99636a2ba7a9471b94281e6af5d30dde49b9b4cd204413998b91a66a5d6c4bf"
+      },
+      {
+        "artifactId": 15256493531,
+        "bytes": 588674,
+        "sha256": "d4a092506e3c6623f9f3deb490cbde998f879bfb3167037fb13dfc32e3acc2c1",
+        "members": 26,
+        "variant": "crc",
+        "originalPath": "/home/agent/manabitan-import-capture-1b47/hosted-artifacts/current-integration-46128395334-crc.zip",
+        "retainedArchivePath": "evidence/current-integration-correctness-20261128-1b47/original-artifacts/current-integration-46128395334-crc.zip",
+        "allOriginalMembersRetained": true,
+        "allExtractedBytesEqualOriginalMembers": true,
+        "auditPath": "evidence/hosted-current-integration-46128395334/crc/audit.json",
+        "auditSha256": "bb9d94f4ec7abb5b3da262394db7cc462e799201638fffa2595f0ae7127a43be"
+      }
+    ],
+    "evidenceSnapshotUtc": "2026-11-28T09:21:07.050351+00:00",
+    "preparedForSealUtc": "2026-11-28T09:25:39.701451+00:00",
+    "readmeSha256": "80e0c6edff2e5d080f490f0ba66faf97718f8e23ccccbff1566e853e107f9ed8"
+  },
+  "memberPathBase": "Original workspace-relative path; contents are byte-for-byte unchanged",
+  "archiveMetadata": "gzip timestamp, tar ownership and file timestamps normalized; payload paths and contents preserved",
+  "symlinkPolicy": "All payload files and their directory components must be regular, non-symlink paths; symlink targets are never read",
+  "manifestPlacement": "External to archive so every archive member, without a self-hash exception, has a digest",
+  "spec": {
+    "path": "evidence/current-integration-correctness-20261128-1b47/bundle-spec.json",
+    "sha256": "b1b3c45f38964feb1f2dc0a91fd9c75d38ddfd97b2728c07238fd4845501d282"
+  },
+  "archive": {
+    "file": "current-integration-correctness-20261128-1b47.tar.gz",
+    "bytes": 2814657,
+    "sha256": "2d69f80b6f42289d9de64e9e583f5447a0e4ac3e3c3a3be03d60e956694c43de"
+  },
+  "totalPayloadBytes": 16909115,
+  "members": [
+    {
+      "path": "evidence/audit-current-integration-gates-1b47.initial-pending-status.py",
+      "bytes": 11636,
+      "sha256": "07167ec4e17f0ac0d560294036d23ed025b3b2699c16a13548e8f16b262a6a7f"
+    },
+    {
+      "path": "evidence/audit-current-integration-gates-1b47.py",
+      "bytes": 11636,
+      "sha256": "e7b1125acd4a755bd3a6d587df70df0ce0145f3b9e7d727014f5bac64b691ef6"
+    },
+    {
+      "path": "evidence/current-develop-integrations/README.md",
+      "bytes": 7646,
+      "sha256": "335894c86e7cac1e1e8a177fbc2a16ec3e0a288ca71a332dbc3fd89f1db1a385"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc-pr-body-current-ready.md",
+      "bytes": 12188,
+      "sha256": "e2da1888b42e41360f557fb08e63d947d3f30a0a433d5f573b2834ce24c2a92e"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc-pr-body-prepared.md",
+      "bytes": 11328,
+      "sha256": "f6b557d82644cde6fe53dbcaf3f9d8b449ff4c6a91914a63fd83806d4459e802"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/build-libs.json",
+      "bytes": 449,
+      "sha256": "a1dd0c2e44fd1865ffbacab627ba378cc74e608c16b7769bf4b7cce1edcb438e"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/build-libs.log",
+      "bytes": 210,
+      "sha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "85c25286a9d3d3ff2ba90b61700fb054e3fe2c7ab81a33725bc001d813512fd7"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 69352,
+      "sha256": "fbcf0f790ced310b93d2824d9d191402bb5496d8d6166be5ea1b4770a215ce81"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 162379,
+      "sha256": "48ee9733ed67c192c10573fbd319c8bcc35d4aabda7904101fb82d0af946dd94"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/manifest.json",
+      "bytes": 845,
+      "sha256": "086cb96c50d3ceb31e1b577423fb264f4c0cecb0e10fc0ce91d858ebcd340022"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/product.patch",
+      "bytes": 6722,
+      "sha256": "ccbc41e48e3e6f4a868fc3fba3c50cec474f8200e7fd3233a8f164d735151b72"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/checkpoint-after-native-build/test/term-bank-crc.test.js",
+      "bytes": 8907,
+      "sha256": "e144707e13ec49bc74d9a45448a4b1655957b2329bee770301a4739d33678876"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/focused-native.json",
+      "bytes": 640,
+      "sha256": "ce7aed230b95d7b77b3d47103b502d8ab73a107637f8368f8401126b6a0fbcd8"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/focused-native.log",
+      "bytes": 369,
+      "sha256": "54658063e7f3d73d5715b3a5443795d92828410643666f5da799366fad653483"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/latest-native-reproduction.json",
+      "bytes": 505,
+      "sha256": "50a600074199aec1a7ae35c1f54f17553e19a2521656ca1d5e59c164866a31ce"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/latest-native-reproduction.log",
+      "bytes": 650,
+      "sha256": "7b2557ad039af052b8a8cfa3aedcb722c2b54f6f0634b82b7e3cf69cbb52a758"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/lint-scoped.json",
+      "bytes": 486,
+      "sha256": "5de2dad0172f2abe78b93afc1764aa669eb28982ea564a5efa078329c27fa6a4"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/lint-scoped.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/native-check.json",
+      "bytes": 486,
+      "sha256": "bc93936c0f21254dbc960c29382a780db7d319359a2d890c4739e8a2deb8695a"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/native-check.log",
+      "bytes": 650,
+      "sha256": "b51aaa61f42d8489b0aaf5c2644b983b954eae9555bc177d0f4cde0e279b4df3"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/native-write.json",
+      "bytes": 487,
+      "sha256": "2ba5b86aab205e8b85e700d9e55c1627e927bba15f6285966932bcef87179fb3"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/native-write.log",
+      "bytes": 650,
+      "sha256": "edc34f13ba170c3d1142256f5ab0bf4332819cf54e10dc788bb17fed6eb3cf42"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/remote-product-blobs.json",
+      "bytes": 2319,
+      "sha256": "6d1d94a4f83edf28f5a3b54c32600a8f57e1c18191363130f18e8bfe4fb679e9"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/source-only.patch",
+      "bytes": 5270,
+      "sha256": "63535a4f96a23f682fddf2d52ee3e1a0e94e14320f04f361e62406c5021c9ceb"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/source-prebuild-identities.json",
+      "bytes": 558,
+      "sha256": "32b0476da18786f81b9298ad4509b7b76156c05fb244353b475023ac9ca099f3"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/term-bank-crc.test.js",
+      "bytes": 8907,
+      "sha256": "e144707e13ec49bc74d9a45448a4b1655957b2329bee770301a4739d33678876"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/term-bank-parser.c",
+      "bytes": 162379,
+      "sha256": "48ee9733ed67c192c10573fbd319c8bcc35d4aabda7904101fb82d0af946dd94"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/test-build.json",
+      "bytes": 449,
+      "sha256": "63e26252161c4545c7c62431c9b7c291116119971077a697bb81110b225b0585"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/test-build.log",
+      "bytes": 430,
+      "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-main.json",
+      "bytes": 451,
+      "sha256": "38094a6f0f644942e24819d404f82dbff9912eee3fea567ebf02127d3848aeff"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-main.log",
+      "bytes": 374,
+      "sha256": "304728a9f411c80317241b80cab57c423743cf128f3f58ae31c8bbd8ec4d1b4e"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-test-1536.json",
+      "bytes": 459,
+      "sha256": "ff144ffe2603026d5d9bace48a465cfcac6ecc2d532821c79d8ed7a3ef82207d"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-test-1536.log",
+      "bytes": 396,
+      "sha256": "d08726b9a8e8f40e9c4e8cb4ef9cf345858e426e1b5615230468a16c01998c06"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-test.json",
+      "bytes": 453,
+      "sha256": "febe908e948887e88d7cfae484af3decec24ea44a0517217f449d5150bfdecfc"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/types-test.log",
+      "bytes": 1222,
+      "sha256": "b44ac5d22ced506b18f9bd012d37046fdc3b2d1f0b7860ef1f804d3862b67f20"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/unit-full-failure-diagnostic.json",
+      "bytes": 1530,
+      "sha256": "ee2a2f38b0093c5c5229e5b990495f66bd6a6264491cbf8bec0ffe9ff7c4b52a"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/unit-full-single-worker.json",
+      "bytes": 678,
+      "sha256": "fbc229d9d2e47e1db6b596267a7d5fe7031c64ad3cea95af9b5ad8e4b154246c"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/unit-full-single-worker.log",
+      "bytes": 232962,
+      "sha256": "fc66e80c8071a020f219766aff6e4307fa1b27899d77ee9870a72b4bf5992401"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/unit-full.json",
+      "bytes": 651,
+      "sha256": "799a946cd3e3de3dcbbaae7ddb40791384393450d97a0559eb9c5bb0e156b5c1"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/unit-full.log",
+      "bytes": 175754,
+      "sha256": "6d81c8525a87f59494444d70a733b4316cac659f45fbc1b50924d30330630449"
+    },
+    {
+      "path": "evidence/current-develop-integrations/crc/worktree-preparation.json",
+      "bytes": 878,
+      "sha256": "800c246dcfcf847ee33a8346ce85aeca1acf777e7072d95a69609a997271f39f"
+    },
+    {
+      "path": "evidence/current-develop-integrations/current-import-integration-gates-1b47.yml",
+      "bytes": 13593,
+      "sha256": "c94be41ec1de28af2d2fd7bde82cf175b3dcfc210faf8de6581fd649ea7a28cf"
+    },
+    {
+      "path": "evidence/current-develop-integrations/current-pr-bodies-prepublication.json",
+      "bytes": 871,
+      "sha256": "60c436d8621d7021238d796bc172165f578aee00f8ca2a70860143dcde74adf4"
+    },
+    {
+      "path": "evidence/current-develop-integrations/current-ready-pr-outcome-review.json",
+      "bytes": 2934,
+      "sha256": "70048436333be716a65d3d2c9b93723707b5332ce07b741b1f3e08e4413fd348"
+    },
+    {
+      "path": "evidence/current-develop-integrations/local-integration-status.json",
+      "bytes": 4790,
+      "sha256": "94953127318f8a925a4c4477c6e920dca8bbe18e7233ca2b31a04cd3d3b07a5d"
+    },
+    {
+      "path": "evidence/current-develop-integrations/prepared-pr-source-history-review.json",
+      "bytes": 2667,
+      "sha256": "8039b88b76b463a8894b9ce70a46423c5aa956b54877ea3b716cc6ab182cbdc9"
+    },
+    {
+      "path": "evidence/current-develop-integrations/readme-format-check-after-recovery.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    {
+      "path": "evidence/current-develop-integrations/readme-preparation-check-receipt.json",
+      "bytes": 756,
+      "sha256": "dd5107c28c9cae5d46e584e27d9f3c3b88e26f7c0215a05e8e7a76dc83201849"
+    },
+    {
+      "path": "evidence/current-develop-integrations/root-hosted-registration.json",
+      "bytes": 483,
+      "sha256": "b614fa29097951f40e1d3a1e735abc99de4bb7907b3d20ed26c76bfeb1a52f4f"
+    },
+    {
+      "path": "evidence/current-develop-integrations/root-product-publication-complete.json",
+      "bytes": 2378,
+      "sha256": "26691a10f9a8b90a3fa25d64b7ac423a1ee02df73bd1b5186b1cdfdd79c27da1"
+    },
+    {
+      "path": "evidence/current-develop-integrations/root-unreferenced-product-commits.json",
+      "bytes": 1971,
+      "sha256": "4172b3aa3ba5d70b4faea1f7fd22c5845ce68951fc783c3b5dddff9d301fddc2"
+    },
+    {
+      "path": "evidence/current-develop-integrations/root-workflow-freeze.json",
+      "bytes": 1159,
+      "sha256": "27edd7aa02312b825da009576d51ebd5e7b5459244b9e4b449dd353de0464d02"
+    },
+    {
+      "path": "evidence/current-develop-integrations/run-gate.py",
+      "bytes": 1495,
+      "sha256": "71d4015769efe9db1bfc6a2a6ff6604e1290539e733812be6358c1201cb117c2"
+    },
+    {
+      "path": "evidence/current-develop-integrations/score-pr-body-current-ready.md",
+      "bytes": 11767,
+      "sha256": "ec350daa863af35f512dd94647ce5e9eaa8a2456aebdbc8b9b839ea6013e4aff"
+    },
+    {
+      "path": "evidence/current-develop-integrations/score-pr-body-prepared.md",
+      "bytes": 10905,
+      "sha256": "64813b256cc95f0298cd9b969d832686bf9b97dbe69b6715d0e6e781ed404056"
+    },
+    {
+      "path": "evidence/current-develop-integrations/score/source-only.patch",
+      "bytes": 768,
+      "sha256": "5c5db739adf0eee89803b5e1e01b8aa573543ac7fc9c7ec6c292c662f61fef59"
+    },
+    {
+      "path": "evidence/current-develop-integrations/score/source-prebuild-identities.json",
+      "bytes": 374,
+      "sha256": "b2eebbbddc1b38ef9d9097e1c8872d580e3fbed1d67ea78567c02e51157dab77"
+    },
+    {
+      "path": "evidence/current-develop-integrations/score/worktree-preparation.json",
+      "bytes": 884,
+      "sha256": "a6b6fbdebaf0c707cfa79b4e045c7a71fc2cf0c5e3b0b3ab29ca1127a761303a"
+    },
+    {
+      "path": "evidence/current-develop-integrations/toolchain-recovery.json",
+      "bytes": 570,
+      "sha256": "60e19a2990562025afb05af27cd0a9570e5f67a7e3895927a074c3b5bff97757"
+    },
+    {
+      "path": "evidence/current-develop-integrations/validation-workflow-draft-receipt.json",
+      "bytes": 2156,
+      "sha256": "d2dd91faa77b236028ecedfb829800a6a140e3e64b3fb11cbaf2d90fbb49314f"
+    },
+    {
+      "path": "evidence/current-develop-integrations/workflow-independent-review-benchmark.json",
+      "bytes": 1477,
+      "sha256": "f8f8278bc0fa239dadc4958a870990b144fddbf711944f5b6d290581ea9879d7"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/README.md",
+      "bytes": 21310,
+      "sha256": "80e0c6edff2e5d080f490f0ba66faf97718f8e23ccccbff1566e853e107f9ed8"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/bundle-spec.json",
+      "bytes": 34941,
+      "sha256": "b1b3c45f38964feb1f2dc0a91fd9c75d38ddfd97b2728c07238fd4845501d282"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/initial-staging-receipt.json",
+      "bytes": 29464,
+      "sha256": "551ede8e1c51c4811a89779dfc2a197ce8b65e264e50e24e31e1da891a0f0137"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/original-artifacts/current-integration-46128395334-crc.zip",
+      "bytes": 588674,
+      "sha256": "d4a092506e3c6623f9f3deb490cbde998f879bfb3167037fb13dfc32e3acc2c1"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/original-artifacts/current-integration-46128395334-score.zip",
+      "bytes": 594268,
+      "sha256": "f01eeef071ec4270402ad7b67bfcaa5396d8f7c431c7ea814a8260699aa4349e"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/preseal-receipt.json",
+      "bytes": 683,
+      "sha256": "2a31af65ba01689d271e769fa7c18017e004d949f7c415b67a99e4fc403351ec"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/publication-plan.json",
+      "bytes": 1159,
+      "sha256": "174da559a7e4a5a840a94b900dfdefdfffb179e33a471e1b65d7293aa2eea3a9"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/readme-final-format-check.log",
+      "bytes": 216,
+      "sha256": "aef7992e724da1db4ca64619c925247236812d6df958cf406210a4349f7e3537"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/readme-format-check.json",
+      "bytes": 681,
+      "sha256": "34a25aa8973d35553d8ca2cfd67c1329707b62f2192354113ac42ba413aedc2f"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/readme-format-check.log",
+      "bytes": 216,
+      "sha256": "aef7992e724da1db4ca64619c925247236812d6df958cf406210a4349f7e3537"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/root-wrapper-review-and-final-format.json",
+      "bytes": 1511,
+      "sha256": "a454a274f625636ebcb47e7f15622f50abbd7024d2f0a516d554bf1f17d30e74"
+    },
+    {
+      "path": "evidence/current-integration-correctness-20261128-1b47/staging-initial-count-failure.json",
+      "bytes": 1116,
+      "sha256": "371cbac672ecd777c824bd71c06c54485cf855ef936e5057b4ab3f6853942b50"
+    },
+    {
+      "path": "evidence/current-integration-hosted-independent-review-1b47.json",
+      "bytes": 12635,
+      "sha256": "4488d2c69c14584d2099ab60e2b9d544db5acd1f82ea65c8fefc00fb73120734"
+    },
+    {
+      "path": "evidence/durable-bundles/package-evidence-v2.py",
+      "bytes": 6789,
+      "sha256": "68b0f97d8e5b40fb5485420419739d95af0e6c47e02a577a09b790ff75f60684"
+    },
+    {
+      "path": "evidence/durable-bundles/scan-evidence-archives.py",
+      "bytes": 2416,
+      "sha256": "7dc85d50b904fb7c31cc87159c1af7e04f1793385974aa430ce653f03c02c54f"
+    },
+    {
+      "path": "evidence/durable-bundles/seal-current-integration-correctness-20261128-1b47.py",
+      "bytes": 5553,
+      "sha256": "d024ed69e80ce6dc521b4a2eedc7f579ce0b8c5a04b3e40cf66f6d52e7147008"
+    },
+    {
+      "path": "evidence/durable-bundles/stage-current-integration-correctness-20261128-1b47.initial-prepublication-count.py",
+      "bytes": 7567,
+      "sha256": "cb2427e2fe48b4d1851391a4bafdd8e4712750efb8b15555ddc50ecfc85ad7f5"
+    },
+    {
+      "path": "evidence/durable-bundles/stage-current-integration-correctness-20261128-1b47.py",
+      "bytes": 8707,
+      "sha256": "c8008466553abb9ef09d787f68672e86de084b4f22629cc7b152a21b7a15531f"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/audit-initial-status-assumption.txt",
+      "bytes": 661,
+      "sha256": "5d77f2b7d9d4dc85a38b23635bc3c632063bccc5116120476b04ecc57a45588e"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/connector-completion.json",
+      "bytes": 8515,
+      "sha256": "66d82a4b8f800285fdc6bf26e14f584a9ec0250bc58152d1cf693e3398c10c75"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/audit.json",
+      "bytes": 20382,
+      "sha256": "bb9d94f4ec7abb5b3da262394db7cc462e799201638fffa2595f0ae7127a43be"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/job.log",
+      "bytes": 1070061,
+      "sha256": "6b0e36459a26064cf226ba29590b762e2aa9c811366786fb86109a872c2b7e04"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/apt-install.log",
+      "bytes": 288,
+      "sha256": "df9998f7854472344d065f09a729a48816b97b75b581946883c5b7da23578867"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/apt-update.log",
+      "bytes": 1855,
+      "sha256": "cb88e71c48b2d7c7862ffeec833d28edcb4d9e3165f714f62e9bb0635aec69de"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/build.log",
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/clang-version.txt",
+      "bytes": 122,
+      "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/final-index-diff.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/final-source-sha.txt",
+      "bytes": 41,
+      "sha256": "651b0fb3ec3dccfcaa0512ff602d1cf63c45c273fc0617ba48d93a1ca29c8866"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/final-tracked-status.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/final-working-diff.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/lint.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/lld-version.txt",
+      "bytes": 18,
+      "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/native-check.log",
+      "bytes": 500,
+      "sha256": "743c325b761c6f9846480c27020740573cec8b1fc4c062189d988a4c1bec57df"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/native-toolchain.json",
+      "bytes": 186,
+      "sha256": "a35e2a4c24e82e940003c8ba64b21f56e45d54bed990a001eb78508166ec7c59"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/node-versions.json",
+      "bytes": 471,
+      "sha256": "82eaad73c0b44f3d09cd82224f5dcfa477bb7ddd3cacef5328c42f5b7e7edfd8"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/parser-asset-sha256.txt",
+      "bytes": 209,
+      "sha256": "493f2af739ba819d548d58f62cf1f99ae1187bdf42f5ced1ee5bf4f07d1e9d53"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/registered-workflow.yml",
+      "bytes": 13593,
+      "sha256": "c94be41ec1de28af2d2fd7bde82cf175b3dcfc210faf8de6581fd649ea7a28cf"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source-check.json",
+      "bytes": 3000,
+      "sha256": "614c487dd39d5833854195dadc7424958966bf5eadcd46f487833422066a1ea3"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source-check.log",
+      "bytes": 2556,
+      "sha256": "483bb1aa5d04e5bc9d1733c4083f928ba0e0ef3eec6e51e236020dc756c9f5c5"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source/dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "85c25286a9d3d3ff2ba90b61700fb054e3fe2c7ab81a33725bc001d813512fd7"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 69352,
+      "sha256": "fbcf0f790ced310b93d2824d9d191402bb5496d8d6166be5ea1b4770a215ce81"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source/ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 162379,
+      "sha256": "48ee9733ed67c192c10573fbd319c8bcc35d4aabda7904101fb82d0af946dd94"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/source/test/term-bank-crc.test.js",
+      "bytes": 8907,
+      "sha256": "e144707e13ec49bc74d9a45448a4b1655957b2329bee770301a4739d33678876"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/types-main.log",
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/types-test.log",
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/unit-results.json",
+      "bytes": 5301531,
+      "sha256": "0be1dc3b3c54b018ba5d4971386da2ce367945eea5619fdce3f49b64fb8ec1d0"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/unit.log",
+      "bytes": 575173,
+      "sha256": "badfd22c12fa985b79919c5f90063591f7d69f7799be91b308fddcacc121e62b"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/crc/raw/validation-status.json",
+      "bytes": 1683,
+      "sha256": "c95a6443fad12bbc8a1e338fbd04aaa8019e249f15eddee6f86281baaed0b5cf"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/audit.json",
+      "bytes": 18937,
+      "sha256": "b99636a2ba7a9471b94281e6af5d30dde49b9b4cd204413998b91a66a5d6c4bf"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/job.log",
+      "bytes": 1082392,
+      "sha256": "f8ae92ffba6d0d526f8092ab392471ec1da9b219222f9d2f354a69e478c46d54"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/apt-install.log",
+      "bytes": 288,
+      "sha256": "df9998f7854472344d065f09a729a48816b97b75b581946883c5b7da23578867"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/apt-update.log",
+      "bytes": 1855,
+      "sha256": "be5ea500f94bb53a3dd639cf4786f8671ce3824455be587cba476141140e4110"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/build.log",
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/clang-version.txt",
+      "bytes": 122,
+      "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/final-index-diff.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/final-source-sha.txt",
+      "bytes": 41,
+      "sha256": "75a3a35146f09f9ffd43b1cedc67d4dffaf886173bea821ce48fc323d4275a5b"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/final-tracked-status.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/final-working-diff.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/lint.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/lld-version.txt",
+      "bytes": 18,
+      "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/native-check.log",
+      "bytes": 500,
+      "sha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/native-toolchain.json",
+      "bytes": 186,
+      "sha256": "a35e2a4c24e82e940003c8ba64b21f56e45d54bed990a001eb78508166ec7c59"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/node-versions.json",
+      "bytes": 471,
+      "sha256": "82eaad73c0b44f3d09cd82224f5dcfa477bb7ddd3cacef5328c42f5b7e7edfd8"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/parser-asset-sha256.txt",
+      "bytes": 209,
+      "sha256": "3a74a636af95465b9b625fe2dd79980697838740e129889281cc1ecf0b42f20c"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/registered-workflow.yml",
+      "bytes": 13593,
+      "sha256": "c94be41ec1de28af2d2fd7bde82cf175b3dcfc210faf8de6581fd649ea7a28cf"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/source-check.json",
+      "bytes": 1455,
+      "sha256": "de0c1a1030061cdecb9e1092f357b77d49464aca797430476e760d2d726b595e"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/source-check.log",
+      "bytes": 1275,
+      "sha256": "43e8f763a8c73bbbe03d05af78f8176f29089eb27d550488c7c6d1c8af75cb82"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/source/ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 365322,
+      "sha256": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/types-main.log",
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/types-test.log",
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/unit-results.json",
+      "bytes": 5299071,
+      "sha256": "84d9ab1b4f3b822107d25495b4fd9e0aceae07c7f6f8a32db72efb12bfc5ebff"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/unit.log",
+      "bytes": 586264,
+      "sha256": "c0cdcaa73f9cb2f69383a8db233d843dae3bd256c466fd3e196b387ff3e6f914"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/score/raw/validation-status.json",
+      "bytes": 1685,
+      "sha256": "30b93e0379d3f9025c551d54160bb5e3e9981819900b7a744603c6531569a475"
+    },
+    {
+      "path": "evidence/hosted-current-integration-46128395334/summary.json",
+      "bytes": 1193,
+      "sha256": "b17b59c5787ea91a44e90675dd704084a6766f86cc3c0e739f2317336fa6ec99"
+    }
+  ],
+  "omissions": [
+    {
+      "included": false,
+      "kind": "Local LLVM toolchain bulk; no original hosted correctness artifact member is omitted",
+      "artifactId": 15245399340,
+      "sourceRunId": 46101416471,
+      "archiveSha256": "a5ec0df3408e28a25cd7c986b9df371187960036cd9767f12269f3cf549cb1e6",
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8",
+      "sizeDescription": "Approximately 82 MB; exact byte length is not asserted from a missing local archive",
+      "reference": "evidence/current-develop-integrations/toolchain-recovery.json",
+      "recovery": "Obtain the exact original Actions toolchain artifact while available and verify its SHA-256; the original archive is not embedded. The hosted workflow separately installs and asserts version 21.1.8, then requires exact native reproduction."
+    },
+    {
+      "included": false,
+      "kind": "Full Git checkouts, installed dependencies, old datasets and prior performance packets",
+      "recovery": "Exact source commits and immutable prior-evidence references are in the standalone README. No new performance observation belongs to this correctness packet."
+    }
+  ],
+  "verification": {
+    "verifiedMembers": 136,
+    "allMemberBytesAndHashesMatch": true
+  },
+  "preservationVerification": {
+    "scope": "Post-seal byte verification and source-bound scan disposition; sealed archive/member bytes remain unchanged",
+    "archiveAndEmbeddedZipVerification": {
+      "verifiedUtc": "2026-11-28T09:25:58.309692+00:00",
+      "scope": "Independent preservation-only archive/member and embedded original-ZIP verification; no source/gate audit, test, import or performance acquisition",
+      "archive": {
+        "bytes": 2814657,
+        "sha256": "2d69f80b6f42289d9de64e9e583f5447a0e4ac3e3c3a3be03d60e956694c43de"
+      },
+      "manifestSha256": "27e3f3b59515f923c2a82e1f8e622daeda9ab231f68cc8774930a386c77b8d39",
+      "readmeSha256": "80e0c6edff2e5d080f490f0ba66faf97718f8e23ccccbff1566e853e107f9ed8",
+      "members": 136,
+      "payloadBytes": 16909115,
+      "allMemberPathsLengthsHashesExact": true,
+      "allOriginalZipMemberBytesEqualRetainedRawCopies": true,
+      "originalZipMemberCounts": {
+        "score": 23,
+        "crc": 26
+      },
+      "noExtraMissingDuplicateOrNonFileMembers": true
+    },
+    "textSensitiveScan": {
+      "scan": "Text members only; fixed patterns; matched values deliberately never reported",
+      "archives": [
+        {
+          "archive": "current-integration-correctness-20261128-1b47.tar.gz",
+          "bytes": 2814657,
+          "sha256": "2d69f80b6f42289d9de64e9e583f5447a0e4ac3e3c3a3be03d60e956694c43de",
+          "textMembers": 128,
+          "binaryMembers": 8,
+          "hits": [
+            {
+              "member": "evidence/hosted-current-integration-46128395334/crc/raw/unit-results.json",
+              "kind": "url-password",
+              "count": 2
+            },
+            {
+              "member": "evidence/hosted-current-integration-46128395334/crc/raw/unit-results.json",
+              "kind": "email-shaped-reference",
+              "count": 2
+            },
+            {
+              "member": "evidence/hosted-current-integration-46128395334/score/raw/unit-results.json",
+              "kind": "url-password",
+              "count": 2
+            },
+            {
+              "member": "evidence/hosted-current-integration-46128395334/score/raw/unit-results.json",
+              "kind": "email-shaped-reference",
+              "count": 2
+            }
+          ]
+        }
+      ]
+    },
+    "fixtureOnlyDisposition": {
+      "verifiedUtc": "2026-11-28T09:27:13.929318+00:00",
+      "scope": "Read-only disposition of fixed-pattern hits, without printing matched values or changing any original artifact",
+      "scanSha256": "509b73074b039071058c29b9fb88e03fbb2fbb54969dbbd5fffa28fb6e7064b4",
+      "allPatternHitsAccountedForByFourPublishedFixtureTitleFields": true,
+      "sourceBindings": {
+        "test/web-asset-fetch.test.js": {
+          "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "bytes": 4627,
+          "sha256": "17c372c385b9c3fe6211db7540b239dba717ed596e0c6207b9e96ff3ce697553",
+          "gitBlob": "a9f1311bda193e93c40207e8814ab32aaa85c012"
+        }
+      },
+      "findings": [
+        {
+          "member": "evidence/hosted-current-integration-46128395334/score/raw/unit-results.json",
+          "jsonPath": "testResults[590].assertionResults[11].fullName",
+          "sourcePath": "test/web-asset-fetch.test.js",
+          "exactDeclaredFixtureStringFoundInBaselineSource": true,
+          "status": "passed",
+          "classification": "Synthetic credential-shaped URL in a package-asset rejection test title; email-shaped match is part of the same deliberately invalid fixture. No matched values are reported."
+        },
+        {
+          "member": "evidence/hosted-current-integration-46128395334/score/raw/unit-results.json",
+          "jsonPath": "testResults[590].assertionResults[11].title",
+          "sourcePath": "test/web-asset-fetch.test.js",
+          "exactDeclaredFixtureStringFoundInBaselineSource": true,
+          "status": "passed",
+          "classification": "Synthetic credential-shaped URL in a package-asset rejection test title; email-shaped match is part of the same deliberately invalid fixture. No matched values are reported."
+        },
+        {
+          "member": "evidence/hosted-current-integration-46128395334/crc/raw/unit-results.json",
+          "jsonPath": "testResults[590].assertionResults[11].fullName",
+          "sourcePath": "test/web-asset-fetch.test.js",
+          "exactDeclaredFixtureStringFoundInBaselineSource": true,
+          "status": "passed",
+          "classification": "Synthetic credential-shaped URL in a package-asset rejection test title; email-shaped match is part of the same deliberately invalid fixture. No matched values are reported."
+        },
+        {
+          "member": "evidence/hosted-current-integration-46128395334/crc/raw/unit-results.json",
+          "jsonPath": "testResults[590].assertionResults[11].title",
+          "sourcePath": "test/web-asset-fetch.test.js",
+          "exactDeclaredFixtureStringFoundInBaselineSource": true,
+          "status": "passed",
+          "classification": "Synthetic credential-shaped URL in a package-asset rejection test title; email-shaped match is part of the same deliberately invalid fixture. No matched values are reported."
+        }
+      ],
+      "presignedOrTokenizedUrls": 0,
+      "credentialShapedTokens": 0,
+      "authorizationValues": 0,
+      "privateKeyHeaders": 0,
+      "unrelatedUserHomePaths": 0,
+      "unresolvedSensitiveFindings": 0,
+      "rawArtifactBytesUnchanged": true
+    }
+  }
+}
