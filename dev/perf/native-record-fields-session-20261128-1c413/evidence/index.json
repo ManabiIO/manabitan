@@ -93,6 +93,24 @@
     "fusion-original-correctness-publication-clarification.json": "b986de5d38259d35656f29f4e81a6c68cabd2073",
     "fusion-original-correctness-remote-publication.json": "486076d032d2a0fc4061eeff79208e245b4e8477",
     "fusion-original-correctness-root-readback.json": "a14377cb240c860e6b12459e0b8fbaaeafdedb20",
-    "fusion-original-correctness-root-reader.py": "d46819c8e8ed960a67a1e9674a0e86dca07e7fb4"
+    "fusion-original-correctness-root-reader.py": "d46819c8e8ed960a67a1e9674a0e86dca07e7fb4",
+    "fusion-cpu-first-producer-publication.json": "c68479339d2cd3930d1aeaf2184152cb6eedb1c1",
+    "fusion-cpu-preparation-history.tar.gz": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5",
+    "fusion-cpu-preparation-ledger.json": "67bc2cafc7fbfa3035afc1e2c4301c8d65542997",
+    "fusion-cpu-preparation-readback.json": "2969bf93345a4816224b9a28e70d2392253efce6",
+    "fusion-cpu-preparation-publication.json": "42750ee802ded4422d65ba46ff28d875dac53a5d",
+    "fusion-cpu-preparation-determinism.json": "31758b9d4832a560186bd3b92aab9d2c4e6fa744",
+    "fusion-cpu-first-harness-review.json": "8fa943600c8ff8852d425c15011cf4c2d1c3a6d1",
+    "fusion-cpu-first-reference-review.md": "3da9e3783554f470a5d0b6b8b2648a3dff6c2ee1",
+    "fusion-cpu-first-failure-root-record.json": "7a52b34ae32282ccbd74f636ebd8d653445a6cbf",
+    "fusion-cpu-first-failure-accessible-evidence.tar.gz": "67962798ea2a7cb600d429a5331c5e71b62d369d",
+    "fusion-cpu-first-failure-ledger.json": "d718ec7c9a107e3c321d3acf6a9efaeed4cfbede",
+    "fusion-cpu-first-failure-readback.json": "cfaaa4c8a6dff9d8a495563625fd5a40977709c9",
+    "fusion-cpu-first-failure-review.md": "ae2316757853fd222baad93df16661734fa31ab8",
+    "fusion-cpu-first-failure-audit.json": "209b98305ebcc31d26db806c13dea31e55e0ab4d",
+    "fusion-cpu-first-failure-publication.json": "79860a5af825f8c45b18453767a4af2359493b9b",
+    "fusion-cpu-first-root-log-readback.json": "db4aaee4fc43b862e73f29c108db183566f76f08",
+    "fusion-cpu-preparation-and-failure-root-archive-readback.json": "d88c0da2fce886cf01dbcba916fd85e747daa802",
+    "fusion-cpu-preparation-and-failure-root-reader.py": "28ca38d920dd1a9b639a847545cb5e15f4fa6b68"
   }
 }

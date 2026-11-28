@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "repository": "ManabiIO/manabitan",
+  "scope": "Durable original preparation history and final reviews; blobs only, no refs or product work",
+  "archiveMemberCount": 60,
+  "archiveRegularPayloadCount": 51,
+  "originalSourceFiles": 48,
+  "everyArchivedMemberIndependentlyRead": true,
+  "sourceAndArchivePayloadsMatched": true,
+  "deterministicSecondArchiveByteIdentical": true,
+  "allReturnedGitHubShasMatched": true,
+  "publications": [
+    {
+      "name": "harness-final-review",
+      "path": "/tmp/manabitan-fusion-harness-review-20261128-1c413/final-review.json",
+      "bytes": 10416,
+      "sha256": "d3f2ce855fb10a7bd016d51054e36d7cba5e5bf879a3065f24456b18cde5769e",
+      "gitBlob": "8fa943600c8ff8852d425c15011cf4c2d1c3a6d1",
+      "returnedSha": "8fa943600c8ff8852d425c15011cf4c2d1c3a6d1",
+      "remoteTextReadbackMatched": true
+    },
+    {
+      "name": "preparation-history-and-reviews-archive",
+      "path": "/tmp/manabitan-cpu-preparation-evidence-20261128-1c413/preparation-history-and-reviews.tar.gz",
+      "bytes": 276095,
+      "sha256": "3d3755d41fe23b1d608ce3aec55b00608e19674a9167ab9b1ca76bf393fc5331",
+      "gitBlob": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5",
+      "returnedSha": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5"
+    },
+    {
+      "name": "member-ledger",
+      "path": "/tmp/manabitan-cpu-preparation-evidence-20261128-1c413/preparation-history-and-reviews.tar.gz.members.json",
+      "bytes": 21350,
+      "sha256": "04823698be97c43e698c870f8f0d3cc62614a9be841adaf658853ed5f5ac0ec5",
+      "gitBlob": "67bc2cafc7fbfa3035afc1e2c4301c8d65542997",
+      "returnedSha": "67bc2cafc7fbfa3035afc1e2c4301c8d65542997",
+      "remoteTextReadbackMatched": true
+    },
+    {
+      "name": "complete-member-readback",
+      "path": "/tmp/manabitan-cpu-preparation-evidence-20261128-1c413/archive-readback.json",
+      "bytes": 15745,
+      "sha256": "7a288860a2ef9977b994c74755ad067a5f363617af14a49da41551513473e976",
+      "gitBlob": "2969bf93345a4816224b9a28e70d2392253efce6",
+      "returnedSha": "2969bf93345a4816224b9a28e70d2392253efce6",
+      "remoteTextReadbackMatched": true
+    },
+    {
+      "name": "corpus-final-reference-review",
+      "path": "/tmp/cpu-original-binding-audit-b4ejkhlw/FINAL-CPU-REFERENCE-BINDING-REVIEW.md",
+      "bytes": 9637,
+      "sha256": "9c9756ff908f6a24fde2c9591372d34baa13d327ebffa82beff952694f79f14f",
+      "gitBlob": "3da9e3783554f470a5d0b6b8b2648a3dff6c2ee1",
+      "returnedSha": "3da9e3783554f470a5d0b6b8b2648a3dff6c2ee1",
+      "remoteTextReadbackMatched": true
+    },
+    {
+      "name": "deterministic-rebuild-receipt",
+      "path": "/tmp/manabitan-cpu-preparation-evidence-20261128-1c413/deterministic-rebuild.json",
+      "bytes": 439,
+      "sha256": "d1f48827bcbe1f2af6b367eb0e3c231a33c1c73cf0f816ea33f663fd409e1f2d",
+      "gitBlob": "31758b9d4832a560186bd3b92aab9d2c4e6fa744",
+      "returnedSha": "31758b9d4832a560186bd3b92aab9d2c4e6fa744",
+      "remoteTextReadbackMatched": true
+    }
+  ],
+  "optionalBinaryFetchAttempt": {
+    "blob": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5",
+    "tool": "github_fetch_blob",
+    "result": {
+      "error": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte",
+      "error_code": "UNKNOWN"
+    },
+    "meaning": "The text-only blob helper cannot UTF-8 decode gzip. Archive publication returned the exact independently computed Git SHA; local complete-member readback is preserved separately."
+  },
+  "frozenSealedCandidateReadOrModified": false,
+  "final44SourceFilesUploadedAgain": false,
+  "refsCreatedOrChanged": 0,
+  "newDictionaryImports": 0,
+  "clockReaders": 0,
+  "performanceExecution": false
+}

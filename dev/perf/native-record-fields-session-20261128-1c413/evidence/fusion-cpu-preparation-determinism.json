@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "two independently rebuilt deterministic evidence archives; no product or performance work",
+  "archivesByteIdentical": true,
+  "archiveSha256": "3d3755d41fe23b1d608ce3aec55b00608e19674a9167ab9b1ca76bf393fc5331",
+  "archiveBytes": 276095,
+  "archiveGitBlob": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5",
+  "clockReaders": 0,
+  "dictionaryImports": 0,
+  "frozenSealedCandidateModified": false
+}

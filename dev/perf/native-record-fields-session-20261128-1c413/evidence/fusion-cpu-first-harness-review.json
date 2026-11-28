@@ -1,0 +1,230 @@
+{
+  "schema": 1,
+  "review": "Independent read-only review of full correctness and complete Node import CPU harnesses",
+  "disposition": "GO for exact final sealed source to root-owned producer freeze and publication; no CPU result or browser qualification claimed",
+  "unresolvedSourceDefects": [],
+  "reviewedFinalDirectory": "/tmp/manabitan-whole-import-screen-seal-candidate-20261128-1c413",
+  "finalManifest": {
+    "path": "final-file-manifest.json",
+    "bytes": 9327,
+    "sha256": "61b538762e8416832d3d2dea1d4b5f9d7f2262b71addbb480bc14ac0784078d7",
+    "gitBlob": "fd2d9b4e4dc902ce9c886fe8f7d9d47589831ae9"
+  },
+  "finalSourceBindings": {
+    "plan.json": {
+      "path": "plan.json",
+      "bytes": 118147,
+      "sha256": "1faa5618f7f5b3f537d41c9fa0f4c78870b7a8418685baf2639e01b09d598d4d",
+      "gitBlob": "8fb3c30750a4e2d73d2d3a9e5a859fa66686fd98"
+    },
+    "workflow/native-whole-import-cpu-screen-1c413.yml": {
+      "path": "workflow/native-whole-import-cpu-screen-1c413.yml",
+      "bytes": 11001,
+      "sha256": "ecfa8c30ba79de2f3c16afbd4cd14b47bb06ac87cf5f060c5b7b32ea82d7a8b7",
+      "gitBlob": "e6c8b7a3e314f56b4e519f7281c7785493ced70a"
+    },
+    "references/preparation.json": {
+      "path": "references/preparation.json",
+      "bytes": 316507,
+      "sha256": "f6ec3995fed659b2d89f501125331cd644d41ba65e491a54592fc1a459c64d8e",
+      "gitBlob": "68a009559a4eb69f447997520b57be9e9c58e6b5"
+    },
+    "corpus/run.mjs": {
+      "path": "corpus/run.mjs",
+      "bytes": 21269,
+      "sha256": "749848162c9b7b0b49e27788600f9d7a2e499d119af92bd9179f5365ad333531",
+      "gitBlob": "be72cde357b9b9659e095e10059ad4954a37853e"
+    },
+    "corpus/cpu-boundary.mjs": {
+      "path": "corpus/cpu-boundary.mjs",
+      "bytes": 2452,
+      "sha256": "8781603f8dbbab84a406795174605d45c844394abfe7bfc87f6f70a50bd3a703",
+      "gitBlob": "108489cd37252910e7e24e94265196c19c1b1d22"
+    },
+    "corpus/receipt-adapter.mjs": {
+      "path": "corpus/receipt-adapter.mjs",
+      "bytes": 29267,
+      "sha256": "1f10f925fa3af8d3123fea17406175d53ea4a6e6273a72e0787e8732a8f07272",
+      "gitBlob": "2c8df46100675fc0475918c7f8255af40960ef4f"
+    },
+    "corpus/owner-observer.mjs": {
+      "path": "corpus/owner-observer.mjs",
+      "bytes": 15410,
+      "sha256": "6ebb47d2edf767be58ad25d341b72dd57afc5968a7cfbfd8fef06400ede925b8",
+      "gitBlob": "4ee10d29498c45263809d2835bddca982b1cfb19"
+    },
+    "corpus/node-runtime.mjs": {
+      "path": "corpus/node-runtime.mjs",
+      "bytes": 8273,
+      "sha256": "6e1a4c57d3d881c1d9f6f570c56962b4473f7b5cd65ba0a3dff653709fb86fdd",
+      "gitBlob": "8c246c4f8aea6d225fb1b9c11865fc3314eccff4"
+    },
+    "screen.mjs": {
+      "path": "screen.mjs",
+      "bytes": 16740,
+      "sha256": "082f344bd158ac5092053e76c3590d1f18cc7986f24128cba83b65d9c053a4d2",
+      "gitBlob": "2bfa72def012adca5886f81a6297db03134bef95"
+    },
+    "screen-policy.mjs": {
+      "path": "screen-policy.mjs",
+      "bytes": 1652,
+      "sha256": "2da710ab0fc3274fc767da96b29b629d6804acb659dfe19385ac97ce3dca986c",
+      "gitBlob": "166b71026da10c57ea397841b9f59f0e9a8c1097"
+    },
+    "workflow-prepare.mjs": {
+      "path": "workflow-prepare.mjs",
+      "bytes": 4361,
+      "sha256": "ef335b7902c431acbebbda8bb09e69ee6950ba2f0da3715f88e5f51877c73977",
+      "gitBlob": "475db72cb52f41b3c92bda377e896277f04d202d"
+    },
+    "project-reference.mjs": {
+      "path": "project-reference.mjs",
+      "bytes": 14592,
+      "sha256": "89bf88e3cdd1305a89011f5ae28f21418f26253cf933c2cca9737f8a1876ac96",
+      "gitBlob": "20cb241d946718e5c9e901ac43ee636873f67004"
+    },
+    "PROTOCOL.md": {
+      "path": "PROTOCOL.md",
+      "bytes": 26548,
+      "sha256": "0984db93afee2bdf0e0a565b1ccd7a1ff57e13dc9c309642ce59484f9eab5a32",
+      "gitBlob": "b7a395c15ba70741bd5d56530a18c729e0ef6a79"
+    }
+  },
+  "sourceVerification": {
+    "manifestEntriesVerified": 43,
+    "manifestPlusSelfFiles": 44,
+    "commonSourceEntriesVerified": 21,
+    "allManifestByteLengthsSha256AndGitBlobsMatch": true,
+    "noSymlinks": true,
+    "preparedRuntimeAndWorkCanonicalDigestsMatchIndependentCorpusAudit": true,
+    "planExpectedWorkEqualsOriginalReferenceProjection": true,
+    "planPreparationAndWorkflowHashesMatch": true,
+    "preparationPolicyAndCommonInventoryDigestMatchPlan": true,
+    "twoStatusReversalReproducesRecordedPreSealPlanSha256": true,
+    "prospectiveNumericGateSchedulesBoundaryActivationAndFixtureEqualOriginalSelectedPolicy": true,
+    "enabledVsDisabledCommonExecutableBytesIdentical": true,
+    "enabledVsDisabledExistingChangedFiles": [
+      "PROTOCOL.md",
+      "plan.json",
+      "references/preparation.json",
+      "workflow/native-whole-import-cpu-screen-1c413.yml"
+    ]
+  },
+  "boundaryReview": {
+    "name": "first-product-module-evaluation-through-import-fixed-semantic-probes-and-retirement",
+    "oneCpuUsagePair": true,
+    "firstProductEvaluationIncluded": true,
+    "actualImportAndFixedSemanticProbesIncluded": true,
+    "normalParserDatabaseAndAllWorkerRetirementIncluded": true,
+    "noOptionalStartupRebindOrReadinessWait": true,
+    "failedOrUnactivatedOriginalEndpointInvalidatesWholeScreen": true,
+    "observerHashesScalarBitsAndSerializationOutsideInterval": true,
+    "allArmsRetainOriginalOwningFieldBuffers": true,
+    "wholeWorkChargedAtEnclosingOwnerAndDirectTerminalCounters": true,
+    "wholeOutputCopyIncludes8ByteScalar": true,
+    "originalOwnerPromisePreserved": true,
+    "ordinaryAndWholeDeclineOverlapHandled": true
+  },
+  "workflowReview": {
+    "repository": "ManabiIO/manabitan",
+    "ref": "refs/heads/test/native-whole-import-cpu-screen-20261128-1c413",
+    "jobs": {
+      "R1": "screen_r1",
+      "R2": "screen_r2"
+    },
+    "node": "v22.22.0",
+    "separatelyProvisionedJobs": true,
+    "onlyOriginalAttempt1": true,
+    "noNeedsOrMatrixFailFastCancellation": true,
+    "independentLockedArmPreparation": true,
+    "readOnlyPreflightBeforeSixUntimedWarmups": true,
+    "actualProducerHeadEqualsBothEnvironmentCommitIds": true,
+    "cleanProducerAndWorkflowFileHashChecked": true,
+    "fullPreparedRuntimeSourceFixtureHarnessReverifiedBeforeAndAfterEachObservation": true,
+    "actualProducerCommitTreeAndPlanShaRequireMandatoryExternalAudit": true,
+    "allOriginalRawSinksFieldsLogsAndFailuresUploaded": true,
+    "noRetriesReplacementsPoolingControlSubtractionOrPostHocExclusion": true
+  },
+  "storageReview": {
+    "observationsPerReplication": 42,
+    "retainedBytesPerObservation": 47555637,
+    "retainedBytesPerReplication": 1997336754,
+    "fixedFreeReserveBytes": 4294967296,
+    "fixedOverheadAllowanceBytes": 2147483648,
+    "minimumFreeBytesBeforeReplication": 8589934592,
+    "surplusAfterDeclaredComponents": 150146894,
+    "minimumFreeBytesBeforeEveryObservation": 4294967296,
+    "tmpfsRejected": true,
+    "sinkDeletionActions": 0
+  },
+  "retainedPureEvidence": {
+    "numeric": {
+      "path": "numeric-tests-final.json",
+      "bytes": 6768,
+      "sha256": "4b00ef2bf7da21c5ff0bfff6cbc849f035f6f825b54c950a5637d409295af75f",
+      "gitBlob": "85c106fa9c8b6fcd60de535292448f14a7a3b960",
+      "node": "v24.22.3",
+      "passed": 16,
+      "cases": 16,
+      "allBoundCurrentSourcesMatch": true
+    },
+    "boundary": {
+      "path": "boundary-tests-final.json",
+      "bytes": 7286,
+      "sha256": "77982b78d096a23bfcc3866c1518a4fe32c5c127fcafaeded3225a6e4270aa83",
+      "gitBlob": "8f7902af44739bf61f224d8fd3bd5184759ccad0",
+      "node": "v24.22.3",
+      "passed": 20,
+      "cases": 20,
+      "allBoundCurrentSourcesMatch": true
+    },
+    "productModuleImports": 0,
+    "dictionaryImports": 0,
+    "workloadChildProcesses": 0,
+    "actualCpuOrWallObservations": 0,
+    "node22HostedPureTestsStillMandatory": true
+  },
+  "correctnessKitPriorReview": {
+    "disposition": "GO for fresh full untimed correctness",
+    "producerCommit": "a9debd150d65c8d11884dadcdf162e7898dea309",
+    "producerTree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+    "parentProductCommit": "01eb863506012136e417167f445b2708d9136293",
+    "sourceSha256": "28b0894c47adaadae564e50ef89a391fc6b323d6de5db4b4d6c0d9bdbd0be86b",
+    "aggregateSha256": "2b6ea2c90f870ced276c6bf49a67b6d1b1aead8fe144956b321d6af37ee0c132",
+    "currentSQLiteOuterBodyUnchangedAndAdmissionHelperOnlyRebound": true,
+    "schemaVersion": 12,
+    "fullFieldScalarAndFinalTermByteParityScope": true,
+    "ownerAccountingIndependentlyRecomputed": true,
+    "freshEpochZeroAndUnsupportedContentLayoutRejected": true,
+    "freshOriginalRunAuditedPassByIndependentCorpusAgent": "46149981540",
+    "attempt": 1,
+    "corpusArtifactId": "15265171488",
+    "corpusArtifactSha256": "c3923ee6d8a1ddfc06a136ee33f2da18ef64420b9f95498212e3148964218559"
+  },
+  "closedConcreteFindings": [
+    "Floating point inclusive percentage boundaries replaced by exact integer/rational comparisons",
+    "Fusion work enclosed at owner boundary rather than incorrectly inferred from field-hook deltas",
+    "Original report source/tree/boundary/raw-plan SHA and both accounting receipts checked against independent evidence",
+    "Complete executable and hosted pure-test source inventory enforced",
+    "Pure disabled-guard tests use a separate explicit unsealed fixture and remain inert with sealed plan",
+    "Self-referential workflow commit literal replaced by checked workflow file identity plus actual producer HEAD/tree and mandatory external commit audit",
+    "All 42 retained raw sinks and field buffers covered by a fixed capacity preflight without deletion"
+  ],
+  "remainingExecutionGates": [
+    "Root freezes and verifies exact complete producer commit/tree and final raw plan hash before publication",
+    "Pinned Node 22 hosted pure tests and exact prepared runtime/source/host/capacity preflight must pass",
+    "Only the six prescribed untimed full warmups serve as the integration gate, including first actual C import",
+    "All original source/output/work/activation/lifecycle/timing checks must pass for every retained observation",
+    "Both separately provisioned replications must independently satisfy the unchanged numeric gate and original artifact audit",
+    "A new complete browser qualification remains required before any performance PR"
+  ],
+  "reviewerActions": {
+    "productImports": 0,
+    "dictionaryImports": 0,
+    "performanceObservations": 0,
+    "harnessEdits": 0,
+    "productEdits": 0,
+    "publicRefsCreated": 0,
+    "browserOrWorkMode": false
+  }
+}

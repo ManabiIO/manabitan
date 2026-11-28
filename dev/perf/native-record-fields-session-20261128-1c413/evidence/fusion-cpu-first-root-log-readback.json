@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-full-original-cpu-log-readback",
+  "run": 46153880495,
+  "attempt": 1,
+  "producer": "3ca60b3f80733e0a07e26a6141a9cad6febfdb55",
+  "allCompletedLogsFetchedDirectlyFromGitHub": true,
+  "logHashesMatchIndependentAuditor": true,
+  "replications": [
+    {
+      "id": "R1",
+      "job": 141006157502,
+      "logSha256": "1217e5fd42637c4ced8f58a09c83ba90265ac54a413e04e26616eb29bfa66420",
+      "logBytes": 346123,
+      "exactOriginalLaunchSchedule": [
+        {
+          "replication": "R1",
+          "index": 0,
+          "phase": "warmup",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 1,
+          "phase": "warmup",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 2,
+          "phase": "warmup",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 3,
+          "phase": "warmup",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 4,
+          "phase": "warmup",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 5,
+          "phase": "warmup",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 6,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 7,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 8,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 9,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 10,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 11,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 12,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 13,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 14,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 15,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 16,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 17,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 18,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 19,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 20,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 21,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 22,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 23,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 24,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 25,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 26,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 27,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 28,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 29,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 30,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 31,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 32,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 33,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 34,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 35,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 36,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 37,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R1",
+          "index": 38,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 39,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R1",
+          "index": 40,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R1",
+          "index": 41,
+          "phase": "measured",
+          "arm": "A"
+        }
+      ],
+      "rawClockOrSummaryTokensPresent": false,
+      "metricTokensChecked": [
+        "\"cpuBefore\"",
+        "\"cpuAfter\"",
+        "\"cpuMs\"",
+        "\"wallBeforeNs\"",
+        "\"nominationGatePassed\"",
+        "\"medianSavingMs\""
+      ],
+      "pathError": "2026-11-28T14:20:13.4708779Z ##[error]The path for one of the files in artifact is not valid: /study-results/R1/observations/000-warmup-A/disk/root/manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr. Contains the following character:  Vertical bar |"
+    },
+    {
+      "id": "R2",
+      "job": 141006157198,
+      "logSha256": "a188686d0db93d35e26034600a38d20c4efad79d004cd1fd23d4348c19db0b81",
+      "logBytes": 346123,
+      "exactOriginalLaunchSchedule": [
+        {
+          "replication": "R2",
+          "index": 0,
+          "phase": "warmup",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 1,
+          "phase": "warmup",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 2,
+          "phase": "warmup",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 3,
+          "phase": "warmup",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 4,
+          "phase": "warmup",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 5,
+          "phase": "warmup",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 6,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 7,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 8,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 9,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 10,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 11,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 12,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 13,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 14,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 15,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 16,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 17,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 18,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 19,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 20,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 21,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 22,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 23,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 24,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 25,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 26,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 27,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 28,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 29,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 30,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 31,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 32,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 33,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 34,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 35,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 36,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 37,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 38,
+          "phase": "measured",
+          "arm": "A"
+        },
+        {
+          "replication": "R2",
+          "index": 39,
+          "phase": "measured",
+          "arm": "C"
+        },
+        {
+          "replication": "R2",
+          "index": 40,
+          "phase": "measured",
+          "arm": "B"
+        },
+        {
+          "replication": "R2",
+          "index": 41,
+          "phase": "measured",
+          "arm": "A"
+        }
+      ],
+      "rawClockOrSummaryTokensPresent": false,
+      "metricTokensChecked": [
+        "\"cpuBefore\"",
+        "\"cpuAfter\"",
+        "\"cpuMs\"",
+        "\"wallBeforeNs\"",
+        "\"nominationGatePassed\"",
+        "\"medianSavingMs\""
+      ],
+      "pathError": "2026-11-28T14:20:44.7147949Z ##[error]The path for one of the files in artifact is not valid: /study-results/R2/observations/000-warmup-C/disk/root/manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr. Contains the following character:  Vertical bar |"
+    }
+  ],
+  "finalArtifacts": 0,
+  "performanceResult": null,
+  "comparativeValuesInspected": 0,
+  "interpretation": "Both source-fixed acquisition steps succeeded, but no numerical qualification is recoverable. Deterministic uploader path validation failed before artifact creation; original cohort remains failed/unreviewable."
+}

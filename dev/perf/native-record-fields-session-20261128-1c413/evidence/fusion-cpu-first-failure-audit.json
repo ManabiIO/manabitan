@@ -1,0 +1,931 @@
+{
+  "artifactDownloadsAttempted": 0,
+  "attempt": 1,
+  "branch": "test/native-whole-import-cpu-screen-20261128-1c413",
+  "cancellations": 0,
+  "cause": "actions/upload-artifact rejected the vertical bar in an unchanged production raw term-record filename before any artifact was created",
+  "cohortDispositionPermanent": true,
+  "finalArtifactCount": 0,
+  "integrityAuditDisposition": "FAILED_UNREVIEWABLE",
+  "kind": "complete-original-accessible-evidence-audit-with-terminal-preservation-failure",
+  "laterStudyMayBeCombinedOrSubstituted": false,
+  "limit": "Not a local capacity or stream-extraction limit: original run artifact total_count is zero; the frozen uploader rejected a filename. No artifact ID or signed download URL exists to acquire.",
+  "newTimingAcquisitions": 0,
+  "observedComparativeValuesExposedInAccessibleEvidence": 0,
+  "performanceDisposition": "NO_AUDITABLE_NUMERIC_RESULT_OR_NOMINATION",
+  "planSha256": "1faa5618f7f5b3f537d41c9fa0f4c78870b7a8418685baf2639e01b09d598d4d",
+  "preAcquisitionFreezeBlob": "c68479339d2cd3930d1aeaf2184152cb6eedb1c1",
+  "producer": {
+    "commit": "3ca60b3f80733e0a07e26a6141a9cad6febfdb55",
+    "soleParent": "01eb863506012136e417167f445b2708d9136293",
+    "tree": "ab4af038a8e9da0bb6080b493166b6dd6e735eab"
+  },
+  "productImportsExecutedByAuditor": 0,
+  "prsCreated": 0,
+  "refsCreated": 0,
+  "replications": {
+    "R1": {
+      "acquisitionJsonPresent": false,
+      "acquisitionStep": {
+        "completed_at": "2026-11-28T14:20:13Z",
+        "conclusion": "success",
+        "name": "Run the original fixed six warmups and 36 measured entries",
+        "number": 12,
+        "started_at": "2026-11-28T14:18:11Z",
+        "status": "completed"
+      },
+      "completeLaunchScheduleMatchesFrozenPlan": true,
+      "error": {
+        "logLine": 2657,
+        "text": "2026-11-28T14:20:13.4708779Z ##[error]The path for one of the files in artifact is not valid: /study-results/R1/observations/000-warmup-A/disk/root/manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr. Contains the following character:  Vertical bar |"
+      },
+      "fixtureHashLogged": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "fullDecodedLog": {
+        "bytes": 346123,
+        "gitBlobIdentity": "fb9e94d3d59fe0d74773cd4b4d6901ee34380f4e",
+        "sha256": "1217e5fd42637c4ced8f58a09c83ba90265ac54a413e04e26616eb29bfa66420"
+      },
+      "fullDecodedLogLines": 2724,
+      "independentObservationChecksPossible": false,
+      "jobConclusion": "failure",
+      "jobId": 141006157502,
+      "nodeVersionLogged": "v22.22.0",
+      "plannedUploadFileCountReported": 1662,
+      "progressEmittedBeforeEachChild": true,
+      "rawClockReceiptPresent": false,
+      "retainedArtifactCount": 0,
+      "runnerId": 1000093765,
+      "runnerLabels": [
+        "ubuntu-26.04"
+      ],
+      "runnerName": "GitHub Actions 1000093765",
+      "scheduleProgress": [
+        {
+          "logLine": 2590,
+          "value": {
+            "arm": "A",
+            "index": 0,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2591,
+          "value": {
+            "arm": "B",
+            "index": 1,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2592,
+          "value": {
+            "arm": "C",
+            "index": 2,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2593,
+          "value": {
+            "arm": "C",
+            "index": 3,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2594,
+          "value": {
+            "arm": "B",
+            "index": 4,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2595,
+          "value": {
+            "arm": "A",
+            "index": 5,
+            "phase": "warmup",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2596,
+          "value": {
+            "arm": "A",
+            "index": 6,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2597,
+          "value": {
+            "arm": "B",
+            "index": 7,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2598,
+          "value": {
+            "arm": "C",
+            "index": 8,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2599,
+          "value": {
+            "arm": "A",
+            "index": 9,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2600,
+          "value": {
+            "arm": "C",
+            "index": 10,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2601,
+          "value": {
+            "arm": "B",
+            "index": 11,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2602,
+          "value": {
+            "arm": "B",
+            "index": 12,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2603,
+          "value": {
+            "arm": "A",
+            "index": 13,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2604,
+          "value": {
+            "arm": "C",
+            "index": 14,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2605,
+          "value": {
+            "arm": "B",
+            "index": 15,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2606,
+          "value": {
+            "arm": "C",
+            "index": 16,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2607,
+          "value": {
+            "arm": "A",
+            "index": 17,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2608,
+          "value": {
+            "arm": "C",
+            "index": 18,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2609,
+          "value": {
+            "arm": "A",
+            "index": 19,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2610,
+          "value": {
+            "arm": "B",
+            "index": 20,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2611,
+          "value": {
+            "arm": "C",
+            "index": 21,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2612,
+          "value": {
+            "arm": "B",
+            "index": 22,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2613,
+          "value": {
+            "arm": "A",
+            "index": 23,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2614,
+          "value": {
+            "arm": "A",
+            "index": 24,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2615,
+          "value": {
+            "arm": "B",
+            "index": 25,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2616,
+          "value": {
+            "arm": "C",
+            "index": 26,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2617,
+          "value": {
+            "arm": "A",
+            "index": 27,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2618,
+          "value": {
+            "arm": "C",
+            "index": 28,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2619,
+          "value": {
+            "arm": "B",
+            "index": 29,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2620,
+          "value": {
+            "arm": "B",
+            "index": 30,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2621,
+          "value": {
+            "arm": "A",
+            "index": 31,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2622,
+          "value": {
+            "arm": "C",
+            "index": 32,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2623,
+          "value": {
+            "arm": "B",
+            "index": 33,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2624,
+          "value": {
+            "arm": "C",
+            "index": 34,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2625,
+          "value": {
+            "arm": "A",
+            "index": 35,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2626,
+          "value": {
+            "arm": "C",
+            "index": 36,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2627,
+          "value": {
+            "arm": "A",
+            "index": 37,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2628,
+          "value": {
+            "arm": "B",
+            "index": 38,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2629,
+          "value": {
+            "arm": "C",
+            "index": 39,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2630,
+          "value": {
+            "arm": "B",
+            "index": 40,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        },
+        {
+          "logLine": 2631,
+          "value": {
+            "arm": "A",
+            "index": 41,
+            "phase": "measured",
+            "replication": "R1"
+          }
+        }
+      ],
+      "singleLineJsonProgressCount": 42,
+      "summaryJsonPresent": false,
+      "uploadStep": {
+        "completed_at": "2026-11-28T14:20:13Z",
+        "conclusion": "failure",
+        "name": "Retain every original raw sink, field buffer, receipt, source and failure",
+        "number": 13,
+        "started_at": "2026-11-28T14:20:13Z",
+        "status": "completed"
+      }
+    },
+    "R2": {
+      "acquisitionJsonPresent": false,
+      "acquisitionStep": {
+        "completed_at": "2026-11-28T14:20:44Z",
+        "conclusion": "success",
+        "name": "Run the original fixed six warmups and 36 measured entries",
+        "number": 12,
+        "started_at": "2026-11-28T14:18:14Z",
+        "status": "completed"
+      },
+      "completeLaunchScheduleMatchesFrozenPlan": true,
+      "error": {
+        "logLine": 2657,
+        "text": "2026-11-28T14:20:44.7147949Z ##[error]The path for one of the files in artifact is not valid: /study-results/R2/observations/000-warmup-C/disk/root/manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr. Contains the following character:  Vertical bar |"
+      },
+      "fixtureHashLogged": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "fullDecodedLog": {
+        "bytes": 346123,
+        "gitBlobIdentity": "6e857847fb500c14ec185254666e6bb6b05edf27",
+        "sha256": "a188686d0db93d35e26034600a38d20c4efad79d004cd1fd23d4348c19db0b81"
+      },
+      "fullDecodedLogLines": 2724,
+      "independentObservationChecksPossible": false,
+      "jobConclusion": "failure",
+      "jobId": 141006157198,
+      "nodeVersionLogged": "v22.22.0",
+      "plannedUploadFileCountReported": 1662,
+      "progressEmittedBeforeEachChild": true,
+      "rawClockReceiptPresent": false,
+      "retainedArtifactCount": 0,
+      "runnerId": 1000093764,
+      "runnerLabels": [
+        "ubuntu-26.04"
+      ],
+      "runnerName": "GitHub Actions 1000093764",
+      "scheduleProgress": [
+        {
+          "logLine": 2590,
+          "value": {
+            "arm": "C",
+            "index": 0,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2591,
+          "value": {
+            "arm": "B",
+            "index": 1,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2592,
+          "value": {
+            "arm": "A",
+            "index": 2,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2593,
+          "value": {
+            "arm": "A",
+            "index": 3,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2594,
+          "value": {
+            "arm": "B",
+            "index": 4,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2595,
+          "value": {
+            "arm": "C",
+            "index": 5,
+            "phase": "warmup",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2596,
+          "value": {
+            "arm": "A",
+            "index": 6,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2597,
+          "value": {
+            "arm": "B",
+            "index": 7,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2598,
+          "value": {
+            "arm": "C",
+            "index": 8,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2599,
+          "value": {
+            "arm": "B",
+            "index": 9,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2600,
+          "value": {
+            "arm": "A",
+            "index": 10,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2601,
+          "value": {
+            "arm": "C",
+            "index": 11,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2602,
+          "value": {
+            "arm": "A",
+            "index": 12,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2603,
+          "value": {
+            "arm": "C",
+            "index": 13,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2604,
+          "value": {
+            "arm": "B",
+            "index": 14,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2605,
+          "value": {
+            "arm": "C",
+            "index": 15,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2606,
+          "value": {
+            "arm": "A",
+            "index": 16,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2607,
+          "value": {
+            "arm": "B",
+            "index": 17,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2608,
+          "value": {
+            "arm": "B",
+            "index": 18,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2609,
+          "value": {
+            "arm": "C",
+            "index": 19,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2610,
+          "value": {
+            "arm": "A",
+            "index": 20,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2611,
+          "value": {
+            "arm": "C",
+            "index": 21,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2612,
+          "value": {
+            "arm": "B",
+            "index": 22,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2613,
+          "value": {
+            "arm": "A",
+            "index": 23,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2614,
+          "value": {
+            "arm": "A",
+            "index": 24,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2615,
+          "value": {
+            "arm": "B",
+            "index": 25,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2616,
+          "value": {
+            "arm": "C",
+            "index": 26,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2617,
+          "value": {
+            "arm": "B",
+            "index": 27,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2618,
+          "value": {
+            "arm": "A",
+            "index": 28,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2619,
+          "value": {
+            "arm": "C",
+            "index": 29,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2620,
+          "value": {
+            "arm": "A",
+            "index": 30,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2621,
+          "value": {
+            "arm": "C",
+            "index": 31,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2622,
+          "value": {
+            "arm": "B",
+            "index": 32,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2623,
+          "value": {
+            "arm": "C",
+            "index": 33,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2624,
+          "value": {
+            "arm": "A",
+            "index": 34,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2625,
+          "value": {
+            "arm": "B",
+            "index": 35,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2626,
+          "value": {
+            "arm": "B",
+            "index": 36,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2627,
+          "value": {
+            "arm": "C",
+            "index": 37,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2628,
+          "value": {
+            "arm": "A",
+            "index": 38,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2629,
+          "value": {
+            "arm": "C",
+            "index": 39,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2630,
+          "value": {
+            "arm": "B",
+            "index": 40,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        },
+        {
+          "logLine": 2631,
+          "value": {
+            "arm": "A",
+            "index": 41,
+            "phase": "measured",
+            "replication": "R2"
+          }
+        }
+      ],
+      "singleLineJsonProgressCount": 42,
+      "summaryJsonPresent": false,
+      "uploadStep": {
+        "completed_at": "2026-11-28T14:20:44Z",
+        "conclusion": "failure",
+        "name": "Retain every original raw sink, field buffer, receipt, source and failure",
+        "number": 13,
+        "started_at": "2026-11-28T14:20:44Z",
+        "status": "completed"
+      }
+    }
+  },
+  "retries": 0,
+  "runConclusion": "failure",
+  "runId": 46153880495,
+  "schema": 1,
+  "scope": "All available completed full job logs and original run/job/artifact/producer/freeze metadata preserved and checked. Source assertions reporting successful acquisition are not substituted for independent raw artifact audits. Job log timestamps are not CPU samples.",
+  "sourceControlFlowFindings": {
+    "acquisitionAndRawClocksWrittenOnlyToFiles": true,
+    "jobStdoutContainsScheduleProgressOnly": true,
+    "nominationBooleanUnavailable": true,
+    "perObservationStdoutStderrRedirectedToFiles": true,
+    "successfulAcquisitionExitDoesNotRequireNominationGatePassed": true,
+    "summaryWrittenOnlyToFile": true
+  },
+  "sourceEvidence": {
+    "corpus/receipt-adapter.mjs": {
+      "bytes": 29267,
+      "gitBlobIdentity": "2c8df46100675fc0475918c7f8255af40960ef4f",
+      "sha256": "1f10f925fa3af8d3123fea17406175d53ea4a6e6273a72e0787e8732a8f07272"
+    },
+    "final-file-manifest.json": {
+      "bytes": 9327,
+      "gitBlobIdentity": "fd2d9b4e4dc902ce9c886fe8f7d9d47589831ae9",
+      "sha256": "61b538762e8416832d3d2dea1d4b5f9d7f2262b71addbb480bc14ac0784078d7"
+    },
+    "plan.json": {
+      "bytes": 118147,
+      "gitBlobIdentity": "8fb3c30750a4e2d73d2d3a9e5a859fa66686fd98",
+      "sha256": "1faa5618f7f5b3f537d41c9fa0f4c78870b7a8418685baf2639e01b09d598d4d"
+    },
+    "screen.mjs": {
+      "bytes": 16740,
+      "gitBlobIdentity": "2bfa72def012adca5886f81a6297db03134bef95",
+      "sha256": "082f344bd158ac5092053e76c3590d1f18cc7986f24128cba83b65d9c053a4d2"
+    },
+    "workflow/native-whole-import-cpu-screen-1c413.yml": {
+      "bytes": 11001,
+      "gitBlobIdentity": "e6c8b7a3e314f56b4e519f7281c7785493ced70a",
+      "sha256": "ecfa8c30ba79de2f3c16afbd4cd14b47bb06ac87cf5f060c5b7b32ea82d7a8b7"
+    }
+  },
+  "unavailableOriginalEvidence": [
+    "acquisition.json",
+    "summary.json",
+    "per-observation report.json and validation receipts",
+    "per-observation raw clock start/end receipts",
+    "per-observation source-before/source-after and host/affinity receipts",
+    "per-observation worker/owner/field/work/activation/lifecycle receipts",
+    "per-observation complete raw disk sinks and field buffers",
+    "per-observation stdout/stderr and any failure originals",
+    "prepared-runtime/capacity receipts and original Node22 pure-check result files"
+  ]
+}

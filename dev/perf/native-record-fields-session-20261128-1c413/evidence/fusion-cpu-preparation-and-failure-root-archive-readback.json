@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-cpu-preparation-and-failed-cohort-archive-readback",
+  "passed": true,
+  "archives": [
+    {
+      "name": "preparation",
+      "passed": true,
+      "archive": {
+        "bytes": 276095,
+        "sha256": "3d3755d41fe23b1d608ce3aec55b00608e19674a9167ab9b1ca76bf393fc5331",
+        "gitBlob": "2a2f6200f322c14169e6d6c05f4d4c7f1fc7aca5"
+      },
+      "members": 60,
+      "regularFiles": 51,
+      "allMembersCompletelyReadAndMatched": true,
+      "linksFollowed": false,
+      "memberDigest": "7146555a4e8e2977e55088fb2e8a6ba9190f2da5a4890d704e05f50edb72b902",
+      "ledgerFile": "/tmp/manabitan-cpu-preparation-evidence-20261128-1c413/preparation-history-and-reviews.tar.gz.members.json"
+    },
+    {
+      "name": "original-failure",
+      "passed": true,
+      "archive": {
+        "bytes": 148917,
+        "sha256": "d75788314d1577a142aacdabcfc420c7d5fc7e2add35bb038a627868d7a6ab8c",
+        "gitBlob": "67962798ea2a7cb600d429a5331c5e71b62d369d"
+      },
+      "members": 20,
+      "regularFiles": 20,
+      "allMembersCompletelyReadAndMatched": true,
+      "linksFollowed": false,
+      "memberDigest": "098829be422bfb512942b65b4b488d259bde11355879007a84b31e0e5e5db9ae",
+      "ledgerFile": "/tmp/cpu-original-audit-46153880495-attempt1-zs5uf_xj/archive-readback.json"
+    }
+  ],
+  "productExecution": false,
+  "newTimingObservations": 0
+}

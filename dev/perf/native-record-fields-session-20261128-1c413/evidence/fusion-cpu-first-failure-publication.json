@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "kind": "remote-publication-verification-of-failed-original-cpu-cohort",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46153880495,
+  "attempt": 1,
+  "cohortDisposition": "FAILED_UNREVIEWABLE",
+  "cohortDispositionPermanent": true,
+  "originalArtifactCount": 0,
+  "originalRawClocksAvailable": false,
+  "originalSummaryValuesAvailable": false,
+  "observedComparativeValuesExposed": 0,
+  "objects": [
+    {
+      "name": "cpu-original-accessible-evidence-46153880495-attempt1.tar.gz",
+      "bytes": 148917,
+      "sha256": "d75788314d1577a142aacdabcfc420c7d5fc7e2add35bb038a627868d7a6ab8c",
+      "gitBlob": "67962798ea2a7cb600d429a5331c5e71b62d369d",
+      "remoteCreateShaMatchesIndependentIdentity": true,
+      "remoteReadback": {
+        "exactByteReadback": false,
+        "attempted": true,
+        "connectorSupportsBinary": false,
+        "error": {
+          "error": "HTTPError: 400: GitHub Fetch only accepts UTF-8 text. (Response: None)",
+          "error_code": "INVALID_ARGUMENT"
+        },
+        "assurance": "Remote create_blob returned the exact independently computed Git blob SHA; complete local archive member bytes were independently read back before publication"
+      }
+    },
+    {
+      "name": "evidence-ledger.json",
+      "bytes": 5702,
+      "sha256": "eacdde16b4bbc6bbc713d821c3df14e22b7760b06e4bf604a0ec11b79b99c0ae",
+      "gitBlob": "d718ec7c9a107e3c321d3acf6a9efaeed4cfbede",
+      "remoteCreateShaMatchesIndependentIdentity": true,
+      "remoteReadback": {
+        "exact": true,
+        "method": "fetch_blob full UTF-8 string"
+      }
+    },
+    {
+      "name": "archive-readback.json",
+      "bytes": 5453,
+      "sha256": "cf9aaf3048a7e7ed80e2d8d88622c7d9ebdd40ec64461d616f6b0c5398805c03",
+      "gitBlob": "cfaaa4c8a6dff9d8a495563625fd5a40977709c9",
+      "remoteCreateShaMatchesIndependentIdentity": true,
+      "remoteReadback": {
+        "exact": true,
+        "method": "fetch_blob full UTF-8 string"
+      }
+    },
+    {
+      "name": "REVIEW.md",
+      "bytes": 5685,
+      "sha256": "ea1ce3a55b69bf450a03c7aa60533eb9f9f46728cd76832b8fd954577300496e",
+      "gitBlob": "ae2316757853fd222baad93df16661734fa31ab8",
+      "remoteCreateShaMatchesIndependentIdentity": true,
+      "remoteReadback": {
+        "exact": true,
+        "method": "fetch_blob full UTF-8 string"
+      }
+    },
+    {
+      "name": "original-evidence-audit.json",
+      "bytes": 24032,
+      "sha256": "ea6ecc38f812361d2eff04c6843a043176c15e84805bdca48b0c245f61959dd6",
+      "gitBlob": "209b98305ebcc31d26db806c13dea31e55e0ab4d",
+      "remoteCreateShaMatchesIndependentIdentity": true,
+      "remoteReadback": {
+        "exact": true,
+        "method": "fetch_blob full UTF-8 string"
+      }
+    }
+  ],
+  "allRemoteCreateShasVerified": true,
+  "allFourTextObjectsReadBackExactly": true,
+  "binaryReadbackConnectorLimitationPreserved": true,
+  "refsCreated": 0,
+  "productImports": 0,
+  "timingAcquisitions": 0,
+  "retries": 0,
+  "sourceArchiveMembership": "The archive retains all accessible completed original logs and metadata; its complete original-member ledger/readback is separately published. Publication receipts are outside the archive to avoid cyclic identities."
+}
