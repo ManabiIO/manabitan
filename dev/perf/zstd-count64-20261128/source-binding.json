@@ -2,9 +2,12 @@
   "zstdCommit": "82d322c4973d9e2968d94047a40892bc6d9a9bdf",
   "sourcePath": "lib/compress/zstd_compress_internal.h",
   "sourceSha256": "e99de778a2a733bde856172057fe380256c379f082bd3513cac600b005ac2b98",
-  "candidateSha256": "820921351386b4a2b315978a34a494f956a63b8ab0f5c166ae33c931e40f21a7",
-  "patchSha256": "4674a95571951bf6a9a9f2d2c5a3e861ec1aff9790428b05d4190f44ff423fc2",
+  "candidateSha256": "9b5f241b61f9a6cccb9fea5f7adbed41af75ed4c08e55aabfd83fe06162411f4",
+  "patchSha256": "bdca115498c52d22960c9feb9686a4c234b3a237e4577a9f2da5849a0c40a749",
   "emscripten": "5.0.1-git",
   "emscriptenRevision": "8c5f43157a3f069ade75876e23061330521eabde",
-  "sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  "sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "supersededPatchSha256": "4674a95571951bf6a9a9f2d2c5a3e861ec1aff9790428b05d4190f44ff423fc2",
+  "supersededCandidateSha256": "820921351386b4a2b315978a34a494f956a63b8ab0f5c166ae33c931e40f21a7",
+  "reversedLimitGuard": true
 }

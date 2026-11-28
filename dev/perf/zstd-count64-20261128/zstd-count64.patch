@@ -1,12 +1,13 @@
 --- a/lib/compress/zstd_compress_internal.h
 +++ b/lib/compress/zstd_compress_internal.h
-@@ -853,6 +853,19 @@
+@@ -853,6 +853,20 @@
  ***************************************/
  MEM_STATIC size_t ZSTD_count(const BYTE* pIn, const BYTE* pMatch, const BYTE* const pInLimit)
  {
 +#if defined(__wasm32__)
 +    /* wasm32 has native unaligned i64 loads and ctz despite its 32-bit size_t. */
 +    const BYTE* const pStart = pIn;
++    if (pIn > pInLimit) return 0;
 +    while ((size_t)(pInLimit - pIn) >= sizeof(U64)) {
 +        U64 const diff = MEM_read64(pMatch) ^ MEM_read64(pIn);
 +        if (diff) return (size_t)(pIn - pStart) + ((unsigned)__builtin_ctzll(diff) >> 3);
@@ -20,7 +21,7 @@
      const BYTE* const pStart = pIn;
      const BYTE* const pInLoopLimit = pInLimit - (sizeof(size_t)-1);
  
-@@ -870,6 +883,7 @@
+@@ -870,6 +884,7 @@
      if ((pIn<(pInLimit-1)) && (MEM_read16(pMatch) == MEM_read16(pIn))) { pIn+=2; pMatch+=2; }
      if ((pIn<pInLimit) && (*pMatch == *pIn)) pIn++;
      return (size_t)(pIn - pStart);
