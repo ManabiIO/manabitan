@@ -1,0 +1,310 @@
+{
+  "jmdict": {
+    "dataset": "jmdict",
+    "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "terms": 528299,
+    "receiptPath": "pinned-source-oracle/jmdict-default-cap-receipt.json",
+    "receiptDigest": "eca8c5bc57c2bf19048fb2eaa1b3fbf5c452c198893cc2e3cf4f2941470d3b7c",
+    "reconstructedDigest": "eca8c5bc57c2bf19048fb2eaa1b3fbf5c452c198893cc2e3cf4f2941470d3b7c",
+    "equal": true,
+    "groups": [
+      {
+        "expression": "\u65e5\u672c\u8a9e",
+        "reading": "\u306b\u307b\u3093\u3054",
+        "matched": "\u65e5\u672c\u8a9e",
+        "rows": [
+          {
+            "bank": "term_bank_12.json",
+            "index": 7199,
+            "rowSha256": "27afed6e68b7b013ce73d9c1881f9c3d4a38d3c5813940f3c6b77c2d03752209",
+            "glossaryRawBytes": 186,
+            "glossaryRawSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+            "glossaryJsonSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+            "glossaryCanonicalSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7200,
+            "rowSha256": "2ff40402ca6787aed5333ac47d201606179e8802baa57ed1aa1c25ba5d2e86ad",
+            "glossaryRawBytes": 525,
+            "glossaryRawSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8",
+            "glossaryJsonSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8",
+            "glossaryCanonicalSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5\u672c\u8a9e",
+        "reading": "\u306b\u3063\u307d\u3093\u3054",
+        "matched": "\u65e5\u672c\u8a9e",
+        "rows": [
+          {
+            "bank": "term_bank_12.json",
+            "index": 7201,
+            "rowSha256": "b98c9acd33169f2c13e2c7bd50f0acfb05d5da6bba211512741b179e12e2f367",
+            "glossaryRawBytes": 186,
+            "glossaryRawSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+            "glossaryJsonSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+            "glossaryCanonicalSha256": "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7202,
+            "rowSha256": "044f697a97a5ba13b00197ee1c088af0e3f797d6585dd8b67ae063af77d5982f",
+            "glossaryRawBytes": 525,
+            "glossaryRawSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8",
+            "glossaryJsonSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8",
+            "glossaryCanonicalSha256": "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5\u672c",
+        "reading": "\u306b\u3063\u307d\u3093",
+        "matched": "\u65e5\u672c",
+        "rows": [
+          {
+            "bank": "term_bank_15.json",
+            "index": 8681,
+            "rowSha256": "9a1c6cc65ba0ee793e68a64484d7968bb6c26c1db85a80dea3aa97a7f89ed33e",
+            "glossaryRawBytes": 172,
+            "glossaryRawSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+            "glossaryJsonSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+            "glossaryCanonicalSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34"
+          },
+          {
+            "bank": "term_bank_15.json",
+            "index": 8682,
+            "rowSha256": "706a1e8e8741da326ae2d96091cb078d75580552e39ef61ebc2b9da2c5bab6e7",
+            "glossaryRawBytes": 516,
+            "glossaryRawSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c",
+            "glossaryJsonSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c",
+            "glossaryCanonicalSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5\u672c",
+        "reading": "\u306b\u307b\u3093",
+        "matched": "\u65e5\u672c",
+        "rows": [
+          {
+            "bank": "term_bank_15.json",
+            "index": 8679,
+            "rowSha256": "3151e425a291b96854d61e0e8f522ceff8923ab72ebc3867eebf704bb5b4aa41",
+            "glossaryRawBytes": 172,
+            "glossaryRawSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+            "glossaryJsonSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+            "glossaryCanonicalSha256": "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34"
+          },
+          {
+            "bank": "term_bank_15.json",
+            "index": 8680,
+            "rowSha256": "5f08a6f747d0f6159b26eebef4250745082d64b360cfdb34a71a54d632daeedc",
+            "glossaryRawBytes": 516,
+            "glossaryRawSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c",
+            "glossaryJsonSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c",
+            "glossaryCanonicalSha256": "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5",
+        "reading": "\u306b\u3061",
+        "matched": "\u65e5",
+        "rows": [
+          {
+            "bank": "term_bank_26.json",
+            "index": 9238,
+            "rowSha256": "a261ce58f323a754b6d26246bc1555db55f598133bf5393a22629abc2e9bdc8b",
+            "glossaryRawBytes": 517,
+            "glossaryRawSha256": "7ae0be011b487dc8235ac0f13acc4d1427ec966ea2bd8de6849def740fb2bf41",
+            "glossaryJsonSha256": "ed4d75f97e8273381ff0e6934bfb0c9ec23f707246bebe8a5821ab9b90ff99a3",
+            "glossaryCanonicalSha256": "ed4d75f97e8273381ff0e6934bfb0c9ec23f707246bebe8a5821ab9b90ff99a3"
+          },
+          {
+            "bank": "term_bank_26.json",
+            "index": 9239,
+            "rowSha256": "4c71f7331dbe8cc39e5c673e02d41af8c3b6856cc5491f7747f162dd627db811",
+            "glossaryRawBytes": 189,
+            "glossaryRawSha256": "cf7fedfd5326627f50d64b837b68e424c9581f9f62521f35e0f466e540b9108e",
+            "glossaryJsonSha256": "cf7fedfd5326627f50d64b837b68e424c9581f9f62521f35e0f466e540b9108e",
+            "glossaryCanonicalSha256": "cf7fedfd5326627f50d64b837b68e424c9581f9f62521f35e0f466e540b9108e"
+          },
+          {
+            "bank": "term_bank_26.json",
+            "index": 9240,
+            "rowSha256": "c2404a8f288252b65b4a2f3e8fa551204d3a63ea00bba8fd8c7805b5450ba1c8",
+            "glossaryRawBytes": 183,
+            "glossaryRawSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
+            "glossaryJsonSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
+            "glossaryCanonicalSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439"
+          },
+          {
+            "bank": "term_bank_26.json",
+            "index": 9241,
+            "rowSha256": "c8155285b87fca5efe626867dc12d686893ad9a49f62cf41fa4802732c0f34ee",
+            "glossaryRawBytes": 515,
+            "glossaryRawSha256": "ff8eb9c9fbd5fc7fe43f5a246dbd80d5e450aff77e229d0b31c862aa9feb1a96",
+            "glossaryJsonSha256": "29491c332f6861665191db141e74a0297a739d1392a9149ffa42a2441957fed2",
+            "glossaryCanonicalSha256": "29491c332f6861665191db141e74a0297a739d1392a9149ffa42a2441957fed2"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5",
+        "reading": "\u3093\u3061",
+        "matched": "\u65e5",
+        "rows": [
+          {
+            "bank": "term_bank_49.json",
+            "index": 4368,
+            "rowSha256": "351a7808cca9d09a7a81c55ac0248bb716aed1dac11d6989c85fa210931a3a16",
+            "glossaryRawBytes": 658,
+            "glossaryRawSha256": "6ee097a9d03ad7a8837994fd86a91ff3b533391e92d18400c3e05a6af7e8e931",
+            "glossaryJsonSha256": "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
+            "glossaryCanonicalSha256": "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e"
+          },
+          {
+            "bank": "term_bank_49.json",
+            "index": 4369,
+            "rowSha256": "ddc22b0b4da78d54a2f4a3d4ad07445928a97c11e42fc8390e2be42d5fff5307",
+            "glossaryRawBytes": 646,
+            "glossaryRawSha256": "8d6363f0d01c4afcd4d228c231df191dcfabc5611e707956c26331f3ab7eb3e9",
+            "glossaryJsonSha256": "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
+            "glossaryCanonicalSha256": "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede"
+          },
+          {
+            "bank": "term_bank_49.json",
+            "index": 4370,
+            "rowSha256": "c88c605fee3bd61982059f1297841d1824637a5382543d753b575305a7dd0415",
+            "glossaryRawBytes": 501,
+            "glossaryRawSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6",
+            "glossaryJsonSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6",
+            "glossaryCanonicalSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5",
+        "reading": "\u304b",
+        "matched": "\u65e5",
+        "rows": [
+          {
+            "bank": "term_bank_26.json",
+            "index": 9242,
+            "rowSha256": "5b867421b51391763121d51d22dff20142260fdac9bc0126bec3fa7f98fbccb8",
+            "glossaryRawBytes": 179,
+            "glossaryRawSha256": "d3aa9bc001c970c8b17c44f47dc35b6beb17ff037de62d2f24f1787aca2bf5b7",
+            "glossaryJsonSha256": "d3aa9bc001c970c8b17c44f47dc35b6beb17ff037de62d2f24f1787aca2bf5b7",
+            "glossaryCanonicalSha256": "d3aa9bc001c970c8b17c44f47dc35b6beb17ff037de62d2f24f1787aca2bf5b7"
+          },
+          {
+            "bank": "term_bank_26.json",
+            "index": 9243,
+            "rowSha256": "f982918a9e091628c73e5f6336aa92f8400c717dd2009272b5c01cef81030c33",
+            "glossaryRawBytes": 183,
+            "glossaryRawSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
+            "glossaryJsonSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
+            "glossaryCanonicalSha256": "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5",
+        "reading": "\u3061",
+        "matched": "\u65e5",
+        "rows": [
+          {
+            "bank": "term_bank_49.json",
+            "index": 4371,
+            "rowSha256": "29f4b55c37f75b53d0e65dcb10e4c7d502e843adf9c8baadec828b40f632b978",
+            "glossaryRawBytes": 658,
+            "glossaryRawSha256": "6ee097a9d03ad7a8837994fd86a91ff3b533391e92d18400c3e05a6af7e8e931",
+            "glossaryJsonSha256": "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
+            "glossaryCanonicalSha256": "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e"
+          },
+          {
+            "bank": "term_bank_49.json",
+            "index": 4372,
+            "rowSha256": "72b335ddae1da295bcf9c86f3a8804cc77dfd8614f1ef3df7328bfea39ada013",
+            "glossaryRawBytes": 646,
+            "glossaryRawSha256": "8d6363f0d01c4afcd4d228c231df191dcfabc5611e707956c26331f3ab7eb3e9",
+            "glossaryJsonSha256": "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
+            "glossaryCanonicalSha256": "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede"
+          },
+          {
+            "bank": "term_bank_49.json",
+            "index": 4373,
+            "rowSha256": "ad39c038a8359063d6569ba537e9cdc3446545388e84110fe24a65f7472fcfd2",
+            "glossaryRawBytes": 501,
+            "glossaryRawSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6",
+            "glossaryJsonSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6",
+            "glossaryCanonicalSha256": "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
+          }
+        ]
+      },
+      {
+        "expression": "\u65e5",
+        "reading": "\u3072",
+        "matched": "\u65e5",
+        "rows": [
+          {
+            "bank": "term_bank_12.json",
+            "index": 7065,
+            "rowSha256": "14485c1c0b39546cbad0f5ead95a4fb1d0abebe45036d49955071eacc5d50ed9",
+            "glossaryRawBytes": 202,
+            "glossaryRawSha256": "30e8d2350e923e617ac4ecc521036bdcc5f658d2c926d5809763e7a7207c18fc",
+            "glossaryJsonSha256": "30e8d2350e923e617ac4ecc521036bdcc5f658d2c926d5809763e7a7207c18fc",
+            "glossaryCanonicalSha256": "30e8d2350e923e617ac4ecc521036bdcc5f658d2c926d5809763e7a7207c18fc"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7066,
+            "rowSha256": "244080fcf97dc3cde7b67d12dd357558ecb52a3851a825f9548bb192986aedc8",
+            "glossaryRawBytes": 240,
+            "glossaryRawSha256": "bfa23902a6cc6fcc4e152e94651f40189833f0cbfdc4d57221e24ed7d405a337",
+            "glossaryJsonSha256": "bfa23902a6cc6fcc4e152e94651f40189833f0cbfdc4d57221e24ed7d405a337",
+            "glossaryCanonicalSha256": "bfa23902a6cc6fcc4e152e94651f40189833f0cbfdc4d57221e24ed7d405a337"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7067,
+            "rowSha256": "83214bc997d53947a985aead57b2edf6b3f4db589b4a1fdc3bec2b63b13ae86c",
+            "glossaryRawBytes": 245,
+            "glossaryRawSha256": "9bba92018ddea60e7ee6e707fd12cdfc25509f45f9425d69b79987daf0a86782",
+            "glossaryJsonSha256": "9bba92018ddea60e7ee6e707fd12cdfc25509f45f9425d69b79987daf0a86782",
+            "glossaryCanonicalSha256": "9bba92018ddea60e7ee6e707fd12cdfc25509f45f9425d69b79987daf0a86782"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7068,
+            "rowSha256": "56b4ec968416a6171d617973cfbadecd5b5d6f15098e82da0b4d7367a888c573",
+            "glossaryRawBytes": 207,
+            "glossaryRawSha256": "c3fbae02a22cc17943489a704ebb06506444f0ea8943bb722abc9ad7813fcf04",
+            "glossaryJsonSha256": "c3fbae02a22cc17943489a704ebb06506444f0ea8943bb722abc9ad7813fcf04",
+            "glossaryCanonicalSha256": "c3fbae02a22cc17943489a704ebb06506444f0ea8943bb722abc9ad7813fcf04"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7069,
+            "rowSha256": "14e69eb30cb6a769312c8f0477cadb345259f73a160168efd67a32bc56fa288c",
+            "glossaryRawBytes": 236,
+            "glossaryRawSha256": "8df4a6973824cf26d16ec1a1dc66ce98cff232f6ba021ec90a8dd5be174c4c20",
+            "glossaryJsonSha256": "8df4a6973824cf26d16ec1a1dc66ce98cff232f6ba021ec90a8dd5be174c4c20",
+            "glossaryCanonicalSha256": "8df4a6973824cf26d16ec1a1dc66ce98cff232f6ba021ec90a8dd5be174c4c20"
+          },
+          {
+            "bank": "term_bank_12.json",
+            "index": 7070,
+            "rowSha256": "a8256078d08fd115cd65c11d448382e90f82d179724a4ae10be82b934749e1ac",
+            "glossaryRawBytes": 399,
+            "glossaryRawSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1",
+            "glossaryJsonSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1",
+            "glossaryCanonicalSha256": "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1"
+          }
+        ]
+      }
+    ]
+  }
+}

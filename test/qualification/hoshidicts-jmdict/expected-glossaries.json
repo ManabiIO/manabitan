@@ -1,0 +1,51 @@
+{
+  "jmdict": {
+    "digest": "eca8c5bc57c2bf19048fb2eaa1b3fbf5c452c198893cc2e3cf4f2941470d3b7c",
+    "expected": {
+      "[\"\u65e5\u672c\u8a9e\",\"\u306b\u307b\u3093\u3054\"]": [
+        "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+        "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
+      ],
+      "[\"\u65e5\u672c\u8a9e\",\"\u306b\u3063\u307d\u3093\u3054\"]": [
+        "89ee822f41246a1dc444968efba45208e9df8d7e12a10c7328d47f968b1a43af",
+        "e8198f962a4cecb3e321b27ef953e72150048cd2c14d777f3edb76433ea582a8"
+      ],
+      "[\"\u65e5\u672c\",\"\u306b\u3063\u307d\u3093\"]": [
+        "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+        "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
+      ],
+      "[\"\u65e5\u672c\",\"\u306b\u307b\u3093\"]": [
+        "e107a7fa0012fe8c2ab32337bd25e5761ece255cb58d0b02b840d9fa61e50a34",
+        "338e6f47cb3f41d7e4432bae3e86cc869308b647d54b9bd30edbfebac97ae91c"
+      ],
+      "[\"\u65e5\",\"\u306b\u3061\"]": [
+        "ed4d75f97e8273381ff0e6934bfb0c9ec23f707246bebe8a5821ab9b90ff99a3",
+        "cf7fedfd5326627f50d64b837b68e424c9581f9f62521f35e0f466e540b9108e",
+        "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439",
+        "29491c332f6861665191db141e74a0297a739d1392a9149ffa42a2441957fed2"
+      ],
+      "[\"\u65e5\",\"\u3093\u3061\"]": [
+        "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
+        "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
+        "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
+      ],
+      "[\"\u65e5\",\"\u304b\"]": [
+        "d3aa9bc001c970c8b17c44f47dc35b6beb17ff037de62d2f24f1787aca2bf5b7",
+        "f361b8dba3ae0d6bd9d4623e99f6b8ea2243c52b9da513b248721ed000f0d439"
+      ],
+      "[\"\u65e5\",\"\u3061\"]": [
+        "1f84cfc1dde8d055018f5d35def7ad030bf468ff2218ac465ff889fde626d58e",
+        "784559521be292421a98f2e36f8ef19c10e7aec4c9f40893ae647599d66dcede",
+        "0d7fed7ac64e292ac2579a34f9a28c27d93f42958b9ece59ccf446119b4b90c6"
+      ],
+      "[\"\u65e5\",\"\u3072\"]": [
+        "30e8d2350e923e617ac4ecc521036bdcc5f658d2c926d5809763e7a7207c18fc",
+        "bfa23902a6cc6fcc4e152e94651f40189833f0cbfdc4d57221e24ed7d405a337",
+        "9bba92018ddea60e7ee6e707fd12cdfc25509f45f9425d69b79987daf0a86782",
+        "c3fbae02a22cc17943489a704ebb06506444f0ea8943bb722abc9ad7813fcf04",
+        "8df4a6973824cf26d16ec1a1dc66ce98cff232f6ba021ec90a8dd5be174c4c20",
+        "23facc4c07a1c755bc8408918925b5513cec41f690aa77a1991c50b804b700e1"
+      ]
+    }
+  }
+}

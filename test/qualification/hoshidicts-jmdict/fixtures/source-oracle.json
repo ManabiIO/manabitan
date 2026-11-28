@@ -1,0 +1,43 @@
+{
+  "archive": "JMdict_2026-11-22.zip",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "dictionaryTitle": "JMdict [2026-11-22]",
+  "query": "\u65e5\u672c\u8a9e",
+  "termCount": 528299,
+  "termBankCount": 53,
+  "matchedSourceRows": [
+    {
+      "bank": "term_bank_12.json",
+      "rowIndex": 7199,
+      "expression": "\u65e5\u672c\u8a9e",
+      "reading": "\u306b\u307b\u3093\u3054",
+      "glossarySha256": "27afed6e68b7b013ce73d9c1881f9c3d4a38d3c5813940f3c6b77c2d03752209",
+      "glossaryBytes": 251
+    },
+    {
+      "bank": "term_bank_12.json",
+      "rowIndex": 7200,
+      "expression": "\u65e5\u672c\u8a9e",
+      "reading": "\u306b\u307b\u3093\u3054",
+      "glossarySha256": "2ff40402ca6787aed5333ac47d201606179e8802baa57ed1aa1c25ba5d2e86ad",
+      "glossaryBytes": 594
+    },
+    {
+      "bank": "term_bank_12.json",
+      "rowIndex": 7201,
+      "expression": "\u65e5\u672c\u8a9e",
+      "reading": "\u306b\u3063\u307d\u3093\u3054",
+      "glossarySha256": "b98c9acd33169f2c13e2c7bd50f0acfb05d5da6bba211512741b179e12e2f367",
+      "glossaryBytes": 243
+    },
+    {
+      "bank": "term_bank_12.json",
+      "rowIndex": 7202,
+      "expression": "\u65e5\u672c\u8a9e",
+      "reading": "\u306b\u3063\u307d\u3093\u3054",
+      "glossarySha256": "044f697a97a5ba13b00197ee1c088af0e3f797d6585dd8b67ae063af77d5982f",
+      "glossaryBytes": 586
+    }
+  ],
+  "sourceOracleSha256": "2832c3b71be2e9f768aa4696a6c18a8eb889b1eba2a7abc328426b2a09fe2bbb"
+}
