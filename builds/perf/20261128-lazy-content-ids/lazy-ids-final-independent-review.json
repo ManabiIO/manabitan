@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-28T06:04:50.270143+00:00",
+  "reviewer": "native_hotspots",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+  "status": "approved-for-existing-internal-numeric-index-contract",
+  "concreteBlockers": [],
+  "sourceIdentity": {
+    "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2": {
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "files": {
+        "ext/js/dictionary/dictionary-database.js": {
+          "bytes": 613153,
+          "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+          "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811"
+        },
+        "test/dictionary-content-publication-range.test.js": {
+          "bytes": 16759,
+          "sha256": "bcd63b67a2113eed41c259fe971e49545615e5b78ed8aa2a50deb1d717fb6c5b",
+          "gitBlob": "6e0958d02e6ce27b6adbe597485d444e99b7073f"
+        },
+        "test/dictionary-database-content-dedup.test.js": {
+          "bytes": 164221,
+          "sha256": "a1e3c39d86c53934e1e63d98896bd84cb8d3d435bae231148a16193fa626bebf",
+          "gitBlob": "9ab7d6d4bc70ffd6760eeb4505943236946dc138"
+        }
+      }
+    },
+    "b0a4532ed4209ad289aa28ac58a92a10e9d54841": {
+      "tree": "fcad26cd0c02b866b5e7cd26fca1b7dd558926a5",
+      "files": {
+        "ext/js/dictionary/dictionary-database.js": {
+          "bytes": 613990,
+          "sha256": "82c37daa13da0163b61981ac0a3d5bd6148b55698d8cf93918c9e311474b1cfd",
+          "gitBlob": "fc232b469970cf9d542885d9bc7c77ba3f7608b3"
+        },
+        "test/dictionary-content-lazy-ids.test.js": {
+          "bytes": 10092,
+          "sha256": "8bf6e26fe119cb0ac15b7854aa0be2b069ed89592e20c3ecdfecaa70130716b4",
+          "gitBlob": "b9c68c8645ba844d31a10fe23460fabe06351124"
+        },
+        "test/dictionary-content-publication-range.test.js": {
+          "bytes": 17127,
+          "sha256": "219bc9799dadecd36deb2f1d03393dd046468a86fb9f20ba08248c739f303ee4",
+          "gitBlob": "a5cb1387c61f7b21d98976c903228336cd64411b"
+        },
+        "test/dictionary-database-content-dedup.test.js": {
+          "bytes": 164538,
+          "sha256": "407932089efe4b207d7b46412943bbe8c954e615e64dfbf56817e18035b14f54",
+          "gitBlob": "aee9cd3789d8590b779db1878e5dae3d397eeae4"
+        }
+      }
+    }
+  },
+  "scope": "Independent read-only correctness and call-site review of the exact final product against develop. No source edits, new performance experiments or heavy tests. This is not performance, memory or full validation qualification.",
+  "findings": [
+    {
+      "area": "Absent ID column and reads",
+      "finding": "The empty Float64Array remains a real sentinel. For numeric indexes, the state-column lookup distinguishes in-capacity cells (including unpublished or free cells that historically held zero) from missing, negative, fractional, NaN, infinite and out-of-range cells. The latter retain undefined ID reads. A materialized ID column retains the original direct read path."
+    },
+    {
+      "area": "Call-site compatibility",
+      "finding": "The only production reads of the ID column occur through _readTermEntryContentMetaHashPairIndex. Its production callers obtain numeric indexes from typed hash slots, typed native exact descriptors, or numeric resolver indexes. The native arena ABI does not contain the optional ID column, and no runtime consumer uses its length as the dense capacity except the explicitly changed publication guard."
+    },
+    {
+      "area": "Signed zero and legacy IDs",
+      "finding": "The writer snapshots and validates the numeric ID before mutation. Object.is(id,0) makes positive zero implicit while -0 and every accepted positive safe integer materialize a full-capacity Float64Array. Existing implicit cells become positive zero; the new value, including the sign of zero, is then written exactly. Later growth copies through the dense high-water mark."
+    },
+    {
+      "area": "Allocation and dictionary-name failures",
+      "finding": "A first legacy-ID column is allocated into a local variable. The instance publishes it only after dictionary-name interning succeeds. An allocation or interning exception therefore leaves the existing ID column and row payload unchanged; the insertion caller returns its newly reserved index to the free list. Interning itself retains its baseline side-effect behavior; this review does not claim the interner is independently transactional."
+    },
+    {
+      "area": "Rollback, reuse, reset and growth",
+      "finding": "Rollback makes entries unreadable through the published-state lookup and preserves free-index reuse. All three import publication paths still write or fill zero into a materialized ID column, so a reused nonzero or -0 legacy ID cannot leak into an imported row. Those same operations are harmless on the unmaterialized zero-length column. Reset returns the sentinel to a fresh empty array. Arena growth builds replacement columns before publishing and allocates an ID replacement only if one already exists."
+    },
+    {
+      "area": "Contiguous publication and aliases",
+      "finding": "Only the empty optional ID destination bypasses its capacity requirement. Other destination capacities and source/state/hash checks remain intact. A materialized ID column still participates in input/destination alias rejection and must have enough capacity. Skipping an empty destination does not expose writable bytes; all other destinations must be nonempty for an accepted nonempty range."
+    },
+    {
+      "area": "Focused test changes",
+      "finding": "The new test file exercises absent and malformed numeric reads, normal zero publication, nonzero and -0 values, allocation/interner failures, growth/reset, rollback/reuse, and short/aliased materialized ID columns. Existing alias and failure-matrix tests explicitly materialize the optional column so their physical-overlap/allocation coverage remains active rather than silently disappearing."
+    }
+  ],
+  "scopeLimits": [
+    "The accessor is an internal number-index API. Arbitrary non-number property-key calls, such as reading the method with index=\"length\", are outside that contract and do not have full TypedArray-property parity after removing the physical column. Every production call site reviewed uses numeric indexes.",
+    "Read-only inspection does not replace the separate exact-source gate and registered whole-import/process-memory evidence."
+  ],
+  "newHeavyTestsRun": 0,
+  "sourceFilesEdited": 0,
+  "productionIdColumnConsumers": "git grep of _termEntryContentMetaIdTable across ext and types finds only dictionary-database.js; all external metadata reads call its numeric accessor."
+}

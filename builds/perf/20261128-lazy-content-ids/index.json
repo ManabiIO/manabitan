@@ -1,0 +1,907 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-28T06:17:55.521247+00:00",
+  "publicationPath": "builds/perf/20261128-lazy-content-ids",
+  "targetBranch": "develop",
+  "reviewBranch": "perf/lazy-content-ids-20261128-63aba8",
+  "claim": "Avoid live import-time allocation of a zero-only optional Float64 ID column:4MiB JMdict,4MiB Jitendex,2MiB VNDB. No speed,process-peak,or permanent per-installed-dictionary saving is claimed.",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "versions": {
+    "initialCorpusAndCampaign": "f17102bac19688f1115d1d630720838abf0df00c",
+    "measuredAndFullGates": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+    "reviewSource": "b0a4532ed4209ad289aa28ac58a92a10e9d54841"
+  },
+  "runtimeFile": "ext/js/dictionary/dictionary-database.js",
+  "numericIndexContractOnly": true,
+  "sourceBundle": {
+    "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+    "bytes": 5949,
+    "path": "source-and-review-validation/lazy-ids-source-f171-da03-b0a.bundle",
+    "sha256": "40240583af6404d86a0e9a09b70e6ce1814c8f628239e7db40b0d23c54f75ac4"
+  },
+  "sourceBundleManifest": {
+    "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+    "bytes": 4826,
+    "path": "source-and-review-validation/lazy-ids-source-f171-da03-b0a.bundle.manifest.json",
+    "sha256": "8fdee2bed898941e8fe72d5bddfa61704b3a56d8b008dcf68d5aa0a35747cb8e"
+  },
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "metadataEntries": 362032,
+      "baselineIdColumnBytes": 4194304,
+      "candidateIdColumnBytes": 0,
+      "fixture": {
+        "label": "JMdict",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "metadataDigest": "bb373ee0186ce646887922256e1fe5d0f4f7c4990bbbbd35ac13d3d07755656d",
+      "cacheDigest": "42127e193206c55301829447e5cd6fcd4200f0f68dfbb4c7ed06369b22940cec",
+      "exactReads": 0,
+      "receipt": {
+        "archive": "lazy-ids-initial-evidence.tar.gz",
+        "bytes": 16156,
+        "path": "component-and-gates/lazy-ids-jmdict-stream.json",
+        "sha256": "160e4bf07d50eac88ce7483feb9f73bd61bd62b430ba15334d2f8c0666864516"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "metadataEntries": 363243,
+      "baselineIdColumnBytes": 4194304,
+      "candidateIdColumnBytes": 0,
+      "fixture": {
+        "label": "Jitendex",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155
+      },
+      "metadataDigest": "acb1c0f0aa95710b07a64778344dbd030598ed92fbc8967c7da462af001bb195",
+      "cacheDigest": "8dc2c1763224ef3c5367e83bbc0eb15a1e61b77561199ccd1a7395a5001b02d9",
+      "exactReads": 29,
+      "receipt": {
+        "archive": "lazy-ids-initial-evidence.tar.gz",
+        "bytes": 30705,
+        "path": "component-and-gates/lazy-ids-jitendex-stream.json",
+        "sha256": "e38850ff211f44b9a0323ec654f1ddf9b9d8e280f35eff3378d34a68cae2263a"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "metadataEntries": 157150,
+      "baselineIdColumnBytes": 2097152,
+      "candidateIdColumnBytes": 0,
+      "fixture": {
+        "label": "VNDB",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284
+      },
+      "metadataDigest": "21bf977fafc109ba780c5999bea6fcd1bd5b161e6420ef4a0244e9e4703de9b4",
+      "cacheDigest": "ec86e4b221153b61e08816882daefea80d785e1206412e835a448f5667e3ab4f",
+      "exactReads": 548,
+      "receipt": {
+        "archive": "lazy-ids-initial-evidence.tar.gz",
+        "bytes": 148930,
+        "path": "component-and-gates/lazy-ids-vndb-stream.json",
+        "sha256": "72d6c51c2dbae485ea3945abe0e31fdb5614fd2336c0e3b438c4b4cfc40c3128"
+      }
+    }
+  ],
+  "measuredCampaign": {
+    "runId": 46104994552,
+    "remoteCommit": "b6f02628da0289316f6b811095dd9a93913a756f",
+    "summary": {
+      "ordinaryReceipts": 216,
+      "exhaustiveMediaReceipts": 12,
+      "instrumentedReceipts": 24,
+      "rawMemoryScans": 2142,
+      "qualifiedMemoryObservations": 20,
+      "memoryScreenPassCells": 5,
+      "totalCells": 6,
+      "allSemanticReceiptsAgreeWithinCellsAndAcrossOrders": true,
+      "allDescriptiveTimingIntervalsCrossZero": true,
+      "speedGainClaimed": false,
+      "processPeakReductionClaimed": false
+    },
+    "cohorts": [
+      {
+        "dictionary": "jmdict",
+        "order": "AB",
+        "artifactId": 15249571268,
+        "originalArtifactSha256": "aff8852b7fcbdb69508556067d3febf67b8fd0e06539eeebc1457177c01fb7d1",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            0.9767507265398062, 1.0007637231503468, 0.9784111353091399,
+            0.9774542038515736, 1.031283500633386, 1.0409293129015966,
+            0.989206945096199, 1.0033627978478095, 0.9874129875083327,
+            1.040840485350718, 1.0239473942487218, 0.9850364617861103
+          ],
+          "medianPairedChangePercent": -0.5014665876727165,
+          "equalWorkChangePercent": 0.251679863212817,
+          "worstPairChangePercent": 4.092931290159663,
+          "descriptiveBootstrap95Percent": [
+            -1.8276201452374963, 2.761544744105393
+          ],
+          "fasterPairs": 6
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            1.0315718548464892, 1.0178385046019993, 1.0144578313253012,
+            1.0345742068559203
+          ],
+          "medianPairedChangePercent": 2.4705179724244353,
+          "equalWorkChangePercent": 2.45395815254259,
+          "worstPairChangePercent": 3.4574206855920275,
+          "descriptiveBootstrap95Percent": [
+            1.4457831325301207, 3.4574206855920275
+          ],
+          "fasterPairs": 0
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 386,
+          "everyObservationQualified": true,
+          "passesProspectiveMemoryScreen": true,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": 1.4604252163150977,
+              "maximumPairedChangePercent": 2.5059190707186874
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": 1.833942079763018,
+              "maximumPairedChangePercent": 3.1977663331529182
+            }
+          }
+        },
+        "memoryObservationFailures": [],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 1517,
+          "path": "measured-da03/jmdict/AB/analysis.json",
+          "sha256": "a1450449a31d49060571bffa2e513692038e817f2c3d54a0446324fc78ae2773"
+        },
+        "archiveLayout": "measured-da03/jmdict/AB",
+        "replayLayout": "hosted-studies/lazy-ids-final/jmdict/AB"
+      },
+      {
+        "dictionary": "jmdict",
+        "order": "BA",
+        "artifactId": 15250478829,
+        "originalArtifactSha256": "9a0c5e922d5edc5999175ab8ce61a60861cb55b587c1198649a605b49545da4a",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "Intel(R) Xeon(R) 6975P-C",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            0.980636833046472, 0.9995621716286536, 0.9832932181793412,
+            1.0021660649819495, 1.016878245816605, 1.040997957397105,
+            1.0014465499783016, 1.0071870058933454, 0.9660419895730952,
+            0.9984567901234893, 1.0062615625445048, 1.0286665701462978
+          ],
+          "medianPairedChangePercent": 0.18063074801255574,
+          "equalWorkChangePercent": 0.24752771234393123,
+          "worstPairChangePercent": 4.09979573971051,
+          "descriptiveBootstrap95Percent": [
+            -0.9124995848584727, 1.203262585497522
+          ],
+          "fasterPairs": 5
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            0.9750000000001338, 1.0122786978870564, 0.974918056149549,
+            1.0151018663628644
+          ],
+          "medianPairedChangePercent": -0.6360651056404931,
+          "equalWorkChangePercent": -0.5642857142707958,
+          "worstPairChangePercent": 1.510186636286437,
+          "descriptiveBootstrap95Percent": [
+            -2.508194385045104, 1.510186636286437
+          ],
+          "fasterPairs": 2
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 312,
+          "everyObservationQualified": true,
+          "passesProspectiveMemoryScreen": true,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": -1.054688560890027,
+              "maximumPairedChangePercent": -0.20498913820000686
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": -1.5341414207412973,
+              "maximumPairedChangePercent": -0.2538580401757917
+            }
+          }
+        },
+        "memoryObservationFailures": [],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 1519,
+          "path": "measured-da03/jmdict/BA/analysis.json",
+          "sha256": "3b4c754aa76f3015b74f0882f8316040bff056f2c4bd5449e66212dfb42ad436"
+        },
+        "archiveLayout": "measured-da03/jmdict/BA",
+        "replayLayout": "hosted-studies/lazy-ids-final/jmdict/BA"
+      },
+      {
+        "dictionary": "jitendex",
+        "order": "AB",
+        "artifactId": 15250547736,
+        "originalArtifactSha256": "45fc3a2fb2e852430d289d7132a1bfd8a968530245921c013d2825b418e6d965",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            1.04435336309741, 1.0034264432029838, 1.0263019066997998,
+            0.9758319253654427, 1.0895095667473098, 0.9963144039112493,
+            1.0097965898893255, 1.0492676431424945, 1.0282328074280702,
+            0.943087719298262, 1.0068949840885248, 0.9705390266967341
+          ],
+          "medianPairedChangePercent": 0.8345786988925186,
+          "equalWorkChangePercent": 1.1474607863171782,
+          "worstPairChangePercent": 8.950956674730982,
+          "descriptiveBootstrap95Percent": [
+            -1.3926835361653955, 3.629308526274011
+          ],
+          "fasterPairs": 4
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            0.9944346807264164, 0.9799250936329675, 1.0368855563129684,
+            0.9755513639001661
+          ],
+          "medianPairedChangePercent": -1.2820112820308038,
+          "equalWorkChangePercent": -0.3593058359415924,
+          "worstPairChangePercent": 3.6885556312968415,
+          "descriptiveBootstrap95Percent": [
+            -2.4448636099833942, 3.6885556312968415
+          ],
+          "fasterPairs": 3
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 303,
+          "everyObservationQualified": true,
+          "passesProspectiveMemoryScreen": true,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": 1.8806233484099266,
+              "maximumPairedChangePercent": 4.478124676425588
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": 2.1420595849223343,
+              "maximumPairedChangePercent": 5.248993926249446
+            }
+          }
+        },
+        "memoryObservationFailures": [],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 1522,
+          "path": "measured-da03/jitendex/AB/analysis.json",
+          "sha256": "5fbf5219744dc97665b9953185215a79c738a544c1b022bf320c17f4b2e5ed4f"
+        },
+        "archiveLayout": "measured-da03/jitendex/AB",
+        "replayLayout": "hosted-studies/lazy-ids-final/jitendex/AB"
+      },
+      {
+        "dictionary": "jitendex",
+        "order": "BA",
+        "artifactId": 15251146431,
+        "originalArtifactSha256": "49a864f4c1070413992ddd453a5b70cd57119fb3d2df2e19f7d7bbb74f12aa43",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            0.9910641754671071, 0.9893832463946067, 0.993604213694518,
+            0.8350369554961421, 1.0021535343298487, 0.9986061834769682,
+            0.993357793522304, 0.9991046875999456, 1.0177606177606027,
+            0.9915129857699008, 1.0055541203823528, 1.0304870001319868
+          ],
+          "medianPairedChangePercent": -0.389480141425691,
+          "equalWorkChangePercent": -1.5510773249240772,
+          "worstPairChangePercent": 3.0487000131986797,
+          "descriptiveBootstrap95Percent": [
+            -0.871141938149611, 0.38538273561008474
+          ],
+          "fasterPairs": 8
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            1.0016182236883089, 1.0155456852791878, 0.981326875278793,
+            0.9968765617191768
+          ],
+          "medianPairedChangePercent": -0.07526072962571462,
+          "equalWorkChangePercent": -0.11333942007969444,
+          "worstPairChangePercent": 1.554568527918776,
+          "descriptiveBootstrap95Percent": [
+            -1.8673124721206968, 1.554568527918776
+          ],
+          "fasterPairs": 2
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 283,
+          "everyObservationQualified": true,
+          "passesProspectiveMemoryScreen": true,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": 1.5902409744355972,
+              "maximumPairedChangePercent": 1.822724605998638
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": 1.6483896286616062,
+              "maximumPairedChangePercent": 1.9574463785979157
+            }
+          }
+        },
+        "memoryObservationFailures": [],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 1525,
+          "path": "measured-da03/jitendex/BA/analysis.json",
+          "sha256": "75dd774855ea8c10122d99417a8ab28dee839f069bc95ffd8421dd7439bc40cc"
+        },
+        "archiveLayout": "measured-da03/jitendex/BA",
+        "replayLayout": "hosted-studies/lazy-ids-final/jitendex/BA"
+      },
+      {
+        "dictionary": "vndb",
+        "order": "AB",
+        "artifactId": 15249214235,
+        "originalArtifactSha256": "d53f9da5dbff9d73c187cbb150b9bd7de483c9e160966b7a9dbb9b2349756141",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            0.9932178980507688, 0.9892483973550008, 1.0117942965908646,
+            0.9872496063125377, 0.9549896874504278, 0.9836445925853344,
+            1.0377475035173813, 1.0067733174350666, 0.9986096453758262,
+            0.9521460520889581, 1.0104560660312456, 1.0084536458419666
+          ],
+          "medianPairedChangePercent": -0.40862282867024646,
+          "equalWorkChangePercent": -0.5951507669140099,
+          "worstPairChangePercent": 3.774750351738132,
+          "descriptiveBootstrap95Percent": [
+            -1.4552900551063952, 0.945485593660611
+          ],
+          "fasterPairs": 7
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            0.986397700441433, 0.9992697459047837, 1.0129367809470669,
+            1.0022009650385169
+          ],
+          "medianPairedChangePercent": 0.07353554716502675,
+          "equalWorkChangePercent": 0.032282272840489235,
+          "worstPairChangePercent": 1.293678094706685,
+          "descriptiveBootstrap95Percent": [
+            -1.3602299558566955, 1.293678094706685
+          ],
+          "fasterPairs": 2
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 420,
+          "everyObservationQualified": false,
+          "passesProspectiveMemoryScreen": false,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": null,
+              "maximumPairedChangePercent": null
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": null,
+              "maximumPairedChangePercent": null
+            }
+          }
+        },
+        "memoryObservationFailures": [
+          {
+            "name": "A1",
+            "exitCode": 0,
+            "qualificationFailures": ["covered-import-scan-gap-over-250ms"],
+            "maximumCoveredSampleGapMs": 254.629514
+          },
+          {
+            "name": "B1",
+            "exitCode": 0,
+            "qualificationFailures": ["covered-import-scan-gap-over-250ms"],
+            "maximumCoveredSampleGapMs": 303.46941
+          },
+          {
+            "name": "B2",
+            "exitCode": 0,
+            "qualificationFailures": ["covered-import-scan-gap-over-250ms"],
+            "maximumCoveredSampleGapMs": 290.282453
+          },
+          {
+            "name": "A2",
+            "exitCode": 0,
+            "qualificationFailures": ["covered-import-scan-gap-over-250ms"],
+            "maximumCoveredSampleGapMs": 253.025429
+          }
+        ],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 1528,
+          "path": "measured-da03/vndb/AB/analysis.json",
+          "sha256": "53994c17ef9b88334f886ac5735e27eb8e3b8bcbd214156ffa139cc0a74c9487"
+        },
+        "archiveLayout": "measured-da03/vndb/AB",
+        "replayLayout": "hosted-studies/lazy-ids-final/vndb/AB"
+      },
+      {
+        "dictionary": "vndb",
+        "order": "BA",
+        "artifactId": 15250001919,
+        "originalArtifactSha256": "0a71ae14aa302277f188c2eb7a2d6c75bb380a7cce3e6383de68e924cfc3da3d",
+        "candidateProductCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+        "candidateRuntimeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "packageMembers": 554,
+        "changedPackageEntries": ["js/dictionary/dictionary-database.js"],
+        "retainedHarnessBytesChecked": true,
+        "ordinaryReceiptCount": 36,
+        "semanticFailures": [],
+        "sourceAndPackageIdentityPassed": true,
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "logicalCpuCount": 4,
+        "nodeVersion": "v22.22.0",
+        "browserVersion": "153.0.8010.12",
+        "candidateVsBaseline": {
+          "count": 12,
+          "ratios": [
+            0.9812822585660002, 0.9943147753819558, 1.02170658682634,
+            0.990085455903109, 0.9731225619345264, 0.9861377165338253,
+            1.0067090321908436, 0.9517416845937354, 0.9851351351351302,
+            1.0148780996040891, 1.0136312391103823, 1.0296710065204153
+          ],
+          "medianPairedChangePercent": -0.779988435746759,
+          "equalWorkChangePercent": -0.43945320947883504,
+          "worstPairChangePercent": 2.967100652041532,
+          "descriptiveBootstrap95Percent": [
+            -1.6791303149434889, 1.4254669357235628
+          ],
+          "fasterPairs": 7
+        },
+        "identicalCodeControl": {
+          "count": 4,
+          "ratios": [
+            1.0043412334088078, 1.0036365147642743, 0.9919253506910923,
+            1.0384542206625171
+          ],
+          "medianPairedChangePercent": 0.39888740865410277,
+          "equalWorkChangePercent": 0.9426596431327594,
+          "worstPairChangePercent": 3.8454220662517136,
+          "descriptiveBootstrap95Percent": [
+            -0.8074649308907667, 3.8454220662517136
+          ],
+          "fasterPairs": 1
+        },
+        "memoryAudit": {
+          "schemaVersion": 1,
+          "observations": 4,
+          "rawScanCount": 438,
+          "everyObservationQualified": true,
+          "passesProspectiveMemoryScreen": true,
+          "metrics": {
+            "maxSampledPssKiB": {
+              "medianPairedChangePercent": 1.181270480026797,
+              "maximumPairedChangePercent": 1.2394013433303153
+            },
+            "maxSampledPrivateKiB": {
+              "medianPairedChangePercent": 0.8268391138038234,
+              "maximumPairedChangePercent": 0.9294769153863625
+            }
+          }
+        },
+        "memoryObservationFailures": [],
+        "analysisReceipt": {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 1524,
+          "path": "measured-da03/vndb/BA/analysis.json",
+          "sha256": "50b1cdb39df691de49a6102848b27a1472403e91e41d776c7892739457ac770d"
+        },
+        "archiveLayout": "measured-da03/vndb/BA",
+        "replayLayout": "hosted-studies/lazy-ids-final/vndb/BA"
+      }
+    ],
+    "independentAudit": {
+      "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+      "bytes": 20552,
+      "path": "review-audit/lazy-final-independent-receipts.json",
+      "sha256": "16491dca73774ba705fb0af7ae9dc36d49d9419a67d6e4ea8969dc27ca05f124"
+    }
+  },
+  "memoryScreen": {
+    "metrics": ["maxSampledPssKiB", "maxSampledPrivateKiB"],
+    "pairChangeFormula": "100*(candidate/baseline-1)",
+    "pairsPerCell": 2,
+    "allFourObservationsMustQualify": true,
+    "medianPairedChangePercentMaximum": 5,
+    "maximumPairedChangePercentMaximum": 10,
+    "maximumCoveredScanGapMs": 250,
+    "protocolAtBaseline": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+    "independentCheckAtBaseline": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+    "thresholdsChanged": false,
+    "failedCell": "vndb/AB",
+    "failedGapsMs": {
+      "A1": 254.629514,
+      "B1": 303.46941,
+      "B2": 290.282453,
+      "A2": 253.025429
+    },
+    "attribution": {
+      "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+      "bytes": 45261,
+      "path": "source-and-review-validation/lazy-vndb-ab-sampling-gap-attribution.json",
+      "sha256": "62d2d2e0d1ab649dfd1274e73f83c854d02f987698a245e6ac01439e7c846934"
+    },
+    "failedComparisonMetricsRemainNull": true
+  },
+  "validation": [
+    {
+      "name": "Complete-corpus allocation/parity",
+      "sourceCommit": "f17102bac19688f1115d1d630720838abf0df00c",
+      "status": "passed",
+      "scope": "Actual source planner, native parser workers and DB owners; raw temporary backing replaces compression/OPFS",
+      "evidence": [
+        {
+          "archive": "lazy-ids-initial-evidence.tar.gz",
+          "bytes": 5797,
+          "path": "component-and-gates/lazy-ids-corpus-receipt.json",
+          "sha256": "63d53dbfaf16d3514e011c42010644bd7da8461dccaae6064f4bee93fb287d38"
+        }
+      ]
+    },
+    {
+      "name": "Full unit suite",
+      "sourceCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "status": "passed",
+      "scope": "670 discovered files exactly covered by eight sequential one-worker shards;15156 passed,47 skipped,0 failed;Node v24.22.3",
+      "evidence": [
+        {
+          "archive": "lazy-ids-initial-evidence.tar.gz",
+          "bytes": 158362,
+          "path": "component-and-gates/lazy-ids-unit-shards-receipt.json",
+          "sha256": "e4b5cbcce82c481b0d1810ee2da0f781f1c6fd04698f20746d251562c912c593"
+        }
+      ]
+    },
+    {
+      "name": "Focused lifecycle tests",
+      "sourceCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "status": "passed",
+      "scope": "230 focused tests, including21 new cases; overlaps full-unit count",
+      "evidence": [
+        {
+          "archive": "lazy-ids-initial-evidence.tar.gz",
+          "bytes": 220,
+          "path": "component-and-gates/lazy-ids-focused-r3.log",
+          "sha256": "ecd58d2b426d4733b100b9dced0b1af6a4d13b0fcfb583762a4f98f52f313523"
+        }
+      ]
+    },
+    {
+      "name": "Independent differential replay",
+      "sourceCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "status": "passed",
+      "scope": "30 seeds,7500 operations,315604 metadata/cache comparisons",
+      "evidence": [
+        {
+          "archive": "lazy-ids-initial-evidence.tar.gz",
+          "bytes": 202,
+          "path": "component-and-gates/review-lazy-ids-r2.log",
+          "sha256": "a95bb585a3ce25b686dd729347ba03da405882ec035cd92fbbbb8ea0e012a3b3"
+        }
+      ]
+    },
+    {
+      "name": "Dry builds",
+      "sourceCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "status": "passed",
+      "scope": "Seven targets",
+      "evidence": [
+        {
+          "archive": "lazy-ids-initial-evidence.tar.gz",
+          "bytes": 210,
+          "path": "component-and-gates/lazy-ids-build-final-r2.log",
+          "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a"
+        }
+      ]
+    },
+    {
+      "name": "Four TypeScript projects",
+      "sourceCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "status": "passed",
+      "scope": "Original hosted static run46106115613; its four lint-style failures remain retained",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 444,
+          "path": "measured-da03/original-static-gate/types.log",
+          "sha256": "493d95206d825009022843ae583d9cebbfd9d664d812523227e48c71d733d454"
+        },
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 1435,
+          "path": "measured-da03/original-static-gate/lint.log",
+          "sha256": "f5d6a9eada664b5263b23dd996c2c6c55c36ed907b7f1dc85bb3b11319cd28b3"
+        }
+      ]
+    },
+    {
+      "name": "Changed test file",
+      "sourceCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+      "status": "passed",
+      "scope": "21 cases after test formatting/typed-snapshot changes",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 217,
+          "path": "source-and-review-validation/lazy-ids-lint-followup-unit.log",
+          "sha256": "bcf3bff7dd252b0c0e73d96658b48f9f7a31c1e4b7be29e11a13501a94617f1b"
+        }
+      ]
+    },
+    {
+      "name": "Required scoped repository lint",
+      "sourceCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+      "status": "passed",
+      "scope": "Runtime and all three changed JS tests, unchanged repository configuration/rules;two bounded processes both exit0",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 422,
+          "path": "source-and-review-validation/lazy-style-runtime-lint-r2.json",
+          "sha256": "9e4385c24db4e76c843ae699cddc3be31f55ac1fbd3288a88d6de528ea95912d"
+        },
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 531,
+          "path": "source-and-review-validation/lazy-style-tests-lint-r1.json",
+          "sha256": "997127875e3e089ca3c7274ea965773816f472a8fd04a8a98d5547ce77da324a"
+        }
+      ]
+    },
+    {
+      "name": "Complete-runtime AST equivalence",
+      "sourceCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+      "status": "passed",
+      "scope": "Complete ext diff is only dictionary-database.js; full AST equals measured source after removing only locations",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 876,
+          "path": "source-and-review-validation/lazy-ids-lint-followup-ast.json",
+          "sha256": "6896174df7e0b6876333283bcf068fba33e0d905db6e3256271764ae63d170dc"
+        },
+        {
+          "archive": "lazy-ids-final-first-three-evidence.tar.gz",
+          "bytes": 2157,
+          "path": "source-and-review-validation/verify-lazy-ids-lint-ast.mjs",
+          "sha256": "74ca23e6d07d0997ea388c403fe28f8103e4a8a48e9d16df817b3fdc1858cf18"
+        }
+      ]
+    },
+    {
+      "name": "Independent final code review",
+      "sourceCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+      "status": "approved-for-existing-internal-numeric-index-contract",
+      "scope": "No blocker; missing/malformed numeric reads, signed zero/legacy IDs, allocation/interner failure, growth, rollback/reuse and alias handling",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 6752,
+          "path": "review-audit/lazy-ids-final-independent-review.json",
+          "sha256": "4e2a6fd6390ab9c5c4f6c1a06638a494302da5f3f2349202e791e5900d6f8175"
+        }
+      ]
+    },
+    {
+      "name": "Portable receipt auditor",
+      "sourceCommit": null,
+      "status": "passed",
+      "scope": "Default and genuinely relocated study roots reproduce one existing final cell byte-for-byte;no product rerun",
+      "evidence": [
+        {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 1268,
+          "path": "review-audit/lazy-ids-auditor-portability-receipt.json",
+          "sha256": "4b9a3ed3083e1dc1367a73166f93a226a36cab2e585d82bff9ed2e402f8cf5dd"
+        },
+        {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 8320,
+          "path": "review-audit/audit-current-receipts.py",
+          "sha256": "fe1f4c3f884b73f186ef9933ca1c992ffd2da960f01718d5fe6c4058f87ef452"
+        },
+        {
+          "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+          "bytes": 8260,
+          "path": "review-audit/audit-current-receipts.pre-portable.py",
+          "sha256": "fad9593e1f5c871ce0f01aaffb606f8cfd02281f198e5e412a6348f73fe94b05"
+        }
+      ]
+    }
+  ],
+  "additionalWholeRepositoryStaticRun": {
+    "runId": 46111003657,
+    "remoteCommit": "41a68da2bea9618e461b26f2edd8f80b4ce73549",
+    "productCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+    "status": "queued",
+    "lastCheckedAtUtc": "2026-11-28T06:15:44Z",
+    "requiredChangedCodeGate": false,
+    "note": "Additional broad rerun;required scoped gate and source-linked unit/build/types validation are complete. Append actual result later without rewriting archived observations."
+  },
+  "archives": [
+    {
+      "file": "lazy-ids-initial-evidence.tar.gz",
+      "sha256": "1a758f3f6a015a3e77adba4652184e65d6d42a824f603d62579496b5c99151c0",
+      "bytes": 7408886,
+      "indexedPayloads": 1081,
+      "rawPayloadBytes": 108891660,
+      "everyRecoveredMemberVerified": true
+    },
+    {
+      "file": "lazy-ids-final-first-three-evidence.tar.gz",
+      "sha256": "5789f4bff4e3438b9cfef5079c7039812e71270b4b3041527d1c054531438661",
+      "bytes": 5745846,
+      "indexedPayloads": 851,
+      "rawPayloadBytes": 72657832,
+      "everyRecoveredMemberVerified": true
+    },
+    {
+      "file": "lazy-ids-final-remaining-evidence.tar.gz",
+      "sha256": "61761ed4ff8bc51a8d4a016122352856f1c1da619c22b83e82742253d7fbfddd",
+      "bytes": 5302296,
+      "indexedPayloads": 839,
+      "rawPayloadBytes": 60824348,
+      "everyRecoveredMemberVerified": true
+    }
+  ],
+  "archiveVerifier": {
+    "file": "verify-lazy-id-evidence.py",
+    "bytes": 2849,
+    "sha256": "38791c26555e2023778baf108fba5ebcf0a5884e32822f8bbe3ae0a166890763"
+  },
+  "archiveVerificationReceipt": {
+    "file": "lazy-ids-evidence-verification.json",
+    "bytes": 698,
+    "sha256": "425e2debd0b8c3d2ecf4d44db02f561ce7e1a398755dba49beb8f10a3517fba1"
+  },
+  "totalIndexedPayloads": 2771,
+  "portableAuditor": {
+    "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+    "bytes": 8320,
+    "path": "review-audit/audit-current-receipts.py",
+    "sha256": "fe1f4c3f884b73f186ef9933ca1c992ffd2da960f01718d5fe6c4058f87ef452"
+  },
+  "portableAuditorEnvironmentVariable": "MANABITAN_STUDY_ROOT",
+  "originalAuditor": {
+    "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+    "bytes": 8260,
+    "path": "review-audit/audit-current-receipts.pre-portable.py",
+    "sha256": "fad9593e1f5c871ce0f01aaffb606f8cfd02281f198e5e412a6348f73fe94b05"
+  },
+  "overlapRefresh": {
+    "archive": "lazy-ids-final-remaining-evidence.tar.gz",
+    "bytes": 12563,
+    "path": "review-audit/lazy-ids-overlap-refresh-r3.json",
+    "sha256": "ebf4aa9a10e99a680e9bf0c9aeace3a6e84004e1b2b9456782a7d0adc4dc6e81"
+  },
+  "historicalInitialCampaign": {
+    "runId": 46102476667,
+    "sourceCommit": "f17102bac19688f1115d1d630720838abf0df00c",
+    "ordinaryReceipts": 120,
+    "mediaReceipts": 12,
+    "instrumentedReceipts": 24,
+    "rawScans": 2010,
+    "qualifiedMemoryObservations": 23,
+    "totalMemoryObservations": 24,
+    "allTimingIntervalsCrossZero": true,
+    "limits": "JMdict AB baseline A1 coverage failure and VNDB AB unstable controls retained;not relabeled as measured-source qualification."
+  },
+  "reproductionLayout": {
+    "initial-browser": "hosted-studies/lazy-ids",
+    "measured-da03": "hosted-studies/lazy-ids-final",
+    "baseline": "Git checkout at baseline commit with source bundle refs imported",
+    "protocolSource": "baseline/dev/perf/import-memory-20261125-a7f7",
+    "referenceAudit": "unpacked/remaining/review-audit/lazy-final-independent-receipts.json"
+  }
+}

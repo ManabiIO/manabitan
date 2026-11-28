@@ -1,0 +1,77 @@
+{
+  "bundle": "experiments/lazy-ids-source-f171-da03-b0a.bundle",
+  "bundleSha256": "40240583af6404d86a0e9a09b70e6ce1814c8f628239e7db40b0d23c54f75ac4",
+  "bundleBytes": 5949,
+  "prerequisiteCommits": [
+    "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  ],
+  "containedRefs": {
+    "refs/heads/lazy-ids-initial": "f17102bac19688f1115d1d630720838abf0df00c",
+    "refs/heads/lazy-ids-measured": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+    "refs/heads/lazy-ids-review": "b0a4532ed4209ad289aa28ac58a92a10e9d54841"
+  },
+  "listHeads": [
+    "f17102bac19688f1115d1d630720838abf0df00c refs/heads/lazy-ids-initial",
+    "da03aa70f88d4b0616eeab8ed251f48a17f8de13 refs/heads/lazy-ids-measured",
+    "b0a4532ed4209ad289aa28ac58a92a10e9d54841 refs/heads/lazy-ids-review"
+  ],
+  "runtimeSha256ByCommit": {
+    "f17102bac19688f1115d1d630720838abf0df00c": "626170d131c001cf30a141255e1a2c218e9c85db8c1447a3821eff26fb5daa8f",
+    "da03aa70f88d4b0616eeab8ed251f48a17f8de13": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+    "b0a4532ed4209ad289aa28ac58a92a10e9d54841": "82c37daa13da0163b61981ac0a3d5bd6148b55698d8cf93918c9e311474b1cfd"
+  },
+  "verification": {
+    "seededBaselineObjectCount": 2818,
+    "seedDescription": "Independent temporary repository borrows only a complete shallow baseline-only store, which has no alternates and no candidate objects. Candidate absence is asserted before bundle import and rechecked in the unchanged shared store afterward.",
+    "baselineOnlyStore": "/home/agent/manabitan-baseline-only-63aba8.git",
+    "baselineOnlyStoreReceipt": "experiments/baseline-only-object-store.json",
+    "candidateObjectsAbsentBeforeImport": {
+      "f17102bac19688f1115d1d630720838abf0df00c": true,
+      "da03aa70f88d4b0616eeab8ed251f48a17f8de13": true,
+      "b0a4532ed4209ad289aa28ac58a92a10e9d54841": true
+    },
+    "bundleVerifyStdout": "The bundle contains these 3 refs:\nf17102bac19688f1115d1d630720838abf0df00c refs/heads/lazy-ids-initial\nda03aa70f88d4b0616eeab8ed251f48a17f8de13 refs/heads/lazy-ids-measured\nb0a4532ed4209ad289aa28ac58a92a10e9d54841 refs/heads/lazy-ids-review\nThe bundle requires this ref:\n9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 \nThe bundle uses this hash algorithm: sha1\n",
+    "bundleVerifyStderr": "/workspace/scratch/63aba8f8e231/experiments/lazy-ids-source-f171-da03-b0a.bundle is okay\n",
+    "importedRefs": {
+      "refs/heads/lazy-ids-initial": "f17102bac19688f1115d1d630720838abf0df00c",
+      "refs/heads/lazy-ids-measured": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "refs/heads/lazy-ids-review": "b0a4532ed4209ad289aa28ac58a92a10e9d54841"
+    },
+    "allImportedRuntimeBytesMatchSource": true,
+    "fullStrictFsckPassed": true,
+    "fsckLog": "",
+    "runtimeAstProofInImportedRepository": {
+      "scope": "Complete runtime AST comparison for the whitespace-only product follow-up; test-only style changes are separate",
+      "beforeCommit": "da03aa70f88d4b0616eeab8ed251f48a17f8de13",
+      "afterCommit": "b0a4532ed4209ad289aa28ac58a92a10e9d54841",
+      "runtime": "ext/js/dictionary/dictionary-database.js",
+      "changedRuntimePaths": [
+        "ext/js/dictionary/dictionary-database.js"
+      ],
+      "beforeSha256": "301fb4b9824f3fe5d7b8652d30a55ffe76ee06bbe0fc1feb63599eda562032d3",
+      "afterSha256": "82c37daa13da0163b61981ac0a3d5bd6148b55698d8cf93918c9e311474b1cfd",
+      "parser": "acorn",
+      "parserVersion": "8.19.0",
+      "ecmaVersion": "latest",
+      "sourceType": "module",
+      "removedAstFields": [
+        "start",
+        "end",
+        "loc",
+        "range"
+      ],
+      "astSha256": "e79e9632b18d66abfa223178589864fadbc52ca47174c6deef163ebbefe2d888",
+      "astByteLength": 2841154,
+      "astExactlyEqual": true
+    },
+    "temporaryVerificationRepositoryRemoved": true
+  },
+  "scope": "Exact local source commit preservation. Remote study wrapper commits have distinct Git IDs and are not substituted for these source commits.",
+  "reproduction": [
+    "Use an existing repository that contains baseline 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 and its normal source objects.",
+    "Verify the bundle SHA-256 against this manifest, then run git bundle verify PATH/lazy-ids-source-f171-da03-b0a.bundle.",
+    "Run git fetch PATH/lazy-ids-source-f171-da03-b0a.bundle refs/heads/lazy-ids-initial:refs/heads/receipt/lazy-ids-initial refs/heads/lazy-ids-measured:refs/heads/receipt/lazy-ids-measured refs/heads/lazy-ids-review:refs/heads/receipt/lazy-ids-review.",
+    "Create a detached worktree at b0a4532ed4209ad289aa28ac58a92a10e9d54841, install the pinned package-lock dependencies, and run node PATH/verify-lazy-ids-lint-ast.mjs WORKTREE.",
+    "Keep da03aa7 measured package receipts unchanged; AST equivalence links the whitespace-only review delta without rewriting measured source identity."
+  ]
+}
