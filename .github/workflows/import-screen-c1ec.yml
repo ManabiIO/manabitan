@@ -1,0 +1,105 @@
+name: Import candidate acquisition c1ec
+
+on:
+  push:
+    branches:
+      - research/import-screen-20261128-c1ec
+    paths:
+      - .github/workflows/import-screen-c1ec.yml
+      - dev/perf/import-screen-c1ec.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-screen-c1ec-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acquire:
+    if: github.ref == 'refs/heads/research/import-screen-20261128-c1ec'
+    name: ${{ matrix.dictionary }} (${{ matrix.order }}, 6 pairs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate prospective acquisition plan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          plan = json.loads(pathlib.Path('dev/perf/import-screen-c1ec.json').read_text())
+          assert plan['schemaVersion'] == 1
+          for key in ('baseline', 'candidate'):
+              assert isinstance(plan[key], str) and re.fullmatch('[a-f0-9]{40}', plan[key]), key
+          assert plan['baseline'] != plan['candidate']
+          assert plan['pairs'] == 6
+          assert plan['orders'] == ['AB']
+          assert plan['dictionaries'] == ['jmdict', 'jitendex', 'vndb']
+          assert os.environ['PERF_DICTIONARY'] in plan['dictionaries']
+          assert os.environ['PERF_ORDER'] in plan['orders']
+          assert plan['vndbSahAllocationUnits'] == [37, 37]
+          entries = plan['expectedPackageEntries']
+          assert entries and len(entries) == len(set(entries))
+          assert all(re.fullmatch(r'[A-Za-z0-9_./-]+', entry) and not entry.startswith('/') and '..' not in entry.split('/') for entry in entries)
+          outputs = {'PERF_BASELINE': plan['baseline'], 'PERF_CANDIDATE': plan['candidate'], 'PERF_PAIRS': plan['pairs'], 'PERF_PACKAGE_ENTRIES': json.dumps(entries)}
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              for key, value in outputs.items():
+                  output.write(f'{key}={value}\n')
+          print(json.dumps(plan, indent=2))
+          PY
+
+      - uses: ./.github/actions/setup
+      - name: Verify qualification receipt checks
+        run: python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare exact packages with unchanged strict qualification runner
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, shutil, subprocess
+          evidence = pathlib.Path('builds/perf/import-screen-c1ec')
+          inputs = pathlib.Path('builds/perf/import-screen-inputs-c1ec')
+          inputs.mkdir(parents=True, exist_ok=False)
+          shutil.copyfile('dev/perf/import-screen-c1ec.json', inputs / 'acquisition.json')
+          command = ['python3', 'dev/perf/import-qualification-20261125-a7f7.py',
+                     '--baseline', os.environ['PERF_BASELINE'], '--candidate', os.environ['PERF_CANDIDATE'],
+                     '--dictionary', os.environ['PERF_DICTIONARY'], '--initial-order', os.environ['PERF_ORDER'],
+                     '--pairs', os.environ['PERF_PAIRS'], '--expected-workers', '3', '--evidence', str(evidence)]
+          for entry in json.loads(os.environ['PERF_PACKAGE_ENTRIES']):
+              command.extend(['--expected-package-entry', entry])
+          if os.environ['PERF_DICTIONARY'] == 'vndb':
+              command.extend(['--vndb-sah-allocation-units', '37', '37'])
+          (inputs / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
+          subprocess.run(command, check=True)
+          PY
+      - name: Preserve every observation, package, plan, and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-screen-c1ec-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}
+          path: |
+            builds/perf/import-screen-c1ec
+            builds/perf/import-screen-inputs-c1ec
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Prospective native gzip six-pair screen after browser integrity and substantive validation; corrected exact-head lint and validation remain required before any PR",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+  "pairs": 6,
+  "orders": [
+    "AB"
+  ],
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "expectedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ]
+}
