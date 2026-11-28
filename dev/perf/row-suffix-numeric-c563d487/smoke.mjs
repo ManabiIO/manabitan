@@ -56,7 +56,8 @@ function snapshot(chunk) {
 }
 
 async function parse(banks) {
-    const sources = banks.map((text) => {
+    const sourceBanks = banks.length === 1 ? [...banks, '[]'] : banks;
+    const sources = sourceBanks.map((text) => {
         const decoded = encoder.encode(text);
         const bytes = new Uint8Array(deflateRawSync(decoded));
         return {bytes, compressedSize: bytes.length, uncompressedSize: decoded.length, compressionMethod: 8, signature: crc32(decoded)};
@@ -68,6 +69,7 @@ async function parse(banks) {
     const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, options, true);
     const results = [];
     await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => results.push(snapshot(chunk)), 2048, {...options, preloadedSource});
+    assert.equal(parser.consumeLastTermBankWasmParseProfile()?.fusedParseAttempts, 1, 'Synthetic input must exercise the default multi-bank fused route');
     return results;
 }
 

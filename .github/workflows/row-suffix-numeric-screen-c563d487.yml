@@ -1,8 +1,8 @@
-name: Numeric-admission row suffix component screen c563d487
+name: Corrected numeric-admission suffix component screen c563d487
 
 on:
   push:
-    branches: [perf/row-suffix-numeric-screen-20261128-c563d487]
+    branches: [perf/row-suffix-numeric-corrected-20261128-c563d487]
   workflow_dispatch:
 
 permissions:

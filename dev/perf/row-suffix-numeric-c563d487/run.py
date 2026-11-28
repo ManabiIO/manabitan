@@ -49,6 +49,8 @@ for pair in range(4):
     schedule.extend({"pair": pair, "arm": arm} for arm in order)
 plan = {"schema": 1, "dictionary": args.dictionary,
         "variant": "Full-row suffix proof admitted by prior full-content reuse and equal scores/sequences on the two prior rows",
+        "preflightCorrection": {"originalToolingHead": "5009ad71fec32e83d738adb9bf7610db75095faf", "originalRun": 46104620899,
+            "reason": "The original synthetic single-bank cases did not select the default fused route. This independent cohort appends an empty bank only to those synthetic cases and asserts the public fused-attempt profile. Candidate patch, timed inputs, flags, grouping and 48-observation schedule are unchanged."},
         "optionsScope": "Production-default component options; VNDB explicitly enables experimentalNativeEscapedKeys for its component route",
         "scope": "Numeric-admission suffix experiment; exploratory component screen, not full browser/import/release qualification. B is rebuilt from a reviewed source patch; candidate tracked generated changes are intentional and recorded.",
         "timing": "Native compressed inflation, CRC, strict parse and completed lookup; independent two-pass warmup in every fresh Node process; complete output digest outside timing",
