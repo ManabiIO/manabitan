@@ -92,13 +92,48 @@ jobs:
           key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
       - name: Install locked Chromium
         run: npx playwright install --with-deps chromium
+      - name: Register review criteria before timing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os, pathlib
+          folder = pathlib.Path("builds/perf/20261128-d2d1-local-parts")
+          folder.mkdir(parents=True, exist_ok=True)
+          criteria = {
+              "status": "prospective; no performance result",
+              "recordedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "baseline": os.environ["BASE_SHA"],
+              "candidate": os.environ["CANDIDATE_SHA"],
+              "workflow": os.environ["GITHUB_SHA"],
+              "screen": {"pairs": 6, "initialOrder": "AB", "purpose": "descriptive candidate selection only; cannot establish a publishable gain"},
+              "jmdictQualification": {
+                  "independentHostCohorts": 2, "completePairsPerCohort": 12, "initialOrders": ["AB", "BA"],
+                  "maxMedianPairedChangePercent": -3.0, "minimumFasterPairsPerCohort": 10,
+                  "bootstrap95UpperPercentMustBeBelow": 0.0, "equalWorkChangePercentMustBeBelow": 0.0,
+                  "maxAbsoluteIdenticalControlMedianPercent": 1.5,
+                  "maxAbsoluteIdenticalControlEqualWorkPercent": 1.5,
+                  "minimumGainToLargerAbsoluteControlShiftRatio": 2.0,
+                  "applyAllConditionsIndependentlyToEachCohort": True,
+              },
+              "otherDictionaryConfirmation": {
+                  "dictionaries": ["jitendex", "vndb"], "independentConfirmationRequired": True,
+                  "maxMedianPairedChangePercent": 3.0, "maxEqualWorkChangePercent": 3.0,
+                  "maxBootstrap95UpperPercent": 3.0,
+              },
+              "correctnessAndResources": "all frozen receipt, exhaustive media and separate prospective memory gates must pass; inspect exact package ZIP byte delta and unchanged storage footprint",
+              "analysisPolicy": "retain every failed or completed observation; no host pooling, pair removal or data-dependent rerun; reverse-order qualification and confirmation must precede a product PR",
+          }
+          name = "review-criteria-" + os.environ["DICTIONARY"] + ".json"
+          (folder / name).write_text(json.dumps(criteria, indent=2, sort_keys=True) + "\n")
+          print("LOCAL_INDEX_EVIDENCE " + json.dumps({"file": name, "value": criteria}, sort_keys=True, separators=(",", ":")))
+          PY
       - name: Run six alternating pairs and identical controls
         shell: bash
         run: |
           set -euo pipefail
           evidence_root=builds/perf/20261128-d2d1-local-parts
           mkdir -p "$evidence_root"
-          git rev-parse HEAD HEAD^{tree} > "$evidence_root/workflow-source.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$evidence_root/workflow-source.txt"
           sha256sum \
             .github/workflows/import-local-index-screen-d2d1.yml \
             dev/perf/import-qualification-20261125-a7f7.py \
@@ -157,6 +192,15 @@ jobs:
                       for key, arm in source["arms"].items()
                   },
               })
+          package_sizes = {
+              arm: (folder / ("package-" + arm + ".zip")).stat().st_size
+              for arm in ["A", "B"] if (folder / ("package-" + arm + ".zip")).is_file()
+          }
+          if package_sizes:
+              if "A" in package_sizes and "B" in package_sizes:
+                  package_sizes["deltaBytes"] = package_sizes["B"] - package_sizes["A"]
+                  package_sizes["candidateToBaselineRatio"] = package_sizes["B"] / package_sizes["A"]
+              emit("package-zip-bytes", package_sizes)
           browser = folder / "browser-identity.json"
           if browser.is_file():
               emit("browser-identity.json", json.loads(browser.read_text()))
