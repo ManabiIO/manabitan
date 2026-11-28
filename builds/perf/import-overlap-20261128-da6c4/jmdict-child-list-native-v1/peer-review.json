@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "baseline_profile",
+  "scope": "Independent source-only review before any timed cohort; no tests, corpus runs or timing performed by this reviewer.",
+  "conclusion": "No concrete blocker found for the declared warm serial native component. Browser/runtime integration and whole-import performance remain unqualified.",
+  "bindings": {
+    "plan": {
+      "blob": "4b014a1ee26e5db4e4dd458e0f955c91b4602ef0",
+      "sha256": "992a8bce45aa320911688d33a583ec11a8f887cd3ae5b4082b395de2024f3aae"
+    },
+    "component-arm.mjs": {
+      "blob": "eba3d6c2e2138f0ab493206efd8cf4729fb4184e",
+      "sha256": "fdcc121afdfbb59cb43878c409bb85df7efc0cad1bfd2d3b0dc9755f5e419c61"
+    },
+    "run.py": {
+      "blob": "08b87b0d9283b12fab242dd71c7aed04e757de34",
+      "sha256": "a780a6b59fa1202e63afc25036223f08013524015af1b1832de02bfed54c44ca"
+    },
+    "analyze.py": {
+      "blob": "7c28f2d34dcac35faec228cd24241adb3e6c93e0",
+      "sha256": "9781704262f091cd34e866e300618653d9e667c03bf3f65013f141c0d25b1449"
+    },
+    "prepare.py": {
+      "sha256": "cc053d3e2f86af485431ee3a488ee8a85631a3db997481b185f39e85081ebcfe"
+    },
+    "test_analyze.py": {
+      "sha256": "4aa765ec55ffc2c5ff2fc820433dc8f4e5d7c3b7aaa7f129b8c096b5c09fde5f"
+    },
+    "inputs.json": {
+      "blob": "949a3420be3b78b0aea0df84fad10ccda3af0ae2",
+      "sha256": "e4bcb5c25b9f57610bb07b5a5246a1bf7372a80041edaaf78ce59e55dbc34721"
+    },
+    "final-preflight-receipt.json": {
+      "blob": "8ec59ec74ab395aef192dabdd21a64ba98dbf24d",
+      "sha256": "674a9ba821e10362f919b74cdb0597daaf03d519a72a060806e13af4267a70fc"
+    }
+  },
+  "checks": [
+    "All six ABC permutations occur exactly twice across twelve fixed blocks. A and C use the same root/module and options. Every observation is a fresh child with two identical complete warmup sweeps and one explicit GC.",
+    "Fixture SHA/length and each compressed bank slice are verified before use. The frozen partition helper creates the recorded twelve production-like groups. Actual parser JS dependency hashes, C/WASM/manifest hashes and parser-policy source bindings are checked before and after each observation.",
+    "The common WebAssembly.instantiate wrapper intercepts the same fused native export in every arm. It preserves actual arguments, result and errors, and accumulates performance.now deltas only during the measured sweep. Each accepted sweep must have exactly twelve fused attempts and zero fallback.",
+    "The primary endpoint covers complete fused native calls, with no counter instrumentation; the secondary per-group endpoint includes unchanged compressed inflate, CRC/parser, lookup/route and copy work. Output validation is outside each group interval. A counter-only module is excluded from timed observations by exact SHA.",
+    "Each measured group hashes the complete emitted typed columns, canonical dedup plan, content slab, row byte lists, preinterned fields, prepared index payload and route filter. Driver compares all twelve complete digest/length objects against the predeclared final preflight oracle.",
+    "Driver records attempts before launching each child, preserves logs/results and stops on any exit, timeout, source mismatch or oracle failure. Thirty-six complete observations are required; final harness hashes must still match. No replacement observations or post-hoc threshold change is authorized.",
+    "The evaluator requires positive finite endpoints and all twelve ABC blocks, uses one shared twelve-index bootstrap sample per replicate for both controls and ms/percent metrics, xorshift32 seed0xda6c4 and type7 percentiles. The 3% median native savings, nine faster pairs, lower equal-work native sums, negative upper confidence limits, both control drift checks and <=1% full-group equal-work regression match the frozen plan."
+  ],
+  "limits": [
+    "Source-only review, not an independent execution of the nine synthetic arithmetic tests or full native differential suite.",
+    "The replay's owned flag is its copy-policy/shape assertion; it is not a native worker receiver/private capability proof and cannot qualify a database ownership protocol.",
+    "Two warmup sweeps and serial direct parser calls exclude cold first-use, actual three-worker dispatch, compression/storage/finalization and browser behavior. Hashing between groups can alter later cache/GC state but is identical across arms and explicitly disclosed.",
+    "Before/after hashes bind the exercised source set and exact candidate C/WASM; the reported source commit is the frozen baseline with declared uncommitted candidate assets, not a claim that candidate runtime is already committed or qualified on latest develop.",
+    "No component percentage should be converted into a whole-import improvement."
+  ]
+}

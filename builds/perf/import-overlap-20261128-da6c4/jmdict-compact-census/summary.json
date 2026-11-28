@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "stockBuildCheck": {
+    "toolReceipt": "functions.exec write_stdin chunk688aca exit0",
+    "command": "LD_LIBRARY_PATH=/tmp/manabitan-c27-llvm/root/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/tmp/manabitan-c27-llvm/root/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/tmp/manabitan-c27-llvm/root/usr/lib/llvm-21/bin/wasm-ld node dev/bin/build-dictionary-wasm.js --check",
+    "parserSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "canonicalSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "passed": true
+  },
+  "fixture": {
+    "path": "/workspace/scratch/b9cacc3542c2/fixtures/JMdict.zip",
+    "bytes": 15645766,
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+  },
+  "allBankTotals": {
+    "rows": 528299,
+    "bankBytes": 171617523,
+    "glossaryBytes": 135760945,
+    "compactRows": 286214,
+    "compactBytes": 62647748,
+    "mediaHintDeclines": 13
+  },
+  "misses": {
+    "rows": 242085,
+    "bytes": 73113197,
+    "shapes": 392
+  },
+  "families": {
+    "plain_string_arrays": {
+      "shapes": 2,
+      "rows": 122087,
+      "bytes": 5968006
+    },
+    "forms_tables": {
+      "shapes": 3,
+      "rows": 25376,
+      "bytes": 19765911
+    },
+    "multi_content_with_ul": {
+      "shapes": 380,
+      "rows": 73626,
+      "bytes": 42940646
+    },
+    "single_arrow_link": {
+      "shapes": 1,
+      "rows": 19389,
+      "bytes": 3924349
+    }
+  },
+  "verification": [
+    "ZIP CRC checked for each original bank by Python zipfile",
+    "Unchanged baseline strict parser and analysis probe native metadata identical at every word for all528299 rows",
+    "Every raw glossary span JSON equals that row in independent full-bank JSON parse",
+    "Existing compact helper called directly with media hints both on and off; successful end must equal complete original glossary span",
+    "Current source and pinned parser byte hashes unchanged before/after; stock native source check passed with21.1.8",
+    "One bank is resident per fresh bounded Node child; no product mutation or comparative timing"
+  ],
+  "limits": [
+    "Raw morphology/acceptance counts precede production glossary-witness and content-reuse decisions; they are not actual executed compact/general-parser call counts.",
+    "The probe adds one exported wrapper around unchanged static helper and is not performance-equivalent to release WASM.",
+    "Shape signatures preserve key order/tags but collapse variable text and repeated identical array-child shapes; they describe families, not a new accepting grammar.",
+    "No speedup or savings ceiling is inferred. All source lines and existing current-profile weights remain diagnostic.",
+    "The thirteen media-hint declines are lexical markers and do not establish actual media files."
+  ]
+}

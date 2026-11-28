@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "scope": "One-line ownership test fixture repair only; no product runtime or import benchmark change",
+  "parentCommit": "2c02336b135ee01661ca2a788395afec75e66712",
+  "parentTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "expectedTreeAfterSingleTestEdit": "b65955a62da72c55e24a681011684601fa089f07",
+  "extTreeBefore": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+  "extTreeAfter": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1",
+  "path": "test/term-bank-wasm-parser.test.js",
+  "sourceBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+  "bytes": 201527,
+  "sha256": "b723a38818f9b70a762bd2227928d6448673f83bed745c9d401671b543576fcf",
+  "policy": "parseTermBankWithWasmColumnChunksParallelSources rejects sources.length<4 before worker selection. Fixture had count=getParallelTermBankParserWorkerCount(). Four-CPU host chooses3 workers, so it needs4 source loaders to reach the intended ownership logic.",
+  "change": "const count = Math.max(4, getParallelTermBankParserWorkerCount());",
+  "node": "v24.22.3",
+  "cpuAffinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "hardwareConcurrency": 4,
+  "effectiveWorkerCount": 3,
+  "command": "taskset -c 0-3 npm run test:unit -- test/term-bank-wasm-parser.test.js -t 'binds receiver record ownership' --maxWorkers=1",
+  "before": {
+    "exitCode": 1,
+    "failed": 4,
+    "passed": 0,
+    "filteredSkipped": 187,
+    "message": "Import-wide parallel parser unavailable (source-count)"
+  },
+  "after": {
+    "exitCode": 0,
+    "failed": 0,
+    "passed": 4,
+    "filteredSkipped": 187
+  },
+  "fullHostedPriorUnitInventory": {
+    "runId": 46134500034,
+    "jobId": 140946673592,
+    "passedFiles": 671,
+    "failedFiles": 1,
+    "passedTests": 15185,
+    "failedTests": 4,
+    "skipped": 47,
+    "fullLogBlob": "4ade1b606860c67211229187efb51aaa2fbace85"
+  },
+  "localPorcelain": "M test/term-bank-wasm-parser.test.js",
+  "files": {
+    "after-four-cases.log": {
+      "bytes": 509,
+      "sha256": "44f03efc4b24d1b497d1dc40b7d50ced62a7f6a7af10ffa8a3ecfd95276fb956"
+    },
+    "before-four-cases.log": {
+      "bytes": 2347,
+      "sha256": "2c005acdf3462dba65275195720ae5c93eeb3f6769c563acb16b7f0756fa8d7c"
+    },
+    "build-libs.log": {
+      "bytes": 210,
+      "sha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d"
+    },
+    "fixture.patch": {
+      "bytes": 716,
+      "sha256": "07066671e2faf9ce32da9255af254303cec1b114b2cba92d698abac677907274"
+    }
+  },
+  "pending": [
+    "Fresh clean candidate full unit gate",
+    "Remaining full qualification gates"
+  ],
+  "noRuntimeTreeDifference": true
+}

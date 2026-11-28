@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "kind": "owned-overlap-jitendex-final-independent-audit",
+  "runId": 46132124178,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "qualifiedCandidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+  "cleanProductHead": "54844293b8ea82350531b8da92336b325d5ab7ec",
+  "decision": "NO_REPLICATED_OVERLAP_GAIN; AB fails the exact1% equal-work control gate; BA fails candidate equal-work and both control gates. No exclusions or pooling.",
+  "fullAuditBlob": "a028060b9c63b491f23c60951a5fb23afb6fcc85",
+  "auditorBlob": "8c2156feaf2bd05a9aba47b7f82296cb4a407870",
+  "auditLogBlob": "9053df41ba3a020404a349d4a94627abdb2e3f00",
+  "cells": [
+    {
+      "order": "AB",
+      "jobId": 140941694543,
+      "artifactId": 15258623551,
+      "artifactBytes": 35729345,
+      "artifactSha256": "4acde1e4f86f969aff37d0cd185c5f4821e1cbe013a228418bef38bf8a82104c",
+      "memberCount": 313,
+      "allObservationAndRawReceiptsPassed": true,
+      "allCanonicalReceiptsMatch": true,
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 1672.249999999971,
+        "otherMedianMs": 1700.4000000000087,
+        "medianPairedChangeMs": 13.400000000023283,
+        "medianPairedChangePercent": 0.7923359569260713,
+        "equalWorkChangePercent": 0.736096506022843,
+        "fasterPairs": 5,
+        "descriptiveBootstrap95Ms": [
+          -10.049999999988358,
+          36.35000000002037
+        ],
+        "descriptiveBootstrap95Percent": [
+          -0.5861327146216233,
+          2.172132148939321
+        ],
+        "pairedMs": [
+          10.299999999988358,
+          -5.099999999976717,
+          35.999999999970896,
+          -0.49999999994179234,
+          -15,
+          45.00000000005821,
+          16.500000000058208,
+          36.70000000006985,
+          51.20000000001164,
+          28.100000000034925,
+          -34,
+          -20.800000000046566
+        ],
+        "pairedRatios": [
+          1.006179505639542,
+          0.9970033491979688,
+          1.0214784320744412,
+          0.9997077219851863,
+          0.9912739965095986,
+          1.0273207455528255,
+          1.0096672134989795,
+          1.0219642109043454,
+          1.0305927342256287,
+          1.016900222529642,
+          0.9796394993712194,
+          0.9874312647289587
+        ],
+        "baselineEqualWorkTotalMs": 20160.39999999979,
+        "otherEqualWorkTotalMs": 20308.800000000017
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 1673.2500000000146,
+        "otherMedianMs": 1667.4000000000087,
+        "medianPairedChangeMs": 10.89999999999418,
+        "medianPairedChangePercent": 0.6593723524850548,
+        "equalWorkChangePercent": 1.0020520348091644,
+        "fasterPairs": 1,
+        "descriptiveBootstrap95Ms": [
+          -19.000000000058208,
+          64.10000000003492
+        ],
+        "descriptiveBootstrap95Percent": [
+          -1.1308850663685366,
+          3.8082224334622605
+        ],
+        "pairedMs": [
+          7.2000000000116415,
+          14.599999999976717,
+          64.10000000003492,
+          -19.000000000058208
+        ],
+        "pairedRatios": [
+          1.0043206913106166,
+          1.0088667557390845,
+          1.0380822243346226,
+          0.9886911493363146
+        ],
+        "baselineEqualWorkTotalMs": 6676.3000000000175,
+        "otherEqualWorkTotalMs": 6743.1999999999825
+      },
+      "nonregression": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": true,
+        "upper95ChangeAtMost3Percent": true
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": true,
+        "absoluteEqualWorkChangeAtMost1Percent": false
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 417,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.6626899762209315,
+            "maximumPairedChangePercent": 2.411328670001245
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.3172300988829044,
+            "maximumPairedChangePercent": 3.6201162948989785
+          }
+        }
+      },
+      "completeJobLogBlob": "52ca48f03666c1647131b0e75c21b98417f5eec7",
+      "completeObservationsAndRawPhasesEnvelopeBlob": "f4ffa36e3511d6bc0a6cc0994edfd762296623f9"
+    },
+    {
+      "order": "BA",
+      "jobId": 140941694523,
+      "artifactId": 15257954003,
+      "artifactBytes": 35749390,
+      "artifactSha256": "1824befe8de3aeba31bfd60f90c331703dcd93e90e6e247363b3606ee2d5345d",
+      "memberCount": 313,
+      "allObservationAndRawReceiptsPassed": true,
+      "allCanonicalReceiptsMatch": true,
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 1696.6499999999942,
+        "otherMedianMs": 1696.25,
+        "medianPairedChangeMs": -4.7000000000116415,
+        "medianPairedChangePercent": -0.27533712805491994,
+        "equalWorkChangePercent": 3.875332490941652,
+        "fasterPairs": 7,
+        "descriptiveBootstrap95Ms": [
+          -16.09999999999127,
+          27.10000000000582
+        ],
+        "descriptiveBootstrap95Percent": [
+          -0.9364605096587875,
+          1.6202476346100614
+        ],
+        "pairedMs": [
+          -3.5,
+          385.80000000001746,
+          -36,
+          -19.900000000023283,
+          -18.39999999999418,
+          27.100000000034925,
+          -5.900000000023283,
+          13.100000000034925,
+          -13.799999999988358,
+          444.80000000004657,
+          27.099999999976717,
+          -12.199999999953434
+        ],
+        "pairedRatios": [
+          0.997934493951018,
+          1.2268077601411038,
+          0.9788085707558275,
+          0.9884052904503741,
+          0.9892680081656493,
+          1.016152103945664,
+          0.9965587634878837,
+          1.0078148302809968,
+          0.992002781641175,
+          1.2679356665261448,
+          1.0162528487465374,
+          0.9927900242302738
+        ],
+        "baselineEqualWorkTotalMs": 20338.899999999936,
+        "otherEqualWorkTotalMs": 21127.100000000064
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 1685.8500000000058,
+        "otherMedianMs": 1715.5,
+        "medianPairedChangeMs": 30.89999999999418,
+        "medianPairedChangePercent": 1.8410210780587688,
+        "equalWorkChangePercent": 7.712462806981191,
+        "fasterPairs": 0,
+        "descriptiveBootstrap95Ms": [
+          8.599999999976717,
+          450.6000000000349
+        ],
+        "descriptiveBootstrap95Percent": [
+          0.5126676602072555,
+          26.372468687816998
+        ],
+        "pairedMs": [
+          50.70000000001164,
+          450.6000000000349,
+          11.099999999976717,
+          8.599999999976717
+        ],
+        "pairedRatios": [
+          1.0302686567164248,
+          1.26372468687817,
+          1.0065517648447506,
+          1.0051266766020726
+        ],
+        "baselineEqualWorkTotalMs": 6755.299999999988,
+        "otherEqualWorkTotalMs": 7276.299999999988
+      },
+      "nonregression": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": false,
+        "upper95ChangeAtMost3Percent": true
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": false,
+        "absoluteEqualWorkChangeAtMost1Percent": false
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 418,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.42060441275418303,
+            "maximumPairedChangePercent": 1.5740320629159088
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.745263171192978,
+            "maximumPairedChangePercent": 2.00812165030384
+          }
+        }
+      },
+      "completeJobLogBlob": "1d5fac2a96de81bf573ed92bba272c4a47fe02d3",
+      "completeObservationsAndRawPhasesEnvelopeBlob": "59586e49d4ff71e1dc1ce5795665804c7a9ed9cc"
+    }
+  ],
+  "sourceAndSemantics": {
+    "ordinaryPerHost": 36,
+    "primaryPairsPerHost": 12,
+    "identicalControlPairsPerHost": 4,
+    "warmupsPerHost": 4,
+    "fullMediaVerificationPerHost": 2,
+    "allMediaFiles": 236,
+    "allMediaDecodedBytes": 4992155,
+    "currentNativeSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "borrowedParserGroupsPerImport": 22,
+    "borrowedPathRemainsSerial": true
+  },
+  "caveats": [
+    "Both hosts remain separate; every tail is retained and no observation was reacquired.",
+    "BA candidate pair2 is+385.8ms and pair10+444.8ms; identical-code control pair2 is+450.6ms. These cannot be excluded or subtracted from the candidate.",
+    "AB identical-code equal-work change+1.0020520348091644% fails the exact≤1% gate despite its proximity; no rounding before evaluation.",
+    "All memory observations are separate instrumented imports, not authoritative timing. Raw417/418scan receipts were independently revalidated.",
+    "The primary owned-overlap design was closed after its JMdict hosts failed. These Jitendex observations add no performance qualification."
+  ]
+}

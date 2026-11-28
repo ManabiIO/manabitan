@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source and focused semantic correction to rejected tag-prefetch experiment only; no corrected-source timing, product PR, or baseline bug claim.",
+  "source": {
+    "base": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "experiment": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+    "files": [
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "bytes": 348661,
+        "sha256": "e863902d7e1f104be96e793507d5f2aab0a4dece90faca6aa5ae93510b423152",
+        "gitBlob": "2947511aac78bcad99a70fd179bd1bb3eeb59052"
+      },
+      {
+        "path": "ext/js/dictionary/bounded-zip-text-writer.js",
+        "bytes": 2548,
+        "sha256": "2257e20d6c70353314a578bdec326f5e942d474919c049fddd67c0f62fdb06ef",
+        "gitBlob": "0b53c45a9ce3a06359a0083f70668eed1b723120"
+      },
+      {
+        "path": "test/dense-zip-directory.test.js",
+        "bytes": 25435,
+        "sha256": "e4144c20a710928815c65c97571d3f5277db23e8a16052ba70adcc90406eecd2",
+        "gitBlob": "d9185cc631ee2a50574073b6c401cab107181944"
+      },
+      {
+        "path": "test/dictionary-importer-tag-prefetch.test.js",
+        "bytes": 15634,
+        "sha256": "dd9be66e7d517f60469de964ad789b246233a456acf178f61bd06332a1a50e11",
+        "gitBlob": "bac360a0c8df228e18899f92afc785d8bfe7d1fc"
+      },
+      {
+        "path": "eslint.config.js",
+        "bytes": 39408,
+        "sha256": "e45b20da1f827df5898d6b1cdefa2ae72bfaf00492c4999ba5df342454e0f8e5",
+        "gitBlob": "0da06ad87b39f658b3fe2bc4624bc3f9de616d14"
+      }
+    ],
+    "repairPatchSha256": "1f4050c99f4275637293cc3d1bf6fd3e131b405adee52f2615c5f9d82d641037"
+  },
+  "sourceBlobs": {
+    "ext/js/dictionary/dictionary-importer.js": "2947511aac78bcad99a70fd179bd1bb3eeb59052",
+    "test/dense-zip-directory.test.js": "d9185cc631ee2a50574073b6c401cab107181944",
+    "dense-native-repair.patch": "be9cb616214093fa45f8471707b65d4c6c07e261"
+  },
+  "nativeAsset": {
+    "bytes": 69068,
+    "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "source": "Exact candidate package B from artifact15258995926"
+  },
+  "finding": "BoundedZipTextWriter was omitted from getDenseEntryData small-entry admission. A supported dense catalog therefore enumerated all generic zip.js entries and retained that fallback map before term parsing. Recognizing it permits the unchanged raw payload and strict native CRC/length path, then writes verified bytes through the bounded writer's own expected-size check.",
+  "scopeLimit": "Dense admission requires >=128MiB archive and >=8192 entries. Pinned JMdict/Jitendex cannot activate this route; failed full cohorts remain failed.",
+  "tests": {
+    "node": "v24.22.3",
+    "validBefore": {
+      "exitCode": 1,
+      "testsFailed": 2,
+      "reason": "Both real dense catalog stored/DEFLATE entries reach the generic catalog fallback only at _prefetchSmallTagBank; catalog admission itself passes."
+    },
+    "validAfter": {
+      "exitCode": 0,
+      "filesPassed": 5,
+      "testsPassed": 103,
+      "coverage": [
+        "actual dense catalog and native raw payload route",
+        "stored and DEFLATE native CRC",
+        "underflow/overflow declared size",
+        "bounded writer independent size snapshot",
+        "cancelled pending source read joined before rejection",
+        "existing dense/map/tag lifetime/ZIP integrity/CRC cases"
+      ]
+    },
+    "lint": {
+      "attempts": [
+        {
+          "heapMiB": null,
+          "exitSignal": 9
+        },
+        {
+          "heapMiB": 1536,
+          "exitSignal": 9
+        }
+      ],
+      "diagnostics": "No lint diagnostic; both process kills preserved. No third unchanged-resource retry."
+    },
+    "notRun": [
+      "Full unit suite",
+      "TypeScript gates",
+      "Build gate",
+      "Browser or timing acquisition"
+    ]
+  },
+  "logs": {
+    "dense-prefetch-before.log": "\n RUN  v4.1.12 /tmp/manabitan-da6c4-tag-dense-repair\n\n ❯ test/dense-zip-directory.test.js (38 tests | 2 failed | 36 skipped) 162ms\n     × prefetches a small method-0 tag without enumerating the generic catalog 94ms\n     × prefetches a small method-8 tag without enumerating the generic catalog 62ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-0 tag without enumerating the generic catalog\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-8 tag without enumerating the generic catalog\nAssertionError: promise rejected \"Error: Unexpected full ZIP catalog fallba…\" instead of resolving\n ❯ test/dense-zip-directory.test.js:401:64\n    399|             const entry = fileMap.get(filename);\n    400|             if (typeof entry === 'undefined') { throw new Error('Missi…\n    401|             await expect(importer._prefetchSmallTagBank(entry)).resolv…\n       |                                                                ^\n    402|             expect(getEntries).not.toHaveBeenCalled();\n    403|         } finally {\n\nCaused by: Error: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:392:90\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 36 skipped (38)\n   Start at  05:29:33\n   Duration  1.36s (transform 768ms, setup 30ms, import 942ms, tests 162ms, environment 0ms)\n\n",
+    "dense-prefetch-after.log": "\n RUN  v4.1.12 /tmp/manabitan-da6c4-tag-dense-repair\n\n\n Test Files  5 passed (5)\n      Tests  103 passed (103)\n   Start at  05:29:34\n   Duration  4.18s (transform 617ms, setup 54ms, import 1.28s, tests 2.05s, environment 0ms)\n\n",
+    "dense-prefetch-lint.log": "▲ [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 │ ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        ╵                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 │     \"type\": \"module\",\n         ╵             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n",
+    "dense-prefetch-lint-bounded.log": "▲ [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 │ ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        ╵                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 │     \"type\": \"module\",\n         ╵             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n",
+    "dense-prefetch-invalid-cli.log": "file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:406\n          throw new CACError(`Unknown option \\`${name.length > 1 ? `--${name}` : `-${name}`}\\``);\n                ^\n\nCACError: Unknown option `--minWorkers`\n    at Command.checkUnknownOptions (file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:406:17)\n    at CAC.runMatchedCommand (file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:606:13)\n    at CAC.parse (file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/vitest/dist/chunks/cac.DzDtg8hz.js:547:12)\n    at file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/vitest/dist/cli.js:11:13\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.22.3\n",
+    "dense-prefetch-before-invalid-fixture.log": "\n RUN  v4.1.12 /tmp/manabitan-da6c4-tag-dense-repair\n\n ❯ test/dense-zip-directory.test.js (38 tests | 2 failed | 36 skipped) 130ms\n     × prefetches a small method-0 tag without enumerating the generic catalog 68ms\n     × prefetches a small method-8 tag without enumerating the generic catalog 58ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-0 tag without enumerating the generic catalog\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-8 tag without enumerating the generic catalog\nError: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:383:90\n    381|\n    382|     test.each([0, 8])('prefetches a small method-%s tag without enumer…\n    383|         const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries')…\n       |                                                                                          ^\n    384|         const {archive, filename, content} = denseTagArchive({method: …\n    385|         const importer = new DictionaryImporter(new DictionaryImporter…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 36 skipped (38)\n   Start at  05:28:30\n   Duration  1.29s (transform 733ms, setup 31ms, import 890ms, tests 130ms, environment 0ms)\n\n",
+    "dense-prefetch-after-invalid-fixture.log": "\n RUN  v4.1.12 /tmp/manabitan-da6c4-tag-dense-repair\n\n ❯ test/dense-zip-directory.test.js (38 tests | 10 failed) 1413ms\n     × prefetches a small method-0 tag without enumerating the generic catalog 16ms\n     × prefetches a small method-8 tag without enumerating the generic catalog 15ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":0,\"badCrc\":true} 16ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":8,\"badCrc\":true} 9ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":0,\"sizeDelta\":-1} 9ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":8,\"sizeDelta\":-1} 20ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":0,\"sizeDelta\":1} 10ms\n     × preserves native CRC and exact decoded-size checks: {\"method\":8,\"sizeDelta\":1} 10ms\n     × enforces the bounded writer snapshot independently of current entry metadata 11ms\n     × joins an aborted bounded payload read before rejecting without a catalog fallback 23ms\n\n⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-0 tag without enumerating the generic catalog\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > prefetches a small method-8 tag without enumerating the generic catalog\nError: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:383:90\n    381|\n    382|     test.each([0, 8])('prefetches a small method-%s tag without enumer…\n    383|         const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries')…\n       |                                                                                          ^\n    384|         const {archive, filename, content} = denseTagArchive({method: …\n    385|         const importer = new DictionaryImporter(new DictionaryImporter…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":0,\"badCrc\":true}\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":8,\"badCrc\":true}\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":0,\"sizeDelta\":-1}\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":8,\"sizeDelta\":-1}\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":0,\"sizeDelta\":1}\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > preserves native CRC and exact decoded-size checks: {\"method\":8,\"sizeDelta\":1}\nError: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:404:90\n    402|         {method: 0, sizeDelta: 1}, {method: 8, sizeDelta: 1},\n    403|     ])('preserves native CRC and exact decoded-size checks: %j', async…\n    404|         const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries')…\n       |                                                                                          ^\n    405|         const {archive, filename} = denseTagArchive({...options, metho…\n    406|         const importer = new DictionaryImporter(new DictionaryImporter…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > enforces the bounded writer snapshot independently of current entry metadata\nError: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:419:90\n    417|\n    418|     test('enforces the bounded writer snapshot independently of curren…\n    419|         const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries')…\n       |                                                                                          ^\n    420|         const {archive, filename, content} = denseTagArchive();\n    421|         const importer = new DictionaryImporter(new DictionaryImporter…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯\n\n FAIL  test/dense-zip-directory.test.js > bounded tag reads from an actual dense ZIP catalog > joins an aborted bounded payload read before rejecting without a catalog fallback\nError: Unexpected full ZIP catalog fallback\n ❯ test/dense-zip-directory.test.js:438:90\n    436|\n    437|     test('joins an aborted bounded payload read before rejecting witho…\n    438|         const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries')…\n       |                                                                                          ^\n    439|         const started = /** @type {PromiseWithResolvers<void>} */ (Pro…\n    440|         const release = /** @type {PromiseWithResolvers<void>} */ (Pro…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯\n\n\n Test Files  1 failed | 4 passed (5)\n      Tests  10 failed | 93 passed (103)\n   Start at  05:28:49\n   Duration  4.06s (transform 738ms, setup 55ms, import 1.29s, tests 1.90s, environment 0ms)\n\n"
+  },
+  "harnessFailures": "An invalid minWorkers CLI attempt and initial sparse fixture with noncontiguous local offsets are retained separately, and are not treated as the valid before/after mechanism proof."
+}

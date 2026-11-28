@@ -1,0 +1,1953 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent full-artifact audit of two completed VNDB tag-prefetch hosts, plus separate baseline-A diagnostic phase extraction. No observations excluded, pooled or reacquired.",
+  "runId": 46125860840,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+  "dictionary": "vndb",
+  "validatorSources": {
+    "qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+  },
+  "statistics": {
+    "bootstrapSeed": 897,
+    "resamples": 10000,
+    "sampleUnit": "complete pair",
+    "interval": "descriptive sorted percentile indices249/9749; no population-general inference"
+  },
+  "gates": {
+    "medianChangePercentMax": 1,
+    "equalWorkChangePercentMax": 1,
+    "upper95PercentMax": 3,
+    "controlGate": "No separate numerical control threshold in the registered VNDB tag nonregression plan; all control statistics are retained."
+  },
+  "cells": [
+    {
+      "order": "AB",
+      "artifactId": 15258995926,
+      "artifactBytes": 35764705,
+      "artifactSha256": "9dbc47c89ed231af492a566e74c2bfc8cfed96cfbbfa164043be7ae775b96ad0",
+      "jobId": 140931493630,
+      "artifactMembers": 313,
+      "allZipMembersCrcAndSha256Verified": true,
+      "ordinaryObservationCount": 36,
+      "candidatePairs": 12,
+      "controlPairs": 4,
+      "allOrdinarySummaryAndRawReportsRevalidated": true,
+      "allCanonicalReceiptsMatch": true,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "sourceIdentities": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "1651be911db9ed78fb8747a24054a8f42c2235b9447e41d717be7f06f1596253",
+          "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "1651be911db9ed78fb8747a24054a8f42c2235b9447e41d717be7f06f1596253",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "460091cac6def82d4118ef7e1724ed466e64ec98e119210a9b20a3389f7d16ed",
+          "sha": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "460091cac6def82d4118ef7e1724ed466e64ec98e119210a9b20a3389f7d16ed",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "3d74b708853a342c55e89fb825e545a35e8ef57d"
+        }
+      },
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 5718.1999999999825,
+        "otherMedianMs": 6771.799999999988,
+        "medianPairedChangeMs": 1076.8000000001048,
+        "medianPairedChangePercent": 18.870590314550096,
+        "equalWorkChangePercent": 18.6661702764463,
+        "fasterPairs": 0,
+        "descriptiveBootstrap95Ms": [
+          990.5000000000291,
+          1176.6999999999825
+        ],
+        "descriptiveBootstrap95Percent": [
+          17.260717370304768,
+          20.668977750883744
+        ],
+        "pairedMs": [
+          957.6000000000349,
+          1201.2000000000116,
+          1257.5000000000582,
+          1139.4000000000233,
+          1069.300000000163,
+          706.1000000000931,
+          1152.1999999999534,
+          1023.4000000000233,
+          1205.3000000000466,
+          1084.3000000000466,
+          921.8000000000466,
+          1067.1999999999534
+        ],
+        "pairedRatios": [
+          1.1671233354857922,
+          1.207802093244531,
+          1.2227950816767776,
+          1.2021969441536136,
+          1.1887788429285484,
+          1.1203224047440707,
+          1.2055774617731438,
+          1.1780910119203034,
+          1.2154552929820273,
+          1.1886329633624535,
+          1.1597020097020179,
+          1.1870148076754496
+        ],
+        "baselineEqualWorkTotalMs": 68494.49999999971,
+        "otherEqualWorkTotalMs": 81279.80000000016
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5679.550000000047,
+        "otherMedianMs": 5650.0,
+        "medianPairedChangeMs": -3.8500000000349246,
+        "medianPairedChangePercent": -0.06438993616013633,
+        "equalWorkChangePercent": -0.378864284149083,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -108.4000000001397,
+          29.70000000001164
+        ],
+        "descriptiveBootstrap95Percent": [
+          -1.9137404445410566,
+          0.5091719526832073
+        ],
+        "pairedMs": [
+          29.70000000001164,
+          -32.800000000046566,
+          25.099999999976717,
+          -108.4000000001397
+        ],
+        "pairedRatios": [
+          1.005091719526832,
+          0.9942403596263176,
+          1.0044718416504796,
+          0.9808625955545894
+        ],
+        "baselineEqualWorkTotalMs": 22805.000000000116,
+        "otherEqualWorkTotalMs": 22718.59999999992
+      },
+      "registeredVndbNonRegressionGates": {
+        "medianChangeAtMost1Percent": false,
+        "equalWorkChangeAtMost1Percent": false,
+        "upper95ChangeAtMost3Percent": false
+      },
+      "passesRegisteredVndbNonRegression": false,
+      "memoryAuditRecomputedFromRawScans": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 436,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryQualificationObservations": [
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 36,
+          "maxSampledPrivateKiB": 998680,
+          "maxSampledPssKiB": 1229645,
+          "maximumCoveredSampleGapMs": 244.084228,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 47,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 293.90064,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 48,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 272.455578,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 38,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 265.722124,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        }
+      ],
+      "memorySemanticFailures": [],
+      "baselinePhaseScope": "Only the 12 A observations in candidate pairs; warmups, A/C controls, B and instrumented memory kept separately. No host pooling.",
+      "baselinePrimaryPhaseStatistics": {
+        "totalImportMs": {
+          "values": [
+            5729.899999999965,
+            5780.5,
+            5644.199999999953,
+            5635.099999999977,
+            5664.29999999993,
+            5868.399999999907,
+            5604.70000000007,
+            5746.5,
+            5594.199999999953,
+            5748.199999999953,
+            5772,
+            5706.5
+          ],
+          "min": 5594.199999999953,
+          "median": 5718.1999999999825,
+          "max": 5868.399999999907
+        },
+        "workerImportMs": {
+          "values": [
+            5697,
+            5748.700000000012,
+            5610.700000000012,
+            5603.499999999942,
+            5632.599999999977,
+            5834.79999999993,
+            5574,
+            5715.699999999953,
+            5563.099999999977,
+            5717.199999999953,
+            5739.099999999977,
+            5673.800000000047
+          ],
+          "min": 5563.099999999977,
+          "median": 5685.400000000023,
+          "max": 5834.79999999993
+        },
+        "archiveAndIndexMs": {
+          "values": [
+            111,
+            86,
+            88,
+            88,
+            89,
+            96,
+            88,
+            86,
+            93,
+            89,
+            87,
+            88
+          ],
+          "min": 86,
+          "median": 88.0,
+          "max": 111
+        },
+        "termFastPathElapsedMs": {
+          "values": [
+            5472,
+            5555,
+            5411,
+            5406,
+            5425,
+            5625,
+            5375,
+            5520,
+            5363,
+            5517,
+            5542,
+            5480
+          ],
+          "min": 5363,
+          "median": 5476.0,
+          "max": 5625
+        },
+        "importDataBanksElapsedMs": {
+          "values": [
+            5534,
+            5612,
+            5473,
+            5470,
+            5491,
+            5687,
+            5440,
+            5584,
+            5425,
+            5576,
+            5605,
+            5540
+          ],
+          "min": 5425,
+          "median": 5537.0,
+          "max": 5687
+        },
+        "bulkFinalizationElapsedMs": {
+          "values": [
+            31,
+            33,
+            32,
+            29,
+            34,
+            32,
+            27,
+            29,
+            28,
+            33,
+            31,
+            29
+          ],
+          "min": 27,
+          "median": 31.0,
+          "max": 34
+        },
+        "step4MediaResolveMs": {
+          "values": [
+            112,
+            99,
+            87,
+            118,
+            108,
+            105,
+            118,
+            113,
+            112,
+            99,
+            115,
+            130
+          ],
+          "min": 87,
+          "median": 112.0,
+          "max": 130
+        },
+        "step4MediaWriteMs": {
+          "values": [
+            17,
+            21,
+            17,
+            15,
+            18,
+            16,
+            18,
+            19,
+            19,
+            15,
+            15,
+            13
+          ],
+          "min": 13,
+          "median": 17.0,
+          "max": 21
+        },
+        "step4MediaZipBatchReadMs": {
+          "values": [
+            1584,
+            1847,
+            1682,
+            1621,
+            1662,
+            1510,
+            1665,
+            1706,
+            1847,
+            2015,
+            1461,
+            1827
+          ],
+          "min": 1461,
+          "median": 1673.5,
+          "max": 2015
+        },
+        "step4MediaZipBatchInflateMs": {
+          "values": [
+            686,
+            693,
+            713,
+            691,
+            687,
+            659,
+            695,
+            723,
+            722,
+            701,
+            655,
+            732
+          ],
+          "min": 655,
+          "median": 694.0,
+          "max": 732
+        },
+        "step4MediaZipBatchCount": {
+          "values": [
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144
+          ],
+          "min": 144,
+          "median": 144.0,
+          "max": 144
+        },
+        "step4MediaZipBatchEntryCount": {
+          "values": [
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570
+          ],
+          "min": 146570,
+          "median": 146570.0,
+          "max": 146570
+        },
+        "step4MediaZipBatchRangeBytes": {
+          "values": [
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882
+          ],
+          "min": 195649882,
+          "median": 195649882.0,
+          "max": 195649882
+        },
+        "step4MediaZipBatchCompressedBytes": {
+          "values": [
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129
+          ],
+          "min": 188864129,
+          "median": 188864129.0,
+          "max": 188864129
+        },
+        "step4MediaZipBatchUncompressedBytes": {
+          "values": [
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284
+          ],
+          "min": 188131284,
+          "median": 188131284.0,
+          "max": 188131284
+        },
+        "step4TagReadMs": {
+          "values": [
+            1,
+            2,
+            1,
+            2,
+            1,
+            2,
+            1,
+            1,
+            1,
+            1,
+            2,
+            1
+          ],
+          "min": 1,
+          "median": 1.0,
+          "max": 2
+        },
+        "step4BulkAddTagsMetaMs": {
+          "values": [
+            2,
+            1,
+            1,
+            1,
+            2,
+            1,
+            2,
+            2,
+            1,
+            2,
+            1,
+            2
+          ],
+          "min": 1,
+          "median": 1.5,
+          "max": 2
+        },
+        "step4BulkAddTermsMs": {
+          "values": [
+            2686,
+            2611,
+            2553,
+            2562,
+            2563,
+            2640,
+            2512,
+            2518,
+            2480,
+            2599,
+            2643,
+            2534
+          ],
+          "min": 2480,
+          "median": 2562.5,
+          "max": 2686
+        },
+        "commitMs": {
+          "values": [
+            1.2000000000116415,
+            1,
+            0.9000000000232831,
+            0.8000000000465661,
+            0.7999999999301508,
+            0.9000000000232831,
+            1.599999999976717,
+            1.1999999999534339,
+            0.9000000000232831,
+            0.8000000000465661,
+            1,
+            3.4000000001396984
+          ],
+          "min": 0.7999999999301508,
+          "median": 0.9500000000116415,
+          "max": 3.4000000001396984
+        },
+        "termContentEndImportSessionMs": {
+          "values": [
+            2.8999999999650754,
+            2.7999999999883585,
+            2,
+            2.400000000023283,
+            3,
+            4.099999999976717,
+            1.8000000000465661,
+            2.299999999930151,
+            2,
+            2.099999999976717,
+            2.400000000023283,
+            4.2000000001862645
+          ],
+          "min": 1.8000000000465661,
+          "median": 2.400000000023283,
+          "max": 4.2000000001862645
+        },
+        "termContentEndImportSessionCloseWritableMs": {
+          "values": [
+            1,
+            1.7999999999883585,
+            1,
+            1.7000000000698492,
+            1.8000000000465661,
+            2.199999999953434,
+            1,
+            1.599999999976717,
+            0.7999999999301508,
+            1.1999999999534339,
+            1.2999999999301508,
+            1
+          ],
+          "min": 0.7999999999301508,
+          "median": 1.2499999999417923,
+          "max": 2.199999999953434
+        },
+        "termRecordEndImportSessionMs": {
+          "values": [
+            24.5,
+            26.100000000034925,
+            25.70000000001164,
+            21.900000000023283,
+            28,
+            25.29999999993015,
+            17.400000000023283,
+            20.899999999906868,
+            21.900000000023283,
+            25.599999999976717,
+            22.600000000093132,
+            20.300000000046566
+          ],
+          "min": 17.400000000023283,
+          "median": 23.550000000046566,
+          "max": 28
+        },
+        "termRecordEndImportSessionFlushPendingWritesMs": {
+          "values": [
+            15.399999999965075,
+            16.20000000001164,
+            11.799999999988358,
+            10,
+            18.099999999976717,
+            12.599999999976717,
+            8.5,
+            8.79999999993015,
+            8.900000000023283,
+            12.29999999993015,
+            10.70000000006985,
+            8.399999999906868
+          ],
+          "min": 8.399999999906868,
+          "median": 11.250000000029104,
+          "max": 18.099999999976717
+        },
+        "termRecordEndImportSessionAwaitQueuedWritesMs": {
+          "values": [
+            0.9000000000232831,
+            2,
+            5,
+            1.3000000000465661,
+            2.5,
+            3.599999999976717,
+            0.9000000000232831,
+            0.9000000000232831,
+            2,
+            4.400000000023283,
+            3.699999999953434,
+            0.9000000001396984
+          ],
+          "min": 0.9000000000232831,
+          "median": 2.0,
+          "max": 5
+        },
+        "termRecordEndImportSessionCloseWritableMs": {
+          "values": [
+            8.099999999976717,
+            7.7000000000116415,
+            8.700000000011642,
+            10.599999999976717,
+            7.299999999930151,
+            9.099999999976717,
+            7.800000000046566,
+            11.199999999953434,
+            10.800000000046566,
+            8.800000000046566,
+            8.099999999976717,
+            10.800000000046566
+          ],
+          "min": 7.299999999930151,
+          "median": 8.750000000029104,
+          "max": 11.199999999953434
+        },
+        "termRecordLookupIndexAwaitMs": {
+          "values": [
+            1.8999999999650754,
+            1.2000000000116415,
+            1.6000000000349246,
+            0.7000000000698492,
+            0.7000000000698492,
+            1.6000000000931323,
+            1.400000000023283,
+            4.900000000023283,
+            0.6999999999534339,
+            0.5,
+            0.5,
+            0.6999999999534339
+          ],
+          "min": 0.5,
+          "median": 0.9500000000407454,
+          "max": 4.900000000023283
+        },
+        "createIndexesMs": {
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "median": 0.0,
+          "max": 0
+        },
+        "termsVirtualTableSyncMs": {
+          "values": [
+            0.09999999997671694,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.09999999997671694,
+            0,
+            0.09999999997671694,
+            0.09999999997671694,
+            0,
+            0
+          ],
+          "min": 0,
+          "median": 0.0,
+          "max": 0.09999999997671694
+        },
+        "totalMs": {
+          "values": [
+            29.79999999998836,
+            31.29999999998836,
+            30.79999999998836,
+            28.29999999993015,
+            33,
+            30.400000000023283,
+            25.800000000046566,
+            26.899999999906868,
+            27,
+            31.800000000046566,
+            29.300000000046566,
+            27.600000000093132
+          ],
+          "min": 25.800000000046566,
+          "median": 29.550000000017462,
+          "max": 33
+        },
+        "dedupCanonicalScanMs": {
+          "values": [
+            114.89999999979045,
+            100.49999999994179,
+            93.89999999973224,
+            112.00000000005821,
+            114.50000000081491,
+            119.29999999911524,
+            103.60000000090804,
+            108.69999999867287,
+            109.09999999927823,
+            108.20000000030268,
+            99.30000000004657,
+            114.29999999934807
+          ],
+          "min": 93.89999999973224,
+          "median": 108.89999999897555,
+          "max": 119.29999999911524
+        },
+        "contentCompressMs": {
+          "values": [
+            321.0999999996857,
+            278.4000000007218,
+            272.2999999995227,
+            290.2999999996973,
+            263.9000000015367,
+            255.8999999993248,
+            300.5999999992782,
+            258.8000000016764,
+            252.79999999981374,
+            282.19999999925494,
+            276.9000000007218,
+            289.5999999984633
+          ],
+          "min": 252.79999999981374,
+          "median": 277.6500000007218,
+          "max": 321.0999999996857
+        },
+        "contentMetadataMs": {
+          "values": [
+            44.099999999802094,
+            54.80000000051223,
+            46.09999999945285,
+            49.20000000036089,
+            40.099999998812564,
+            45.799999999348074,
+            64.90000000025611,
+            57.79999999993015,
+            39.69999999983702,
+            49.199999998672865,
+            35.70000000053551,
+            45.600000001024455
+          ],
+          "min": 35.70000000053551,
+          "median": 45.94999999940046,
+          "max": 64.90000000025611
+        },
+        "termRecordFieldEncodeMs": {
+          "values": [
+            464.5999999998603,
+            403.89999999967404,
+            361.39999999973224,
+            411.60000000038417,
+            412.39999999967404,
+            396.8000000002794,
+            377.2000000013504,
+            405.19999999937136,
+            417.00000000023283,
+            395.6999999996042,
+            388.70000000018626,
+            411.70000000088476
+          ],
+          "min": 361.39999999973224,
+          "median": 404.5499999995227,
+          "max": 464.5999999998603
+        },
+        "termRecordValidationMs": {
+          "values": [
+            49.29999999998836,
+            40.19999999983702,
+            29.099999999976717,
+            41.599999999802094,
+            33.19999999925494,
+            33.29999999946449,
+            37.99999999906868,
+            38.8000000002794,
+            42.00000000023283,
+            31.800000000628643,
+            36.49999999906868,
+            31.79999999818392
+          ],
+          "min": 29.099999999976717,
+          "median": 37.24999999906868,
+          "max": 49.29999999998836
+        },
+        "dedupRecentSourceCacheMs": {
+          "values": [
+            7.999999999825377,
+            9.300000000395812,
+            4.599999999918509,
+            12.400000000314321,
+            5.399999999557622,
+            8.199999999837019,
+            7.099999999743886,
+            10.099999999976717,
+            5.100000000325963,
+            16.899999999441206,
+            3,
+            7.800000000512227
+          ],
+          "min": 3,
+          "median": 7.900000000168802,
+          "max": 16.899999999441206
+        },
+        "parserSourceInflateMs": {
+          "values": [
+            1387.2000000001863,
+            1288.9999999998836,
+            1287.5000000001746,
+            1375.299999999872,
+            1257.8000000016764,
+            1419.2999999992317,
+            1368.7000000000698,
+            1344.5000000001164,
+            1310.0999999998603,
+            1279.7000000005355,
+            1285.6000000000931,
+            1343.5999999998603
+          ],
+          "min": 1257.8000000016764,
+          "median": 1326.8499999998603,
+          "max": 1419.2999999992317
+        },
+        "parserResultCopyMs": {
+          "values": [
+            1703.1999999997788,
+            1832.2000000002445,
+            1789.6999999998952,
+            1755.1000000002678,
+            1794.1000000004424,
+            1703.0000000001164,
+            1714.800000000163,
+            1833.6000000007916,
+            1780.3000000000466,
+            1920.999999999418,
+            1746.2000000000698,
+            1844.7999999991152
+          ],
+          "min": 1703.0000000001164,
+          "median": 1784.999999999971,
+          "max": 1920.999999999418
+        },
+        "parserLookupIndexEncodeMs": {
+          "values": [
+            623.3999999999651,
+            617.2000000004191,
+            611.3999999999651,
+            608.099999999511,
+            605.6999999999534,
+            621.5000000004657,
+            625.9999999989523,
+            646.7999999998137,
+            640.199999999837,
+            709.1999999991385,
+            637.4999999996508,
+            627.6000000012573
+          ],
+          "min": 605.6999999999534,
+          "median": 624.6999999994587,
+          "max": 709.1999999991385
+        },
+        "mediaWriteShareOfTotalPercent": {
+          "values": [
+            0.2966892964973229,
+            0.36329037280512066,
+            0.3011941462031845,
+            0.2661887100495122,
+            0.3177797786134248,
+            0.27264671801513624,
+            0.3211590272449868,
+            0.3306360393282868,
+            0.3396374816774545,
+            0.2609512543056978,
+            0.2598752598752599,
+            0.2278103916586349
+          ],
+          "min": 0.2278103916586349,
+          "median": 0.2989417213502537,
+          "max": 0.36329037280512066
+        }
+      }
+    },
+    {
+      "order": "BA",
+      "artifactId": 15258782555,
+      "artifactBytes": 35971164,
+      "artifactSha256": "1525153da8ec42a60d1f47bd6a1b8eada409ca0677f94dc07c869411d5f27034",
+      "jobId": 140931493677,
+      "artifactMembers": 313,
+      "allZipMembersCrcAndSha256Verified": true,
+      "ordinaryObservationCount": 36,
+      "candidatePairs": 12,
+      "controlPairs": 4,
+      "allOrdinarySummaryAndRawReportsRevalidated": true,
+      "allCanonicalReceiptsMatch": true,
+      "exhaustiveMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "sourceIdentities": {
+        "A": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "80c46c6b091f0eac947cbdfa93e247de6ea7124ed26fec0420fc11c6bc1e7733",
+          "sha": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "80c46c6b091f0eac947cbdfa93e247de6ea7124ed26fec0420fc11c6bc1e7733",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+        },
+        "B": {
+          "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+          "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+          "packageSha256": "d606a5c1c5357c44884d7c3d9d1cfc191655824d7dd1ac69fe3aa8609ae951d2",
+          "sha": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+          "sourceHashes": {
+            "builds/manabitan-chrome-dev.zip": null,
+            "builds/manabitan-chrome.zip": "d606a5c1c5357c44884d7c3d9d1cfc191655824d7dd1ac69fe3aa8609ae951d2",
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+          },
+          "tree": "3d74b708853a342c55e89fb825e545a35e8ef57d"
+        }
+      },
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 5554.25,
+        "otherMedianMs": 6655.0,
+        "medianPairedChangeMs": 1072.4500000000116,
+        "medianPairedChangePercent": 19.24724747150226,
+        "equalWorkChangePercent": 19.614788806656126,
+        "fasterPairs": 0,
+        "descriptiveBootstrap95Ms": [
+          893.25,
+          1283.5999999999767
+        ],
+        "descriptiveBootstrap95Percent": [
+          16.13808449945955,
+          22.96936407204091
+        ],
+        "pairedMs": [
+          863.0999999999767,
+          768.3999999999651,
+          1013.8000000000466,
+          1112.399999999965,
+          1035.9000000000233,
+          1495.7000000000116,
+          1461.2000000000698,
+          1176.0999999999767,
+          1391.0999999999767,
+          1109.0,
+          856.3999999999069,
+          923.4000000000233
+        ],
+        "pairedRatios": [
+          1.1532057654075505,
+          1.1237379023816747,
+          1.1835629832153494,
+          1.1993762770190273,
+          1.185568672411018,
+          1.265727432622099,
+          1.2711751169178354,
+          1.2006277613824325,
+          1.2573394749986104,
+          1.2020478064422078,
+          1.155754401280355,
+          1.1670072887088363
+        ],
+        "baselineEqualWorkTotalMs": 67329.30000000013,
+        "otherEqualWorkTotalMs": 80535.80000000008
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5606.100000000035,
+        "otherMedianMs": 5589.299999999959,
+        "medianPairedChangeMs": -23.54999999998836,
+        "medianPairedChangePercent": -0.43152674317559203,
+        "equalWorkChangePercent": 2.4267518790222375,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -243.4000000001397,
+          829.7000000000698
+        ],
+        "descriptiveBootstrap95Percent": [
+          -4.328111385744915,
+          15.417634488526799
+        ],
+        "pairedMs": [
+          173.0,
+          829.7000000000698,
+          -243.4000000001397,
+          -220.09999999997672
+        ],
+        "pairedRatios": [
+          1.030753915346737,
+          1.154176344885268,
+          0.9567188861425509,
+          0.9606155497897509
+        ],
+        "baselineEqualWorkTotalMs": 22219.00000000006,
+        "otherEqualWorkTotalMs": 22758.20000000001
+      },
+      "registeredVndbNonRegressionGates": {
+        "medianChangeAtMost1Percent": false,
+        "equalWorkChangeAtMost1Percent": false,
+        "upper95ChangeAtMost3Percent": false
+      },
+      "passesRegisteredVndbNonRegression": false,
+      "memoryAuditRecomputedFromRawScans": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 637,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 86.48107463331927,
+            "maximumPairedChangePercent": 88.0376022925724
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 106.93528034463178,
+            "maximumPairedChangePercent": 108.78898642188553
+          }
+        }
+      },
+      "memoryQualificationObservations": [
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 70,
+          "maxSampledPrivateKiB": 2122624,
+          "maxSampledPssKiB": 2345126,
+          "maximumCoveredSampleGapMs": 159.342342,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 56,
+          "maxSampledPrivateKiB": 1016636,
+          "maxSampledPssKiB": 1247158,
+          "maximumCoveredSampleGapMs": 150.556135,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 58,
+          "maxSampledPrivateKiB": 1034640,
+          "maxSampledPssKiB": 1267146,
+          "maximumCoveredSampleGapMs": 159.528014,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 74,
+          "maxSampledPrivateKiB": 2121856,
+          "maxSampledPssKiB": 2343264,
+          "maximumCoveredSampleGapMs": 164.337662,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ],
+      "memorySemanticFailures": [],
+      "baselinePhaseScope": "Only the 12 A observations in candidate pairs; warmups, A/C controls, B and instrumented memory kept separately. No host pooling.",
+      "baselinePrimaryPhaseStatistics": {
+        "totalImportMs": {
+          "values": [
+            5633.600000000006,
+            6209.900000000023,
+            5522.899999999965,
+            5579.400000000023,
+            5582.299999999988,
+            5628.700000000012,
+            5388.400000000023,
+            5862.100000000093,
+            5405.699999999953,
+            5488.800000000047,
+            5498.400000000023,
+            5529.099999999977
+          ],
+          "min": 5388.400000000023,
+          "median": 5554.25,
+          "max": 6209.900000000023
+        },
+        "workerImportMs": {
+          "values": [
+            5603.5,
+            6177.8000000000175,
+            5489.5,
+            5547.299999999988,
+            5550.799999999988,
+            5596.5,
+            5356.400000000023,
+            5828.599999999977,
+            5372.099999999977,
+            5458.199999999953,
+            5466.599999999977,
+            5499.599999999977
+          ],
+          "min": 5356.400000000023,
+          "median": 5523.4499999999825,
+          "max": 6177.8000000000175
+        },
+        "archiveAndIndexMs": {
+          "values": [
+            87,
+            87,
+            86,
+            92,
+            88,
+            90,
+            90,
+            88,
+            92,
+            89,
+            90,
+            93
+          ],
+          "min": 86,
+          "median": 89.5,
+          "max": 93
+        },
+        "termFastPathElapsedMs": {
+          "values": [
+            5366,
+            5926,
+            5281,
+            5293,
+            5328,
+            5352,
+            5142,
+            5607,
+            5130,
+            5209,
+            5251,
+            5265
+          ],
+          "min": 5130,
+          "median": 5287.0,
+          "max": 5926
+        },
+        "importDataBanksElapsedMs": {
+          "values": [
+            5428,
+            6003,
+            5342,
+            5381,
+            5388,
+            5415,
+            5202,
+            5666,
+            5201,
+            5294,
+            5311,
+            5324
+          ],
+          "min": 5201,
+          "median": 5361.5,
+          "max": 6003
+        },
+        "bulkFinalizationElapsedMs": {
+          "values": [
+            67,
+            68,
+            43,
+            57,
+            57,
+            74,
+            47,
+            58,
+            57,
+            56,
+            45,
+            66
+          ],
+          "min": 43,
+          "median": 57.0,
+          "max": 74
+        },
+        "step4MediaResolveMs": {
+          "values": [
+            116,
+            116,
+            130,
+            126,
+            107,
+            121,
+            105,
+            109,
+            120,
+            122,
+            110,
+            108
+          ],
+          "min": 105,
+          "median": 116.0,
+          "max": 130
+        },
+        "step4MediaWriteMs": {
+          "values": [
+            22,
+            27,
+            17,
+            33,
+            14,
+            18,
+            20,
+            18,
+            18,
+            28,
+            16,
+            18
+          ],
+          "min": 14,
+          "median": 18.0,
+          "max": 33
+        },
+        "step4MediaZipBatchReadMs": {
+          "values": [
+            1706,
+            1997,
+            1622,
+            1404,
+            1429,
+            1796,
+            1528,
+            1534,
+            1808,
+            1860,
+            1485,
+            1496
+          ],
+          "min": 1404,
+          "median": 1578.0,
+          "max": 1997
+        },
+        "step4MediaZipBatchInflateMs": {
+          "values": [
+            520,
+            536,
+            534,
+            490,
+            507,
+            485,
+            551,
+            538,
+            567,
+            555,
+            507,
+            528
+          ],
+          "min": 485,
+          "median": 531.0,
+          "max": 567
+        },
+        "step4MediaZipBatchCount": {
+          "values": [
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144,
+            144
+          ],
+          "min": 144,
+          "median": 144.0,
+          "max": 144
+        },
+        "step4MediaZipBatchEntryCount": {
+          "values": [
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570,
+            146570
+          ],
+          "min": 146570,
+          "median": 146570.0,
+          "max": 146570
+        },
+        "step4MediaZipBatchRangeBytes": {
+          "values": [
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882,
+            195649882
+          ],
+          "min": 195649882,
+          "median": 195649882.0,
+          "max": 195649882
+        },
+        "step4MediaZipBatchCompressedBytes": {
+          "values": [
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129,
+            188864129
+          ],
+          "min": 188864129,
+          "median": 188864129.0,
+          "max": 188864129
+        },
+        "step4MediaZipBatchUncompressedBytes": {
+          "values": [
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284,
+            188131284
+          ],
+          "min": 188131284,
+          "median": 188131284.0,
+          "max": 188131284
+        },
+        "step4TagReadMs": {
+          "values": [
+            2,
+            2,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1,
+            2
+          ],
+          "min": 1,
+          "median": 2.0,
+          "max": 2
+        },
+        "step4BulkAddTagsMetaMs": {
+          "values": [
+            2,
+            1,
+            1,
+            2,
+            1,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
+            1
+          ],
+          "min": 1,
+          "median": 2.0,
+          "max": 2
+        },
+        "step4BulkAddTermsMs": {
+          "values": [
+            2453,
+            2394,
+            2454,
+            2396,
+            2348,
+            2468,
+            2522,
+            2471,
+            2393,
+            2559,
+            2361,
+            2363
+          ],
+          "min": 2348,
+          "median": 2424.5,
+          "max": 2559
+        },
+        "commitMs": {
+          "values": [
+            1.5,
+            7.699999999953434,
+            1.5,
+            1.6000000000349246,
+            1.400000000023283,
+            1.2999999999883585,
+            1.3000000000465661,
+            1.599999999976717,
+            1.3000000000465661,
+            1.3000000000465661,
+            1.2999999999301508,
+            1.599999999976717
+          ],
+          "min": 1.2999999999301508,
+          "median": 1.4500000000116415,
+          "max": 7.699999999953434
+        },
+        "termContentEndImportSessionMs": {
+          "values": [
+            1.5,
+            1.7999999999883585,
+            2.2000000000116415,
+            4.2000000000116415,
+            2.7999999999883585,
+            11.5,
+            2.400000000023283,
+            2.199999999953434,
+            2.700000000069849,
+            3.199999999953434,
+            5.199999999953434,
+            3
+          ],
+          "min": 1.5,
+          "median": 2.750000000029104,
+          "max": 11.5
+        },
+        "termContentEndImportSessionCloseWritableMs": {
+          "values": [
+            0.6000000000058208,
+            1.1000000000349246,
+            1.400000000023283,
+            0.8999999999650754,
+            1.1999999999534339,
+            3.2000000000116415,
+            1.2000000000698492,
+            1.3000000000465661,
+            1.599999999976717,
+            0.9000000000232831,
+            1.8000000000465661,
+            1.900000000023283
+          ],
+          "min": 0.6000000000058208,
+          "median": 1.2500000000582077,
+          "max": 3.2000000000116415
+        },
+        "termRecordEndImportSessionMs": {
+          "values": [
+            57.09999999997672,
+            53.90000000002328,
+            35.5,
+            49.20000000001164,
+            50.29999999998836,
+            66.60000000003492,
+            39.79999999993015,
+            49.59999999997672,
+            49.90000000002328,
+            49.199999999953434,
+            37.59999999997672,
+            58.5
+          ],
+          "min": 35.5,
+          "median": 49.75,
+          "max": 66.60000000003492
+        },
+        "termRecordEndImportSessionFlushPendingWritesMs": {
+          "values": [
+            13.800000000017462,
+            10.200000000011642,
+            7.7000000000116415,
+            12.700000000011642,
+            8.400000000023283,
+            14.900000000023283,
+            13,
+            8.099999999976717,
+            8.70000000006985,
+            4.300000000046566,
+            12.599999999976717,
+            9.400000000023283
+          ],
+          "min": 4.300000000046566,
+          "median": 9.800000000017462,
+          "max": 14.900000000023283
+        },
+        "termRecordEndImportSessionAwaitQueuedWritesMs": {
+          "values": [
+            0.6999999999825377,
+            1.3999999999650754,
+            2.6000000000349246,
+            1.2000000000116415,
+            0.5,
+            0.7999999999883585,
+            1.599999999976717,
+            2.5,
+            1.7999999999301508,
+            0.8999999999068677,
+            1.2999999999301508,
+            5.099999999976717
+          ],
+          "min": 0.5,
+          "median": 1.349999999947613,
+          "max": 5.099999999976717
+        },
+        "termRecordEndImportSessionCloseWritableMs": {
+          "values": [
+            42.30000000001746,
+            42.20000000001164,
+            25.099999999976717,
+            35.199999999953434,
+            41.20000000001164,
+            50.79999999998836,
+            25.099999999976717,
+            38.90000000002328,
+            39.40000000002328,
+            43.90000000002328,
+            23.5,
+            43.90000000002328
+          ],
+          "min": 23.5,
+          "median": 40.30000000001746,
+          "max": 50.79999999998836
+        },
+        "termRecordLookupIndexAwaitMs": {
+          "values": [
+            0.39999999999417923,
+            0.29999999998835847,
+            1,
+            0.7999999999883585,
+            0.5,
+            0.7999999999883585,
+            0.5999999999767169,
+            0.8999999999068677,
+            0.5,
+            2.5,
+            0.30000000004656613,
+            1.7999999999301508
+          ],
+          "min": 0.29999999998835847,
+          "median": 0.6999999999825377,
+          "max": 2.5
+        },
+        "createIndexesMs": {
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "median": 0.0,
+          "max": 0
+        },
+        "termsVirtualTableSyncMs": {
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.09999999997671694
+          ],
+          "min": 0,
+          "median": 0.0,
+          "max": 0.09999999997671694
+        },
+        "totalMs": {
+          "values": [
+            63.89999999999418,
+            66.59999999997672,
+            41.5,
+            55.699999999953434,
+            56.399999999965075,
+            72.90000000002328,
+            45.5,
+            56.59999999997672,
+            56.20000000006985,
+            54.90000000002328,
+            43.5,
+            64.79999999993015
+          ],
+          "min": 41.5,
+          "median": 56.30000000001746,
+          "max": 72.90000000002328
+        },
+        "dedupCanonicalScanMs": {
+          "values": [
+            113.69999999983702,
+            87.40000000075088,
+            90.80000000022119,
+            84.59999999922002,
+            79,
+            85.59999999991851,
+            89.40000000083819,
+            96.5999999990454,
+            80.90000000118744,
+            108.60000000067521,
+            92.40000000188593,
+            93.40000000118744
+          ],
+          "min": 79,
+          "median": 90.10000000052969,
+          "max": 113.69999999983702
+        },
+        "contentCompressMs": {
+          "values": [
+            251.20000000001164,
+            256.900000000227,
+            274.2000000003027,
+            271.199999999837,
+            282.99999999947613,
+            241.0000000000582,
+            284.20000000018626,
+            283.0999999997439,
+            289.39999999979045,
+            294.20000000006985,
+            243.69999999937136,
+            272.8000000010943
+          ],
+          "min": 241.0000000000582,
+          "median": 273.5000000006985,
+          "max": 294.20000000006985
+        },
+        "contentMetadataMs": {
+          "values": [
+            50.700000000186265,
+            47.999999999970896,
+            59.29999999993015,
+            53.70000000082655,
+            46.800000000337604,
+            41.29999999975553,
+            47.40000000037253,
+            55.39999999990687,
+            51.19999999878928,
+            60.20000000053551,
+            56.4000000001397,
+            34.299999999115244
+          ],
+          "min": 34.299999999115244,
+          "median": 50.94999999948777,
+          "max": 60.20000000053551
+        },
+        "termRecordFieldEncodeMs": {
+          "values": [
+            363.20000000004075,
+            403.99999999959255,
+            410.99999999953434,
+            363.9000000002561,
+            331.00000000023283,
+            349.49999999959255,
+            394.5999999998603,
+            373.6000000005588,
+            372.8000000003958,
+            408.0999999998603,
+            374.7000000004191,
+            383.4000000007218
+          ],
+          "min": 331.00000000023283,
+          "median": 374.15000000048894,
+          "max": 410.99999999953434
+        },
+        "termRecordValidationMs": {
+          "values": [
+            38.699999999895226,
+            45.200000000273576,
+            34.10000000032596,
+            42.49999999970896,
+            51.59999999945285,
+            43.700000000419095,
+            32.30000000086147,
+            31.800000000046566,
+            29.999999999883585,
+            42.599999999045394,
+            47.19999999925494,
+            30.699999999371357
+          ],
+          "min": 29.999999999883585,
+          "median": 40.599999999802094,
+          "max": 51.59999999945285
+        },
+        "dedupRecentSourceCacheMs": {
+          "values": [
+            11.000000000029104,
+            7.399999999761349,
+            6.099999999918509,
+            18.300000000395812,
+            4.099999999976717,
+            4.200000000128057,
+            11.800000000395812,
+            8.699999999837019,
+            11.79999999969732,
+            17.00000000023283,
+            11.699999999953434,
+            4
+          ],
+          "min": 4,
+          "median": 9.849999999933061,
+          "max": 18.300000000395812
+        },
+        "parserSourceInflateMs": {
+          "values": [
+            1508.7000000000407,
+            1505.1000000005588,
+            1592.900000000489,
+            1554.4999999998254,
+            1515.7000000001863,
+            1560.0000000001164,
+            1521.3000000008615,
+            1507.5999999997439,
+            1634.099999999511,
+            1513.3000000005122,
+            1544.0000000011642,
+            1558.800000000163
+          ],
+          "min": 1505.1000000005588,
+          "median": 1532.6500000010128,
+          "max": 1634.099999999511
+        },
+        "parserResultCopyMs": {
+          "values": [
+            1484.0999999997148,
+            1428.7999999998428,
+            1495.7999999996973,
+            1387.5,
+            1449.9999999996508,
+            1385.700000000128,
+            1435.599999998929,
+            1438.3000000003958,
+            1372.4999999990687,
+            1501.800000000163,
+            1531.4000000001397,
+            1448.9000000000233
+          ],
+          "min": 1372.4999999990687,
+          "median": 1443.6000000002095,
+          "max": 1531.4000000001397
+        },
+        "parserLookupIndexEncodeMs": {
+          "values": [
+            515.7000000001572,
+            494.1999999997206,
+            494.20000000001164,
+            484.20000000012806,
+            491.40000000037253,
+            503.70000000001164,
+            501.9000000015367,
+            517.0999999998603,
+            487.30000000004657,
+            546.100000000908,
+            511.20000000006985,
+            535.3999999989755
+          ],
+          "min": 484.20000000012806,
+          "median": 502.80000000077416,
+          "max": 546.100000000908
+        },
+        "mediaWriteShareOfTotalPercent": {
+          "values": [
+            0.3905140585061058,
+            0.4347896101386479,
+            0.3078093030835269,
+            0.5914614474674672,
+            0.2507926840191324,
+            0.3197896494750113,
+            0.3711676935639506,
+            0.30705719793247666,
+            0.3329818524890422,
+            0.5101297186998937,
+            0.29099374363451064,
+            0.32555027038758705
+          ],
+          "min": 0.2507926840191324,
+          "median": 0.3292660614383146,
+          "max": 0.5914614474674672
+        }
+      }
+    }
+  ],
+  "decision": "REJECT_TAG_PREFETCH: both complete VNDB timing hosts regress in all12 primary pairs; AB memory coverage fails, BA qualified memory exceeds prospective limits",
+  "phaseDecision": "All original raw phases and default settings are retained for separate causal investigation. This artifact audit does not claim that any one phase or proposed fix explains the regression.",
+  "limits": [
+    "Source/raw phase counters are elapsed spans and may overlap or include waiting; they are not additive CPU costs or a removable-time guarantee.",
+    "Media ZIP batch count does not establish SQL write-batch/statement geometry.",
+    "The candidate regression is preserved without excluding any tail, replacing imports or pooling hosts. Raw phase clocks overlap and do not alone prove the cause.",
+    "Current-source source/semantic tests pass independently of performance; memory observations are separate and non-authoritative for timing."
+  ]
+}

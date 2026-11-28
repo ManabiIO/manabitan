@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-source-only-fixed-generated-runtime-proof-review",
+  "handoff": "32e04b4da407da8bcc9d2e02517bc4a43508b1af",
+  "reviewedFiles": [
+    {
+      "path": "runtime-source-guard.mjs",
+      "blob": "76caa7463c73f9eb10cd26b30cc1494751520436"
+    },
+    {
+      "path": "generated-runtime-source-proof.json",
+      "blob": "39ff962eeeffb8aa0d482d6801fd8b53033e8e7c"
+    },
+    {
+      "path": "test-runtime-source-guard.mjs",
+      "blob": "36c0a5cfc5d0edb1c3ec7e7d00075f8cba6c6966"
+    },
+    {
+      "path": "run.py",
+      "blob": "1915aecc47c954b42dff2d0786dcaf5d4295c89b"
+    },
+    {
+      "path": "browser-verify.mjs",
+      "blob": "2b5b7808b00aa7661fb8f7973131a256fd0932ba"
+    }
+  ],
+  "localGitBlobIdentitiesIndependentlyMatched": true,
+  "verdict": "No concrete blocker found in the fixed byte-pair admission or runner/verifier integration.",
+  "findings": [
+    "The guard's compiled proof SHA binds exactly18 expected paths and645 fixed ordered source-prefix spans. Each listed path requires its exact historical hash before even accepting unchanged bytes.",
+    "Changed input must have the exact fixed hosted hash/length. Every declared span must equal the fixed hosted prefix; reconstruction must match the entire historical byte count and hash. Any other byte difference is rejected.",
+    "All unlisted runtime files retain full raw-hash equality; proof bytes, unknown hash pairs, executable edits and unrelated source-map edits fail closed.",
+    "Fixed offsets avoid replacing four unrelated node_modules strings in linkedom. This is not a generic prefix rewrite, and the real generated runtime is never mutated.",
+    "Runner writes actual hosted hashes to manifest.files and runtimeHashes, keeps original naturalSourceHashes separately, and binds the proof receipt. Browser verifier reruns the same proof and requires matching actual manifest hashes plus original natural witness.",
+    "Guard and proof are included in verifier dependency hashes; release package and harness overlay retain their own exact hashes."
+  ],
+  "limits": [
+    "Source-only review; no additional test execution or import acquisition was performed.",
+    "The separate concrete byte/AST classification remains bound by its own retained evidence. This review does not extend the fixed18pairs to a future build or platform."
+  ]
+}

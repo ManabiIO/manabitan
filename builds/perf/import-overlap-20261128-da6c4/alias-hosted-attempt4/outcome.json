@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "scope": "Attempt4 terminal outcome; failed prerequisite gates retained. No ordinary timing or memory observations acquired, no whole-import gain conclusion.",
+  "researchCommit": "eaee9b0e408307410558adc69d7695e9ea506fbb",
+  "researchTree": "44319b6b69924e2719ef88a82fed01fe829eb671",
+  "runId": 46134500034,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "jobs": [
+    {
+      "id": 140946673357,
+      "name": "Untimed complete browser layout proof",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-28T10:17:54Z",
+      "completedAt": "2026-11-28T10:28:25Z",
+      "failedSteps": [
+        {
+          "name": "Prove actual full-media browser A and B files",
+          "number": 7
+        }
+      ]
+    },
+    {
+      "id": 140946673592,
+      "name": "Exact candidate repository gates",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-28T10:17:54Z",
+      "completedAt": "2026-11-28T10:25:44Z",
+      "failedSteps": [
+        {
+          "name": "Run every required candidate gate once",
+          "number": 8
+        }
+      ]
+    },
+    {
+      "id": 140949267277,
+      "name": "${{ matrix.dictionary }} ${{ matrix.order }} fixed ordinary and memory cell",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-28T10:28:25Z",
+      "completedAt": "2026-11-28T10:28:25Z",
+      "failedSteps": []
+    }
+  ],
+  "logs": {
+    "verify": {
+      "blob": "4ade1b606860c67211229187efb51aaa2fbace85",
+      "characters": 345865
+    },
+    "preflight": {
+      "blob": "5522ff02328928a9736bb5b8d10c34f7d5858514",
+      "characters": 686348
+    }
+  },
+  "artifacts": {
+    "verify": {
+      "id": 15259511211,
+      "bytes": 34709319,
+      "sha256": "adc37dc4ebf809a315a287502887cdb5f003f157dfc2ac003a313832eb4668f1",
+      "archiveBytes": 34433022,
+      "archiveSha256": "1bbe6bdfbc1d7042f7c84fd212f57f3626425fc2579a36eae670dba79e82eff7"
+    },
+    "preflight": {
+      "id": 15259058617,
+      "bytes": 313694045,
+      "sha256": "17c87059b7cbaedb250aee7a97a3f139f62a5c9a01e4ab19b7d72dc3dddb5d60",
+      "archiveBytes": 313147615,
+      "archiveSha256": "6a59bd01813e3093c4c4432e24f7165a1cb6cdc6475af7a71ecf6aa954b5428a"
+    }
+  },
+  "verification": {
+    "originalPath": "run-state.json",
+    "originalSha256": "6e12a1f76243889cfed5f832528c109e2d947a23ed7f5bb63731963c41c306f1",
+    "complete": false,
+    "phase": "gate-complete-unit-inventory",
+    "failures": [
+      {
+        "message": "Command failed (1); exact log: /home/runner/work/_temp/alias-native-verify-46134500034-1/gate-complete-unit-inventory.log",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 624, in main\n    study.verify_gates()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 356, in verify_gates\n    self.run(command, target, self.evidence / ('gate-' + name + '.log'), capped_env)\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 147, in run\n    require(completed.returncode == 0, f'Command failed ({completed.returncode}); exact log: {log}')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 51, in require\n    raise RuntimeError(message)\nRuntimeError: Command failed (1); exact log: /home/runner/work/_temp/alias-native-verify-46134500034-1/gate-complete-unit-inventory.log\n",
+        "type": "RuntimeError"
+      }
+    ],
+    "cleanupFailures": [],
+    "commands": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "unittest",
+          "-v",
+          "test_setup_sources.py"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/dependency-setup-test.log"
+      },
+      {
+        "command": [
+          "git",
+          "worktree",
+          "add",
+          "--detach",
+          "--no-checkout",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1-sources/A",
+          "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/worktree-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "sparse-checkout",
+          "set",
+          "--no-cone",
+          "/*",
+          "!/builds/perf/"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/sparse-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/checkout-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/libs-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/license-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--",
+          "--target",
+          "chrome"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/build-A.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/test-runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1-sources/A/ext/lib"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-guard-tests.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-config-A.json",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-A.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "worktree",
+          "add",
+          "--detach",
+          "--no-checkout",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1-sources/B",
+          "2c02336b135ee01661ca2a788395afec75e66712"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/worktree-B.log"
+      },
+      {
+        "command": [
+          "git",
+          "sparse-checkout",
+          "set",
+          "--no-cone",
+          "/*",
+          "!/builds/perf/"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/sparse-B.log"
+      },
+      {
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "2c02336b135ee01661ca2a788395afec75e66712"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/checkout-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/libs-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/license-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--",
+          "--target",
+          "chrome"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/build-B.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-config-B.json",
+          "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-B.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/runtime-source-proof-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:js"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-javascript.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:ts"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-types.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:css"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-css.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:html"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-html.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:md"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-markdown.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:json:format"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-json-format.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:json:types",
+          "--",
+          "--maxWorkers=2"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-json-types.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--maxWorkers=2"
+        ],
+        "exitCode": 1,
+        "log": "/home/runner/work/_temp/alias-native-verify-46134500034-1/gate-complete-unit-inventory.log"
+      }
+    ]
+  },
+  "unitInventory": {
+    "passedFiles": 671,
+    "failedFiles": 1,
+    "passedCases": 15185,
+    "failedCases": 4,
+    "skipped": 47,
+    "totalCases": 15236,
+    "failureFile": "test/term-bank-wasm-parser.test.js",
+    "failureMessage": "Import-wide parallel parser unavailable (source-count)",
+    "failureTestPrefix": "binds receiver record ownership only through the private importer sink"
+  },
+  "preflight": {
+    "originalPath": "run-state.json",
+    "originalSha256": "573275ba56bd9efa8771b647bb316169d09da21a1db9831a94ad77e4fa1f0a81",
+    "complete": false,
+    "phase": "browser-preflight-B",
+    "failures": [
+      {
+        "message": "Logical browser probe projection differs across arms",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 628, in main\n    study.preflight()\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/run.py\", line 507, in preflight\n    binding = bind_preflight(core=self.core, core_sha256=digest(self.oracle['core']),\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/browser_proof.py\", line 111, in bind_preflight\n    comparator = AliasReceiptComparator(binding)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py\", line 166, in __init__\n    same(self.witnesses['A']['semanticProbeDigestSha256'], self.witnesses['B']['semanticProbeDigestSha256'], 'Logical browser probe projection differs across arms')\n  File \"/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/receipt_adapter.py\", line 38, in same\n    raise ValueError(label)\nValueError: Logical browser probe projection differs across arms\n",
+        "type": "ValueError"
+      }
+    ],
+    "cleanupFailures": [],
+    "commands": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "unittest",
+          "-v",
+          "test_setup_sources.py"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/dependency-setup-test.log"
+      },
+      {
+        "command": [
+          "git",
+          "worktree",
+          "add",
+          "--detach",
+          "--no-checkout",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A",
+          "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/worktree-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "sparse-checkout",
+          "set",
+          "--no-cone",
+          "/*",
+          "!/builds/perf/"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/sparse-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/checkout-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/libs-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/license-A.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--",
+          "--target",
+          "chrome"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/build-A.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/test-runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A/ext/lib"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-guard-tests.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-config-A.json",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-A.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-A.log"
+      },
+      {
+        "command": [
+          "git",
+          "worktree",
+          "add",
+          "--detach",
+          "--no-checkout",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/B",
+          "2c02336b135ee01661ca2a788395afec75e66712"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/worktree-B.log"
+      },
+      {
+        "command": [
+          "git",
+          "sparse-checkout",
+          "set",
+          "--no-cone",
+          "/*",
+          "!/builds/perf/"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/sparse-B.log"
+      },
+      {
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "2c02336b135ee01661ca2a788395afec75e66712"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/checkout-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build:libs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/libs-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "license-report:html"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/license-B.log"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--",
+          "--target",
+          "chrome"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/build-B.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/runtime-source-guard.mjs",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-config-B.json",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-B.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/runtime-source-proof-B.log"
+      },
+      {
+        "command": [
+          "node",
+          "dev/perf/prepare-dictionaries.js",
+          "vndb"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/fixtures.log"
+      },
+      {
+        "command": [
+          "node",
+          "--test",
+          "--test-concurrency=1",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/test-browser-layout-export.mjs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/export-helper-tests.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.test.mjs",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/archived/raw-alias-node-opfs.mjs"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/decoder-adapter-tests.log"
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "unittest",
+          "-v",
+          "test_receipt_adapter.py",
+          "test_qualification_stats.py",
+          "test_pack_artifacts.py",
+          "test_browser_proof.py"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/receipt-stats-tests.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A/dev/perf/host-environment.js"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/host-before.json"
+      },
+      {
+        "command": [
+          "node",
+          "dev/perf/import-benchmark.js",
+          "vndb",
+          "--runs",
+          "1",
+          "--no-build",
+          "--build-target",
+          "chrome",
+          "--media-check",
+          "all",
+          "--output",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/run.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A/dev/perf/host-environment.js"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/host-after.json"
+      },
+      {
+        "command": [
+          "node",
+          "--expose-gc",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/browser-verifier-config.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/browser-verifier.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A/dev/perf/host-environment.js"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/host-before.json"
+      },
+      {
+        "command": [
+          "node",
+          "dev/perf/import-benchmark.js",
+          "vndb",
+          "--runs",
+          "1",
+          "--no-build",
+          "--build-target",
+          "chrome",
+          "--media-check",
+          "all",
+          "--output",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/run.log"
+      },
+      {
+        "command": [
+          "node",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1-sources/A/dev/perf/host-environment.js"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/host-after.json"
+      },
+      {
+        "command": [
+          "node",
+          "--expose-gc",
+          "/home/runner/work/manabitan/manabitan/dev/perf/native-record-alias-qualification-da6c4/browser-verify.mjs",
+          "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/browser-verifier-config.json"
+        ],
+        "exitCode": 0,
+        "log": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/browser-verifier.log"
+      }
+    ]
+  },
+  "perArmVerifierReports": [
+    {
+      "data": {
+        "aliasProofs": [],
+        "arm": "A",
+        "browserLayoutReportSha256": "68565d4bf0443849c43f872d673463a08291b228b29c8ee46bf07e1907205193",
+        "browserNaturalTermFileEqualityEstablished": true,
+        "coldLookupProbes": 82,
+        "coldRecordProbes": 20,
+        "complete": true,
+        "failures": [],
+        "inputLogicalSha256": "ec3b399cf741c74c7d0ca2d2e5d963961d6aeafbe9cad5aefec123166b7a63f0",
+        "maximumRssKiB": 769072,
+        "nativePreparedGroups": 162,
+        "naturalComparisonReportSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+        "naturalCoreSha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+        "naturalVerificationReportSha256": "3b7cef17e4603172ef10bbeafddb4a3c6f150a997119caf40bfb36b6b1f6377a",
+        "pipelineSha256": "4571a33abcf884341389e39d87e123a3a5de6b769045a55d158e72044c4cd321",
+        "quiescenceAfterRead": {
+          "lockDirectory": "/tmp/manabitan-node-opfs-locks-147ef02beea0fd93ad3ef06fb926638c40404228ffe03d51ae8d31b1f16ece33",
+          "lockEntries": [],
+          "parentOpenResources": 0,
+          "rootPath": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/layout/opfs",
+          "stagingDirectory": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-A/layout/opfs.staging",
+          "stagingEntries": []
+        },
+        "sourceCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "sourceTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+        "verifiedRows": 6648310
+      },
+      "path": "browser-preflight-A/browser-verification.json",
+      "sha256": "fb0f7571fe44fae3e4ee17d741ce0779d678247a5f8e322df58dfea40ebbcc91"
+    },
+    {
+      "data": {
+        "aliasProofs": [
+          {
+            "actual": {
+              "length": 617,
+              "name": "raw-block-v2",
+              "offset": 545372
+            },
+            "logicalSha256": "bb85f19a58dfc2f31ab6b6dc99aecdcdf85644c8db57440844d1b63931d12ed6",
+            "original": {
+              "length": 617,
+              "name": "raw-v6",
+              "offset": 503201
+            },
+            "rawBytesSha256": "0961c60d93eb6de74524a9864b6a638d926d723d374c479b00895ea05076d0a1"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 4069857
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 4244036
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 4287606
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 4856609
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 5644298
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 5766553
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          },
+          {
+            "actual": {
+              "length": 338,
+              "name": "raw-block-v2",
+              "offset": 6286335
+            },
+            "logicalSha256": "13e61e61fe80170cff7583f080c28e5b9a34d808dbaceda8766f8f5bad83e3a4",
+            "original": {
+              "length": 338,
+              "name": "raw-v6",
+              "offset": 129171
+            },
+            "rawBytesSha256": "930e1e997a7d547b14d5c514d49a80657689ce7ea50a6b6efb73ea95e825471f"
+          }
+        ],
+        "arm": "B",
+        "browserLayoutReportSha256": "0e377e9626ade4119f2d819b7acc33b0982bb75ae4668ed483687307c13b8a5b",
+        "browserNaturalTermFileEqualityEstablished": true,
+        "coldLookupProbes": 82,
+        "coldRecordProbes": 194,
+        "complete": true,
+        "failures": [],
+        "inputLogicalSha256": "ec3b399cf741c74c7d0ca2d2e5d963961d6aeafbe9cad5aefec123166b7a63f0",
+        "maximumRssKiB": 800728,
+        "nativePreparedGroups": 170,
+        "naturalComparisonReportSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+        "naturalCoreSha256": "d43174e02396c77fc51463b197b6072996a68310b54ad385981758ef89270490",
+        "naturalVerificationReportSha256": "6a9842f3bb21d570a51cdb6d5922e15b693ada1bfe1ffa6bf0ae4321dcaabb70",
+        "pipelineSha256": "c5a49eac7551f74415d2d48a8c2c54dc582b715819c4ee84f376eaf8b158536e",
+        "quiescenceAfterRead": {
+          "lockDirectory": "/tmp/manabitan-node-opfs-locks-0a07ef083f210eeec90aea920138adfef5ac84eb13c1058d7c32ca20e119f2cb",
+          "lockEntries": [],
+          "parentOpenResources": 0,
+          "rootPath": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/layout/opfs",
+          "stagingDirectory": "/home/runner/work/_temp/alias-native-preflight-46134500034-1/browser-preflight-B/layout/opfs.staging",
+          "stagingEntries": []
+        },
+        "sourceCommit": "2c02336b135ee01661ca2a788395afec75e66712",
+        "sourceTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+        "verifiedRows": 6648310
+      },
+      "path": "browser-preflight-B/browser-verification.json",
+      "sha256": "7c1c3068ccb5b3403b5560bec34af0fb02f267a79de136a01fa31206c1cb70ec"
+    }
+  ],
+  "perArmObservations": [
+    {
+      "data": {
+        "arm": "A",
+        "authoritativeTiming": false,
+        "checked": null,
+        "export": true,
+        "layoutSha256": "68565d4bf0443849c43f872d673463a08291b228b29c8ee46bf07e1907205193",
+        "media": "all",
+        "name": "browser-preflight-A",
+        "reportSha256": "d7e2f6c9890d7eabc661bdb1bfc0bc4e7fbfb9d96b4a351d7bb28d94268b5337",
+        "sourceArm": "A",
+        "summarySha256": "6203138ece89a742220daf6e22c2a5ecac9e503751947b01c262dca63892da0a",
+        "totalImportMs": 4247.5
+      },
+      "path": "browser-preflight-A/observation.json",
+      "sha256": "6faa6ed21c10e14f2c6c54640677b7fdefce7bc6e421198cf5e63e75a9f1cb21"
+    },
+    {
+      "data": {
+        "arm": "B",
+        "authoritativeTiming": false,
+        "checked": null,
+        "export": true,
+        "layoutSha256": "0e377e9626ade4119f2d819b7acc33b0982bb75ae4668ed483687307c13b8a5b",
+        "media": "all",
+        "name": "browser-preflight-B",
+        "reportSha256": "f9919c74cb7cbdfc8f03363cfad82862d166a9e2ef3ab1d4f312cf0104c5ee7f",
+        "sourceArm": "B",
+        "summarySha256": "27c954d3e2a63da7cf871ce3f58b6d35d38c8c2c9e92e1b5ae63ecba88b14818",
+        "totalImportMs": 3674.3000000000466
+      },
+      "path": "browser-preflight-B/observation.json",
+      "sha256": "81deedfc519013d6468603a17f9069dcd02d164c7c0e3ed9f9d07e133593c392"
+    }
+  ],
+  "fixtureRepair": {
+    "scope": "One test-only line raises number of fixture sources to Math.max(4, workerCount); production source-count policy unchanged.",
+    "testBlob": "7ad8549d30c8aea37e7fa64c8802cc545da05ef5",
+    "patchBlob": "e97824beede77e4a1052ae0ee05286e1d8775980",
+    "validationBlob": "80ae0ba9ae111e1d0be75ded8238868ebc48f1ee",
+    "beforeFailureBlob": "6cb1dc50f373b05144e724e212a874c60860f553",
+    "afterPassBlob": "4fe3b94da2b1868b97caa2f2e7600876a1d4dcef",
+    "expectedCompleteTree": "b65955a62da72c55e24a681011684601fa089f07",
+    "runtimeExtTreeBeforeAndAfter": "64089ebc7f3b247b3a0d5e1cb0e58e64f73b75a1"
+  },
+  "projectionInvestigation": {
+    "owner": "import_history",
+    "status": "Original complete projection diff reports exactly20 rawContentPreview fields differ, all other projection fields identical. Actual physical-byte/relocation explanation is under independent source/data review; no comparator repair or successful preflight claim yet.",
+    "rawDiffBlob": "3b1219cfdc133100efa79bddbdcff0f5d4edb490"
+  },
+  "interpretation": {
+    "passed": "Both full-media browser imports and separate per-arm complete persisted-row/native-byte/cold-reader proofs completed, proving same-arm natural/browser term-file equality.",
+    "failed": "Prerequisite run remains failed: full units fixture error and cross-arm projection mismatch. Six ordinary timing/memory cells skipped.",
+    "excludedTiming": "Preflight totalImportMs fields are excluded observations only; no comparative performance inference."
+  }
+}

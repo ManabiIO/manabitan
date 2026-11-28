@@ -1,0 +1,864 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-tag-vndb-regression-mechanism-review",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "b2a909472aa6a415a9bc0b91f7d37208390af016",
+  "importerBlob": "20d839775d3afb4a73b672e806edbf65234699ac",
+  "writerBlob": "0b53c45a9ce3a06359a0083f70668eed1b723120",
+  "scope": "Read-only source and existing ordinary-observation diagnostic review; no new imports, exclusion, pooling or causal timing attribution.",
+  "sourceFinding": [
+    "The new BoundedZipTextWriter does not extend TextWriter or Uint8ArrayWriter.",
+    "_getFilesFromArchive/getDenseEntryData recognizes only those two existing writer classes for its bounded native small-entry path.",
+    "A small bounded tag writer therefore falls through to zipReader.getEntries() and an all-entry Map on a dense catalog. The normal late TextWriter uses the native fast path.",
+    "Dense directory admission requires archive at least128MiB and at least8192entries. The pinned JMdict/Jitendex archives are below128MiB, so correcting this route cannot change their primary code path or rescue the failed JMdict evidence."
+  ],
+  "interpretation": "Whole-catalog hydration before terms is a concrete experiment integration defect and a plausible cause of the VNDB memory/time regression. A focused reproducer is required; no attributable millisecond or byte saving is claimed from these overlapping counters. No new full-import campaign is warranted solely for a fix unreachable by JMdict.",
+  "cells": [
+    {
+      "order": "AB",
+      "arms": {
+        "A": {
+          "medians": {
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5476.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5326.149999999907,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7974.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5466.29999999993,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5326.149999999907,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244.0,
+            "import-data-banks/step4MediaZipBatchReadMs": 1673.5,
+            "import-data-banks/step4MediaZipBatchInflateMs": 694.0,
+            "import-data-banks/step4TermFileNonParseWriteMs": 26.5
+          },
+          "all12PrimaryObservations": [
+            {
+              "id": "pair-01-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5472,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5312,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7788,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5463,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5312,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1584,
+                "import-data-banks/step4MediaZipBatchInflateMs": 686,
+                "import-data-banks/step4TermFileNonParseWriteMs": 0
+              }
+            },
+            {
+              "id": "pair-02-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5555,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5389.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 8167,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5536.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5389.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1847,
+                "import-data-banks/step4MediaZipBatchInflateMs": 693,
+                "import-data-banks/step4TermFileNonParseWriteMs": 12
+              }
+            },
+            {
+              "id": "pair-03-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5411,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5288.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 8082,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5400.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5288.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1682,
+                "import-data-banks/step4MediaZipBatchInflateMs": 713,
+                "import-data-banks/step4TermFileNonParseWriteMs": 40
+              }
+            },
+            {
+              "id": "pair-04-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5406,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5248.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5396.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5248.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1621,
+                "import-data-banks/step4MediaZipBatchInflateMs": 691,
+                "import-data-banks/step4TermFileNonParseWriteMs": 0
+              }
+            },
+            {
+              "id": "pair-05-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5425,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5268.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7627,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5405.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5268.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1662,
+                "import-data-banks/step4MediaZipBatchInflateMs": 687,
+                "import-data-banks/step4TermFileNonParseWriteMs": 4
+              }
+            },
+            {
+              "id": "pair-06-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5625,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5463,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7960,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5614.899999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5463,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1510,
+                "import-data-banks/step4MediaZipBatchInflateMs": 659,
+                "import-data-banks/step4TermFileNonParseWriteMs": 46
+              }
+            },
+            {
+              "id": "pair-07-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5375,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5203.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7689,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5366.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5203.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1665,
+                "import-data-banks/step4MediaZipBatchInflateMs": 695,
+                "import-data-banks/step4TermFileNonParseWriteMs": 44
+              }
+            },
+            {
+              "id": "pair-08-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5520,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5389.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 8325,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5508.79999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5389.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1706,
+                "import-data-banks/step4MediaZipBatchInflateMs": 723,
+                "import-data-banks/step4TermFileNonParseWriteMs": 186
+              }
+            },
+            {
+              "id": "pair-09-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5363,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5245.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7672,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5353.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5245.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1847,
+                "import-data-banks/step4MediaZipBatchInflateMs": 722,
+                "import-data-banks/step4TermFileNonParseWriteMs": 86
+              }
+            },
+            {
+              "id": "pair-10-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5517,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5362.29999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7954,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5507.699999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5362.29999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 2015,
+                "import-data-banks/step4MediaZipBatchInflateMs": 701,
+                "import-data-banks/step4TermFileNonParseWriteMs": 13
+              }
+            },
+            {
+              "id": "pair-11-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5542,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5388.399999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 8260,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5533.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5388.399999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1461,
+                "import-data-banks/step4MediaZipBatchInflateMs": 655,
+                "import-data-banks/step4TermFileNonParseWriteMs": 0
+              }
+            },
+            {
+              "id": "pair-12-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5480,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5340.299999999814,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7997,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5469.59999999986,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5340.299999999814,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1827,
+                "import-data-banks/step4MediaZipBatchInflateMs": 732,
+                "import-data-banks/step4TermFileNonParseWriteMs": 66
+              }
+            }
+          ]
+        },
+        "B": {
+          "medians": {
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6539.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6242.950000000012,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7271.5,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6527.150000000023,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6242.950000000012,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244.0,
+            "import-data-banks/step4MediaZipBatchReadMs": 731.5,
+            "import-data-banks/step4MediaZipBatchInflateMs": 379.5,
+            "import-data-banks/step4TermFileNonParseWriteMs": 1162.5
+          },
+          "all12PrimaryObservations": [
+            {
+              "id": "pair-01-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6473,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6215.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7231,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6457.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6215.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 767,
+                "import-data-banks/step4MediaZipBatchInflateMs": 382,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1482
+              }
+            },
+            {
+              "id": "pair-02-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6731,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6427.700000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7815,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6680.100000000035,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6427.700000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 709,
+                "import-data-banks/step4MediaZipBatchInflateMs": 371,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1153
+              }
+            },
+            {
+              "id": "pair-03-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6658,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6371.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7248,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6647.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6371.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 852,
+                "import-data-banks/step4MediaZipBatchInflateMs": 398,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1133
+              }
+            },
+            {
+              "id": "pair-04-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6541,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6263.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7390,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6529,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6263.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 784,
+                "import-data-banks/step4MediaZipBatchInflateMs": 387,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1243
+              }
+            },
+            {
+              "id": "pair-05-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6513,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6188.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7352,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6492.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6188.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 710,
+                "import-data-banks/step4MediaZipBatchInflateMs": 364,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1128
+              }
+            },
+            {
+              "id": "pair-06-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6242,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6025.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7340,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6223.79999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6025.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 697,
+                "import-data-banks/step4MediaZipBatchInflateMs": 379,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1422
+              }
+            },
+            {
+              "id": "pair-07-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6537,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6231.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7090,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6525.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6231.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 725,
+                "import-data-banks/step4MediaZipBatchInflateMs": 380,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1562
+              }
+            },
+            {
+              "id": "pair-08-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6547,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6384.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7295,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6537.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6384.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 738,
+                "import-data-banks/step4MediaZipBatchInflateMs": 379,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1172
+              }
+            },
+            {
+              "id": "pair-09-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6447,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6254.70000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7169,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6423.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6254.70000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 744,
+                "import-data-banks/step4MediaZipBatchInflateMs": 387,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1134
+              }
+            },
+            {
+              "id": "pair-10-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6608,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6382.599999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7392,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6598.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6382.599999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 970,
+                "import-data-banks/step4MediaZipBatchInflateMs": 428,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1308
+              }
+            },
+            {
+              "id": "pair-11-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6347,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6123.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7048,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6323.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6123.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 692,
+                "import-data-banks/step4MediaZipBatchInflateMs": 368,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1103
+              }
+            },
+            {
+              "id": "pair-12-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6558,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6204.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6999,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6544,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6204.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 723,
+                "import-data-banks/step4MediaZipBatchInflateMs": 351,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1141
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "order": "BA",
+      "arms": {
+        "A": {
+          "medians": {
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5287.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5162.749999999971,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7232.5,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5273.950000000012,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5162.749999999971,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244.0,
+            "import-data-banks/step4MediaZipBatchReadMs": 1578.0,
+            "import-data-banks/step4MediaZipBatchInflateMs": 531.0,
+            "import-data-banks/step4TermFileNonParseWriteMs": 176.5
+          },
+          "all12PrimaryObservations": [
+            {
+              "id": "pair-01-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5366,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5212.899999999994,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7197,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5351.899999999994,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5212.899999999994,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1706,
+                "import-data-banks/step4MediaZipBatchInflateMs": 520,
+                "import-data-banks/step4TermFileNonParseWriteMs": 151
+              }
+            },
+            {
+              "id": "pair-02-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5926,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5819.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7113,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5914,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5819.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1997,
+                "import-data-banks/step4MediaZipBatchInflateMs": 536,
+                "import-data-banks/step4TermFileNonParseWriteMs": 843
+              }
+            },
+            {
+              "id": "pair-03-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5281,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5137.599999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7427,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5265.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5137.599999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1622,
+                "import-data-banks/step4MediaZipBatchInflateMs": 534,
+                "import-data-banks/step4TermFileNonParseWriteMs": 41
+              }
+            },
+            {
+              "id": "pair-04-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5293,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5175.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7211,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5282.100000000035,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5175.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1404,
+                "import-data-banks/step4MediaZipBatchInflateMs": 490,
+                "import-data-banks/step4TermFileNonParseWriteMs": 202
+              }
+            },
+            {
+              "id": "pair-05-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5328,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5196.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7111,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5317.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5196.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1429,
+                "import-data-banks/step4MediaZipBatchInflateMs": 507,
+                "import-data-banks/step4TermFileNonParseWriteMs": 356
+              }
+            },
+            {
+              "id": "pair-06-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5352,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5217.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7222,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5343,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5217.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1796,
+                "import-data-banks/step4MediaZipBatchInflateMs": 485,
+                "import-data-banks/step4TermFileNonParseWriteMs": 112
+              }
+            },
+            {
+              "id": "pair-07-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5142,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 4985.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7244,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5126.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 4985.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1528,
+                "import-data-banks/step4MediaZipBatchInflateMs": 551,
+                "import-data-banks/step4TermFileNonParseWriteMs": 0
+              }
+            },
+            {
+              "id": "pair-08-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5607,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5444,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7396,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5595.79999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5444,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1534,
+                "import-data-banks/step4MediaZipBatchInflateMs": 538,
+                "import-data-banks/step4TermFileNonParseWriteMs": 367
+              }
+            },
+            {
+              "id": "pair-09-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5130,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 4997.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7355,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5122.29999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 4997.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1808,
+                "import-data-banks/step4MediaZipBatchInflateMs": 567,
+                "import-data-banks/step4TermFileNonParseWriteMs": 59
+              }
+            },
+            {
+              "id": "pair-10-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5209,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5093.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7379,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5198.100000000093,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5093.800000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1860,
+                "import-data-banks/step4MediaZipBatchInflateMs": 555,
+                "import-data-banks/step4TermFileNonParseWriteMs": 0
+              }
+            },
+            {
+              "id": "pair-11-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5251,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5119.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7243,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5242.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5119.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1485,
+                "import-data-banks/step4MediaZipBatchInflateMs": 507,
+                "import-data-banks/step4TermFileNonParseWriteMs": 237
+              }
+            },
+            {
+              "id": "pair-12-A/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 5265,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5149.699999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7111,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 5256.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5149.699999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1496,
+                "import-data-banks/step4MediaZipBatchInflateMs": 528,
+                "import-data-banks/step4TermFileNonParseWriteMs": 237
+              }
+            }
+          ]
+        },
+        "B": {
+          "medians": {
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6380.5,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6222.100000000006,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6837.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170.0,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6346.900000000052,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6222.100000000006,
+            "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244.0,
+            "import-data-banks/step4MediaZipBatchReadMs": 675.5,
+            "import-data-banks/step4MediaZipBatchInflateMs": 338.0,
+            "import-data-banks/step4TermFileNonParseWriteMs": 1474.0
+          },
+          "all12PrimaryObservations": [
+            {
+              "id": "pair-01-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6232,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6007.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6862,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6222.799999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6007.299999999988,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 696,
+                "import-data-banks/step4MediaZipBatchInflateMs": 326,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1236
+              }
+            },
+            {
+              "id": "pair-02-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6728,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6516.200000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6561,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6704.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6516.200000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 675,
+                "import-data-banks/step4MediaZipBatchInflateMs": 339,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1457
+              }
+            },
+            {
+              "id": "pair-03-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6253,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6193.100000000035,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6766,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6244.700000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6193.100000000035,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 708,
+                "import-data-banks/step4MediaZipBatchInflateMs": 357,
+                "import-data-banks/step4TermFileNonParseWriteMs": 990
+              }
+            },
+            {
+              "id": "pair-04-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6426,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6307,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6812,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6417.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6307,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 655,
+                "import-data-banks/step4MediaZipBatchInflateMs": 316,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1900
+              }
+            },
+            {
+              "id": "pair-05-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6363,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6298.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7008,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6354.200000000012,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6298.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 670,
+                "import-data-banks/step4MediaZipBatchInflateMs": 339,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1491
+              }
+            },
+            {
+              "id": "pair-06-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6490,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6251.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 7149,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6475.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6251.099999999977,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 2071,
+                "import-data-banks/step4MediaZipBatchInflateMs": 462,
+                "import-data-banks/step4TermFileNonParseWriteMs": 438
+              }
+            },
+            {
+              "id": "pair-07-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6604,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6310.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6791,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6594.5,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6310.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 639,
+                "import-data-banks/step4MediaZipBatchInflateMs": 337,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1628
+              }
+            },
+            {
+              "id": "pair-08-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6398,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6161.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6575,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6339.600000000093,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6161.20000000007,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 676,
+                "import-data-banks/step4MediaZipBatchInflateMs": 326,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1535
+              }
+            },
+            {
+              "id": "pair-09-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6546,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6344.79999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6914,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6530.899999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6344.79999999993,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 666,
+                "import-data-banks/step4MediaZipBatchInflateMs": 314,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1693
+              }
+            },
+            {
+              "id": "pair-10-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6339,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6080.899999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6719,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6322,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6080.899999999907,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 653,
+                "import-data-banks/step4MediaZipBatchInflateMs": 332,
+                "import-data-banks/step4TermFileNonParseWriteMs": 1589
+              }
+            },
+            {
+              "id": "pair-11-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6104,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 6015.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6990,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6094.900000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 6015.300000000047,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 681,
+                "import-data-banks/step4MediaZipBatchInflateMs": 340,
+                "import-data-banks/step4TermFileNonParseWriteMs": 972
+              }
+            },
+            {
+              "id": "pair-12-B/run-1.json",
+              "metrics": {
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/elapsedMs": 6208,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/sourceArchiveReadMs": 5997.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParseBankMs": 6943,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserBorrowedContentResultCount": 0,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelGroupCount": 170,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelWorkerWallMs": 6199.400000000023,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelSourceReadWallMs": 5997.199999999953,
+                "term-file-fast-path:term_bank_1.json..term_bank_665.json/parserParallelOwnedContentBytes": 91670244,
+                "import-data-banks/step4MediaZipBatchReadMs": 1671,
+                "import-data-banks/step4MediaZipBatchInflateMs": 483,
+                "import-data-banks/step4TermFileNonParseWriteMs": 574
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+diff --git a/test/term-bank-wasm-parser.test.js b/test/term-bank-wasm-parser.test.js
+index a5fd778..7ad8549 100644
+--- a/test/term-bank-wasm-parser.test.js
++++ b/test/term-bank-wasm-parser.test.js
+@@ -1748,7 +1748,7 @@ describe('term-bank WASM parser', () => {
+         vi.stubGlobal('Worker', RecordWorker);
+         const owner = new NativeTermRecordImportOwner(() => {});
+         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+-        const count = getParallelTermBankParserWorkerCount();
++        const count = Math.max(4, getParallelTermBankParserWorkerCount());
+         /** @type {Array<{lease: object, chunk: object}>} */
+         const leases = [];
+         let chunks = 0;

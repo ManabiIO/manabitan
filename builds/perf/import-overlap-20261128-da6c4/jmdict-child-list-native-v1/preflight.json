@@ -1,0 +1,468 @@
+{
+  "complete": true,
+  "timingAcquired": false,
+  "inputSha256": "e4bcb5c25b9f57610bb07b5a5246a1bf7372a80041edaaf78ce59e55dbc34721",
+  "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "node": "v24.22.3",
+  "files": {
+    "preflight-A-final.json": "2557c11a85f63dd4296f0e7b8f29b9738d9df8e01810349f513dee6ee11c6896",
+    "preflight-B-final.json": "73bd1830acaecf726c5aa23c31ed8453e35d427bb7212d72ab54c6f1e32b5eb0",
+    "preflight-counter-final.json": "f6dc98fb618670e691f99a882c8e05b1dc90376f128a0f8a9e9303cc17a6317c"
+  },
+  "modules": [
+    "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "3d6f798a14952a154100caa7fa407ec02c36e4553dc037f95dcae0961aa38ffd",
+    "d166fa326f56f726895e7a54321b62cb37fcf1519cb8577dd02cd030047d0e3b"
+  ],
+  "rows": [
+    528299,
+    528299,
+    528299
+  ],
+  "groups": [
+    12,
+    12,
+    12
+  ],
+  "outputOracle": [
+    {
+      "sha256": "ab22f320947a737d87c62dffeb89bd76962ab826bb329ce99e1339ad56551d85",
+      "lengths": {
+        "readingEqualsExpressionList": 50000,
+        "scoreList": 200000,
+        "sequenceList": 200000,
+        "contentMetaList": 800000,
+        "contentUniqueIndexList": 200000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 8486982,
+        "recordPlan.stringLengths": 60496,
+        "recordPlan.stringsBuffer": 513984,
+        "recordPlan.expressionIndexes": 200000,
+        "recordPlan.readingIndexes": 200000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 139804,
+        "dedup.uniqueSignatures": 419412,
+        "0:50000.bytes": 1427380,
+        "0:50000.route": 75624,
+        "0:50000.plan.stringLengths": 60496,
+        "0:50000.plan.stringsBuffer": 513984,
+        "0:50000.plan.expressionIndexes": 200000,
+        "0:50000.plan.readingIndexes": 200000
+      }
+    },
+    {
+      "sha256": "29fa464056cb429d43a3cb49bc8a47261626e364291a23556ec1be376c385323",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 9427894,
+        "recordPlan.stringLengths": 72418,
+        "recordPlan.stringsBuffer": 396172,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 131424,
+        "dedup.uniqueSignatures": 394272,
+        "0:40000.bytes": 1337216,
+        "0:40000.route": 90528,
+        "0:40000.plan.stringLengths": 72418,
+        "0:40000.plan.stringsBuffer": 396172,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "dd614be2334944061621543420b34c4cf3be9cb232134693f11419afafbe8699",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 9272798,
+        "recordPlan.stringLengths": 72988,
+        "recordPlan.stringsBuffer": 405246,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 129684,
+        "dedup.uniqueSignatures": 389052,
+        "0:40000.bytes": 1338588,
+        "0:40000.route": 91240,
+        "0:40000.plan.stringLengths": 72988,
+        "0:40000.plan.stringsBuffer": 405246,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "dd2e4a6a13049c84eec2a5d8389146ff13c3e548e117d008454314ba0c4e6204",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 8619220,
+        "recordPlan.stringLengths": 56414,
+        "recordPlan.stringsBuffer": 287464,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 115580,
+        "dedup.uniqueSignatures": 346740,
+        "0:40000.bytes": 1086020,
+        "0:40000.route": 70524,
+        "0:40000.plan.stringLengths": 56414,
+        "0:40000.plan.stringsBuffer": 287464,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "6e719f8963c522035733a9f2b991896cc00f683bc0f7741792926df6a404d0e7",
+      "lengths": {
+        "readingEqualsExpressionList": 50000,
+        "scoreList": 200000,
+        "sequenceList": 200000,
+        "contentMetaList": 800000,
+        "contentUniqueIndexList": 200000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 8782091,
+        "recordPlan.stringLengths": 101986,
+        "recordPlan.stringsBuffer": 613939,
+        "recordPlan.expressionIndexes": 200000,
+        "recordPlan.readingIndexes": 200000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 138708,
+        "dedup.uniqueSignatures": 416124,
+        "0:50000.bytes": 1829408,
+        "0:50000.route": 127488,
+        "0:50000.plan.stringLengths": 101986,
+        "0:50000.plan.stringsBuffer": 613939,
+        "0:50000.plan.expressionIndexes": 200000,
+        "0:50000.plan.readingIndexes": 200000
+      }
+    },
+    {
+      "sha256": "27d65e38ef468f4d82d8a9434af9368e598e87a78c73b0949fb56a2d08e6c460",
+      "lengths": {
+        "readingEqualsExpressionList": 50000,
+        "scoreList": 200000,
+        "sequenceList": 200000,
+        "contentMetaList": 800000,
+        "contentUniqueIndexList": 200000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 9009676,
+        "recordPlan.stringLengths": 104168,
+        "recordPlan.stringsBuffer": 809120,
+        "recordPlan.expressionIndexes": 200000,
+        "recordPlan.readingIndexes": 200000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 136024,
+        "dedup.uniqueSignatures": 408072,
+        "0:50000.bytes": 2029212,
+        "0:50000.route": 130216,
+        "0:50000.plan.stringLengths": 104168,
+        "0:50000.plan.stringsBuffer": 809120,
+        "0:50000.plan.expressionIndexes": 200000,
+        "0:50000.plan.readingIndexes": 200000
+      }
+    },
+    {
+      "sha256": "30a18c1081114ac9a6f1b513efcb1e42f5381cade39ee9d48e249df19f930e86",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 7077918,
+        "recordPlan.stringLengths": 71734,
+        "recordPlan.stringsBuffer": 589849,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 97084,
+        "dedup.uniqueSignatures": 291252,
+        "0:40000.bytes": 1491628,
+        "0:40000.route": 89672,
+        "0:40000.plan.stringLengths": 71734,
+        "0:40000.plan.stringsBuffer": 589849,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "c67511ea1b2fd870135586b872401d9b46b91718e9316c63ad28dbc7fa8eea92",
+      "lengths": {
+        "readingEqualsExpressionList": 50000,
+        "scoreList": 200000,
+        "sequenceList": 200000,
+        "contentMetaList": 800000,
+        "contentUniqueIndexList": 200000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 7502995,
+        "recordPlan.stringLengths": 94236,
+        "recordPlan.stringsBuffer": 930123,
+        "recordPlan.expressionIndexes": 200000,
+        "recordPlan.readingIndexes": 200000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 127624,
+        "dedup.uniqueSignatures": 382872,
+        "0:50000.bytes": 2084184,
+        "0:50000.route": 117800,
+        "0:50000.plan.stringLengths": 94236,
+        "0:50000.plan.stringsBuffer": 930123,
+        "0:50000.plan.expressionIndexes": 200000,
+        "0:50000.plan.readingIndexes": 200000
+      }
+    },
+    {
+      "sha256": "4d592b28ddd76ebf00c6fc8e5b2c09f625deaef542a95509c583031b15782bdc",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 7850259,
+        "recordPlan.stringLengths": 79496,
+        "recordPlan.stringsBuffer": 602808,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 103096,
+        "dedup.uniqueSignatures": 309288,
+        "0:40000.bytes": 1569148,
+        "0:40000.route": 99376,
+        "0:40000.plan.stringLengths": 79496,
+        "0:40000.plan.stringsBuffer": 602808,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "16ae8816c8a3e58e6e0d852e38369823418db6c47dd3f0d78026496ac8400961",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 7597844,
+        "recordPlan.stringLengths": 76890,
+        "recordPlan.stringsBuffer": 602876,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 100436,
+        "dedup.uniqueSignatures": 301308,
+        "0:40000.bytes": 1547192,
+        "0:40000.route": 96120,
+        "0:40000.plan.stringLengths": 76890,
+        "0:40000.plan.stringsBuffer": 602876,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "50e7989eb8d05e820a851d35e99dc918266eb7f9da4fc20493afe49c7273ec7c",
+      "lengths": {
+        "readingEqualsExpressionList": 40000,
+        "scoreList": 160000,
+        "sequenceList": 160000,
+        "contentMetaList": 640000,
+        "contentUniqueIndexList": 160000,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 7885247,
+        "recordPlan.stringLengths": 79962,
+        "recordPlan.stringsBuffer": 642598,
+        "recordPlan.expressionIndexes": 160000,
+        "recordPlan.readingIndexes": 160000,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 104408,
+        "dedup.uniqueSignatures": 313224,
+        "0:40000.bytes": 1610024,
+        "0:40000.route": 99960,
+        "0:40000.plan.stringLengths": 79962,
+        "0:40000.plan.stringsBuffer": 642598,
+        "0:40000.plan.expressionIndexes": 160000,
+        "0:40000.plan.readingIndexes": 160000
+      }
+    },
+    {
+      "sha256": "713acd61c6d0f7aa7e05d0ac99ba68e80a5615ff2813db6afe02a48c861db866",
+      "lengths": {
+        "readingEqualsExpressionList": 48299,
+        "scoreList": 193196,
+        "sequenceList": 193196,
+        "contentMetaList": 772784,
+        "contentUniqueIndexList": 193196,
+        "contentHash1List": 0,
+        "contentHash2List": 0,
+        "contentBytesBuffer": 9631061,
+        "recordPlan.stringLengths": 105234,
+        "recordPlan.stringsBuffer": 951471,
+        "recordPlan.expressionIndexes": 193196,
+        "recordPlan.readingIndexes": 193196,
+        "dedup.resolvedFlags": 0,
+        "dedup.resolvedLengths": 0,
+        "dedup.resolvedOffsets": 0,
+        "dedup.uniqueRowIndexes": 140248,
+        "dedup.uniqueSignatures": 420744,
+        "0:48299.bytes": 2158472,
+        "0:48299.route": 131548,
+        "0:48299.plan.stringLengths": 105234,
+        "0:48299.plan.stringsBuffer": 951471,
+        "0:48299.plan.expressionIndexes": 193196,
+        "0:48299.plan.readingIndexes": 193196
+      }
+    }
+  ],
+  "counterTotals": {
+    "attempts": 212262,
+    "hits": 66897,
+    "bytes": 11977682,
+    "compositeCalls": 208562
+  },
+  "previousCounterTotals": {
+    "attempts": 954913,
+    "hits": 66897,
+    "bytes": 11977682,
+    "compositeCalls": 208562
+  },
+  "groupGeometry": [
+    {
+      "firstBank": "term_bank_1.json",
+      "lastBank": "term_bank_5.json",
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 14543374
+    },
+    {
+      "firstBank": "term_bank_6.json",
+      "lastBank": "term_bank_9.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13240716
+    },
+    {
+      "firstBank": "term_bank_10.json",
+      "lastBank": "term_bank_13.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13257737
+    },
+    {
+      "firstBank": "term_bank_14.json",
+      "lastBank": "term_bank_17.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 14088207
+    },
+    {
+      "firstBank": "term_bank_18.json",
+      "lastBank": "term_bank_22.json",
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 15138615
+    },
+    {
+      "firstBank": "term_bank_23.json",
+      "lastBank": "term_bank_27.json",
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 15955653
+    },
+    {
+      "firstBank": "term_bank_28.json",
+      "lastBank": "term_bank_31.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13702906
+    },
+    {
+      "firstBank": "term_bank_32.json",
+      "lastBank": "term_bank_36.json",
+      "banks": 5,
+      "rows": 50000,
+      "sourceBytes": 14307906
+    },
+    {
+      "firstBank": "term_bank_37.json",
+      "lastBank": "term_bank_40.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 14119170
+    },
+    {
+      "firstBank": "term_bank_41.json",
+      "lastBank": "term_bank_44.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13775196
+    },
+    {
+      "firstBank": "term_bank_45.json",
+      "lastBank": "term_bank_48.json",
+      "banks": 4,
+      "rows": 40000,
+      "sourceBytes": 13936647
+    },
+    {
+      "firstBank": "term_bank_49.json",
+      "lastBank": "term_bank_53.json",
+      "banks": 5,
+      "rows": 48299,
+      "sourceBytes": 15551396
+    }
+  ],
+  "sourceStable": true,
+  "limitations": [
+    "Untimed serial native/parser/copy output parity, not a complete concurrent browser import or performance observation.",
+    "Counter-only module excludes these instrumentation counters from timed candidate; actual helper hits are post-reuse and differ from raw morphology coverage."
+  ]
+}

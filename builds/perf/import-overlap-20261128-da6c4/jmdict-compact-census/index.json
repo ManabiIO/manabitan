@@ -1,0 +1,270 @@
+{
+  "all-banks/aggregate-shapes.json": {
+    "bytes": 952191,
+    "sha256": "2d4503f042d75e662abac52a66503d9cdc1de706b7e7bcfe2375465433f117c2"
+  },
+  "all-banks/build.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "all-banks/probe.wasm": {
+    "bytes": 69173,
+    "sha256": "b1045767d56bc0d0d4990f950e52941c951dd35db5ae75653969dab79cb171d6"
+  },
+  "all-banks/receipt.json": {
+    "bytes": 30670,
+    "sha256": "21f871dab4b6b069d2d5fa142a1954f6e5a57c4648f9747ceac110681ac14135"
+  },
+  "all-banks/term_bank_1.json.census.json": {
+    "bytes": 140592,
+    "sha256": "78798f29dfdedd63b198f7fd87f5c0e8ccd4774b16ac3772ba43b0cc206aaa6a"
+  },
+  "all-banks/term_bank_10.json.census.json": {
+    "bytes": 83382,
+    "sha256": "6e6e2736cc7a3ca84bec58ad144d39e95ffaa28cde3d896f91f9cbd721cf5efa"
+  },
+  "all-banks/term_bank_11.json.census.json": {
+    "bytes": 100791,
+    "sha256": "b1dcb827748a356f6d89faa3dbd2d8612850537269e0ec4836e63fe6b654cc8b"
+  },
+  "all-banks/term_bank_12.json.census.json": {
+    "bytes": 102053,
+    "sha256": "5b45cc2db73be1dc9773bb5a4d178c7080f5089f82140500363d2251859294b6"
+  },
+  "all-banks/term_bank_13.json.census.json": {
+    "bytes": 89732,
+    "sha256": "6a5c3cf1c2499464971349752515907bccb31b9f0aacac4e09ce843acf1d038d"
+  },
+  "all-banks/term_bank_14.json.census.json": {
+    "bytes": 98969,
+    "sha256": "0253363419b6d5dfbd1ec5fbb50c9d8ea9df1c0843413224698466e20984f143"
+  },
+  "all-banks/term_bank_15.json.census.json": {
+    "bytes": 105406,
+    "sha256": "ca1b7a7a5568efd984995381bb4620bb45f655f8266784f3883ed0aa23cc9667"
+  },
+  "all-banks/term_bank_16.json.census.json": {
+    "bytes": 71752,
+    "sha256": "5957edaef52fff6433fe14634c3d3580452688a2aab40d0bd0e1e71e5c95e7a0"
+  },
+  "all-banks/term_bank_17.json.census.json": {
+    "bytes": 99689,
+    "sha256": "1471b026275ccdcc117d9606bce5b87ca1dce2ddff494ac5e6e5d34dd8e6cc05"
+  },
+  "all-banks/term_bank_18.json.census.json": {
+    "bytes": 117571,
+    "sha256": "56916fe8c953c8819ede85e6c39a4638e77f6ba306e900b5649fc642ea74decd"
+  },
+  "all-banks/term_bank_19.json.census.json": {
+    "bytes": 68404,
+    "sha256": "d5d7e941c58f44e4cdcb4d8c932c6fc2495391b6327c8dff4221cc642c7431bb"
+  },
+  "all-banks/term_bank_2.json.census.json": {
+    "bytes": 186760,
+    "sha256": "a2c446ebdd6903f1f1707927820661990b89cd3ad0bb62465d9e6f80243e740f"
+  },
+  "all-banks/term_bank_20.json.census.json": {
+    "bytes": 83302,
+    "sha256": "ad95efbcd76236c1837b7a246129877df1a4b50a5d2fc7422b2c8dcc7b3c444b"
+  },
+  "all-banks/term_bank_21.json.census.json": {
+    "bytes": 87093,
+    "sha256": "e1238af4245f9bff019fbf8b4bd5d9de8928209a20949eab5437bf78807af9c2"
+  },
+  "all-banks/term_bank_22.json.census.json": {
+    "bytes": 84633,
+    "sha256": "216fe1fd14f7cd966f1c3882b85cf6fd0367afc915c7f09790eabb12fae46657"
+  },
+  "all-banks/term_bank_23.json.census.json": {
+    "bytes": 124334,
+    "sha256": "b08f4c9739ae41e6e95f756c4e6ba331364263b5fc455906be2a4742df1a30f0"
+  },
+  "all-banks/term_bank_24.json.census.json": {
+    "bytes": 103035,
+    "sha256": "e4af0e2ab126e46428c652dec275d322dad5d3831c55076d5d15de1bfc8a999e"
+  },
+  "all-banks/term_bank_25.json.census.json": {
+    "bytes": 144301,
+    "sha256": "25d26163b34e5453a2ce61aee31d8b213beaa1513378de83189423d759b7d58d"
+  },
+  "all-banks/term_bank_26.json.census.json": {
+    "bytes": 169145,
+    "sha256": "3b4ef7477e761eb26163ba6e8e765a46324cab881ebf375bf9bafc66f1e30e5a"
+  },
+  "all-banks/term_bank_27.json.census.json": {
+    "bytes": 156416,
+    "sha256": "683a79f13bda0e2b18af33c27174f34316de6e56202eeba9f5ee7fd5e8e20208"
+  },
+  "all-banks/term_bank_28.json.census.json": {
+    "bytes": 171745,
+    "sha256": "dbb8204704558abf582fbc04462b24c11f8cddf654ad290b54f1802d965883a5"
+  },
+  "all-banks/term_bank_29.json.census.json": {
+    "bytes": 152349,
+    "sha256": "b11caa978e6ad990e490a0548aceeced0f6b08fd7e073310a6b4207985a4a28b"
+  },
+  "all-banks/term_bank_3.json.census.json": {
+    "bytes": 159047,
+    "sha256": "29bf2dbd4debb00d6de50c5b58dc52dc7d74640490ca55b4f8763b44f7d15f65"
+  },
+  "all-banks/term_bank_30.json.census.json": {
+    "bytes": 164271,
+    "sha256": "813c46b7d60fa681d6c1f177ca95ec7496f97f46c83242626caacc4f169a821b"
+  },
+  "all-banks/term_bank_31.json.census.json": {
+    "bytes": 130095,
+    "sha256": "595dd9453c0c733b2198840aee4d6885b62e89d1acdb71bb2fc6f83077059a9c"
+  },
+  "all-banks/term_bank_32.json.census.json": {
+    "bytes": 51070,
+    "sha256": "a83d2c4a16a2205854e58f86a4c4ef405954f749da399e332d2b9f91b13b2348"
+  },
+  "all-banks/term_bank_33.json.census.json": {
+    "bytes": 121914,
+    "sha256": "9a6244805fe670741456d8162ca7a4b81e0169d49bf3db907823bb54cb32df53"
+  },
+  "all-banks/term_bank_34.json.census.json": {
+    "bytes": 163588,
+    "sha256": "fd48c32f7339f511198aff08033cdc8950187f00712cda284288a95553d25d51"
+  },
+  "all-banks/term_bank_35.json.census.json": {
+    "bytes": 101391,
+    "sha256": "5222e145cafd839cff82dfdcb087886e1561d6e83bca31eaee3258566ea28fdf"
+  },
+  "all-banks/term_bank_36.json.census.json": {
+    "bytes": 169666,
+    "sha256": "5e72452c1189acab1f451cf4da2c0b6b3c46197d830538b6c073057b2ece9596"
+  },
+  "all-banks/term_bank_37.json.census.json": {
+    "bytes": 175372,
+    "sha256": "037ce58930261587e75351b738581b115fcd58661e1f447760a7878dfa1fc93a"
+  },
+  "all-banks/term_bank_38.json.census.json": {
+    "bytes": 164090,
+    "sha256": "448e2564144d9ba3260b7c8bfd0d7c388cc0bee625cf0f3546b1baa806f67247"
+  },
+  "all-banks/term_bank_39.json.census.json": {
+    "bytes": 168388,
+    "sha256": "80c9cae4ee0d0e726d639585035fd45baaa24bd1ca231ec2cb0c2721d3c6ec98"
+  },
+  "all-banks/term_bank_4.json.census.json": {
+    "bytes": 168130,
+    "sha256": "64109038b90a5e78c92e7bd3d68e5a894c31c895c919f285740ccc42609a3c64"
+  },
+  "all-banks/term_bank_40.json.census.json": {
+    "bytes": 204848,
+    "sha256": "15c657a278a94b3ecfa256c965dc7021e70bf9f6fccffab9a3856c45b7da152f"
+  },
+  "all-banks/term_bank_41.json.census.json": {
+    "bytes": 215393,
+    "sha256": "971669f740843502a5ce4740d798a121745633c508f4e7a4539644ff0d535c5e"
+  },
+  "all-banks/term_bank_42.json.census.json": {
+    "bytes": 192121,
+    "sha256": "d7e895d18f8aefc79727c471db3924e743568a4c1e98c31b1d02d197c8e90a26"
+  },
+  "all-banks/term_bank_43.json.census.json": {
+    "bytes": 256030,
+    "sha256": "9056adbfa619fd78a2b81b20c29e02e9d4c19a207341c08c51c4894d6089ed19"
+  },
+  "all-banks/term_bank_44.json.census.json": {
+    "bytes": 228175,
+    "sha256": "63f94d418a0cc5ad2b59b93900cf7649d8a181b49fa41cf48edae0bd8880f73f"
+  },
+  "all-banks/term_bank_45.json.census.json": {
+    "bytes": 193099,
+    "sha256": "d479e5b44172f23596b5ee2b936c013e21aac145c9b82d31fe7ab8b7577608f0"
+  },
+  "all-banks/term_bank_46.json.census.json": {
+    "bytes": 215037,
+    "sha256": "ec90cd78dc8d3eae4a213b835ec8bf505ecba90a8c4ff695300629121767b28d"
+  },
+  "all-banks/term_bank_47.json.census.json": {
+    "bytes": 185113,
+    "sha256": "accc2d77df9df5da0bab4c03543719c78d5ba117e0e363f9dff0057a0e976b12"
+  },
+  "all-banks/term_bank_48.json.census.json": {
+    "bytes": 149703,
+    "sha256": "43daed2b76e4fe00e5ed3ae56974a60ae4eb08a0202a81700acd99719249d0a5"
+  },
+  "all-banks/term_bank_49.json.census.json": {
+    "bytes": 193454,
+    "sha256": "0325eec48b049ad4a83c537edca5bc280245e56861ead261a0439ea7bfc69374"
+  },
+  "all-banks/term_bank_5.json.census.json": {
+    "bytes": 124631,
+    "sha256": "3429cb0b086bf570cb6c298a1d18a05c819482f7ecdafbdd5f3f2436b32bee91"
+  },
+  "all-banks/term_bank_50.json.census.json": {
+    "bytes": 151439,
+    "sha256": "781c849b6a0f3035deeafd85dd705f38c6c6a281c43bce72f3edd6a849a0a55d"
+  },
+  "all-banks/term_bank_51.json.census.json": {
+    "bytes": 180812,
+    "sha256": "9e67d2dfb063be72bd5f27e1e8713b72e454299b3a279414c929757d2609ff1d"
+  },
+  "all-banks/term_bank_52.json.census.json": {
+    "bytes": 159474,
+    "sha256": "9c33d43929c6dba5abb675805fb63791d265525073f721746fdebe75fddf6947"
+  },
+  "all-banks/term_bank_53.json.census.json": {
+    "bytes": 9895,
+    "sha256": "d38086304d703971de06b77923e58e486e473efbefe6bf08d34155aa88f734e1"
+  },
+  "all-banks/term_bank_6.json.census.json": {
+    "bytes": 102589,
+    "sha256": "6fa0c616677306b3c2b0da04395fab683e9ff1e16903909d03951c05f33d990a"
+  },
+  "all-banks/term_bank_7.json.census.json": {
+    "bytes": 98621,
+    "sha256": "2f80f76da4ccd5a7cbaa20a5886172212e09f6990870ae74dedca29d7a89a4a4"
+  },
+  "all-banks/term_bank_8.json.census.json": {
+    "bytes": 105144,
+    "sha256": "57c6c0825596b201d75652cef3eeb46089fe5cc0fa16a5a84258449003d8f05c"
+  },
+  "all-banks/term_bank_9.json.census.json": {
+    "bytes": 99260,
+    "sha256": "de8e8358f7f112772a341d6348ab4a8894c737d6fff7cfe02269557f75fa1b23"
+  },
+  "all-banks.log": {
+    "bytes": 21707,
+    "sha256": "465fa39467a5d7039abde64c0fc54ee97520a8f0efcafb30453741dc384566f1"
+  },
+  "analyze-bank.mjs": {
+    "bytes": 4670,
+    "sha256": "516c7509d790b26347d6e335bd7917a4bab4b4888f5b16cc996c4b7b201685d4"
+  },
+  "first-bank/build.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "first-bank/probe.wasm": {
+    "bytes": 69173,
+    "sha256": "b1045767d56bc0d0d4990f950e52941c951dd35db5ae75653969dab79cb171d6"
+  },
+  "first-bank/receipt.json": {
+    "bytes": 4017,
+    "sha256": "21a4a287be7cc3b23452bcaf892b4143f94cc2a7f10b329f920bbbeabefb120c"
+  },
+  "first-bank/term_bank_1.json.census.json": {
+    "bytes": 140592,
+    "sha256": "78798f29dfdedd63b198f7fd87f5c0e8ccd4774b16ac3772ba43b0cc206aaa6a"
+  },
+  "first-bank.log": {
+    "bytes": 409,
+    "sha256": "4eb495d79d056221cbd2b53c59c9e53b0b08d030be1322336d525aaef810a5c2"
+  },
+  "probe.c": {
+    "bytes": 406,
+    "sha256": "a0ff6b363bc574830a145722410691ed3346145e82cbb6800055243ccce805af"
+  },
+  "run.py": {
+    "bytes": 4545,
+    "sha256": "0d61aaf17fa00644899c0c2be6e638e2e78a4eb6a7b2f983b3692d405895d090"
+  },
+  "summary.json": {
+    "bytes": 2911,
+    "sha256": "80f4ce230195e8341466da439cc404e3d65c3f8f1f37b6cb057729dafb8b42da"
+  }
+}

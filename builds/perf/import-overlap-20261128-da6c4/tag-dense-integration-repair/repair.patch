@@ -1,0 +1,201 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 20d8397..2947511 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -3072,13 +3072,18 @@ export class DictionaryImporter {
+                     if (
+                         this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                         this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+-                        (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
++                        (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter || writer instanceof BoundedZipTextWriter)
+                     ) {
+                         const signal = options.signal ?? new AbortController().signal;
+                         rawReader ??= new RawZipPayloadReader(archiveContent);
+                         const bytes = await rawReader.read(this, signal);
+                         const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
+                         signal.throwIfAborted();
++                        if (writer instanceof BoundedZipTextWriter) {
++                            await writer.writeUint8Array(decoded.sources[0]);
++                            signal.throwIfAborted();
++                            return await writer.getData();
++                        }
+                         return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
+                     }
+                     fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
+diff --git a/test/dense-zip-directory.test.js b/test/dense-zip-directory.test.js
+index e7ff3c1..d9185cc 100644
+--- a/test/dense-zip-directory.test.js
++++ b/test/dense-zip-directory.test.js
+@@ -4,11 +4,13 @@
+  */
+ 
+ import {readFile} from 'node:fs/promises';
+-import {crc32} from 'node:zlib';
+-import {describe, expect, test} from 'vitest';
+-import {TextWriter, Uint8ArrayWriter} from '../ext/lib/zip.js';
++import {crc32, deflateRawSync} from 'node:zlib';
++import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
++import {TextWriter, Uint8ArrayWriter, ZipReader} from '../ext/lib/zip.js';
++import {BoundedZipTextWriter} from '../ext/js/dictionary/bounded-zip-text-writer.js';
+ import {readDenseZipDirectory, readDenseZipFileMap} from '../ext/js/dictionary/dense-zip-directory.js';
+ import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
++import {DictionarySourceIntegrityError} from '../ext/js/dictionary/dictionary-source-integrity-error.js';
+ import {setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+ import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
+ 
+@@ -17,6 +19,8 @@ const filenameLength = 8;
+ const packedLength = 16 * 1024;
+ const directoryOffset = count * (30 + filenameLength + packedLength);
+ 
++afterEach(() => { vi.restoreAllMocks(); });
++
+ /** A virtual archive lets the fixture test directory reads without 128 MiB of payloads. */
+ class SparseZipDirectory extends Blob {
+     /** @param {{zip64?: boolean, corrupt?: string}} [options] */
+@@ -330,3 +334,146 @@ describe('compact dense ZIP catalog', () => {
+     })
+ })
+ /* eslint-enable @stylistic/semi */
++
++/**
++ * Keep the real 8192-entry dense directory and a valid first local entry, while
++ * avoiding allocation of the unused large image payloads.
++ * @param {{method?: 0|8, badCrc?: boolean, sizeDelta?: number, readGate?: Promise<void>, onRead?: () => void}} [options]
++ */
++function denseTagArchive({method = 8, badCrc = false, sizeDelta = 0, readGate, onRead} = {}) {
++    const archive = new SparseZipDirectory();
++    const filename = 'tag_bank_1.json';
++    setSparseZipNames(archive, (index) => index === 0 ? filename : void 0);
++    const content = new TextEncoder().encode('[["名詞","partOfSpeech",0,"noun",0]]');
++    const payload = method === 0 ? content : new Uint8Array(deflateRawSync(content));
++    const directory = new DataView(archive.directory.buffer);
++    directory.setUint16(10, method, true);
++    directory.setUint32(16, (crc32(content) ^ (badCrc ? 1 : 0)) >>> 0, true);
++    directory.setUint32(20, payload.length, true);
++    directory.setUint32(24, content.length + sizeDelta, true);
++    const removedBytes = packedLength - payload.length;
++    let position = 46 + filename.length;
++    for (let index = 1; index < count; ++index) {
++        directory.setUint32(position + 42, directory.getUint32(position + 42, true) - removedBytes, true);
++        position += 46 + filenameLength;
++    }
++    archive.directoryOffset -= removedBytes;
++    archive.archiveSize -= removedBytes;
++    new DataView(archive.tail.buffer).setUint32(92, archive.directoryOffset, true);
++    const local = new Uint8Array(30 + filename.length + payload.length);
++    const localHeader = new DataView(local.buffer);
++    localHeader.setUint32(0, 0x04034b50, true);
++    localHeader.setUint16(8, method, true);
++    localHeader.setUint16(26, filename.length, true);
++    local.set(new TextEncoder().encode(filename), 30);
++    local.set(payload, 30 + filename.length);
++    const directorySlice = archive.slice.bind(archive);
++    archive.slice = (start, end) => {
++        if (start !== 0) { return directorySlice(start, end); }
++        if (end !== local.length) { throw new Error(`Unexpected dense tag range: ${start}:${end}`); }
++        const blob = new Blob([local]);
++        const arrayBuffer = blob.arrayBuffer.bind(blob);
++        blob.arrayBuffer = async () => {
++            onRead?.();
++            await readGate;
++            return await arrayBuffer();
++        };
++        return blob;
++    };
++    return {archive, filename, content};
++}
++
++describe('bounded tag reads from an actual dense ZIP catalog', () => {
++    beforeAll(async () => {
++        setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))));
++    });
++
++    test.each([0, 8])('prefetches a small method-%s tag without enumerating the generic catalog', async (method) => {
++        const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries').mockRejectedValue(new Error('Unexpected full ZIP catalog fallback'));
++        const {archive, filename, content} = denseTagArchive({method: /** @type {0|8} */ (method)});
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
++        const {fileMap, zipReader, catalog} = await importer._getFilesFromArchive(archive);
++        try {
++            expect(catalog).toBe('dense-zip');
++            expect(fileMap.size).toBe(count);
++            const entry = fileMap.get(filename);
++            if (typeof entry === 'undefined') { throw new Error('Missing dense tag'); }
++            await expect(importer._prefetchSmallTagBank(entry)).resolves.toBe(new TextDecoder().decode(content));
++            expect(getEntries).not.toHaveBeenCalled();
++        } finally {
++            await zipReader.close();
++        }
++    });
++
++    test.each([
++        {method: 0, badCrc: true}, {method: 8, badCrc: true},
++        {method: 0, sizeDelta: -1}, {method: 8, sizeDelta: -1},
++        {method: 0, sizeDelta: 1}, {method: 8, sizeDelta: 1},
++    ])('preserves native CRC and exact decoded-size checks: %j', async (options) => {
++        const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries').mockRejectedValue(new Error('Unexpected full ZIP catalog fallback'));
++        const {archive, filename} = denseTagArchive({...options, method: /** @type {0|8} */ (options.method)});
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
++        const {fileMap, zipReader} = await importer._getFilesFromArchive(archive);
++        try {
++            const entry = fileMap.get(filename);
++            if (typeof entry === 'undefined') { throw new Error('Missing dense tag'); }
++            await expect(importer._prefetchSmallTagBank(entry)).rejects.toBeInstanceOf(DictionarySourceIntegrityError);
++            expect(getEntries).not.toHaveBeenCalled();
++        } finally {
++            await zipReader.close();
++        }
++    });
++
++    test('enforces the bounded writer snapshot independently of current entry metadata', async () => {
++        const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries').mockRejectedValue(new Error('Unexpected full ZIP catalog fallback'));
++        const {archive, filename, content} = denseTagArchive();
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
++        const {fileMap, zipReader} = await importer._getFilesFromArchive(archive);
++        try {
++            const entry = fileMap.get(filename);
++            if (typeof entry === 'undefined') { throw new Error('Missing dense tag'); }
++            for (const delta of [-1, 1]) {
++                const writer = new BoundedZipTextWriter(filename, content.length + delta);
++                await expect(importer._getData(entry, writer)).rejects.toBeInstanceOf(DictionarySourceIntegrityError);
++                expect(writer.getFailure()).toBeInstanceOf(DictionarySourceIntegrityError);
++            }
++            expect(getEntries).not.toHaveBeenCalled();
++        } finally {
++            await zipReader.close();
++        }
++    });
++
++    test('joins an aborted bounded payload read before rejecting without a catalog fallback', async () => {
++        const getEntries = vi.spyOn(ZipReader.prototype, 'getEntries').mockRejectedValue(new Error('Unexpected full ZIP catalog fallback'));
++        const started = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
++        const release = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
++        const {archive, filename, content} = denseTagArchive({readGate: release.promise, onRead: () => started.resolve()});
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
++        const {fileMap, zipReader} = await importer._getFilesFromArchive(archive);
++        const controller = new AbortController();
++        let settled = false;
++        /** @type {Promise<unknown>|null} */
++        let pending = null;
++        try {
++            const entry = fileMap.get(filename);
++            if (typeof entry === 'undefined') { throw new Error('Missing dense tag'); }
++            const writer = new BoundedZipTextWriter(filename, content.length);
++            pending = importer._getData(entry, writer, controller.signal);
++            void pending.then(() => { settled = true; }, () => { settled = true; });
++            await started.promise;
++            const reason = new DOMException('Dense tag cancelled', 'AbortError');
++            controller.abort(reason);
++            await Promise.resolve();
++            expect(settled).toBe(false);
++            expect(Reflect.get(writer, '_offset')).toBe(0);
++            release.resolve();
++            await expect(pending).rejects.toBe(reason);
++            expect(getEntries).not.toHaveBeenCalled();
++            expect(Reflect.get(writer, '_offset')).toBe(0);
++        } finally {
++            release.resolve();
++            await pending?.catch(() => {});
++            await zipReader.close();
++        }
++    });
++});

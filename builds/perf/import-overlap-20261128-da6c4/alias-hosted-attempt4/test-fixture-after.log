@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-wasm-parser.test.js -t binds receiver record ownership --maxWorkers=1
+
+
+ RUN  v4.1.12 /tmp/manabitan-da6c4-alias-tests
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed | 187 skipped (191)
+   Start at  05:30:38
+   Duration  1.70s (transform 1.12s, setup 24ms, import 1.44s, tests 35ms, environment 0ms)
+

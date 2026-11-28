@@ -1,0 +1,38 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-wasm-parser.test.js -t binds receiver record ownership --maxWorkers=1
+
+
+ RUN  v4.1.12 /tmp/manabitan-da6c4-alias-tests
+
+ ❯ test/term-bank-wasm-parser.test.js (191 tests | 4 failed | 187 skipped) 109ms
+     × binds receiver record ownership only through the private importer sink: 'owned'/true 102ms
+     × binds receiver record ownership only through the private importer sink: 'borrowed'/true 1ms
+     × binds receiver record ownership only through the private importer sink: 'conflicting'/true 1ms
+     × binds receiver record ownership only through the private importer sink: 'owned'/false 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > binds receiver record ownership only through the private importer sink: 'owned'/true
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > binds receiver record ownership only through the private importer sink: 'borrowed'/true
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > binds receiver record ownership only through the private importer sink: 'conflicting'/true
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > binds receiver record ownership only through the private importer sink: 'owned'/false
+Error: Import-wide parallel parser unavailable (source-count)
+ ❯ DictionaryImporter._readTermBankFileFast ext/js/dictionary/dictionary-importer.js:5511:23
+    5509|             const parallelParserSkipReason = usedParallelParser ? null…
+    5510|             if (!usedParallelParser && lazySourceBatch !== null) {
+    5511|                 throw new Error(`Import-wide parallel parser unavailab…
+       |                       ^
+    5512|             }
+    5513|             if (!usedParallelParser && deferredSourceBatch !== null) {
+ ❯ test/term-bank-wasm-parser.test.js:1756:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 187 skipped (191)
+   Start at  05:30:23
+   Duration  2.59s (transform 1.63s, setup 44ms, import 2.13s, tests 109ms, environment 0ms)
+
