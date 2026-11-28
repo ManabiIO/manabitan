@@ -1,0 +1,142 @@
+name: Frozen JS record-field helper qualification 20261128 0f1f
+
+on:
+  push:
+    branches: ["perf/js-record-field-helper-qualification-20261128-0f1f"]
+    paths:
+      - ".github/workflows/js-record-field-helper-qualification-20261128-0f1f.yml"
+
+permissions:
+  contents: read
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  PERF_CANDIDATE: 6da3dc87d4d0695ef7c1fafd9a934460a0186659
+  PERF_BASELINE_TREE: d99ea4d04658f7ec1c76acdc5f3684594212a471
+  PERF_CANDIDATE_TREE: 0eb585edf865d8d68c8d9e2b42a01643c29bf4f5
+
+jobs:
+  correctness:
+    if: github.run_attempt == 1
+    name: Frozen candidate / ${{ matrix.check }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: unit
+            os: ubuntu-latest
+          - check: lint-types
+            os: ubuntu-latest
+          - check: build
+            os: ubuntu-latest
+    env:
+      PERF_CHECK: ${{ matrix.check }}
+      PERF_EVIDENCE: builds/perf/js-record-field-helper-checks-20261128-0f1f
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 6da3dc87d4d0695ef7c1fafd9a934460a0186659
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify exact source and run the required gate
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$PERF_CANDIDATE_TREE"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE/source.txt"
+          case "$PERF_CHECK" in
+            unit) npm run test:unit > "$PERF_EVIDENCE/check.log" 2>&1 ;;
+            lint-types)
+              npx eslint ext/js/dictionary/term-record-opfs-store.js > "$PERF_EVIDENCE/check.log" 2>&1
+              npm run test:ts >> "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            build)
+              npm run test:build > "$PERF_EVIDENCE/check.log" 2>&1
+              ;;
+            *) exit 1 ;;
+          esac
+          git status --porcelain=v1 > "$PERF_EVIDENCE/source-status.txt"
+          test ! -s "$PERF_EVIDENCE/source-status.txt"
+      - name: Preserve exact-commit checks and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: js-record-field-helper-checks-${{ matrix.check }}-20261128-0f1f
+          path: builds/perf/js-record-field-helper-checks-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
+
+  qualify:
+    if: github.run_attempt == 1
+    name: JS record-field helper / ${{ matrix.dictionary }} / ${{ matrix.order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: "1"
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: "0"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify unchanged qualification source bindings
+        run: |
+          sha256sum --check <<'SOURCE'
+          cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef  dev/perf/import-qualification-20261125-a7f7.py
+          4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51  dev/perf/import-memory-20261125-a7f7/qualification_receipts.py
+          ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7  dev/perf/import-memory-20261125-a7f7/protocol.py
+          8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7  dev/perf/import-memory-20261125-a7f7/chromium_memory.py
+          871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c  dev/perf/import-memory-20261125-a7f7/audit_memory.py
+          aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6  dev/perf/import-benchmark.js
+          269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b  dev/perf/dictionary-fixtures.js
+          0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5  dev/perf/host-environment.js
+          d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf  test/chromium/extension-two-dictionary-import.e2e.js
+          60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89  test/perf/dictionaries.lock.json
+          01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96  package-lock.json
+          SOURCE
+      - name: Verify unchanged qualification observer and receipts
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install lockfile-pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch both frozen product revisions
+        run: |
+          git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+          test "$(git rev-parse "${PERF_BASELINE}^{tree}")" = "$PERF_BASELINE_TREE"
+          test "$(git rev-parse "${PERF_CANDIDATE}^{tree}")" = "$PERF_CANDIDATE_TREE"
+      - name: Run complete imports, controls, and separate memory checks
+        run: |
+          qualification_extra=()
+          if [ "$PERF_DICTIONARY" = 'vndb' ]; then
+            qualification_extra+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            "${qualification_extra[@]}" \
+            --evidence builds/perf/js-record-field-helper-20261128-0f1f
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: js-record-field-helper-${{ matrix.dictionary }}-${{ matrix.order }}-20261128-0f1f
+          path: builds/perf/js-record-field-helper-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
