@@ -56,7 +56,7 @@ jobs:
         dictionary: [jmdict, jitendex, vndb]
         order: [AB, BA]
     env:
-      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_BASELINE: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
       PERF_CANDIDATE: ${{ github.sha }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_ORDER: ${{ matrix.order }}

@@ -90,6 +90,50 @@ describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns
         }
     })
 
+    test('preserves compact list bytes, media hints and changed list structures', async () => {
+        const item = (/** @type {string} */ text) => ({content: text, tag: 'li'})
+        const leafSets = [
+            item('definition'),
+            [
+                item('doubled "quotation"'),
+                item('second\\entry'),
+                item('日本語'),
+            ],
+            [item('img'), item('image')],
+            [
+                item('image'),
+                {tag: 'img', path: 'cover.webp'},
+            ],
+            [],
+        ]
+        const rows = leafSets.map((content, i) => [
+            String(i),
+            '',
+            null,
+            '',
+            0,
+            [{
+                content: {
+                    content,
+                    data: {content: 'glossary'},
+                    lang: 'en',
+                    style: {listStyleType: 'circle'},
+                    tag: 'ul',
+                },
+                type: 'structured-content',
+            }],
+            i,
+            '',
+        ])
+        const source = JSON.stringify(rows).replace('"image"', '"\\u0069mage"')
+        expect((await parse(source, true, columns)).rows).toStrictEqual((await parse(source, false, columns)).rows)
+    })
+
+    test('rejects an invalid escape inside a compact structured list', async () => {
+        const glossary = '[{"content":{"content":{"content":"bad\\q","tag":"li"},"data":{"content":"glossary"},"lang":"en","style":{"listStyleType":"circle"},"tag":"ul"},"type":"structured-content"}]'
+        await expect(parse('[["key","",null,"",0,' + glossary + ',null,""]]', true, columns)).rejects.toThrow()
+    })
+
     test.each(['-0', '0.5', '1e3', '-2147483649'])('preserves valid numeric fallback for score %s', async (score) => {
         const source = `[["key","",null,"",${score},["meaning"],null,""]]`
         const actual = await parse(source, true, columns)

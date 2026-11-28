@@ -1,7 +1,7 @@
 {
   "experiment": "Bounded single small tag-bank text prefetch",
-  "registeredAtUtc": "2026-11-28T08:05:31Z",
-  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "registeredAtUtc": "2026-11-28T08:26:39Z",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
   "candidateBinding": "Exact GitHub workflow source SHA, runtime blob map and independently built release packages recorded before acquisition",
   "qualificationRunnerBlob": "7bfac83eedfbae61590b849c0934060c30ff4cef",
   "implementation": "Ordinary source imports only, one first tag entry, both declared sizes <=64 KiB, actual decoded byte writer bounded to declared uncompressed length, text retained during terms, ordinary tag-stage JSON/conversion/storage order, direct ZIP scope abort/join",
@@ -11,7 +11,7 @@
     "mechanism": "Cached native late small-text read; does not overlap the tag read with terms",
     "limits": "Related source only; result not used as evidence for this candidate"
   },
-  "currentEvidence": "137 focused tests passed before final test type cleanup; no candidate timing has been observed",
+  "currentEvidence": "Independent source review, main/test type checks,137 focused import tests,42 Python receipt gates, scoped ESLint and all-target dry-run build pass on the prior parser base. Four previously timed-out suites pass209cases at maxWorkers2. Full local suite still has missing compiler/unexpected-worker limitations; exact-current full hosted gates remain required. No candidate timing observed.",
   "independentCells": [
     "jmdict-AB",
     "jmdict-BA",
@@ -60,5 +60,11 @@
   "expectedAddedPackageEntries": [
     "js/dictionary/bounded-zip-text-writer.js"
   ],
-  "limitations": "The previous 13ms late tag read is a single old diagnostic opportunity ceiling. This candidate also uses a bounded byte writer, so any measured effect includes that implementation change; it is not pure scheduling attribution."
+  "limitations": "The previous 13ms late tag read is a single old diagnostic opportunity ceiling. This candidate also uses a bounded byte writer, so any measured effect includes that implementation change; it is not pure scheduling attribution.",
+  "supersedes": {
+    "candidate": "81da87b1585533357930f8e52169e397b669391c",
+    "planBlob": "e264c1cd6c39a298d48e0db9712a4388601b178d",
+    "run": 46125143851,
+    "reason": "Develop merged #972's parser/WASM optimization. Prior source verification was still queued and no timing acquisition had begun when superseded. Product patch and all decision thresholds are unchanged."
+  }
 }
