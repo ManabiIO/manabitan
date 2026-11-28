@@ -560,6 +560,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
         const cacheRecent = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
         const owner = {
+            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
             _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
             _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
             _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),
@@ -3286,6 +3287,7 @@ describe('recent-source cache metadata mapping', () => {
         const batchIds = new Uint32Array(8).fill(99);
         const offsets = new Uint32Array(8).fill(77);
         const owner = {
+            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
             _termEntryContentMetaStateTable: states,
             _termEntryContentMetaRecentSourceBatchIdTable: batchIds,
             _termEntryContentMetaRecentSourceOffsetTable: offsets,
@@ -3330,6 +3332,7 @@ describe('recent-source cache metadata mapping', () => {
         const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
         const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
         const owner = {
+            _scanPublishedTermContentSourceRange: Reflect.get(database, '_scanPublishedTermContentSourceRange'),
             _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
             _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
             _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),

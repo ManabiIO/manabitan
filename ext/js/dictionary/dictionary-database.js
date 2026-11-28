@@ -6784,6 +6784,35 @@ void 0 :
 
     /* eslint-disable @stylistic/semi */
     /**
+     * Keep the repeated span validation separate from cache ownership and mutation.
+     * @param {{indexes: Int32Array}} staged
+     * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}} spans
+     * @param {number} sourceStart
+     * @param {number} sourceEnd
+     * @returns {{minimumOffset: number, maximumEnd: number, publishedCount: number, publishedContentBytes: number, lastPublishedSource: number}|null}
+     */
+    _scanPublishedTermContentSourceRange(staged, spans, sourceStart, sourceEnd) {
+        let minimumOffset = Infinity
+        let maximumEnd = 0
+        let publishedCount = 0
+        let publishedContentBytes = 0
+        let lastPublishedSource = -1
+        for (let i = sourceStart; i < sourceEnd; ++i) {
+            const index = staged.indexes[i]
+            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue }
+            const offset = spans.offsets[i]
+            const length = spans.lengths[i]
+            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return null }
+            minimumOffset = Math.min(minimumOffset, offset)
+            maximumEnd = Math.max(maximumEnd, offset + length)
+            ++publishedCount
+            publishedContentBytes += length
+            lastPublishedSource = i
+        }
+        return {minimumOffset, maximumEnd, publishedCount, publishedContentBytes, lastPublishedSource}
+    }
+
+    /**
      * Retains bounded owned bytes so the next parser groups can verify exact
      * duplicates without reading recently written OPFS blocks. Immutable parser
      * slabs can back a retained view when their full allocation fits the budget.
@@ -6843,23 +6872,10 @@ void 0 :
             if (sourceStart < 0) { return 0 }
             sourceEnd = sourceStart + 1
         }
-        let minimumOffset = Infinity;
-        let maximumEnd = 0;
-        let publishedCount = 0;
-        let publishedContentBytes = 0;
-        let lastPublishedSource = -1
-        for (let i = sourceStart; i < sourceEnd; ++i) {
-            const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-            const offset = spans.offsets[i];
-            const length = spans.lengths[i];
-            if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
-            minimumOffset = Math.min(minimumOffset, offset);
-            maximumEnd = Math.max(maximumEnd, offset + length);
-            ++publishedCount;
-            publishedContentBytes += length;
-            lastPublishedSource = i
-        }
+        const range = this._scanPublishedTermContentSourceRange(staged, spans, sourceStart, sourceEnd)
+        if (range === null) { return 0 }
+        let {minimumOffset, maximumEnd, publishedCount} = range
+        const {publishedContentBytes, lastPublishedSource} = range
         if (!retainBoundaryOnly && publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
             retainBoundaryOnly = true
             sourceStart = lastPublishedSource
