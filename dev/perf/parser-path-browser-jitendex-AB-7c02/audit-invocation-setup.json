@@ -1,0 +1,9 @@
+{
+  "scope": "Saved-data audit launcher setup only; no acquisition or native execution",
+  "attemptedCommand": "python3 -B import-experiments-7c02210aa375/path-hosted-audits/jitendex-AB/audit.py",
+  "exitCode": 2,
+  "error": "The command used a nonexistent directory name; Python could not open the audit script.",
+  "auditScriptExecuted": false,
+  "artifactMutated": false,
+  "repair": "Use the existing import-experiments-7c02 path. Script, inputs, calculations and gates unchanged."
+}

@@ -1,0 +1,110 @@
+{
+  "scope": "Cell identity, frozen dictionary fixture, AB ordering and replication1 adaptation only. Measurement helpers, calculations and gates unchanged.",
+  "sourceScriptSha256": "eec86ccadfaf79cc2db559b47c95df130009196f40946167ef62b61cf5decb26",
+  "sourcePublishedCommit": "4d1feb8cef029825a03d0e3a7c9e49f300b6a33a",
+  "sourcePublishedPath": "dev/perf/parser-path-browser-jmdict-BA-7c02/audit.py",
+  "newScriptSha256": "d59c23e793bfe7f6fcce09c500c78aad635c0cfc3a5ab718155152267b0a7a5b",
+  "diffSha256": "f94a3b0da02fea6e79692f47483fc11f1f8c2fd9ec0d79fd080b5332a6bd980d",
+  "replacements": [
+    {
+      "before": "jmdict-BA",
+      "after": "jitendex-AB",
+      "occurrences": 3
+    },
+    {
+      "before": "JMdict BA",
+      "after": "Jitendex AB",
+      "occurrences": 3
+    },
+    {
+      "before": "15256246047",
+      "after": "15256555705",
+      "occurrences": 5
+    },
+    {
+      "before": "140904689347",
+      "after": "140904689410",
+      "occurrences": 2
+    },
+    {
+      "before": "35781708",
+      "after": "35590927",
+      "occurrences": 1
+    },
+    {
+      "before": "3a39c24c411fadf7f1791aa119816c14c85e8a6d518b70bed74f9244b613c75b",
+      "after": "82ab640cdc6aec23a033dc3960cfe7e26bb1cc778d22c5efa602eddd4f81ff46",
+      "occurrences": 1
+    },
+    {
+      "before": "('BA', 'AB')",
+      "after": "('AB', 'BA')",
+      "occurrences": 1
+    },
+    {
+      "before": "('BA' if pair % 2 else 'AB')",
+      "after": "('AB' if pair % 2 else 'BA')",
+      "occurrences": 1
+    },
+    {
+      "before": "('CA' if control % 2 else 'AC')",
+      "after": "('AC' if control % 2 else 'CA')",
+      "occurrences": 1
+    },
+    {
+      "before": "'initialOrder': 'BA'",
+      "after": "'initialOrder': 'AB'",
+      "occurrences": 2
+    },
+    {
+      "before": "cell['initialOrder'] == 'BA'",
+      "after": "cell['initialOrder'] == 'AB'",
+      "occurrences": 1
+    },
+    {
+      "before": "for arm in 'BA':",
+      "after": "for arm in 'AB':",
+      "occurrences": 1
+    },
+    {
+      "before": "memory_schedule(2)",
+      "after": "memory_schedule(1)",
+      "occurrences": 4
+    },
+    {
+      "before": "mp['replication'] == 2",
+      "after": "mp['replication'] == 1",
+      "occurrences": 1
+    },
+    {
+      "before": "memory_comparison(mem_obs, 'jmdict', 2, memory_schedule)",
+      "after": "memory_comparison(mem_obs, 'jmdict', 1, memory_schedule)",
+      "occurrences": 1
+    },
+    {
+      "before": "'jmdict'",
+      "after": "'jitendex'",
+      "occurrences": 7
+    },
+    {
+      "before": "JMdict run 1/1",
+      "after": "Jitendex run 1/1",
+      "occurrences": 1
+    },
+    {
+      "before": "assert fixture['termRows'] == 528299 and fixture['mediaFiles'] == fixture['mediaBytes'] == 0",
+      "after": "assert fixture['termRows'] == 436555 and fixture['mediaFiles'] == 236 and fixture['mediaBytes'] == 4992155",
+      "occurrences": 1
+    },
+    {
+      "before": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "after": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "occurrences": 1
+    },
+    {
+      "before": "'uniqueMediaFiles': 0, 'mediaBytes': 0",
+      "after": "'uniqueMediaFiles': 236, 'mediaBytes': 4992155",
+      "occurrences": 1
+    }
+  ]
+}

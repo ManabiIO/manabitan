@@ -1,0 +1,85 @@
+{
+  "scope": "Cell identity, frozen dictionary fixture, AB ordering and replication1 adaptation only. Measurement helpers, calculations and gates unchanged.",
+  "sourceScriptSha256": "eec86ccadfaf79cc2db559b47c95df130009196f40946167ef62b61cf5decb26",
+  "sourcePublishedCommit": "4d1feb8cef029825a03d0e3a7c9e49f300b6a33a",
+  "sourcePublishedPath": "dev/perf/parser-path-browser-jmdict-BA-7c02/audit.py",
+  "newScriptSha256": "123767edfbff36f47737b9efab7b672a4812666fe0af8d2cefd65beb85d43212",
+  "diffSha256": "fa18b702c02628e67ad899c805ecdf71e0d6be5562fe416c7247a7ee1adc6a4d",
+  "replacements": [
+    {
+      "before": "jmdict-BA",
+      "after": "jmdict-AB",
+      "occurrences": 3
+    },
+    {
+      "before": "JMdict BA",
+      "after": "JMdict AB",
+      "occurrences": 3
+    },
+    {
+      "before": "15256246047",
+      "after": "15256162585",
+      "occurrences": 5
+    },
+    {
+      "before": "140904689347",
+      "after": "140904689380",
+      "occurrences": 2
+    },
+    {
+      "before": "35781708",
+      "after": "35606138",
+      "occurrences": 1
+    },
+    {
+      "before": "3a39c24c411fadf7f1791aa119816c14c85e8a6d518b70bed74f9244b613c75b",
+      "after": "2bc83e741b11967bc9c034da28ef87ae40df7d45be0e1b47e3fdccfbef47838f",
+      "occurrences": 1
+    },
+    {
+      "before": "('BA', 'AB')",
+      "after": "('AB', 'BA')",
+      "occurrences": 1
+    },
+    {
+      "before": "('BA' if pair % 2 else 'AB')",
+      "after": "('AB' if pair % 2 else 'BA')",
+      "occurrences": 1
+    },
+    {
+      "before": "('CA' if control % 2 else 'AC')",
+      "after": "('AC' if control % 2 else 'CA')",
+      "occurrences": 1
+    },
+    {
+      "before": "'initialOrder': 'BA'",
+      "after": "'initialOrder': 'AB'",
+      "occurrences": 2
+    },
+    {
+      "before": "cell['initialOrder'] == 'BA'",
+      "after": "cell['initialOrder'] == 'AB'",
+      "occurrences": 1
+    },
+    {
+      "before": "for arm in 'BA':",
+      "after": "for arm in 'AB':",
+      "occurrences": 1
+    },
+    {
+      "before": "memory_schedule(2)",
+      "after": "memory_schedule(1)",
+      "occurrences": 4
+    },
+    {
+      "before": "mp['replication'] == 2",
+      "after": "mp['replication'] == 1",
+      "occurrences": 1
+    },
+    {
+      "before": "memory_comparison(mem_obs, 'jmdict', 2, memory_schedule)",
+      "after": "memory_comparison(mem_obs, 'jmdict', 1, memory_schedule)",
+      "occurrences": 1
+    }
+  ]
+}

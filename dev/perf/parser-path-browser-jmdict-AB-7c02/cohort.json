@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "artifactId": 15256162585,
+  "runId": 46113567719,
+  "jobId": 140904689380,
+  "dictionary": "jmdict",
+  "initialOrder": "AB",
+  "extractionPath": "/tmp/manabitan-path-qualification-7c02/jmdict-AB-15256162585",
+  "originalZip": {
+    "path": "/tmp/manabitan-path-qualification-7c02/originals/parser-path-qualification-7c02-jmdict-AB-15256162585.zip",
+    "size": 35606138,
+    "sha256": "2bc83e741b11967bc9c034da28ef87ae40df7d45be0e1b47e3fdccfbef47838f"
+  },
+  "preservationSha256": "6202ab92e0a6e84101c46f8c23f6dae74e1bf8e83cc5960c9739d0b4411053db",
+  "metadataSha256": "98d8017f219077fb8c4f78ce057b2055261f24b83390fdcc8900cf8f55a2ba2d",
+  "extractedBytes": 57533278,
+  "retainedArtifactBytes": 23920873,
+  "omittedPackageBytes": 33612405
+}
