@@ -1,0 +1,106 @@
+name: Frozen import baseline profile 20261128 0f1f
+
+on:
+  push:
+    branches: ['perf/import-study-20261128-0f1f']
+    paths:
+      - '.github/workflows/import-profile-20261128-0f1f.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    name: Frozen baseline / ${{ matrix.dictionary }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: builds/perf/baseline-profile-20261128-0f1f
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          persist-credentials: false
+      - name: Record immutable source and host identity
+        run: |
+          mkdir -p "$PERF_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          git rev-parse HEAD HEAD^{tree} > "$PERF_EVIDENCE/source.txt"
+          git status --porcelain=v1 > "$PERF_EVIDENCE/source-status-before.txt"
+          test ! -s "$PERF_EVIDENCE/source-status-before.txt"
+          uname -a > "$PERF_EVIDENCE/host.txt"
+          lscpu >> "$PERF_EVIDENCE/host.txt"
+          free -b >> "$PERF_EVIDENCE/host.txt"
+          df -B1 . >> "$PERF_EVIDENCE/host.txt"
+          sha256sum test/perf/dictionaries.lock.json \
+            dev/perf/import-benchmark.js dev/perf/benchmark-support.js \
+            test/chromium/extension-two-dictionary-import.e2e.js \
+            dev/data/dictionary-wasm/term-bank-parser.wasm > "$PERF_EVIDENCE/input-sha256.txt"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install lockfile-pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify archive and runtime identities
+        run: |
+          node --input-type=module <<'JS' > "$PERF_EVIDENCE/fixture.json"
+          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'
+          import {chromium} from '@playwright/test'
+          const result = await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', [process.env.PERF_DICTIONARY])
+          console.log(JSON.stringify({node: process.version, browserExecutable: chromium.executablePath(), fixture: result.fixtures[process.env.PERF_DICTIONARY], paths: result.paths}, null, 2))
+          JS
+          node --input-type=module -e "import {chromium} from '@playwright/test'; console.log(chromium.executablePath())" \
+            | xargs -r -I '{}' '{}' --version > "$PERF_EVIDENCE/browser-version.txt"
+          node dev/bin/build.js --target chrome > "$PERF_EVIDENCE/build.log" 2>&1
+          sha256sum builds/manabitan-chrome.zip > "$PERF_EVIDENCE/package-before.sha256"
+      - name: Acquire three ordinary complete imports
+        run: |
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --runs 3 --no-build --build-target chrome --media-check all \
+            --output "$PERF_EVIDENCE/ordinary" > "$PERF_EVIDENCE/ordinary.log" 2>&1
+      - name: Capture one separate diagnostic CPU trace
+        if: ${{ !cancelled() && success() }}
+        run: |
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --trace --runs 1 --no-build --build-target chrome --media-check all \
+            --output "$PERF_EVIDENCE/trace" > "$PERF_EVIDENCE/trace.log" 2>&1
+      - name: Verify package stability and preserve final identity
+        if: always()
+        run: |
+          git rev-parse HEAD HEAD^{tree} > "$PERF_EVIDENCE/source-after.txt"
+          git status --porcelain=v1 > "$PERF_EVIDENCE/source-status-after.txt"
+          if test -f "$PERF_EVIDENCE/package-before.sha256"; then
+            sha256sum --check "$PERF_EVIDENCE/package-before.sha256" > "$PERF_EVIDENCE/package-check.txt"
+          fi
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ['PERF_EVIDENCE'])
+          rows = []
+          for file in sorted(root.rglob('*')):
+              if file.is_file() and file.name != 'manifest.json':
+                  rows.append({'path': str(file.relative_to(root)), 'bytes': file.stat().st_size, 'sha256': hashlib.sha256(file.read_bytes()).hexdigest()})
+          (root / 'manifest.json').write_text(json.dumps({'baseline': os.environ['PERF_BASELINE'], 'dictionary': os.environ['PERF_DICTIONARY'], 'scope': 'Baseline attribution only; diagnostic trace durations are not performance qualification.', 'files': rows}, indent=2) + '\n')
+          PY
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: baseline-profile-20261128-0f1f-${{ matrix.dictionary }}
+          path: builds/perf/baseline-profile-20261128-0f1f
+          if-no-files-found: error
+          retention-days: 14
