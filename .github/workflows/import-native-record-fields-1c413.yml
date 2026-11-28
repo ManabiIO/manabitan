@@ -1,0 +1,160 @@
+name: Native record fields complete import qualification fixture guard repair 20261128
+
+on:
+  push:
+    branches: [perf/native-record-fields-browser-acquire-20261128-1c413]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: native-record-fields-browser-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FIELD_UPSTREAM: f28c2801fcfd9416f220b46b9cbafeee901c1cb2
+  FIELD_CONTROL: c34c272357fb8af463d32ab781bcbc640ba1bd3d
+  FIELD_PRODUCT: 8982dd89fac525100bdcaca7507bfff7feb2c842
+  FIELD_KIT: dev/perf/native-record-fields-browser-20261128-1c413
+  PYTHONDONTWRITEBYTECODE: '1'
+
+# Separate fixture-projection repair after original run 46136060186 at 7d003d51:
+# all six source guards failed before setup, Chromium or imports; zero observations.
+# A separate source-only preflight must pass for this exact source before this
+# acquisition branch is published. No original run/ref is changed or rerun.
+# SEALED ORIGINAL STUDY: exact current-source correctness and corpus artifacts
+# passed the independent records audit before this six-cell acquisition was enabled.
+# The six cells use the separate clean product as B and an inactive asset-matched
+# control as A/C. GITHUB_SHA identifies only this isolated study source.
+# Numeric gates are prospective and unchanged from the reviewed24-pair design.
+# No same-run correctness job duplicates the separately bound original evidence.
+jobs:
+  compare:
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        initial_order: [AB, BA]
+    env:
+      FIELD_DICTIONARY: ${{ matrix.dictionary }}
+      FIELD_INITIAL_ORDER: ${{ matrix.initial_order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind original attempt, immutable source and completed prerequisites
+        id: source
+        shell: bash
+        env:
+          FIELD_AUDIT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_RUN_ATTEMPT" == 1 ]]
+          mkdir -p builds/perf/native-record-fields-browser-metadata
+          git fetch --no-tags origin "$FIELD_CONTROL" "$FIELD_PRODUCT"
+          python3 "$FIELD_KIT/verify-source.py" --head "$GITHUB_SHA" --phase launch \
+            --output builds/perf/native-record-fields-browser-metadata/source-before-setup.json \
+            2>&1 | tee builds/perf/native-record-fields-browser-metadata/source-before-setup.log
+      - name: Prepare exact Node and locked dependencies
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Bind generated native assets and setup document
+        id: generated
+        shell: bash
+        env:
+          FIELD_AUDIT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 "$FIELD_KIT/verify-source.py" --head "$GITHUB_SHA" --phase generated \
+            --output builds/perf/native-record-fields-browser-metadata/source-after-setup.json \
+            2>&1 | tee builds/perf/native-record-fields-browser-metadata/source-after-setup.log
+      - name: Verify the pure activation receipt checker
+        id: protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$FIELD_KIT/test-activation.py" \
+            2>&1 | tee builds/perf/native-record-fields-browser-metadata/activation-tests.log
+      - name: Install matching Chromium
+        id: browser
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Acquire the original frozen comparisons and separate media and memory checks
+        id: qualify
+        shell: bash
+        run: |
+          set -euo pipefail
+          field_allocation=()
+          if [[ "$FIELD_DICTIONARY" == vndb ]]; then
+            field_allocation+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$FIELD_CONTROL" --candidate "$FIELD_PRODUCT" \
+            --dictionary "$FIELD_DICTIONARY" --initial-order "$FIELD_INITIAL_ORDER" \
+            --pairs 24 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            "${field_allocation[@]}" \
+            --evidence builds/perf/native-record-fields-browser-cell \
+            2>&1 | tee builds/perf/native-record-fields-browser-metadata/qualification.log
+      - name: Audit activation in every original receipt, including failures
+        id: activation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-browser-metadata
+          python3 "$FIELD_KIT/audit-activation.py" --study "$FIELD_KIT/study.json" \
+            --evidence builds/perf/native-record-fields-browser-cell \
+            --dictionary "$FIELD_DICTIONARY" --initial-order "$FIELD_INITIAL_ORDER" \
+            --output builds/perf/native-record-fields-browser-metadata/activation.json \
+            2>&1 | tee builds/perf/native-record-fields-browser-metadata/activation.log
+      - name: Preserve complete step outcomes without replacing any acquisition
+        if: always()
+        shell: bash
+        env:
+          FIELD_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p builds/perf/native-record-fields-browser-metadata
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          raw = json.loads(os.environ['FIELD_STEP_RESULTS'])
+          steps = {key: {field: value.get(field) for field in ('outcome', 'conclusion')} for key, value in raw.items()}
+          required = ('source', 'setup', 'generated', 'protocol', 'browser', 'qualify', 'activation')
+          failed = [key for key in required if steps.get(key, {}).get('outcome') != 'success']
+          result = {'cellComplete': not failed, 'required': required, 'failed': failed,
+                    'steps': steps, 'numericQualificationDecided': False,
+                    'runAttempt': os.environ.get('GITHUB_RUN_ATTEMPT'),
+                    'dictionary': os.environ['FIELD_DICTIONARY'],
+                    'initialOrder': os.environ['FIELD_INITIAL_ORDER']}
+          Path('builds/perf/native-record-fields-browser-metadata/step-outcomes.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(result, sort_keys=True))
+          if failed:
+              raise SystemExit('Original cell incomplete: ' + ', '.join(failed))
+          PY
+      - name: Preserve every original report, package, source proof and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-fields-browser-${{ matrix.dictionary }}-${{ matrix.initial_order }}-${{ github.sha }}
+          path: |
+            builds/perf/native-record-fields-browser-cell
+            builds/perf/native-record-fields-browser-metadata
+            dev/perf/native-record-fields-browser-20261128-1c413
+            .github/workflows/import-native-record-fields-1c413.yml
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

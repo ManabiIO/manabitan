@@ -1,0 +1,2474 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-record-fields-prospective-full-browser-qualification",
+  "acquisitionEnabled": true,
+  "status": "Separate acquisition-trigger revision after exact 915d passed its source-only preflight and the original zero-acquisition archive audit, but no acquisition workflow registered on its published fixtures branch as of the retained API observation. This revision uses a new unique branch without a push path filter. Product, control, all 29 pure cases, guards, prerequisites, readiness policies, schedules and numeric gates remain unchanged; the exact new source must pass a separate source-only preflight before acquisition publication.",
+  "upstream": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+  },
+  "control": {
+    "commit": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+    "tree": "4c916a995f996afe56cecf0714c20d5b7e5ef346"
+  },
+  "productFiles": [
+    {
+      "path": "dev/bin/audit-release-packages.js",
+      "gitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "mode": "100644",
+      "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d",
+      "bytes": 4062
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "gitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+      "mode": "100644",
+      "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+      "bytes": 3159
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "mode": "100644",
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753
+    },
+    {
+      "path": "dev/dictionary-wasm.js",
+      "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "mode": "100644",
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "bytes": 7244
+    },
+    {
+      "path": "eslint.config.js",
+      "gitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "mode": "100644",
+      "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b",
+      "bytes": 39532
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "gitBlob": "b144b0f9bb4dda83547c9865d3407643c890d741",
+      "mode": "100644",
+      "sha256": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+      "bytes": 617901
+    },
+    {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "gitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "mode": "100644",
+      "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+      "bytes": 16843
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "gitBlob": "4dc746075254a31016759e808e72582b7bda8afc",
+      "mode": "100644",
+      "sha256": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+      "bytes": 368779
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "mode": "100644",
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+      "bytes": 6660
+    },
+    {
+      "path": "test/dictionary-wasm-build.test.js",
+      "gitBlob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "mode": "100644",
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+      "bytes": 7552
+    },
+    {
+      "path": "test/release-package-native-assets.test.js",
+      "gitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "mode": "100644",
+      "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174",
+      "bytes": 5421
+    },
+    {
+      "path": "test/term-record-fields-native.test.js",
+      "gitBlob": "bfdafcd86db1ca223132faa194250647321dea31",
+      "mode": "100644",
+      "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+      "bytes": 40450
+    },
+    {
+      "path": "test/term-record-import-fields.test.js",
+      "gitBlob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "mode": "100644",
+      "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323",
+      "bytes": 20572
+    }
+  ],
+  "sharedControlPaths": [
+    "dev/bin/audit-release-packages.js",
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-record-fields.wasm",
+    "dev/dictionary-wasm.js",
+    "eslint.config.js",
+    "ext/js/dictionary/term-record-fields.js",
+    "ext/js/dictionary/wasm/term-record-fields.c",
+    "test/dictionary-wasm-build.test.js",
+    "test/release-package-native-assets.test.js"
+  ],
+  "expectedPackageEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "runtimeSha256": {
+    "ext/js/dictionary/term-record-fields.js": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+    "ext/js/dictionary/term-record-opfs-store.js": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+    "ext/js/dictionary/dictionary-database.js": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+    "ext/lib/term-record-fields.wasm": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+  },
+  "schedule": {
+    "measuredPairs": 24,
+    "controlPairs": 8,
+    "warmupPairs": 2,
+    "mediaImports": 2,
+    "memoryImports": 4,
+    "totalReports": 74
+  },
+  "armCountsPerCell": {
+    "A": 37,
+    "B": 29,
+    "C": 8
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "hostReplication": 1,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": null
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "hostReplication": 2,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": null
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "hostReplication": 1,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": null
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "hostReplication": 2,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": null
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "hostReplication": 1,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": [
+        37,
+        37
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "hostReplication": 2,
+      "measuredPairs": 24,
+      "controlPairs": 8,
+      "warmupPairs": 2,
+      "warmupImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalReports": 74,
+      "vndbSahAllocationUnits": [
+        37,
+        37
+      ]
+    }
+  ],
+  "exactSchedules": {
+    "AB": {
+      "reports": 74,
+      "armCounts": {
+        "A": 37,
+        "B": 29,
+        "C": 8
+      },
+      "rows": [
+        {
+          "id": "warmup-1-A",
+          "role": "warmup",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-1-B",
+          "role": "warmup",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-2-B",
+          "role": "warmup",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-2-A",
+          "role": "warmup",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-01-A",
+          "role": "candidate",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-01-B",
+          "role": "candidate",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-02-B",
+          "role": "candidate",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-02-A",
+          "role": "candidate",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-03-A",
+          "role": "candidate",
+          "pair": 3,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-03-B",
+          "role": "candidate",
+          "pair": 3,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-01-A",
+          "role": "control",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-01-C",
+          "role": "control",
+          "pair": 1,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-04-B",
+          "role": "candidate",
+          "pair": 4,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-04-A",
+          "role": "candidate",
+          "pair": 4,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-05-A",
+          "role": "candidate",
+          "pair": 5,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-05-B",
+          "role": "candidate",
+          "pair": 5,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-06-B",
+          "role": "candidate",
+          "pair": 6,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-06-A",
+          "role": "candidate",
+          "pair": 6,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-02-C",
+          "role": "control",
+          "pair": 2,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-02-A",
+          "role": "control",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-07-A",
+          "role": "candidate",
+          "pair": 7,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-07-B",
+          "role": "candidate",
+          "pair": 7,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-08-B",
+          "role": "candidate",
+          "pair": 8,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-08-A",
+          "role": "candidate",
+          "pair": 8,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-09-A",
+          "role": "candidate",
+          "pair": 9,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-09-B",
+          "role": "candidate",
+          "pair": 9,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-03-A",
+          "role": "control",
+          "pair": 3,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-03-C",
+          "role": "control",
+          "pair": 3,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-10-B",
+          "role": "candidate",
+          "pair": 10,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-10-A",
+          "role": "candidate",
+          "pair": 10,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-11-A",
+          "role": "candidate",
+          "pair": 11,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-11-B",
+          "role": "candidate",
+          "pair": 11,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-12-B",
+          "role": "candidate",
+          "pair": 12,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-12-A",
+          "role": "candidate",
+          "pair": 12,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-04-C",
+          "role": "control",
+          "pair": 4,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-04-A",
+          "role": "control",
+          "pair": 4,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-13-A",
+          "role": "candidate",
+          "pair": 13,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-13-B",
+          "role": "candidate",
+          "pair": 13,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-14-B",
+          "role": "candidate",
+          "pair": 14,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-14-A",
+          "role": "candidate",
+          "pair": 14,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-15-A",
+          "role": "candidate",
+          "pair": 15,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-15-B",
+          "role": "candidate",
+          "pair": 15,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-05-A",
+          "role": "control",
+          "pair": 5,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-05-C",
+          "role": "control",
+          "pair": 5,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-16-B",
+          "role": "candidate",
+          "pair": 16,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-16-A",
+          "role": "candidate",
+          "pair": 16,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-17-A",
+          "role": "candidate",
+          "pair": 17,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-17-B",
+          "role": "candidate",
+          "pair": 17,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-18-B",
+          "role": "candidate",
+          "pair": 18,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-18-A",
+          "role": "candidate",
+          "pair": 18,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-06-C",
+          "role": "control",
+          "pair": 6,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-06-A",
+          "role": "control",
+          "pair": 6,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-19-A",
+          "role": "candidate",
+          "pair": 19,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-19-B",
+          "role": "candidate",
+          "pair": 19,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-20-B",
+          "role": "candidate",
+          "pair": 20,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-20-A",
+          "role": "candidate",
+          "pair": 20,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-21-A",
+          "role": "candidate",
+          "pair": 21,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-21-B",
+          "role": "candidate",
+          "pair": 21,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-07-A",
+          "role": "control",
+          "pair": 7,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-07-C",
+          "role": "control",
+          "pair": 7,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-22-B",
+          "role": "candidate",
+          "pair": 22,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-22-A",
+          "role": "candidate",
+          "pair": 22,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-23-A",
+          "role": "candidate",
+          "pair": 23,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-23-B",
+          "role": "candidate",
+          "pair": 23,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-24-B",
+          "role": "candidate",
+          "pair": 24,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-24-A",
+          "role": "candidate",
+          "pair": 24,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-08-C",
+          "role": "control",
+          "pair": 8,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-08-A",
+          "role": "control",
+          "pair": 8,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "exhaustive-media-A",
+          "role": "exhaustive-media",
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "exhaustive-media-B",
+          "role": "exhaustive-media",
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/A1",
+          "role": "memory",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/B1",
+          "role": "memory",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/B2",
+          "role": "memory",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/A2",
+          "role": "memory",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        }
+      ]
+    },
+    "BA": {
+      "reports": 74,
+      "armCounts": {
+        "A": 37,
+        "B": 29,
+        "C": 8
+      },
+      "rows": [
+        {
+          "id": "warmup-1-B",
+          "role": "warmup",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-1-A",
+          "role": "warmup",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-2-A",
+          "role": "warmup",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "warmup-2-B",
+          "role": "warmup",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-01-B",
+          "role": "candidate",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-01-A",
+          "role": "candidate",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-02-A",
+          "role": "candidate",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-02-B",
+          "role": "candidate",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-03-B",
+          "role": "candidate",
+          "pair": 3,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-03-A",
+          "role": "candidate",
+          "pair": 3,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-01-C",
+          "role": "control",
+          "pair": 1,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-01-A",
+          "role": "control",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-04-A",
+          "role": "candidate",
+          "pair": 4,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-04-B",
+          "role": "candidate",
+          "pair": 4,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-05-B",
+          "role": "candidate",
+          "pair": 5,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-05-A",
+          "role": "candidate",
+          "pair": 5,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-06-A",
+          "role": "candidate",
+          "pair": 6,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-06-B",
+          "role": "candidate",
+          "pair": 6,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-02-A",
+          "role": "control",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-02-C",
+          "role": "control",
+          "pair": 2,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-07-B",
+          "role": "candidate",
+          "pair": 7,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-07-A",
+          "role": "candidate",
+          "pair": 7,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-08-A",
+          "role": "candidate",
+          "pair": 8,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-08-B",
+          "role": "candidate",
+          "pair": 8,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-09-B",
+          "role": "candidate",
+          "pair": 9,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-09-A",
+          "role": "candidate",
+          "pair": 9,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-03-C",
+          "role": "control",
+          "pair": 3,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-03-A",
+          "role": "control",
+          "pair": 3,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-10-A",
+          "role": "candidate",
+          "pair": 10,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-10-B",
+          "role": "candidate",
+          "pair": 10,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-11-B",
+          "role": "candidate",
+          "pair": 11,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-11-A",
+          "role": "candidate",
+          "pair": 11,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-12-A",
+          "role": "candidate",
+          "pair": 12,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-12-B",
+          "role": "candidate",
+          "pair": 12,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-04-A",
+          "role": "control",
+          "pair": 4,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-04-C",
+          "role": "control",
+          "pair": 4,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-13-B",
+          "role": "candidate",
+          "pair": 13,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-13-A",
+          "role": "candidate",
+          "pair": 13,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-14-A",
+          "role": "candidate",
+          "pair": 14,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-14-B",
+          "role": "candidate",
+          "pair": 14,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-15-B",
+          "role": "candidate",
+          "pair": 15,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-15-A",
+          "role": "candidate",
+          "pair": 15,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-05-C",
+          "role": "control",
+          "pair": 5,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-05-A",
+          "role": "control",
+          "pair": 5,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-16-A",
+          "role": "candidate",
+          "pair": 16,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-16-B",
+          "role": "candidate",
+          "pair": 16,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-17-B",
+          "role": "candidate",
+          "pair": 17,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-17-A",
+          "role": "candidate",
+          "pair": 17,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-18-A",
+          "role": "candidate",
+          "pair": 18,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-18-B",
+          "role": "candidate",
+          "pair": 18,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-06-A",
+          "role": "control",
+          "pair": 6,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-06-C",
+          "role": "control",
+          "pair": 6,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-19-B",
+          "role": "candidate",
+          "pair": 19,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-19-A",
+          "role": "candidate",
+          "pair": 19,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-20-A",
+          "role": "candidate",
+          "pair": 20,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-20-B",
+          "role": "candidate",
+          "pair": 20,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-21-B",
+          "role": "candidate",
+          "pair": 21,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-21-A",
+          "role": "candidate",
+          "pair": 21,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-07-C",
+          "role": "control",
+          "pair": 7,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-07-A",
+          "role": "control",
+          "pair": 7,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "pair-22-A",
+          "role": "candidate",
+          "pair": 22,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-22-B",
+          "role": "candidate",
+          "pair": 22,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-23-B",
+          "role": "candidate",
+          "pair": 23,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-23-A",
+          "role": "candidate",
+          "pair": 23,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-24-A",
+          "role": "candidate",
+          "pair": 24,
+          "arm": "A",
+          "latencyContrast": true
+        },
+        {
+          "id": "pair-24-B",
+          "role": "candidate",
+          "pair": 24,
+          "arm": "B",
+          "latencyContrast": true
+        },
+        {
+          "id": "control-08-A",
+          "role": "control",
+          "pair": 8,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "control-08-C",
+          "role": "control",
+          "pair": 8,
+          "arm": "C",
+          "latencyContrast": false
+        },
+        {
+          "id": "exhaustive-media-B",
+          "role": "exhaustive-media",
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "exhaustive-media-A",
+          "role": "exhaustive-media",
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/B1",
+          "role": "memory",
+          "pair": 1,
+          "arm": "B",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/A1",
+          "role": "memory",
+          "pair": 1,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/A2",
+          "role": "memory",
+          "pair": 2,
+          "arm": "A",
+          "latencyContrast": false
+        },
+        {
+          "id": "memory/B2",
+          "role": "memory",
+          "pair": 2,
+          "arm": "B",
+          "latencyContrast": false
+        }
+      ]
+    }
+  },
+  "numericGates": {
+    "jmdict": {
+      "everyOriginalHost": {
+        "candidateMedianChangePercentAtMost": -2,
+        "strictlyFasterPairsAtLeast": 18,
+        "measuredPairsExactly": 24,
+        "controlPairsExactly": 8,
+        "absoluteControlMedianChangePercentAtMost": 1,
+        "absoluteControlEqualWorkChangePercentAtMost": 1
+      },
+      "requiresBothHosts": true
+    },
+    "jitendex": {
+      "eachOriginalHost": {
+        "absoluteControlMedianChangePercentAtMost": 3,
+        "absoluteControlEqualWorkChangePercentAtMost": 3
+      },
+      "rejectIfBothOriginalHostsCandidateMedianSlowdownPercentGreaterThan": 3
+    },
+    "vndb": {
+      "eachOriginalHost": {
+        "absoluteControlMedianChangePercentAtMost": 3,
+        "absoluteControlEqualWorkChangePercentAtMost": 3
+      },
+      "rejectIfBothOriginalHostsCandidateMedianSlowdownPercentGreaterThan": 3
+    },
+    "isolatedNonTargetSlowdown": "Report every non-target host result, including a single >3% slowdown; do not rerun, pool or hide it. The frozen repeatable-regression rejection uses both original hosts.",
+    "memory": "Unchanged common strict scan/whole-tree validity plus, for PSS and private memory, median paired increase <=5% and maximum paired increase <=10% in each cell.",
+    "semanticMediaSource": "Every one of six complete cells and all corresponding source/semantic/exhaustive-media/memory and production correctness gates must pass."
+  },
+  "environment": {
+    "runner": "ubuntu-26.04",
+    "node": "22.22.0",
+    "setupAction": ".github/actions/setup/action.yml",
+    "dependencyLock": "package-lock.json",
+    "browser": "Exact Playwright Chromium from the unchanged lock; version and binary SHA recorded per original cell.",
+    "timeoutMinutesPerCell": 120,
+    "timeoutReason": "Prospective allowance for 24 measured pairs plus eight controls and separate exhaustive-media/memory imports, fixed before acquisition.",
+    "cellsShareNoProcessOrTimingHost": true,
+    "parallelFailFast": false,
+    "originalAttemptOnly": 1,
+    "flags": {},
+    "workerPolicy": "Unchanged production defaults; no worker/queue/source/materialization/codec override or helper-readiness wait.",
+    "expectedCallCountsScope": "Normal production worker/group policy is unchanged and can vary with logical CPU/device-memory availability. Exact expected encoder calls and readiness budgets are prospective assertions on each actual browser report, derived from the audited current-source corpus plan; they are not guaranteed on arbitrary hardware."
+  },
+  "commonMachinery": [
+    {
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "gitBlob": "964ab9c061b2490b65852344244f11dce62fa644",
+      "bytes": 19981,
+      "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "gitBlob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "gitBlob": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "gitBlob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "gitBlob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    }
+  ],
+  "fixtures": {
+    "lock": {
+      "path": "test/perf/dictionaries.lock.json",
+      "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "dictionaries": {
+      "jmdict": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "jitendex": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "vndb": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      }
+    }
+  },
+  "sourceBoundary": {
+    "completeBaselineDiff": "Exactly the13 reviewed product paths plus this isolated browser kit and workflow",
+    "sharedControl": "Exact nine reviewed files, no store/DB activation; all tracked ext member sets equal and only store/DB bytes differ",
+    "generatedAssets": "Tracked dev/data native bytes are verified against setup-produced ext/lib; only setup-produced ext/legal-npm.html may differ from committed root source",
+    "protectedRegularModes": "Each unchanged baseline entry keeps its exact Git mode/type/blob; regular executable100755 is permitted"
+  },
+  "prerequisites": {
+    "rootPublicationAuthorized": true,
+    "component": {
+      "sealed": true,
+      "passed": true,
+      "runId": 46123144616,
+      "attempt": 1,
+      "jobId": 140911790961,
+      "headSha": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+      "artifact": {
+        "id": 15254998779,
+        "name": "native-record-fields-1c413-e5d6d7273fafc84affe808bc4383b55107a3c99b",
+        "bytes": 4076464,
+        "sha256": "e4b76382586a00d8824e85804e3a978942fd452f61c2006aedc1342c5d84d654"
+      },
+      "recordsAudit": {
+        "runId": 46126612006,
+        "attempt": 1,
+        "jobId": 140922487765,
+        "headSha": "b99e1a9daf7fe0885291ec25245959f731619373",
+        "artifact": {
+          "id": 15255898869,
+          "name": "corrected-fields-readonly-audit-b99e1a9daf7fe0885291ec25245959f731619373",
+          "bytes": 16594754,
+          "sha256": "0b9620507329ff7b4163a40035ccbdbf9dedec69d50b4c33e71961c4cd7eb164"
+        },
+        "completionReceiptBlob": "7a88aa027bb49f3de5c2c118454936a0b4d9458c",
+        "resultBlob": "c41c034efa9021adc77c328ffc50066912e6e195"
+      },
+      "scope": "Standalone complete-call component nomination only; no full-import result."
+    },
+    "validation": {
+      "sealed": true,
+      "passed": true,
+      "runId": 46133913032,
+      "attempt": 1,
+      "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "sourceTree": "71bb7a59810ebdfcd2ee896d8d269ed83e92ebaf",
+      "sourceDigest": "95fe6764ac16451b9257b9224a2b1bdbc286536ddeb3ad69b6323601baec9a71",
+      "productCommit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+      "status": "The complete exact original artifact passed the independently reviewed current-source records audit.",
+      "artifact": {
+        "id": 15259375276,
+        "name": "native-record-fields-correctness-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+        "bytes": 344007,
+        "sha256": "88dc4436039992f3819f186357e1736701a0a0a15a60e37b2bbf9dde0ed01433"
+      },
+      "receiptSha256": "7b4c9efe8ac081422a68cb6ffae7a9e817fcb79d15866712fd58fc6071689608",
+      "jobId": 140944881152,
+      "requiredGates": [
+        "source",
+        "setup",
+        "generated",
+        "toolchain",
+        "native",
+        "lint",
+        "unit",
+        "options",
+        "main_types",
+        "dev_types",
+        "test_types",
+        "builds"
+      ],
+      "originalJobConclusion": "success"
+    },
+    "corpus": {
+      "sealed": true,
+      "passed": true,
+      "runId": 46133913032,
+      "attempt": 1,
+      "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "sourceTree": "71bb7a59810ebdfcd2ee896d8d269ed83e92ebaf",
+      "sourceDigest": "95fe6764ac16451b9257b9224a2b1bdbc286536ddeb3ad69b6323601baec9a71",
+      "productCommit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+      "status": "The complete exact original artifact passed the independently reviewed current-source records audit.",
+      "artifact": {
+        "id": 15259500068,
+        "name": "native-record-fields-corpus-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+        "bytes": 1043287,
+        "sha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c"
+      },
+      "receiptSha256": "3c12c7cef20952656579dfe77a5f4a0d3fdb2f91caddf8516ba5d0ec6119ad39",
+      "jobId": 140944880913,
+      "requiredCorpora": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "normalReadiness": true,
+      "originalJobConclusion": "success"
+    },
+    "productionEvidenceAudit": {
+      "sealed": true,
+      "passed": true,
+      "runId": 46135194884,
+      "attempt": 1,
+      "jobId": 140948804639,
+      "headSha": "866b9a8a4149f4fbc4c7b7f176a80626a9cab82c",
+      "artifact": {
+        "id": 15259502329,
+        "name": "native-fields-current-correctness-audit-866b9a8a4149f4fbc4c7b7f176a80626a9cab82c",
+        "bytes": 6022837,
+        "sha256": "3cb4f294e2892e74fbaecf7a31d226ca12ae66547864561afb5723403375f411"
+      },
+      "resultSha256": "f433eb75a0e0e6e0117045580a1f4f8ec7f67a17c78fb461e8b10e747e1bc128",
+      "resultGitBlob": "07161060078f96743419784e04ae5e33d407ddca",
+      "scope": "Pure original-records audit of the exact current-source validation ZIP and corpus PAX tar, every complete field/final-term byte comparison and natural activation; no new import or timing."
+    }
+  },
+  "activation": {
+    "sealed": true,
+    "perCorpus": {
+      "jmdict": {
+        "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "termRows": 528299,
+        "expectedCalls": 12,
+        "minimumNativeCalls": 11,
+        "minimumNativeRows": 478299,
+        "maximumReadinessJavascriptCalls": 1,
+        "allowedDeclineMaximums": {
+          "eligibility": 0,
+          "memory-bound": 0,
+          "unsupported-compact": 0
+        },
+        "proof": {
+          "runId": 46133913032,
+          "attempt": 1,
+          "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+          "artifactId": 15259500068,
+          "artifactSha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c",
+          "comparisonSha256": "de4f5d536904cf713915fe738110a431246e5a0c7fb929f7df720946c8ab92e5",
+          "candidateReportSha256": "28aa121780e1059db5146e1e011c3e2a52bba5e3f9123294a24bc4ffc9fc36ed",
+          "fieldCallsSha256": "146d7a7c6403cd9f1fae489007643755c641ce2f08a932ea0bcb505cf0661851",
+          "completeTermByteParity": true,
+          "runtimeSha256": {
+            "ext/js/dictionary/dictionary-database.js": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+            "ext/js/dictionary/term-record-fields.js": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+            "ext/js/dictionary/term-record-opfs-store.js": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+            "ext/lib/term-record-fields.wasm": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+          }
+        }
+      },
+      "jitendex": {
+        "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "termRows": 436555,
+        "expectedCalls": 22,
+        "minimumNativeCalls": 21,
+        "minimumNativeRows": 420555,
+        "maximumReadinessJavascriptCalls": 1,
+        "allowedDeclineMaximums": {
+          "eligibility": 0,
+          "memory-bound": 0,
+          "unsupported-compact": 0
+        },
+        "proof": {
+          "runId": 46133913032,
+          "attempt": 1,
+          "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+          "artifactId": 15259500068,
+          "artifactSha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c",
+          "comparisonSha256": "a09b06e0a123a3f789bda9c11f7478696b4ea51d6890fb5d4ee7acc5fa973208",
+          "candidateReportSha256": "b941124ae4bba850695fdc33788baa870f1f8e34735cc3e6d4141cd8cc86cfbe",
+          "fieldCallsSha256": "9c55a6056db14c4b3a8db3111154b3787a16bba6e61a71f436e28d05b1896b0a",
+          "completeTermByteParity": true,
+          "runtimeSha256": {
+            "ext/js/dictionary/dictionary-database.js": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+            "ext/js/dictionary/term-record-fields.js": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+            "ext/js/dictionary/term-record-opfs-store.js": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+            "ext/lib/term-record-fields.wasm": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+          }
+        }
+      },
+      "vndb": {
+        "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "termRows": 6648310,
+        "expectedCalls": 192,
+        "minimumNativeCalls": 191,
+        "minimumNativeRows": 6608310,
+        "maximumReadinessJavascriptCalls": 1,
+        "allowedDeclineMaximums": {
+          "eligibility": 0,
+          "memory-bound": 0,
+          "unsupported-compact": 0
+        },
+        "proof": {
+          "runId": 46133913032,
+          "attempt": 1,
+          "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+          "artifactId": 15259500068,
+          "artifactSha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c",
+          "comparisonSha256": "7780014c761bdf1e8b028289280e0a438c7512abb540c3a51804ab8dfd475d3a",
+          "candidateReportSha256": "68ea6e85ca4d67ee8731a454fdaf7728c797bda1340e743f4c6f5f6fa6059e34",
+          "fieldCallsSha256": "867ceb5eee6ff9444fb470324f66b0ab707226afd84fa51bad4d7567e977120a",
+          "completeTermByteParity": true,
+          "runtimeSha256": {
+            "ext/js/dictionary/dictionary-database.js": "d8fff4d69d73350e3988fe2c907339a7a4d77582b4b5a501da36bda8fe63ec6f",
+            "ext/js/dictionary/term-record-fields.js": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec",
+            "ext/js/dictionary/term-record-opfs-store.js": "916e4667db889679053c853f40ceeed7ca4164e4e3ee2e66ffae72201d4c5028",
+            "ext/lib/term-record-fields.wasm": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+          }
+        }
+      }
+    }
+  },
+  "artifacts": {
+    "count": 6,
+    "nameTemplate": "native-record-fields-browser-{dictionary}-{initialOrder}-{studyHead}",
+    "evidenceDirectory": "builds/perf/native-record-fields-browser-cell",
+    "metadataDirectory": "builds/perf/native-record-fields-browser-metadata",
+    "sameRunCorrectnessJob": false,
+    "numericDecision": "Independent records-only reader recomputes every raw pair/control and both-host policy; unchanged qualifier analysis remains descriptive."
+  },
+  "provenance": {
+    "previousUnpublished12PairDraft": {
+      "measuredPairs": 12,
+      "controlPairs": 4,
+      "totalReports": 42
+    },
+    "precisionRevisionReason": "Before any production candidate timing, original baseline-only contrasts in other studies showed enough single-observation drift to use the unchanged qualifier's existing24-pair maximum. No measured cohort was changed.",
+    "previousInertDesign": "96c7f3b0537677af3f973c15a84a39aa70f1bbd1",
+    "previousControl": "83fb6a76367e36a663ed1100191bf7959c5beb38",
+    "previousProduct": "d4038d0cfaeda8f019afc9ead47d035df633f284",
+    "productControlTreeProof": "b7b1e9914f663fa0c18f94f58b844642522614ce",
+    "currentCorrectnessSourceProof": "6a7f5d930eb73e64e72b20cb63a2b755434b7599",
+    "originalCorrectnessFailureReceipts": [
+      "4fbcb8cab5e61482fad0c678eff4c43bdad9e346",
+      "455d940a7ad3786dc425aa0b86c004c73080127f",
+      "5696251e503c805ba476299a026feb5aab13aca9"
+    ],
+    "activationStaticReview": "87ff448c9684044810e492bc5a7f5e040390289f",
+    "previousUnpublishedExecutableStudy": "a1fcdf723b0026bab2aa9cfdc46e3535362487d1",
+    "currentCorrectnessIndependentReviews": [
+      "91cb372af58dab2578a15981d2ff59b49e14a1b1",
+      "d8dc561caab2c839437feb82a974b7d698bf1d3b"
+    ],
+    "previousCorrectness": {
+      "runId": 46129727075,
+      "headSha": "a700f3192a74978a678f37922afe901c82baa628",
+      "productCommit": "d4038d0cfaeda8f019afc9ead47d035df633f284",
+      "validationJobId": 140932020532,
+      "corpusJobId": 140932020734,
+      "validationPassedGates": [
+        "source",
+        "setup",
+        "generated",
+        "toolchain",
+        "native",
+        "unit",
+        "options",
+        "main_types",
+        "dev_types",
+        "builds"
+      ],
+      "validationFailures": [
+        "One descriptor-value no-unsafe-assignment diagnostic",
+        "One invariant mock callback generic test-type diagnostic"
+      ],
+      "corpusLogBackedCompleteByteParity": true,
+      "corpusArtifactAvailable": false,
+      "corpusArchiveFailure": "Intentional smoke symlink was rejected before archive creation; full original report/source archive unavailable.",
+      "corpusRecoveredProofBlob": "462fc38be97a2dd82c4eac9f8488601514b3a891",
+      "disposition": "Preserved original successes and failures. The separately reviewed helper type-boundary change alters packaged bytes, so the current exact-source revision requires its own correctness/corpus evidence; no browser acquisition or performance result was replaced."
+    },
+    "numericPolicyModule": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
+    "numericPolicyTests": "e792a8b60cb690cc7c6b601203805cf2a00f6fa5",
+    "numericPolicyIndependentTestReview": "9836ad44e5684b5da0cf37cf32ba9cf54e62af12",
+    "previousCompletedTypesCorrectness": {
+      "runId": 46132025311,
+      "headSha": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+      "productCommit": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+      "productTree": "1800a0e2cd59503d2ffeb605f415476dc9025f2c",
+      "validationJobId": 140939066469,
+      "corpusJobId": 140939066689,
+      "originalJobsConclusion": "success",
+      "completionReceipt": "56ee96368e7abc499ac8de3093c6122f895a5fd8",
+      "resultTransferToCurrentSource": false,
+      "historicalReaderFindings": {
+        "optionalBaselineAssetAbsenceReview": "c73c543960922982508a9fd09c1eace7eff6a052",
+        "deferredOnlyCrcSourceProof": "90db5f071bd7bbf748dd32fff5800c2eac5ad1e9",
+        "deferredOnlyCrcReaderReview": "a7a03c861d6ef25deb72eb01947c0d20611a01e9",
+        "requestLimitation": "Version/options are source-derived, not retained in compact worker request records.",
+        "originalImportsChanged": false,
+        "fullReaderSuccessClaimed": false
+      }
+    },
+    "currentDevelopRebase": {
+      "priorUpstream": {
+        "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+      },
+      "currentUpstream": {
+        "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+        "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+      },
+      "acceptedPullRequest": 981,
+      "priorInertProducerCommit": "97de439695816465c34b1da52193869ba54167aa",
+      "priorInertStudyBlob": "f0b8f35252f5e455b8d98e3571bf68c12fa47f50",
+      "priorProduct": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+      "priorControl": "1cf7869c1dbab89b7c4da9895fb7b0f2e7fc178f",
+      "ownDbAndStorePatchesUnchanged": true,
+      "peerChangesPreserved": true,
+      "patchApplicationOrdersCommute": true,
+      "productControlTreeProof": "b7b1e9914f663fa0c18f94f58b844642522614ce",
+      "rootReview": "3f1760c6664232c76d2a77efac7093e17ef11ba7",
+      "correctnessSourceProof": "6a7f5d930eb73e64e72b20cb63a2b755434b7599",
+      "correctnessAssemblyReviews": [
+        "91cb372af58dab2578a15981d2ff59b49e14a1b1",
+        "d8dc561caab2c839437feb82a974b7d698bf1d3b"
+      ],
+      "correctnessOriginalCompletion": "af558285347a7e5e941509a5ee69def401bd0014",
+      "noOriginalStudyChanged": true,
+      "noBrowserObservationAcquired": true,
+      "priorProducerBindings": {
+        "productControlTreeProof": "769be5ae55e1a0d1f43c14392afdfde975d17b41",
+        "currentCorrectnessSourceProof": "b3ba7f8efc3bc3a168ccf3035f1a07604c101353",
+        "currentCorrectnessIndependentReviews": [
+          "4cd536cb77c545caceca8df22254c92624e7a222",
+          "c48ba86849bb625225d42247984debde65559ba0"
+        ]
+      }
+    },
+    "fullMediaAndMemoryFlagReview": "f4c850fcf932f21038932643717db43f866e29a2",
+    "finalPreAcquisitionSeal": {
+      "previousInertCommit": "66fe1d04ed41568e2a2ce6c966258d7fd32de9e0",
+      "previousInertTree": "ce25702695f618ced0238a550aec53c6aa0ca443",
+      "previousInertSourceManifest": "32e5775d4f169d95572dc8e9becd68481011aacb",
+      "previousInertProducerReview": "cce4254953c0bb7a49cdb02de918406b4060d419",
+      "currentOriginalAuditResult": "07161060078f96743419784e04ae5e33d407ddca",
+      "firstGroupDecision": "293adf44d2172d8da91f707386356dcb093cd4f8",
+      "independentSealInputProofs": [
+        "7e8352e121260ba5b6ccf9f03c5c3f441e33e2fb",
+        "8714d351db987865f35e6883cbe8092d8e1542b9",
+        "079e588301f0ca0e9a826c06e6e724412c119778"
+      ],
+      "inertBrowserReaderReview": "d1ec2e300f307bdd69494dd2c1e5e1ace6e86ed8",
+      "numericTimingGatesUnchanged": true,
+      "scheduleUnchanged": true,
+      "runtimeProductAndControlUnchanged": true,
+      "noBrowserObservationBeforeSeal": true
+    },
+    "fixtureGuardLaunchRepair": {
+      "previousStudyCommit": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "previousStudyTree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+      "previousSourceManifest": "71108341a50c71f340252153eb18080c9753b55c",
+      "previousSourceDigest": "0c9aa2674e74a98d711b7a78c09906db046bd1051835049bc8e14fc973cfb02c",
+      "originalRunId": 46136060186,
+      "originalAttempt": 1,
+      "originalBranch": "perf/native-record-fields-browser-20261128-1c413",
+      "originalConclusion": "failure",
+      "originalSuccessfulCells": 0,
+      "originalBrowserImports": 0,
+      "originalTimingObservations": 0,
+      "originalFailure": "All six source guards compared the complete four-dictionary lock map against the exact three-dictionary study projection; all setup, Chromium and qualifier steps were skipped.",
+      "originalFailureReceipt": {
+        "gitBlob": "e77d71829fb743df78edbd48984699b08460675c",
+        "sha256": "e9e5eb1056cd06d40c4c5127b9f17c0b6449dadfccf43c7d0d42577edff43852"
+      },
+      "originalCells": [
+        {
+          "dictionary": "vndb",
+          "initialOrder": "BA",
+          "jobId": 140951508293,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "vndb",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "BA",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "f0f30da80593bcd97b9048789cf708cc806ed0a7",
+            "sha256": "abaabd8be72d9b73302ef8a2675e4f91e873c6edf9cfd2657e622d47ad422704",
+            "bytes": 292514
+          },
+          "artifact": {
+            "id": 15260140331,
+            "name": "native-record-fields-browser-vndb-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51739,
+            "sha256": "59160a78aae561ce7921a3ecdaaa7b36300011ea9d2f191043f2db8c7262d757"
+          }
+        },
+        {
+          "dictionary": "jitendex",
+          "initialOrder": "BA",
+          "jobId": 140951508493,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "jitendex",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "BA",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "475e997f727989742621229e341bf1c510257f91",
+            "sha256": "8e436a5500ebc3a29af256a92648ebc831089094f99e4ef10c405e9a3a9a3bba",
+            "bytes": 292556
+          },
+          "artifact": {
+            "id": 15260230004,
+            "name": "native-record-fields-browser-jitendex-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51742,
+            "sha256": "4373503f8ae23908cfad24909016e775bff8325917c6c6709b8f0a72ac1c0cc2"
+          }
+        },
+        {
+          "dictionary": "jitendex",
+          "initialOrder": "AB",
+          "jobId": 140951508501,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "jitendex",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "AB",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "6a3f544e15755045b7224222c4c2d3e52e5a058d",
+            "sha256": "8178ca124e922a0f1d6fbf383b33d2ec55be898618950865642105be8151dc34",
+            "bytes": 292554
+          },
+          "artifact": {
+            "id": 15260155296,
+            "name": "native-record-fields-browser-jitendex-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51742,
+            "sha256": "484c8c389794b6bbfac768ef96e16e1b5ca68c3e5369986ef74e3e9b19602092"
+          }
+        },
+        {
+          "dictionary": "jmdict",
+          "initialOrder": "AB",
+          "jobId": 140951508519,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "jmdict",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "AB",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "b405b2fb0e14a1514807181d129f1e10a8b0a2ea",
+            "sha256": "ef65040bc51cf56e8efa3ba5c14c9707572ccfb90f46690a6dac910c18eb1f30",
+            "bytes": 292534
+          },
+          "artifact": {
+            "id": 15259713287,
+            "name": "native-record-fields-browser-jmdict-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51739,
+            "sha256": "15b5d3164f01cb98cef5efeef097d551afac0d828317dfa3ab3c4e4b78e9b821"
+          }
+        },
+        {
+          "dictionary": "vndb",
+          "initialOrder": "AB",
+          "jobId": 140951508552,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "vndb",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "AB",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "5281665e5832578d3bf24aa21a6d7dc06768fd62",
+            "sha256": "f476090c1d6292edb5807b53d6e65bc1ef2f626f67e3446780fb78d8caf88382",
+            "bytes": 292516
+          },
+          "artifact": {
+            "id": 15260185274,
+            "name": "native-record-fields-browser-vndb-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51739,
+            "sha256": "aebb424159cb28948686a226378e5addd581566d420324d4b7ac803d9733fc5b"
+          }
+        },
+        {
+          "dictionary": "jmdict",
+          "initialOrder": "BA",
+          "jobId": 140951508568,
+          "failedSourceReceipt": {
+            "error": "RuntimeError('Pinned fixture metadata changed')",
+            "passed": false,
+            "phase": "launch",
+            "productExecuted": false,
+            "schemaVersion": 1,
+            "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "timingAcquired": false
+          },
+          "stepOutcomes": {
+            "cellComplete": false,
+            "dictionary": "jmdict",
+            "failed": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "initialOrder": "BA",
+            "numericQualificationDecided": false,
+            "required": [
+              "source",
+              "setup",
+              "generated",
+              "protocol",
+              "browser",
+              "qualify",
+              "activation"
+            ],
+            "runAttempt": "1",
+            "steps": {
+              "activation": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              },
+              "browser": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "generated": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "protocol": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "qualify": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "setup": {
+                "conclusion": "skipped",
+                "outcome": "skipped"
+              },
+              "source": {
+                "conclusion": "failure",
+                "outcome": "failure"
+              }
+            }
+          },
+          "log": {
+            "gitBlob": "6f8450f0529c36a13db62ab9f5bee4a046e59c39",
+            "sha256": "6b7acfd3ef2214b5e61dcc73dd9f106c5b688c60f33ef33c9ba7ed8df9afe564",
+            "bytes": 292534
+          },
+          "artifact": {
+            "id": 15259179765,
+            "name": "native-record-fields-browser-jmdict-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+            "sizeBytes": 51739,
+            "sha256": "80bbd2183699ec8ef7f050f6263528a6debef8fa6a4656eb6f06acf22f5c7907"
+          }
+        }
+      ],
+      "archiveByteAudit": "Original archive bytes remain separately pending; complete job logs and exact API artifact identities are retained without claiming archive verification.",
+      "projectionProof": "ee896ede5f647d89a235ce759d7226fbaf2882f1",
+      "independentGuardTestsReview": "8bbb1de376158262c162ed7998fe0604272c3563",
+      "fullFixtureLockUnchanged": true,
+      "selectedFixtureMetadataUnchanged": true,
+      "fixedSelectedKeys": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "unchangedActivationCases": 22,
+      "addedFixtureGuardCases": 7,
+      "totalPureCases": 29,
+      "sourceOnlyPreflight": {
+        "requiredBeforeAcquisitionBranchPublication": true,
+        "sourceCheckout": "Exact corrected producer commit, published only under a unique non-acquisition test ref first.",
+        "required": [
+          "launch guard",
+          "locked Node 22.22.0 setup",
+          "generated-source guard",
+          "29 pure activation and fixture cases"
+        ],
+        "browserInstallation": false,
+        "qualifierExecution": false,
+        "imports": false,
+        "timing": false,
+        "resultMustBeBoundSeparately": true
+      },
+      "newAcquisitionBranch": "perf/native-record-fields-browser-fixtures-20261128-1c413",
+      "originalRefOrRunChanged": false,
+      "productControlUnchanged": true,
+      "acquisitionCommandsAndSixCellTopologyUnchanged": true,
+      "numericGatesUnchanged": true,
+      "readinessPoliciesUnchanged": true,
+      "scheduleUnchanged": true
+    },
+    "unfilteredAcquisitionTriggerRepair": {
+      "previousStudy": {
+        "commit": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+        "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+        "sourceManifest": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+        "sourceDigest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+        "branch": "perf/native-record-fields-browser-fixtures-20261128-1c413"
+      },
+      "retainedRegistrationObservation": {
+        "gitBlob": "232ae9f84f705cd5bdb0cb7883127289591a0b8b",
+        "sha256": "2eddfb24d45f4b45382d6457351123c14205295c9efff1d0c4e60519cd99a393",
+        "observedUtc": "2026-11-28 11:01:11 UTC",
+        "customRunPresent": false,
+        "scope": "Read-only observation of corrected browser workflow registration; not an acquisition or a conclusion about the underlying trigger cause"
+      },
+      "triggerCauseEstablished": false,
+      "triggerHypothesis": "Path filters may have skipped a newly created ref pointing to a commit already introduced on another ref; no push event diff has been inspected.",
+      "priorSourcePreflight": {
+        "completionProof": {
+          "gitBlob": "04b6779799b477521d8644c315688a662efe7936",
+          "sha256": "52f5c4706f0ffae64774587402ab7590fa76900db59dd4e07dec806d17bbf3e7"
+        },
+        "run": {
+          "id": 46137023673,
+          "attempt": 1,
+          "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+          "branch": "test/native-record-fields-browser-preflight-env-20261128-1c413",
+          "status": "completed",
+          "conclusion": "success",
+          "jobId": 140954485323
+        },
+        "target": {
+          "commit": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+          "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+          "sourceDigest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+          "sourceManifest": {
+            "bytes": 6043,
+            "gitBlob": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+            "mode": "100644",
+            "sha256": "536da70d3ae5b0485607deccb2c11043836cd7aa9db4869b468a737c49daef72"
+          }
+        },
+        "artifact": {
+          "id": 15259224388,
+          "name": "native-fields-browser-launch-preflight-0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+          "bytes": 165797,
+          "sha256": "b85778bfbd78f5da614bb93a99c35ab5b7df8a13a0100020d5956b29fc1f945b",
+          "originalRunId": 46137023673,
+          "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+          "remoteOriginalRetained": true,
+          "archiveBytesIndependentlyDownloaded": false
+        },
+        "executed": {
+          "launchGuard": true,
+          "activationAndFixtureTests": {
+            "count": 29,
+            "passed": true
+          },
+          "node": "22.22.0",
+          "lockedDependencyInstall": true,
+          "unchangedLibraryBuild": true,
+          "unchangedLicenseReport": true,
+          "generatedGuard": true
+        },
+        "imports": 0,
+        "timingObservations": 0,
+        "transferToNewSource": "Execution proof remains bound to 915d. The new launcher/source-manifest revision requires its own source-only preflight."
+      },
+      "completedOriginalZeroAcquisitionAudit": {
+        "completionProof": {
+          "gitBlob": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+          "sha256": "222be4ce3d60cf9c849fbbcfc97c4827edc0adee894961b6610e32efd38d30d1"
+        },
+        "runId": 46137216352,
+        "attempt": 1,
+        "headSha": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+        "jobId": 140955079610,
+        "artifact": {
+          "id": 15260456656,
+          "name": "native-fields-browser-failed-launch-audit-ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+          "bytes": 1728452,
+          "sha256": "6257e9e3c076b5bb56a6b61e651ffcb31cd7081acfb2368edd4fc051a43104ff"
+        },
+        "result": {
+          "gitBlob": "222e137181478cf9adbd96ff95276c8cb5ca3c52",
+          "bytes": 65537,
+          "sha256": "0993e18f86fc4a4e3bee32099a0cea524929d26c25ba44a59b9b2e264f43601c",
+          "source": "Exact final JSON line from original audit job stdout, with one terminating newline"
+        },
+        "completeOriginalCells": 6,
+        "completeRegularMembers": 78,
+        "originalReportCount": 0,
+        "originalTimingObservations": 0,
+        "originalStudyPassed": false,
+        "qualificationPassed": false,
+        "historicalSnapshotNote": "The preceding fixtureGuardLaunchRepair provenance retains its original pending-audit snapshot. This later completed audit verifies all six original archive bytes without changing the failed originals."
+      },
+      "workflowDelta": [
+        "Replace only the unique push branch literal with perf/native-record-fields-browser-acquire-20261128-1c413",
+        "Remove only the top-level push.paths filter"
+      ],
+      "completeJobsSectionByteIdentical": true,
+      "newAcquisitionBranch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+      "newSourcePreflightRequiredBeforeAcquisitionPublication": true,
+      "originalRefsAndRunsRetained": true,
+      "noForceUpdate": true,
+      "noDefaultBranchWrite": true,
+      "noRerun": true,
+      "productControlAndAllPrerequisiteDataUnchanged": true,
+      "guardAndActivationCheckerAndAll29TestsUnchanged": true,
+      "numericGatesAndReadinessPoliciesAndSchedulesUnchanged": true,
+      "noNewBrowserObservationAtAuthoring": true
+    }
+  },
+  "failurePolicy": {
+    "attempt": 1,
+    "reruns": false,
+    "pruning": false,
+    "replacementImports": false,
+    "controlCorrection": false,
+    "postResultThresholdTuning": false,
+    "partialEvidence": "Retain every failed/missing observation and all earlier complete originals; incomplete semantics/media/memory/activation cannot qualify."
+  },
+  "readinessCoverageDecision": {
+    "decisionBlob": "293adf44d2172d8da91f707386356dcb093cd4f8",
+    "mode": "first-complete-actual-source-group",
+    "maximumReadinessJavascriptCalls": "firstGroup.fieldCallOrdinals.length",
+    "minimumNativeCalls": "audited.expectedCalls - firstGroup.fieldCallOrdinals.length",
+    "minimumNativeRows": "fixture.termRows - firstGroup.rowCount",
+    "allowedDeclineMaximums": {
+      "eligibility": 0,
+      "memory-bound": 0,
+      "unsupported-compact": 0
+    },
+    "numericInputsSource": "New f28 exact-source independently audited actual source-group/field-call plan only",
+    "rationale": "Allow optional startup work through the first complete source group's call/row budget while requiring native coverage of the rest. This is a prospective engineering coverage budget, not a guaranteed loader deadline.",
+    "exceededBudget": "Reject the original cell without retry, exclusion, adjusted timing or relaxed thresholds.",
+    "numericInputsSealed": true,
+    "verifiedPlanSummary": {
+      "jmdict": {
+        "firstGroupRows": 50000,
+        "firstGroupCalls": 1,
+        "totalRows": 528299,
+        "totalCalls": 12,
+        "groupCount": 12,
+        "sourceGroupFieldPlanSha256": "dfdbea10a54fff61e575c1612fecc1907249e48dcf23e86c77e518e45ae528dc"
+      },
+      "jitendex": {
+        "firstGroupRows": 16000,
+        "firstGroupCalls": 1,
+        "totalRows": 436555,
+        "totalCalls": 22,
+        "groupCount": 22,
+        "sourceGroupFieldPlanSha256": "16a738bc65c7a04582fd4062dbcc842c811a6bb586b43d8897ef2d8dc8cf404e"
+      },
+      "vndb": {
+        "firstGroupRows": 40000,
+        "firstGroupCalls": 1,
+        "totalRows": 6648310,
+        "totalCalls": 192,
+        "groupCount": 170,
+        "sourceGroupFieldPlanSha256": "2b5e8da9c69f9bd4ccb3b6879cb6ebdf109b0f87734714c57a8d6b8cb12556af"
+      }
+    },
+    "sealInputsProof": "7e8352e121260ba5b6ccf9f03c5c3f441e33e2fb"
+  }
+}
