@@ -464,28 +464,29 @@ async function inflateTermBankSourcesNative(sources, wasm, compressedBytes, unco
         // expansion, rather than handing an entire Blob chunk to the decoder.
         // The input is worker-owned, so these views also avoid a Blob copy.
         // Admission requires compressed <= decoded size, bounding the number
-        // of payload pulls even for a tiny declared output with empty blocks.
+        // of payload writes even for a tiny declared output with empty blocks.
         const inputChunkSize = Math.max(1, Math.floor(source.uncompressedSize / MAX_DEFLATE_BYTES_PER_COMPRESSED_BYTE));
-        let inputOffset = -1;
-        const input = new ReadableStream({
-            pull(controller) {
-                if (inputOffset < 0) {
-                    controller.enqueue(gzipHeader);
-                    inputOffset = 0;
-                } else if (inputOffset < source.bytes.byteLength) {
-                    const end = Math.min(source.bytes.byteLength, inputOffset + inputChunkSize);
-                    controller.enqueue(source.bytes.subarray(inputOffset, end));
-                    inputOffset = end;
-                } else {
-                    controller.enqueue(trailer);
-                    controller.close();
-                }
-            },
-        });
-        const stream = input.pipeThrough(new Stream('gzip'));
-        const reader = stream.getReader();
-        let written = 0;
+        const stream = new Stream('gzip');
+        const reader = stream.readable.getReader();
+        let writer;
         try {
+            writer = stream.writable.getWriter();
+        } catch (error) {
+            reader.releaseLock();
+            throw error;
+        }
+        let written = 0;
+        const producer = (async () => {
+            await writer.write(gzipHeader);
+            for (let inputOffset = 0; inputOffset < source.bytes.byteLength;) {
+                const end = Math.min(source.bytes.byteLength, inputOffset + inputChunkSize);
+                await writer.write(source.bytes.subarray(inputOffset, end));
+                inputOffset = end;
+            }
+            await writer.write(trailer);
+            await writer.close();
+        })();
+        const consumer = (async () => {
             while (true) {
                 const {done, value} = await reader.read();
                 if (done) { break; }
@@ -495,11 +496,22 @@ async function inflateTermBankSourcesNative(sources, wasm, compressedBytes, unco
                 output.set(value, cursor + written);
                 written += value.byteLength;
             }
+        })();
+        try {
+            await Promise.all([producer, consumer]);
         } catch (error) {
-            await reader.cancel(error).catch(() => {});
+            // Join both directions before the caller resets the WASM arena for
+            // fallback. Cancellation also releases native writer backpressure.
+            await Promise.allSettled([
+                Promise.resolve().then(() => reader.cancel(error)),
+                Promise.resolve().then(() => writer.abort(error)),
+                producer,
+                consumer,
+            ]);
             throw error;
         } finally {
             reader.releaseLock();
+            writer.releaseLock();
         }
         if (written !== source.uncompressedSize) {
             throw new Error('Native term-bank output length does not match ZIP metadata');

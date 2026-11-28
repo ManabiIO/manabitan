@@ -231,3 +231,219 @@ describe('native gzip validation of raw ZIP term banks', () => {
         expect(constructors).toHaveBeenCalledTimes(kind === 'unsupported' ? 1 : 0);
     });
 });
+
+describe('native writer and reader settlement', () => {
+    test('releases the reader if acquiring the writer fails before fallback', async () => {
+        const sources = [source(paddedEmptyBank)];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = snapshot(baseline);
+        const readable = new ReadableStream();
+        const writable = new WritableStream();
+        const injected = new Error('Injected writer acquisition failure');
+        vi.spyOn(writable, 'getWriter').mockImplementation(() => { throw injected; });
+        const originalInflate = baseline.wasm.inflate_and_join_term_banks;
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks').mockImplementation((...args) => {
+            expect(readable.locked).toBe(false);
+            expect(writable.locked).toBe(false);
+            return originalInflate(...args);
+        });
+        let instances = 0;
+        vi.stubGlobal('DecompressionStream', function strictThenControlled(/** @type {CompressionFormat} */ format) {
+            return ++instances <= 2 ? strictGzipStream(format) : {readable, writable};
+        });
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        expect(snapshot(await inflateCompressedTermBankSourcesWasm(sources))).toEqual(expected);
+        expect(instances).toBe(3);
+        expect(wasmInflate).toHaveBeenCalledOnce();
+    });
+
+    test.each(['header', 'payload', 'trailer', 'close'])('joins reader cancellation after a %s failure before fallback', async (phase) => {
+        const sources = [source(paddedEmptyBank)];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = snapshot(baseline);
+        const wasmReset = vi.spyOn(baseline.wasm, 'wasm_reset_heap');
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        const cancelEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const cancelGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const injected = new Error(`Injected ${phase} failure`);
+        let cancelSettled = false;
+        let writes = 0;
+        const readable = new ReadableStream({
+            async cancel(reason) {
+                expect(reason).toBe(injected);
+                cancelEntered.resolve();
+                await cancelGate.promise;
+                cancelSettled = true;
+                if (phase === 'close') { throw new Error('Injected cancellation rejection'); }
+            },
+        });
+        const writable = new WritableStream({
+            write(chunk) {
+                ++writes;
+                if ((phase === 'header' && writes === 1) || (phase === 'payload' && writes === 2) ||
+                (phase === 'trailer' && chunk.byteLength === 8)) { throw injected; }
+            },
+            close() { throw injected; },
+        });
+        let instances = 0;
+        const constructors = vi.fn(function strictThenControlled(/** @type {CompressionFormat} */ format) {
+            return ++instances <= 2 ? strictGzipStream(format) : {readable, writable};
+        });
+        vi.stubGlobal('DecompressionStream', constructors);
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const operation = inflateCompressedTermBankSourcesWasm(sources);
+        let settled = false;
+        void operation.then(
+            () => { settled = true; },
+            () => { settled = true; },
+        );
+        try {
+            await cancelEntered.promise;
+            await new Promise((resolve) => { setImmediate(resolve); });
+            expect(settled).toBe(false);
+            expect(wasmReset).toHaveBeenCalledOnce();
+            expect(wasmInflate).not.toHaveBeenCalled();
+            expect(readable.locked).toBe(true);
+            expect(writable.locked).toBe(true);
+        } finally {
+            cancelGate.resolve();
+        }
+        expect(snapshot(await operation)).toEqual(expected);
+        expect(constructors).toHaveBeenCalledTimes(3);
+        expect(cancelSettled).toBe(true);
+        expect(readable.locked).toBe(false);
+        expect(writable.locked).toBe(false);
+        expect(wasmReset).toHaveBeenCalledTimes(2);
+        expect(wasmInflate).toHaveBeenCalledOnce();
+    });
+
+    test.each([false, true])('joins an in-flight write and abort after a read failure (abort rejects: %s)', async (abortRejects) => {
+        const sources = [source(paddedEmptyBank)];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = snapshot(baseline);
+        const wasmReset = vi.spyOn(baseline.wasm, 'wasm_reset_heap');
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        const writeGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortRequested = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const injected = new Error('Injected native read failure');
+        let failRead = () => {};
+        let writes = 0;
+        let writeSettled = false;
+        let abortSettled = false;
+        const readable = new ReadableStream({
+            start(controller) { failRead = () => { controller.error(injected); }; },
+        });
+        const writable = new WritableStream({
+            async write() {
+                ++writes;
+                failRead();
+                await writeGate.promise;
+                writeSettled = true;
+            },
+            async abort(reason) {
+                expect(reason).toBe(injected);
+                abortEntered.resolve();
+                await abortGate.promise;
+                abortSettled = true;
+                if (abortRejects) { throw new Error('Injected abort rejection'); }
+            },
+        });
+        const getWriter = writable.getWriter.bind(writable);
+        vi.spyOn(writable, 'getWriter').mockImplementation(() => {
+            const writer = getWriter();
+            const abort = writer.abort.bind(writer);
+            vi.spyOn(writer, 'abort').mockImplementation((reason) => {
+                abortRequested.resolve();
+                return abort(reason);
+            });
+            return writer;
+        });
+        let instances = 0;
+        vi.stubGlobal('DecompressionStream', function strictThenControlled(/** @type {CompressionFormat} */ format) {
+            return ++instances <= 2 ? strictGzipStream(format) : {readable, writable};
+        });
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const operation = inflateCompressedTermBankSourcesWasm(sources);
+        let settled = false;
+        void operation.then(
+            () => { settled = true; },
+            () => { settled = true; },
+        );
+        try {
+            await abortRequested.promise;
+            expect(writeSettled).toBe(false);
+            expect(wasmReset).toHaveBeenCalledOnce();
+            expect(wasmInflate).not.toHaveBeenCalled();
+            writeGate.resolve();
+            await abortEntered.promise;
+            await new Promise((resolve) => { setImmediate(resolve); });
+            expect(settled).toBe(false);
+            expect(writeSettled).toBe(true);
+            expect(abortSettled).toBe(false);
+            expect(wasmReset).toHaveBeenCalledOnce();
+            expect(wasmInflate).not.toHaveBeenCalled();
+        } finally {
+            writeGate.resolve();
+            abortGate.resolve();
+        }
+        expect(snapshot(await operation)).toEqual(expected);
+        expect(instances).toBe(3);
+        expect(writes).toBe(1);
+        expect(abortSettled).toBe(true);
+        expect(readable.locked).toBe(false);
+        expect(writable.locked).toBe(false);
+        expect(wasmReset).toHaveBeenCalledTimes(2);
+        expect(wasmInflate).toHaveBeenCalledOnce();
+    });
+
+    test.each([false, true])('waits for writer close after readable EOF (close rejects: %s)', async (closeRejects) => {
+        const sources = [source(paddedEmptyBank)];
+        const baseline = await inflateCompressedTermBankSourcesWasm(sources);
+        const expected = snapshot(baseline);
+        const wasmInflate = vi.spyOn(baseline.wasm, 'inflate_and_join_term_banks');
+        const closeEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const closeGate = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        let closeSettled = false;
+        const readable = new ReadableStream({
+            start(controller) {
+                controller.enqueue(encoder.encode(paddedEmptyBank));
+                controller.close();
+            },
+        });
+        const writable = new WritableStream({
+            async close() {
+                closeEntered.resolve();
+                await closeGate.promise;
+                closeSettled = true;
+                if (closeRejects) { throw new Error('Injected late close failure'); }
+            },
+        });
+        let instances = 0;
+        vi.stubGlobal('DecompressionStream', function strictThenControlled(/** @type {CompressionFormat} */ format) {
+            return ++instances <= 2 ? strictGzipStream(format) : {readable, writable};
+        });
+        vi.stubGlobal('__manabitanTermBankParserWorker', true);
+        const operation = inflateCompressedTermBankSourcesWasm(sources);
+        let settled = false;
+        void operation.then(
+            () => { settled = true; },
+            () => { settled = true; },
+        );
+        try {
+            await closeEntered.promise;
+            await new Promise((resolve) => { setImmediate(resolve); });
+            expect(settled).toBe(false);
+            expect(wasmInflate).not.toHaveBeenCalled();
+        } finally {
+            closeGate.resolve();
+        }
+        expect(snapshot(await operation)).toEqual(expected);
+        expect(instances).toBe(3);
+        expect(closeSettled).toBe(true);
+        expect(readable.locked).toBe(false);
+        expect(writable.locked).toBe(false);
+        expect(wasmInflate).toHaveBeenCalledTimes(closeRejects ? 1 : 0);
+    });
+});
