@@ -907,7 +907,7 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
     }
 }
 
-static int parse_composite_span_impl(
+static __attribute__((minsize)) int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
     uint32_t start,

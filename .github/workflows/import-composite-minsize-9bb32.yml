@@ -1,0 +1,61 @@
+name: Composite parser minsize verification 9bb32
+
+on:
+  push:
+    branches: [perf/import-composite-minsize-20261128-9bb32]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install dependencies and pinned native tools
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Verify exact native artifacts
+        run: |
+          npm run build:dictionary-wasm -- --check
+          git diff --exit-code -- dev/data/dictionary-wasm
+      - name: Prepare generated libraries
+        run: |
+          npm run build:libs
+          npm run license-report:html
+      - name: Focused composite grammar and parser tests
+        run: >-
+          node node_modules/vitest/vitest.mjs run
+          test/term-bank-composite-state.test.js
+          test/term-bank-adjacent-delimiters.test.js
+          test/term-bank-common-colon.test.js
+          test/term-bank-content-container-open.test.js
+          test/term-bank-glossary-semantics.test.js
+          test/term-bank-format3-row.test.js
+          test/term-bank-wasm-parser.test.js
+          test/term-bank-wasm-differential.fuzz.test.js
+          --maxWorkers=2
+      - name: JavaScript lint
+        run: npm run test:js
+      - name: Type checking
+        run: npm run test:ts
+      - name: Complete unit suite
+        run: npm run test:unit -- --maxWorkers=2
+      - name: Build validation
+        run: npm run test:build
+      - name: Record final source and native identities
+        if: always()
+        run: |
+          git rev-parse HEAD
+          git status --short
+          cat dev/data/dictionary-wasm/manifest.json
