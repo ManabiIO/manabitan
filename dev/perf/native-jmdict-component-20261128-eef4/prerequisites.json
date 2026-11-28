@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "variants": {
+    "recent-signature-prefilter": {
+      "focusedReportSha256": "5e10900084cd920405c25b7e1f4cf7f7b6a528b34a81b5e1799652046c800590",
+      "corpusReportSha256": "213eddc12be2b58af2429bc37533c456a6ec5189fc628b1029cc3a9957c8eacb",
+      "focusedAssertions": 3649,
+      "focusedCases": null,
+      "allThreeCorporaPassed": true,
+      "rowsPerArm": 7613164,
+      "digests": {
+        "jmdict": "b45ba963161294c0ea398e65e86b6ee669df09dd83c13c0dec7cc33fb09d81d2",
+        "jitendex": "7bf32d68a87033639043d80fb5790a924f222ad3417f0eb8a0c84430b081304b",
+        "vndb": "fa7435ef7e6f3583e3f06e971c889d02122f899a92ec438d313edbd5a889b3cf"
+      },
+      "sourceSha256": "36a5aa057020c60b0a2f25a0ce5a76e2da93901c8ecad2d6591ebd7402aa90c8",
+      "wasmSha256": "dafe526b9ac1ecfa083216ca1d008fb8592738ebc617956e54233f9b4879fe6e",
+      "note": "Original complete local raw reports remain in the work session. This compact receipt binds the publication prerequisites; it is not a timing observation."
+    },
+    "equality-bounded-tail": {
+      "focusedReportSha256": "eaf8607e01fd273b0165300af2e97dd011324b97c19be8652e613cf7aadfe674",
+      "corpusReportSha256": "699420aa860f884a1544c1d78a16f2efcc16dcc8864a78ae8bb6340fd9553004",
+      "focusedAssertions": 3588886,
+      "focusedCases": 859932,
+      "allThreeCorporaPassed": true,
+      "rowsPerArm": 7613164,
+      "digests": {
+        "jmdict": "b45ba963161294c0ea398e65e86b6ee669df09dd83c13c0dec7cc33fb09d81d2",
+        "jitendex": "7bf32d68a87033639043d80fb5790a924f222ad3417f0eb8a0c84430b081304b",
+        "vndb": "fa7435ef7e6f3583e3f06e971c889d02122f899a92ec438d313edbd5a889b3cf"
+      },
+      "sourceSha256": "9570174624c1076825ed3ad569730371f9c75fd6d28d0032d4cf42db5013ea32",
+      "wasmSha256": "a921cc6b71fb5fc59d22ab769416db6fbe9a6a5e5cedfa705ae3cace16ffefe7",
+      "note": "Original complete local raw reports remain in the work session. This compact receipt binds the publication prerequisites; it is not a timing observation."
+    }
+  }
+}

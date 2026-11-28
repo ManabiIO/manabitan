@@ -1,0 +1,39 @@
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -3579,14 +3579,28 @@
+                 const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
+                     row_count - RECENT_CONTENT_DEDUP_WINDOW :
+                     0u;
+-                for (uint32_t candidate = row_count; candidate > recent_start;) {
+-                    --candidate;
+-                    if (
+-                        recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
+-                        raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
+-                    ) {
+-                        recent_match = candidate;
+-                        break;
++                int may_match = 1;
++#if defined(__wasm_simd128__) && RECENT_CONTENT_DEDUP_WINDOW == 4u
++                // Once every ring entry is initialized, reject four unequal
++                // signatures together. A possible match still takes the exact
++                // newest-first token comparisons below.
++                if (row_count >= RECENT_CONTENT_DEDUP_WINDOW) {
++                    may_match = wasm_v128_any_true(wasm_i32x4_eq(
++                        wasm_v128_load(recent_content_signatures),
++                        wasm_i32x4_splat((int32_t)raw_content_signature)
++                    ));
++                }
++#endif
++                if (may_match) {
++                    for (uint32_t candidate = row_count; candidate > recent_start;) {
++                        --candidate;
++                        if (
++                            recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
++                            raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
++                        ) {
++                            recent_match = candidate;
++                            break;
++                        }
+                     }
+                 }
+                 recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;

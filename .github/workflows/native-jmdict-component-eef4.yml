@@ -1,0 +1,133 @@
+name: Frozen JMdict native component diagnostic eef4
+
+on:
+  push:
+    branches: [experiment/native-jmdict-component-20261128-eef4]
+    paths: [.github/workflows/native-jmdict-component-eef4.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-jmdict-component-eef4-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  NODE_OPTIONS: ''
+
+jobs:
+  component:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Two JMdict native components (${{ matrix.order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        order: [forward, reverse]
+    env:
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      - name: Check out the exact diagnostic bundle
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out the unchanged production JavaScript baseline
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          path: baseline
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Bind source identities and prohibit production edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/native-jmdict-component/context
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C baseline rev-parse HEAD)" = "$PERF_BASELINE"
+          git fetch --no-tags origin "$PERF_BASELINE"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/native-jmdict-component/context/harness-source.txt
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import subprocess
+          changed = subprocess.check_output(['git', 'diff', '--name-only', os.environ['PERF_BASELINE'], 'HEAD'], text=True).splitlines()
+          assert changed
+          assert all(name == '.github/workflows/native-jmdict-component-eef4.yml' or name.startswith('dev/perf/native-jmdict-component-20261128-eef4/') for name in changed), changed
+          pathlib.Path('builds/native-jmdict-component/context/changed-files.txt').write_text('\n'.join(changed) + '\n')
+          PY
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - name: Install the pinned compiler and linker
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Install exact baseline dependencies and generated libraries
+        working-directory: baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          npm ci 2>&1 | tee ../builds/native-jmdict-component/context/npm-ci.log
+          npm run build:libs 2>&1 | tee ../builds/native-jmdict-component/context/build-libs.log
+      - name: Restore the locked dictionary archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: baseline/builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('baseline/test/perf/dictionaries.lock.json') }}
+      - name: Validate or acquire the exact locked JMdict fixture
+        working-directory: baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js jmdict 2>&1 | tee ../builds/native-jmdict-component/context/fixture.log
+      - name: Reproduce every candidate module and freeze both observation schedules
+        shell: bash
+        run: |
+          set -euo pipefail
+          node baseline/dev/perf/host-environment.js > builds/native-jmdict-component/context/host-before.json
+          python3 dev/perf/native-jmdict-component-20261128-eef4/prepare.py \
+            --baseline-root baseline \
+            --cache-dir baseline/builds/e2e-dictionary-cache \
+            --node "$(command -v node)" \
+            --clang "$(command -v clang-21)" \
+            --linker "$(command -v wasm-ld-21)" \
+            --order "$PERF_ORDER" \
+            --out builds/native-jmdict-component \
+            2>&1 | tee builds/native-jmdict-component/context/admission.log
+      - name: Acquire every fixed cohort once with one live child at a time
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/native-jmdict-component-20261128-eef4/campaign.py \
+            --campaign builds/native-jmdict-component/campaign.json \
+            2>&1 | tee builds/native-jmdict-component/context/acquisition.log
+          git -C baseline diff --exit-code > builds/native-jmdict-component/context/baseline-final.diff
+          git diff --exit-code > builds/native-jmdict-component/context/harness-final.diff
+      - name: Preserve final context and every failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p builds/native-jmdict-component/context
+          if command -v node >/dev/null && test -f baseline/dev/perf/host-environment.js; then
+            node baseline/dev/perf/host-environment.js > builds/native-jmdict-component/context/host-after.json 2> builds/native-jmdict-component/context/host-after.stderr
+          fi
+          df -h > builds/native-jmdict-component/context/disk-after.txt
+      - name: Retain every source, warmup, observation, verification and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-jmdict-component-eef4-${{ matrix.order }}
+          path: builds/native-jmdict-component
+          if-no-files-found: error
+          retention-days: 30

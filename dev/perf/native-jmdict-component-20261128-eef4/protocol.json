@@ -1,0 +1,71 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "serverSha256": "c13f63b7069dd81cc78ea6fe0d58663473c5c5009e9dc12588be89908db3134b",
+  "dictionary": "jmdict",
+  "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "fixtureBytes": 15645766,
+  "rows": 528299,
+  "expectedDigest": "b45ba963161294c0ea398e65e86b6ee669df09dd83c13c0dec7cc33fb09d81d2",
+  "nodeVersion": "v22.22.0",
+  "workerCountPolicy": 3,
+  "warmupsPerChild": 2,
+  "timedPassesPerChild": 1,
+  "verificationPassesPerChild": 1,
+  "orders": [
+    "ABC",
+    "BCA",
+    "CAB",
+    "CBA",
+    "ACB",
+    "BAC"
+  ],
+  "NODE_OPTIONS": "",
+  "primaryMetrics": [
+    "workerMs",
+    "threadCpuMs"
+  ],
+  "secondaryMetrics": [
+    "process-wide cpuMs",
+    "all existing internal phase wall timers"
+  ],
+  "conditioning": "One fresh child alive at a time. Each child completes two excluded full-corpus warmups, one timed full-corpus pass and one subsequent exhaustive verification, then exits before the next arm starts. Node defaults; no GC/tiering flags, retries, replacements, extra samples or result-based stopping.",
+  "boundary": "Actual production parser-worker component on preloaded compressed banks, including inflate/CRC, grammar/content/dedup, lookup preparation, ownership copies and media-path projection. Excludes source archive loading, process/module startup, real IPC/parallel scheduling, DB/OPFS, compression, media-payload import, browser UI and lookup readiness.",
+  "schema": 1,
+  "variantOrder": [
+    "recent-signature-prefilter",
+    "equality-bounded-tail"
+  ],
+  "reverseDefinition": "Reverse the two-candidate order and reverse every candidate complete 18-child schedule (block order and each block arm order).",
+  "baselineSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "baselineManifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+  "compilerVersion": "21.1.8",
+  "linkerVersion": "21.1.8",
+  "interpretation": "Independent confirmation campaign motivated by exact work removal and complete semantic/corpus gates. Local screens are separate and never replaced or pooled. Each host and candidate reports all B/A, B/C and identical C/A controls. No complete-import or memory benefit follows from this component diagnostic. Every failure remains; no retry, adaptive sample count, variant selection, threshold or rerun based on results.",
+  "variants": {
+    "recent-signature-prefilter": {
+      "sourceSha256": "36a5aa057020c60b0a2f25a0ce5a76e2da93901c8ecad2d6591ebd7402aa90c8",
+      "wasmSha256": "dafe526b9ac1ecfa083216ca1d008fb8592738ebc617956e54233f9b4879fe6e",
+      "wasmBytes": 67699,
+      "files": {
+        "term-bank-parser.c": "36a5aa057020c60b0a2f25a0ce5a76e2da93901c8ecad2d6591ebd7402aa90c8",
+        "term-bank-parser.wasm": "dafe526b9ac1ecfa083216ca1d008fb8592738ebc617956e54233f9b4879fe6e",
+        "build-receipt.json": "59e43a89696f6133747056a63b2143587bd04bc28bd0532329fa76673564518c",
+        "source.patch": "34424136aa20502bb76182f4612633ec1899ecf9162d6475f04b741d50af0420"
+      }
+    },
+    "equality-bounded-tail": {
+      "sourceSha256": "9570174624c1076825ed3ad569730371f9c75fd6d28d0032d4cf42db5013ea32",
+      "wasmSha256": "a921cc6b71fb5fc59d22ab769416db6fbe9a6a5e5cedfa705ae3cace16ffefe7",
+      "wasmBytes": 68470,
+      "files": {
+        "term-bank-parser.c": "9570174624c1076825ed3ad569730371f9c75fd6d28d0032d4cf42db5013ea32",
+        "term-bank-parser.wasm": "a921cc6b71fb5fc59d22ab769416db6fbe9a6a5e5cedfa705ae3cace16ffefe7",
+        "build-receipt.json": "5112614bb3b39b3e63bb20e73e71b82867004362c9a77801b0b2a8dba87499ed",
+        "source.patch": "b9be78c8197a870787aec727329cd590d0812d9f0d057d2d6e5032c610f8636a"
+      }
+    }
+  },
+  "prerequisitesSha256": "2e018dec2cad4d9eba2c7a59e2674be6056bd0dd106f673dd5a638175fbcbaaf",
+  "excludedOverlappingHypothesis": "composite-owned-normalization: equivalent production-local hint work is already under separate qualification (486330b7/run46105416073). Unpublished three-candidate draft withdrawn before acquisition, all original bytes and local results retained."
+}
