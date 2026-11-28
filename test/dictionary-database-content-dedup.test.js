@@ -19,10 +19,13 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {
     encodeRawTermContentSharedGlossaryBinary,
+    RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
 import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 import {registerOwnedTermContent, takeOwnedTermContent} from '../ext/js/dictionary/term-content-ownership.js';
 
 /**
@@ -2875,6 +2878,73 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
 });
 
 describe('DictionaryDatabase term lookup warming', () => {
+    test('warms physical block-reference spans for recognized storage formats only', async () => {
+        const database = new DictionaryDatabase();
+        const iterateSpans = /** @type {(records: Iterable<Pick<import('../ext/js/dictionary/term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>) => IterableIterator<{offset: number, length: number}>} */ (
+            Reflect.get(database, '_iterateTermRecordContentSpans').bind(database)
+        );
+        const logicalLength = 972;
+        const records = [
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v1'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v1:jmdict'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v3:jmdict'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:unknown-codec'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-v2'},
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: ''},
+            {entryContentOffset: -1, entryContentLength: 0, entryContentDictName: 'raw-block-v2:jmdict'},
+            {entryContentOffset: 64_640, entryContentLength: 0, entryContentDictName: 'raw-block-v2:jmdict'},
+        ];
+
+        expect([...iterateSpans(records)]).toStrictEqual([
+            {offset: 64_640, length: RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES},
+            {offset: 64_640, length: RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES},
+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},
+            {offset: 64_640, length: RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES},
+            {offset: 64_640, length: logicalLength},
+            {offset: 64_640, length: logicalLength},
+            {offset: 64_640, length: logicalLength},
+            {offset: 64_640, length: logicalLength},
+            {offset: 64_640, length: logicalLength},
+            {offset: -1, length: 0},
+            {offset: 64_640, length: 0},
+        ]);
+
+        const pageSize = 64 * 1024;
+        const contentStore = new TermContentOpfsStore();
+        const pageReads = vi.fn(/** @type {(start: number, end: number) => Promise<ArrayBuffer>} */ (
+            async (start, end) => new ArrayBuffer(end - start)
+        ));
+        const file = {size: pageSize * 2, slice: (/** @type {number} */ start, /** @type {number} */ end) => ({arrayBuffer: () => pageReads(start, end)})};
+        const fileHandle = {getFile: vi.fn(async () => file)};
+        Reflect.set(contentStore, '_fileHandle', fileHandle);
+        Reflect.set(contentStore, '_loadedForRead', true);
+        Reflect.set(contentStore, '_length', file.size);
+        Reflect.set(contentStore, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: file.size,
+            startOffset: 0,
+            readFile: file,
+        }]);
+        await contentStore.warmSlices(iterateSpans([
+            {entryContentOffset: 65_526, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},
+        ]));
+        expect(pageReads).toHaveBeenCalledTimes(2);
+        expect(pageReads.mock.calls).toStrictEqual([[0, pageSize], [pageSize, pageSize * 2]]);
+
+        pageReads.mockClear();
+        Reflect.get(contentStore, '_readPageCache').clear();
+        await contentStore.warmSlices(iterateSpans([
+            {entryContentOffset: 64_640, entryContentLength: logicalLength, entryContentDictName: 'raw-block-v2:jmdict'},
+        ]));
+        expect(pageReads).toHaveBeenCalledTimes(1);
+        expect(pageReads).toHaveBeenCalledWith(0, pageSize);
+    });
+
     test('does not reload direct term indexes already cached for lookup', async () => {
         const database = new DictionaryDatabase();
         Reflect.get(database, '_directTermIndexByDictionary').set('JMdict', {

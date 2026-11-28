@@ -44,6 +44,8 @@ import {
     decodeRawTermContentHeader,
     decodeRawTermContentTokenHeader,
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+    RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX,
+    RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
     decodeRawTermContentSharedGlossaryHeader,
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
@@ -56,6 +58,8 @@ import {
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+    RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX,
+    RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
@@ -11511,13 +11515,39 @@ null :
     }
 
     /**
-     * @param {Iterable<import('./term-record-opfs-store.js').TermRecord>} records
+     * @param {Iterable<Pick<import('./term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>} records
      * @yields {{offset: number, length: number}}
      * @returns {IterableIterator<{offset: number, length: number}>}
      */
     *_iterateTermRecordContentSpans(records) {
-        for (const {entryContentOffset: offset, entryContentLength: length} of records) {
-            yield {offset, length};
+        for (const {entryContentOffset: offset, entryContentLength: length, entryContentDictName} of records) {
+            let prefetchLength = length;
+            if (offset >= 0 && length > 0) {
+                const dictName = typeof entryContentDictName === 'string' ? entryContentDictName : '';
+                const compressionDictName = getRawTermContentBlockCompressionDictName(dictName);
+                // The reference formats are stored as exact dictionary-name
+                // selectors. Unknown codec suffixes keep the legacy logical
+                // length so speculative reads cannot interpret a new format
+                // using the wrong header size.
+                if (compressionDictName === null || compressionDictName === 'jmdict') {
+                    const compactPrefix = `${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`;
+                    const compact = (
+                        dictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||
+                        dictName.startsWith(compactPrefix)
+                    );
+                    const blockPrefix = `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`;
+                    const legacy = (
+                        dictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX ||
+                        dictName.startsWith(blockPrefix)
+                    );
+                    if (compact || legacy) {
+                        prefetchLength = compact ?
+                            RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES :
+                            RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
+                    }
+                }
+            }
+            yield {offset, length: prefetchLength};
         }
     }
 
