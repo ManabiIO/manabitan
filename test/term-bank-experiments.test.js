@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number}}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number, previousBuffersDetached: boolean}}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -636,7 +636,9 @@ describe('actual parser worker flag propagation', () => {
                         prepareLookupIndexes: true,
                         prepareLookupRoute}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
-                expect(reply.chunk?.mediaRows[0].imagePaths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
+                expect(reply.chunk?.mediaRows).toHaveLength(0)
+                expect(reply.chunk?.projectedMedia?.paths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
+                expect(reply.chunk?.projectedMedia?.rowIndexes).toEqual(new Uint32Array([0]))
                 expect(reply.borrowsWorkerMemory).toBe(current === glossary)
                 if (!reply.chunk) { throw new Error('Missing projected worker result') }
                 expect(reply.chunk.preparedLookupIndexes?.size).toBeGreaterThan(0)
@@ -658,18 +660,25 @@ describe('actual parser worker flag propagation', () => {
         } finally { await worker.terminate() }
     })
 
-    test('transfers the diagnostic key arena once and preserves its views after another request', async () => {
+    test('transfers projected media columns once and preserves them after another request', async () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
+            let priorTransferred = []
             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
                 postMessage: (data, transfer = []) => {
                     if (data.type === 'result' && data.chunk) {
                         const arena = data.chunk.termRecordPreinternedPlan.stringsBuffer.buffer
-                        const keys = data.chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes]).filter(bytes => bytes?.byteLength > 0)
+                        const projected = data.chunk.projectedMedia
+                        const keys = projected ? [projected.diagnosticKeys.bytes, projected.diagnosticKeys.spans,
+                            projected.rowIndexes, projected.pathEnds] : []
                         data.transferObservation = {count: transfer.length, uniqueCount: new Set(transfer).size,
                             keyArenaOccurrences: transfer.filter(buffer => buffer === arena).length,
                             keyBuffers: new Set(keys.map(bytes => bytes.buffer)).size,
-                            keyBuffersOutsideArena: keys.filter(bytes => bytes.buffer !== arena).length}
+                            keyBuffersOutsideArena: keys.filter(bytes => bytes.buffer !== arena).length,
+                            previousBuffersDetached: priorTransferred.every(view => view.byteLength === 0)}
+                        parentPort.postMessage(data, transfer)
+                        priorTransferred = keys
+                        return
                     }
                     parentPort.postMessage(data, transfer)
                 }}
@@ -699,34 +708,45 @@ describe('actual parser worker flag propagation', () => {
                 projectImagePaths: true,
                 ownContentBytes: true,
                 prepareLookupIndexes: true}
+            const compressedSource = compressed(JSON.stringify(rows), 8)
             const reply = await requestWorker(worker, {type: 'parse',
                 id: 1,
                 version: 3,
-                sourceBuffers: [encoder.encode(JSON.stringify(rows)).buffer],
+                sourceBuffers: [compressedSource.bytes.buffer],
+                sourceMetadata: [compressedSource],
                 options})
             expect(reply.type, JSON.stringify(reply.error)).toBe('result')
             const {chunk, transferObservation} = reply
             if (!chunk || !transferObservation) { throw new Error('Missing copied worker result') }
+            if (!chunk.projectedMedia) { throw new Error('Missing projected media columns') }
             expect(transferObservation.count).toBe(transferObservation.uniqueCount)
             expect(transferObservation.keyArenaOccurrences).toBe(1)
-            expect(transferObservation.keyBuffers).toBe(1)
-            expect(transferObservation.keyBuffersOutsideArena).toBe(0)
-            expect(chunk.mediaRows[0].row.expression).toBe('quoted"\ud800')
-            expect(chunk.mediaRows[0].row.expressionBytes).toBeUndefined()
-            const keys = chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes])
-                .filter((bytes) => bytes instanceof Uint8Array)
-            for (const bytes of keys) { expect(bytes.buffer).toBe(chunk.termRecordPreinternedPlan.stringsBuffer.buffer) }
-            const snapshots = keys.map((bytes) => new Uint8Array(bytes))
-            const imagePaths = chunk.mediaRows.map(({imagePaths}) => imagePaths)
-            expect(imagePaths).toEqual(rows.map((_, index) => [`${index}.png`]))
+            expect(transferObservation.keyBuffers).toBe(4)
+            expect(transferObservation.keyBuffersOutsideArena).toBe(4)
+            expect(chunk.mediaRows).toHaveLength(0)
+            expect(chunk.projectedMedia?.rowIndexes).toEqual(Uint32Array.from(rows.map((_, i) => i)))
+            expect(chunk.projectedMedia?.paths).toEqual(rows.map((_, index) => `${index}.png`))
+            expect(chunk.projectedMedia?.diagnosticKeys.decodedKeys?.get(0)).toBe('quoted"\ud800')
+            const columns = chunk.projectedMedia && [
+                chunk.projectedMedia.diagnosticKeys.bytes,
+                chunk.projectedMedia.diagnosticKeys.spans,
+                chunk.projectedMedia.rowIndexes,
+                chunk.projectedMedia.pathEnds,
+            ]
+            if (!columns) { throw new Error('Missing projected media columns') }
+            const snapshots = columns.map((view) => [...view])
+            const projected = chunk.projectedMedia
+            const paths = [...projected.paths]
             const next = await requestWorker(worker, {type: 'parse',
                 id: 2,
                 version: 3,
                 sourceBuffers: [encoder.encode(JSON.stringify([row('replacement'.repeat(100), ['later'])])).buffer],
                 options})
             expect(next.type, JSON.stringify(next.error)).toBe('result')
-            expect(keys).toEqual(snapshots)
-            expect(chunk.mediaRows.map(({imagePaths}) => imagePaths)).toEqual(imagePaths)
+            if (!next.transferObservation) { throw new Error('Missing transfer observation') }
+            expect(columns.map((view) => [...view])).toEqual(snapshots)
+            expect(projected.paths).toEqual(paths)
+            expect(next.transferObservation.previousBuffersDetached).toBe(true)
         } finally { await worker.terminate() }
     })
 
