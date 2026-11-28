@@ -133,6 +133,22 @@ export class NativeCanonicalScanner {
     }
 
     /**
+     * Starts the optional immutable-code load while import storage is prepared.
+     * A failed preload is owned here; scan retains its existing fallback and
+     * retry behavior when the first eligible content chunk arrives.
+     * @returns {Promise<void>}
+     */
+    async preload() {
+        /* eslint-disable @stylistic/semi */
+        try {
+            await this._loadModule()
+        } catch {
+            // Loading this optional accelerator never gates import setup.
+        }
+        /* eslint-enable @stylistic/semi */
+    }
+
+    /**
      * @param {ScanOwner} db
      * @param {ScanContext} ctx
      * @param {Record<string, number>} metrics

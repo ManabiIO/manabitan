@@ -1346,6 +1346,9 @@ export class DictionaryDatabase {
         // Reserve ownership before the first await so two import requests cannot
         // initialize overlapping journals and OPFS sessions.
         this._beginBulkImportLifecycle();
+        // The native scanner's first-use load can overlap journal and OPFS setup.
+        // eslint-disable-next-line @stylistic/semi
+        void this._nativeCanonicalScanner.preload()
         const setupPromise = this._startBulkImportSetup(db);
         this._bulkImportSetupPromise = setupPromise;
         try {
