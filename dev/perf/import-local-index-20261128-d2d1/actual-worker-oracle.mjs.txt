@@ -1,0 +1,299 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+/* eslint @stylistic/semi: ["error", "never"] */
+
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {execFileSync} from 'node:child_process'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {readFile, writeFile} from 'node:fs/promises'
+import {join, resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
+import {Worker as ThreadWorker} from 'node:worker_threads'
+import {BlobReader, Uint8ArrayWriter, ZipReader} from '@zip.js/zip.js'
+
+// Replay the actual source planner and parser workers. Only persistence is
+// intercepted. Resolved spans use native content lengths at deterministic
+// offsets; this checks record bytes, not compression or whole-database parity.
+const [parentPath, candidatePath, cachePath, outputPath, dictionary = 'jmdict', cpus = '4', memory = '8'] = process.argv.slice(2)
+assert(parentPath && candidatePath && cachePath && outputPath)
+const parentRoot = resolve(parentPath)
+const candidateRoot = resolve(candidatePath)
+// The CLI explicitly selects the two local source trees to compare.
+// eslint-disable-next-line no-unsanitized/method
+const localImport = (root, filename) => import(pathToFileURL(join(root, filename)))
+const parser = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')
+const pipelineModule = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-source-pipeline.js')
+const parents = await localImport(parentRoot, 'ext/js/dictionary/term-record-opfs-store.js')
+const candidates = await localImport(candidateRoot, 'ext/js/dictionary/term-record-opfs-store.js')
+const resolution = await localImport(candidateRoot, 'ext/js/dictionary/term-content-plan-resolution.js')
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const lockBytes = await readFile(join(candidateRoot, 'test/perf/dictionaries.lock.json'))
+assert.deepEqual(lockBytes, await readFile(join(parentRoot, 'test/perf/dictionaries.lock.json')))
+const fixture = JSON.parse(lockBytes).dictionaries[dictionary]
+assert(fixture)
+const archivePath = join(cachePath, fixture.cacheFile)
+const archiveHash = createHash('sha256')
+for await (const bytes of createReadStream(archivePath)) { archiveHash.update(bytes) }
+assert.equal(archiveHash.digest('hex'), fixture.sha256)
+const archive = await openAsBlob(archivePath)
+assert.equal(archive.size, fixture.sizeBytes)
+const wasm = await readFile(join(candidateRoot, 'ext/lib/term-bank-parser.wasm'))
+assert.deepEqual(wasm, await readFile(join(parentRoot, 'ext/lib/term-bank-parser.wasm')))
+parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+
+const terminations = []
+const sourceGroups = []
+class BrowserWorker extends EventTarget {
+    constructor(url) {
+        super()
+        this.worker = new ThreadWorker(pathToFileURL(join(candidateRoot, 'test/fixtures/parser-settlement/worker-node.mjs')), {workerData: {url: url.href}})
+        this.worker.on('message', (data) => this.dispatchEvent(new MessageEvent('message', {data})))
+        this.worker.on('error', (error) => {
+            const event = new Event('error')
+            Object.defineProperty(event, 'message', {value: error.message})
+            this.dispatchEvent(event)
+        })
+        this.worker.on('messageerror', () => this.dispatchEvent(new MessageEvent('messageerror')))
+    }
+
+    postMessage(data, transfer) {
+        if (data.type === 'parse') {
+            sourceGroups.push({id: data.id, files: data.sourceMetadata?.map(({filename}) => filename) ?? null, bytes: data.sourceBuffers.map((buffer) => buffer.byteLength)})
+        }
+        this.worker.postMessage(data, transfer)
+    }
+
+    terminate() { terminations.push(this.worker.terminate()) }
+}
+globalThis.Worker = BrowserWorker
+Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency: Number(cpus), deviceMemory: Number(memory)}})
+assert.equal(parser.getParallelTermBankParserWorkerCount(), 3)
+
+const reader = new ZipReader(new BlobReader(archive))
+const entries = await reader.getEntries()
+const termFiles = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const totalSourceBytes = termFiles.reduce((total, file) => total + file.uncompressedSize, 0)
+const rawReader = new pipelineModule.RawZipPayloadReader(archive)
+const sourcePipeline = new pipelineModule.TermBankSourcePipeline({
+    termFiles,
+    enabled: true,
+    read: async (file) => await file.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}),
+    readCompressed: async (file, signal) => await rawReader.read(file, signal),
+})
+const groups = []
+const profiles = []
+const fullDigest = createHash('sha256')
+let rowCount = 0
+let contentBase = 2 ** 40
+
+async function encode(module, chunk, offsets, lengths) {
+    const store = new module.TermRecordOpfsStore()
+    store.setRawTermBankSourceBytes(totalSourceBytes)
+    Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return {} }})
+    Reflect.set(store, '_nextId', rowCount + 1)
+    await store.beginImportSession()
+    const writes = []
+    const envelopes = []
+    let adoptedRows = 0
+    let adoptedPayloadBytes = 0
+    let adoptedFieldBytes = 0
+    // Intercept persistence only; both actual encoder invocation witnesses and
+    // public append/materialization/consumer-factory admission stay active.
+    store._flushPendingLookupIndexChunks = async () => {}
+    if (typeof store._createPendingLookupIndexChunk === 'function') {
+        const createPending = store._createPendingLookupIndexChunk.bind(store)
+        store._createPendingLookupIndexChunk = (...args) => {
+            const payloadBytes = args[3].byteLength
+            const fieldsBytes = args[4]?.byteLength ?? 0
+            const pending = createPending(...args)
+            const adopted = !(pending instanceof Uint8Array)
+            const parts = adopted ? [pending.header, pending.payload, pending.recordFields] : [pending]
+            const envelope = new Uint8Array(parts.reduce((total, part) => total + part.byteLength, 0))
+            let cursor = 0
+            for (const part of parts) {
+                envelope.set(part, cursor)
+                cursor += part.byteLength
+            }
+            assert.equal(cursor, pending.byteLength)
+            if (adopted) {
+                assert.equal(args[3].byteLength, 0)
+                assert.equal(args[4].byteLength, 0)
+                adoptedRows += args[1]
+                adoptedPayloadBytes += payloadBytes
+                adoptedFieldBytes += fieldsBytes
+            }
+            writes.push({firstId: args[0], rows: args[1], contentOffsetBase: args[2], fieldsFormat: args[5]})
+            envelopes.push(envelope)
+            return pending
+        }
+    } else {
+        const createEnvelope = store._createLookupIndexChunk.bind(store)
+        store._createLookupIndexChunk = (...args) => {
+            const envelope = createEnvelope(...args)
+            writes.push({firstId: args[0], rows: args[1], contentOffsetBase: args[2], fieldsFormat: args[5]})
+            envelopes.push(envelope)
+            return envelope
+        }
+    }
+    const {mediaRows, ...columnPayload} = chunk
+    const recordChunk = module.createArtifactTermRecordChunkWithResolvedContent(
+        {...columnPayload, dictionary: fixture.expectedTitle, dictionaryTotalRows: fixture.termRows},
+        chunk.contentUniqueIndexList,
+        offsets,
+        lengths,
+        chunk.preparedLookupIndexes,
+    )
+    const metrics = await store.appendBatchFromArtifactChunkResolvedContent(
+        recordChunk,
+        new Float64Array(0),
+        new Uint32Array(0),
+        'raw',
+    )
+    return {writes, envelopes, metrics, adoptedRows, adoptedPayloadBytes, adoptedFieldBytes, mediaRows: mediaRows.length}
+}
+
+async function consume(chunk) {
+    const plan = chunk.contentDedupPlan
+    assert(plan && chunk.contentUniqueIndexList && chunk.contentMetaList)
+    const offsets = new Float64Array(plan.uniqueCount)
+    const lengths = new Uint32Array(plan.uniqueCount)
+    for (let i = 0; i < plan.uniqueCount; ++i) {
+        const meta = (chunk.contentMetaByUniqueIndex ? i : plan.uniqueRowIndexes[i]) * 4
+        offsets[i] = contentBase + chunk.contentMetaList[meta]
+        lengths[i] = chunk.contentMetaList[meta + 1]
+    }
+    // Resolve deferred columns in the same original worker plan object, as
+    // database admission does. The deterministic uniform raw label is an
+    // oracle scenario; real codec-label mixtures remain browser-validation work.
+    resolution.initializeTermContentPlanResolution(plan)
+    plan.resolvedOffsets.set(offsets)
+    plan.resolvedLengths.set(lengths)
+    plan.resolvedFlags.fill(1)
+    plan.resolvedUniformDictName = 'raw'
+    const before = await encode(parents, chunk, offsets, lengths)
+    const after = await encode(candidates, chunk, offsets, lengths)
+    assert.deepEqual(after.writes, before.writes)
+    assert.deepEqual(after.envelopes, before.envelopes)
+    for (const envelope of after.envelopes) { fullDigest.update(envelope) }
+    groups.push({
+        rows: chunk.rowCount,
+        scoreColumnType: chunk.scoreList.constructor.name,
+        uniqueContentCount: plan.uniqueCount,
+        sharedContentSlab: typeof SharedArrayBuffer !== 'undefined' && chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer,
+        prepared: [...chunk.preparedLookupIndexes.keys()],
+        runRows: after.writes.map((write) => write.rows),
+        adoptedRows: after.adoptedRows,
+        adoptedPayloadBytes: after.adoptedPayloadBytes,
+        adoptedFieldBytes: after.adoptedFieldBytes,
+        mediaRows: after.mediaRows,
+        resolvedDictNamesArray: Array.isArray(plan.resolvedDictNames),
+        envelopeBytes: after.envelopes.reduce((total, bytes) => total + bytes.byteLength, 0),
+        envelopeSha256: after.envelopes.map(sha),
+    })
+    rowCount += chunk.rowCount
+    contentBase += chunk.contentBytesLength ?? chunk.contentBytesBuffer.byteLength
+    process.stderr.write(`${dictionary}: ${rowCount}/${fixture.termRows} rows\n`)
+}
+
+const media = fixture.mediaFiles > 0
+const options = {
+    emitTermByteLists: false,
+    computeContentHashes: true,
+    emitContentSlab: true,
+    emitTokenBinaryContent: true,
+    mediaHintFastScan: media,
+    projectImagePaths: media,
+    validateGlossaryTypes: true,
+    prepareLookupIndexes: true,
+    prepareLookupRoute: totalSourceBytes >= 128 * 1024 ** 2,
+    maxPendingChunks: 2,
+}
+let complete = false
+let error = null
+try {
+    for (let start = 0; start < termFiles.length;) {
+        const compressedPlan = sourcePipeline.createCompressedImportRunPlan(start)
+        if (compressedPlan !== null) {
+            assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(compressedPlan.loaders, compressedPlan.estimatedByteLengths, 3, consume, options), true)
+            profiles.push(parser.consumeLastTermBankWasmParseProfile())
+            sourcePipeline.releaseBatch(compressedPlan.files)
+            start += compressedPlan.files.length
+        } else {
+            const files = sourcePipeline.getBatch(start)
+            const batch = await sourcePipeline.readBatch(files)
+            if (batch?.promises) {
+                assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelDeferred(batch.promises, batch.estimatedByteLengths, 3, consume, options), true)
+            } else {
+                await parser.parseTermBankWithWasmColumnChunks(batch, 3, consume, 2048, {...options, singleChunk: true})
+            }
+            profiles.push(parser.consumeLastTermBankWasmParseProfile())
+            sourcePipeline.releaseBatch(files)
+            start += files.length
+        }
+    }
+    assert.equal(rowCount, fixture.termRows)
+    if (dictionary === 'jmdict') {
+        assert.equal(groups.length, 12)
+        assert.equal(groups.reduce((total, group) => total + group.adoptedRows, 0), fixture.termRows)
+        assert(groups.every((group) => group.sharedContentSlab && group.adoptedRows === group.rows))
+    }
+    complete = true
+} catch (failure) {
+    error = String(failure)
+    throw failure
+} finally {
+    await sourcePipeline.dispose()
+    await parser.disposeParallelTermBankParser()
+    await Promise.all(terminations)
+    await reader.close()
+    const summary = {rows: 0, runs: 0, adoptedRows: 0, adoptedGroups: 0, adoptedPayloadBytes: 0, adoptedFieldBytes: 0, preparedGroups: 0, fallbackRows: 0}
+    for (const group of groups) {
+        summary.rows += group.rows
+        summary.runs += group.runRows.length
+        summary.preparedGroups += group.prepared.length > 0 ? 1 : 0
+        summary.adoptedRows += group.adoptedRows
+        summary.adoptedGroups += group.adoptedRows > 0 ? 1 : 0
+        summary.adoptedPayloadBytes += group.adoptedPayloadBytes
+        summary.adoptedFieldBytes += group.adoptedFieldBytes
+        summary.fallbackRows += group.rows - group.adoptedRows
+    }
+    const identities = {}
+    for (const [arm, root] of [['A', parentRoot], ['B', candidateRoot]]) {
+        identities[arm] = {
+            commitAndTree: execFileSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim().split('\n'),
+            dirty: execFileSync('git', ['status', '--porcelain'], {cwd: root, encoding: 'utf8'}).trim(),
+        }
+    }
+    assert.equal(identities.A.dirty, '')
+    assert.equal(identities.B.dirty, '')
+    const report = {
+        complete,
+        error,
+        node: process.version,
+        identities,
+        fastPathActivated: summary.adoptedRows > 0,
+        executedWorkerCounts: [...new Set(profiles.map((profile) => profile?.parallelWorkerCount ?? 0))],
+        dictionary,
+        hardwareConcurrency: Number(cpus),
+        deviceMemory: Number(memory),
+        fixture,
+        lockSha256: sha(lockBytes),
+        parserWasmSha256: sha(wasm),
+        parentSourceSha256: sha(await readFile(join(parentRoot, 'ext/js/dictionary/term-record-opfs-store.js'))),
+        candidateSourceSha256: sha(await readFile(join(candidateRoot, 'ext/js/dictionary/term-record-opfs-store.js'))),
+        candidateWorkerSourceSha256: sha(await readFile(join(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js'))),
+        ownershipSourceSha256: sha(await readFile(join(candidateRoot, 'ext/js/dictionary/term-lookup-index-ownership.js'))),
+        totalSourceBytes,
+        scope: 'Actual production source planner and three-worker delivery through unmodified record encoders and public store append, with original shared content slabs, deferred resolution columns populated at deterministic native-content spans, importer mediaRows removal, complete sidecar-envelope comparison and persistence-only interception. Activation counts are observed for the uniform raw-label oracle scenario. No elapsed-import, real codec-label distribution or full-database persistence claim.',
+        summary,
+        encodedByteSha256: fullDigest.digest('hex'),
+        groups,
+        sourceGroups,
+        profiles,
+    }
+    await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`, {flag: 'wx'})
+    console.log(JSON.stringify({complete, error, ...summary}))
+}
