@@ -7,7 +7,7 @@ import {crc32} from 'node:zlib';
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
 import {tryCollectGlossaryImagePaths} from '../ext/js/dictionary/dictionary-image-references.js';
 import {getImageMediaTypeFromFileName} from '../ext/js/media/media-util.js';
-import {copyWasmBackedColumnChunk, inflateCompressedTermBankSourcesWasm, parseTermBankWithWasmColumnChunks, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {copyParserWorkerColumnChunk, copyWasmBackedColumnChunk, inflateCompressedTermBankSourcesWasm, parseTermBankWithWasmColumnChunks, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, project_single_glossary_image_path: (pointer: number, length: number) => bigint}} ProjectionWasm */
 /** @type {ProjectionWasm} */
@@ -150,7 +150,17 @@ describe('native single-image semantic projection', () => {
  * @param {(chunk: Parameters<typeof copyWasmBackedColumnChunk>[0], source: Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>) => void} inspect
  */
 async function parseCompressedGlossary(glossary, inspect) {
-    const bytes = encoder.encode(`[["画像","がぞう","","",0,${glossary},1,""]]`);
+    return parseCompressedGlossaries([glossary], inspect);
+}
+
+/**
+ * @param {string[]} glossaries
+ * @param {Parameters<typeof parseCompressedGlossary>[1]} inspect
+ */
+async function parseCompressedGlossaries(glossaries, inspect) {
+    const bytes = encoder.encode('[' + glossaries.map((glossary, index) =>
+        `["画像${index}","がぞう${index}","","",${index % 3},${glossary},${index + 1},""]`,
+    ).join(',') + ']');
     const source = await inflateCompressedTermBankSourcesWasm([{bytes, compressionMethod: 0, compressedSize: bytes.length, uncompressedSize: bytes.length, signature: crc32(bytes)}]);
     await parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => inspect(chunk, source), 2048, {
         singleChunk: true,
@@ -224,5 +234,91 @@ describe('compressed worker-source media projection', () => {
             expect(parse).toHaveBeenCalledTimes(1);
             expect(actual.mediaRows[0].imagePaths).toEqual(kind === 'multiple' ? ['first.png', 'second.png'] : ['first.png']);
         });
+    });
+});
+
+/** @param {string} path @returns {string} */
+function imageGlossary(path) {
+    return JSON.stringify([{type: 'image', path}]);
+}
+
+describe('worker image-path decode windows', () => {
+    test.each([false, true])('preserves complete columns and routes with shared content=%s', async (shareContent) => {
+        const glossaries = Array.from({length: 10}, (_, index) => imageGlossary(`img/ascii-${index}.webp`));
+        await parseCompressedGlossaries(glossaries, (chunk, source) => {
+            const expected = copyWasmBackedColumnChunk(chunk, shareContent, true, true, source);
+            const before = Uint8Array.from(new Uint8Array(source.wasm.memory.buffer, source.jsonPtr, source.jsonLength));
+            const decode = vi.spyOn(TextDecoder.prototype, 'decode');
+            const actual = copyParserWorkerColumnChunk(chunk, shareContent, true, true, source);
+            expect(actual).toEqual(expected);
+            expect(decode).toHaveBeenCalledOnce();
+            expect(decode.mock.calls[0][0]?.byteLength).toBe(160);
+            expect(new Uint8Array(source.wasm.memory.buffer, source.jsonPtr, source.jsonLength)).toEqual(before);
+            expect(actual.contentBytesBuffer?.buffer === source.wasm.memory.buffer).toBe(shareContent);
+        });
+    });
+
+    test.each([
+        imageGlossary('img/猫😀.png'),
+        imageGlossary('\ufeffimage.png'),
+        String.raw`[{"type":"image","path":"\ufeffimage.png"}]`,
+        String.raw`[{"type":"image","path":"img/\u732b.png"}]`,
+        String.raw`[{"type":"image","path":"img/a\\b\"c.png"}]`,
+        String.raw`[{"type":"image","path":"img/\ud800.png"}]`,
+        imageGlossary(''),
+        imageGlossary('ignored.bin'),
+        '[{"type":"image","path":"one.png"},{"type":"image","path":"two.png"}]',
+        '[{"type":"image","path":"old.png","path":"new.png"}]',
+        '[{"type":"text","type":"image","path":"last.webp"}]',
+        '[{"type":"structured-content","content":[{"tag":"img","path":"one.png"},{"tag":"img","path":"two.webp"}]}]',
+    ])('preserves ASCII runs around a fallback or semantic special case: %s', async (middle) => {
+        await parseCompressedGlossaries([
+            imageGlossary('before-a.png'), imageGlossary('before-b.png'), middle,
+            imageGlossary('after-a.png'), imageGlossary('after-b.png'),
+        ], (chunk, source) => {
+            const expected = copyWasmBackedColumnChunk(chunk, false, true, false, source);
+            expect(copyParserWorkerColumnChunk(chunk, false, true, false, source)).toEqual(expected);
+        });
+    });
+
+    test.each([
+        {lengths: [65536, 8], decodeLengths: [65536, 8]},
+        {lengths: [65537, 8], decodeLengths: [65537, 8]},
+        {lengths: [32768, 32768, 8], decodeLengths: [65536, 8]},
+    ])('bounds copied windows for path lengths $lengths', async ({lengths, decodeLengths}) => {
+        const glossaries = lengths.map((length, index) => imageGlossary(String.fromCharCode(97 + index).repeat(length - 4) + '.png'));
+        await parseCompressedGlossaries(glossaries, (chunk, source) => {
+            const expected = copyWasmBackedColumnChunk(chunk, false, true, false, source);
+            const decode = vi.spyOn(TextDecoder.prototype, 'decode');
+            const actual = copyParserWorkerColumnChunk(chunk, false, true, false, source);
+            expect(actual).toEqual(expected);
+            expect(decode.mock.calls.map(([bytes]) => bytes?.byteLength)).toEqual(decodeLengths);
+        });
+    });
+
+    test.each(['foreign', 'range', 'decoded', 'missing-export', 'outside-proof', 'bad-quote-proof'])('retains fallback for %s sources', async (kind) => {
+        await parseCompressedGlossaries([imageGlossary('first.png'), imageGlossary('second.png')], (chunk, source) => {
+            if (kind === 'foreign') { chunk.mediaRows[0].row.glossaryJsonBytes = Uint8Array.from(chunk.mediaRows[0].row.glossaryJsonBytes ?? []); }
+            if (kind === 'range') { source = {...source, jsonLength: 1}; }
+            if (kind === 'decoded') { chunk.mediaRows[0].row.glossaryJson = imageGlossary('first.png'); }
+            if (kind === 'missing-export') { source = {...source, wasm: {...source.wasm, project_single_glossary_image_path: undefined}}; }
+            if (kind === 'outside-proof') { source = {...source, wasm: {...source.wasm, project_single_glossary_image_path: () => (0xffffffffn << 32n) | 99n}}; }
+            if (kind === 'bad-quote-proof') { source = {...source, wasm: {...source.wasm, project_single_glossary_image_path: () => 3n}}; }
+            const expected = copyWasmBackedColumnChunk(chunk, false, true, false, source);
+            expect(copyParserWorkerColumnChunk(chunk, false, true, false, source)).toEqual(expected);
+        });
+    });
+
+    test('keeps owned strings and representative order after native heap reuse', async () => {
+        let retained;
+        let snapshot;
+        await parseCompressedGlossaries([imageGlossary('same.webp'), imageGlossary('other.webp'), imageGlossary('same.webp')], (chunk, source) => {
+            const expected = copyWasmBackedColumnChunk(chunk, false, true, false, source);
+            retained = copyParserWorkerColumnChunk(chunk, false, true, false, source);
+            expect(retained).toEqual(expected);
+            snapshot = structuredClone(retained);
+        });
+        await parseCompressedGlossary(imageGlossary('later.png'), () => {});
+        expect(retained).toEqual(snapshot);
     });
 });

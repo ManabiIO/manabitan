@@ -4100,6 +4100,97 @@ function tryProjectNativeGlossaryImagePath(row, source) {
 }
 
 /**
+ * Native projection proves each quoted token while the worker owns its source.
+ * Unescaped ASCII has identical byte and UTF-16 offsets, so one bounded decode
+ * can supply several path values. Other tokens retain the existing decoder.
+ * No source span survives this synchronous worker result-copy callback.
+ * @param {TermBankColumnChunk['mediaRows']} mediaRows
+ * @param {PreloadedTermBankSource|undefined} source
+ * @returns {Array<string[]|null>|null}
+ */
+function projectWorkerGlossaryImagePaths(mediaRows, source) {
+    if (typeof source === 'undefined' || mediaRows.length === 0) { return null; }
+    const {wasm, jsonPtr, jsonLength} = source;
+    const project = wasm.project_single_glossary_image_path;
+    if (typeof project !== 'function') { return null; }
+    const maximumDecodeBytes = 65536;
+    /** @type {Array<string[]|null>} */
+    const paths = new Array(mediaRows.length).fill(null);
+    const starts = new Uint32Array(mediaRows.length);
+    const lengths = new Uint32Array(mediaRows.length);
+    let firstPending = 0;
+    let pendingCount = 0;
+    let pendingBytes = 0;
+    const flush = () => {
+        if (pendingCount === 0) { return; }
+        // Size each private snapshot to its admitted bytes, including the tail.
+        const bytes = new Uint8Array(pendingBytes);
+        let cursor = 0;
+        for (let i = firstPending; i < firstPending + pendingCount; ++i) {
+            const length = lengths[i];
+            bytes.set(new Uint8Array(wasm.memory.buffer, starts[i], length), cursor);
+            cursor += length;
+        }
+        const decoded = textDecoder.decode(bytes);
+        cursor = 0;
+        for (let i = firstPending; i < firstPending + pendingCount; ++i) {
+            const end = cursor + lengths[i];
+            const path = decoded.slice(cursor, end);
+            paths[i] = getImageMediaTypeFromFileName(path) === null ? null : [path];
+            cursor = end;
+        }
+        pendingCount = 0;
+        pendingBytes = 0;
+    };
+    for (let i = 0; i < mediaRows.length; ++i) {
+        const {row} = mediaRows[i];
+        const bytes = row.glossaryJsonBytes;
+        if (
+            row.termEntryContentBytes.length === 0 || row.glossaryJson.length > 0 ||
+            !(bytes instanceof Uint8Array) || bytes.buffer !== wasm.memory.buffer ||
+            bytes.byteOffset < jsonPtr || bytes.byteOffset + bytes.byteLength > jsonPtr + jsonLength
+        ) {
+            flush();
+            continue;
+        }
+        const span = project(bytes.byteOffset, bytes.byteLength);
+        if (span === 0n) {
+            flush();
+            continue;
+        }
+        const start = Number((span >> 32n) & 0xffffffffn);
+        const length = Number(span & 0xffffffffn);
+        if (
+            length < 2 || start > bytes.byteLength || length > bytes.byteLength - start ||
+            bytes[start] !== U8_QUOTE || bytes[start + length - 1] !== U8_QUOTE
+        ) {
+            flush();
+            continue;
+        }
+        const valueLength = length - 2;
+        let ascii = valueLength > 0 && valueLength <= maximumDecodeBytes;
+        for (let p = start + 1, end = p + valueLength; ascii && p < end; ++p) {
+            const value = bytes[p];
+            if (value >= 0x80 || value === U8_BACKSLASH) { ascii = false; }
+        }
+        if (!ascii) {
+            flush();
+            const path = decodeJsonStringToken(bytes, start, length);
+            paths[i] = getImageMediaTypeFromFileName(path) === null ? null : [path];
+            continue;
+        }
+        if (pendingBytes + valueLength > maximumDecodeBytes) { flush(); }
+        if (pendingCount === 0) { firstPending = i; }
+        starts[i] = bytes.byteOffset + start + 1;
+        lengths[i] = valueLength;
+        ++pendingCount;
+        pendingBytes += valueLength;
+    }
+    flush();
+    return paths;
+}
+
+/**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
@@ -4109,6 +4200,35 @@ function tryProjectNativeGlossaryImagePath(row, source) {
  * @throws {Error} If the native string plan is incomplete.
  */
 export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+    return copyColumnChunk(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, false);
+}
+
+/**
+ * Copies the parser worker's fresh synchronous result before it is exposed to
+ * another callback. Only this path groups native image-token decoding;
+ * arbitrary callers retain the public copy helper's per-row access order.
+ * @param {TermBankColumnChunk} chunk
+ * @param {boolean} shareContentBytes
+ * @param {boolean} projectImagePaths
+ * @param {boolean} prepareLookupRoute
+ * @param {PreloadedTermBankSource|undefined} preloadedSource
+ * @returns {TermBankColumnChunk}
+ */
+export function copyParserWorkerColumnChunk(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource) {
+    return copyColumnChunk(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, true);
+}
+
+/**
+ * @param {TermBankColumnChunk} chunk
+ * @param {boolean} shareContentBytes
+ * @param {boolean} projectImagePaths
+ * @param {boolean} prepareLookupRoute
+ * @param {PreloadedTermBankSource|undefined} preloadedSource
+ * @param {boolean} batchNativeImagePaths
+ * @returns {TermBankColumnChunk}
+ * @throws {Error} If the native string plan is incomplete.
+ */
+function copyColumnChunk(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, batchNativeImagePaths) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4144,9 +4264,12 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
-    const mediaRows = chunk.mediaRows.map(({index, row}) => {
+    const nativeImagePaths = batchNativeImagePaths && projectImagePaths ?
+        projectWorkerGlossaryImagePaths(chunk.mediaRows, preloadedSource) :
+        null;
+    const mediaRows = chunk.mediaRows.map(({index, row}, mediaIndex) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            (tryProjectNativeGlossaryImagePath(row, preloadedSource) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+            ((nativeImagePaths === null ? tryProjectNativeGlossaryImagePath(row, preloadedSource) : nativeImagePaths[mediaIndex]) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
