@@ -1,0 +1,316 @@
+name: Import experiments 20261128 a7c4
+
+on:
+  push:
+    branches: [test/import-experiments-20261128-a7c4]
+    paths:
+      - '.github/workflows/import-experiments-20261128-a7c4.yml'
+      - 'dev/perf/prepare-import-ownership-screen-a7c4.js'
+      - 'dev/perf/capture-canonical-jmdict-a7c4.js'
+      - 'dev/perf/seed-cctx-probe.c'
+      - 'dev/perf/seed-cctx-screen.py'
+      - 'ext/js/dictionary/wasm/term-bank-parser.c'
+      - 'test/term-bank-wasm-consecutive-keys.test.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-experiments-20261128-a7c4
+  cancel-in-progress: false
+
+jobs:
+  key-witness:
+    name: Strict JMdict adjacent-key component screen
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_OUT: builds/perf/import-experiments-20261128-a7c4/key-witness
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record fixed source and protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_OUT"
+          git rev-parse HEAD > "$PERF_OUT/workflow-source-commit.txt"
+          git status --porcelain > "$PERF_OUT/initial-status.txt"
+          git diff --exit-code "$PERF_BASELINE" HEAD -- \
+            package.json package-lock.json test/perf/dictionaries.lock.json \
+            ext/js/dictionary/term-bank-wasm-parser.js \
+            ext/js/dictionary/term-bank-wasm-parser-worker.js \
+            ext/js/dictionary/term-content-ownership.js
+          git diff --stat "$PERF_BASELINE" HEAD > "$PERF_OUT/source-diff-stat.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = {
+              "scope": "Diagnostic sequential parse/lookup/actual ownership component, not browser import qualification",
+              "workflowCommit": os.environ["GITHUB_SHA"],
+              "baselineCommit": os.environ["PERF_BASELINE"],
+              "dictionary": "jmdict",
+              "flags": {},
+              "pairs": 3,
+              "order": ["AB", "BA", "AB"],
+              "warmupsPerFreshProcess": 2,
+              "reruns": 0,
+          }
+          Path(os.environ["PERF_OUT"], "protocol.json").write_text(json.dumps(result, indent=2) + "\n")
+          PY
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Install locked dependencies and pinned compiler family
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_OUT/npm-ci.log"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          clang-21 --version > "$PERF_OUT/clang-version.txt"
+          wasm-ld-21 --version > "$PERF_OUT/wasm-ld-version.txt"
+          node --version > "$PERF_OUT/node-version.txt"
+      - name: Verify frozen baseline and generate source-bound candidate WASM
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/a7c4-key-baseline"
+          git worktree add --detach "$baseline" "$PERF_BASELINE"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          (
+            cd "$baseline"
+            npm run build:dictionary-wasm -- --check
+            npm run build:libs
+          ) 2>&1 | tee "$PERF_OUT/baseline-build.log"
+          cp "$baseline/dev/data/dictionary-wasm/manifest.json" "$PERF_OUT/baseline-manifest.json"
+          cp "$baseline/ext/lib/term-bank-parser.wasm" "$PERF_OUT/baseline-term-bank-parser.wasm"
+          npm run build:dictionary-wasm -- --write 2>&1 | tee "$PERF_OUT/candidate-native-write.log"
+          cp dev/data/dictionary-wasm/manifest.json "$PERF_OUT/candidate-manifest.json"
+          cp dev/data/dictionary-wasm/term-bank-parser.wasm "$PERF_OUT/candidate-term-bank-parser.wasm"
+          npm run build:dictionary-wasm -- --check 2>&1 | tee "$PERF_OUT/candidate-native-check.log"
+          npm run build:libs 2>&1 | tee "$PERF_OUT/candidate-libs.log"
+          git diff --binary > "$PERF_OUT/generated-native-assets.patch"
+          sha256sum package-lock.json test/perf/dictionaries.lock.json \
+            ext/js/dictionary/wasm/term-bank-parser.c \
+            test/term-bank-wasm-consecutive-keys.test.js \
+            dev/data/dictionary-wasm/manifest.json ext/lib/term-bank-parser.wasm \
+            > "$PERF_OUT/candidate-identities.txt"
+      - name: Run focused parser correctness checks before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vitest run \
+            test/term-bank-wasm-consecutive-keys.test.js \
+            test/term-bank-format3-row.test.js \
+            test/term-bank-wasm-key-escape-hints.test.js \
+            test/term-bank-utf8-key-validation.test.js \
+            test/term-bank-wasm-differential.fuzz.test.js \
+            test/term-bank-parser-string-scan.test.js \
+            2>&1 | tee "$PERF_OUT/focused-tests.log"
+      - name: Prepare exact fixture and frozen measurement boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'JS' > "$PERF_OUT/fixture.json"
+          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js';
+          console.log(JSON.stringify(await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', ['jmdict']), null, 2));
+          JS
+          node dev/perf/prepare-import-ownership-screen-a7c4.js "$RUNNER_TEMP/a7c4-key-baseline" \
+            > "$PERF_OUT/generated-runner.json"
+          node --check "$RUNNER_TEMP/a7c4-key-baseline/dev/perf/import-ownership-support-a7c4.js"
+          node --check "$RUNNER_TEMP/a7c4-key-baseline/dev/perf/import-ownership-screen-a7c4.js"
+          cp "$RUNNER_TEMP/a7c4-key-baseline/dev/perf/import-ownership-support-a7c4.js" "$PERF_OUT/"
+          cp "$RUNNER_TEMP/a7c4-key-baseline/dev/perf/import-ownership-screen-a7c4.js" "$PERF_OUT/"
+      - name: Run exactly three alternating component pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --expose-gc "$RUNNER_TEMP/a7c4-key-baseline/dev/perf/import-ownership-screen-a7c4.js" jmdict \
+            --source-root "$GITHUB_WORKSPACE" \
+            --baseline-root "$RUNNER_TEMP/a7c4-key-baseline" \
+            --cache-dir "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --flags '{}' --pairs 3 --initial-order AB \
+            --out "$PERF_OUT/component.json" \
+            2>&1 | tee "$PERF_OUT/component.log"
+      - name: Print compact results and generated identities
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          output = {"job": "key-witness"}
+          for filename in ("protocol.json", "generated-runner.json", "baseline-manifest.json", "candidate-manifest.json"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = json.loads(path.read_text())
+          path = root / "component.json"
+          if path.exists():
+              result = json.loads(path.read_text())
+              output["component"] = {key: value for key, value in result.items() if key != "observations"}
+              keys = ("elapsedMs", "ownershipCopyMs", "lookupMs", "rows", "groupRows", "ownedContentBytes", "transferBytes", "transferCount", "nativeSuccessGroups", "fusedAttempts", "fusedFallbacks", "nativeSegments", "scratchReuseMisses", "digest", "indexBytes", "wasmSha256", "archiveSha256", "lockSha256", "runnerSha256", "supportSha256", "sourceHashes", "node")
+              output["component"]["observations"] = [
+                  {"pair": item["pair"], "arm": item["arm"], "result": {key: item["result"].get(key) for key in keys}}
+                  for item in result.get("observations", [])
+              ]
+          for filename in ("candidate-identities.txt", "node-version.txt", "clang-version.txt", "wasm-ld-version.txt"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = path.read_text()
+          print("A7C4_RESULT_BEGIN")
+          print(json.dumps(output, separators=(",", ":")))
+          print("A7C4_RESULT_END")
+          PY
+      - name: Retain every result, source identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-experiments-a7c4-key-witness
+          path: builds/perf/import-experiments-20261128-a7c4/key-witness
+          if-no-files-found: error
+          retention-days: 14
+
+  seed-cctx:
+    name: Current JMdict block capture and native seed-context feasibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_OUT: builds/perf/import-experiments-20261128-a7c4/seed-cctx
+      ZSTD_COMMIT: 82d322c4973d9e2968d94047a40892bc6d9a9bdf
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record component-only protocol
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_OUT"
+          git rev-parse HEAD > "$PERF_OUT/workflow-source-commit.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = {
+              "scope": "Native C compression feasibility on exact current canonical JMdict blocks; not WASM/browser qualification",
+              "workflowCommit": os.environ["GITHUB_SHA"],
+              "baselineCommit": os.environ["PERF_BASELINE"],
+              "zstdCommit": os.environ["ZSTD_COMMIT"],
+              "pairs": 3,
+              "controlPairs": 2,
+              "reruns": 0,
+              "capture": "Real parser/ownership/native canonical selection with persistence and records mocked; exact counts and row bytes verified",
+          }
+          Path(os.environ["PERF_OUT"], "protocol.json").write_text(json.dumps(result, indent=2) + "\n")
+          PY
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Prepare exact baseline libraries and fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_OUT/npm-ci.log"
+          baseline="$RUNNER_TEMP/a7c4-seed-baseline"
+          git worktree add --detach "$baseline" "$PERF_BASELINE"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          (
+            cd "$baseline"
+            npm run build:libs
+          ) 2>&1 | tee "$PERF_OUT/baseline-build.log"
+          cp "$baseline/dev/data/dictionary-wasm/manifest.json" "$PERF_OUT/baseline-manifest.json"
+          node --input-type=module - <<'JS' > "$PERF_OUT/fixture.json"
+          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js';
+          console.log(JSON.stringify(await ensureSelectedPinnedDictionaryCache('builds/e2e-dictionary-cache', ['jmdict']), null, 2));
+          JS
+          node dev/perf/prepare-import-ownership-screen-a7c4.js "$baseline" > "$PERF_OUT/generated-runner.json"
+          node --check dev/perf/capture-canonical-jmdict-a7c4.js
+          node --check "$baseline/dev/perf/import-ownership-support-a7c4.js"
+      - name: Capture full current canonical compression inputs without timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/capture-canonical-jmdict-a7c4.js \
+            "$RUNNER_TEMP/a7c4-seed-baseline" \
+            "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            "$GITHUB_WORKSPACE/$PERF_OUT/blocks" \
+            2>&1 | tee "$PERF_OUT/capture.log"
+      - name: Build pinned native Zstd probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          zstd_source="$RUNNER_TEMP/a7c4-zstd"
+          git init --quiet "$zstd_source"
+          git -C "$zstd_source" remote add origin https://github.com/facebook/zstd.git
+          git -C "$zstd_source" fetch --quiet --depth=1 origin "$ZSTD_COMMIT"
+          git -C "$zstd_source" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$zstd_source" rev-parse HEAD)" = "$ZSTD_COMMIT"
+          (
+            cd "$zstd_source/build/single_file_libs"
+            ./create_single_file_library.sh
+          ) 2>&1 | tee "$PERF_OUT/zstd-generation.log"
+          gcc --version > "$PERF_OUT/gcc-version.txt"
+          gcc -O3 -DNDEBUG -fPIC -shared \
+            -I "$zstd_source/build/single_file_libs" \
+            dev/perf/seed-cctx-probe.c -o "$RUNNER_TEMP/seed-cctx-probe.so"
+          sha256sum "$zstd_source/build/single_file_libs/zstd.c" \
+            "$RUNNER_TEMP/seed-cctx-probe.so" \
+            dev/perf/seed-cctx-probe.c dev/perf/seed-cctx-screen.py \
+            > "$PERF_OUT/native-identities.txt"
+      - name: Run exact parity controls and finite native component pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/seed-cctx-screen.py \
+            --library "$RUNNER_TEMP/seed-cctx-probe.so" \
+            --manifest "$PERF_OUT/blocks/manifest.json" \
+            --dictionary "$RUNNER_TEMP/a7c4-seed-baseline/dev/data/zstd-dicts/jmdict.zdict" \
+            --lock "$RUNNER_TEMP/a7c4-seed-baseline/test/perf/dictionaries.lock.json" \
+            --out "$PERF_OUT/seed-cctx-jmdict.json" \
+            --pairs 3 --control-pairs 2 \
+            2>&1 | tee "$PERF_OUT/native-screen.log"
+      - name: Print compact results and capture identities
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["PERF_OUT"])
+          output = {"job": "seed-cctx"}
+          for filename in ("protocol.json", "generated-runner.json", "baseline-manifest.json", "seed-cctx-jmdict.json"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = json.loads(path.read_text())
+          path = root / "blocks/manifest.json"
+          if path.exists():
+              result = json.loads(path.read_text())
+              output["capture"] = {key: value for key, value in result.items() if key not in ("blocks", "groups")}
+              output["capture"]["blockCount"] = len(result.get("blocks", []))
+              output["capture"]["groupRows"] = [group["rows"] for group in result.get("groups", [])]
+          for filename in ("native-identities.txt", "gcc-version.txt"):
+              path = root / filename
+              if path.exists():
+                  output[filename] = path.read_text()
+          print("A7C4_RESULT_BEGIN")
+          print(json.dumps(output, separators=(",", ":")))
+          print("A7C4_RESULT_END")
+          PY
+      - name: Retain capture, native observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-experiments-a7c4-seed-cctx
+          path: builds/perf/import-experiments-20261128-a7c4/seed-cctx
+          if-no-files-found: error
+          retention-days: 14
