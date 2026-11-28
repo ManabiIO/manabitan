@@ -1,0 +1,11 @@
+{
+  "archive": "lazy-validation-successor-20261128T0756.tar.gz",
+  "bytes": 11816,
+  "sha256": "a1aa963291bcd7a2eaddd73022c70b0cfee22a28f819646a3955c7de4a6c3b51",
+  "gitBlobSha1": "3d64e4b5eb6ecf17e64dbb474310baf43143f415",
+  "files": 34,
+  "rawBytes": 44093,
+  "allMembersVerified": true,
+  "commit": "a9c35cc2bee28b8f6ac7432861b41d63f86d418b",
+  "tree": "0c31c1d21066feef68ba38ce1e085046d25a5d24"
+}
