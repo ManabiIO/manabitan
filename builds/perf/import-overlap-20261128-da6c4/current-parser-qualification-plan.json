@@ -1,21 +1,21 @@
 {
-  "schema": "manabitan-owned-overlap-current-baseline-qualification-v3",
+  "schema": "manabitan-owned-overlap-current-baseline-qualification-v4",
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
-  "productCommit": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
-  "productTree": "2497bc64bbef07ad9d352b043fffa52e9a314024",
+  "productCommit": "54844293b8ea82350531b8da92336b325d5ab7ec",
+  "productTree": "5bff2fbe75d2f2ee747a0f4e4af90ffc576573c3",
   "productSubtrees": {
     "eslint": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8",
     "ext": "7c2db3acb0121fca3e639350c629d8afb561a9f7",
-    "test": "0263e3c7b6c37045faab54d6e3e596ea3e44cef6"
+    "test": "114b9afcc621222f9e94fe6c20cd60fa503a8a08"
   },
   "supersedes": {
-    "qualificationCommit": "55c7d6e3d570c585185e932afaf20c778ca5a1a6",
-    "run": 46129519577,
-    "reason": "Paired clean product head88add36 failed the new public-callback test's TypeScript annotations. Correct the test-only assignability fixture before interpreting qualification.",
+    "qualificationCommit": "53a00db6a070a02f40b4111d69dc439b868e1fe4",
+    "run": 46130837802,
+    "job": 140935388109,
+    "reason": "The exact verification gate found twelve lint diagnostics in three completion tests. Correct only formatting and JSDoc placement, with one local explained exception for deliberately invalid thenable input; keep runtime, assertions and acceptance gates unchanged.",
     "browserObservationCount": 0,
-    "staticWebRun": 46129517279,
-    "staticWebJob": 140931398123,
-    "logBlob": "e0080200c7d825b471a37d07938e22058340ce6e"
+    "logBlob": "895cc73d7494d4cdf3d88d66456323c134317b62",
+    "repairReceiptBlob": "c46e8dadd743afd4b69e6ef4eda7ffceb811a2ee"
   },
   "productPatch": [
     {
@@ -52,7 +52,7 @@
     },
     {
       "path": "test/artifact-term-chunk-pipeline.test.js",
-      "blob": "b7786a5b83550dee50cec14f345125e54f30c42e"
+      "blob": "ce42be05f52afb26da5f0bf3eeb0dbbdd8251ba9"
     },
     {
       "path": "test/dictionary-database-chunk-pipeline.test.js",
@@ -68,11 +68,11 @@
     },
     {
       "path": "test/dictionary-importer-chunk-completion.test.js",
-      "blob": "9886e3b11b4d2c9fc0a07ffa44daa862dcd51b1b"
+      "blob": "71b51c6cccf7e0d0bb775fc935d25a1e1c6822fa"
     },
     {
       "path": "test/term-bank-pipeline-completion.test.js",
-      "blob": "c5744034f1235b8fa8996ee6f86472358b32b4b7"
+      "blob": "1c89a4b5fdf1e34a144486b6f8cfeec156f090a8"
     },
     {
       "path": "test/zstd-term-content-initialization.test.js",
@@ -110,12 +110,43 @@
     "localLimits": "Current Vitest and lint attempts were killed with exit137 before useful diagnostics. No current repaired full lint/type/unit pass is claimed. Existing native fixtures and test timeouts are unchanged."
   },
   "disposition": "Draft #977 remains on hold until complete current-source verification, semantic and memory checks, and the original replicated timing gates pass. Historical component results are not a complete-import gain.",
-  "createdAtUtc": "2026-11-28T09:30:24Z",
+  "createdAtUtc": "2026-11-28T09:47:27Z",
   "testTypeAmendment": {
     "evidenceBlob": "a673c55d0cf6b9ef4ea5a7ca18ccc3c0dbbd9486",
     "runtimeChanged": false,
     "changedTest": "test/term-bank-pipeline-completion.test.js",
     "scope": "Correct three Parameters indexes from2 to3 for deferred/lazy/compressed callbacks and infer a numeric-returning function before assigning the legacy void callback type. Every byte after this first new test remains unchanged.",
     "verification": "Exact source/signature review and V8 execution of this first test passed; current hosted TypeScript/full gates remain required. No local compiler run is claimed during the outage."
+  },
+  "supersessionHistory": [
+    {
+      "qualificationCommit": "55c7d6e3d570c585185e932afaf20c778ca5a1a6",
+      "run": 46129519577,
+      "reason": "Paired clean product head88add36 failed the new public-callback test's TypeScript annotations. Correct the test-only assignability fixture before interpreting qualification.",
+      "browserObservationCount": 0,
+      "staticWebRun": 46129517279,
+      "staticWebJob": 140931398123,
+      "logBlob": "e0080200c7d825b471a37d07938e22058340ce6e"
+    }
+  ],
+  "testLintAmendment": {
+    "evidenceBlob": "c46e8dadd743afd4b69e6ef4eda7ffceb811a2ee",
+    "runtimeChanged": false,
+    "lintConfigurationChanged": false,
+    "changedTests": [
+      "test/artifact-term-chunk-pipeline.test.js",
+      "test/dictionary-importer-chunk-completion.test.js",
+      "test/term-bank-pipeline-completion.test.js"
+    ],
+    "scope": "Formatting and equivalent JSDoc placement only. The malformed {then:12} rejection fixture and every assertion remain. The sole next-line lint exception documents that intentionally invalid fixture.",
+    "verification": "Root exact replacement review and adapted V8 parsing passed; full current-head lint, types and repository gates must execute on the hosted qualifier. Local executor remains unavailable.",
+    "previousSourceFunctionalEvidence": {
+      "commit": "2e82d9957e2a6d8cfe9dc713bdc3b8420f7fed5a",
+      "staticWebRun": 46130835581,
+      "job": 140935381652,
+      "conclusion": "success",
+      "receiptBlob": "246a67f9fa5118e9f5b08ee03523181282f1a4cb",
+      "scope": "Main/test/web types, 78 focused tests, 24 static-browser acceptance checks. Does not replace amended-head gates or comparative performance/memory evidence."
+    }
   }
 }
