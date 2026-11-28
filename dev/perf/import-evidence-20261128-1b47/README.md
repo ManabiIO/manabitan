@@ -58,3 +58,16 @@ product PR. The conditional first-use study was never implemented or run.
 The cache archive, external member manifest and checksum file are stored here
 as `score-cache-held-evidence-20261128-1b47.*`. Its archive SHA-256 is
 `3a2ef15ec420b06bcff2db905b69454520c291479ac6a20a6af1344b0788acda`.
+
+## Other experiments and preserved failures
+
+The [session investigation readout](session-held-README.md) covers the pipeline,
+checkpoint, compression, inflater, glossary-reuse and parser experiments. Its
+sealed archive preserves the status snapshot at 2026-11-28 06:32:35 UTC, including
+all selected raw observations, controls, scripts, source bindings and failures.
+Later browser results are identified separately; they do not rewrite the sealed
+snapshot.
+
+The session archive, external member manifest and checksum are stored here as
+`import-session-held-evidence-20261128-1b47.*`. Its archive SHA-256 is
+`eed792a9c77ffcdc65fcffa2106157b365dc8a56369a06bcd640d1b6ba060f8b`.
