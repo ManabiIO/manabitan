@@ -1,0 +1,62 @@
+--- a/.github/workflows/tail-qualification-da6c4.yml
++++ b/.github/workflows/tail-qualification-da6c4.yml
+@@ -27,9 +27,8 @@
+     steps:
+       - name: Resolve runtime evidence paths
+         run: |
+-          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
++          printf 'EVIDENCE=%s/tail-%s-evidence\nUPLOAD=%s/tail-%s-upload\nPREREQUISITES=%s/tail-%s-prerequisites\n' \
++            "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+         with:
+           ref: ${{ github.sha }}
+@@ -81,9 +80,8 @@
+     steps:
+       - name: Resolve runtime evidence paths
+         run: |
+-          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
++          printf 'EVIDENCE=%s/tail-%s-evidence\nUPLOAD=%s/tail-%s-upload\nPREREQUISITES=%s/tail-%s-prerequisites\n' \
++            "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+         with:
+           ref: ${{ github.sha }}
+@@ -141,9 +139,8 @@
+     steps:
+       - name: Resolve runtime evidence paths
+         run: |
+-          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
++          printf 'EVIDENCE=%s/tail-%s-evidence\nUPLOAD=%s/tail-%s-upload\nPREREQUISITES=%s/tail-%s-prerequisites\n' \
++            "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+         with:
+           ref: ${{ github.sha }}
+@@ -204,9 +201,8 @@
+     steps:
+       - name: Resolve runtime evidence paths
+         run: |
+-          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
++          printf 'EVIDENCE=%s/tail-%s-evidence\nUPLOAD=%s/tail-%s-upload\nPREREQUISITES=%s/tail-%s-prerequisites\n' \
++            "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+         with:
+           ref: ${{ github.sha }}
+@@ -270,9 +266,8 @@
+     steps:
+       - name: Resolve runtime evidence paths
+         run: |
+-          printf 'EVIDENCE=%s/tail-%s-evidence\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'UPLOAD=%s/tail-%s-upload\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+-          printf 'PREREQUISITES=%s/tail-%s-prerequisites\n' "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
++          printf 'EVIDENCE=%s/tail-%s-evidence\nUPLOAD=%s/tail-%s-upload\nPREREQUISITES=%s/tail-%s-prerequisites\n' \
++            "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" "$RUNNER_TEMP" "$TAIL_JOB_NAME" >> "$GITHUB_ENV"
+       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+         with:
+           ref: ${{ github.sha }}

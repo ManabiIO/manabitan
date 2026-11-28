@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "kind": "tail-workflow-style-only-repair",
+  "activeQualification": {
+    "commit": "2f472f97afe48e4def322ebaefb6f7bd84135c9d",
+    "tree": "a36a8e8110608e5c3dacc077c6450491ec9f8ecd",
+    "run": 46139475958,
+    "unchanged": true,
+    "cancelled": false,
+    "rerun": false
+  },
+  "originalActionlint": {
+    "run": 46139475833,
+    "job": 140961990528,
+    "conclusion": "failure",
+    "logBlob": "bcd8d46958306509f2b57cf28739e87b2c74a7f6",
+    "logSha256": "a3591728d5d20b12edf52491bab5c332649de3ce2c9f1dfd8593756306ce156c",
+    "diagnostics": [
+      {
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "line": 29,
+        "code": "SC2129",
+        "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects"
+      },
+      {
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "line": 83,
+        "code": "SC2129",
+        "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects"
+      },
+      {
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "line": 143,
+        "code": "SC2129",
+        "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects"
+      },
+      {
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "line": 206,
+        "code": "SC2129",
+        "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects"
+      },
+      {
+        "path": ".github/workflows/tail-qualification-da6c4.yml",
+        "line": 272,
+        "code": "SC2129",
+        "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects"
+      }
+    ]
+  },
+  "originalWorkflow": {
+    "blob": "3164e7632cf487896b2d0679ba6e9530e76f3b2b",
+    "bytes": 16202,
+    "sha256": "d628dbb9dbf34b36f0ee79c804dfdb712d90d9e8d7a7b6b33d8855c226d024d4"
+  },
+  "correctedWorkflow": {
+    "blob": "dfbaf1be8b52f5c8d880e8584b48c48194d949d7",
+    "bytes": 15902,
+    "sha256": "d7f06e11ab561125756174dd7fc5f0730d5bfd1f37ec4c9fd754adac3fb9a64a"
+  },
+  "change": "At exactly five runtime-path steps, consolidate the same ordered three printf format strings and repeated quoted arguments into one printf and one append. Every other byte is unchanged.",
+  "sourceProof": {
+    "changedSites": 5,
+    "oldChangedLinesPerSite": 3,
+    "newChangedLinesPerSite": 2,
+    "oldFormatsConcatenatedEqualNewFormat": true,
+    "quotedArgumentOrderPreserved": true,
+    "syntheticDeterministicOutputCases": [
+      {
+        "runnerTemp": "/home/runner/work/_temp",
+        "jobName": "verify-46139475958-1",
+        "identical": true,
+        "outputSha256": "e3378fec41e753fc91fbc265cb38613c8692f85b6b67f81750cb8ef21ed44b2b",
+        "outputBytes": 210
+      },
+      {
+        "runnerTemp": "/tmp/with spaces",
+        "jobName": "jmdict-AB-1-1",
+        "identical": true,
+        "outputSha256": "3d583e378e1ff12cbd76f3fd5a7fb6e05866baf701747c02259c42b5be777a7d",
+        "outputBytes": 168
+      },
+      {
+        "runnerTemp": "/tmp/%s-literal",
+        "jobName": "vndb-BA-2-1",
+        "identical": true,
+        "outputSha256": "8084fc9ada83dacc5da2ef38054b8b8119a96c776cc2b349212a6e2557f5b527",
+        "outputBytes": 159
+      }
+    ],
+    "scope": "Source-level printf substitution proof in V8; not a Bash or actionlint execution claim."
+  },
+  "publicationPolicy": "Validate only on a separate branch whose name does not match the qualification push trigger. Do not update the active2f472 cohort, its manifest, controls, numerical plan or product source. The style branch's unchanged manifest deliberately prevents qualification acquisition if manually dispatched.",
+  "observedOrdinaryImportsAtDiagnosis": 0,
+  "repositoryGateAtDiagnosis": "running",
+  "productCodeChanged": false,
+  "ordinaryAcquisitionCodeChanged": false,
+  "numericalAcceptanceChanged": false,
+  "hostedStyleValidation": "pending"
+}

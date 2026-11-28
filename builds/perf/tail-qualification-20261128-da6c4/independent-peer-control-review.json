@@ -1,0 +1,42 @@
+{
+  "schema": "manabitan-owned-tail-control-independent-review-v1",
+  "handoff": "5fcb4e11d9ecd5c63d16ee23c5db5e065fab7479",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "candidate": {
+    "commit": "cb77c4727d0bfd5175aa3684395a66e9887bfe64",
+    "tree": "c89d9747a4e1836913e98497d7c3613d0f115eee"
+  },
+  "reviewed": {
+    "wrapper": "47d9d205482a10e516af2e2ba907256316a27375",
+    "workflow": "3164e7632cf487896b2d0679ba6e9530e76f3b2b",
+    "plan": "aa406b9d9f1cd91bf6a315784edab4d0b9de23b5",
+    "manifest": "de910bafbd130c520cc84168b6f101150c2486c8",
+    "stats": "24acf1090893710bc85cdfa89edc2edd7ca39b1c",
+    "statsTests": "e0f7f595400a8c470f574b8ef97ddcf8ecf48ce9",
+    "commonRunner": "6667622563c7fbeb35b9e5381685db2474d2789f"
+  },
+  "commonRunnerByteProof": {
+    "base": "7bfac83eedfbae61590b849c0934060c30ff4cef",
+    "exactTwoChanges": true,
+    "changes": [
+      "Repository root parents[2] to parents[3]",
+      "package_identity import to identical copied tail_package_identity"
+    ],
+    "ordinaryBodyOtherwiseIdentical": true
+  },
+  "findingRepaired": "The initial wrapper swallowed per-worktree final state capture errors. Final47d9 preserves diagnostics, raises on missing/error/dirty worktrees and removes publishable gates on final capture failure.",
+  "controlAssessment": [
+    "Exact complete product inventory, baseline/candidate tree and parent, clean research HEAD/GITHUB_SHA, control hashes, and unchanged stock helper blobs bind before/after acquisition.",
+    "Hosted35-method controls and complete repository gate precede both independent JMdict hosts.",
+    "JMdict has24candidatepairs+8controls+4retainedwarmups per host. Both hosts must pass timing, unchanged stock semantics/media and separate memory.",
+    "Downstream Jitendex/VNDB hosts require the exact complete JMdict stage; embedded original cell gates are re-evaluated and bind the verification gate hash.",
+    "Matrix fail-fast:false, exact-source artifact names, immutable action pins and persist-credentials:false preserve independent outcomes.",
+    "All source/statistical/control thresholds remain prospective; no tail diagnostic value filters or chooses observations.",
+    "Source/failure reporting and verified archives run always; successful prerequisite publication requires prior steps to succeed."
+  ],
+  "scope": "Read-only source review and V8 exact byte comparison only. No local Python/native/browser execution; all35hosted control methods and complete repository/measurement gates remain pending.",
+  "conclusion": "No further concrete blocker found in the reviewed final orchestration. Root's artifact/test review remains separate; no timing or PR claim."
+}
