@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {NativeRecordFieldEncoder} from './term-record-field-encoder.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -905,6 +906,7 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        this._nativeRecordFieldEncoder = new NativeRecordFieldEncoder();
         /** @type {ExactLookupRoute|null} */
         this._exactLookupRoute = null;
         /** @type {boolean} */
@@ -1185,6 +1187,7 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _prepare() {
+        this._nativeRecordFieldEncoder.release();
         await this._closeAllWritables();
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
@@ -1267,6 +1270,7 @@ export class TermRecordOpfsStore {
                 state.lookupIndexWritePromise = null;
                 state.lookupIndexWriteError = null;
             }
+            await this._nativeRecordFieldEncoder.prepare();
         }, true);
     }
 
@@ -1405,6 +1409,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async _abandonImportWritesForRollback() {
+        this._nativeRecordFieldEncoder.release();
         this._importSessionActive = false;
         this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
@@ -1489,6 +1494,7 @@ export class TermRecordOpfsStore {
         } finally {
             this._preinternedCompactionRemap = new Uint32Array(0);
             this._rawTermBankSourceBytes = null;
+            this._nativeRecordFieldEncoder.release();
         }
     }
 
@@ -1546,6 +1552,11 @@ export class TermRecordOpfsStore {
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
+    }
+
+    /** @returns {Record<string, number>} */
+    getNativeRecordFieldMetrics() {
+        return this._nativeRecordFieldEncoder.getMetrics();
     }
 
     /**
@@ -5856,6 +5867,16 @@ view.chunks :
         }
         /* eslint-disable @stylistic/semi */
         const directReferences = getSynchronousRecordFieldReferences(chunk, count)
+        if (directReferences !== null) {
+            const nativeFields = this._nativeRecordFieldEncoder.tryEncode(
+                chunk,
+                count,
+                directReferences,
+                resolvedContentReferenceOrigins.get(chunk),
+                contentOffsetBase,
+            );
+            if (nativeFields !== null) { return nativeFields; }
+        }
         const offsets = directReferences === null ? new Uint32Array(count) : null
         const lengths = directReferences === null ? new Uint16Array(count) : null
         /* eslint-enable @stylistic/semi */
