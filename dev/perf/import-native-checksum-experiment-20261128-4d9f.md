@@ -64,7 +64,8 @@ that target directly without opening a provisional performance PR.
   No profiling or memory sampling occurs during the timed observations.
 - Preserve restart, lookup, deterministic media and storage receipts. Run the
   separate exhaustive-media checks and unchanged covered memory observations.
-- Require exactly the two declared packaged-file differences. Keep the current
+- Require exactly the three declared packaged-file differences, including the
+  regenerated source map alongside its wrapper. Keep the current
   VNDB active-SAH allocation contract at exactly 37 full-file units.
 - Retain every observation and failure. Do not rerun an unchanged candidate to
   replace an unfavorable or incomplete acquisition.
@@ -73,3 +74,37 @@ The existing qualification runner and receipt/memory validators are unchanged.
 Any future PR decision must distinguish a demonstrated component reduction from
 the actual complete-import and memory outcomes. A failed or inconclusive browser
 comparison must not be presented as a qualified import gain.
+
+## Retained initial preflight failure and prospective correction
+
+Run [46124815073](https://github.com/ManabiIO/manabitan/actions/runs/46124815073)
+completed with all six cells failing the package-difference preflight. No browser
+warmup or measured import ran. The original checklist omitted
+`lib/zstd-wasm.js.map`, which the ordinary build regenerates with the changed
+wrapper. This was a workflow declaration error, not a measured runtime result.
+
+Every artifact and every packaged entry was independently inspected. All six
+baseline entry inventories agree, as do all six candidate inventories. The
+only changed entries are the record-store source, Zstd wrapper, and its source
+map. The map's source list is unchanged; its only changed embedded source is
+`../../dev/lib/zstd-wasm.js`, with exact baseline SHA256
+`5e47e777cbe870f65cdf4926a9032ea7090886f4c11f2409a8187404401b442e`
+and candidate SHA256
+`ad780bc1c86bbb70181549385ec9f2fde1da604b2137547b312425237a9861d4`.
+Both match the frozen product sources. Package sizes are 16,805,714 and
+16,807,033 bytes, a 1,319-byte increase; individual ZIP hashes differ across
+hosts and are all retained.
+
+The initial reports, decoded job logs, complete package entry inventories,
+source identities, representative source maps, and artifact/package hashes are
+retained in `builds/perf/20261128-4d9f-investigation/checksum-preflight-1.tar.xz`
+(SHA256 `2c0bcc5a52a0e9e92f4047e88501aa467fb6316c63d62d784f43a7a366502e88`).
+The original CI artifacts contain the raw product ZIPs; this compact archive
+retains their verified hashes and full entry inventories, not their ZIP bytes.
+
+A new `manifest2` cohort adds that exact source-map entry to the prospective
+allowlist. Product sources, runner and receipt validators, dictionary archives,
+12 pairs per host, opposite initial orders, controls, warmups, and all storage,
+lookup, media and memory gates remain unchanged. The initial failed cohort is
+not relabeled or replaced. The new acquisition remains unqualified until its
+actual receipts have been inspected.

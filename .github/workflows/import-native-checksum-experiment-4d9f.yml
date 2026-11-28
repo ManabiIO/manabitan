@@ -1,4 +1,4 @@
-name: Import native checksum experiment
+name: Import native checksum experiment - manifest correction
 
 on:
   push:
@@ -10,8 +10,8 @@ permissions:
 
 jobs:
   qualify:
-    # Only the initial fast-forward from the frozen baseline acquires data.
-    if: github.event.before == '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2' && github.run_attempt == 1
+    # Only this corrected-manifest fast-forward acquires the new cohort.
+    if: github.event.before == 'b0b68543990bf9ecfa8782171f15c1b30e4410a8' && github.run_attempt == 1
     name: ${{ matrix.dictionary }} (${{ matrix.order }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -57,14 +57,15 @@ jobs:
             --initial-order "$PERF_ORDER" \
             --pairs 12 \
             --expected-package-entry lib/zstd-wasm.js \
+            --expected-package-entry lib/zstd-wasm.js.map \
             --expected-package-entry js/dictionary/term-record-opfs-store.js \
             "${allocation_args[@]}" \
-            --evidence "builds/perf/import-native-checksum-$PERF_DICTIONARY-$PERF_ORDER-4d9f"
+            --evidence "builds/perf/import-native-checksum-$PERF_DICTIONARY-$PERF_ORDER-manifest2-4d9f"
       - name: Retain every observation and failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-native-checksum-${{ matrix.dictionary }}-${{ matrix.order }}-4d9f
-          path: builds/perf/import-native-checksum-${{ matrix.dictionary }}-${{ matrix.order }}-4d9f
+          name: import-native-checksum-${{ matrix.dictionary }}-${{ matrix.order }}-manifest2-4d9f
+          path: builds/perf/import-native-checksum-${{ matrix.dictionary }}-${{ matrix.order }}-manifest2-4d9f
           if-no-files-found: error
           retention-days: 14

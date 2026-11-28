@@ -1,0 +1,112 @@
+{
+  "run": 46124815073,
+  "status": "failed-package-preflight",
+  "browserObservations": 0,
+  "sourceA": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceB": "7cda9a3a39f3c2626873d414a741433058f9ff16",
+  "allSixPackageEntryInventoriesIdentical": true,
+  "changedEntries": [
+    "js/dictionary/term-record-opfs-store.js",
+    "lib/zstd-wasm.js",
+    "lib/zstd-wasm.js.map"
+  ],
+  "packageSizes": {
+    "A": 16805714,
+    "B": 16807033,
+    "delta": 1319
+  },
+  "sourceMapChangedSource": "../../dev/lib/zstd-wasm.js",
+  "artifacts": [
+    {
+      "artifact": 15257251603,
+      "artifactBytes": 33516337,
+      "artifactSha256": "9b0587129f89e5df14c15c5d8c5acb5ea91f8edc28985be498a364065c55d69d",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "4c2fc8b1f31c3fa0c39ba62488dd988b438e65a07b223501b358d714a50724be"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "cffdca599b8bbb37579d399f0dad700c9dac2328aaaa29f9254c44c06d6ed066"
+        }
+      }
+    },
+    {
+      "artifact": 15257243757,
+      "artifactBytes": 33516482,
+      "artifactSha256": "612e45ae3696774115d798d3a032622290f156c0a222e4c0dafe3aa312993264",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "d1b6e5abb9be18a78a7c77f7eee8ba3aa41016472088225ac8de99d664aee1f9"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "d76b913cfecf07c46b02a1a20e66082006d40a458fa84b04ee56b0b6b0e0d58c"
+        }
+      }
+    },
+    {
+      "artifact": 15256977702,
+      "artifactBytes": 33516325,
+      "artifactSha256": "5035bfb60ed1c9d62d428e9749803e8f9193a481dd635ce26bb152221f072842",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "12cab03291d9c1addc8524cef4a34d7105841a637d85086f1d4f41c02e144ae6"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "82505849039fb7dfbfd1099e7d48389f030c1f9fd26b8c794a752e130d255249"
+        }
+      }
+    },
+    {
+      "artifact": 15257392721,
+      "artifactBytes": 33516473,
+      "artifactSha256": "631efce648c94c817b03b2e8e6c79ca4cf9662c45bce2ab27b5ad6f707ec00e9",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "5c633996d2417dd441b57c42c1f6941f4aff16df01138b5fe9a01a362caca8d5"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "bcfa09bb7a82f9be0ca2f96462272a64fa22a1ddd5cdded1bf466ef3edf32178"
+        }
+      }
+    },
+    {
+      "artifact": 15257196873,
+      "artifactBytes": 33516183,
+      "artifactSha256": "977a73dd2d7831dcdce9120ba2a2c2a45df566b430a8d1414643defc523e095a",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "121c4a261a3e499e37944893fa8a6d71928912af0d05d8dd397c4b780351b0ee"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "320d25f0d2626b082dc466ceab1eb20731c6861ba1322cb3118d819c306e2609"
+        }
+      }
+    },
+    {
+      "artifact": 15256922461,
+      "artifactBytes": 33516405,
+      "artifactSha256": "46b0f12291b99a803abc4e7085fcce6116e28d6503f9605a382c3273c446c696",
+      "package": {
+        "A": {
+          "bytes": 16805714,
+          "sha256": "c531e359d9b3de80aa997a0484930b12f9dca11be487827c704852d6e8dfeb54"
+        },
+        "B": {
+          "bytes": 16807033,
+          "sha256": "c854c88a979c67a2646228b761fb70d2eef1d2a8ba33ac056b30a7b79a3c3295"
+        }
+      }
+    }
+  ],
+  "prospectiveCorrection": "Include lib/zstd-wasm.js.map in exact packaged-entry list; all product sources, pairs, controls, timing, storage and memory gates unchanged"
+}
