@@ -6,6 +6,7 @@ on:
     branches:
       - perf/import-preload-bda85f3c7e15
     paths:
+      - test/dictionary-importer-canonical-preload.test.js
       - .github/workflows/import-preload-bda85f3c7e15.yml
       - dev/perf/import-preload-bda85f3c7e15.py
       - ext/js/dictionary/**

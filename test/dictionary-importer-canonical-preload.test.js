@@ -34,7 +34,7 @@ async function setup() {
         Reflect.set(importer, '_skipImageMetadata', options.skipImageMetadata ?? false);
         return Reflect.get(importer, '_readTermBankFileFast').call(
             importer,
-            {filename: 'term_bank_1.json'},
+            /** @type {import('@zip.js/zip.js').Entry} */ ({filename: 'term_bank_1.json'}),
             3,
             'Preload',
             false,
