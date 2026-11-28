@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "kind": "fusion-test-annotation-correction",
+  "originalCandidate": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+  "correctedCandidate": "01eb863506012136e417167f445b2708d9136293",
+  "correctedTree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+  "soleChangedPath": "test/term-record-fields-fusion.test.js",
+  "correctedBlob": "4cffcc890bd923445b74cd32329117bdb96720c1",
+  "runtimeAndControlUnchanged": true,
+  "executableAst": {
+    "originalSha256": "95dd19f605d929f5affcb8b2a17ab7d7b1228dc4758102f468c39cd3f9d9c48f",
+    "updatedSha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb",
+    "normalizedExecutableAstSha256": "be6cf5f1e0899470a3337898a95a75249e627d8fe71aabbe3e753f4516ce66d1",
+    "executableAstIdentical": true,
+    "onlyJSDocAnnotationsIntended": true,
+    "productModulesExecuted": false
+  },
+  "localEnvironment": {
+    "node": "24.22.3",
+    "sharedExistingDependencies": true,
+    "freshCi": false
+  },
+  "originalRequiredTypeGates": [
+    {
+      "script": "test:ts:main",
+      "exitCode": 0,
+      "log": "/tmp/manabitan-fusion-root-type-preflight-1c413/test-ts-main.log",
+      "logBytes": 374,
+      "logSha256": "304728a9f411c80317241b80cab57c423743cf128f3f58ae31c8bbd8ec4d1b4e",
+      "sourcesUnchanged": true
+    },
+    {
+      "script": "test:ts:test",
+      "exitCode": 2,
+      "log": "/tmp/manabitan-fusion-root-type-preflight-1c413/test-ts-test.log",
+      "logBytes": 1294,
+      "logSha256": "53a724e0e3181f2220018728295a49987a936bf490092b5e0ee6182b2ff86fc2",
+      "sourcesUnchanged": true
+    }
+  ],
+  "intermediateGateResults": {
+    "sourceSha256": "9f525eff29804f36998ac7d5562764d4c97b7c87f6e8f03d8b253dc2611af086",
+    "noProductCodeChange": true,
+    "mainTypeGateNotRepeated": true,
+    "results": [
+      {
+        "name": "test-ts-test-corrected",
+        "argv": [
+          "npm",
+          "run",
+          "test:ts:test"
+        ],
+        "exitCode": 0,
+        "logBytes": 389,
+        "logSha256": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a",
+        "testSourceUnchanged": true
+      },
+      {
+        "name": "test-file-lint-corrected",
+        "argv": [
+          "npx",
+          "eslint",
+          "test/term-record-fields-fusion.test.js"
+        ],
+        "exitCode": 1,
+        "logBytes": 1048,
+        "logSha256": "e1e616b3627a11d5a1d7f0e23eac703f0b7500a115494f7b913bf541de2f2e14",
+        "testSourceUnchanged": true
+      }
+    ]
+  },
+  "finalRequiredGates": {
+    "sourceSha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb",
+    "noProductCodeChange": true,
+    "mainTypeGateNotRepeated": true,
+    "results": [
+      {
+        "name": "test-ts-test-final",
+        "argv": [
+          "npm",
+          "run",
+          "test:ts:test"
+        ],
+        "exitCode": 0,
+        "logBytes": 389,
+        "logSha256": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a",
+        "testSourceUnchanged": true
+      },
+      {
+        "name": "test-file-lint-final",
+        "argv": [
+          "npx",
+          "eslint",
+          "test/term-record-fields-fusion.test.js"
+        ],
+        "exitCode": 0,
+        "logBytes": 844,
+        "logSha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a",
+        "testSourceUnchanged": true
+      }
+    ]
+  },
+  "mainTypeGateNotRepeated": true,
+  "originalFailuresRetained": true,
+  "newFocusedRuntimeTests": 0,
+  "noProductEditsImportsOrPerformanceObservations": true,
+  "limits": [
+    "All executable product files are byte-identical",
+    "Test executable AST is unchanged; only annotations and formatting changed",
+    "Original165 focused executions remain originalsource results; fresh full CI is still required",
+    "Every original log and per-attempt source hash is retained; original and final test source snapshots are retained"
+  ]
+}

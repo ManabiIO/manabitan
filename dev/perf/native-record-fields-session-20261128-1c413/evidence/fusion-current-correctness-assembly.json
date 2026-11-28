@@ -1,0 +1,206 @@
+{
+  "passed": true,
+  "commit": "a9debd150d65c8d11884dadcdf162e7898dea309",
+  "tree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+  "parent": "01eb863506012136e417167f445b2708d9136293",
+  "sourceDigest": "2b6ea2c90f870ced276c6bf49a67b6d1b1aead8fe144956b321d6af37ee0c132",
+  "treeTruncated": false,
+  "changedPaths": [
+    ".github/workflows/native-record-fields-fusion-correctness-1c413.yml",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/README.md",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/README.md",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-connection.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-supported-connection.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-storage-schema-version.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-import-worker-bridge.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-opfs-disk.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-runtime.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/owner-observer.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/source-binding.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-opfs.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/recovery.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/source.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/native-record-fields-fusion-correctness-1c413.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0544c5cab2a62ff4dde4e95b51805451ce822097",
+      "bytes": 16056,
+      "sha256": "49d22264a3a8593d76ea9ea5cf114734f7b798977a8da37ea604fc07e381c839"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4484f79b4e6bb847cf54f1aa3e06a9a6be257b9",
+      "bytes": 6013,
+      "sha256": "5a07138d312bd36bbb9c9562b164b3aecf03aa44707c2925eaa1eebc402a711d"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82913f3e5a0091affdfa870c630c748dd20b150a",
+      "bytes": 7634,
+      "sha256": "a4a97de2f5f63fc194c289a502f74d4065db4bfa1dd6b8f9b00c2d5b23d03928"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "bytes": 6397,
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-connection.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "bytes": 1436,
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-supported-connection.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "bytes": 1538,
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-storage-schema-version.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "bytes": 53,
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-import-worker-bridge.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "bytes": 2148,
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-opfs-disk.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09b8eda066484d748408868937494d79d3d33e83",
+      "bytes": 15180,
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-runtime.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe800d59128034a957d4ce920270cb0e59439972",
+      "bytes": 8164,
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/owner-observer.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "bytes": 14670,
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "bytes": 33763,
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "bytes": 24435,
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/source-binding.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33fa89711c00e6242bebb0c6cf959fc4cc0827d4",
+      "bytes": 6846,
+      "sha256": "b592d8a0d051b920825add65054cc04c4cba502767cc651ca5c82064eec951da"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-opfs.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "bytes": 11798,
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "bytes": 8539,
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "bytes": 18038,
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/recovery.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "112b8b8cc31b6532eca7a37a9883df72404498c9",
+      "bytes": 6748,
+      "sha256": "1fa106a5ea7a060d1e39b66aa1bf0467cb5729c3e10acb323cfffa6590b21943"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/source.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75c7b527113a83126acb0b1e935d85427f89d2ce",
+      "bytes": 9937,
+      "sha256": "28b0894c47adaadae564e50ef89a391fc6b323d6de5db4b4d6c0d9bdbd0be86b"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42f5543f35b0bd06c792487dba7d63759aa078bd",
+      "bytes": 6910,
+      "sha256": "2b2ea1e53daeadb38f7143e859bdb3898ec0578ad52fc44d094c9e0ed5e1c3ed"
+    },
+    {
+      "path": "dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58e31a1fb9686bbccb166dadc3ee6f2bcdafc8f5",
+      "bytes": 11331,
+      "sha256": "b0527361fd9bdc1d16aa93210a4fc999adff0ccac6be9c6288e20ae771bafeb3"
+    }
+  ],
+  "localSourceGuardCommit": "a35b6806bf0b12e7f2bd749f328b92fbed4ce4de",
+  "localSourceGuardTree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+  "localGuardProductExecution": false,
+  "refsCreated": false,
+  "performanceMeasurements": false
+}

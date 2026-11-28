@@ -75,6 +75,15 @@
     "fusion-local-attempts.tar.gz": "b99934da9c41b83c3f364aa477e656a8cbe1ebe9",
     "fusion-local-attempts-readback.json": "178b9423b0cd3b60d6d96a544d82948f66674b8c",
     "fusion-local-attempts-root-readback.json": "2ec084deea36f62f2ac2d4438ba78962591b24af",
-    "fusion-node-numeric-policy.json": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408"
+    "fusion-node-numeric-policy.json": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
+    "fusion-test-type-correction.json": "4e6c729062d7cef33d967286d2320984eaa1c600",
+    "fusion-test-type-correction-attempts.tar.gz": "0330b2a89b2bfbf4012b5f0171c92f62a276658c",
+    "fusion-test-type-correction-readback.json": "0d43d336fa54d12863506e15d3e4dfcf24282776",
+    "fusion-node-policy-source-supplement.json": "347dcb71b389207afc2ecb9dd5eb1ef1622d266b",
+    "fusion-current-correctness-assembly.json": "a3a4a517d84ae7adb09f165c601f4675a7a4cbd2",
+    "fusion-current-correctness-prevalidation.tar.gz": "53094af1b4af20aee70b2cf3f55521526f4ae041",
+    "fusion-current-correctness-prevalidation-receipt.json": "b39a30b21cbc51a08c2521d7ee9e3bc4ac8de255",
+    "fusion-current-correctness-root-publication.json": "64aa6fba32dd08973ebddda8414b0c37c78c08f1",
+    "fusion-current-correctness-terminal-api.json": "e4573865f0e99dd80de6895e6af088354e40fcd4"
   }
 }

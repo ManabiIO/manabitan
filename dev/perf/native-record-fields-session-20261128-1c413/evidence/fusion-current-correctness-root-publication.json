@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-fresh-fusion-correctness-publication-review",
+  "observedAt": "2026-11-28 13:30:49 UTC",
+  "head": "a9debd150d65c8d11884dadcdf162e7898dea309",
+  "tree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+  "soleParent": "01eb863506012136e417167f445b2708d9136293",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "branch": "test/native-record-fields-fusion-20261128-1c413",
+  "workflow": {
+    "path": ".github/workflows/native-record-fields-fusion-correctness-1c413.yml",
+    "blob": "0544c5cab2a62ff4dde4e95b51805451ce822097",
+    "exactBranchUnfilteredPush": true,
+    "permissions": "contents:read",
+    "node": "22.22.0",
+    "attemptOneOnly": true
+  },
+  "source": {
+    "blob": "75c7b527113a83126acb0b1e935d85427f89d2ce",
+    "sha256": "28b0894c47adaadae564e50ef89a391fc6b323d6de5db4b4d6c0d9bdbd0be86b",
+    "aggregate": "2b6ea2c90f870ced276c6bf49a67b6d1b1aead8fe144956b321d6af37ee0c132",
+    "boundFiles": 36,
+    "includingManifest": 37,
+    "allLocalBytesSha256GitBlobsAndTreeModesMatch": true
+  },
+  "exactKitDelta": [
+    ".github/workflows/native-record-fields-fusion-correctness-1c413.yml",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/README.md",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/README.md",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-connection.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-open-supported-connection.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/baseline-storage-schema-version.txt",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-import-worker-bridge.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-opfs-disk.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/node-runtime.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/owner-observer.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/source-binding.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-opfs.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/recovery.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/source.json",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py",
+    "dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py"
+  ],
+  "productRuntimeUnchanged": true,
+  "reviewedScope": [
+    "Pinned native reproduction, full units/options/types, scopedlint andalltargetbuilds",
+    "Separate fresh A/B actual JMdict/Jitendex/VNDB imports with full field andfinaltermcontent/record/index byte parity",
+    "Current a300 SQLite root/schema/purge/recovery lifecycle kept, narrowly bound real memorySQLite dependency; disk OPFS",
+    "Owner accounting covers earlier fused nativework; scalarbasebits and8Bcopy accounted; overlapdeclines notsummed",
+    "All failures/source/workers/fixtures/archives retained; no helperreadinesswait or comparative performance measurements"
+  ],
+  "independentReview": {
+    "reviewer": "fusion_harness_review",
+    "exactExternalCommitTreeParentVerified": true,
+    "logicWorkflowSourceGo": true,
+    "pureCases": {
+      "owner": 14,
+      "comparator": 27,
+      "archive": 9
+    },
+    "localGuardPassed": true,
+    "node22RuntimeValidationPending": true
+  },
+  "branchFresh404": true,
+  "noPrOrPerformanceQualification": true,
+  "originalF28StudyUnchanged": true,
+  "reviewNote": "An initial root path-name assertion used an assumed workflow filename; before any mutation the actual isolated filename was retrieved and fully verified. No source changed."
+}

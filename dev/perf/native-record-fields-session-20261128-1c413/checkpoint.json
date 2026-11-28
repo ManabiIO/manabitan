@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "manabitan-import-optimization-session-checkpoint",
-  "observedAt": "2026-11-28 13:04:16 UTC",
+  "observedAt": "2026-11-28 13:40:33 UTC",
   "startedAt": "2026-11-28 02:43 UTC",
   "goal": "Optimize JMdict first, also Jitendex/VNDB; open PRs only for a gain worth reviewing",
   "constraints": [
@@ -1407,10 +1407,11 @@
         "independentReviewer": "fusion_harness_review"
       },
       "candidate": {
-        "head": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
-        "tree": "db8950675c04d4da1ed02c5dffe8f72c130ca515",
-        "parent": "663df294f40e1832ad3e3349d0e061681fed77cb",
-        "pathsVersusA300": 16
+        "head": "01eb863506012136e417167f445b2708d9136293",
+        "tree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+        "parent": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+        "pathsVersusA300": 16,
+        "annotationOnlyChild": true
       },
       "control": {
         "head": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
@@ -1452,7 +1453,64 @@
         "rootCompleteReadback": "2ec084deea36f62f2ac2d4438ba78962591b24af",
         "allAttemptsRetained": true
       },
-      "sourceRetention": "Candidate and inactive-control commits are additional parents of this evidence checkpoint. No dedicated product or performance ref, PR or acquisition."
+      "sourceRetention": "Candidate and inactive-control commits are additional parents of this evidence checkpoint. No dedicated product or performance ref, PR or acquisition.",
+      "annotationCorrection": {
+        "proof": "4e6c729062d7cef33d967286d2320984eaa1c600",
+        "archive": "0330b2a89b2bfbf4012b5f0171c92f62a276658c",
+        "readback": "0d43d336fa54d12863506e15d3e4dfcf24282776",
+        "affectedPath": "test/term-record-fields-fusion.test.js",
+        "executableAstUnchanged": true,
+        "runtimeFilesUnchanged": true,
+        "originalTypeFailureRetained": true,
+        "originalLintFailureRetained": true,
+        "finalLocalTestTypesAndFileLintPassed": true
+      },
+      "freshCorrectness": {
+        "name": "whole-record field validation fusion",
+        "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "product": "01eb863506012136e417167f445b2708d9136293",
+        "productTree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+        "originalProduct": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+        "control": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+        "controlTree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+        "correctnessProducer": "a9debd150d65c8d11884dadcdf162e7898dea309",
+        "correctnessTree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+        "correctnessBranch": "test/native-record-fields-fusion-20261128-1c413",
+        "correctnessRun": 46149981540,
+        "correctnessAttempt": 1,
+        "correctnessStatus": "Original run and both jobs succeeded; independent complete artifact audit in progress",
+        "comparativePerformanceObservations": 0,
+        "acquisitionAuthorized": false,
+        "prsOpened": 0,
+        "numericPolicy": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
+        "sourceOnlyPolicySupplement": "347dcb71b389207afc2ecb9dd5eb1ef1622d266b",
+        "timingHarnessStatus": "Concrete disabled full actual Node import driver under independent review; numerical rules already selected before any new observations",
+        "sourceManifest": "75c7b527113a83126acb0b1e935d85427f89d2ce",
+        "sourceAggregate": "2b6ea2c90f870ced276c6bf49a67b6d1b1aead8fe144956b321d6af37ee0c132",
+        "workflow": "0544c5cab2a62ff4dde4e95b51805451ce822097",
+        "sourceGuard": "58e31a1fb9686bbccb166dadc3ee6f2bcdafc8f5",
+        "assemblyProof": "a3a4a517d84ae7adb09f165c601f4675a7a4cbd2",
+        "prevalidationArchive": "53094af1b4af20aee70b2cf3f55521526f4ae041",
+        "prevalidationReceipt": "b39a30b21cbc51a08c2521d7ee9e3bc4ac8de255",
+        "rootPublicationReview": "64aa6fba32dd08973ebddda8414b0c37c78c08f1",
+        "terminalApi": "e4573865f0e99dd80de6895e6af088354e40fcd4",
+        "jobs": {
+          "validation": 140994295588,
+          "corpus": 140994295297
+        },
+        "reportedSuccessfulGates": {
+          "unitFiles": 701,
+          "unitPassed": 16035,
+          "unitSkipped": 47,
+          "optionsPassed": 32,
+          "typeProjects": 3,
+          "dryBuildTargets": 7,
+          "nativeModules": 3,
+          "sourceManifestFiles": 36
+        },
+        "independentArtifactAuditCompleted": false,
+        "corpusLimitations": "Real memory SQLite plus disk OPFS and three real workers; successful final sinks retired only after complete hashes. Not browser, restart, full-media or performance evidence."
+      }
     },
     "originalJmdictPhaseCensus": {
       "scope": "Records-only descriptive phase census of all148 original JMdict raw reports, SHA matched to original independent auditor. No new execution, observations, qualification or timing transfer to new source.",
@@ -1479,12 +1537,12 @@
     }
   },
   "next": [
-    "Preserve closed original study evidence as reachable checkpoint files; no original rerun or PR",
-    "Read existing original JMdict phase counters only to assess remaining opportunity; no new observations",
-    "Complete bounded fusion prototype source/focused correctness review; stop if provenance overhead or redesign becomes broad",
-    "Review source-independent whole-owner capture/oracle design before any fresh untimed capture or broader correctness run",
-    "Only after exact source and correctness, seal any distinct performance protocol before observations",
-    "PR only for a separately qualified worthwhile whole-import gain"
+    "Finish independent audit of all original fusion correctness logs and artifacts; preserve every failure and original receipt",
+    "Complete and independently review disabled actual-import CPU driver, output and lifecycle receipts, preparation workflow, and exact plan bindings",
+    "Seal exact source, runtime, work, output, arm order and numeric policy before any distinct comparative CPU acquisition",
+    "Acquire only the original two full replications; no retry, replacement, pooling, control subtraction or post-result rule changes",
+    "Only a qualified CPU screen may proceed to a separately bound full browser study; original f28 study remains rejected",
+    "Open a PR only for a demonstrated worthwhile whole-import gain"
   ],
   "integration": {
     "reviewedDevelop": "a300da36d00df8e353c5679b1528b50a1299b75f",
@@ -1558,5 +1616,26 @@
       "browserOrActualCorpus": false,
       "performanceClaim": false
     }
+  },
+  "activeExperiment": {
+    "name": "whole-record field validation fusion",
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "product": "01eb863506012136e417167f445b2708d9136293",
+    "productTree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+    "originalProduct": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "control": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+    "controlTree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+    "correctnessProducer": "a9debd150d65c8d11884dadcdf162e7898dea309",
+    "correctnessTree": "56af9b6152630c9e7b11c30652e21fb88e69aa34",
+    "correctnessBranch": "test/native-record-fields-fusion-20261128-1c413",
+    "correctnessRun": 46149981540,
+    "correctnessAttempt": 1,
+    "correctnessStatus": "Original run and both jobs succeeded; independent complete artifact audit in progress",
+    "comparativePerformanceObservations": 0,
+    "acquisitionAuthorized": false,
+    "prsOpened": 0,
+    "numericPolicy": "72da5c9f2ba5b99114fa8981ed76e8d84f77d408",
+    "sourceOnlyPolicySupplement": "347dcb71b389207afc2ecb9dd5eb1ef1622d266b",
+    "timingHarnessStatus": "Concrete disabled full actual Node import driver under independent review; numerical rules already selected before any new observations"
   }
 }
