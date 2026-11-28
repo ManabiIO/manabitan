@@ -1,0 +1,45 @@
+{
+  "observedAtUtc": "2026-11-28T05:53:00Z",
+  "reason": "The obsolete pre-style-repair run has remained queued since 04:42 UTC and prevents the amended current run from starting in this branch-specific concurrency group.",
+  "superseded": [
+    {
+      "runId": 46108777430,
+      "head": "c76723e9da97046d55ba529b71fcbc10d4da6638",
+      "status": "queued",
+      "jobs": [
+        {
+          "id": 140867397266,
+          "name": "validate",
+          "status": "queued",
+          "steps": null
+        }
+      ],
+      "ordinaryObservations": 0
+    },
+    {
+      "runId": 46112230468,
+      "head": "ecc7dc277e7b422354897f0eabf080474a44d79a",
+      "status": "pending",
+      "jobs": [],
+      "ordinaryObservations": 0
+    }
+  ],
+  "change": {
+    "path": ".github/workflows/parser-path-qualification-7c02.yml",
+    "from": "cancel-in-progress: false",
+    "to": "cancel-in-progress: true",
+    "group": "parser-path-batch-7c02-${{ github.ref }}",
+    "scope": "Only this experiment's branch-specific workflow group; no other branch or workflow is targeted."
+  },
+  "unchanged": {
+    "candidate": "e90c4c04172b691985858609094887f9541541dd",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "runtimeSources": true,
+    "runnerImage": "ubuntu-26.04",
+    "node": "22.22.0",
+    "cohorts": true,
+    "gates": true,
+    "dictionaryLocks": true
+  },
+  "interpretation": "This cancels unused setup runs before any step or browser observation. Their history remains retained. It does not rerun, replace, append, filter, or reinterpret a measured cohort."
+}
