@@ -380,6 +380,60 @@ test.each(['content', 'records'])('explicit purge discards failed live %s writes
     expect(await database._termContentStore.readSlice(0, 3)).toEqual(bytes)
 })
 
+test.each([
+    {stage: 'open', hook: 'beforeCreateWritable', raw: false},
+    {stage: 'seek', hook: 'beforeSeek', raw: false},
+    {stage: 'write', hook: 'beforeWrite', raw: false},
+    {stage: 'non-Error write', hook: 'beforeWrite', raw: true},
+])('recovers the dictionary after queued descriptor $stage fails without changing unrelated data', async ({stage, hook, raw}) => {
+    const {database, opfs} = await fixture()
+    const sessionId = await database.startBulkImport()
+    const store = database._termRecordStore
+    const fileName = store._getShardFileName('Interrupted', 'raw')
+    const recordDirectory = await opfs.root.getDirectoryHandle('manabitan-term-records')
+    const entered = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())
+    const resume = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())
+    const message = `queued descriptor ${stage} failure`
+    const failure = raw ? message : new Error(message)
+    let failures = 0
+    Reflect.set(opfs.hooks, hook, async (/** @type {string} */ name) => {
+        if (name !== fileName) { return }
+        ++failures
+        entered.resolve()
+        await resume.promise
+        throw failure
+    })
+    await appendTerm(database, 'Interrupted')
+    await entered.promise
+    const health = vi.spyOn(store, '_setDictionaryHealth')
+    const completion = database.finishBulkImport(null, null, sessionId).then(() => null, (error) => error)
+    resume.resolve()
+    const result = await completion
+    if (raw) {
+        expect(result).toBeInstanceOf(Error)
+        expect(result).toHaveProperty('message', message)
+    } else {
+        expect(result).toBe(failure)
+    }
+    expect(failures).toBe(1)
+    expect(health).not.toHaveBeenCalledWith('Interrupted', 'available')
+    expect(await database._importJournal.read()).toBeNull()
+    await expect(recordDirectory.getFileHandle(fileName)).rejects.toHaveProperty('name', 'NotFoundError')
+    await expect(recordDirectory.getFileHandle(`${fileName}.mbti`)).rejects.toHaveProperty('name', 'NotFoundError')
+    Reflect.set(opfs.hooks, hook, null)
+    await database.close()
+
+    const reopened = new DictionaryDatabase()
+    await reopened.prepare()
+    expect(await reopened.getDictionaryInfo()).toMatchObject([{title: 'Survivor'}])
+    expect(await reopened.findTermsBulk(['Survivor'], new Set(['Survivor']), 'exact')).toMatchObject([
+        {dictionary: 'Survivor', definitions: ['Survivor definition']},
+    ])
+    expect(reopened._termRecordStore.getDictionaryRecordCount('Interrupted')).toBe(0)
+    const nextSession = await reopened.startBulkImport()
+    await expect(reopened.abortBulkImport(nextSession)).resolves.toBeUndefined()
+})
+
 test('purge joins an in-flight content writer before deleting its files', async () => {
     const {database, opfs} = await fixture()
     const entered = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())

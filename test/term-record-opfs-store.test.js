@@ -924,6 +924,8 @@ describe('TermRecordOpfsStore', () => {
         vi.spyOn(store, '_validateShardAppendFormat').mockResolvedValue();
         vi.spyOn(store, '_createLookupIndexChunk').mockReturnValue(new Uint8Array(2 * 1024 * 1024));
         const flushRecords = vi.spyOn(store, '_flushPendingWritesForShard').mockResolvedValue();
+        // eslint-disable-next-line @stylistic/semi
+        const queueRecords = vi.spyOn(store, '_queueWriteChunksForShard').mockImplementation(() => {})
         const flushIndex = vi.spyOn(store, '_flushPendingLookupIndexChunks').mockResolvedValue();
 
         await store._appendEncodedChunk(
@@ -937,8 +939,14 @@ describe('TermRecordOpfsStore', () => {
         );
 
         expect(flushRecords).not.toHaveBeenCalled();
-        expect(state.pendingWriteBytes).toBeGreaterThan(0);
-        expect(state.pendingWriteBytes).toBeLessThan(64);
+        /* eslint-disable @stylistic/semi */
+        expect(state.pendingWriteBytes).toBe(0)
+        expect(queueRecords).toHaveBeenCalledOnce()
+        const descriptorChunks = queueRecords.mock.calls[0][1]
+        expect(descriptorChunks).toHaveLength(1)
+        expect(descriptorChunks[0].byteLength).toBeGreaterThan(0)
+        expect(descriptorChunks[0].byteLength).toBeLessThan(64)
+        /* eslint-enable @stylistic/semi */
         expect(flushIndex).toHaveBeenCalledWith(state, false);
     });
 

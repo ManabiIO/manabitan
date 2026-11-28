@@ -6116,6 +6116,20 @@ view.chunks :
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
             state.pendingLookupIndexRecordCount += count;
+            /* eslint-disable @stylistic/semi */
+            if (
+                this._importSessionActive && binaryHeader !== null &&
+                binaryHeader.byteLength < this._queuedWriteBudgetBytes
+            ) {
+                // Fresh authoritative descriptors contain only this immutable
+                // header. Let the existing queue own its opener and one write
+                // while later import work runs; finalization still owns close.
+                const descriptorChunks = this._coalescePendingChunks(state.pendingWriteChunks)
+                state.pendingWriteChunks = []
+                state.pendingWriteBytes = 0
+                this._queueWriteChunksForShard(state, descriptorChunks)
+            }
+            /* eslint-enable @stylistic/semi */
             if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {
                 await this._flushPendingLookupIndexChunks(state, !this._importSessionActive);
             } else if (
@@ -6926,6 +6940,7 @@ view.chunks :
                 state.writable !== null ||
                 state.pendingWriteBytes > 0 ||
                 state.pendingWriteChunks.length > 0 ||
+                state.queuedWritePromise !== null ||
                 state.pendingLookupIndexChunks.length > 0 ||
                 state.lookupIndexWritable !== null ||
                 state.lookupIndexWritePromise !== null
@@ -7063,7 +7078,13 @@ view.chunks :
         if (state.queuedWritePromise !== null) {
             return;
         }
-        state.queuedWritePromise = this._drainQueuedWritesForShard(state);
+        /* eslint-disable @stylistic/semi */
+        // Install ownership before an unopened descriptor can invoke OPFS.
+        // Already-open generic queues retain their current drain scheduling.
+        state.queuedWritePromise = state.writable === null ?
+            Promise.resolve().then(() => this._drainQueuedWritesForShard(state)) :
+            this._drainQueuedWritesForShard(state)
+        /* eslint-enable @stylistic/semi */
         // Own early rejection until finalization observes the original promise
         // or the sticky write error recorded by the drain.
         void state.queuedWritePromise.catch(() => {});
@@ -7151,7 +7172,9 @@ view.chunks :
      */
     async _writeChunksForShard(state, chunks, writeStartOffset) {
         if (state.writable === null) {
-            return;
+            // The drain captured this offset before opening can suspend.
+            // eslint-disable-next-line @stylistic/semi
+            await this._reopenShardWritable(state, writeStartOffset)
         }
         let writtenBytes = 0;
         for (const chunk of chunks) {
