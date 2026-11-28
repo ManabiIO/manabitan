@@ -1,0 +1,941 @@
+{
+    "schemaVersion": 1,
+    "status": "CLOSE_WITHOUT_PR",
+    "scope": "Retained heap plus reported backing storage in the actual nested VNDB source-media extension worker at fixed forced-GC checkpoints. No peak process-memory or import-latency claim.",
+    "mechanism": "Keep fewer entry objects and raw-filename views simultaneously retained; hydrate only the current media batch. Decoded filename strings and the compact byte arena remain. Selected images are still hydrated across all 144 batches, so no reduction in total object allocations is claimed. The saving lasts during worker packing; worker termination and post-import memory behavior are unchanged.",
+    "claimLimits": ["No complete-import speedup established.", "No whole-process peak RSS/PSS reduction claimed.", "No permanent installed-dictionary saving claimed.", "Original 16 MiB criterion and overall registered promotion rule failed and remain failed."],
+    "candidate": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "ordinaryHead": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+        "primaryDiagnosticHead": "ead4110b13e45e373155236f1dff430c972e6b1b",
+        "files": [
+            {"path": "ext/js/dictionary/dense-zip-directory.js", "sha": "a4a468ec5fe7a2c8c13fcad75a0ffad64735fbe6", "sha256": "b6e3cbf2fff2ef88cc2788374fed2739af6dfd8a0d13f4c6e8963ee8dc82ab4c"},
+            {"path": "ext/js/dictionary/dense-zip-file-map.js", "sha": "e117ce5536e1b26c1fc6c53b23bf33f37d7563dc", "sha256": "48f259e0e35b6c6ac9ce866c1c3a02d0d6875e51baf660d6403577123dd100af"},
+            {"path": "ext/js/dictionary/source-zip-media-pack.js", "sha": "b274dfd4a4dce46a152c39460742e18eaf130cac", "sha256": "8d00d6d2a8dbe463d0cc792d0efe0d555bbb7b8ba127cdb5fd360dc2cbd980c5"},
+            {"path": "ext/js/dictionary/source-zip-media-preparation-worker.js", "sha": "08da39f0c54adb1e7a73979300e2e3eb38131584", "sha256": "346fda099232590bf12645cdf214c0a7ff1be69bea859898f2017a8fc6fc0d8b"},
+            {"path": "test/dense-zip-directory.test.js", "sha": "8e87a2d506dc7578e2ec4f59df4a06e46a94c8a1", "sha256": "21cd223ab04239b93d822134da0892943632b5609133b82bb13d1869f12159d6"},
+            {"path": "test/source-zip-media-entry-pack.test.js", "sha": "f3c480c082803dadd34ee24810951787ceda2d56", "sha256": "ce5bc45e5d6952cb0cb955b49e513a6738a892cbb1833c43f30350fc59c59faf"}
+        ],
+        "primaryRuntimeSourceBytesMatchOrdinaryHead": true
+    },
+    "registeredRule": {
+        "registeredAtUtc": "2026-11-28 05:09:50 UTC",
+        "source": {"path": "promotion-rule-20261128.json", "bytes": 2410, "sha256": "75c767669e2da9f5caa2dcd94b334275c00c8578308ed233ce11939e804d8276"},
+        "preObservationQueuedStatus": {"path": "promotion-rule-preflight-jobs.json", "bytes": 214, "sha256": "24f337cd371f26ece624122de954e0d6a7c5a26b3e3601f79696e8d7ac3fc6cf"},
+        "originalPrimaryFloorBytes": 16777216,
+        "activeCheckpointFloorBytes": 8388608,
+        "primaryCriterion": "FAIL",
+        "activeCheckpointCriteria": "PASS",
+        "overallRegisteredPromotionRule": "FAIL",
+        "ordinaryProcessMemoryPrerequisite": {
+            "status": "FAIL",
+            "failedCorpora": ["vndb"],
+            "pendingCorpora": []
+        },
+        "engineeringException": {"status": "NOT_AUTHORIZED_UNMET_PROCESS_MEMORY_PREREQUISITE", "rationaleForPossibleReview": "Stable retained-worker reduction of about 14.2 MiB (53.7%) may be worth a memory-only review under the user goal, conditional on all ordinary gates and assessment of slowdown. This is separate engineering judgment, not a retroactive protocol pass. An unqualified ordinary process-memory cohort does not satisfy that prerequisite."}
+    },
+    "primary": {
+        "runId": 46109767804,
+        "artifactId": 15252876622,
+        "artifactSha256": "cf1bb6b3cad54c649f958b21f2c1a406adc66279012eeeb08d364ce78ca88faf",
+        "schedule": ["ABC", "BCA", "CAB"],
+        "primaryCheckpoint": "catalogReady",
+        "primaryMetric": "Runtime.getHeapUsage.usedSize + backingStorageSize",
+        "units": "bytes; null native-memory fields mean not instantiated/observed at that checkpoint, not zero",
+        "checkpointColumns": ["label", "usedSize", "backingStorageSize", "embedderHeapUsedSize", "totalSize", "nativeMemoryBytes", "nativeMemoryShared"],
+        "all9Observations": [
+            {
+                "block": 0,
+                "arm": "A",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "76a18f8863feac4b19f15936541bb41acfbabb41ff44775f678cf7d7b36ab707",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593380, 9800900, 51728, 23658496, null, null],
+                    ["afterRead1", 22745040, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22926100, 11170071, 56704, 23658496, 1638400, true],
+                    ["afterRead144", 22812720, 9958383, 56704, 23396352, 1703936, true],
+                    ["afterPack", 22725692, 9214651, 56680, 23396352, 1703936, true]
+                ]
+            },
+            {
+                "block": 0,
+                "arm": "B",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "c98e877cf49305ba451a5e63830bb026028c3d99dc7a5211ea9a67dbb9f722a4",
+                "checkpoints": [
+                    ["beforeCatalog", 453144, 508318, 51728, 786432, null, null],
+                    ["catalogReady", 4015372, 8843118, 51728, 4521984, null, null],
+                    ["beforeFirstRead", 4276552, 13342214, 51728, 4784128, null, null],
+                    ["afterRead1", 4428212, 14737548, 51152, 5046272, null, null],
+                    ["afterRead72", 4616312, 14711385, 56136, 5046272, 1638400, true],
+                    ["afterRead144", 4396724, 13499697, 56136, 4784128, 1703936, true],
+                    ["afterPack", 4292036, 12755965, 56112, 4784128, 1703936, true]
+                ]
+            },
+            {
+                "block": 0,
+                "arm": "C",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "877863da4bc9bffe2bfca9a146a3088c01f8508bcb58b94b43cd6c8b72ac0b4d",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593380, 9800900, 51728, 23396352, null, null],
+                    ["afterRead1", 22745040, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22925996, 11170071, 56680, 23658496, 1638400, true],
+                    ["afterRead144", 22812832, 9958383, 56680, 23396352, 1703936, true],
+                    ["afterPack", 22725804, 9214651, 56656, 23396352, 1703936, true]
+                ]
+            },
+            {
+                "block": 1,
+                "arm": "B",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "947a8a522ea013eb991fbd7b2ce0bb371ddaf53c2f38574559ba4e511f0a11c0",
+                "checkpoints": [
+                    ["beforeCatalog", 453144, 508318, 51728, 786432, null, null],
+                    ["catalogReady", 4015372, 8843118, 51728, 4521984, null, null],
+                    ["beforeFirstRead", 4275308, 13342214, 51728, 5046272, null, null],
+                    ["afterRead1", 4428528, 14737548, 51152, 5308416, null, null],
+                    ["afterRead72", 4616312, 14711385, 56152, 5046272, 1638400, true],
+                    ["afterRead144", 4396784, 13499697, 56152, 4784128, 1703936, true],
+                    ["afterPack", 4292120, 12755965, 56128, 4784128, 1703936, true]
+                ]
+            },
+            {
+                "block": 1,
+                "arm": "C",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "9d1bf415468bc769d9566fb069f5a2d0e22c0fde9c9e120074337c6d7059bc7c",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593428, 9800900, 51728, 23396352, null, null],
+                    ["afterRead1", 22745088, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22925736, 11170071, 56152, 23658496, 1638400, true],
+                    ["afterRead144", 22813012, 9958383, 56664, 23396352, 1703936, true],
+                    ["afterPack", 22726004, 9214651, 56640, 23396352, 1703936, true]
+                ]
+            },
+            {
+                "block": 1,
+                "arm": "A",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "aad141ea60d8cb55502c74cec11f17f0d1c587445f6744b1ade7207f269218b5",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593380, 9800900, 51728, 23396352, null, null],
+                    ["afterRead1", 22745040, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22925788, 11170071, 56160, 23396352, 1638400, true],
+                    ["afterRead144", 22812748, 9958383, 56680, 23134208, 1703936, true],
+                    ["afterPack", 22725716, 9214651, 56656, 23134208, 1703936, true]
+                ]
+            },
+            {
+                "block": 2,
+                "arm": "C",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "af5e2dd7b7d55dea9a1a7b5cb51303d5dbf5c66c72c2a0e66e1ef3c909705e0e",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593380, 9800900, 51728, 23396352, null, null],
+                    ["afterRead1", 22745040, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22925284, 11170071, 56664, 23658496, 1638400, true],
+                    ["afterRead144", 22812684, 9958383, 56704, 23396352, 1703936, true],
+                    ["afterPack", 22725656, 9214651, 56680, 23396352, 1703936, true]
+                ]
+            },
+            {
+                "block": 2,
+                "arm": "A",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "77aeaf1b94cd6aaf1720540ce4eb6f751b228e9cc6a3fdbf7b6c6163ce40c3ec",
+                "checkpoints": [
+                    ["beforeCatalog", 449464, 500692, 51728, 786432, null, null],
+                    ["catalogReady", 22470628, 5301804, 51728, 23396352, null, null],
+                    ["beforeFirstRead", 22593380, 9800900, 51728, 23396352, null, null],
+                    ["afterRead1", 22745040, 11196234, 51152, 23658496, null, null],
+                    ["afterRead72", 22925712, 11170071, 56168, 23658496, 1638400, true],
+                    ["afterRead144", 22812660, 9958383, 56680, 23396352, 1703936, true],
+                    ["afterPack", 22725648, 9214651, 56656, 23396352, 1703936, true]
+                ]
+            },
+            {
+                "block": 2,
+                "arm": "B",
+                "complete": true,
+                "qualified": true,
+                "rawObservationSha256": "c51826c0e519f4b953ad4939a55373f241fc541984ab0127126fe9a4fa8b99a5",
+                "checkpoints": [
+                    ["beforeCatalog", 453144, 508318, 51728, 786432, null, null],
+                    ["catalogReady", 4015296, 8843118, 51728, 4521984, null, null],
+                    ["beforeFirstRead", 4276420, 13342214, 51728, 4784128, null, null],
+                    ["afterRead1", 4428092, 14737548, 51152, 5046272, null, null],
+                    ["afterRead72", 4616352, 14711385, 56664, 5308416, 1638400, true],
+                    ["afterRead144", 4396704, 13499697, 56152, 4784128, 1703936, true],
+                    ["afterPack", 4292044, 12755965, 56128, 4784128, 1703936, true]
+                ]
+            }
+        ],
+        "checkpointResults": {
+            "beforeCatalog": {"medianSavingsVsABytes": -11306, "medianSavingsVsCBytes": -11306, "everyCandidateBelowBothControls": false, "minimumSavingBytes": -11306, "maximumControlSpreadBytes": 0},
+            "catalogReady": {"medianSavingsVsABytes": 14913942, "medianSavingsVsCBytes": 14913942, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14913942, "maximumControlSpreadBytes": 0},
+            "beforeFirstRead": {"medianSavingsVsABytes": 14775646, "medianSavingsVsCBytes": 14775646, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14775514, "maximumControlSpreadBytes": 48},
+            "afterRead1": {"medianSavingsVsABytes": 14775514, "medianSavingsVsCBytes": 14775514, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14775198, "maximumControlSpreadBytes": 48},
+            "afterRead72": {"medianSavingsVsABytes": 14768162, "medianSavingsVsCBytes": 14768110, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14767618, "maximumControlSpreadBytes": 428},
+            "afterRead144": {"medianSavingsVsABytes": 14874650, "medianSavingsVsCBytes": 14874794, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14874642, "maximumControlSpreadBytes": 264},
+            "afterPack": {"medianSavingsVsABytes": 14892290, "medianSavingsVsCBytes": 14892454, "everyCandidateBelowBothControls": true, "minimumSavingBytes": 14892282, "maximumControlSpreadBytes": 288}
+        },
+        "node": "v22.22.0",
+        "browser": {"path": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome", "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e", "versionOutput": "Google Chrome for Testing 153.0.8010.12", "version": "153.0.8010.12"},
+        "harnessSha256": "f96d2e7281b30e1919cd6a706fba8810598c904dc439fcb7de806184866bd2b9",
+        "fixture": {
+            "label": "VNDB",
+            "cacheFile": "vndb_characters_by_bee.zip",
+            "release": "1.0.0",
+            "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+            "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "sizeBytes": 291705969,
+            "expectedTitle": "VNDB Characters by Bee",
+            "revision": "395525135651",
+            "termRows": 6648310,
+            "mediaFiles": 146570,
+            "mediaBytes": 188131284,
+            "mediaRows": 146570,
+            "optional": true
+        },
+        "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "sourceManifestSha256CanonicalJson": {"A": "2b4f03e499d46e094afc19e6c44e491af3c6a5e849cf6feea1477164a0447ae3", "B": "799f231f7d33b009098902d79542d37748c4cb17ecf888fcd555a6675762152f"},
+        "packages": {
+            "A": {
+                "originalPackageSha256": "b34b6956e1b1ad7a8dc611ea15bc61dc3592b34ac019c301ae10be73890a13e4",
+                "originalMemberCount": 554,
+                "originalMemberHashesSha256CanonicalJson": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+                "instrumentedMemberCount": 556,
+                "instrumentedIdentity": "81ef3513456781c56ab989508fc64ee62ba04a222ba83c7ada2f668ef3f0ed9c",
+                "instrumentedMemberHashesSha256CanonicalJson": "845c190c5e7f68e86125a8515ed5176b50a20978aed128561831cc09b21331e0",
+                "instrumentationChangedMembers": ["js/dictionary/source-zip-media-preparation-worker.js", "media-catalog-heap-parent.js", "media-catalog-heap.html"],
+                "runtimeDeltaMemberHashes": {"js/dictionary/dense-zip-directory.js": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b", "js/dictionary/dense-zip-file-map.js": "b0dfe1e72086389da33f7ff31bdd65e62dc45f580e97f27997bc195beb6c8d3d", "js/dictionary/source-zip-media-pack.js": "2f08b4c92817e8fb5dc6e0cb7ea8b7c2ab1eb6c7df7daee79d43f275802905c6", "js/dictionary/source-zip-media-preparation-worker.js": "04b030529f2c100ce629177ad958a89364e94043d1552b9d522e27f9d634640a"},
+                "manifestUnchangedByInstrumentation": true
+            },
+            "B": {
+                "originalPackageSha256": "4a088a6e8d674b3e8fc6799c389f99b16598cf96de925d1e8b467311dded689e",
+                "originalMemberCount": 554,
+                "originalMemberHashesSha256CanonicalJson": "5ea44d4284d312693682c29475b5e04ac2b9bce98d788f954a29a52d12a4348c",
+                "instrumentedMemberCount": 556,
+                "instrumentedIdentity": "f48bd4b666f0b08326a4899b4ff4646ab333e0a00cd981abc6c71d8c62774262",
+                "instrumentedMemberHashesSha256CanonicalJson": "b9e3e65e86dc1e818a3ad1f60fa9633597089e05d5cbc990981e4117ad209612",
+                "instrumentationChangedMembers": ["js/dictionary/source-zip-media-preparation-worker.js", "media-catalog-heap-parent.js", "media-catalog-heap.html"],
+                "runtimeDeltaMemberHashes": {"js/dictionary/dense-zip-directory.js": "b6e3cbf2fff2ef88cc2788374fed2739af6dfd8a0d13f4c6e8963ee8dc82ab4c", "js/dictionary/dense-zip-file-map.js": "48f259e0e35b6c6ac9ce866c1c3a02d0d6875e51baf660d6403577123dd100af", "js/dictionary/source-zip-media-pack.js": "8d00d6d2a8dbe463d0cc792d0efe0d555bbb7b8ba127cdb5fd360dc2cbd980c5", "js/dictionary/source-zip-media-preparation-worker.js": "346fda099232590bf12645cdf214c0a7ff1be69bea859898f2017a8fc6fc0d8b"},
+                "manifestUnchangedByInstrumentation": true
+            }
+        },
+        "observedCapabilityFlags": {"sharedArrayBufferConstructor": true, "atomics": true, "secureContext": true, "crossOriginIsolated": false},
+        "allServiceParentChildCapabilitiesAgree": true,
+        "allStableOutputsAgree": true,
+        "expectedOutput": {
+            "descriptor": {"version": 2, "prefix": "img/cc", "suffix": ".webp", "firstId": 1, "slotCount": 163034, "count": 146570, "dataBytes": 195649882},
+            "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+            "sourceSpanSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+            "rangeReadCount": 144,
+            "rangeReadBytes": 195649882,
+            "compressedBytes": 188864129,
+            "uncompressedBytes": 188131284
+        },
+        "nodeParityResultsSha256": "af224001c5bc1c0d777ab6ca27930694da315fc57af18789a4fc8e94a6dc67ac",
+        "rawEvidence": [
+            {"path": "primary-extension-46109767804/chromium/protocol.json", "bytes": 339687, "sha256": "ae244c4b9ca67d50592c6a32d91b49f2a21d25ca3c5851a8b6933f588ac4342e"},
+            {"path": "primary-extension-46109767804/chromium/results.json", "bytes": 424903, "sha256": "bbcdfde0b0e6f2058c685725033fa8645d55d503e4393f980e9c2f170b445b81"},
+            {"path": "primary-extension-46109767804/chromium/A-worker-original.js", "bytes": 2339, "sha256": "04b030529f2c100ce629177ad958a89364e94043d1552b9d522e27f9d634640a"},
+            {"path": "primary-extension-46109767804/chromium/A-worker-instrumented.js", "bytes": 4354, "sha256": "b32567f04c55a72fce98e5e33fca7ffa136d7638d3a1dbd40c6763e4edd6bd2f"},
+            {"path": "primary-extension-46109767804/chromium/B-worker-original.js", "bytes": 2323, "sha256": "346fda099232590bf12645cdf214c0a7ff1be69bea859898f2017a8fc6fc0d8b"},
+            {"path": "primary-extension-46109767804/chromium/B-worker-instrumented.js", "bytes": 4338, "sha256": "99e1fb4f8400def49bd60bd2dc66c1c977ce7e7aeb4f6961bf9c9c06119018b3"},
+            {"path": "primary-extension-46109767804/chromium/parent-bridge.js", "bytes": 797, "sha256": "847cb620a267eb84a3ce72f51a9b73f60402cf069e8942620770cd0947658ae0"},
+            {"path": "primary-extension-46109767804/node/results.json", "bytes": 25199, "sha256": "af224001c5bc1c0d777ab6ca27930694da315fc57af18789a4fc8e94a6dc67ac"}
+        ]
+    },
+    "ordinaryProtocol": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+        "runId": 46108057559,
+        "initialOrder": "AB",
+        "timedCandidatePairs": 6,
+        "identicalCodeControlPairs": 2,
+        "retainedWarmups": 4,
+        "flags": {},
+        "vndbSahAllocationUnits": [37, 37],
+        "browser": {"executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome", "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e", "version": "153.0.8010.12", "versionOutput": "Google Chrome for Testing 153.0.8010.12"},
+        "unchangedHarnessSourceHashes": {
+            "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+            "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+        },
+        "memoryObserverProtocol": {
+            "authoritativeTiming": false,
+            "limitations": ["Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.", "Only complete scans wholly inside the marked automation import window contribute to maxima.", "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.", "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.", "All failed and boundary scans are retained; no missing read is assigned a measured zero."],
+            "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+            "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+            "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+            "schemaVersion": 3
+        },
+        "expectedPackageDelta": ["js/dictionary/dense-zip-directory.js", "js/dictionary/dense-zip-file-map.js", "js/dictionary/source-zip-media-pack.js", "js/dictionary/source-zip-media-preparation-worker.js"],
+        "noDataTrimmingOrReplacementCohorts": true,
+        "timingObservationColumns": ["id", "kind", "pair", "arm", "totalImportMs"],
+        "memoryObservationColumns": ["allObservedSampleCount", "arm", "benchmarkExitCode", "confirmedExitedZombieIdentityCount", "confirmedExitedZombieObservationCount", "fullyContainedImportSampleCount", "index", "maxSampledPrivateKiB", "maxSampledPssKiB", "maximumCoveredSampleGapMs", "name", "observedProcessCountRange", "overlappingImportSampleCount", "pair", "postImportBracketGapMs", "preImportBracketGapMs", "qualificationFailures", "qualifiedForWholeTreePss", "sampleCount", "samplesWithUnavailableSmaps", "samplesWithUnreadableAddressSpaces", "stableFullyReadImportSampleCount", "stableFullyReadTreeSampleCount", "windowDurationMs", "windowMarkers"]
+    },
+    "ordinaryImports": {
+        "jmdict": {
+            "status": "correctness-memory-passed",
+            "artifactId": 15253403546,
+            "artifactSha256": "ea15da8fe0cddcd1779efaaf29a19f67f10c5f595cb54254a0fc8e74b73aa4f2",
+            "fixture": {
+                "label": "JMdict",
+                "cacheFile": "JMdict.zip",
+                "release": "2026-11-22",
+                "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+                "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+                "sizeBytes": 15645766,
+                "expectedTitle": "JMdict [2026-11-22]",
+                "revision": "JMdict.2026-11-22",
+                "termRows": 528299,
+                "mediaFiles": 0,
+                "mediaBytes": 0
+            },
+            "packages": {
+                "A": {"sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2", "packageSha256": "18b74c3cc9e88e832b501530c675ea46e934b6694947340bd7277dfbfc62519b", "memberCount": 554, "memberHashesSha256CanonicalJson": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde", "primaryOriginalMemberHashesIdentical": true},
+                "B": {"sourceHead": "931eff9fb194df34b67cb4f5f952f437aa8c084b", "packageSha256": "f9c02e4fe4c501cfc7b2e7654e3fe0ee2678825bb167c17c5000a5d386dd6757", "memberCount": 554, "memberHashesSha256CanonicalJson": "5ea44d4284d312693682c29475b5e04ac2b9bce98d788f954a29a52d12a4348c", "primaryOriginalMemberHashesIdentical": true}
+            },
+            "all20TimingObservations": [
+                ["warmup-1-A", "warmup", 1, "A", 700.6000000000058],
+                ["warmup-1-B", "warmup", 1, "B", 705.2999999999884],
+                ["warmup-2-B", "warmup", 2, "B", 692.8000000000029],
+                ["warmup-2-A", "warmup", 2, "A", 681.3000000000029],
+                ["pair-01-A", "candidate", 1, "A", 761.6999999999971],
+                ["pair-01-B", "candidate", 1, "B", 767.8000000000029],
+                ["pair-02-B", "candidate", 2, "B", 728],
+                ["pair-02-A", "candidate", 2, "A", 697.1999999999971],
+                ["pair-03-A", "candidate", 3, "A", 709],
+                ["pair-03-B", "candidate", 3, "B", 692.3000000000029],
+                ["control-01-A", "control", 1, "A", 694.3000000000175],
+                ["control-01-C", "control", 1, "C", 695],
+                ["pair-04-B", "candidate", 4, "B", 678.5999999999767],
+                ["pair-04-A", "candidate", 4, "A", 697.2000000000116],
+                ["pair-05-A", "candidate", 5, "A", 692.6000000000058],
+                ["pair-05-B", "candidate", 5, "B", 703.9000000000233],
+                ["pair-06-B", "candidate", 6, "B", 700.9000000000233],
+                ["pair-06-A", "candidate", 6, "A", 746.8000000000175],
+                ["control-02-C", "control", 2, "C", 726.8999999999942],
+                ["control-02-A", "control", 2, "A", 707.7999999999884]
+            ],
+            "pairedStatistics": {
+                "candidateVsBaseline": {
+                    "count": 6,
+                    "descriptiveBootstrap95Percent": [-4.407019001096302, 3.0246020176591504],
+                    "equalWorkChangePercent": -0.7666395632477618,
+                    "fasterPairs": 3,
+                    "medianAbsoluteChangeMs": -5.299999999995634,
+                    "medianPairedChangePercent": -0.7772949787724803,
+                    "ratios": [1.0080084022581146, 1.0441767068273136, 0.9764456981664357, 0.9733218588639779, 1.0163153335258697, 0.938537761114096],
+                    "worstPairChangePercent": 4.417670682731356
+                },
+                "identicalCodeControl": {
+                    "count": 2,
+                    "descriptiveBootstrap95Percent": [0.10082097075940766, 2.6985024018092885],
+                    "equalWorkChangePercent": 1.4121674630902525,
+                    "fasterPairs": 0,
+                    "medianAbsoluteChangeMs": 9.89999999999418,
+                    "medianPairedChangePercent": 1.3996616862843592,
+                    "ratios": [1.001008209707594, 1.0269850240180929],
+                    "worstPairChangePercent": 2.6985024018092885
+                }
+            },
+            "memory": {
+                "observations": [
+                    [64, "A", 0, 0, 0, 8, 1, 770884, 1004037, 152.572861, "A1", [9, 9], 9, 1, 63.805314, 23.015075, [], true, 9, 0, 0, 8, 9, 875.348724, [{"epochMs": 1795851420389, "event": "start", "monotonicNs": "211744981039"}, {"epochMs": 1795851421264, "event": "end", "monotonicNs": "212620329763"}]],
+                    [63, "B", 0, 0, 0, 7, 2, 771448, 1000848, 162.790247, "B1", [9, 9], 8, 1, 7.751292, 34.926992, [], true, 8, 0, 0, 7, 8, 867.644436, [{"epochMs": 1795851427488, "event": "start", "monotonicNs": "218844508557"}, {"epochMs": 1795851428356, "event": "end", "monotonicNs": "219712152993"}]],
+                    [62, "B", 0, 0, 0, 8, 3, 797012, 1029200, 135.54071, "B2", [9, 9], 8, 2, 19.678675, 17.710524, [], true, 8, 0, 0, 8, 8, 855.155519, [{"epochMs": 1795851434447, "event": "start", "monotonicNs": "225803381047"}, {"epochMs": 1795851435302, "event": "end", "monotonicNs": "226658536566"}]],
+                    [65, "A", 0, 0, 0, 7, 4, 768876, 998319, 145.453167, "A2", [9, 9], 9, 2, 28.651344, 81.917514, [], true, 9, 0, 0, 7, 9, 910.509435, [{"epochMs": 1795851441757, "event": "start", "monotonicNs": "233113746122"}, {"epochMs": 1795851442668, "event": "end", "monotonicNs": "234024255557"}]]
+                ],
+                "pairs": [
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 770884, "candidate": 771448, "changePercent": 0.07316275859921006},
+                        "maxSampledPssKiB": {"baseline": 1004037, "candidate": 1000848, "changePercent": -0.3176177770341182},
+                        "pair": 1,
+                        "qualified": true
+                    },
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 768876, "candidate": 797012, "changePercent": 3.65936770038342},
+                        "maxSampledPssKiB": {"baseline": 998319, "candidate": 1029200, "changePercent": 3.0932998370260423},
+                        "pair": 2,
+                        "qualified": true
+                    }
+                ],
+                "metrics": {
+                    "maxSampledPrivateKiB": {"maximumPairedChangePercent": 3.65936770038342, "medianPairedChangePercent": 1.8662652294913151},
+                    "maxSampledPssKiB": {"maximumPairedChangePercent": 3.0932998370260423, "medianPairedChangePercent": 1.387841029995962}
+                },
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "audit": {
+                    "everyObservationQualified": true,
+                    "metrics": {
+                        "maxSampledPrivateKiB": {"maximumPairedChangePercent": 3.65936770038342, "medianPairedChangePercent": 1.8662652294913151},
+                        "maxSampledPssKiB": {"maximumPairedChangePercent": 3.0932998370260423, "medianPairedChangePercent": 1.387841029995962}
+                    },
+                    "observations": 4,
+                    "passesProspectiveMemoryScreen": true,
+                    "rawScanCount": 254,
+                    "schemaVersion": 1
+                },
+                "auditFailure": null
+            },
+            "rawReportCount": 26,
+            "semanticFailures": [],
+            "semanticRevalidationFailures": [],
+            "rawReportFailures": [],
+            "activationMismatches": [],
+            "activationByArm": {
+                "A": {
+                    "media": [0],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                },
+                "C": {
+                    "media": [0],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                },
+                "B": {
+                    "media": [0],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                }
+            },
+            "provenanceAudit": {"outerArtifactSha256Verified": true, "sourceHeadsAndFrozenHarnessVerified": true, "everyPackageMemberSha256Verified": true, "exactPackageDeltaVerified": true, "allRawSemanticReceiptsRevalidated": true},
+            "retainedEvidence": [
+                {"path": "imports-jmdict-46108057559/independent-review.json", "bytes": 225422, "sha256": "6bcbb4a99e399ebb0e83fdc4b8966448d700b212c61198bcfb0b9a0bc0bac49b"},
+                {"path": "imports-jmdict-46108057559/artifact-entry-manifest.json", "bytes": 95337, "sha256": "abe91b93f178d59df61c9ea228402e10476c32e625f488e5b34b6c5e122d730a"},
+                {"path": "imports-jmdict-46108057559/source-identities.json", "bytes": 129084, "sha256": "6853840d7e4858a0e67d96b11a602d1bdda2614fecf17d65eefa3da668a941d1"},
+                {"path": "imports-jmdict-46108057559/observations.json", "bytes": 2497, "sha256": "b9cefb6d8b2b1c53b01799d51a10f359b84e889164ccec42e724f81497f26f4d"}
+            ],
+            "interpretation": "No complete-import speedup or whole-process peak-memory reduction is claimed."
+        },
+        "jitendex": {
+            "status": "correctness-memory-passed",
+            "artifactId": 15253643013,
+            "artifactSha256": "f0895fe43c82f77c41fe3536f52bc6bcbcfa8bef72c9626f098798be94048a62",
+            "fixture": {
+                "label": "Jitendex",
+                "cacheFile": "jitendex-yomitan.zip",
+                "release": "2026.10.03.0",
+                "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+                "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+                "sizeBytes": 38831822,
+                "expectedTitle": "Jitendex.org [2026-10-03]",
+                "revision": "2026.10.03.0",
+                "termRows": 436555,
+                "mediaFiles": 236,
+                "mediaBytes": 4992155,
+                "unreferencedMediaPaths": ["jitendex/HanaMinA/05167.svg", "jitendex/HanaMinA/05641.svg", "jitendex/HanaMinA/0576b.svg", "jitendex/HanaMinA/05bda.svg", "jitendex/HanaMinA/06207.svg", "jitendex/HanaMinA/07055.svg", "jitendex/HanaMinA/07575.svg", "jitendex/HanaMinA/076a5.svg", "jitendex/HanaMinA/0793d.svg", "jitendex/HanaMinA/080ed.svg", "jitendex/HanaMinA/09093.svg", "jitendex/HanaMinA/09c81.svg", "jitendex/HanaMinA/20bb7.svg"]
+            },
+            "packages": {
+                "A": {"sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2", "packageSha256": "dbec48e7ea229d86d1bc031558015449a5d9f443af59391bc771c6355fa7712a", "memberCount": 554, "memberHashesSha256CanonicalJson": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde", "primaryOriginalMemberHashesIdentical": true},
+                "B": {"sourceHead": "931eff9fb194df34b67cb4f5f952f437aa8c084b", "packageSha256": "1e12d596a3d99712b092f65e723da8811069c36b7e99147fe003eb86f8036743", "memberCount": 554, "memberHashesSha256CanonicalJson": "5ea44d4284d312693682c29475b5e04ac2b9bce98d788f954a29a52d12a4348c", "primaryOriginalMemberHashesIdentical": true}
+            },
+            "all20TimingObservations": [
+                ["warmup-1-A", "warmup", 1, "A", 1624.199999999997],
+                ["warmup-1-B", "warmup", 1, "B", 1991.0999999999913],
+                ["warmup-2-B", "warmup", 2, "B", 1597.300000000003],
+                ["warmup-2-A", "warmup", 2, "A", 1618.699999999997],
+                ["pair-01-A", "candidate", 1, "A", 1655.800000000003],
+                ["pair-01-B", "candidate", 1, "B", 1591.3999999999942],
+                ["pair-02-B", "candidate", 2, "B", 1599.5],
+                ["pair-02-A", "candidate", 2, "A", 1597.3999999999942],
+                ["pair-03-A", "candidate", 3, "A", 1588.4000000000233],
+                ["pair-03-B", "candidate", 3, "B", 1687.1000000000058],
+                ["control-01-A", "control", 1, "A", 1593.6000000000058],
+                ["control-01-C", "control", 1, "C", 1594],
+                ["pair-04-B", "candidate", 4, "B", 1922.9000000000233],
+                ["pair-04-A", "candidate", 4, "A", 1580.7000000000116],
+                ["pair-05-A", "candidate", 5, "A", 1614.2000000000116],
+                ["pair-05-B", "candidate", 5, "B", 1613.2000000000116],
+                ["pair-06-B", "candidate", 6, "B", 1600.899999999965],
+                ["pair-06-A", "candidate", 6, "A", 1666],
+                ["control-02-C", "control", 2, "C", 1595.5999999999767],
+                ["control-02-A", "control", 2, "A", 1592.4000000000233]
+            ],
+            "pairedStatistics": {
+                "candidateVsBaseline": {
+                    "count": 6,
+                    "descriptiveBootstrap95Percent": [-3.8984608217016437, 13.931218365158227],
+                    "equalWorkChangePercent": 3.2208193764489135,
+                    "fasterPairs": 3,
+                    "medianAbsoluteChangeMs": 0.5500000000029104,
+                    "medianPairedChangePercent": 0.03475671817545489,
+                    "ratios": [0.9611064138180888, 1.001314636283965, 1.0621380005036396, 1.216486366799525, 0.9993804980795441, 0.9609243697478782],
+                    "worstPairChangePercent": 21.648636679952492
+                },
+                "identicalCodeControl": {
+                    "count": 2,
+                    "descriptiveBootstrap95Percent": [0.02510040160605964, 0.2009545340337482],
+                    "equalWorkChangePercent": 0.11299435028084837,
+                    "fasterPairs": 0,
+                    "medianAbsoluteChangeMs": 1.7999999999738066,
+                    "medianPairedChangePercent": 0.11302746781991502,
+                    "ratios": [1.0002510040160606, 1.0020095453403375],
+                    "worstPairChangePercent": 0.2009545340337482
+                }
+            },
+            "memory": {
+                "observations": [
+                    [68, "A", 0, 0, 0, 12, 1, 815128, 1045195, 180.684114, "A1", [9, 9], 14, 1, 122.906329, 64.146206, [], true, 14, 0, 0, 12, 14, 2080.891159, [{"epochMs": 1795850675220, "event": "start", "monotonicNs": "330156869964"}, {"epochMs": 1795850677301, "event": "end", "monotonicNs": "332237761123"}]],
+                    [71, "B", 0, 0, 0, 12, 2, 829348, 1061423, 220.316931, "B1", [9, 9], 14, 1, 125.245484, 124.744685, [], true, 14, 0, 0, 12, 14, 2045.084041, [{"epochMs": 1795850687829, "event": "start", "monotonicNs": "342765558758"}, {"epochMs": 1795850689874, "event": "end", "monotonicNs": "344810642799"}]],
+                    [72, "B", 0, 0, 0, 12, 3, 829728, 1064351, 185.00181, "B2", [9, 9], 13, 2, 84.826781, 11.940592, [], true, 13, 0, 0, 12, 13, 2047.763002, [{"epochMs": 1795850700243, "event": "start", "monotonicNs": "355179765716"}, {"epochMs": 1795850702291, "event": "end", "monotonicNs": "357227528718"}]],
+                    [69, "A", 0, 0, 0, 12, 4, 805144, 1034550, 189.567335, "A2", [9, 9], 13, 2, 19.653418, 102.793619, [], true, 13, 0, 0, 12, 13, 2022.731011, [{"epochMs": 1795850712381, "event": "start", "monotonicNs": "367317465077"}, {"epochMs": 1795850714403, "event": "end", "monotonicNs": "369340196088"}]]
+                ],
+                "pairs": [
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 815128, "candidate": 829348, "changePercent": 1.7445112914781458},
+                        "maxSampledPssKiB": {"baseline": 1045195, "candidate": 1061423, "changePercent": 1.5526289352704614},
+                        "pair": 1,
+                        "qualified": true
+                    },
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 805144, "candidate": 829728, "changePercent": 3.0533668511471213},
+                        "maxSampledPssKiB": {"baseline": 1034550, "candidate": 1064351, "changePercent": 2.8805760958870996},
+                        "pair": 2,
+                        "qualified": true
+                    }
+                ],
+                "metrics": {
+                    "maxSampledPrivateKiB": {"maximumPairedChangePercent": 3.0533668511471213, "medianPairedChangePercent": 2.3989390713126335},
+                    "maxSampledPssKiB": {"maximumPairedChangePercent": 2.8805760958870996, "medianPairedChangePercent": 2.2166025155787805}
+                },
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "audit": {
+                    "everyObservationQualified": true,
+                    "metrics": {
+                        "maxSampledPrivateKiB": {"maximumPairedChangePercent": 3.0533668511471213, "medianPairedChangePercent": 2.3989390713126335},
+                        "maxSampledPssKiB": {"maximumPairedChangePercent": 2.8805760958870996, "medianPairedChangePercent": 2.2166025155787805}
+                    },
+                    "observations": 4,
+                    "passesProspectiveMemoryScreen": true,
+                    "rawScanCount": 280,
+                    "schemaVersion": 1
+                },
+                "auditFailure": null
+            },
+            "rawReportCount": 26,
+            "semanticFailures": [],
+            "semanticRevalidationFailures": [],
+            "rawReportFailures": [],
+            "activationMismatches": [],
+            "activationByArm": {
+                "A": {
+                    "media": [236],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                },
+                "C": {
+                    "media": [236],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                },
+                "B": {
+                    "media": [236],
+                    "step4SourcePackedMediaBytes": [0],
+                    "step4SourcePackedMediaEarlyPayload": [false],
+                    "step4SourcePackedMediaEntryCount": [0],
+                    "step4SourcePackedMediaParallel": [false]
+                }
+            },
+            "provenanceAudit": {"outerArtifactSha256Verified": true, "sourceHeadsAndFrozenHarnessVerified": true, "everyPackageMemberSha256Verified": true, "exactPackageDeltaVerified": true, "allRawSemanticReceiptsRevalidated": true},
+            "retainedEvidence": [
+                {"path": "imports-jitendex-46108057559/independent-review.json", "bytes": 224697, "sha256": "4f4ebe72d73e9fbedbf7b98b0938b3d095a184c40c2295e8dbc72d24c5f34069"},
+                {"path": "imports-jitendex-46108057559/artifact-entry-manifest.json", "bytes": 95337, "sha256": "f43a15fec14d89d2f0e3c56e988a879834146794da66ff1724769651361ee3fa"},
+                {"path": "imports-jitendex-46108057559/source-identities.json", "bytes": 129084, "sha256": "3a3cbd16ee13abfd3561535f9fad827e31379df9935a1d90ecb4943e2d4064ba"},
+                {"path": "imports-jitendex-46108057559/observations.json", "bytes": 2514, "sha256": "aa7f2b9595dd7f1aa917f2bd13240245f055d2d0378a7aae020b5ed257d415a5"}
+            ],
+            "interpretation": "No complete-import speedup or whole-process peak-memory reduction is claimed."
+        },
+        "vndb": {
+            "status": "memory-or-semantics-failed",
+            "artifactId": 15254656202,
+            "artifactSha256": "40c4830053f2dddd94f0285f1c5608cf5aa097c6e63f72427bbeafd685fcbd8c",
+            "fixture": {
+                "label": "VNDB",
+                "cacheFile": "vndb_characters_by_bee.zip",
+                "release": "1.0.0",
+                "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+                "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+                "sizeBytes": 291705969,
+                "expectedTitle": "VNDB Characters by Bee",
+                "revision": "395525135651",
+                "termRows": 6648310,
+                "mediaFiles": 146570,
+                "mediaBytes": 188131284,
+                "mediaRows": 146570,
+                "optional": true
+            },
+            "packages": {
+                "A": {"sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2", "packageSha256": "d03aa6d36366329dfa1c02d8e917782a7da7fecd44bc08e4444191c8b9fe58c2", "memberCount": 554, "memberHashesSha256CanonicalJson": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde", "primaryOriginalMemberHashesIdentical": true},
+                "B": {"sourceHead": "931eff9fb194df34b67cb4f5f952f437aa8c084b", "packageSha256": "7b948e9c548f3fc692c670c59fc1d54b2f5cdd7731297c7d5d91490ef9a66380", "memberCount": 554, "memberHashesSha256CanonicalJson": "5ea44d4284d312693682c29475b5e04ac2b9bce98d788f954a29a52d12a4348c", "primaryOriginalMemberHashesIdentical": true}
+            },
+            "all20TimingObservations": [
+                ["warmup-1-A", "warmup", 1, "A", 7234.300000000003],
+                ["warmup-1-B", "warmup", 1, "B", 5666],
+                ["warmup-2-B", "warmup", 2, "B", 5697.100000000006],
+                ["warmup-2-A", "warmup", 2, "A", 5886.3000000000175],
+                ["pair-01-A", "candidate", 1, "A", 5739.5],
+                ["pair-01-B", "candidate", 1, "B", 5667.600000000006],
+                ["pair-02-B", "candidate", 2, "B", 5898.5],
+                ["pair-02-A", "candidate", 2, "A", 5961.300000000047],
+                ["pair-03-A", "candidate", 3, "A", 5736.5],
+                ["pair-03-B", "candidate", 3, "B", 5706.600000000035],
+                ["control-01-A", "control", 1, "A", 5911.400000000023],
+                ["control-01-C", "control", 1, "C", 5868.099999999977],
+                ["pair-04-B", "candidate", 4, "B", 5867],
+                ["pair-04-A", "candidate", 4, "A", 5977.900000000023],
+                ["pair-05-A", "candidate", 5, "A", 5756.799999999988],
+                ["pair-05-B", "candidate", 5, "B", 5761.899999999965],
+                ["pair-06-B", "candidate", 6, "B", 5729.700000000012],
+                ["pair-06-A", "candidate", 6, "A", 5792.899999999907],
+                ["control-02-C", "control", 2, "C", 5689.900000000023],
+                ["control-02-A", "control", 2, "A", 5877.5]
+            ],
+            "pairedStatistics": {
+                "candidateVsBaseline": {
+                    "count": 6,
+                    "descriptiveBootstrap95Percent": [-1.553944446313893, -0.21631642943784612],
+                    "equalWorkChangePercent": -0.9540996828246273,
+                    "fasterPairs": 5,
+                    "medianAbsoluteChangeMs": -62.999999999970896,
+                    "medianPairedChangePercent": -1.0722260944019957,
+                    "ratios": [0.9874727763742497, 0.9894653850670079, 0.9947877625730036, 0.9814483346994726, 1.0008859088382394, 0.9890900930449522],
+                    "worstPairChangePercent": 0.08859088382393576
+                },
+                "identicalCodeControl": {
+                    "count": 2,
+                    "descriptiveBootstrap95Percent": [-3.1918332624411128, -0.7324829989519666],
+                    "equalWorkChangePercent": -1.9586220936645748,
+                    "fasterPairs": 2,
+                    "medianAbsoluteChangeMs": -115.45000000001164,
+                    "medianPairedChangePercent": -1.962158130696534,
+                    "ratios": [0.9926751700104803, 0.9680816673755889],
+                    "worstPairChangePercent": -0.7324829989519666
+                }
+            },
+            "memory": {
+                "observations": [
+                    [103, "A", 0, 0, 0, 36, 1, 985272, 1208644, 231.699774, "A1", [9, 9], 38, 1, 49.489211, 50.554064, [], true, 38, 0, 0, 36, 38, 6982.102041, [{"epochMs": 1795852617436, "event": "start", "monotonicNs": "1436152484374"}, {"epochMs": 1795852624418, "event": "end", "monotonicNs": "1443134586415"}]],
+                    [104, "B", 0, 1, 4, 37, 2, null, null, 399.792045, "B1", [9, 9], 39, 1, 98.850453, 86.828523, ["covered-import-scan-gap-over-250ms"], false, 39, 5, 1, 36, 38, 7379.121261, [{"epochMs": 1795852646718, "event": "start", "monotonicNs": "1465434727754"}, {"epochMs": 1795852654097, "event": "end", "monotonicNs": "1472813849015"}]],
+                    [103, "B", 0, 0, 0, 36, 3, 933216, 1155491, 246.383683, "B2", [9, 9], 38, 2, 92.903896, 108.000273, [], true, 38, 0, 0, 36, 38, 7058.504197, [{"epochMs": 1795852676517, "event": "start", "monotonicNs": "1495233914452"}, {"epochMs": 1795852683576, "event": "end", "monotonicNs": "1502292418649"}]],
+                    [104, "A", 0, 0, 0, 37, 4, null, null, 308.60082, "A2", [9, 9], 39, 2, 88.421811, 54.316272, ["covered-import-scan-gap-over-250ms"], false, 39, 0, 0, 37, 39, 7669.648201, [{"epochMs": 1795852706110, "event": "start", "monotonicNs": "1524826446707"}, {"epochMs": 1795852713779, "event": "end", "monotonicNs": "1532496094908"}]]
+                ],
+                "pairs": [
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 985272, "candidate": null, "changePercent": null},
+                        "maxSampledPssKiB": {"baseline": 1208644, "candidate": null, "changePercent": null},
+                        "pair": 1,
+                        "qualified": false
+                    },
+                    {
+                        "maxSampledPrivateKiB": {"baseline": null, "candidate": 933216, "changePercent": null},
+                        "maxSampledPssKiB": {"baseline": null, "candidate": 1155491, "changePercent": null},
+                        "pair": 2,
+                        "qualified": false
+                    }
+                ],
+                "metrics": {
+                    "maxSampledPrivateKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null},
+                    "maxSampledPssKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null}
+                },
+                "everyObservationQualified": false,
+                "passesProspectiveMemoryScreen": false,
+                "audit": {
+                    "everyObservationQualified": false,
+                    "metrics": {
+                        "maxSampledPrivateKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null},
+                        "maxSampledPssKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null}
+                    },
+                    "observations": 4,
+                    "passesProspectiveMemoryScreen": false,
+                    "rawScanCount": 414,
+                    "schemaVersion": 1
+                },
+                "auditFailure": null
+            },
+            "rawReportCount": 26,
+            "semanticFailures": [],
+            "semanticRevalidationFailures": [],
+            "rawReportFailures": [],
+            "activationMismatches": [],
+            "activationByArm": {
+                "A": {
+                    "media": [146570],
+                    "step4SourcePackedMediaBytes": [195649882],
+                    "step4SourcePackedMediaEarlyPayload": [true],
+                    "step4SourcePackedMediaEntryCount": [146570],
+                    "step4SourcePackedMediaParallel": [true]
+                },
+                "C": {
+                    "media": [146570],
+                    "step4SourcePackedMediaBytes": [195649882],
+                    "step4SourcePackedMediaEarlyPayload": [true],
+                    "step4SourcePackedMediaEntryCount": [146570],
+                    "step4SourcePackedMediaParallel": [true]
+                },
+                "B": {
+                    "media": [146570],
+                    "step4SourcePackedMediaBytes": [195649882],
+                    "step4SourcePackedMediaEarlyPayload": [true],
+                    "step4SourcePackedMediaEntryCount": [146570],
+                    "step4SourcePackedMediaParallel": [true]
+                }
+            },
+            "provenanceAudit": {"outerArtifactSha256Verified": true, "sourceHeadsAndFrozenHarnessVerified": true, "everyPackageMemberSha256Verified": true, "exactPackageDeltaVerified": true, "allRawSemanticReceiptsRevalidated": true},
+            "retainedEvidence": [
+                {"path": "imports-vndb-46108057559/independent-review.json", "bytes": 226038, "sha256": "caa27238207e12b76e6945ef7c7fda6777c649f4f83a1a8b3764b1421ce8ea21"},
+                {"path": "imports-vndb-46108057559/artifact-entry-manifest.json", "bytes": 95338, "sha256": "3df3b1cffb36f0446f913fbe0010f099686776a62f398397a9cbb61ea5e40079"},
+                {"path": "imports-vndb-46108057559/source-identities.json", "bytes": 129084, "sha256": "22e633a72797c4aefc46fc30608828922add8062f8130a3599c016f8ef068d7f"},
+                {"path": "imports-vndb-46108057559/observations.json", "bytes": 2470, "sha256": "809685bd8d3292466a00b12b4d4f5598ea764a82de0c2ad82f22f5d5f75caec1"}
+            ],
+            "interpretation": "No complete-import speedup or whole-process peak-memory reduction is claimed."
+        }
+    },
+    "quality": {
+        "head": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+        "runId": 46108057559,
+        "jobId": 140865155085,
+        "artifactId": 15250694134,
+        "artifactSha256": "c1d8cb3863be53b09c5b5a678d8fb966f72d74fff48f98f0dfec1fefc1191a56",
+        "conclusion": "success",
+        "scopedLint": "PASS",
+        "allFourTypeScriptProjects": "PASS",
+        "unitFilesPassed": 669,
+        "unitTestsPassed": 15154,
+        "unitTestsSkipped": 47,
+        "allTargetBuildDryRun": "PASS",
+        "pipelineFailurePropagation": "Observed set -o pipefail and Actions bash -e shell in job log",
+        "receipt": {"path": "validation-passed-46108057559-receipt.json", "bytes": 1635, "sha256": "b716d692a1ea658125ef87db7a43c4b513442e5d2e5d1021a093ac5640c60bcd"}
+    },
+    "retainedFailuresAndSensitivity": {
+        "initialLintFailure": {"runId": 46104577106, "head": "eee5a250284c5960ed8b99fa7c3d538b0372dc38", "outcome": "Lint failed before types/unit/build/import/memory observations; preserved."},
+        "localFullUnitExit137": "Incomplete local attempt retained; not relabeled as a pass. Later hosted full unit suite passed.",
+        "localFullTestTypingExit134": {
+            "outcome": "Incomplete; explicit 768 MiB heap limit exhausted. Later all four hosted type projects passed.",
+            "recordedExitCode": 134,
+            "statusReceipt": {"path": "local-focus-status.json", "bytes": 30, "sha256": "ac2baf0e8a9bcab360dc37fb47f06999d8ad7da338113caa5583bb5ad967146d"},
+            "rawLog": {"path": "local-test-types.log", "bytes": 1222, "sha256": "db35e5515c31fac81adfc4fae684fa42918da4f9bdae8b336711a4f95ba44b8b"}
+        },
+        "partialPrimaryRecords": "All saved partial checkpoint records retained alongside nine completed final observations.",
+        "httpHeadlessShellSensitivity": {
+            "classification": "Original HTTP/headless-shell cohort prospectively sensitivity-only before observations; not pooled with primary extension measurements and not used to alter thresholds. No full executable hash or service/parent/child/native capability binding was registered here.",
+            "runId": 46108057559,
+            "artifactId": 15253603996,
+            "artifactSha256": "840f5ccf0249d172d84c613cfeca0c4a803790bb85509be071cb27a59b49936f",
+            "resultsSha256": "91f06dc5aa9d7dda5aa15a95ba8a56539906147d3a12d4edabcf75ab3bdafe04",
+            "observations": 9,
+            "completeAndOutputParityPassed": true,
+            "source": {"path": "http-headless-sensitivity-46108057559/sensitivity-audit.json", "bytes": 5567, "sha256": "6293d63cb7ac5b08104c2bdf91c10abbc772e16a4f7578fa5f570e624d417046"}
+        },
+        "jitendexSlowPair": {
+            "pair": 4,
+            "baselineMs": 1580.7000000000116,
+            "candidateMs": 1922.9000000000233,
+            "changePercent": 21.64863667995249,
+            "equalWorkChangePercentAll6Pairs": 3.2208193764489135,
+            "keptInAllStatistics": true,
+            "interpretation": "Nested phase diagnostics locate most added wall time in term processing but do not establish a cause; no rerun or trimming.",
+            "source": {"path": "imports-jitendex-46108057559/slow-pair-phase-review.json", "bytes": 4900, "sha256": "8f44eb66b17c870bc3181a1b2be9a369bdcfbde4ad22f5205d869ca381dfcdf0"}
+        }
+    },
+    "reproduction": {
+        "repository": "ManabiIO/manabitan",
+        "primaryWorkflow": {"ref": "ead4110b13e45e373155236f1dff430c972e6b1b", "path": ".github/workflows/media-catalog-extension-memory-lab-4a779.yml", "harness": ".github/scripts/media-catalog-extension-heap.mjs"},
+        "ordinaryWorkflow": {"ref": "931eff9fb194df34b67cb4f5f952f437aa8c084b", "path": ".github/workflows/media-catalog-lab-4a779.yml"},
+        "frozenOrdinaryQualifier": {"ref": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2", "path": "dev/perf/import-qualification-20261125-a7f7.py", "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"},
+        "primaryCommand": "node .github/scripts/media-catalog-extension-heap.mjs --baseline BASELINE_WORKTREE --candidate CANDIDATE_WORKTREE --baseline-package BASELINE_WORKTREE/builds/manabitan-chrome.zip --candidate-package builds/manabitan-chrome.zip --archive builds/e2e-dictionary-cache/vndb_characters_by_bee.zip --parity builds/perf/media-catalog-extension-memory/node/results.json --out builds/perf/media-catalog-extension-memory/chromium",
+        "ordinaryCommand": "python3 dev/perf/import-qualification-20261125-a7f7.py --baseline 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 --candidate 931eff9fb194df34b67cb4f5f952f437aa8c084b --dictionary DICTIONARY --initial-order AB --pairs 6 --evidence EVIDENCE_DIR --expected-package-entry js/dictionary/dense-zip-directory.js --expected-package-entry js/dictionary/dense-zip-file-map.js --expected-package-entry js/dictionary/source-zip-media-pack.js --expected-package-entry js/dictionary/source-zip-media-preparation-worker.js [VNDB only: --vndb-sah-allocation-units 37 37]",
+        "warning": "These references describe the completed frozen runs; no reproduction or new observation was executed while preparing this packet."
+    },
+    "memoryOnlyCoverageFollowup": {
+        "scope": "One separately reported four-observation VNDB process-memory coverage cohort. No latency claim or exhaustive-media rerun; no original observation is replaced or pooled.",
+        "observationState": "Completed and independently audited; the separate four-observation memory screen failed coverage.",
+        "runId": 46124641451,
+        "runAttempt": 1,
+        "jobId": 140916439021,
+        "branch": "perf/media-memory-coverage-20261128-4a779",
+        "head": "860d5518820ae080b01c1e1f2ce84d3a345ce336",
+        "tree": "71586031615411359675e5d06575933850c2d5e7",
+        "parent": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+        "registeredAtUtc": "2026-11-28 08:10:39 UTC",
+        "runCreatedAt": "2026-11-28T08:11:29Z",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "931eff9fb194df34b67cb4f5f952f437aa8c084b",
+        "schedule": ["A1", "B1", "B2", "A2"],
+        "unchangedConfiguration": {
+            "node": "v22.22.0",
+            "browser": "153.0.8010.12",
+            "browserSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+            "sourceHashCount": 44,
+            "runtimeAndTestBlobCount": 6,
+            "priorPackageMemberCountPerArm": 554,
+            "vndbSahAllocationUnits": [37, 37],
+            "coverageAndBracketLimitMs": 250,
+            "memoryMedianChangeLimitPercent": 5,
+            "memoryMaximumPairChangeLimitPercent": 10,
+            "sameOriginalSamplerAndMarkerOverlay": true
+        },
+        "diagnosticFiles": [
+            {"path": ".github/scripts/media-memory-coverage-followup.py", "gitBlob": "ee6ddede61e18ed915c09ef258e02bb2ecfbb29f", "sha256": "f02ad9f02f02b2cd8d892985f17b01db10ceb5ed0c3d74e42b227369d2e41053"},
+            {"path": ".github/workflows/media-memory-coverage-followup-4a779.yml", "gitBlob": "24f3d4f04d3a876ab06a8c661478b3ef6bbc1d81", "sha256": "daf67e34de96bc616f000c927f66a6dfaed5590c6be481fa2a97c28ae3286c5f"},
+            {"path": ".github/scripts/media-memory-coverage-4a779/plan.json", "gitBlob": "8c4d123dfe2f033db48594d6fe54a6650fd5a107", "sha256": "3cc00cc007442ca6531fe69a73899b8d5f1e64da507e80eed397510126d68534"},
+            {"path": ".github/scripts/media-memory-coverage-4a779/prior-canonical-receipt.json", "gitBlob": "667c1e3a3bf46f38c506332571b0a864b331b917", "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"},
+            {"path": ".github/scripts/media-memory-coverage-4a779/prior-source-identities.json", "gitBlob": "6cdabb365cfbbb0d8060d421a910136bbc1ff589", "sha256": "22e633a72797c4aefc46fc30608828922add8062f8130a3599c016f8ef068d7f"}
+        ],
+        "attemptPolicy": "Exactly one cohort, no per-observation retries, no workflow rerun attempts, and stop after all four scheduled outcomes regardless of result.",
+        "originalOutcomesRemain": {"primary16MiBCriterion": "FAIL", "overallRegisteredPromotionRule": "FAIL", "originalVndbProcessMemoryScreen": "FAIL"},
+        "originalPacketSha256": "0740c0492bc25dd0e90e4ebaf465c97e81b101f9b5bbde7ffbc31faa395d49b9",
+        "originalFieldsUnchanged": true,
+        "publicationReceipt": {"path": "memory-coverage-followup-publication.json", "bytes": 4837, "sha256": "f7c5bcd0bc5590190c4d7c5e600670ffb96b304163631b3b3b7d39ef0e74c351"},
+        "prospectiveReviewReceipt": {"path": "memory-coverage-followup-independent-review.json", "bytes": 5023, "sha256": "43b931d4d389ba738926c5d45f700b4201e1367c7d005109f94ae8de521281ab"},
+        "result": {
+            "status": "coverage-followup-failed",
+            "memoryPassed": false,
+            "artifact": {"bytes": 34341527, "head": "860d5518820ae080b01c1e1f2ce84d3a345ce336", "id": 15257037141, "name": "media-memory-coverage-followup-vndb-4a779", "runAttempt": 1, "runId": 46124641451, "sha256": "3e5e3a3a49fb093c5a3eef24f7b826912fc3529fba452c31185ba86c84bd36ab"},
+            "packages": {
+                "A": {"allMembersIndependentlyHashed": true, "containerSha256": "34c5404f591cb1959dfeec98d77a1f14c5aea6ef0ae7abbf0fef5354773ba74a", "memberCount": 554, "memberMapCanonicalSha256": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde", "sameOriginalMemberBytes": true, "sourceHead": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2", "sourceTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"},
+                "B": {"allMembersIndependentlyHashed": true, "containerSha256": "7ad9251f034f847df9b20487dde5ed8072c4fd00974a7e39b0ab12899e8f0033", "memberCount": 554, "memberMapCanonicalSha256": "5ea44d4284d312693682c29475b5e04ac2b9bce98d788f954a29a52d12a4348c", "sameOriginalMemberBytes": true, "sourceHead": "931eff9fb194df34b67cb4f5f952f437aa8c084b", "sourceTree": "528343bc931dd3d1aeceb6753a0afbf0e22afd3f"}
+            },
+            "packageDelta": ["js/dictionary/dense-zip-directory.js", "js/dictionary/dense-zip-file-map.js", "js/dictionary/source-zip-media-pack.js", "js/dictionary/source-zip-media-preparation-worker.js"],
+            "browserIdentity": {"executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome", "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e", "version": "153.0.8010.12", "versionOutput": "Google Chrome for Testing 153.0.8010.12"},
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "activation": {
+                "allFourRawReportsValidated": true,
+                "expectedValues": {"step4SourcePackedMediaBytes": 195649882, "step4SourcePackedMediaEarlyPayload": true, "step4SourcePackedMediaEntryCount": 146570, "step4SourcePackedMediaParallel": true}
+            },
+            "semanticRevalidation": [
+                {"name": "A1", "newReference": "A1", "status": "validated"},
+                {"name": "B1", "newReference": "A1", "status": "validated"},
+                {"name": "B2", "newReference": "A1", "status": "validated"},
+                {"name": "A2", "newReference": "A1", "status": "validated"}
+            ],
+            "semanticFailures": [],
+            "memory": {
+                "observationColumnsRef": "ordinaryProtocol.memoryObservationColumns",
+                "sharedObserverProtocolRef": "ordinaryProtocol.memoryObserverProtocol",
+                "observations": [
+                    [164, "A", 0, 1, 6, 59, 1, null, null, 330.034337, "A1", [9, 9], 61, 1, 78.607427, 71.934012, ["covered-import-scan-gap-over-250ms"], false, 61, 7, 1, 58, 60, 7594.982132, [{"epochMs": 1795856822598, "event": "start", "monotonicNs": "85404230388"}, {"epochMs": 1795856830193, "event": "end", "monotonicNs": "92999212520"}]],
+                    [108, "B", 0, 0, 0, 40, 2, 941864, 1164597, 195.346063, "B1", [9, 9], 40, 1, 21.346507, 14.594071, [], true, 40, 0, 0, 40, 40, 6005.295924, [{"epochMs": 1795856848727, "event": "start", "monotonicNs": "111533312428"}, {"epochMs": 1795856854732, "event": "end", "monotonicNs": "117538608352"}]],
+                    [110, "B", 0, 0, 0, 41, 3, 937656, 1157318, 191.799526, "B2", [9, 9], 43, 2, 82.898418, 68.567683, [], true, 43, 0, 0, 41, 43, 6119.766624, [{"epochMs": 1795856872340, "event": "start", "monotonicNs": "135146060899"}, {"epochMs": 1795856878460, "event": "end", "monotonicNs": "141265827523"}]],
+                    [105, "A", 0, 0, 0, 38, 4, 998824, 1227932, 210.688681, "A2", [9, 9], 40, 2, 63.529155, 27.569427, [], true, 40, 0, 0, 38, 40, 5998.213289, [{"epochMs": 1795856895845, "event": "start", "monotonicNs": "158651281302"}, {"epochMs": 1795856901843, "event": "end", "monotonicNs": "164649494591"}]]
+                ],
+                "pairs": [
+                    {
+                        "maxSampledPrivateKiB": {"baseline": null, "candidate": 941864, "changePercent": null},
+                        "maxSampledPssKiB": {"baseline": null, "candidate": 1164597, "changePercent": null},
+                        "pair": 1,
+                        "qualified": false
+                    },
+                    {
+                        "maxSampledPrivateKiB": {"baseline": 998824, "candidate": 937656, "changePercent": -6.124001826147552},
+                        "maxSampledPssKiB": {"baseline": 1227932, "candidate": 1157318, "changePercent": -5.750644172478603},
+                        "pair": 2,
+                        "qualified": true
+                    }
+                ],
+                "metrics": {
+                    "maxSampledPrivateKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null},
+                    "maxSampledPssKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null}
+                },
+                "everyObservationQualified": false,
+                "passesProspectiveMemoryScreen": false,
+                "rawScanAudit": {
+                    "everyObservationQualified": false,
+                    "metrics": {
+                        "maxSampledPrivateKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null},
+                        "maxSampledPssKiB": {"maximumPairedChangePercent": null, "medianPairedChangePercent": null}
+                    },
+                    "observations": 4,
+                    "passesProspectiveMemoryScreen": false,
+                    "rawScanCount": 487,
+                    "schemaVersion": 1
+                },
+                "rawScanAuditFailure": null
+            },
+            "provenanceAudit": {
+                "status": "audited",
+                "sourceBindingChecksPassed": true,
+                "exactScheduleVerified": true,
+                "everyNestedPackageMemberVerified": true,
+                "errors": []
+            },
+            "producerFailure": {"message": "The single memory-coverage follow-up failed; no repeat is authorized", "retried": false, "type": "RuntimeError"},
+            "retainedEvidence": [
+                {"path": "memory-coverage-followup-46124641451/independent-review.json", "bytes": 46028, "sha256": "fbb8793aeecba51a439efb1c0477569cced5866271c64194dc0e8e7cc07a860e"},
+                {"path": "memory-coverage-followup-46124641451/artifact-upstream-metadata.json", "bytes": 778, "sha256": "07188251ecd200101d86653bd57ac7e872949b8113d37ef6487d0961b23ee45e"},
+                {"path": "memory-coverage-followup-46124641451/artifact-entry-manifest.json", "bytes": 29010, "sha256": "c6a9c6c75b151af6a8ea4e7ec153260cbf93edcad4f89455ce8314f8c6775c3b"},
+                {"path": "memory-coverage-followup-46124641451/job-log-receipt.json", "bytes": 292, "sha256": "0a9e1b9c4ca8336e5106eaf372e71da78cdb319b283ce1af9c7159213502ba0e"}
+            ],
+            "interpretation": "A1 exceeds the unchanged 250 ms covered-scan-gap limit. Pair 1 and aggregate metrics remain null; the valid second pair does not qualify the four-observation screen. This coverage failure does not establish a memory regression."
+        }
+    },
+    "reviewDecision": {
+        "decision": "CLOSE_WITHOUT_PR",
+        "recordedAtUtc": "2026-11-28 09:11:23 UTC",
+        "rationale": "The 14.223 MiB retained-worker reduction is accepted as a real resource saving, but the required prospective whole-process memory screen remains unqualified after the single predefined follow-up. No engineering exception is granted and no product PR is proposed. A coverage failure is not evidence of a memory regression.",
+        "acceptedMeasuredGain": {"scope": "Actual VNDB source-media extension worker; forced-GC heap plus reported backing storage at fixed checkpoints", "checkpoint": "catalogReady", "medianReductionBytes": 14913942, "medianReductionMiB": 14.223043441772461, "medianReductionPercent": 53.700525758781225, "minimumReductionAtMeasuredActiveCheckpointsBytes": 14767618, "continuousMeasurementClaim": false},
+        "unmetPrerequisite": {
+            "scope": "Separate four-observation VNDB process-memory coverage follow-up",
+            "status": "coverage-followup-failed",
+            "failedObservation": "A1",
+            "maximumCoveredSampleGapMs": 330.034337,
+            "maximumAllowedGapMs": 250,
+            "qualifiedObservationCount": 3,
+            "qualifiedPairCount": 1,
+            "aggregateMetrics": null,
+            "measuredMemoryRegressionEstablished": false
+        },
+        "originalAdministrativeStatus": "HOLD_FAILED_VNDB_PROCESS_MEMORY_GATE",
+        "originalPacketBytes": 59324,
+        "originalPacketSha256": "0740c0492bc25dd0e90e4ebaf465c97e81b101f9b5bbde7ffbc31faa395d49b9",
+        "originalMeasurementsAndPerCohortOutcomesUnchanged": true,
+        "originalPrimary16MiBCriterion": "FAIL",
+        "originalOverallRegisteredPromotionRule": "FAIL",
+        "originalVndbProcessMemoryScreen": "FAIL",
+        "followupResultRef": "memoryOnlyCoverageFollowup.result",
+        "followupIndependentAuditSha256": "fbb8793aeecba51a439efb1c0477569cced5866271c64194dc0e8e7cc07a860e",
+        "productPr": "WITHHELD",
+        "additionalCohorts": "NONE"
+    }
+}
