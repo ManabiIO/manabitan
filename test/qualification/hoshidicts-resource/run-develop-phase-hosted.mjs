@@ -17,6 +17,8 @@ const harnessCommit = 'a300da36d00df8e353c5679b1528b50a1299b75f'
 const product = path.join(process.env.RUNNER_TEMP, 'manabitan-develop-a300da36')
 const extensionDir = path.join(process.env.RUNNER_TEMP, 'cross-engine/manabitan-develop-extension')
 const runner = path.join(harness, 'test/qualification/hoshidicts-jmdict/run-glossary.mjs')
+// Start with one stock control to validate in-worker instrumentation before spending a full cohort.
+const workerCountScreenMode = 'smoke'
 // JMdict was already imported once in run 46143842404. Its complete snapshot
 // is retained despite a harness title-identity assertion bug, so do not repeat it.
 const datasets = {
@@ -78,6 +80,7 @@ try {
     const workerCountScreen = {
         schemaVersion: 1,
         mode: 'hosted benchmark-only overlay; four stock versus two Zstd compression workers; parser pool and all other source bytes held constant',
+        runMode: workerCountScreenMode,
         productCommit: harnessCommit,
         archive: 'JMdict_2026-11-22.zip',
         archiveSha256: '3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f',
@@ -112,21 +115,37 @@ try {
         workerInitializationAnchor,
         `${workerInitializationAnchor.slice(0, workerInitializationAnchor.indexOf('\n            await Promise.all(readyPromises);'))}\n            globalThis.__manabitanQualificationZstdWorkersCreated = workers.length;\n            await Promise.all(readyPromises);\n            globalThis.__manabitanQualificationZstdWorkersReady = workers.length;`,
     )
-    const importerRelativePath = 'ext/js/dictionary/dictionary-importer.js'
-    const importerPath = path.resolve(product, importerRelativePath)
-    const importerStat = await lstat(importerPath)
-    if (importerStat.isSymbolicLink() || await realpath(importerPath) !== importerPath) {
-        throw new Error('Dictionary importer source is not a regular file in the detached source worktree')
+    const offscreenWorkerRelativePath = 'ext/js/background/offscreen-dictionary-worker.js'
+    const offscreenWorkerPath = path.resolve(product, offscreenWorkerRelativePath)
+    const offscreenWorkerStat = await lstat(offscreenWorkerPath)
+    if (offscreenWorkerStat.isSymbolicLink() || await realpath(offscreenWorkerPath) !== offscreenWorkerPath) {
+        throw new Error('Offscreen dictionary worker source is not a regular file in the detached source worktree')
     }
-    const importerSource = await readFile(importerPath)
-    const importerSourceText = importerSource.toString('utf8')
-    const importerDebugAnchor = '            if (bulkFinalizationDetails !== null) {\n                Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);\n            }\n            recordPhaseTiming(\'bulk-finalization\', tBulkFinalizationStart, bulkFinalizationPhaseDetails);'
-    if ((importerSourceText.split(importerDebugAnchor).length - 1) !== 1) {
-        throw new Error('Frozen importer finalization diagnostics anchor is absent or ambiguous')
+    const offscreenWorkerSource = await readFile(offscreenWorkerPath)
+    const offscreenWorkerSourceText = offscreenWorkerSource.toString('utf8')
+    const offscreenDebugAnchor = '                        termRecordShardFileNames: (\n                            typeof getShardFileNames === \'function\' ?\n                                getShardFileNames.call(termRecordStore) :\n                                []\n                        ),'
+    if ((offscreenWorkerSourceText.split(offscreenDebugAnchor).length - 1) !== 1) {
+        throw new Error('Frozen offscreen storage-debug response anchor is absent or ambiguous')
     }
-    const instrumentedImporterSourceText = importerSourceText.replace(
-        importerDebugAnchor,
-        `            if (bulkFinalizationDetails !== null) {\n                Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);\n            }\n            Object.assign(bulkFinalizationPhaseDetails, {\n                qualificationZstdWorkersCreated: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersCreated') ?? null,\n                qualificationZstdWorkersReady: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersReady') ?? null,\n            });\n            recordPhaseTiming('bulk-finalization', tBulkFinalizationStart, bulkFinalizationPhaseDetails);`,
+    const instrumentedOffscreenWorkerSourceText = offscreenWorkerSourceText.replace(
+        offscreenDebugAnchor,
+        `${offscreenDebugAnchor}\n                        qualificationZstdWorkersCreated: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersCreated') ?? null,\n                        qualificationZstdWorkersReady: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersReady') ?? null,`,
+    )
+    const backendRelativePath = 'ext/js/background/backend.js'
+    const backendPath = path.resolve(product, backendRelativePath)
+    const backendStat = await lstat(backendPath)
+    if (backendStat.isSymbolicLink() || await realpath(backendPath) !== backendPath) {
+        throw new Error('Background backend source is not a regular file in the detached source worktree')
+    }
+    const backendSource = await readFile(backendPath)
+    const backendSourceText = backendSource.toString('utf8')
+    const backendDebugAnchor = '            offscreenTermRecordShardFileNames: ('
+    if ((backendSourceText.split(backendDebugAnchor).length - 1) !== 1) {
+        throw new Error('Frozen background storage-debug response anchor is absent or ambiguous')
+    }
+    const instrumentedBackendSourceText = backendSourceText.replace(
+        backendDebugAnchor,
+        `            offscreenQualificationZstdWorkersCreated: offscreenDictionaryRowsResult?.qualificationZstdWorkersCreated ?? null,\n            offscreenQualificationZstdWorkersReady: offscreenDictionaryRowsResult?.qualificationZstdWorkersReady ?? null,\n${backendDebugAnchor}`,
     )
     const candidateSourceText = instrumentedControlSourceText.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;')
     if ((instrumentedControlSourceText.match(/const COMPRESSION_WORKER_COUNT = 4;/gu) ?? []).length !== 1 ||
@@ -135,7 +154,8 @@ try {
     }
     try {
         await writeFile(overlayPath, instrumentedControlSourceText)
-        await writeFile(importerPath, instrumentedImporterSourceText)
+        await writeFile(offscreenWorkerPath, instrumentedOffscreenWorkerSourceText)
+        await writeFile(backendPath, instrumentedBackendSourceText)
         await run(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-dev'], {cwd: product})
         const controlPackagePath = path.join(product, 'builds/manabitan-chrome-dev.zip')
         workerCountScreen.controlPackageSha256 = await sha256File(controlPackagePath)
@@ -145,13 +165,14 @@ try {
         workerCountScreen.sharedDiagnosticInstrumentation = {
             changes: [
                 {path: overlayRelativePath, sourceSha256: createHash('sha256').update(controlSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'), anchorSha256: createHash('sha256').update(workerInitializationAnchor).digest('hex')},
-                {path: importerRelativePath, sourceSha256: createHash('sha256').update(importerSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedImporterSourceText).digest('hex'), anchorSha256: createHash('sha256').update(importerDebugAnchor).digest('hex')},
+                {path: offscreenWorkerRelativePath, sourceSha256: createHash('sha256').update(offscreenWorkerSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedOffscreenWorkerSourceText).digest('hex'), anchorSha256: createHash('sha256').update(offscreenDebugAnchor).digest('hex')},
+                {path: backendRelativePath, sourceSha256: createHash('sha256').update(backendSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedBackendSourceText).digest('hex'), anchorSha256: createHash('sha256').update(backendDebugAnchor).digest('hex')},
             ],
-            purpose: 'Record constructed and ready Zstd worker counts in the offscreen dictionary worker global scope in both packages',
+            purpose: 'Read constructed and ready Zstd worker counts through debugDictionaryStorageState from the offscreen dictionary worker in both packages',
         }
         await writeFile(overlayPath, candidateSourceText)
         const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
-        const expectedChangedPaths = [importerRelativePath, overlayRelativePath].sort().join('\n')
+        const expectedChangedPaths = [offscreenWorkerRelativePath, backendRelativePath, overlayRelativePath].sort().join('\n')
         if (changedFiles.trim() !== expectedChangedPaths) throw new Error(`Unexpected worker-count overlay paths: ${changedFiles.trim()}`)
         workerCountScreen.overlayOnly = {
             changedPaths: [overlayRelativePath],
@@ -167,7 +188,7 @@ try {
         await mkdir(candidateExtensionDir, {recursive: true})
         await run('unzip', ['-q', candidatePackagePath, '-d', candidateExtensionDir])
 
-        const schedule = [
+        const cohortSchedule = [
             {pair: 1, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 2}, kind: 'treatment'},
             {pair: 2, first: {arm: 'candidate', workers: 2}, second: {arm: 'control', workers: 4}, kind: 'treatment'},
             {pair: 3, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 2}, kind: 'treatment'},
@@ -175,9 +196,12 @@ try {
             {pair: 5, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 4}, kind: 'same-code-control'},
             {pair: 6, first: {arm: 'candidate', workers: 4}, second: {arm: 'control', workers: 4}, kind: 'same-code-control'},
         ]
+        const schedule = workerCountScreenMode === 'smoke' ? [
+            {pair: 1, first: {arm: 'control', workers: 4}, kind: 'stock-control-smoke'},
+        ] : cohortSchedule
         for (const item of schedule) {
             const pairReceipts = []
-            for (const arm of [item.first, item.second]) {
+            for (const arm of [item.first, ...(item.second ? [item.second] : [])]) {
                 const isCandidatePackage = item.kind === 'treatment' && arm.workers === 2
                 const packageDir = isCandidatePackage ? candidateExtensionDir : controlExtensionDir
                 const expectedPackageSha256 = isCandidatePackage ? workerCountScreen.candidatePackageSha256 : workerCountScreen.controlPackageSha256
@@ -210,6 +234,17 @@ try {
                 }
             }
             const [first, second] = pairReceipts
+            if (second === undefined) {
+                workerCountScreen.pairs.push({pair: item.pair, kind: item.kind, order: [{arm: first.arm, workerCount: first.workerCount}],
+                    completionMs: [{arm: first.arm, workerCount: first.workerCount, value: first.receipt.completionMs}],
+                    lookupStageMs: [{arm: first.arm, workerCount: first.workerCount, value: first.receipt.lookupStageMs}],
+                    totalMs: [{arm: first.arm, workerCount: first.workerCount, value: first.receipt.totalMs}],
+                    resultSha256: first.receipt.resultSha256, resultCount: first.receipt.resultCount,
+                    parserWorkerCounts: first.receipt.parserWorkerCounts, hardwareConcurrency: first.receipt.hardwareConcurrency,
+                    warmRestartPasses: first.receipt.warm?.equal === true && first.receipt.afterRestart?.equal === true,
+                    samePackageSha256: true})
+                continue
+            }
             const equalPairSemantics = first.receipt.resultSha256 === second.receipt.resultSha256 &&
                 first.receipt.resultCount === second.receipt.resultCount &&
                 JSON.stringify(first.receipt.orderedHeadwordPairs) === JSON.stringify(second.receipt.orderedHeadwordPairs) &&
@@ -227,7 +262,8 @@ try {
         }
     } finally {
         await writeFile(overlayPath, controlSource)
-        await writeFile(importerPath, importerSource)
+        await writeFile(offscreenWorkerPath, offscreenWorkerSource)
+        await writeFile(backendPath, backendSource)
         const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
         if (changedFiles.trim() !== '') throw new Error(`Temporary worker-count overlay was not restored: ${changedFiles.trim()}`)
     }
@@ -237,22 +273,30 @@ try {
         return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
     }
     const armTime = (pair, workers) => pair.totalMs.find(({workerCount}) => workerCount === workers)?.value
-    const treatmentPairs = workerCountScreen.pairs.filter(({kind}) => kind === 'treatment')
-    const sameCodePairs = workerCountScreen.pairs.filter(({kind}) => kind === 'same-code-control')
-    const pairedDeltas = treatmentPairs.map((pair) => armTime(pair, 2) - armTime(pair, 4))
-    const sameCodeDeltas = sameCodePairs.map((pair) => pair.totalMs[1].value - pair.totalMs[0].value)
-    workerCountScreen.analysis = {
-        endpoint: 'import plus first ordinary hydrated termsFind response',
-        treatmentPairCount: treatmentPairs.length,
-        pairedTotalMsDeltasTwoMinusFour: pairedDeltas,
-        medianPairedTotalMsDeltaTwoMinusFour: median(pairedDeltas),
-        treatmentWinsForTwoWorkers: pairedDeltas.filter((delta) => delta < 0).length,
-        treatmentTies: pairedDeltas.filter((delta) => delta === 0).length,
-        sameCodePairCount: sameCodePairs.length,
-        sameCodeTotalMsDeltasCandidateMinusControl: sameCodeDeltas,
-        medianAbsoluteSameCodeDeltaMs: median(sameCodeDeltas.map(Math.abs)),
-        allTreatmentSemanticParityPassed: treatmentPairs.every(({resultSha256}) => resultSha256 !== null),
-        allSameCodePackageDigestsMatched: sameCodePairs.every(({samePackageSha256}) => samePackageSha256),
+    if (workerCountScreenMode === 'smoke') {
+        workerCountScreen.analysis = {
+            endpoint: 'stock four-worker import plus first ordinary hydrated termsFind response',
+            smokeOnly: true,
+            workerAttestationPassed: workerCountScreen.pairs.length === 1 && workerCountScreen.pairs[0].totalMs[0].workerCount === 4,
+        }
+    } else {
+        const treatmentPairs = workerCountScreen.pairs.filter(({kind}) => kind === 'treatment')
+        const sameCodePairs = workerCountScreen.pairs.filter(({kind}) => kind === 'same-code-control')
+        const pairedDeltas = treatmentPairs.map((pair) => armTime(pair, 2) - armTime(pair, 4))
+        const sameCodeDeltas = sameCodePairs.map((pair) => pair.totalMs[1].value - pair.totalMs[0].value)
+        workerCountScreen.analysis = {
+            endpoint: 'import plus first ordinary hydrated termsFind response',
+            treatmentPairCount: treatmentPairs.length,
+            pairedTotalMsDeltasTwoMinusFour: pairedDeltas,
+            medianPairedTotalMsDeltaTwoMinusFour: median(pairedDeltas),
+            treatmentWinsForTwoWorkers: pairedDeltas.filter((delta) => delta < 0).length,
+            treatmentTies: pairedDeltas.filter((delta) => delta === 0).length,
+            sameCodePairCount: sameCodePairs.length,
+            sameCodeTotalMsDeltasCandidateMinusControl: sameCodeDeltas,
+            medianAbsoluteSameCodeDeltaMs: median(sameCodeDeltas.map(Math.abs)),
+            allTreatmentSemanticParityPassed: treatmentPairs.every(({resultSha256}) => resultSha256 !== null),
+            allSameCodePackageDigestsMatched: sameCodePairs.every(({samePackageSha256}) => samePackageSha256),
+        }
     }
     await writeFile(path.join(evidence, 'jmdict-worker-count-summary.json'), `${JSON.stringify(workerCountScreen, null, 2)}\n`, {flag: 'wx'})
     const summary = {

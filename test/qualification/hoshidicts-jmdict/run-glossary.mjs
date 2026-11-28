@@ -285,6 +285,8 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
         if (result.responseReceivedAt < result.startedAt || result.responseReceivedAt < result.importCompletedAt) {
             throw new Error('Non-monotonic Manabitan benchmark clock')
         }
+        const compressionWorkerDebugState = process.env.BENCH_EXPECTED_ZSTD_WORKERS ?
+            await send(page, 'debugDictionaryStorageState', undefined) : null
         const info = await send(page, 'getDictionaryInfo', undefined)
         const counts = await send(page, 'getDictionaryCounts', {dictionaryNames: info.map(({title}) => title), getTotal: false})
         const dictionaryCounts = counts.counts?.find(({name, title}) => name === spec.title || title === spec.title) ?? counts.counts?.[0] ?? null
@@ -339,16 +341,13 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             }
         }
         if (process.env.BENCH_EXPECTED_ZSTD_WORKERS) {
-            const actualCreatedCount = findNumericProperties(
-                record.importDebugSnapshot ?? {}, new Set(['qualificationZstdWorkersCreated']),
-            )[0] ?? null
-            const actualReadyCount = findNumericProperties(
-                record.importDebugSnapshot ?? {}, new Set(['qualificationZstdWorkersReady']),
-            )[0] ?? null
+            const actualCreatedCount = compressionWorkerDebugState?.offscreenQualificationZstdWorkersCreated ?? null
+            const actualReadyCount = compressionWorkerDebugState?.offscreenQualificationZstdWorkersReady ?? null
             record.compressionWorkerAttestation = {
                 expected: Number(process.env.BENCH_EXPECTED_ZSTD_WORKERS),
                 actualCreatedCount,
                 actualReadyCount,
+                source: 'debugDictionaryStorageState.offscreen worker response',
             }
             const foundParserWorkerCounts = [...new Set(findNumericProperties(
                 record.importDebugSnapshot ?? {},
