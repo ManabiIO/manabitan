@@ -1,0 +1,23 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "browserVersion": "153.0.8010.12",
+  "comparativePerformanceClaim": false,
+  "diagnosticSourceSha256": {
+    "ext/js/dictionary/dictionary-database.js": "a0b536e17cd9af85211a638d1c77f9aa7371517be52553d3d1d63171af467a98",
+    "ext/js/dictionary/term-record-import-index-writer.js": "4354f46476f0c577514b876bbc5a350098801d536f68a7d98e52e728b5250543",
+    "ext/js/dictionary/term-record-opfs-store.js": "ac171cb785af4ec33e5080d720dda1d430bfefcdaaa6e7e0f3d6a22a099d4387"
+  },
+  "dictionary": "jmdict",
+  "expectedPackageChanges": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-import-index-writer.js",
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "hosts": 2,
+  "memoryObserver": false,
+  "nodeVersion": "v22.22.0",
+  "observationsPerHost": 6,
+  "purpose": "Research-only current JMdict finalization operation attribution",
+  "trace": false
+}

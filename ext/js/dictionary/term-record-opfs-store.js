@@ -803,6 +803,35 @@ class DenseIdRecordStore {
  */
 
 /**
+ * Research-only operation attribution. Overlapping fields are not additive.
+ * @typedef {object} TermRecordFinalizationDiagnostics
+ * @property {string} fileName
+ * @property {number} regionStartedAtMs
+ * @property {number} descriptorBytes
+ * @property {number} descriptorAwaitQueuedWritesMs
+ * @property {number} descriptorCloseStartOffsetMs
+ * @property {number} descriptorCloseMs
+ * @property {number} descriptorFinishOffsetMs
+ * @property {number} lookupPendingBytesAtStart
+ * @property {number} lookupQueuedBytesAtStart
+ * @property {string} lookupWriterKind
+ * @property {number} lookupPendingFlushMs
+ * @property {number} lookupHeaderBuildMs
+ * @property {number} lookupHeaderSeekMs
+ * @property {number} lookupHeaderWriteMs
+ * @property {number} lookupCloseStartOffsetMs
+ * @property {number} lookupCloseMs
+ * @property {number} lookupFinishOffsetMs
+ * @property {number} lookupSyncQueueAwaitMs
+ * @property {number} lookupSyncFlushMs
+ * @property {number} lookupSyncCloseMs
+ * @property {number} lookupSyncFlushCount
+ * @property {number} lookupSyncCloseCount
+ * @property {number} lookupUnflushedBytesAtClose
+ * @property {number} joinElapsedMs
+ */
+
+/**
  * @typedef {object} TermRecordEndImportSessionMetrics
  * @property {number} flushPendingWritesMs
  * @property {number} awaitQueuedWritesMs
@@ -825,6 +854,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {TermRecordFinalizationDiagnostics[]} finalizationDiagnostics
  */
 
 /**
@@ -954,6 +984,8 @@ export class TermRecordOpfsStore {
         this._rawTermBankSourceBytes = null;
         /** @type {TermRecordEndImportSessionMetrics|null} */
         this._lastEndImportSessionMetrics = null;
+        /** @type {TermRecordFinalizationDiagnostics[]|null} */
+        this._finalizationDiagnostics = null
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
@@ -1510,6 +1542,7 @@ export class TermRecordOpfsStore {
         await this._awaitQueuedWrites();
         awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
         const tCloseWritableStart = safePerformance.now();
+        this._finalizationDiagnostics = []
         await this._closeAllWritables();
         for (const dictionaryName of this._importSessionDictionaryNames) {
             this._setDictionaryHealth(dictionaryName, 'available');
@@ -1529,7 +1562,9 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            finalizationDiagnostics: this._finalizationDiagnostics,
         };
+        this._finalizationDiagnostics = null
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
             this._indexDirty = false;
@@ -6281,9 +6316,10 @@ view.chunks :
 
     /**
      * @param {TermRecordShardState} state
+     * @param {TermRecordFinalizationDiagnostics|null} [diagnostics=null]
      * @returns {Promise<void>}
      */
-    async _flushLookupIndexFile(state) {
+    async _flushLookupIndexFile(state, diagnostics = null) {
         if (
             (
                 state.pendingLookupIndexChunks.length === 0 &&
@@ -6308,9 +6344,18 @@ view.chunks :
         /** @type {Error|null} */
         let operationError = null;
         try {
+            const pendingStartedAt = safePerformance.now()
             await this._flushPendingLookupIndexChunks(state, true);
+            if (diagnostics !== null) {
+                diagnostics.lookupPendingFlushMs = safePerformance.now() - pendingStartedAt
+            }
             const writable = state.lookupIndexWritable;
             if (writable !== null) {
+                if (diagnostics !== null) {
+                    diagnostics.lookupWriterKind = writable instanceof SyncImportIndexWriter ? 'local-sync-access-handle' :
+                        writable instanceof WorkerImportIndexWriter ? 'worker-sync-access-handle' : 'async-writable-stream'
+                }
+                const headerStartedAt = safePerformance.now()
                 const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
                 header.set(this._textEncoder.encode(LOOKUP_INDEX_MAGIC_TEXT), 0);
                 const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
@@ -6318,8 +6363,19 @@ view.chunks :
                 view.setUint32(16, state.lookupIndexChunkCount, true);
                 view.setUint32(20, state.lookupIndexRecordCount, true);
                 header.set(state.generationId, 24);
+                if (diagnostics !== null) {
+                    diagnostics.lookupHeaderBuildMs = safePerformance.now() - headerStartedAt
+                }
+                const seekStartedAt = safePerformance.now()
                 await writable.seek(0);
+                if (diagnostics !== null) {
+                    diagnostics.lookupHeaderSeekMs = safePerformance.now() - seekStartedAt
+                }
+                const writeStartedAt = safePerformance.now()
                 await writable.write(header);
+                if (diagnostics !== null) {
+                    diagnostics.lookupHeaderWriteMs = safePerformance.now() - writeStartedAt
+                }
             }
         } catch (error) {
             operationError = error instanceof Error ? error : new Error(String(error));
@@ -6328,11 +6384,27 @@ view.chunks :
         let closeError = null;
         const writable = state.lookupIndexWritable;
         if (writable !== null) {
+            const closeStartedAt = safePerformance.now()
+            if (diagnostics !== null) {
+                diagnostics.lookupCloseStartOffsetMs = closeStartedAt - diagnostics.regionStartedAtMs
+            }
             try {
                 await writable.close();
             } catch (error) {
                 closeError = error instanceof Error ? error : new Error(String(error));
             } finally {
+                if (diagnostics !== null) {
+                    diagnostics.lookupCloseMs = safePerformance.now() - closeStartedAt
+                    if (writable instanceof SyncImportIndexWriter) {
+                        const inner = writable.getFinalizationDiagnostics()
+                        diagnostics.lookupSyncQueueAwaitMs = inner.queueAwaitMs
+                        diagnostics.lookupSyncFlushMs = inner.flushMs
+                        diagnostics.lookupSyncCloseMs = inner.closeMs
+                        diagnostics.lookupSyncFlushCount = inner.flushCount
+                        diagnostics.lookupSyncCloseCount = inner.closeCount
+                        diagnostics.lookupUnflushedBytesAtClose = inner.unflushedBytes
+                    }
+                }
                 state.lookupIndexWritable = null;
             }
         }
@@ -6350,6 +6422,9 @@ view.chunks :
         state.pendingLookupIndexRecordCount = 0;
         state.lookupIndexChunkCount = 0;
         state.lookupIndexRecordCount = 0;
+        if (diagnostics !== null) {
+            diagnostics.lookupFinishOffsetMs = safePerformance.now() - diagnostics.regionStartedAtMs
+        }
     }
 
     /**
@@ -6525,10 +6600,22 @@ view.chunks :
         /** @type {Error[]} */
         const errors = [];
         for (const state of this._shardStateByFileName.values()) {
+            const diagnostics = this._finalizationDiagnostics === null ? null : {
+                fileName: state.fileName, regionStartedAtMs: safePerformance.now(), descriptorBytes: state.fileLength,
+                descriptorAwaitQueuedWritesMs: 0, descriptorCloseStartOffsetMs: 0, descriptorCloseMs: 0,
+                descriptorFinishOffsetMs: 0, lookupPendingBytesAtStart: state.pendingLookupIndexBytes,
+                lookupQueuedBytesAtStart: state.lookupIndexQueuedBytes, lookupWriterKind: 'none',
+                lookupPendingFlushMs: 0, lookupHeaderBuildMs: 0, lookupHeaderSeekMs: 0, lookupHeaderWriteMs: 0,
+                lookupCloseStartOffsetMs: 0, lookupCloseMs: 0, lookupFinishOffsetMs: 0,
+                lookupSyncQueueAwaitMs: 0, lookupSyncFlushMs: 0, lookupSyncCloseMs: 0,
+                lookupSyncFlushCount: 0, lookupSyncCloseCount: 0, lookupUnflushedBytesAtClose: 0, joinElapsedMs: 0,
+            }
+            if (diagnostics !== null) { this._finalizationDiagnostics?.push(diagnostics) }
             const results = await Promise.allSettled([
-                this._finalizeShardWritable(state),
-                this._flushLookupIndexFile(state),
+                this._finalizeShardWritable(state, diagnostics),
+                this._flushLookupIndexFile(state, diagnostics),
             ]);
+            if (diagnostics !== null) { diagnostics.joinElapsedMs = safePerformance.now() - diagnostics.regionStartedAtMs }
             for (const result of results) {
                 if (result.status === 'fulfilled') { continue; }
                 errors.push(
@@ -6549,20 +6636,28 @@ view.chunks :
 
     /**
      * @param {TermRecordShardState} state
+     * @param {TermRecordFinalizationDiagnostics|null} [diagnostics=null]
      * @returns {Promise<void>}
      */
-    async _finalizeShardWritable(state) {
+    async _finalizeShardWritable(state, diagnostics = null) {
         /** @type {Error[]} */
         const errors = [];
+        const awaitStartedAt = safePerformance.now()
         try {
             await this._awaitQueuedWritesForShard(state);
         } catch (error) {
             errors.push(error instanceof Error ? error : new Error(String(error)));
         }
+        if (diagnostics !== null) {
+            diagnostics.descriptorAwaitQueuedWritesMs = safePerformance.now() - awaitStartedAt
+        }
         try {
-            await this._closeShardWritable(state);
+            await this._closeShardWritable(state, diagnostics);
         } catch (error) {
             errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+        if (diagnostics !== null) {
+            diagnostics.descriptorFinishOffsetMs = safePerformance.now() - diagnostics.regionStartedAtMs
         }
         if (errors.length === 1) {
             throw errors[0];
@@ -6577,11 +6672,16 @@ view.chunks :
 
     /**
      * @param {TermRecordShardState} state
+     * @param {TermRecordFinalizationDiagnostics|null} [diagnostics=null]
      * @returns {Promise<void>}
      */
-    async _closeShardWritable(state) {
+    async _closeShardWritable(state, diagnostics = null) {
         if (state.writable === null) {
             return;
+        }
+        const closeStartedAt = safePerformance.now()
+        if (diagnostics !== null) {
+            diagnostics.descriptorCloseStartOffsetMs = closeStartedAt - diagnostics.regionStartedAtMs
         }
         try {
             await state.writable.close();
@@ -6590,6 +6690,7 @@ view.chunks :
                 throw error;
             }
         } finally {
+            if (diagnostics !== null) { diagnostics.descriptorCloseMs = safePerformance.now() - closeStartedAt }
             state.writable = null;
         }
     }

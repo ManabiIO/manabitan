@@ -1520,6 +1520,8 @@ export class DictionaryDatabase {
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
             let termRecordLookupIndexWorkerFileCount = 0;
+            /** @type {import('./term-record-opfs-store.js').TermRecordFinalizationDiagnostics[]} */
+            let termRecordFinalizationDiagnostics = []
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1591,6 +1593,7 @@ export class DictionaryDatabase {
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
                             termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
+                            termRecordFinalizationDiagnostics = metrics.finalizationDiagnostics
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1768,6 +1771,7 @@ export class DictionaryDatabase {
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termRecordLookupIndexWorkerFileCount,
+                    termRecordFinalizationDiagnostics,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,

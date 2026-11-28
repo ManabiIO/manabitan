@@ -91,6 +91,11 @@ export class SyncImportIndexWriter {
         this._yieldChannel = null;
         /** @type {(() => void)|null} */
         this._pendingYield = null;
+        // Research instrumentation; this branch is not a runtime candidate.
+        this._finalizationDiagnostics = {
+            queueAwaitMs: 0, flushMs: 0, closeMs: 0,
+            flushCount: 0, closeCount: 0, unflushedBytes: 0,
+        }
     }
 
     /** @param {number} offset */
@@ -187,6 +192,11 @@ export class SyncImportIndexWriter {
         await this._finish(true);
     }
 
+    /** @returns {{queueAwaitMs: number, flushMs: number, closeMs: number, flushCount: number, closeCount: number, unflushedBytes: number}} */
+    getFinalizationDiagnostics() {
+        return {...this._finalizationDiagnostics}
+    }
+
     /**
      * @param {boolean} abort
      * @returns {Promise<void>}
@@ -196,20 +206,31 @@ export class SyncImportIndexWriter {
         this._closing = true;
         this._aborted = abort;
         this._closePromise = (async () => {
+            const queueStartedAt = safePerformance.now()
             await this._queue;
+            this._finalizationDiagnostics.queueAwaitMs = safePerformance.now() - queueStartedAt
+            this._finalizationDiagnostics.unflushedBytes = this._unflushedBytes
             this._closeYieldChannel();
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
+                const flushStartedAt = safePerformance.now()
+                ++this._finalizationDiagnostics.flushCount
                 try {
                     this._access.flush();
                 } catch (error) {
                     errors.push(toError(error));
+                } finally {
+                    this._finalizationDiagnostics.flushMs = safePerformance.now() - flushStartedAt
                 }
             }
+            const closeStartedAt = safePerformance.now()
+            ++this._finalizationDiagnostics.closeCount
             try {
                 this._access.close();
             } catch (error) {
                 errors.push(toError(error));
+            } finally {
+                this._finalizationDiagnostics.closeMs = safePerformance.now() - closeStartedAt
             }
             if (errors.length > 0) {
                 this._failure = errors.length === 1 ?
