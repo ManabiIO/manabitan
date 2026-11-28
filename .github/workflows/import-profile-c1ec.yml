@@ -1,0 +1,143 @@
+name: Import critical path profile c1ec
+
+on:
+  push:
+    branches:
+      - research/import-profile-20261127-c1ec
+    paths:
+      - .github/workflows/import-profile-c1ec.yml
+      - ext/js/dictionary/term-record-opfs-store.js
+      - ext/js/dictionary/term-record-import-index-writer.js
+      - ext/js/dictionary/dictionary-database.js
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-profile-c1ec-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    if: github.ref == 'refs/heads/research/import-profile-20261127-c1ec'
+    name: Baseline and finalization diagnostics (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PROFILE_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PROFILE_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare exact baseline and diagnostic packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/profile-c1ec"
+          baseline="$RUNNER_TEMP/profile-baseline"
+          mkdir -p "$evidence"
+          node dev/perf/prepare-dictionaries.js "$PROFILE_DICTIONARY" > "$evidence/fixtures.log" 2>&1
+          git worktree add --detach "$baseline" "$PROFILE_BASELINE"
+          cmp package-lock.json "$baseline/package-lock.json"
+          cmp test/perf/dictionaries.lock.json "$baseline/test/perf/dictionaries.lock.json"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          mkdir -p "$baseline/builds"
+          ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$baseline/builds/e2e-dictionary-cache"
+          (
+            cd "$baseline"
+            npm run build:libs
+            npm run license-report:html
+            node dev/bin/build.js chrome
+          ) > "$evidence/baseline-build.log" 2>&1
+          node dev/bin/build.js chrome > "$evidence/diagnostic-build.log" 2>&1
+          cp "$baseline/builds/manabitan-chrome.zip" "$evidence/baseline-chrome.zip"
+          cp builds/manabitan-chrome.zip "$evidence/diagnostic-chrome.zip"
+          git diff "$PROFILE_BASELINE" HEAD -- ext > "$evidence/diagnostic-source.patch"
+          node dev/perf/host-environment.js > "$evidence/host-before.json"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, zipfile
+          root = pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          base = pathlib.Path(os.environ['RUNNER_TEMP']) / 'profile-baseline'
+          evidence = root / 'builds/perf/profile-c1ec'
+          sha = lambda data: hashlib.sha256(data).hexdigest()
+          receipt = {'scope': 'Diagnostic profiles only; no comparative timing claim', 'workflowSource': os.environ['GITHUB_SHA'], 'baseline': os.environ['PROFILE_BASELINE'], 'dictionary': os.environ['PROFILE_DICTIONARY'], 'node': subprocess.check_output(['node', '--version'], text=True).strip(), 'packageLockSha256': sha((root/'package-lock.json').read_bytes()), 'fixtureLockSha256': sha((root/'test/perf/dictionaries.lock.json').read_bytes()), 'arms': {}}
+          for arm, source in [('baseline', base), ('diagnostic', root)]:
+              archive = evidence / f'{arm}-chrome.zip'
+              with zipfile.ZipFile(archive) as package:
+                  members = {name: sha(package.read(name)) for name in sorted(package.namelist()) if not name.endswith('/')}
+              receipt['arms'][arm] = {'commit': subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip(), 'tree': subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD^{tree}'], text=True).strip(), 'status': subprocess.check_output(['git', '-C', str(source), 'status', '--porcelain'], text=True), 'packageSha256': sha(archive.read_bytes()), 'packageMembers': members}
+          original = receipt['arms']['baseline']['packageMembers']
+          diagnostic = receipt['arms']['diagnostic']['packageMembers']
+          assert original.keys() == diagnostic.keys(), 'Package inventories differ'
+          changed = sorted(name for name in original if original[name] != diagnostic[name])
+          expected = ['js/dictionary/dictionary-database.js', 'js/dictionary/term-record-import-index-writer.js', 'js/dictionary/term-record-opfs-store.js']
+          assert changed == expected, changed
+          receipt['changedPackageMembers'] = changed
+          (evidence/'identity.json').write_text(json.dumps(receipt, indent=2)+'\n')
+          PY
+      - name: Capture exact baseline ordinary import
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/profile-c1ec"
+          cd "$RUNNER_TEMP/profile-baseline"
+          node dev/perf/import-benchmark.js "$PROFILE_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --output "$evidence/baseline-ordinary" > "$evidence/baseline-ordinary.log" 2>&1
+      - name: Capture exact baseline browser-wide CPU trace
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/profile-c1ec"
+          cd "$RUNNER_TEMP/profile-baseline"
+          node dev/perf/import-benchmark.js "$PROFILE_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --trace --output "$evidence/baseline-trace" > "$evidence/baseline-trace.log" 2>&1
+      - name: Capture split finalization diagnostics and exhaustive media verification
+        if: ${{ !cancelled() }}
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_CHROMIUM_BUILD_TARGET: chrome
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
+          MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '1'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_BENCH_MEDIA_CHECK: all
+          MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES: '10000'
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/profile-c1ec"
+          export MANABITAN_CHROMIUM_E2E_REPORT="$evidence/finalization/report.html"
+          mkdir -p "$evidence/finalization"
+          node test/chromium/extension-two-dictionary-import.e2e.js > "$evidence/finalization.log" 2>&1
+      - name: Record final host snapshot
+        if: ${{ !cancelled() }}
+        run: node dev/perf/host-environment.js > builds/perf/profile-c1ec/host-after.json
+      - name: Retain exact products, profiles and all failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-profile-c1ec-${{ matrix.dictionary }}
+          path: builds/perf/profile-c1ec
+          if-no-files-found: error
+          retention-days: 14

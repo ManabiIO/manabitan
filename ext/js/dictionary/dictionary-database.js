@@ -1505,6 +1505,7 @@ export class DictionaryDatabase {
             let termRecordEndImportSessionFlushPendingWritesMs = 0;
             let termRecordEndImportSessionAwaitQueuedWritesMs = 0;
             let termRecordEndImportSessionCloseWritableMs = 0;
+            let diagnosticStorageFinalization = null;
             let termRecordDrainCycleCount = 0;
             let termRecordWriteCallCount = 0;
             let termRecordSingleChunkWriteCount = 0;
@@ -1576,6 +1577,7 @@ export class DictionaryDatabase {
                             termRecordEndImportSessionFlushPendingWritesMs = metrics.flushPendingWritesMs;
                             termRecordEndImportSessionAwaitQueuedWritesMs = metrics.awaitQueuedWritesMs;
                             termRecordEndImportSessionCloseWritableMs = metrics.closeWritableMs;
+                            diagnosticStorageFinalization = metrics.diagnosticStorageFinalization;
                             termRecordDrainCycleCount = metrics.drainCycleCount;
                             termRecordWriteCallCount = metrics.writeCallCount;
                             termRecordSingleChunkWriteCount = metrics.singleChunkWriteCount;
@@ -1752,6 +1754,7 @@ export class DictionaryDatabase {
                     termRecordEndImportSessionFlushPendingWritesMs,
                     termRecordEndImportSessionAwaitQueuedWritesMs,
                     termRecordEndImportSessionCloseWritableMs,
+                    diagnosticStorageFinalization,
                     termRecordDrainCycleCount,
                     termRecordWriteCallCount,
                     termRecordSingleChunkWriteCount,

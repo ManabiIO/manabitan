@@ -91,6 +91,7 @@ export class SyncImportIndexWriter {
         this._yieldChannel = null;
         /** @type {(() => void)|null} */
         this._pendingYield = null;
+        this._storageProfile = {writeMs: 0, writeCount: 0, writeBytes: 0, periodicFlushMs: 0, periodicFlushCount: 0, finalFlushMs: 0, accessCloseMs: 0, finalQueueWaitMs: 0, yieldMs: 0, yieldCount: 0};
     }
 
     /** @param {number} offset */
@@ -196,18 +197,24 @@ export class SyncImportIndexWriter {
         this._closing = true;
         this._aborted = abort;
         this._closePromise = (async () => {
+            const queueStart = safePerformance.now();
             await this._queue;
+            this._storageProfile.finalQueueWaitMs += safePerformance.now() - queueStart;
             this._closeYieldChannel();
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
                 try {
+                    const flushStart = safePerformance.now();
                     this._access.flush();
+                    this._storageProfile.finalFlushMs += safePerformance.now() - flushStart;
                 } catch (error) {
                     errors.push(toError(error));
                 }
             }
             try {
+                const closeStart = safePerformance.now();
                 this._access.close();
+                this._storageProfile.accessCloseMs += safePerformance.now() - closeStart;
             } catch (error) {
                 errors.push(toError(error));
             }
@@ -268,7 +275,11 @@ export class SyncImportIndexWriter {
         this._validateWriteLength(bytes.byteLength);
         for (let offset = 0; offset < bytes.byteLength;) {
             const view = bytes.subarray(offset, Math.min(bytes.byteLength, offset + MAX_WRITE_BYTES));
+            const writeStart = safePerformance.now();
             const written = this._access.write(view, {at: this._position});
+            this._storageProfile.writeMs += safePerformance.now() - writeStart;
+            ++this._storageProfile.writeCount;
+            this._storageProfile.writeBytes += written;
             if (!Number.isSafeInteger(written) || written <= 0 || written > view.byteLength) {
                 throw new Error('Invalid import index write progress');
             }
@@ -278,7 +289,10 @@ export class SyncImportIndexWriter {
             if (this._periodicFlush && !this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
                 // Persist bounded batches while parser workers can still make progress.
                 // Successful close must also flush the final index header and tail.
+                const flushStart = safePerformance.now();
                 this._access.flush();
+                this._storageProfile.periodicFlushMs += safePerformance.now() - flushStart;
+                ++this._storageProfile.periodicFlushCount;
                 this._unflushedBytes = 0;
             }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
@@ -291,7 +305,10 @@ export class SyncImportIndexWriter {
         this._workElapsedMs += now - this._workStartedAt;
         this._workStartedAt = now;
         if (this._workElapsedMs < WRITE_TIME_BUDGET_MS) { return; }
+        const yieldStart = safePerformance.now();
         await this._yieldToNextTask();
+        this._storageProfile.yieldMs += safePerformance.now() - yieldStart;
+        ++this._storageProfile.yieldCount;
         this._workElapsedMs = 0;
         this._workStartedAt = safePerformance.now();
     }
@@ -324,6 +341,11 @@ export class SyncImportIndexWriter {
                 setTimeout(resolve, 0);
             }
         });
+    }
+
+    /** Returns instrumentation for this diagnostic-only package. */
+    getStorageProfile() {
+        return {...this._storageProfile};
     }
 
     /** Closes the per-writer task-yield channel after queued writes settle. */

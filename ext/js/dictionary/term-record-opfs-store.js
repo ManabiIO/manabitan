@@ -958,6 +958,7 @@ export class TermRecordOpfsStore {
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
+        this._diagnosticStorageFinalization = [];
     }
 
     /** */
@@ -1510,6 +1511,7 @@ export class TermRecordOpfsStore {
         await this._awaitQueuedWrites();
         awaitQueuedWritesMs = safePerformance.now() - tAwaitQueuedWritesStart;
         const tCloseWritableStart = safePerformance.now();
+        this._diagnosticStorageFinalization = [];
         await this._closeAllWritables();
         for (const dictionaryName of this._importSessionDictionaryNames) {
             this._setDictionaryHealth(dictionaryName, 'available');
@@ -1522,6 +1524,7 @@ export class TermRecordOpfsStore {
             flushPendingWritesMs,
             awaitQueuedWritesMs,
             closeWritableMs,
+            diagnosticStorageFinalization: this._diagnosticStorageFinalization,
             totalMs: safePerformance.now() - tStart,
             ...this._writeDrainMetrics,
             lookupIndexWriteCallCount: this._lookupIndexWriteMetrics.writeCallCount,
@@ -6294,6 +6297,8 @@ view.chunks :
         ) {
             return;
         }
+        const diagnostic = {kind: 'lookup-index', fileName: state.fileName, begin: safePerformance.now(), flushPendingMs: 0, headerMs: 0, closeMs: 0, end: 0, writer: null};
+        this._diagnosticStorageFinalization.push(diagnostic);
         const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
         if (state.initialFileLength !== 0) {
             // Appending to an existing descriptor invalidates the previous
@@ -6308,7 +6313,9 @@ view.chunks :
         /** @type {Error|null} */
         let operationError = null;
         try {
+            const flushPendingStart = safePerformance.now();
             await this._flushPendingLookupIndexChunks(state, true);
+            diagnostic.flushPendingMs = safePerformance.now() - flushPendingStart;
             const writable = state.lookupIndexWritable;
             if (writable !== null) {
                 const header = new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES);
@@ -6318,8 +6325,10 @@ view.chunks :
                 view.setUint32(16, state.lookupIndexChunkCount, true);
                 view.setUint32(20, state.lookupIndexRecordCount, true);
                 header.set(state.generationId, 24);
+                const headerStart = safePerformance.now();
                 await writable.seek(0);
                 await writable.write(header);
+                diagnostic.headerMs = safePerformance.now() - headerStart;
             }
         } catch (error) {
             operationError = error instanceof Error ? error : new Error(String(error));
@@ -6329,13 +6338,17 @@ view.chunks :
         const writable = state.lookupIndexWritable;
         if (writable !== null) {
             try {
+                const closeStart = safePerformance.now();
                 await writable.close();
+                diagnostic.closeMs = safePerformance.now() - closeStart;
+                diagnostic.writer = writable instanceof SyncImportIndexWriter ? writable.getStorageProfile() : {type: writable.constructor.name};
             } catch (error) {
                 closeError = error instanceof Error ? error : new Error(String(error));
             } finally {
                 state.lookupIndexWritable = null;
             }
         }
+        diagnostic.end = safePerformance.now();
         state.lookupIndexFileHandle = null;
         if (operationError !== null && closeError !== null) {
             throw new AggregateError(
@@ -6554,16 +6567,23 @@ view.chunks :
     async _finalizeShardWritable(state) {
         /** @type {Error[]} */
         const errors = [];
+        const diagnostic = {kind: 'record-descriptor', fileName: state.fileName, begin: safePerformance.now(), queueMs: 0, closeMs: 0, end: 0};
+        this._diagnosticStorageFinalization.push(diagnostic);
         try {
+            const queueStart = safePerformance.now();
             await this._awaitQueuedWritesForShard(state);
+            diagnostic.queueMs = safePerformance.now() - queueStart;
         } catch (error) {
             errors.push(error instanceof Error ? error : new Error(String(error)));
         }
         try {
+            const closeStart = safePerformance.now();
             await this._closeShardWritable(state);
+            diagnostic.closeMs = safePerformance.now() - closeStart;
         } catch (error) {
             errors.push(error instanceof Error ? error : new Error(String(error)));
         }
+        diagnostic.end = safePerformance.now();
         if (errors.length === 1) {
             throw errors[0];
         }
