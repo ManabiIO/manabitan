@@ -66,6 +66,13 @@ export class TermContentMetadataArena {
         if (!Number.isSafeInteger(offset) || offset > 0xffffffff) {
             throw new RangeError('Term content metadata arena exceeds WASM32 bounds');
         }
+        /* eslint-disable @stylistic/semi */
+        // Slots retain index+1 in the low bits and cache the mixed hash in the
+        // remaining bits. Capacity itself must fit, including its last index.
+        /** @type {number} */
+        this.slotIndexMask = denseCapacity === 0 ? 0xffffffff : 0xffffffff >>> Math.clz32(denseCapacity)
+        Object.defineProperty(this, 'slotIndexMask', {writable: false, configurable: false})
+        /* eslint-enable @stylistic/semi */
         /** @type {WebAssembly.Memory} */
         this.memory = new WebAssembly.Memory({initial: pages, maximum: pages});
         const buffer = this.memory.buffer;
@@ -92,7 +99,8 @@ export class TermContentMetadataArena {
     /* eslint-disable @stylistic/semi */
     /**
      * Copies dense columns while preserving stable IDs. Slot coordinates are
-     * valid only at the same capacity; callers rebuild them when it changes.
+     * valid only at the same slot capacity and index mask; callers rebuild
+     * them when either changes.
      * @param {TermContentMetadataArena} previous
      * @param {number} [denseCount=previous.state.length] Allocated ID high-water mark, including reusable empty IDs.
      * @param {boolean} [preserveSlots=true]
@@ -113,7 +121,7 @@ export class TermContentMetadataArena {
         this.signature1.set(previous.signature1.subarray(0, denseCount))
         this.signature2.set(previous.signature2.subarray(0, denseCount))
         this.signature3.set(previous.signature3.subarray(0, denseCount))
-        if (preserveSlots && this.slots.length === previous.slots.length) {
+        if (preserveSlots && this.slots.length === previous.slots.length && this.slotIndexMask === previous.slotIndexMask) {
             this.slots.set(previous.slots)
         }
     }

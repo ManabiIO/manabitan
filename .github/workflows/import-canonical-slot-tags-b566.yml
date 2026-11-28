@@ -1,0 +1,205 @@
+name: Canonical slot tag import qualification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'ext/js/dictionary/dictionary-database.js'
+      - 'ext/js/dictionary/term-content-canonical-scan.js'
+      - 'ext/js/dictionary/term-content-metadata-arena.js'
+      - 'ext/js/dictionary/wasm/term-content-canonical-scan-v1.c'
+      - 'dev/data/dictionary-wasm/manifest.json'
+      - 'dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm'
+      - '.github/workflows/import-canonical-slot-tags-b566.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-canonical-slot-tags-b566-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    if: github.head_ref == 'perf/import-canonical-slot-tags-20261128-b566' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      acquire: ${{ steps.changed.outputs.acquire }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: changed
+        name: Skip evidence-only follow-ups
+        shell: bash
+        env:
+          PERF_ACTION: ${{ github.event.action }}
+          PERF_BEFORE: ${{ github.event.before }}
+          PERF_EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          candidate="$(git rev-parse HEAD)"
+          test "$candidate" = "$PERF_EVENT_HEAD"
+          acquire=true
+          if [[ "$PERF_ACTION" == synchronize && "$PERF_BEFORE" =~ ^[a-f0-9]{40}$ ]] &&
+             git cat-file -e "${PERF_BEFORE}^{commit}" &&
+             git diff --quiet "$PERF_BEFORE" "$candidate" -- \
+               ext/js/dictionary/dictionary-database.js \
+               ext/js/dictionary/term-content-canonical-scan.js \
+               ext/js/dictionary/term-content-metadata-arena.js \
+               ext/js/dictionary/wasm/term-content-canonical-scan-v1.c \
+               dev/data/dictionary-wasm/manifest.json \
+               dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm \
+               .github/workflows/import-canonical-slot-tags-b566.yml; then
+            acquire=false
+          fi
+          echo "acquire=$acquire" >> "$GITHUB_OUTPUT"
+
+  qualify:
+    needs: select
+    if: needs.select.outputs.acquire == 'true'
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: builds/perf/import-canonical-slot-tags-${{ matrix.dictionary }}-${{ matrix.order }}
+      PERF_PREFLIGHT: builds/perf/import-canonical-slot-tags-preflight-${{ matrix.dictionary }}-${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+      PYTHONOPTIMIZE: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Freeze exact source and qualification helper identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_PREFLIGHT"
+          PERF_CANDIDATE="$(git rev-parse HEAD)"
+          export PERF_CANDIDATE
+          test "$PERF_CANDIDATE" = "$PERF_EVENT_HEAD"
+          printf '%s\n' "$PERF_CANDIDATE" > "$PERF_PREFLIGHT/candidate-head.txt"
+          printf '%s\n' "$PERF_BASELINE" > "$PERF_PREFLIGHT/baseline.txt"
+          git fetch --no-tags origin "$PERF_BASELINE" 2>&1 | tee "$PERF_PREFLIGHT/fetch-baseline.log"
+          test "$(git rev-parse "${PERF_BASELINE}^{commit}")" = "$PERF_BASELINE"
+          printf 'PERF_CANDIDATE=%s\n' "$PERF_CANDIDATE" >> "$GITHUB_ENV"
+          python - <<'PY' 2>&1 | tee "$PERF_PREFLIGHT/helper-check.log"
+          import hashlib
+          import inspect
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          if sys.flags.optimize != 0:
+              raise RuntimeError('Python assertions must remain enabled')
+          root = Path.cwd()
+          baseline = os.environ['PERF_BASELINE']
+          candidate = os.environ['PERF_CANDIDATE']
+          expected = {
+              'dev/perf/import-qualification-20261125-a7f7.py': 'cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef',
+              'dev/perf/host-environment.js': '0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5',
+              'dev/perf/import-memory-20261125-a7f7/chromium_memory.py': '8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7',
+              'dev/perf/import-memory-20261125-a7f7/audit_memory.py': '871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c',
+              'dev/perf/import-memory-20261125-a7f7/protocol.py': 'ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7',
+              'dev/perf/import-memory-20261125-a7f7/qualification_receipts.py': '4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51',
+              'test/perf/dictionaries.lock.json': '60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89',
+              'dev/perf/import-media-validation.js': 'e493225cd4c66a6b3bcc4a5d309439b7a08e584b340b9d54d67115252da461bb',
+              'test/chromium/extension-two-dictionary-import.e2e.js': 'd0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf',
+          }
+          for relative, wanted in expected.items():
+              for label, data in (
+                  ('checkout', (root / relative).read_bytes()),
+                  ('baseline', subprocess.check_output(['git', 'show', f'{baseline}:{relative}'])),
+                  ('candidate', subprocess.check_output(['git', 'show', f'{candidate}:{relative}'])),
+              ):
+                  if hashlib.sha256(data).hexdigest() != wanted:
+                      raise RuntimeError(f'Unexpected {label} qualification helper: {relative}')
+          helper_root = root / 'dev/perf/import-memory-20261125-a7f7'
+          sys.path.insert(0, str(helper_root))
+          import chromium_memory
+          import protocol
+          import qualification_receipts
+          for imported in (chromium_memory, protocol, qualification_receipts):
+              if Path(imported.__file__).resolve().parent != helper_root:
+                  raise RuntimeError('Qualification helper imported from an unexpected directory')
+          if str(inspect.signature(chromium_memory.run_with_sampling)) != '(args, cwd, log, receipt, markers)':
+              raise RuntimeError('Unexpected process observer API')
+          empty = chromium_memory.summarize_import_window([], [], -1)
+          if (empty['schemaVersion'] != 3 or
+                  empty['observerRule'] != 'import-window-stable-single-thread-zombie-esrch-v1' or
+                  empty['authoritativeTiming'] is not False or empty['qualifiedForWholeTreePss'] is not False or
+                  empty['maxSampledPssKiB'] is not None or empty['maxSampledPrivateKiB'] is not None):
+              raise RuntimeError('Unexpected process observer failure contract')
+          overlay = protocol.memory_overlay((root / 'test/chromium/extension-two-dictionary-import.e2e.js').read_text())
+          receipt = {
+              'baseline': baseline, 'candidate': candidate,
+              'dictionary': os.environ['PERF_DICTIONARY'], 'initialOrder': os.environ['PERF_ORDER'],
+              'helperSha256': expected, 'pythonAssertionsEnabled': True,
+              'overlaySha256': hashlib.sha256(overlay.encode()).hexdigest(),
+              'vndbSahAllocationUnits': [37, 37] if os.environ['PERF_DICTIONARY'] == 'vndb' else None,
+          }
+          (Path(os.environ['PERF_PREFLIGHT']) / 'helpers.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          print(json.dumps(receipt))
+          PY
+      - uses: ./.github/actions/setup
+      - name: Verify current host helper and qualification checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "if (process.version !== 'v22.22.0') { throw new Error('Expected Node 22.22.0') }"
+          node dev/perf/host-environment.js > "$PERF_PREFLIGHT/host-environment.json"
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v 2>&1 | tee "$PERF_PREFLIGHT/qualification-tests.log"
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Qualify exact release packages and separate memory observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            allocation=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/term-content-canonical-scan.js \
+            --expected-package-entry js/dictionary/term-content-metadata-arena.js \
+            --expected-package-entry js/dictionary/wasm/term-content-canonical-scan-v1.c \
+            --expected-package-entry lib/term-content-canonical-scan-v1.wasm \
+            "${allocation[@]}" \
+            --evidence "$PERF_EVIDENCE"
+      - name: Retain every observation, package, and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-canonical-slot-tags-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_PREFLIGHT }}
+          if-no-files-found: error
+          retention-days: 14

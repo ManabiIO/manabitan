@@ -89,7 +89,7 @@ describe('term content metadata arena ownership', () => {
         const error = new Error('injected arena replacement failure');
         const fault = failure === 'memory' ?
             vi.spyOn(WebAssembly, 'Memory').mockImplementationOnce(function failMemoryAllocation() { throw error; }) :
-            vi.spyOn(database, '_getTermEntryContentMetaHashPairSlot').mockImplementationOnce(() => { throw error; });
+            vi.spyOn(database, '_getTermEntryContentMetaHashPairHash').mockImplementationOnce(() => { throw error; });
         try {
             expect(() => Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').call(database, 2000)).toThrow(error);
         } finally { fault.mockRestore(); }

@@ -24,7 +24,7 @@ import {CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './ter
 const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT} = layout;
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null;
-/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number}>} */
+/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: (slotIndexMask: number) => number}>} */
 const instances = new WeakMap();
 
 /** @returns {Promise<WebAssembly.Module>} */
@@ -251,11 +251,13 @@ export class NativeCanonicalScanner {
                         typeof exports.canonical_max_rows !== 'function' ||
                         exports.canonical_max_rows() !== MAX ||
                         typeof exports.canonical_prefix_bytes !== 'function' ||
-                        exports.canonical_prefix_bytes() !== PREFIX
+                        exports.canonical_prefix_bytes() !== PREFIX ||
+                        typeof exports.canonical_slot_tag_version !== 'function' ||
+                        exports.canonical_slot_tag_version() !== 1
                     ) {
                         throw new Error('Canonical scan WASM ABI/layout mismatch');
                     }
-                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical)};
+                    cached = {module, scan: /** @type {(slotIndexMask: number) => number} */ (exports.scan_canonical)};
                     instances.set(a.memory, cached);
                     ++stats.instances;
                 }
@@ -328,7 +330,10 @@ export class NativeCanonicalScanner {
             this._hooks.beforeNative?.({a, beforeDense, beforePending});
             try {
                 ++stats.calls;
-                const stop = native();
+                // Capability was checked before any authoritative mutation;
+                // an older module must use the packed-aware JavaScript path.
+                /* eslint-disable-next-line @stylistic/semi */
+                const stop = native(a.slotIndexMask)
                 if (stop < 0) {
                     throw new Error(`Native canonical scan error ${stop}`);
                 }

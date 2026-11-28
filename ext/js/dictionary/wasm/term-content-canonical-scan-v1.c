@@ -59,14 +59,18 @@ uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 // contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter. The
 // old projection slots are reserved. trapAfter is for internal fault tests.
 __attribute__((export_name("scan_canonical")))
-int32_t scan_canonical(void) {
+int32_t scan_canonical(uint32_t slot_index_mask) {
+    // Omitted/zero retains the original slot format for older JS callers.
+    if (slot_index_mask == 0u) { slot_index_mask = 0xffffffffu; }
+    const uint32_t tag_mask = ~slot_index_mask;
     volatile uint32_t *h = (volatile uint32_t *)(uintptr_t)1024u;
     const uint32_t *c = U32(1088u);
     const uint64_t bytes = (uint64_t)__builtin_wasm_memory_size(0) * 65536u;
     h[0] = h[2] = h[3] = h[4] = h[6] = 0;
     h[1] = c[15];
     h[5] = c[11];
-    if (c[12] > MAX_ROWS || c[14] < c[13] || c[14] - c[13] > MAX_ROWS ||
+    if ((slot_index_mask & (slot_index_mask + 1u)) != 0u || c[10] > slot_index_mask ||
+        c[12] > MAX_ROWS || c[14] < c[13] || c[14] - c[13] > MAX_ROWS ||
         c[15] > c[14] - c[13] || c[1] == 0 || (c[1] & (c[1] - 1)) || bytes < PREFIX) {
         return -1;
     }
@@ -104,9 +108,10 @@ int32_t scan_canonical(void) {
         hash ^= hash >> 16;
         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
         while (slots[slot]) {
-            uint32_t index = slots[slot] - 1;
+            uint32_t index = (slots[slot] & slot_index_mask) - 1u;
             if (index >= c[10] || ++probes >= c[1]) { return -4; }
-            if (hash1[index] == m[2] && hash2[index] == m[3]) {
+            if ((slots[slot] & tag_mask) == (hash & tag_mask) &&
+                hash1[index] == m[2] && hash2[index] == m[3]) {
                 pair = 1;
                 if (c[19] && state[index] == 1) {
                     existing = index;
@@ -142,7 +147,7 @@ int32_t scan_canonical(void) {
             s3[index] = sigs[i * 3 + 2];
             present[index] = 1;
             state[index] = 2;
-            slots[slot] = index + 1;
+            slots[slot] = (index + 1u) | (hash & tag_mask);
             staged = index;
             h[5] = index + 1;
             if (c[21] && h[0] == c[21]) { __builtin_trap(); }
@@ -157,3 +162,6 @@ int32_t scan_canonical(void) {
     }
     return 0;
 }
+
+__attribute__((export_name("canonical_slot_tag_version")))
+uint32_t canonical_slot_tag_version(void) { return 1u; }

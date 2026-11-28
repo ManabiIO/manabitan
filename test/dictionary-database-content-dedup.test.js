@@ -918,7 +918,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
     test('keeps exact hash-pair matches distinct through collisions and resize', () => {
         const database = new DictionaryDatabase();
-        Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);
+        Reflect.set(database, '_getTermEntryContentMetaHashPairHash', () => 0);
 
         for (let i = 0; i < 64; ++i) {
             cacheMeta(database, null, i * 10, i + 1, `raw-${i}`, 0x1000 + i, 0x2000 + (i * 17));
@@ -1033,7 +1033,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
 
     test('retains colliding published keys through free-ID reuse and pending rehash rollback', () => {
         const database = new DictionaryDatabase();
-        Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);
+        Reflect.set(database, '_getTermEntryContentMetaHashPairHash', () => 0);
         const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
         const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
         const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
