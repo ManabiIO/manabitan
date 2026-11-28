@@ -1,0 +1,82 @@
+{
+  "updatedUtc": "2026-11-28 09:06:07 UTC",
+  "task": "Optimize JMdict critically, plus Jitendex and VNDB, with measured gains before opening PRs; no Work mode; extensive subagents.",
+  "execution": {
+    "resumedUtc": "2026-11-28T07:28:00Z",
+    "environment": "unavailable since approximately 09:02 UTC",
+    "elapsedClaim": "Approximately 1 hour 35 minutes of the requested multi-hour investigation before this outage; not a completed several-hour campaign.",
+    "cloudFallback": "GitHub source preparation and isolated hosted experiments continue; no local command results are inferred."
+  },
+  "sources": {
+    "frozenBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "currentDevelop": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "developDelta": "Merged PR972 parser token-end and compact-list changes; all completed local corpus measurements remain bound to9e10."
+  },
+  "checksum": {
+    "source": "7cda9a3a39f3c2626873d414a741433058f9ff16",
+    "sourceTree": "31389c1be11df89695fcbe1eac2b935bbffaa872",
+    "workflowHead": "d84ea2942d62e3321e4799638aee0d608af5e53e",
+    "run": 46124815073,
+    "status": "All six dictionary/order jobs queued at09:03 UTC",
+    "decision": "No PR or performance claim. Original local comparisons had mismatched packaging. Corrected fixed cohorts have large unchanged-code control variation.",
+    "correctness": "Actual JMdict sink:528299 rows,4 codec workers,103 frames; all persisted bytes and canonical metadata match baseline.",
+    "oracleSha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e",
+    "validation": "174 focused tests pass. Full-unit attempts each15124 assertions passed but2suite startup failures; local Clang linker PATH alias fixed, remaining21 native tests pass. Dry build passes. Scoped lint found one test-only typed snapshot style issue, fixed locally; subsequent lint exited137. Types not reached.",
+    "testOnlyLocalDelta": "backing.slice() snapshot changed to new Uint8Array(backing); runtime source unchanged; not yet published."
+  },
+  "rejected": {
+    "jointPublication": "Guarded implementation:500+LOC, median4.292ms versus A and1.054ms versus identical C,3/6 wins against both; failed prespecified10ms/5of6 review gate.",
+    "multiMemoryCopy": "Six balanced fresh-process triplets with exact12JMdict slab sizes; WASM page-backed copy versus ordinary SAB JS copy median+42.22%,equal-work+29.38%,1/6wins; all correctness checks pass; rejected.",
+    "wholeTailWitness": "dcfc source-bound independent census,528299rows,12groups; exact existing54641 glossary witnesses and154416 content reuse hits reproduced. Zero full suffix matches including score and sequence among2113076 candidates; rejected before C edits.",
+    "signatureDeferral": "Deferring all three signatures could add cold collision reads and failures; rejected in favor of exact constant-word representation."
+  },
+  "recordReferenceCensus": {
+    "boundary": "Actual parser ownership/CRC, canonical public DB sink,4 codecs, actual record-field encoding and storage splitting; source9e10, actual4-core/8GiB planner policy; sequential group execution; no browser/media/restart or import-latency claim.",
+    "jmdict": {
+      "complete": true,
+      "rows": 528299,
+      "chunks": 12,
+      "currentFieldBytes": 4239960,
+      "hypotheticalSelectedFieldBytes": 4198956,
+      "potentialSavingBytes": 41004,
+      "decision": "Too small to justify another authoritative format."
+    },
+    "jitendex": {
+      "complete": true,
+      "rows": 436555,
+      "chunks": 22,
+      "currentFieldBytes": 3497796,
+      "hypotheticalSelectedFieldBytes": 3497796,
+      "potentialSavingBytes": 0,
+      "decision": "Rejected."
+    },
+    "vndb": {
+      "complete": false,
+      "largestCompletedGroups": 53,
+      "totalGroups": 170,
+      "largestCompletedRows": 2120000,
+      "currentPrefixFieldBytes": 16961532,
+      "hypotheticalPrefixFieldBytes": 8758424,
+      "prefixOnlySavingBytes": 8203108,
+      "decision": "Promising storage lead only; no whole-corpus extrapolation."
+    },
+    "failures": "Generic ZIP entry materialization hit512MiB heap OOM before source groups. Actual production dense directory passed147237entries/665banks/4267992967sourcebytes. Memory-backed adapter replay killed137 at53groups,peak sampled821.4MB. Bounded file-backed adapter passed contract tests and fullJMdictfileoracle, but VNDB killed137 at34groups,peak sampled411.3MB; cause unconfirmed. Approved unchanged foreground acquisition unrun due outage."
+  },
+  "constantSignature1": {
+    "implementationStatus": "Design/source preparation only; no runtime edit, build, test or PR yet.",
+    "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "provenBaseline": "JMdict final dense362032 entries all startMBR6, zero unused tail tocapacity524288. Reconstructed whole-column SHA matches exactly.",
+    "columnSha256": "6fed4e642e597cae275a2d1cf84a38569ba214b0ae712a1c37be4e918af5ce5a",
+    "targetAllocationBytes": 2097152,
+    "design": "Presence marker2 synthesizes exactMBR6 first signature; marker1 uses optional externalS1 array; S2/S3 unchanged. Materialization preserves all stale/free/unsigned words; native rare-nonmagic header flag uses existing output IDs and copiedSIGS snapshot before adoption/await. No new collision reads or signature rejection changes."
+  },
+  "localEvidenceRoot": "/workspace/scratch/4d9ffe79ec6f",
+  "evidenceAvailability": "Local raw cohorts, source checkpoints and receipts remain in workspace, currently inaccessible. This summary is not a replacement for those raw files and does not claim they are all published.",
+  "next": [
+    "Complete constant-S1 source prototype and focused correctness checks on currentdevelop.",
+    "Complete source-bound currentparser profile after#972 before selecting a grammar change.",
+    "Complete fullVNDB census through bounded adapter; after one approved foreground attempt, use a portable hosted runner if localexecution stillfails.",
+    "Inspect frozen checksum Chrome run without reacquiring failed cohorts.",
+    "Open PRs only for independently reviewable gains; no merges or main/develop edits."
+  ]
+}
