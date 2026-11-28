@@ -1,0 +1,62 @@
+{
+  "runId": 46106527898,
+  "source": "47f3c3262931d0a92728c72fcd5cfb9b0ccc49a0",
+  "tree": "023368b2731c17c91f16cd740d868ae2ebafa27b",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "artifacts": [
+    {
+      "dictionary": "jmdict",
+      "artifactId": 15250202921,
+      "sha256": "8b5ac6be0323b4585497b3b63e0f0fb915443f297868fcd742048e58fa45867a",
+      "bytes": 168978,
+      "path": "jmdict.zip",
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    },
+    {
+      "dictionary": "jitendex",
+      "artifactId": 15250101751,
+      "sha256": "4ad6e52ebaa4e622d10eb1e61508dca0692a0d389cc40fbcac3e17061cd575e3",
+      "bytes": 195202,
+      "path": "jitendex.zip",
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    },
+    {
+      "dictionary": "vndb",
+      "artifactId": 15250985625,
+      "sha256": "75dd8592469fbc71cc7437482371f1c0ca4903adcdfc4e9dc885a3238d2d0dfc",
+      "bytes": 1142386,
+      "path": "vndb.zip",
+      "retention": "Verbatim original complete GitHub artifact; no members removed"
+    }
+  ],
+  "initialStagingFailure": {
+    "runId": 46104544456,
+    "timingStarted": false,
+    "artifacts": [
+      {
+        "dictionary": "jmdict",
+        "artifactId": 15248415539,
+        "sha256": "27818c61989e9bf566ed8e9861229d5d0a1c31215d4de5a04c17e13b64d81451",
+        "bytes": 1919,
+        "path": "initial-staging-failure/jmdict.zip",
+        "retention": "Verbatim original complete GitHub artifact; no members removed"
+      },
+      {
+        "dictionary": "jitendex",
+        "artifactId": 15247791285,
+        "sha256": "bdb931ede1603e79932513fa7f0b5809759d5fe04664aa0fee8a992500038ddb",
+        "bytes": 1919,
+        "path": "initial-staging-failure/jitendex.zip",
+        "retention": "Verbatim original complete GitHub artifact; no members removed"
+      },
+      {
+        "dictionary": "vndb",
+        "artifactId": 15247903816,
+        "sha256": "760a7025ad274af2bd31e050843eb80d7b1e540fc60fed4d013aa94eeb3ba2e3",
+        "bytes": 1913,
+        "path": "initial-staging-failure/vndb.zip",
+        "retention": "Verbatim original complete GitHub artifact; no members removed"
+      }
+    ]
+  }
+}

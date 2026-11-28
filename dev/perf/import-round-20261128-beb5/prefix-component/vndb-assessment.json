@@ -1,0 +1,220 @@
+{
+  "complete": true,
+  "scope": "Descriptive full-work sums by pair index across sequential production-shaped groups. Each group is repeatedly replayed before the next group. These are component observations, not complete import runs or independent browser hosts. No pair is discarded.",
+  "results": [
+    {
+      "report": "results/prefix-corrected-hosted-vndb/evidence/screen.json",
+      "dictionary": "vndb",
+      "synthetic": false,
+      "experiments": {},
+      "groups": 170,
+      "rows": 6648310,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 5584.391466000001,
+          "alternateMedianMs": 5723.769204000194,
+          "pairedPercentChanges": [
+            3.6265745442509045,
+            1.025786997910716,
+            2.5314172306623695,
+            2.249137222966757,
+            3.276876149319663,
+            2.7442672339584417
+          ],
+          "medianPairedPercentChange": 2.6378422323104056,
+          "equalWorkPercentChange": 2.5701658325418597,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 5662.243543999938,
+              "alternate": 5867.58902700013
+            },
+            {
+              "baseline": 5697.429205000005,
+              "alternate": 5755.872693000063
+            },
+            {
+              "baseline": 5488.692156999872,
+              "alternate": 5627.633856000181
+            },
+            {
+              "baseline": 5603.735144000029,
+              "alternate": 5729.770837000204
+            },
+            {
+              "baseline": 5462.07039400003,
+              "alternate": 5641.055676000068
+            },
+            {
+              "baseline": 5565.047787999972,
+              "alternate": 5717.767571000184
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 5543.350319000104,
+          "alternateMedianMs": 5583.947973499979,
+          "pairedPercentChanges": [
+            -0.43687812272663606,
+            2.1856448317854937,
+            0.6469269959733959,
+            0.9279871041783627,
+            0.18028294159291303,
+            -0.4825454848899291
+          ],
+          "medianPairedPercentChange": 0.41360496878315445,
+          "equalWorkPercentChange": 0.49677568923944815,
+          "alternateFasterPairs": 2,
+          "pairTotals": [
+            {
+              "baseline": 5798.950939000088,
+              "alternate": 5773.616590999945
+            },
+            {
+              "baseline": 5528.078224000161,
+              "alternate": 5648.90238000008
+            },
+            {
+              "baseline": 5563.262040999938,
+              "alternate": 5599.252284999908
+            },
+            {
+              "baseline": 5510.499744000065,
+              "alternate": 5561.636471000167
+            },
+            {
+              "baseline": 5558.622414000047,
+              "alternate": 5568.6436620000495
+            },
+            {
+              "baseline": 5487.725577999703,
+              "alternate": 5461.244805999916
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 6648310,
+          "glossaryWitnesses": 6010152,
+          "contentWitnesses": 5514978,
+          "fusedFallbacks": 26,
+          "crcReusedBytes": 3154233291,
+          "maxHeapBytes": 45219840,
+          "floatScoreGroups": 26
+        },
+        "candidate": {
+          "rows": 6648310,
+          "glossaryWitnesses": 6010308,
+          "contentWitnesses": 5514978,
+          "fusedFallbacks": 26,
+          "crcReusedBytes": 3154291847,
+          "maxHeapBytes": 45219840,
+          "floatScoreGroups": 26
+        },
+        "control": {
+          "rows": 6648310,
+          "glossaryWitnesses": 6010152,
+          "contentWitnesses": 5514978,
+          "fusedFallbacks": 26,
+          "crcReusedBytes": 3154233291,
+          "maxHeapBytes": 45219840,
+          "floatScoreGroups": 26
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-vndb/evidence/reuse-disabled.json",
+      "dictionary": "vndb",
+      "synthetic": false,
+      "experiments": {
+        "experimentalValidatedGlossaryReuse": false
+      },
+      "groups": 1,
+      "rows": 40000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 51.60110799999984,
+          "alternateMedianMs": 58.45152499999995,
+          "pairedPercentChanges": [
+            24.91482806256917,
+            14.307012019328091,
+            10.803318409364993
+          ],
+          "medianPairedPercentChange": 14.307012019328091,
+          "equalWorkPercentChange": 17.001555430789207,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 57.82978700000001,
+              "alternate": 72.237979
+            },
+            {
+              "baseline": 51.13555499999984,
+              "alternate": 58.45152499999995
+            },
+            {
+              "baseline": 51.60110799999984,
+              "alternate": 57.17574000000013
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 58.177952000000005,
+          "alternateMedianMs": 58.92440899999997,
+          "pairedPercentChanges": [
+            11.754954640135606,
+            1.2830582279691916,
+            -6.5680882627753405
+          ],
+          "medianPairedPercentChange": 1.2830582279691916,
+          "equalWorkPercentChange": 1.8265632764679296,
+          "alternateFasterPairs": 1,
+          "pairTotals": [
+            {
+              "baseline": 55.195381,
+              "alternate": 61.683573000000024
+            },
+            {
+              "baseline": 58.177952000000005,
+              "alternate": 58.92440899999997
+            },
+            {
+              "baseline": 61.51313500000015,
+              "alternate": 57.47289799999999
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 40000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 39178,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 44761088,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 40000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 39178,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 44761088,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 40000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 39178,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 44761088,
+          "floatScoreGroups": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "complete": true,
+  "scope": "Descriptive full-work sums by pair index across sequential production-shaped groups. Each group is repeatedly replayed before the next group. These are component observations, not complete import runs or independent browser hosts. No pair is discarded.",
+  "results": [
+    {
+      "report": "results/prefix-corrected-hosted-jitendex/evidence/screen.json",
+      "dictionary": "jitendex",
+      "synthetic": false,
+      "experiments": {},
+      "groups": 22,
+      "rows": 436555,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 1323.1191950000054,
+          "alternateMedianMs": 1344.8775294999955,
+          "pairedPercentChanges": [
+            2.32822705810265,
+            -0.9979559951134642,
+            2.4336656669129653,
+            -1.282713286704662,
+            3.572100345521756,
+            0.4588491510807202
+          ],
+          "medianPairedPercentChange": 1.393538104591685,
+          "equalWorkPercentChange": 1.064308212923204,
+          "alternateFasterPairs": 2,
+          "pairTotals": [
+            {
+              "baseline": 1316.1014040000014,
+              "alternate": 1346.7432329999983
+            },
+            {
+              "baseline": 1356.5495940000028,
+              "alternate": 1343.0118259999924
+            },
+            {
+              "baseline": 1315.450286999984,
+              "alternate": 1347.4639490000106
+            },
+            {
+              "baseline": 1349.1074099999953,
+              "alternate": 1331.8022300000082
+            },
+            {
+              "baseline": 1317.391211000011,
+              "alternate": 1364.4497470000156
+            },
+            {
+              "baseline": 1328.8471789999999,
+              "alternate": 1334.9445830000013
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 1328.450297499995,
+          "alternateMedianMs": 1316.4593844999977,
+          "pairedPercentChanges": [
+            -1.0255150681325986,
+            -0.534478741772948,
+            -2.2127330597315087,
+            -1.4014180546260135,
+            -0.8894758050961182,
+            -1.0876300546430628
+          ],
+          "medianPairedPercentChange": -1.0565725613878307,
+          "equalWorkPercentChange": -1.1947590874717529,
+          "alternateFasterPairs": 6,
+          "pairTotals": [
+            {
+              "baseline": 1332.9444319999914,
+              "alternate": 1319.274885999997
+            },
+            {
+              "baseline": 1321.5287060000044,
+              "alternate": 1314.4654160000073
+            },
+            {
+              "baseline": 1348.2873529999981,
+              "alternate": 1318.4533529999883
+            },
+            {
+              "baseline": 1324.5037009999958,
+              "alternate": 1305.941866999992
+            },
+            {
+              "baseline": 1332.3968939999943,
+              "alternate": 1320.545546000012
+            },
+            {
+              "baseline": 1319.0747110000157,
+              "alternate": 1304.7280579999833
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 436555,
+          "glossaryWitnesses": 85996,
+          "contentWitnesses": 73242,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 76087296,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 436555,
+          "glossaryWitnesses": 86011,
+          "contentWitnesses": 73242,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 76087296,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 436555,
+          "glossaryWitnesses": 85996,
+          "contentWitnesses": 73242,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 76087296,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jitendex/evidence/reuse-disabled.json",
+      "dictionary": "jitendex",
+      "synthetic": false,
+      "experiments": {
+        "experimentalValidatedGlossaryReuse": false
+      },
+      "groups": 1,
+      "rows": 16000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 64.28501700000004,
+          "alternateMedianMs": 73.60111900000015,
+          "pairedPercentChanges": [
+            10.699740500963074,
+            18.23723627864191,
+            17.12631175695265
+          ],
+          "medianPairedPercentChange": 17.12631175695265,
+          "equalWorkPercentChange": 15.40883474089676,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 64.28501700000004,
+              "alternate": 71.16334700000004
+            },
+            {
+              "baseline": 68.87264499999992,
+              "alternate": 81.43311200000016
+            },
+            {
+              "baseline": 62.83909900000003,
+              "alternate": 73.60111900000015
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 66.24646900000005,
+          "alternateMedianMs": 63.182799000000045,
+          "pairedPercentChanges": [
+            -4.624654032503983,
+            16.421040384214457,
+            -11.065554030012525
+          ],
+          "medianPairedPercentChange": -4.624654032503983,
+          "equalWorkPercentChange": -0.2530672393909361,
+          "alternateFasterPairs": 2,
+          "pairTotals": [
+            {
+              "baseline": 66.24646900000005,
+              "alternate": 63.182799000000045
+            },
+            {
+              "baseline": 62.72455799999989,
+              "alternate": 73.0245829999999
+            },
+            {
+              "baseline": 69.94448699999998,
+              "alternate": 62.2047419999999
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 16000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 4251,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 54198272,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 16000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 4251,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 54198272,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 16000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 4251,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 54198272,
+          "floatScoreGroups": 0
+        }
+      }
+    }
+  ]
+}

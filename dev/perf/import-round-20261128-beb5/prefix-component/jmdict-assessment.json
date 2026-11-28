@@ -1,0 +1,704 @@
+{
+  "complete": true,
+  "scope": "Descriptive full-work sums by pair index across sequential production-shaped groups. Each group is repeatedly replayed before the next group. These are component observations, not complete import runs or independent browser hosts. No pair is discarded.",
+  "results": [
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/screen.json",
+      "dictionary": "jmdict",
+      "synthetic": false,
+      "experiments": {},
+      "groups": 12,
+      "rows": 528299,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 485.6286295000022,
+          "alternateMedianMs": 470.1271720000012,
+          "pairedPercentChanges": [
+            -3.9942561449336056,
+            -1.325605195705537,
+            -4.143885224680166,
+            -4.823945169086308,
+            -3.812048969379811,
+            -3.008360939010668
+          ],
+          "medianPairedPercentChange": -3.9031525571567083,
+          "equalWorkPercentChange": -3.5223020566972685,
+          "alternateFasterPairs": 6,
+          "pairTotals": [
+            {
+              "baseline": 496.4526379999981,
+              "alternate": 476.62304799999816
+            },
+            {
+              "baseline": 485.3034690000012,
+              "alternate": 478.870260999998
+            },
+            {
+              "baseline": 483.14233899999533,
+              "alternate": 463.1214750000004
+            },
+            {
+              "baseline": 492.6867360000024,
+              "alternate": 468.91979800000126
+            },
+            {
+              "baseline": 482.82808399999817,
+              "alternate": 464.42244099999994
+            },
+            {
+              "baseline": 485.9537900000032,
+              "alternate": 471.3345460000012
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 488.2637980000004,
+          "alternateMedianMs": 490.34369849999973,
+          "pairedPercentChanges": [
+            3.101273406916172,
+            -1.0734268015550774,
+            2.307090206723328,
+            -1.7043347957759414,
+            1.375538781606478,
+            -1.7256351439391415
+          ],
+          "medianPairedPercentChange": 0.15105599002570025,
+          "equalWorkPercentChange": 0.3806830107212722,
+          "alternateFasterPairs": 3,
+          "pairTotals": [
+            {
+              "baseline": 486.767499000001,
+              "alternate": 501.86348999999893
+            },
+            {
+              "baseline": 486.9963179999978,
+              "alternate": 481.76876899999945
+            },
+            {
+              "baseline": 489.47323200000005,
+              "alternate": 500.76582100000417
+            },
+            {
+              "baseline": 487.05436400000076,
+              "alternate": 478.75332700000354
+            },
+            {
+              "baseline": 491.9604659999977,
+              "alternate": 498.72757299999967
+            },
+            {
+              "baseline": 490.42273100000193,
+              "alternate": 481.9598239999998
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 528299,
+          "glossaryWitnesses": 54641,
+          "contentWitnesses": 154416,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 43384832,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 528299,
+          "glossaryWitnesses": 200168,
+          "contentWitnesses": 159158,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 43384832,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 528299,
+          "glossaryWitnesses": 54641,
+          "contentWitnesses": 154416,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 43384832,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/reuse-disabled.json",
+      "dictionary": "jmdict",
+      "synthetic": false,
+      "experiments": {
+        "experimentalValidatedGlossaryReuse": false
+      },
+      "groups": 1,
+      "rows": 50000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 44.29238700000002,
+          "alternateMedianMs": 43.75801200000001,
+          "pairedPercentChanges": [
+            -5.918296975053505,
+            -2.8624512886118114,
+            17.942359334486714
+          ],
+          "medianPairedPercentChange": -2.8624512886118114,
+          "equalWorkPercentChange": 2.532560620439517,
+          "alternateFasterPairs": 2,
+          "pairTotals": [
+            {
+              "baseline": 44.29238700000002,
+              "alternate": 41.671032000000025
+            },
+            {
+              "baseline": 45.04747400000008,
+              "alternate": 43.75801200000001
+            },
+            {
+              "baseline": 40.06154300000003,
+              "alternate": 47.24952899999994
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 42.7696719999999,
+          "alternateMedianMs": 45.46720700000003,
+          "pairedPercentChanges": [
+            0.370483002309574,
+            9.634758419817512,
+            6.30712108336986
+          ],
+          "medianPairedPercentChange": 6.30712108336986,
+          "equalWorkPercentChange": 5.390091222066018,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 43.18227799999994,
+              "alternate": 43.34226100000001
+            },
+            {
+              "baseline": 41.82590600000003,
+              "alternate": 45.85573099999999
+            },
+            {
+              "baseline": 42.7696719999999,
+              "alternate": 45.46720700000003
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 50000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 14289,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 37027840,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 50000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 14289,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 37027840,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 50000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 14289,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 37027840,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/enabled-probe-negatives.json",
+      "dictionary": "unique-prefixes",
+      "synthetic": true,
+      "experiments": {},
+      "groups": 1,
+      "rows": 10000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 17.480706499999968,
+          "alternateMedianMs": 18.689301,
+          "pairedPercentChanges": [
+            9.606461633481821,
+            12.387018883460122,
+            7.324647096242964,
+            15.376680511575547,
+            -9.17358285708001,
+            12.82686852181467
+          ],
+          "medianPairedPercentChange": 10.996740258470972,
+          "equalWorkPercentChange": 7.8477226762103225,
+          "alternateFasterPairs": 1,
+          "pairTotals": [
+            {
+              "baseline": 17.126690999999994,
+              "alternate": 18.77195999999998
+            },
+            {
+              "baseline": 16.555864000000042,
+              "alternate": 18.606642000000022
+            },
+            {
+              "baseline": 18.06228999999996,
+              "alternate": 19.385288999999943
+            },
+            {
+              "baseline": 15.545787000000018,
+              "alternate": 17.936213000000066
+            },
+            {
+              "baseline": 17.834721999999942,
+              "alternate": 16.19863900000007
+            },
+            {
+              "baseline": 18.216230999999993,
+              "alternate": 20.55280300000004
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 17.313004000000035,
+          "alternateMedianMs": 18.04775399999997,
+          "pairedPercentChanges": [
+            -6.3869435071839735,
+            2.178164255943593,
+            -8.402196294279774,
+            16.270655006015055,
+            -7.237922483007864,
+            15.477692427152178
+          ],
+          "medianPairedPercentChange": -2.10438962562019,
+          "equalWorkPercentChange": 1.1242047396272214,
+          "alternateFasterPairs": 3,
+          "pairTotals": [
+            {
+              "baseline": 19.086656999999946,
+              "alternate": 17.867602999999974
+            },
+            {
+              "baseline": 16.32117500000004,
+              "alternate": 16.67667700000004
+            },
+            {
+              "baseline": 18.30483300000003,
+              "alternate": 16.766824999999926
+            },
+            {
+              "baseline": 15.72845099999995,
+              "alternate": 18.287573000000066
+            },
+            {
+              "baseline": 19.650169000000005,
+              "alternate": 18.227904999999964
+            },
+            {
+              "baseline": 15.788988000000018,
+              "alternate": 18.232758999999987
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 28966912,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 28966912,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 28966912,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/enabled-probe-negatives.json",
+      "dictionary": "common-prefix-unique-middles",
+      "synthetic": true,
+      "experiments": {},
+      "groups": 1,
+      "rows": 10000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 17.337674499999935,
+          "alternateMedianMs": 19.577020500000003,
+          "pairedPercentChanges": [
+            6.758367614237448,
+            22.591424645709914,
+            5.494489518271317,
+            6.9011579216542,
+            1.6357468088273652,
+            3.5376387435587464
+          ],
+          "medianPairedPercentChange": 6.126428566254383,
+          "equalWorkPercentChange": 7.7739877369217725,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 19.970058999999992,
+              "alternate": 21.319709000000103
+            },
+            {
+              "baseline": 17.19065999999998,
+              "alternate": 21.07427500000017
+            },
+            {
+              "baseline": 19.396942999999965,
+              "alternate": 20.462706000000026
+            },
+            {
+              "baseline": 17.48468899999989,
+              "alternate": 18.69133499999998
+            },
+            {
+              "baseline": 16.91588200000001,
+              "alternate": 17.192583000000013
+            },
+            {
+              "baseline": 16.79023899999993,
+              "alternate": 17.384217000000035
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 17.197386999999935,
+          "alternateMedianMs": 18.700202500000046,
+          "pairedPercentChanges": [
+            27.693079434454027,
+            -2.2625843076379937,
+            22.3217727497101,
+            -17.03295900709638,
+            7.597947335756006,
+            -1.7650256109858486
+          ],
+          "medianPairedPercentChange": 2.9164608623850787,
+          "equalWorkPercentChange": 5.239699041891233,
+          "alternateFasterPairs": 3,
+          "pairTotals": [
+            {
+              "baseline": 17.23174199999994,
+              "alternate": 22.003742000000102
+            },
+            {
+              "baseline": 19.908782999999858,
+              "alternate": 19.45833000000016
+            },
+            {
+              "baseline": 17.16303199999993,
+              "alternate": 20.99412499999994
+            },
+            {
+              "baseline": 20.264141999999993,
+              "alternate": 16.812559000000192
+            },
+            {
+              "baseline": 16.67510900000002,
+              "alternate": 17.94207499999993
+            },
+            {
+              "baseline": 16.948196000000053,
+              "alternate": 16.649055999999973
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/enabled-probe-negatives.json",
+      "dictionary": "short-unique",
+      "synthetic": true,
+      "experiments": {},
+      "groups": 1,
+      "rows": 10000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 2.7799099999999726,
+          "alternateMedianMs": 2.8964300000000094,
+          "pairedPercentChanges": [
+            8.176740804609617,
+            45.13621412575635,
+            0.38674668618972063,
+            8.144013025006181,
+            7.503154468300055,
+            6.0753620058042745
+          ],
+          "medianPairedPercentChange": 7.823583746653118,
+          "equalWorkPercentChange": 12.852806453811949,
+          "alternateFasterPairs": 0,
+          "pairTotals": [
+            {
+              "baseline": 2.98758399999997,
+              "alternate": 3.2318709999999555
+            },
+            {
+              "baseline": 2.930165999999872,
+              "alternate": 4.252731999999924
+            },
+            {
+              "baseline": 2.9386160000001382,
+              "alternate": 2.9499809999999798
+            },
+            {
+              "baseline": 2.628789999999981,
+              "alternate": 2.842879000000039
+            },
+            {
+              "baseline": 2.5780889999998635,
+              "alternate": 2.7715270000001055
+            },
+            {
+              "baseline": 2.629654000000073,
+              "alternate": 2.78941500000019
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 2.587503999999967,
+          "alternateMedianMs": 2.6013445000000956,
+          "pairedPercentChanges": [
+            1.1562915650208616,
+            0.40799650342397964,
+            -1.295154345486571,
+            0.6550384110896479,
+            1.5270583928350012,
+            0.20644631061237373
+          ],
+          "medianPairedPercentChange": 0.5315174572568138,
+          "equalWorkPercentChange": 0.4369711301056789,
+          "alternateFasterPairs": 1,
+          "pairTotals": [
+            {
+              "baseline": 2.606608999999935,
+              "alternate": 2.636749000000009
+            },
+            {
+              "baseline": 2.6311500000001615,
+              "alternate": 2.641885000000002
+            },
+            {
+              "baseline": 2.6355160000000524,
+              "alternate": 2.601382000000058
+            },
+            {
+              "baseline": 2.5683989999999994,
+              "alternate": 2.585223000000042
+            },
+            {
+              "baseline": 2.5621810000000096,
+              "alternate": 2.6013070000001335
+            },
+            {
+              "baseline": 2.545455999999831,
+              "alternate": 2.550711000000092
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        }
+      }
+    },
+    {
+      "report": "results/prefix-corrected-hosted-jmdict/evidence/enabled-probe-negatives.json",
+      "dictionary": "nonlocal-reuse",
+      "synthetic": true,
+      "experiments": {},
+      "groups": 1,
+      "rows": 10000,
+      "comparisons": {
+        "treatment": {
+          "baselineMedianMs": 14.74953000000005,
+          "alternateMedianMs": 3.8183825000003253,
+          "pairedPercentChanges": [
+            -72.61299494621964,
+            -64.26518742566387,
+            -74.06906742771753,
+            -74.20287382275914,
+            -74.3885216562864,
+            -74.07448835186099
+          ],
+          "medianPairedPercentChange": -74.07177788978926,
+          "equalWorkPercentChange": -72.27153017934533,
+          "alternateFasterPairs": 6,
+          "pairTotals": [
+            {
+              "baseline": 14.836814000000004,
+              "alternate": 4.063358999999991
+            },
+            {
+              "baseline": 14.732960999999705,
+              "alternate": 5.264795999999933
+            },
+            {
+              "baseline": 14.764818000000105,
+              "alternate": 3.8286550000002535
+            },
+            {
+              "baseline": 14.734241999999995,
+              "alternate": 3.801011000000017
+            },
+            {
+              "baseline": 14.837402000000111,
+              "alternate": 3.8000779999997576
+            },
+            {
+              "baseline": 14.688658999999916,
+              "alternate": 3.808110000000397
+            }
+          ]
+        },
+        "control": {
+          "baselineMedianMs": 14.786493999999948,
+          "alternateMedianMs": 14.733189499999753,
+          "pairedPercentChanges": [
+            1.009983856265162,
+            -0.2263065956194965,
+            -0.7298546312794252,
+            -0.46199115726656137,
+            -0.39289768324440866,
+            -0.5605920180993929
+          ],
+          "medianPairedPercentChange": -0.427444420255485,
+          "equalWorkPercentChange": -0.2265401457243521,
+          "alternateFasterPairs": 5,
+          "pairTotals": [
+            {
+              "baseline": 14.821226999999908,
+              "alternate": 14.970919000000322
+            },
+            {
+              "baseline": 14.762716000000182,
+              "alternate": 14.729306999999608
+            },
+            {
+              "baseline": 14.845421999999871,
+              "alternate": 14.737071999999898
+            },
+            {
+              "baseline": 14.702013000000079,
+              "alternate": 14.634090999999898
+            },
+            {
+              "baseline": 14.801817999999912,
+              "alternate": 14.743661999999858
+            },
+            {
+              "baseline": 14.771169999999984,
+              "alternate": 14.688364000000092
+            }
+          ]
+        }
+      },
+      "diagnostics": {
+        "baseline": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "candidate": {
+          "rows": 10000,
+          "glossaryWitnesses": 9966,
+          "contentWitnesses": 9966,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 10484232,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        },
+        "control": {
+          "rows": 10000,
+          "glossaryWitnesses": 0,
+          "contentWitnesses": 0,
+          "fusedFallbacks": 0,
+          "crcReusedBytes": 0,
+          "maxHeapBytes": 30212096,
+          "floatScoreGroups": 0
+        }
+      }
+    }
+  ]
+}
