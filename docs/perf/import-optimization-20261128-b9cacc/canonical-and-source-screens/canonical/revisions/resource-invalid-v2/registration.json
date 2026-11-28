@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "protocolSha256": "8e3f206b4a27e7a19e022c6b7a5b37974fd2735de056eb891a21bec51f4af744",
+  "baseline": {
+    "path": "/workspace/scratch/b9cacc3542c2/baseline",
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "wasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+  },
+  "candidate": {
+    "path": "/workspace/scratch/b9cacc3542c2/canonical-combined",
+    "commit": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+    "wasmSha256": "5ce4a3ef2869fe101d92cd46d1364c4be273546d2a77b9d7fd38ec3b10f2644a"
+  },
+  "nodeVersion": "v22.22.0",
+  "nodeExecutable": "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+  "harness": {
+    "path": "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/canonical-component.mjs",
+    "sha256": "860212a3021b8eaaf755cc54d176fccc6665d5f583bcdfa9f1a1ab11888963dd"
+  },
+  "watchdog": {
+    "path": "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/component-watchdog.py",
+    "sha256": "729a7a205470752eb19887e3dbff8ceb8c93c19f5ba5e5400c2141db8383b458"
+  },
+  "baselineFiles": {
+    "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "ext/js/dictionary/term-bank-source-pipeline.js": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+    "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+    "ext/js/dictionary/term-content-canonical-layout.js": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c",
+    "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+    "ext/js/dictionary/term-content-ownership.js": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe",
+    "ext/js/dictionary/term-content-plan-resolution.js": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+    "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+    "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "test/fixtures/parser-settlement/worker-node.mjs": "cc04b9bf7b875c7b49b4047823b6fb638598352620994c78dd88776b0752ad5c",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+    "ext/js/dictionary/wasm/vendor/libdeflate/common_defs.h": "00ff4bdc24e0003fb9a3f18e692d21cc59200f09920d327fa1341a33915bbc71",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_constants.h": "72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_decompress.c": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/lib_common.h": "e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea",
+    "ext/js/dictionary/wasm/vendor/libdeflate/libdeflate.h": "1bb50a3ff8c6980c1031c0e9bb324cf99df51379fdca77a358644cca841765cc",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz.h": "619fbff2e98605a83f327a2879d52f219b5edaa579036a657937910f0707a43b",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_common.h": "e015eb5bc667062cbd53451438dd49bb9904c6a7765c806b765f6f735cf01a06",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_export.h": "195259dc89fb3f83a96426a90ee03dc45acef113150cd3475ea9cfbf1f7784f3",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c": "05930a45b5d9fdd5786c4e631373cdfec32b7be50ec0906d3b98caa503e068f3",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.h": "da4850920fdf09f8877d9affabe1ebba1852ce4b1ebbd121f2ba7a7ea8e57e5d"
+  },
+  "fixture": {
+    "path": "/workspace/scratch/b9cacc3542c2/fixtures/JMdict.zip",
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "termBanks": 53,
+    "termRows": 528299,
+    "exactMatches": 3998
+  },
+  "expectedGroups": [
+    {
+      "group": 0,
+      "rowCount": 50000,
+      "uniqueCount": 34951,
+      "pendingContentCount": 34951,
+      "sourceBytes": 14543374,
+      "ownedContentBytes": 8486982
+    },
+    {
+      "group": 1,
+      "rowCount": 40000,
+      "uniqueCount": 32856,
+      "pendingContentCount": 32739,
+      "sourceBytes": 13240716,
+      "ownedContentBytes": 9427894
+    },
+    {
+      "group": 2,
+      "rowCount": 40000,
+      "uniqueCount": 32421,
+      "pendingContentCount": 32256,
+      "sourceBytes": 13257737,
+      "ownedContentBytes": 9272798
+    },
+    {
+      "group": 3,
+      "rowCount": 40000,
+      "uniqueCount": 28895,
+      "pendingContentCount": 28758,
+      "sourceBytes": 14088207,
+      "ownedContentBytes": 8619220
+    },
+    {
+      "group": 4,
+      "rowCount": 50000,
+      "uniqueCount": 34677,
+      "pendingContentCount": 34159,
+      "sourceBytes": 15138615,
+      "ownedContentBytes": 8782091
+    },
+    {
+      "group": 5,
+      "rowCount": 50000,
+      "uniqueCount": 34006,
+      "pendingContentCount": 33543,
+      "sourceBytes": 15955653,
+      "ownedContentBytes": 9009676
+    },
+    {
+      "group": 6,
+      "rowCount": 40000,
+      "uniqueCount": 24271,
+      "pendingContentCount": 24030,
+      "sourceBytes": 13702906,
+      "ownedContentBytes": 7077918
+    },
+    {
+      "group": 7,
+      "rowCount": 50000,
+      "uniqueCount": 31906,
+      "pendingContentCount": 31330,
+      "sourceBytes": 14307906,
+      "ownedContentBytes": 7502995
+    },
+    {
+      "group": 8,
+      "rowCount": 40000,
+      "uniqueCount": 25774,
+      "pendingContentCount": 25442,
+      "sourceBytes": 14119170,
+      "ownedContentBytes": 7850259
+    },
+    {
+      "group": 9,
+      "rowCount": 40000,
+      "uniqueCount": 25109,
+      "pendingContentCount": 24806,
+      "sourceBytes": 13775196,
+      "ownedContentBytes": 7597844
+    },
+    {
+      "group": 10,
+      "rowCount": 40000,
+      "uniqueCount": 26102,
+      "pendingContentCount": 25651,
+      "sourceBytes": 13936647,
+      "ownedContentBytes": 7885247
+    },
+    {
+      "group": 11,
+      "rowCount": 48299,
+      "uniqueCount": 35062,
+      "pendingContentCount": 34367,
+      "sourceBytes": 15551396,
+      "ownedContentBytes": 9631061
+    }
+  ],
+  "censusSource": {
+    "path": "/workspace/scratch/b9cacc3542c2/analysis/canonical-timeline-b9cacc/acquired/files/analysis/overlap-ceilings.json",
+    "sha256": "985449a1bd66d58a818676f410328c519e0a8c3cea21cc96d598be8a2c47f63d",
+    "scope": "Hosted marked baseline counts only; this is not a byte-exact browser state oracle"
+  },
+  "parserPolicy": {
+    "hardwareConcurrency": 4,
+    "deviceMemory": 8,
+    "workerCount": 3,
+    "scope": "Declared hardware policy for same12sourcegroups; not a constrained-host performance claim",
+    "options": {
+      "emitTermByteLists": false,
+      "computeContentHashes": true,
+      "emitContentSlab": true,
+      "emitTokenBinaryContent": true,
+      "mediaHintFastScan": false,
+      "projectImagePaths": false,
+      "validateGlossaryTypes": true,
+      "prepareLookupIndexes": true,
+      "maxPendingChunks": 2
+    }
+  },
+  "schedule": {
+    "firstUseOrders": [
+      "ABC",
+      "BCA",
+      "CAB"
+    ],
+    "warmupOrders": [
+      "ABC",
+      "BCA",
+      "CAB"
+    ],
+    "measuredOrders": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC",
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ]
+  },
+  "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+  "continuationGate": {
+    "minimumMedianSavingsMsVersusBothControls": 10,
+    "minimumMedianPairedReductionPercentVersusBothControls": 10,
+    "minimumFasterBlocksVersusEachControl": 10,
+    "maximumAbsoluteMedianControlDriftFractionOfMinimumEffect": 0.5,
+    "controlDriftMustPassBothMillisecondsAndPercent": true,
+    "stage3Authorized": false
+  },
+  "temporaryRoot": "/home/agent/.cache/manabitan-b9cacc/canonical-combined",
+  "limits": {
+    "minimumAvailableBytes": 1879048192,
+    "minimumTemporaryFreeBytes": 268435456,
+    "maxRssBytes": 1073741824,
+    "maxArenaBytes": 67108864,
+    "maxTemporaryBytes": 201326592,
+    "timeoutSeconds": 300,
+    "maximumPreflightCpuBusyFraction": 0.1,
+    "minimumRuntimeAvailableBytes": 536870912
+  },
+  "reviewRevision": 2,
+  "replayAttemptPolicy": "Any prior replay registration or timing artifact permanently blocks another attempt in that acquisition directory; first-use failures remain observations.",
+  "temporaryByteLimitScope": "Entire registered temporaryRoot, including prior retained acquisitions; final child-exit size checked independently."
+}

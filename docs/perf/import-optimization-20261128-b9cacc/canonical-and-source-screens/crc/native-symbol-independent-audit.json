@@ -1,0 +1,30 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "artifactId": 15247569694,
+  "workflowRunId": 46105005935,
+  "artifactSha256": "b7197f3f07a0f04c017171f9389b0ed26ac841bce2e4a9fc370a58d4e5377907",
+  "hostedReceiptSha256": "605fc9a4f7eefbc917a333599bc200ac59f117aa4b173fc49931b25cae373344",
+  "localReceiptSha256": "f5af4ae9c76ebca278c0ad142747029268ad16a8fdca2e3531c871ebad8bf8d0",
+  "exactFrozenInputsEqual": 23,
+  "reviewedToolingBytesEqual": true,
+  "targets": {
+    "term-content-canonical-scan-v1.wasm": {
+      "noncustomSectionsEqual": true,
+      "functionCount": 5,
+      "namedSha256": "536cafe76913e5e2277e6e5031559caf65e96b1d85d1012119aea98e02a374b3",
+      "strippedSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "independentProofMatchesRecorded": true,
+      "namedBytesEqualLocal": true
+    },
+    "term-bank-parser.wasm": {
+      "noncustomSectionsEqual": true,
+      "functionCount": 51,
+      "namedSha256": "5b89a49b9a34d21360f5db24f6dc19dc4dad0d96c321ecd7a79e447a13413bb9",
+      "strippedSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "independentProofMatchesRecorded": true,
+      "namedBytesEqualLocal": true
+    }
+  },
+  "scope": "Independent hosted/native-toolchain reproduction confirms the same exact function-name map. Diagnostic only; no import or performance result."
+}

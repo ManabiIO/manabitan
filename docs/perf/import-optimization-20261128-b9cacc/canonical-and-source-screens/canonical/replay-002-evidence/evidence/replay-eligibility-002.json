@@ -1,0 +1,21 @@
+{
+  "atUtc": "2026-11-28T05:44:52.450637+00:00",
+  "kind": "read-only natural-window observation, not native timing or a change to the mandatory guard",
+  "samples": [
+    {
+      "seconds": 3.0048417350008094,
+      "aggregateCpuBusyFraction": 0.008509064002959699
+    },
+    {
+      "seconds": 3.0011027229993488,
+      "aggregateCpuBusyFraction": 0.012982195845697375
+    },
+    {
+      "seconds": 3.0007111739996617,
+      "aggregateCpuBusyFraction": 0.014074074074074128
+    }
+  ],
+  "MemAvailableBytes": 4263776256,
+  "temporaryFilesystemFreeBytes": 4578578432,
+  "nativeReplayStarted": false
+}

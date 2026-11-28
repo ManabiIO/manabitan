@@ -1,0 +1,23 @@
+{
+  "status": "invalid-resource-qualification",
+  "originalGuardReceiptPreserved": "analysis/canonical-combined/acquire-002-guard.json",
+  "originalGuardSha256": "83357144653b03eb547d6a077c0c9e468fe200d12716419a3325bc5068a79b37",
+  "producerReportedStageValid": true,
+  "reason": "Every resource sample contains only watchdog PID2, omitting launched Node PID5; children files are unsupported in this environment. Reported12MiB is not an importer process-tree peak.",
+  "ownedNodePid": 5,
+  "observedPidSets": [
+    [
+      2
+    ]
+  ],
+  "captureManifestSha256": "150533375f89a1afcee3612bbcac8abd97366d4c6ea00c9aefa509385ace8a6e",
+  "sourceCensusMatched": true,
+  "capturedCalls": 12,
+  "nativeRows": 366030,
+  "nativePending": 362032,
+  "exactDescriptors": 3998,
+  "nativeFallbacks": 0,
+  "timingObservations": 0,
+  "replayAuthorized": false,
+  "rawPayloadsRetainedPendingReviewedDisposal": true
+}

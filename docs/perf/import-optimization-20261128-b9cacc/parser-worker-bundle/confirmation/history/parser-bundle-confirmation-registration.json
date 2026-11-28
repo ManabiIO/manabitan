@@ -1,0 +1,18 @@
+{
+  "registeredAtUtc": "2026-11-28 04:10:55 UTC",
+  "planPath": "analysis/parser-bundle-confirmation-plan.md",
+  "planSha256": "d14aff3875c62c92e0608f8a9fcf847c9879acb5fd984d7817172c77702e080e",
+  "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "initialRun": 46104747758,
+  "jobsAtRegistration": [
+    {
+      "id": 140854868947,
+      "name": "Validate parser worker bundle and every package target",
+      "status": "queued",
+      "conclusion": null
+    }
+  ],
+  "initialTimingObservationsAtRegistration": 0,
+  "confirmationPublished": false,
+  "confirmationLaunched": false
+}

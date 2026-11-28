@@ -1,0 +1,34 @@
+{
+  "workflow": "/home/agent/b9cacc-parser-bundle/.github/workflows/import-parser-worker-bundle-b9cacc.yml",
+  "sha256": "d29c393c519430dbea6a59228f9171edd0c2b03803ea5ca6329b4abe9d4f4c27",
+  "previousSha256": "3fd9dfc462b21bd4468841a7623d047844632840252bc355442aaef08f435d77",
+  "syntaxChecks": [
+    "validate:1:bash",
+    "validate:1:python",
+    "validate:3:bash",
+    "validate:4:bash",
+    "validate:5:bash",
+    "validate:6:bash",
+    "validate:7:bash",
+    "validate:8:bash",
+    "validate:8:node",
+    "validate:9:bash",
+    "validate:9:python",
+    "validate:10:bash",
+    "validate:10:python",
+    "validate:11:bash",
+    "validate:11:python",
+    "qualify:2:bash",
+    "qualify:3:bash",
+    "qualify:5:bash",
+    "qualify:6:bash",
+    "qualify:6:python"
+  ],
+  "changedFiles": [
+    ".github/workflows/import-parser-worker-bundle-b9cacc.yml"
+  ],
+  "unchangedTimingCommand": true,
+  "unchangedPackageDeltaGate": true,
+  "unchangedBundleProof": true,
+  "frozenRuntimeAndHarness": "9da7dedd17535b4a0f8edb97e56756049bbad7a7"
+}

@@ -1,0 +1,93 @@
+{
+  "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateSourceSha256": "dc50ff2e2597e3e869583582abeb877e1174c6539d32de1870774fdfe780f126",
+  "manifest": {
+    "format": 1,
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "7eabffde1166fc8b44aaac80e32796cbe4fdf3f9958c35e3a46b2b131cb264e7",
+    "sourceFileCount": 14,
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+        ],
+        "arguments": [
+          "--target=wasm32",
+          "-O3",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--import-memory",
+          "-Wl,-z,stack-size=65536",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "5ce4a3ef2869fe101d92cd46d1364c4be273546d2a77b9d7fd38ec3b10f2644a"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "ext/js/dictionary/wasm/term-bank-inflate.c"
+        ],
+        "arguments": [
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=verify_term_bank_source_crcs",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=project_single_glossary_image_path",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+      }
+    ]
+  },
+  "canonicalBytes": 1806,
+  "commands": [
+    {
+      "command": "env MANABITAN_CLANG=/tmp/manabitan-native-9bb32/native-toolchain/bin/clang MANABITAN_WASM_LD=/tmp/manabitan-native-9bb32/native-toolchain/bin/wasm-ld /home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node dev/bin/build-dictionary-wasm.js --write",
+      "exitCode": 0,
+      "log": "build-write.log"
+    },
+    {
+      "command": "env MANABITAN_CLANG=/tmp/manabitan-native-9bb32/native-toolchain/bin/clang MANABITAN_WASM_LD=/tmp/manabitan-native-9bb32/native-toolchain/bin/wasm-ld /home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node dev/bin/build-dictionary-wasm.js --check",
+      "exitCode": 0,
+      "log": "build-check.log"
+    },
+    {
+      "command": "env NODE_OPTIONS=--max-old-space-size=768 /home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node node_modules/vitest/vitest.mjs run test/term-content-canonical-inputs.test.js test/term-content-canonical-counters.test.js test/term-content-canonical-scan.test.js test/term-content-metadata-arena.test.js test/dictionary-database-canonical-epoch.test.js test/dictionary-wasm-build.test.js --maxWorkers=1 --no-file-parallelism",
+      "exitCode": 0,
+      "log": "focused-tests.log",
+      "filesPassed": 6,
+      "testsPassed": 150,
+      "durationSeconds": 5.31
+    }
+  ],
+  "timingStarted": false,
+  "published": false,
+  "parserUnchanged": true
+}

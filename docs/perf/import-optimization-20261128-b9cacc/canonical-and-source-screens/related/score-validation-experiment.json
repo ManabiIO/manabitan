@@ -1,0 +1,9 @@
+{
+  "runId": 46103789342,
+  "sourceBranch": "perf/restore-score-validation-20261127-b9cacc",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "f21bda709a5b3374f4d5175f8234c94439936040",
+  "expectedPackageEntries": [
+    "js/dictionary/term-record-opfs-store.js"
+  ]
+}

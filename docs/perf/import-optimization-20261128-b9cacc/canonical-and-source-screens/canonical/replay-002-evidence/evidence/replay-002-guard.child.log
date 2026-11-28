@@ -1,0 +1,35 @@
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:37) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:44) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:51) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:58) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:65) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:72) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:79) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:86) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"event":"completed-block","index":0,"order":"ABC","warmup":true,"totalsMs":{"A":19.599924999999985,"B":44.37185100000124,"C":16.020022000000154},"calls":36}
+{"event":"completed-block","index":1,"order":"BCA","warmup":true,"totalsMs":{"A":50.039575999999215,"B":12.261941000000661,"C":12.384668999999121},"calls":36}
+{"event":"completed-block","index":2,"order":"CAB","warmup":true,"totalsMs":{"A":16.312519999997676,"B":15.29638100000011,"C":18.341998000000785},"calls":36}
+{"event":"completed-block","index":3,"order":"ABC","warmup":false,"totalsMs":{"A":11.597990999997819,"B":10.782628999997542,"C":10.54832400000032},"calls":36}
+{"event":"completed-block","index":4,"order":"BCA","warmup":false,"totalsMs":{"A":10.838072000002285,"B":10.486986000003526,"C":10.526671999999962},"calls":36}
+{"event":"completed-block","index":5,"order":"CAB","warmup":false,"totalsMs":{"A":14.34522399999878,"B":10.71596800000043,"C":41.62589299999854},"calls":36}
+{"event":"completed-block","index":6,"order":"ACB","warmup":false,"totalsMs":{"A":14.24835499999972,"B":11.846103000003495,"C":12.241696000000957},"calls":36}
+{"event":"completed-block","index":7,"order":"CBA","warmup":false,"totalsMs":{"A":11.045587999999043,"B":9.659813999996913,"C":16.33634799999527},"calls":36}
+{"event":"completed-block","index":8,"order":"BAC","warmup":false,"totalsMs":{"A":10.040772000000288,"B":11.000476999999591,"C":10.075376999999207},"calls":36}
+{"event":"completed-block","index":9,"order":"ABC","warmup":false,"totalsMs":{"A":11.585433000009289,"B":10.480688000001464,"C":10.34962600000108},"calls":36}
+{"event":"completed-block","index":10,"order":"BCA","warmup":false,"totalsMs":{"A":10.08063200000106,"B":12.856682999994518,"C":11.610986999992747},"calls":36}
+{"event":"completed-block","index":11,"order":"CAB","warmup":false,"totalsMs":{"A":10.814967999995133,"B":10.466021999989607,"C":14.025163999991491},"calls":36}
+{"event":"completed-block","index":12,"order":"ACB","warmup":false,"totalsMs":{"A":16.29111499999999,"B":12.035080000008747,"C":12.275103999993007},"calls":36}
+{"event":"completed-block","index":13,"order":"CBA","warmup":false,"totalsMs":{"A":19.198362999999517,"B":24.933951000002708,"C":46.57405800000561},"calls":36}
+{"event":"completed-block","index":14,"order":"BAC","warmup":false,"totalsMs":{"A":16.381712000002153,"B":21.893242999991344,"C":17.389238999992813},"calls":36}

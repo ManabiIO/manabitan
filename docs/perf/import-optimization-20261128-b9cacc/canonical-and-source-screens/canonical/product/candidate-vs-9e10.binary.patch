@@ -1,0 +1,766 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index e9de2e2ba5aa6bc8b0d22c6352d4edb001c774a3..98fdb52b7e0ef18e3b8a5f33c33607c49f754a1b 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
++    "sourceDigest": "7eabffde1166fc8b44aaac80e32796cbe4fdf3f9958c35e3a46b2b131cb264e7",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -21,7 +21,7 @@
+                 "-Wl,-z,stack-size=65536",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
++            "sha256": "5ce4a3ef2869fe101d92cd46d1364c4be273546d2a77b9d7fd38ec3b10f2644a"
+         },
+         {
+             "name": "term-bank-parser.wasm",
+diff --git a/dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm b/dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm
+index e81f92e8aca60a10dbb753777eef1df6a9862f02..0623fb98ad524fba9ceebf9dd2114db3ee073aec 100644
+GIT binary patch
+literal 1806
+zcma)6J8WB37(VCR>+54*-^595H*MqQKgSuebgTyk@QIXE6+^eK#w|gLo5W2VLL)+b
+zRYg@Q1*t;@)CCV6x@4%>D}+EG!N8D#fl8n<0Ac`@p+ltd{nw9JJR}lX|Lgl--#Pb)
+zMte;PA!JIvC1gj9OK*97J6Ky@Yi;f*p}Zi4s1SZi-jY%VT6Uz1_x&*4N)>N3)?4c<
+zHyW$;#`Tr@_VQ+XrL`_Z;ncs{*lE4HRbO6zTgb^%_gdq2eY5pmTd2~h^Va6_J1e*A
+z*LSv-+rk@bBT^qmg`fQ~m-2;^VOqHElb2o?Kz<mo8OO07ewOpH9q-O`=M7<m!+%wM
+zq<iu~Umo=3eqY9koL48hs`mQ&Z`#VLI@GRXl&U!~uYT9o<4$izC_1lRYU{K7Q`^*)
+zNRUsdoA8_hPP7fk@1sB0Hob^MRHHPdU8lK$9E>cH%VoaORwoN^E$uvn+5NM&nIoHB
+zQ1@&|`e>KL(L(;7&0Xt-ztOh0HfM<>i$Y*_X@K}v+h|xfOVLQ^Slh8-Xl#%?HiGz0
+z+wmbHOXDM<@3qYjL-|2+egyG@wi83d!~iidg7`_>$suBLfS4RXe5&o#5HZz5q>sP`
+zP4!VEDFcpGP1Oi=Cv2L66Q+ot!mmVu@pCdvNH=Gg)WeLKW*KM9Stl;3{fr4&?qy7t
+z{SPwc9Ls}@Ip42Tf-G<oRr6{j&5XN)lMHOxsVx+`e^**bXRkyaLEMDyU1hx&Jzk+Q
+zrJDA_W%$ZYHcgPsTfQjbXV0aRmvMRp_7`ZzNDS*fKy~T-Eh{gnIM$TiwK<aWYA@Dy
+z7ORKXP%5|Z3V-8JlX6oGH~@g$lNZna*jZ(JAGT>*<?`F4+H_{a@=(orC9LH;WGZNv
+zq@U;e37gVp&a1gyOki<Ot)<M>C{1&$&n-r25UmkWTUK!yGCaMYo<T62M3IPW^P+&h
+z6nP<GG_3dc?l~_6@Bh&;7<L3%|Lo`_RZhDuoi~+#@3I)FoCrfIIS&Jqt*S>~e&La#
+za#eMqVOYha10b8W<YH_f*#WJ8cY+X~txY&OhgEwggqbQJY;a!ha}_4ar&-rof{17a
+z+%W~O<VKV{6*!7Hms`accv`xTPgKGSPQz9}BxX?VF}zKhse)JK9wi2_I2W)Xn^lFY
+zplPN@J{g8F^F*wTu{O(Ep0zT!!VQR@KI9TK!A|M+VDh=KYqICsA90OiY$sn6f{&O*
+z1?|8Lm%z@`$t6KiP1D#i#Qu1gipfBfdtG&Z{e{=)zIcviAe-0dKK&ZTg}!nB6Bx<7
+zh#WtJk*opZ<GV1D`HSdiiedkQ<~yQrS3pA0d!VUURs48UsjB!fr$SZn<IcPuYQa;<
+S!Dr8E+4!98|DWuTRQMO_Nm6tG
+
+literal 1624
+zcmZ8hF>G5^6n*dh@9$@S|JaG+P|^(7Z}QTy9vC1m5{VE)wywr4MzTrbCU!$3Lj6@m
+zl`93QLkH9a4;?C@3>ACDPy`YT3>g@xgj5DV3`J$=5UHH|zwKDHhx_lj=iPVjx$iyI
+z>}_kMl+Ngnlpat~d##=QV7s;5-8&#fUXVdlDL<pHYpnyL2inC$Kg@PBm21tN?oRt!
+zbF0z3+HUN(_ImB^j#7)~_*V0vd!yfI?R>2C!a2O%yxG|6e%4d8bPitMYkktb*|>Vp
+zZ}pTn*F&T+jVeF?O_=eO(_vP*(c@QM7{GoRh#SYTA0CIE8F;rA2Jfk=a`@NjE0fxL
+zV|zTd!?BGMTca~mr=#)rKgQ}h-8XJfC0cc=MlX!)^I?RPHF{;NC-y&M{SP9=9{ZmH
+zIVYSMn_+LvehSw6ScqKgv+o9-U93UD8fzuZkH!W``I0Me9>N0uX>9hynl-v(a~zx;
+zvN~BS-Ld&AY4~Sj)23yWN>*_WoI{>4ela$j<~1D7giehuOhbjq;=&B$S7W0o!*Dbc
+z`pww6X=rY;cy5OAyRpS7qc~v{XBdANTbeRT6Gmx<@tv{rQ^tJC@K2xy&yQKGIh$w<
+zVIlV>bP#o`3*M@`C73Nc>enc~ds|yAlEyh1n8rd3EJ0qFP4QFSX*-=NmpgWGBLacT
+zPIqiZP6n;gDwi**_}O#q^o9&U*f>_YQ->+&(0zejwe$P7a+zW|SeNN2cWComsnJnv
+z?9$1hV8h&%h&aFY8owewC3TX1o-6J+HXZv`jg-CM9>09{@4*(pp@44-xZJbkO8ZPb
+zUf4ws)b9xFOFdPRB2@KadVH!Y_|8I%Lpga+#`?Un83mk`rm{kMiuMEa6(CN1OOlJ1
+z(HtvIoeOZ%D{!2{9=du__JHA#{mvx?Xg%^mo=4-l^JYyUqn3>-g*g3wn&w^(mw^en
+zKChD0a3A+0EqF7^@RA#>!$@+QmGrOmZj_NY^jmR-Eenb3G<tMK$)4!nE~DzIW^#{!
+zcG$0@333k;2V5w_E6J2%bKWV7oWhh&Sp*lSAWp?$SR#cWbAps*V~rY~JdlK36i~Y(
+zxD#F}g@!XwgeIJRM=2;yVwNE@q$i|6O)z+3M1h<oc_ES}nbsrdm3TvgVaxFv8Z;yW
+z;{3Zb`ui_wcJ%e_H){oW`T*dhHR&o5X7uto;IS~HCqKbils>TF?zeEHse<fUqhq{%
+t&XcV`fB3`q9ut=#IKD7;Oe`669lVt7V#ZY|c%hP`m)u0WNMXnn{tq1?JfHvo
+
+diff --git a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+index 2035b8e2859bb4dc6a770812361040ff5b8c370f..16f13672ebf6a9a18209a2409491e889dd7107e6 100644
+--- a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
++++ b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+@@ -52,6 +52,16 @@ uint32_t canonical_max_rows(void) { return MAX_ROWS; }
+ __attribute__((export_name("canonical_prefix_bytes")))
+ uint32_t canonical_prefix_bytes(void) { return PREFIX; }
+ 
++static inline void publish_counters(volatile uint32_t *h, uint32_t next,
++                                   uint32_t pending, uint32_t exact,
++                                   uint32_t resolved, uint32_t dense) {
++    h[1] = next;
++    h[2] = pending;
++    h[3] = exact;
++    h[4] = resolved;
++    h[5] = dense;
++}
++
+ // Header at 1024: journal progress, next cursor, pending count, exact count,
+ // resolved count, dense count, reserved. The journal count is volatile so a
+ // trap cannot hide an insertion from the synchronous JS rollback owner.
+@@ -87,28 +97,40 @@ int32_t scan_canonical(void) {
+     const uint8_t *flags = U8(FLAGS);
+     uint32_t *out = U32(OUT), *journal = U32(JOURNAL), *exact = U32(EXACT);
+     const uint32_t n = c[14] - c[13], mask = c[1] - 1;
++    // Validated authoritative pointers cannot reach this config or the fixed
++    // input columns below PREFIX. Snapshot immutable inputs across the journal
++    // barrier, while preserving volatile journal progress and every trap point.
++    const uint32_t row_count = c[12], first_unique = c[13], row_start = c[16];
++    const uint32_t base_offset = c[17], buffer_length = c[18];
++    const uint32_t capacity = c[10], slots_count = c[1];
++    const uint32_t lookup = c[19], reserve = c[20], trap_after = c[21];
++    // Only journal progress must reach memory before each mutation. Preserve
++    // every other header field at returns and the intentional trap boundary.
++    uint32_t next = c[15], pending = 0, exact_count = 0, resolved = 0, dense = c[11];
++    int32_t result = 0;
+     for (uint32_t i = c[15]; i < n; ++i) {
+-        const uint32_t unique = c[13] + i, global = rows[i];
+-        if (global < c[16] || (uint64_t)global - c[16] >= c[12]) { return -2; }
+-        const uint32_t row = global - c[16];
+-        if (identity[row] != unique) { return -2; }
+-        h[1] = i + 1;
++        const uint32_t unique = first_unique + i, global = rows[i];
++        if (global < row_start || (uint64_t)global - row_start >= row_count) { result = -2; goto finished; }
++        const uint32_t row = global - row_start;
++        if (identity[row] != unique) { result = -2; goto finished; }
++        next = i + 1;
+         if (flags[i] == 1) {
+-            ++h[4];
++            ++resolved;
+             continue;
+         }
+         const uint32_t *m = meta + row * 4;
+-        const uint64_t offset = (uint64_t)c[17] + m[0], end = offset + m[1];
+-        if (end > c[18] || offset > 0xffffffffu) { return -3; }
+-        uint32_t hash = m[2] ^ (m[3] * 0x9e3779b1u);
++        const uint32_t content_length = m[1], content_hash1 = m[2], content_hash2 = m[3];
++        const uint64_t offset = (uint64_t)base_offset + m[0], end = offset + content_length;
++        if (end > buffer_length || offset > 0xffffffffu) { result = -3; goto finished; }
++        uint32_t hash = content_hash1 ^ (content_hash2 * 0x9e3779b1u);
+         hash ^= hash >> 16;
+         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
+         while (slots[slot]) {
+             uint32_t index = slots[slot] - 1;
+-            if (index >= c[10] || ++probes >= c[1]) { return -4; }
+-            if (hash1[index] == m[2] && hash2[index] == m[3]) {
++            if (index >= capacity || ++probes >= slots_count) { result = -4; goto finished; }
++            if (hash1[index] == content_hash1 && hash2[index] == content_hash2) {
+                 pair = 1;
+-                if (c[19] && state[index] == 1) {
++                if (lookup && state[index] == 1) {
+                     existing = index;
+                     break;
+                 }
+@@ -116,27 +138,27 @@ int32_t scan_canonical(void) {
+             slot = (slot + 1) & mask;
+         }
+         if (existing != 0xffffffffu) {
+-            uint32_t j = h[3];
++            uint32_t j = exact_count;
+             exact[j * 2] = i;
+             exact[j * 2 + 1] = existing;
+-            h[3] = j + 1;
++            exact_count = j + 1;
+             // Do not inspect the following row before the exact-byte await.
+-            if (h[3] == EXACT_BATCH_SIZE) { return 1; }
++            if (exact_count == EXACT_BATCH_SIZE) { result = 1; goto finished; }
+             continue;
+         }
+         uint32_t staged = 0xffffffffu;
+-        if (c[20] && !pair) {
+-            const uint32_t index = h[5];
+-            if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
++        if (reserve && !pair) {
++            const uint32_t index = dense;
++            if (index >= capacity || state[index] != 0 || content_length == 0xffffffffu) { result = -5; goto finished; }
+             uint32_t j = h[0];
+             journal[j * 3] = slot;
+             journal[j * 3 + 1] = slots[slot];
+             journal[j * 3 + 2] = index;
+             h[0] = j + 1; // Commit rollback progress BEFORE authoritative mutation.
+             __asm__ __volatile__("" ::: "memory");
+-            hash1[index] = m[2];
+-            hash2[index] = m[3];
+-            length[index] = m[1];
++            hash1[index] = content_hash1;
++            hash2[index] = content_hash2;
++            length[index] = content_length;
+             s1[index] = sigs[i * 3];
+             s2[index] = sigs[i * 3 + 1];
+             s3[index] = sigs[i * 3 + 2];
+@@ -144,16 +166,21 @@ int32_t scan_canonical(void) {
+             state[index] = 2;
+             slots[slot] = index + 1;
+             staged = index;
+-            h[5] = index + 1;
+-            if (c[21] && h[0] == c[21]) { __builtin_trap(); }
++            dense = index + 1;
++            if (trap_after && h[0] == trap_after) {
++                publish_counters(h, next, pending, exact_count, resolved, dense);
++                __builtin_trap();
++            }
+         }
+-        uint32_t j = h[2]++;
++        uint32_t j = pending++;
+         out[j] = (uint32_t)offset;
+-        out[MAX_ROWS + j] = m[1];
+-        out[2u * MAX_ROWS + j] = m[2];
+-        out[3u * MAX_ROWS + j] = m[3];
++        out[MAX_ROWS + j] = content_length;
++        out[2u * MAX_ROWS + j] = content_hash1;
++        out[3u * MAX_ROWS + j] = content_hash2;
+         out[4u * MAX_ROWS + j] = unique;
+         out[5u * MAX_ROWS + j] = staged;
+     }
+-    return 0;
++finished:
++    publish_counters(h, next, pending, exact_count, resolved, dense);
++    return result;
+ }
+diff --git a/test/data/dictionary-wasm/term-content-canonical-counters-baseline.wasm b/test/data/dictionary-wasm/term-content-canonical-counters-baseline.wasm
+new file mode 100644
+index 0000000000000000000000000000000000000000..e81f92e8aca60a10dbb753777eef1df6a9862f02
+GIT binary patch
+literal 1624
+zcmZ8hF>G5^6n*dh@9$@S|JaG+P|^(7Z}QTy9vC1m5{VE)wywr4MzTrbCU!$3Lj6@m
+zl`93QLkH9a4;?C@3>ACDPy`YT3>g@xgj5DV3`J$=5UHH|zwKDHhx_lj=iPVjx$iyI
+z>}_kMl+Ngnlpat~d##=QV7s;5-8&#fUXVdlDL<pHYpnyL2inC$Kg@PBm21tN?oRt!
+zbF0z3+HUN(_ImB^j#7)~_*V0vd!yfI?R>2C!a2O%yxG|6e%4d8bPitMYkktb*|>Vp
+zZ}pTn*F&T+jVeF?O_=eO(_vP*(c@QM7{GoRh#SYTA0CIE8F;rA2Jfk=a`@NjE0fxL
+zV|zTd!?BGMTca~mr=#)rKgQ}h-8XJfC0cc=MlX!)^I?RPHF{;NC-y&M{SP9=9{ZmH
+zIVYSMn_+LvehSw6ScqKgv+o9-U93UD8fzuZkH!W``I0Me9>N0uX>9hynl-v(a~zx;
+zvN~BS-Ld&AY4~Sj)23yWN>*_WoI{>4ela$j<~1D7giehuOhbjq;=&B$S7W0o!*Dbc
+z`pww6X=rY;cy5OAyRpS7qc~v{XBdANTbeRT6Gmx<@tv{rQ^tJC@K2xy&yQKGIh$w<
+zVIlV>bP#o`3*M@`C73Nc>enc~ds|yAlEyh1n8rd3EJ0qFP4QFSX*-=NmpgWGBLacT
+zPIqiZP6n;gDwi**_}O#q^o9&U*f>_YQ->+&(0zejwe$P7a+zW|SeNN2cWComsnJnv
+z?9$1hV8h&%h&aFY8owewC3TX1o-6J+HXZv`jg-CM9>09{@4*(pp@44-xZJbkO8ZPb
+zUf4ws)b9xFOFdPRB2@KadVH!Y_|8I%Lpga+#`?Un83mk`rm{kMiuMEa6(CN1OOlJ1
+z(HtvIoeOZ%D{!2{9=du__JHA#{mvx?Xg%^mo=4-l^JYyUqn3>-g*g3wn&w^(mw^en
+zKChD0a3A+0EqF7^@RA#>!$@+QmGrOmZj_NY^jmR-Eenb3G<tMK$)4!nE~DzIW^#{!
+zcG$0@333k;2V5w_E6J2%bKWV7oWhh&Sp*lSAWp?$SR#cWbAps*V~rY~JdlK36i~Y(
+zxD#F}g@!XwgeIJRM=2;yVwNE@q$i|6O)z+3M1h<oc_ES}nbsrdm3TvgVaxFv8Z;yW
+z;{3Zb`ui_wcJ%e_H){oW`T*dhHR&o5X7uto;IS~HCqKbils>TF?zeEHse<fUqhq{%
+t&XcV`fB3`q9ut=#IKD7;Oe`669lVt7V#ZY|c%hP`m)u0WNMXnn{tq1?JfHvo
+
+literal 0
+HcmV?d00001
+
+diff --git a/test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm b/test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm
+new file mode 100644
+index 0000000000000000000000000000000000000000..e81f92e8aca60a10dbb753777eef1df6a9862f02
+GIT binary patch
+literal 1624
+zcmZ8hF>G5^6n*dh@9$@S|JaG+P|^(7Z}QTy9vC1m5{VE)wywr4MzTrbCU!$3Lj6@m
+zl`93QLkH9a4;?C@3>ACDPy`YT3>g@xgj5DV3`J$=5UHH|zwKDHhx_lj=iPVjx$iyI
+z>}_kMl+Ngnlpat~d##=QV7s;5-8&#fUXVdlDL<pHYpnyL2inC$Kg@PBm21tN?oRt!
+zbF0z3+HUN(_ImB^j#7)~_*V0vd!yfI?R>2C!a2O%yxG|6e%4d8bPitMYkktb*|>Vp
+zZ}pTn*F&T+jVeF?O_=eO(_vP*(c@QM7{GoRh#SYTA0CIE8F;rA2Jfk=a`@NjE0fxL
+zV|zTd!?BGMTca~mr=#)rKgQ}h-8XJfC0cc=MlX!)^I?RPHF{;NC-y&M{SP9=9{ZmH
+zIVYSMn_+LvehSw6ScqKgv+o9-U93UD8fzuZkH!W``I0Me9>N0uX>9hynl-v(a~zx;
+zvN~BS-Ld&AY4~Sj)23yWN>*_WoI{>4ela$j<~1D7giehuOhbjq;=&B$S7W0o!*Dbc
+z`pww6X=rY;cy5OAyRpS7qc~v{XBdANTbeRT6Gmx<@tv{rQ^tJC@K2xy&yQKGIh$w<
+zVIlV>bP#o`3*M@`C73Nc>enc~ds|yAlEyh1n8rd3EJ0qFP4QFSX*-=NmpgWGBLacT
+zPIqiZP6n;gDwi**_}O#q^o9&U*f>_YQ->+&(0zejwe$P7a+zW|SeNN2cWComsnJnv
+z?9$1hV8h&%h&aFY8owewC3TX1o-6J+HXZv`jg-CM9>09{@4*(pp@44-xZJbkO8ZPb
+zUf4ws)b9xFOFdPRB2@KadVH!Y_|8I%Lpga+#`?Un83mk`rm{kMiuMEa6(CN1OOlJ1
+z(HtvIoeOZ%D{!2{9=du__JHA#{mvx?Xg%^mo=4-l^JYyUqn3>-g*g3wn&w^(mw^en
+zKChD0a3A+0EqF7^@RA#>!$@+QmGrOmZj_NY^jmR-Eenb3G<tMK$)4!nE~DzIW^#{!
+zcG$0@333k;2V5w_E6J2%bKWV7oWhh&Sp*lSAWp?$SR#cWbAps*V~rY~JdlK36i~Y(
+zxD#F}g@!XwgeIJRM=2;yVwNE@q$i|6O)z+3M1h<oc_ES}nbsrdm3TvgVaxFv8Z;yW
+z;{3Zb`ui_wcJ%e_H){oW`T*dhHR&o5X7uto;IS~HCqKbils>TF?zeEHse<fUqhq{%
+t&XcV`fB3`q9ut=#IKD7;Oe`669lVt7V#ZY|c%hP`m)u0WNMXnn{tq1?JfHvo
+
+literal 0
+HcmV?d00001
+
+diff --git a/test/term-content-canonical-counters.test.js b/test/term-content-canonical-counters.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..e9262ad019611f8e176cb14160b1588735b59453
+--- /dev/null
++++ b/test/term-content-canonical-counters.test.js
+@@ -0,0 +1,231 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program. If not, see <https://www.gnu.org/licenses/>.
++ */
++
++/* eslint-disable @stylistic/semi */
++
++import assert from 'node:assert/strict'
++import {createHash} from 'node:crypto'
++import {readFile} from 'node:fs/promises'
++import {test} from 'vitest'
++import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js'
++import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metadata-arena.js'
++
++// Exact source-bound artifact at d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26.
++// Its unchanged kernel is the independent oracle for partial failure state.
++const baselineBytes = await readFile(new URL('data/dictionary-wasm/term-content-canonical-counters-baseline.wasm', import.meta.url))
++assert.equal(createHash('sha256').update(baselineBytes).digest('hex'), '40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af')
++const modules = [
++    await WebAssembly.compile(baselineBytes),
++    await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url))),
++]
++
++/**
++ * @typedef {object} Fixture
++ * @property {TermContentMetadataArena} arena
++ * @property {Uint32Array} config
++ * @property {Uint32Array} rows
++ * @property {Uint32Array} identities
++ * @property {Uint32Array} meta
++ * @property {Uint8Array} flags
++ */
++
++/**
++ * @param {number} count
++ * @returns {Fixture}
++ */
++function createFixture(count) {
++    const capacity = 2 ** Math.ceil(Math.log2(Math.max(16, count * 2)))
++    const arena = new TermContentMetadataArena(capacity, capacity * 2)
++    const buffer = arena.memory.buffer
++    const config = new Uint32Array(buffer, 1088, 22)
++    const first = 7
++    const rowStart = 100
++    config.set([
++        arena.slots.byteOffset,
++        arena.slots.length,
++        arena.hash1.byteOffset,
++        arena.hash2.byteOffset,
++        arena.state.byteOffset,
++        arena.length.byteOffset,
++        arena.signaturePresent.byteOffset,
++        arena.signature1.byteOffset,
++        arena.signature2.byteOffset,
++        arena.signature3.byteOffset,
++        arena.state.length,
++        0,
++        count,
++        first,
++        first + count,
++        0,
++        rowStart,
++        0,
++        count * 8,
++        1,
++        1,
++        0,
++    ])
++    new Uint32Array(buffer, 1024, 7).fill(0xdeadbeef)
++    const rows = new Uint32Array(buffer, layout.ROWS, count)
++    const identities = new Uint32Array(buffer, layout.IDENT, count)
++    const meta = new Uint32Array(buffer, layout.META, count * 4)
++    const flags = new Uint8Array(buffer, layout.FLAGS, count)
++    const signatures = new Uint32Array(buffer, layout.SIGS, count * 3)
++    for (let i = 0; i < count; ++i) {
++        rows[i] = rowStart + i
++        identities[i] = first + i
++        meta.set([i * 8, 8, i + 1, (i ^ 0x9e3779b9) >>> 0], i * 4)
++        signatures.set([i, i + 1, i + 2], i * 3)
++    }
++    return {arena, config, rows, identities, meta, flags}
++}
++
++/**
++ * @param {number} hash1
++ * @param {number} hash2
++ * @param {number} mask
++ * @returns {number}
++ */
++function hashSlot(hash1, hash2, mask) {
++    const hash = hash1 ^ Math.imul(hash2, 0x9e3779b1)
++    return (hash ^ (hash >>> 16)) & mask
++}
++
++/**
++ * @param {Fixture} fixture
++ * @param {number} row
++ * @param {number} state
++ */
++function seedExisting({arena, config, meta}, row, state) {
++    const index = config[11]++
++    const hash1 = meta[row * 4 + 2]
++    const hash2 = meta[row * 4 + 3]
++    const mask = arena.slots.length - 1
++    let slot = hashSlot(hash1, hash2, mask)
++    while (arena.slots[slot] !== 0) { slot = (slot + 1) & mask }
++    arena.slots[slot] = index + 1
++    arena.hash1[index] = hash1
++    arena.hash2[index] = hash2
++    arena.length[index] = 8
++    arena.state[index] = state
++}
++
++/** @type {Array<{name: string, count: number, change?: (fixture: Fixture) => void, result: number|'trap', resumeResult?: number}>} */
++const cases = [
++    {name: 'empty segment', count: 0, result: 0},
++    {name: 'fresh pending rows', count: 23, result: 0},
++    {name: 'maximum-size pending segment', count: layout.MAX, result: 0},
++    {name: 'nonzero starting cursor', count: 23, change: ({config}) => { config[15] = 5 }, result: 0},
++    {name: 'no reservation', count: 23, change: ({config}) => { config[20] = 0 }, result: 0},
++    {name: 'already resolved rows', count: 23, change: ({flags}) => { flags.fill(1) }, result: 0},
++    {name: 'mixed published, pending and resolved rows',
++        count: 23,
++        change: (fixture) => {
++            for (let i = 0; i < 18; i += 3) {
++                seedExisting(fixture, i, 1)
++                seedExisting(fixture, i + 1, 2)
++                fixture.flags[i + 2] = 1
++            }
++        },
++        result: 0},
++    {name: 'published hash pair with lookup disabled',
++        count: 23,
++        change: (fixture) => {
++            seedExisting(fixture, 5, 1)
++            fixture.config[19] = 0
++        },
++        result: 0},
++    {name: 'exact-batch return precedes invalid later row',
++        count: 4097,
++        change: (fixture) => {
++            for (let i = 0; i < 4096; ++i) { seedExisting(fixture, i, 1) }
++            fixture.identities[4096] = 0
++        },
++        result: 1,
++        resumeResult: -2},
++    {name: 'invalid source count', count: 23, change: ({config}) => { config[12] = layout.MAX + 1 }, result: -1},
++    {name: 'reversed unique range', count: 23, change: ({config}) => { config[14] = config[13] - 1 }, result: -1},
++    {name: 'out-of-range cursor', count: 23, change: ({config}) => { config[15] = 24 }, result: -1},
++    {name: 'non-power-of-two slots', count: 23, change: ({config}) => { config[1] = 3 }, result: -1},
++    {name: 'invalid table pointer', count: 23, change: ({config}) => { config[2] = layout.PREFIX - 4 }, result: -1},
++    {name: 'invalid dense count', count: 23, change: ({config}) => { config[11] = config[10] + 1 }, result: -1},
++    {name: 'invalid slot index',
++        count: 23,
++        change: ({arena, meta}) => {
++            arena.slots[hashSlot(meta[22 * 4 + 2], meta[22 * 4 + 3], arena.slots.length - 1)] = arena.state.length + 1
++        },
++        result: -4},
++    {name: 'exhausted probe chain',
++        count: 23,
++        change: ({arena, config}) => {
++            arena.slots.fill(1)
++            arena.state[0] = 2
++            config[11] = 1
++        },
++        result: -4},
++    {name: 'dense capacity exhausted after insertions', count: 23, change: ({config}) => { config[10] = 5 }, result: -5},
++    {name: 'occupied dense tail after insertions', count: 23, change: ({arena}) => { arena.state[5] = 1 }, result: -5},
++    {name: 'reserved length after insertions',
++        count: 23,
++        change: ({config, meta}) => {
++            config[18] = 0xffffffff
++            meta[5 * 4] = 0
++            meta[5 * 4 + 1] = 0xffffffff
++        },
++        result: -5},
++]
++for (const row of [0, 5, 22]) {
++    cases.push(
++        {name: `invalid row at ${row}`, count: 23, change: ({rows}) => { rows[row] = 99 }, result: -2},
++        {name: `invalid identity at ${row}`, count: 23, change: ({identities}) => { identities[row] = 0 }, result: -2},
++        {name: `invalid span at ${row}`, count: 23, change: ({meta}) => { meta[row * 4] = 0xffffffff }, result: -3},
++        {name: `trap after insertion ${row + 1}`, count: 23, change: ({config}) => { config[21] = row + 1 }, result: 'trap'},
++    )
++}
++
++test.each(cases)('canonical counters preserve complete native state: $name', ({count, change, result, resumeResult}) => {
++    const fixture = createFixture(count)
++    change?.(fixture)
++    const input = new Uint8Array(fixture.arena.memory.buffer)
++    const arms = modules.map((module) => {
++        const pages = input.byteLength / 65536
++        const memory = new WebAssembly.Memory({initial: pages, maximum: pages})
++        new Uint8Array(memory.buffer).set(input)
++        const instance = new WebAssembly.Instance(module, {env: {memory}})
++        return {memory, run: /** @type {() => number} */ (instance.exports.scan_canonical)}
++    })
++    const expectedResults = typeof resumeResult === 'number' ? [result, resumeResult] : [result]
++    for (let pass = 0; pass < expectedResults.length; ++pass) {
++        for (const arm of arms) {
++            if (pass > 0) {
++                new Uint32Array(arm.memory.buffer, 1088, 22)[15] = new Uint32Array(arm.memory.buffer, 1024, 7)[1]
++            }
++            if (expectedResults[pass] === 'trap') {
++                assert.throws(arm.run, WebAssembly.RuntimeError)
++            } else {
++                assert.equal(arm.run(), expectedResults[pass])
++            }
++        }
++        const [baseline, candidate] = arms.map(({memory}) => new Uint8Array(memory.buffer))
++        assert.deepEqual(new Uint32Array(candidate.buffer, 1024, 7), new Uint32Array(baseline.buffer, 1024, 7), 'all seven header words')
++        // The private compiler stack may differ. Every input, output column,
++        // journal word, exact descriptor and authoritative byte must match.
++        assert.equal(Buffer.compare(candidate.subarray(layout.META), baseline.subarray(layout.META)), 0)
++        assert.equal(Buffer.compare(candidate.subarray(1088, 1176), baseline.subarray(1088, 1176)), 0)
++    }
++})
++
++/* eslint-enable @stylistic/semi */
+diff --git a/test/term-content-canonical-inputs.test.js b/test/term-content-canonical-inputs.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..7ebeabe4a40b6faf0a8378167ed8625339fb7e93
+--- /dev/null
++++ b/test/term-content-canonical-inputs.test.js
+@@ -0,0 +1,198 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import assert from 'node:assert/strict'
++import {createHash} from 'node:crypto'
++import {readFile} from 'node:fs/promises'
++import {test} from 'vitest'
++import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js'
++import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metadata-arena.js'
++
++// Exact checked module from bbccabd520972cc351a65d9f545bd5369b6e9747.
++// Preserve partial failure/trap state as well as ordinary successful results.
++const baseline = await readFile(new URL('data/dictionary-wasm/term-content-canonical-v1-baseline.wasm', import.meta.url))
++assert.equal(createHash('sha256').update(baseline).digest('hex'), '40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af')
++const modules = await Promise.all([
++    WebAssembly.compile(baseline),
++    WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url))),
++])
++
++/**
++ * @param {number} count
++ * @returns {{arena: TermContentMetadataArena, config: Uint32Array, rows: Uint32Array, identities: Uint32Array, meta: Uint32Array, flags: Uint8Array}}
++ */
++function fixture(count) {
++    const capacity = 2 ** Math.ceil(Math.log2(Math.max(16, count * 2)))
++    const arena = new TermContentMetadataArena(capacity, capacity * 2)
++    const buffer = arena.memory.buffer
++    const config = new Uint32Array(buffer, 1088, 22)
++    config.set([
++        arena.slots.byteOffset,
++        arena.slots.length,
++        arena.hash1.byteOffset,
++        arena.hash2.byteOffset,
++        arena.state.byteOffset,
++        arena.length.byteOffset,
++        arena.signaturePresent.byteOffset,
++        arena.signature1.byteOffset,
++        arena.signature2.byteOffset,
++        arena.signature3.byteOffset,
++        arena.state.length,
++        0,
++        count,
++        7,
++        count + 7,
++        0,
++        100,
++        0,
++        count * 8,
++        1,
++        1,
++        0,
++    ])
++    new Uint32Array(buffer, 1024, 7).fill(0xdeadbeef)
++    const rows = new Uint32Array(buffer, layout.ROWS, count)
++    const identities = new Uint32Array(buffer, layout.IDENT, count)
++    const meta = new Uint32Array(buffer, layout.META, count * 4)
++    const flags = new Uint8Array(buffer, layout.FLAGS, count)
++    const signatures = new Uint32Array(buffer, layout.SIGS, count * 3)
++    for (let i = 0; i < count; ++i) {
++        rows[i] = 100 + i
++        identities[i] = 7 + i
++        meta.set([i * 8, 8, i + 1, (i ^ 0x9e3779b9) >>> 0], i * 4)
++        signatures.set([i, i + 1, i + 2], i * 3)
++    }
++    return {arena, config, rows, identities, meta, flags}
++}
++
++/**
++ * @param {ReturnType<typeof fixture>} input
++ * @param {number} row
++ * @param {number} state
++ */
++function seedExisting({arena, config, meta}, row, state) {
++    const index = config[11]++
++    const hash1 = meta[row * 4 + 2]
++    const hash2 = meta[row * 4 + 3]
++    const hash = hash1 ^ Math.imul(hash2, 0x9e3779b1)
++    let slot = (hash ^ (hash >>> 16)) & (arena.slots.length - 1)
++    while (arena.slots[slot] !== 0) { slot = (slot + 1) & (arena.slots.length - 1) }
++    arena.slots[slot] = index + 1
++    arena.hash1[index] = hash1
++    arena.hash2[index] = hash2
++    arena.length[index] = 8
++    arena.state[index] = state
++}
++
++/**
++ * @param {Uint8Array} input
++ * @returns {Array<{memory: WebAssembly.Memory, run: () => number}>}
++ */
++function createArms(input) {
++    return modules.map((module) => {
++        const pages = input.byteLength / 65536
++        const memory = new WebAssembly.Memory({initial: pages, maximum: pages})
++        new Uint8Array(memory.buffer).set(input)
++        const instance = new WebAssembly.Instance(module, {env: {memory}})
++        return {memory, run: /** @type {() => number} */ (instance.exports.scan_canonical)}
++    })
++}
++
++/**
++ * @param {ReturnType<typeof createArms>} arms
++ * @param {number|'trap'} expected
++ */
++function compare(arms, expected) {
++    for (const arm of arms) {
++        if (expected === 'trap') {
++            assert.throws(arm.run, WebAssembly.RuntimeError)
++        } else {
++            assert.equal(arm.run(), expected)
++        }
++    }
++    const [a, b] = arms.map(({memory}) => new Uint8Array(memory.buffer))
++    // Exclude only compiler-owned stack. All inputs, outputs, journals, exact
++    // descriptors, authoritative tables and seven volatile words must match.
++    assert.equal(Buffer.compare(a.subarray(1024, 1052), b.subarray(1024, 1052)), 0, 'volatile progress')
++    assert.equal(Buffer.compare(a.subarray(1088, 1176), b.subarray(1088, 1176)), 0, 'configuration')
++    assert.equal(Buffer.compare(a.subarray(layout.META), b.subarray(layout.META)), 0, 'all input/output/table bytes')
++}
++
++/** @type {Array<{name: string, count?: number, edit?: (input: ReturnType<typeof fixture>) => void, result: number|'trap'}>} */
++const cases = [
++    {name: 'empty', count: 0, result: 0},
++    {name: 'pending rows', result: 0},
++    {name: 'maximum segment', count: layout.MAX, result: 0},
++    {name: 'nonzero cursor', edit: ({config}) => { config[15] = 5 }, result: 0},
++    {name: 'reservation disabled', edit: ({config}) => { config[20] = 0 }, result: 0},
++    {name: 'all resolved', edit: ({flags}) => { flags.fill(1) }, result: 0},
++    {name: 'lookup disabled', edit: (input) => { seedExisting(input, 4, 1); input.config[19] = 0 }, result: 0},
++    {name: 'existing pending pair', edit: (input) => { seedExisting(input, 4, 2) }, result: 0},
++    {name: 'existing published pair', edit: (input) => { seedExisting(input, 4, 1) }, result: 0},
++    {name: 'source count too large', edit: ({config}) => { config[12] = layout.MAX + 1 }, result: -1},
++    {name: 'cursor beyond range', edit: ({config}) => { config[15] = 24 }, result: -1},
++    {name: 'reversed range', edit: ({config}) => { config[14] = config[13] - 1 }, result: -1},
++    {name: 'invalid slot count', edit: ({config}) => { config[1] = 3 }, result: -1},
++    {name: 'oversized dense count', edit: ({config}) => { config[11] = config[10] + 1 }, result: -1},
++    {name: 'capacity exhausted', edit: ({config}) => { config[10] = 5 }, result: -5},
++    {name: 'occupied dense tail', edit: ({arena}) => { arena.state[5] = 1 }, result: -5},
++    {name: 'aliased authoritative hash columns', edit: ({config}) => { config[3] = config[2] }, result: 0},
++    {name: 'aliased authoritative length and hash', edit: ({config}) => { config[5] = config[2] }, result: 0},
++    {name: 'wide offset addition', edit: ({config}) => { config[17] = 0xffffffff; config[18] = 0xffffffff }, result: -3},
++    {name: 'null length after inserts',
++        edit: ({config, meta}) => {
++            config[18] = 0xffffffff
++            meta[5 * 4] = 0
++            meta[5 * 4 + 1] = 0xffffffff
++        },
++        result: -5},
++]
++for (const pointer of [0, 2, 3, 4, 5, 6, 7, 8, 9]) {
++    for (const address of [1024, 1088, layout.META, layout.OUT, layout.PREFIX - 4]) {
++        cases.push({name: `reject table ${pointer} alias of immutable prefix ${address}`,
++            edit: ({config}) => { config[pointer] = address },
++            result: -1})
++    }
++}
++for (const row of [0, 5, 22]) {
++    cases.push(
++        {name: `bad source row ${row}`, edit: ({rows}) => { rows[row] = 99 }, result: -2},
++        {name: `bad identity ${row}`, edit: ({identities}) => { identities[row] = 0 }, result: -2},
++        {name: `bad source extent ${row}`, edit: ({meta}) => { meta[row * 4] = 0xffffffff }, result: -3},
++        {name: `trap after insertion ${row + 1}`, edit: ({config}) => { config[21] = row + 1 }, result: 'trap'},
++    )
++}
++
++test.each(cases)('canonical input snapshots preserve native state: $name', ({count = 23, edit, result}) => {
++    const input = fixture(count)
++    edit?.(input)
++    compare(createArms(new Uint8Array(input.arena.memory.buffer)), result)
++})
++
++test('fresh snapshots observe changed configuration and source bytes at an exact-match continuation', () => {
++    const input = fixture(4097)
++    for (let row = 0; row < 4096; ++row) { seedExisting(input, row, 1) }
++    const arms = createArms(new Uint8Array(input.arena.memory.buffer))
++    compare(arms, 1)
++    for (const {memory} of arms) {
++        const config = new Uint32Array(memory.buffer, 1088, 22)
++        config[15] = new Uint32Array(memory.buffer, 1024, 7)[1]
++        config[17] = 32
++        config[18] += 32
++        config[20] = 0
++        new Uint32Array(memory.buffer, layout.META, 4097 * 4).set([0, 4, 0x1234, 0x5678], 4096 * 4)
++    }
++    compare(arms, 0)
++})
++
++test('canonical kernel has no reentrant imports and rejects concurrently writable shared memory', () => {
++    for (const module of modules) {
++        assert.deepEqual(WebAssembly.Module.imports(module), [{module: 'env', name: 'memory', kind: 'memory'}])
++        const memory = new WebAssembly.Memory({initial: 256, maximum: 256, shared: true})
++        assert.throws(() => new WebAssembly.Instance(module, {env: {memory}}), WebAssembly.LinkError)
++    }
++})
+diff --git a/test/term-content-canonical-scan.test.js b/test/term-content-canonical-scan.test.js
+index 4879a0aa550c09e702ce52aec28b513b37fb8e9c..0eb9144ecd73ef16e8cf795a24f25a2952cdcbf7 100644
+--- a/test/term-content-canonical-scan.test.js
++++ b/test/term-content-canonical-scan.test.js
+@@ -55,7 +55,7 @@ function useProductionScanner(db, _bytes, hooks = {}) {
+     };
+ }
+ 
+-test('production canonical kernel: 63 differential, boundary, rollback and full record/index byte controls', async () => {
++test('production canonical kernel: 64 differential, boundary, rollback and full record/index byte controls', async () => {
+     const checks = [],
+         totals = {
+             calls: 0,
+@@ -304,7 +304,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+         collect(controller);
+         checks.push(`${candidates} candidate await ordering, mixed misses, arena growth`);
+     }
+-    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-view', 'exact-read']) {
++    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-view', 'exact-read', 'exact-cancel']) {
+         const a = fixture(40, {existing: true}),
+             b = fixture(40, {existing: true});
+         const priorA = metadata(a),
+@@ -330,13 +330,17 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+             if (fault === 'late-row') {
+                 f.plan.uniqueRowIndexes[20] = 0;
+             }
+-            if (fault === 'exact-read') {
++            if (fault === 'exact-read' || fault === 'exact-cancel') {
+                 f.db._readTermEntryContentBytesDetailed = async () => {
++                    if (fault === 'exact-cancel') {
++                        // eslint-disable-next-line @stylistic/semi
++                        throw new DOMException('Exact read cancelled', 'AbortError')
++                    }
+                     throw new Error('read fault');
+                 };
+             }
+         }
+-        if (['late-source', 'late-identity', 'late-row', 'exact-read'].includes(fault)) {
++        if (['late-source', 'late-identity', 'late-row', 'exact-read', 'exact-cancel'].includes(fault)) {
+             await assert.rejects(a.db._resolveArtifactTermContentDedup(a.chunk, true));
+             await assert.rejects(b.db._resolveArtifactTermContentDedup(b.chunk, true));
+             // Native can undo an unaccepted segment precisely, baseline rollback leaves reusable IDs.
+@@ -347,7 +351,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+         for (const f of [a, b]) {
+             assert.equal(f.db._getTermEntryContentMetaByHashPair(1, 0x9e3779b9).offset, 100);
+         }
+-        if (fault !== 'exact-read') {
++        if (fault !== 'exact-read' && fault !== 'exact-cancel') {
+             assert.equal(b.db._termEntryContentMetaDenseCount, 27); // only the 27 earlier published entries
+             assert.deepEqual(b.plan.pendingEpochs, new Uint32Array(40).fill(87));
+         }
+@@ -1061,7 +1065,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+     }
+     assert.ok(layout.usedBytes <= layout.PREFIX);
+     assert.equal(layout.usedBytes, 8263840);
+-    assert.equal(checks.length, 63);
++    assert.equal(checks.length, 64);
+ });
+ 
+ test('production typed pending IDs: storage and record failure, old-entry preservation, free-ID retry (4 controls)', async () => {

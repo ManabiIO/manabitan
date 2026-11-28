@@ -1,0 +1,20 @@
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"event":"acquired-group","group":0,"rows":50000,"rawBytes":8486982,"compressedBytes":767597}
+{"event":"acquired-group","group":1,"rows":90000,"rawBytes":17914876,"compressedBytes":3027787}
+{"event":"acquired-group","group":2,"rows":130000,"rawBytes":27187674,"compressedBytes":5810905}
+{"event":"acquired-group","group":3,"rows":170000,"rawBytes":35806894,"compressedBytes":9059898}
+{"event":"acquired-group","group":4,"rows":220000,"rawBytes":44588985,"compressedBytes":12729993}
+{"event":"acquired-group","group":5,"rows":270000,"rawBytes":53598661,"compressedBytes":16914067}
+{"event":"acquired-group","group":6,"rows":310000,"rawBytes":60676579,"compressedBytes":21565975}
+{"event":"acquired-group","group":7,"rows":360000,"rawBytes":68179574,"compressedBytes":26591319}
+{"event":"acquired-group","group":8,"rows":400000,"rawBytes":76029833,"compressedBytes":32106149}
+{"event":"acquired-group","group":9,"rows":440000,"rawBytes":83627677,"compressedBytes":38007036}
+{"event":"acquired-group","group":10,"rows":480000,"rawBytes":91512924,"compressedBytes":44304272}
+{"event":"acquired-group","group":11,"rows":528299,"rawBytes":101143985,"compressedBytes":51035120}

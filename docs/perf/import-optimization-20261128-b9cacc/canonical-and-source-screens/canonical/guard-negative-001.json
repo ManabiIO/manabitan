@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "mode": "acquire",
+  "status": "failed",
+  "registrationSha256": "0f48bb0cc8318f1c0f9d73542293ba67bcc039179b47c4092102c8ea832028bb",
+  "harnessSha256": "61601c994fd24cb4646aa8be0c65f197bd3fe0322ab964aa1be10bfc5c2f2417",
+  "watchdogSha256": "c7dd6b2cc10fcfc6185d9cc2b26bbe639d0c8c48c5047bdf1e95d4f1391a1dd5",
+  "limits": {
+    "minimumAvailableBytes": 1879048192,
+    "minimumTemporaryFreeBytes": 268435456,
+    "maxRssBytes": 100663296,
+    "maxArenaBytes": 67108864,
+    "maxTemporaryBytes": 201326592,
+    "timeoutSeconds": 20,
+    "maximumPreflightCpuBusyFraction": 0.1,
+    "minimumRuntimeAvailableBytes": 536870912
+  },
+  "sampleIntervalSeconds": 0.05,
+  "scope": "Atomic /proc stat RSS for explicit launched PID, all owned process-group members/descendants, and watchdog; host aggregate counters do not expose every other user's job",
+  "samples": [
+    {
+      "elapsedSeconds": 0.0011828500000774511,
+      "rssBytes": 12845056,
+      "rssByPid": {
+        "5": 393216,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2108805120
+    },
+    {
+      "elapsedSeconds": 0.05407974500030832,
+      "rssBytes": 42184704,
+      "rssByPid": {
+        "5": 29732864,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2104401920
+    },
+    {
+      "elapsedSeconds": 0.12073216299995693,
+      "rssBytes": 55578624,
+      "rssByPid": {
+        "5": 43126784,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2096328704
+    },
+    {
+      "elapsedSeconds": 0.17129324200050178,
+      "rssBytes": 62001152,
+      "rssByPid": {
+        "5": 49549312,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2096070656
+    },
+    {
+      "elapsedSeconds": 0.22176368400050706,
+      "rssBytes": 66588672,
+      "rssByPid": {
+        "5": 54136832,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2095370240
+    },
+    {
+      "elapsedSeconds": 0.27263324199975614,
+      "rssBytes": 109576192,
+      "rssByPid": {
+        "5": 55316480,
+        "12": 41807872,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5,
+        12
+      ],
+      "temporaryBytes": 0,
+      "MemAvailableBytes": 2093785088
+    }
+  ],
+  "preflight": {
+    "MemAvailableBytes": 2108805120,
+    "temporaryFilesystemFreeBytes": 3047346176,
+    "retainedTemporaryBytes": 0,
+    "aggregateCpuBusyFraction": 0.005934718100890191,
+    "cpuSampleSeconds": 3.000808202999906,
+    "loadavg": "1.46 1.39 1.81 2/243 4",
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "logicalCpuCount": 9,
+    "cpuPressure": null,
+    "cgroupCpuMax": null
+  },
+  "command": [
+    "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+    "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/guard-negative-child.mjs",
+    "acquire",
+    "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/guard-negative-registration.json",
+    "0f48bb0cc8318f1c0f9d73542293ba67bcc039179b47c4092102c8ea832028bb",
+    "/home/agent/.cache/manabitan-b9cacc/canonical-guard-validation/negative-001"
+  ],
+  "pidNamespaces": {
+    "watchdog": "pid:[4026532939]",
+    "launched": "pid:[4026532939]"
+  },
+  "launchedIdentity": {
+    "pid": 5,
+    "state": "R",
+    "ppid": 2,
+    "pgrp": 5,
+    "session": 5,
+    "starttime": 721475,
+    "rssBytes": 0
+  },
+  "ownedPid": 5,
+  "observedProcessIdentities": [
+    {
+      "pid": 5,
+      "ppid": 2,
+      "pgrp": 5,
+      "session": 5,
+      "starttime": 721475
+    },
+    {
+      "pid": 12,
+      "ppid": 5,
+      "pgrp": 5,
+      "session": 5,
+      "starttime": 721499
+    }
+  ],
+  "positiveLaunchedRssSamples": 6,
+  "finalTemporaryBytes": 0,
+  "finalMemAvailableBytes": 2101723136,
+  "exitCode": -15,
+  "guardFailure": "Sampled owned process RSS exceeded registered limit",
+  "elapsedSeconds": 0.2798518059998969,
+  "maxSampledRssBytes": 109576192,
+  "maxTemporaryBytes": 0,
+  "childLog": "analysis/canonical-combined/guard-negative-001.child.log",
+  "stageValid": false
+}

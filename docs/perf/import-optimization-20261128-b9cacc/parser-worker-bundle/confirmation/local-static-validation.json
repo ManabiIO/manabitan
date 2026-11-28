@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+  "sourceTree": "3ef7ad617844c276ff086ff3efeaa1ddb6b31611",
+  "exactSourceFileCount": 7,
+  "nodeBinary": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+  "nodeVersion": "v22.22.0",
+  "validationStepExitCode": 0,
+  "scope": "Exact registration syntax-validation block only; dependencies reused read-only; no npm ci, browser, imports or timing acquisition",
+  "syntaxChecks": 41,
+  "yamlVersion": "2.9.1"
+}

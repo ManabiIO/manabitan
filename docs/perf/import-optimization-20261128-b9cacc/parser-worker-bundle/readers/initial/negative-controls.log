@@ -1,0 +1,21 @@
+test_changed_zip_digest_is_rejected (test_import_analysis_b9cacc.PackageAuditTests.test_changed_zip_digest_is_rejected) ... ok
+test_declared_added_member_must_exist (test_import_analysis_b9cacc.PackageAuditTests.test_declared_added_member_must_exist) ... ok
+test_duplicate_nested_member_is_rejected (test_import_analysis_b9cacc.PackageAuditTests.test_duplicate_nested_member_is_rejected) ... /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/zipfile/__init__.py:1625: UserWarning: Duplicate name: 'worker.js'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+ok
+test_exact_nested_packages_pass (test_import_analysis_b9cacc.PackageAuditTests.test_exact_nested_packages_pass) ... ok
+test_fabricated_producer_member_map_is_rejected (test_import_analysis_b9cacc.PackageAuditTests.test_fabricated_producer_member_map_is_rejected) ... ok
+test_removed_existing_member_is_rejected (test_import_analysis_b9cacc.PackageAuditTests.test_removed_existing_member_is_rejected) ... ok
+test_runtime_payload_source_binding_is_independent_of_producer_map (test_import_analysis_b9cacc.PackageAuditTests.test_runtime_payload_source_binding_is_independent_of_producer_map) ... ok
+test_undeclared_added_member_is_rejected (test_import_analysis_b9cacc.PackageAuditTests.test_undeclared_added_member_is_rejected) ... ok
+test_distinct_workflow_and_runtime_heads_are_explicit (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_distinct_workflow_and_runtime_heads_are_explicit) ... ok
+test_initial_reader_cannot_accept_twelve_pair_confirmation (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_initial_reader_cannot_accept_twelve_pair_confirmation) ... ok
+test_missing_artifacts_fail_closed_without_waiting (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_missing_artifacts_fail_closed_without_waiting) ... ok
+test_runtime_sha_cannot_substitute_for_workflow_sha (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_runtime_sha_cannot_substitute_for_workflow_sha) ... ok
+test_second_source_attempt_is_rejected (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_second_source_attempt_is_rejected) ... ok
+test_wrong_branch_is_rejected (test_import_analysis_b9cacc.SourceAndCompletenessTests.test_wrong_branch_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.008s
+
+OK

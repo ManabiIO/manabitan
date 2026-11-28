@@ -1,0 +1,49 @@
+{
+  "watchdogPid": 5,
+  "popenPid": 6,
+  "nodeSelf": {
+    "pid": 6,
+    "ppid": 5,
+    "rss": 53170176
+  },
+  "proc": {
+    "5": {
+      "status": [
+        "Name:\tpython3",
+        "Pid:\t5",
+        "PPid:\t2",
+        "NSpid:\t5",
+        "VmRSS:\t    9504 kB",
+        "Threads:\t1"
+      ],
+      "stat": "5 (python3) R 2 1 1 0 -1 4194304 2720 0 0 0 1 1 0 0 20 0 1 0 688379 37027840 2336 18446744073709551615 4329472 32290168 140724467881056 0 0 0 0 16781312 2 0 0 0 17 4 0 0 0 0 0 23068672 32290168 1030668288 140724467886854 140724467886864 140724467886864 140724467892142 0\n",
+      "children": {
+        "error": "FileNotFoundError",
+        "message": "[Errno 2] No such file or directory: '/proc/5/task/5/children'"
+      },
+      "namespacePid": "pid:[4026532450]"
+    },
+    "6": {
+      "status": [
+        "Name:\tnode",
+        "Pid:\t6",
+        "PPid:\t5",
+        "NSpid:\t6",
+        "VmRSS:\t   52392 kB",
+        "Threads:\t7"
+      ],
+      "stat": "6 (node) R 5 6 6 0 -1 4194304 4032 0 0 0 3 1 0 0 20 0 7 0 688382 1038417920 12981 18446744073709551615 14876672 54527057 140727781439248 0 0 0 0 16781312 17922 0 0 0 17 1 0 0 0 0 0 110917864 111098960 661716992 140727781444154 140727781444366 140727781444366 140727781449644 0\n",
+      "children": {
+        "error": "FileNotFoundError",
+        "message": "[Errno 2] No such file or directory: '/proc/6/task/6/children'"
+      },
+      "namespacePid": "pid:[4026532450]"
+    }
+  },
+  "visiblePids": [
+    "1",
+    "2",
+    "5",
+    "6"
+  ]
+}

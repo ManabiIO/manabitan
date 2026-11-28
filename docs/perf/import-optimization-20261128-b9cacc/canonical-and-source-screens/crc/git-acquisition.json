@@ -1,0 +1,19 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "fetch",
+    "--no-tags",
+    "--filter=blob:none",
+    "--depth=1",
+    "origin",
+    "83912e61edb0bf4c8148ef3db309ed944f9babaf"
+  ],
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "From https://github.com/ManabiIO/manabitan\n * branch            83912e61edb0bf4c8148ef3db309ed944f9babaf -> FETCH_HEAD\n",
+  "scope": "Small read-only remote Git object acquisition; no branch ref or source-file mutation."
+}

@@ -1,0 +1,60 @@
+# Import optimization research checkpoint
+
+This checkpoint records the import optimization investigation started on November 27, 2026, Toronto time (November 28 at approximately 02:48 UTC). The requested targets were JMdict, Jitendex and VNDB, with priority on JMdict. The experiment baseline is `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` on `develop`.
+
+**No optimization PR is supported by the completed results in this checkpoint.** The parser-worker bundle is the strongest remaining candidate, but its frozen hosted qualification is pending. Product and experimental branches remain separate from this evidence-only branch. No production worker counts, memory budgets or persisted formats were changed, and no Work mode or interactive control of the user’s browser was used. Headless component and hosted extension harnesses supplied the browser observations.
+
+## Results and decisions
+
+Percentage changes below are paired candidate-versus-baseline changes; negative means faster. The two values are from separate hosts using opposite starting orders. They must not be pooled or substituted for replicated evidence.
+
+| Experiment                                           | JMdict                                                                        | Jitendex        | VNDB            | Decision                                                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------- | --------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Batch compression RPCs                               | +0.05% / −0.86%                                                               | −1.88% / +0.26% | −2.30% / +1.00% | Reject. No replicated material import gain. JMdict AB exceeded the private-memory screen; VNDB AB memory coverage was unqualified. |
+| Remove parser source-limit dependency                | −2.34% / −0.65%                                                               | −0.73% / +1.50% | +0.66% / −1.91% | Reject. All six median intervals include zero; identical-code drift prevents a persuasive JMdict result.                           |
+| Combine canonical input snapshots and local counters | Component only: median saving 0.58 ms versus A and 0.14 ms versus identical C | Not tested      | Not tested      | Reject. Every registered continuation condition failed. No browser or whole-import gain is claimed.                                |
+| Restore indexed score validation loop                | Hosted acquisition incomplete at the initial handoff                          | Same            | Same            | Park. Preserve the complete frozen cohort and its separate qualification failures; no gain is established.                         |
+| Bundle parser-worker modules                         | No whole-import observations yet                                              | Same            | Same            | Pending. Strong startup component result, with full-import, package, browser and memory gates outstanding.                         |
+
+The first two hosted studies each retained 120 ordinary import observations, including warmups and identical-code controls, plus separate media and memory runs. The canonical replay retained nine fresh-process first-use observations, 108 warmup native calls and 432 measured native calls. These counts describe different experimental units and are not combined into a single performance sample.
+
+The detailed [canonical and source-screen record](canonical-and-source-screens/README.md) includes every retained acquisition failure, all raw replay observations, independent audits, source identities and an exact reconstructable binary patch. It also documents the closed publication/cache investigation and why the CRC gap-tail proposal would duplicate existing work.
+
+## Parser-worker bundle: prepared, not promoted
+
+The frozen product changes make parser workers load one generated ESM bundle in place of their module graph. The existing build generates the bundle without minification and retains its license notices. The original worker source stays available for source-level tests. The change preserves worker counts and all import/storage protocols.
+
+An isolated HTTP startup probe with five workers measured approximately 80% lower startup latency against both baseline controls, with B faster in six of six comparisons against each. The identical-code C/A median drift was −17.46%, which remains part of the screen’s noise caveat. This is **not an 80% import improvement**. In the exact JMdict browser trace, the three-worker readiness window is approximately 55 ms; the trace only establishes a plausible opportunity. Actual whole-import timing remains the deciding evidence.
+
+The startup probe used a 174,292-byte bundle; the final frozen bundle is 174,314 bytes. The difference includes both the `@ts-nocheck` banner and the nested worker URL's `.bundle` suffix. The probe therefore cannot establish the final package's latency or browser behavior. The final bundle SHA-256 is `f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6`.
+
+| Prepared object               | Identity and purpose                                                                                                                                                                                                               |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen experiment runtime     | [`9da7dedd17535b4a0f8edb97e56756049bbad7a7`](https://github.com/ManabiIO/manabitan/commit/9da7dedd17535b4a0f8edb97e56756049bbad7a7); contains six product files and four qualification files                                       |
+| Corrected validation workflow | [`7d77b3858b4f3f37e651f770f8f3a92c59d77036`](https://github.com/ManabiIO/manabitan/commit/7d77b3858b4f3f37e651f770f8f3a92c59d77036); workflow-only correction, runtime and benchmark source stay pinned to `9da7dedd`              |
+| Clean product-only commit     | [`c0d62d7ef79e63fcf5c04968f2eab579ce3240a8`](https://github.com/ManabiIO/manabitan/commit/c0d62d7ef79e63fcf5c04968f2eab579ce3240a8); unreferenced, exactly six product files with byte-identical blobs and modes                   |
+| Frozen initial run            | [46110124022](https://github.com/ManabiIO/manabitan/actions/runs/46110124022)                                                                                                                                                      |
+| Prepared confirmation         | [`50fcb1152888d8ec4ed1c4d3d1ecff3876f34185`](https://github.com/ManabiIO/manabitan/commit/50fcb1152888d8ec4ed1c4d3d1ecff3876f34185); unreferenced and not launched                                                                 |
+| Six-pair independent reader   | [`c7a18f22ff374503bbe73596552bb9d9f628fc2b`](https://github.com/ManabiIO/manabitan/commit/c7a18f22ff374503bbe73596552bb9d9f628fc2b); source reviewed, fourteen negative tests passed                                               |
+| Future twelve-pair reader     | [`91f69660bc63d0faf2fed1fdeb2bb1919a272974`](https://github.com/ManabiIO/manabitan/commit/91f69660bc63d0faf2fed1fdeb2bb1919a272974); source reviewed, fifteen synthetic checks passed; future run/head fields deliberately unbound |
+
+The first bundle validation [run 46104747758](https://github.com/ManabiIO/manabitan/actions/runs/46104747758) passed its normal lint, type, unit, build and native-WASM/simulated-transport protocol steps but failed the exact package-delta guard before timing. Sharing the dependency directory through a top-level symlink changed unrelated esbuild source labels and maps. A minimal reproduction showed that independent hardlinked directory hierarchies preserve the original bytes. The corrected workflow changes only that setup and its provenance checks; it does not loosen the package allowlist or replace a timing observation.
+
+The [bundle handoff](parser-worker-bundle/README.md) preserves source review, probe boundaries, package-failure evidence, the clean six-file patch, confirmation source and independent readers.
+
+An additional [local transport adapter](score-audit-transport/local_snapshot_audit.py) is prepared for the score-validation reader. It substitutes exact authenticated API snapshots and downloaded ZIP files for transport while retaining the byte-identical `c7a18` audit and original streamed ZIP size/SHA verification. It requires the registered run and all seven jobs to be terminal, accepts only the five registered API endpoints, and rejects unexpected artifacts or paths. The [three adapter-specific negative checks](score-audit-transport/adapter-route-checks.json) and thirteen baseline/support source bindings passed. Preparation does not constitute an artifact audit; no source-run timing or qualification check is bypassed.
+
+## Gates remaining before a PR
+
+1. Complete and independently audit the frozen initial six cells, including their exact packaged bytes, all timing observations, same-code controls, media checks and separate memory coverage. A promising JMdict result and no repeated material Jitendex/VNDB regression are required before confirmation.
+2. Only then reference and launch the prepared two-host JMdict confirmation: twelve pairs per host, opposite starting orders, interleaved same-code controls and separate memory/media measurements. Each host must achieve at least 3% and 20 ms median paired saving, improve the equal-work ratio, win at least ten of twelve pairs, have the upper bound of the descriptive 95% interval for paired percent change below zero (equivalently, ratio below one) and exceed its absolute same-code drift.
+3. Pass the unchanged memory gates and actual Firefox parallel-worker and Chromium interruption/restart coverage. The one-bank interruption fixture does not establish parallel-parser cancellation coverage.
+4. Verify the clean product commit reproduces the qualified package, then assess current `develop` for relevant changes and conflicts. A rebase or source change must not silently inherit timing evidence for different runtime bytes.
+
+These are prospective gates, not completed results or a promise of unattended follow-up. No replacement cohort, control subtraction, selective retry or relaxed threshold is authorized by this checkpoint. Failed acquisition and qualification receipts remain part of the evidence.
+
+## Reproduction and scope
+
+The two nested packs have their own manifests and verification scripts. Original raw observations and historical status fields are preserved byte-for-byte; later corrections are additive. Large reproducible dictionary archives, captured gzip inputs and toolchains are represented by exact hashes instead of duplicated into Git. The canonical pack explicitly records its missing full traceback and lost partial capture payloads.
+
+This branch changes research documentation only. Its commit deliberately avoids launching another CI workload; the baseline `AGENTS.md` and new README formatting checks passed, and all copied evidence is checked by hashes. No runtime source is installed by a patch stored as documentation, and this evidence branch is not intended as a merge request.

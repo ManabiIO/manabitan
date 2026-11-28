@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "mode": "replay",
+  "status": "preflight-blocked",
+  "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "harnessSha256": "860212a3021b8eaaf755cc54d176fccc6665d5f583bcdfa9f1a1ab11888963dd",
+  "watchdogSha256": "8a90530c5672cec136b0c26fc9223e1e39225d53180f6d616a9e8910a2272057",
+  "limits": {
+    "minimumAvailableBytes": 1879048192,
+    "minimumTemporaryFreeBytes": 268435456,
+    "maxRssBytes": 1073741824,
+    "maxArenaBytes": 67108864,
+    "maxTemporaryBytes": 201326592,
+    "timeoutSeconds": 300,
+    "maximumPreflightCpuBusyFraction": 0.1,
+    "minimumRuntimeAvailableBytes": 536870912
+  },
+  "sampleIntervalSeconds": 0.05,
+  "scope": "Atomic /proc stat RSS for explicit launched PID, all owned process-group members/descendants, and watchdog; host aggregate counters do not expose every other user's job",
+  "samples": [],
+  "preflight": {
+    "MemAvailableBytes": 3306229760,
+    "temporaryFilesystemFreeBytes": 4578930688,
+    "retainedTemporaryBytes": 51176423,
+    "aggregateCpuBusyFraction": 0.2187964338781575,
+    "cpuSampleSeconds": 3.001076026001101,
+    "loadavg": "0.83 1.83 1.90 2/278 6",
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "logicalCpuCount": 9,
+    "cpuPressure": null,
+    "cgroupCpuMax": null
+  },
+  "failures": [
+    "Aggregate CPU preflight is not quiet"
+  ]
+}

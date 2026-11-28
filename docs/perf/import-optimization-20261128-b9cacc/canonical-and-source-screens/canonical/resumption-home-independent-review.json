@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "scope": "Read-only path/provenance amendment review; no acquisition or timing",
+  "registrationDiff": [
+    {
+      "field": "nodeExecutable",
+      "old": "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+      "new": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node"
+    },
+    {
+      "field": "temporaryRoot",
+      "old": "/home/agent/.cache/manabitan-b9cacc/canonical-combined",
+      "new": "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128"
+    }
+  ],
+  "originalRegistrationSha256": "bf70ae2086942e673d310498cd7a69a8ac08e7ec3543805c6cbc7c7e8be3ae27",
+  "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "amendmentSha256": "2c76428f39763e031c3e97560f03b1d0fdfb88a4ddb10556eda646c4e99b74c8",
+  "amendment": {
+    "schemaVersion": 1,
+    "status": "prospective-path-only-amendment-awaiting-two-reviews",
+    "createdAtUtc": "2026-11-28T05:30:33.477622+00:00",
+    "originalRegistrationSha256": "bf70ae2086942e673d310498cd7a69a8ac08e7ec3543805c6cbc7c7e8be3ae27",
+    "amendedRegistrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+    "changes": [
+      {
+        "field": "nodeExecutable",
+        "old": "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+        "new": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node"
+      },
+      {
+        "field": "temporaryRoot",
+        "old": "/home/agent/.cache/manabitan-b9cacc/canonical-combined",
+        "new": "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128"
+      }
+    ],
+    "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+    "allOtherFieldsValueIdentical": true,
+    "withdrawnUnusedPlanningAmendment": {
+      "path": "registration-resumed-paths.json",
+      "sha256": "c1af905ac8df0b242c4b550df04d0ff430bf932ed8dd3ba793ece2f7d9c34650",
+      "reason": "Shared workspace free space fell below the unchanged256MiB preflight; no acquisition or replay used this planning file."
+    },
+    "oldTemporaryRootExists": false,
+    "lostTemporaryData": "Acquisition003 partial raw/gzip payloads and the duplicate acquisition002 temporary manifest were lost at environment reset. Acquisition002 gzip disposal predates reset and has its own preserved authorization/hash receipt. Persistent source/guard/failure receipts remain unchanged.",
+    "originalAcquisition003Cause": "External SIGKILL; source of signal and resource cause remain unknown.",
+    "acquisitionStarted": false,
+    "replayStarted": false
+  },
+  "protocolSha256": "8e3f206b4a27e7a19e022c6b7a5b37974fd2735de056eb891a21bec51f4af744",
+  "harnessSha256": "860212a3021b8eaaf755cc54d176fccc6665d5f583bcdfa9f1a1ab11888963dd",
+  "watchdogSha256": "8a90530c5672cec136b0c26fc9223e1e39225d53180f6d616a9e8910a2272057",
+  "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+  "baseline": {
+    "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "trackedClean": true,
+    "wasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "cSourceSha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+  },
+  "candidate": {
+    "head": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+    "tree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f",
+    "trackedClean": true,
+    "wasmSha256": "5ce4a3ef2869fe101d92cd46d1364c4be273546d2a77b9d7fd38ec3b10f2644a",
+    "cSourceSha256": "dc50ff2e2597e3e869583582abeb877e1174c6539d32de1870774fdfe780f126"
+  },
+  "baselineSourceFileCountVerified": 29,
+  "node": {
+    "path": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+    "version": "v22.22.0",
+    "bytes": 123405064,
+    "sha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+  },
+  "limitsUnchanged": true,
+  "continuationGateUnchanged": true,
+  "oldTemporaryRootExists": false,
+  "newTemporaryRootExists": true
+}

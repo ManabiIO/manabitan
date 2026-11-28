@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "prospective-path-only-amendment-awaiting-two-reviews",
+  "createdAtUtc": "2026-11-28T05:30:33.477622+00:00",
+  "originalRegistrationSha256": "bf70ae2086942e673d310498cd7a69a8ac08e7ec3543805c6cbc7c7e8be3ae27",
+  "amendedRegistrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "changes": [
+    {
+      "field": "nodeExecutable",
+      "old": "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+      "new": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node"
+    },
+    {
+      "field": "temporaryRoot",
+      "old": "/home/agent/.cache/manabitan-b9cacc/canonical-combined",
+      "new": "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128"
+    }
+  ],
+  "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+  "allOtherFieldsValueIdentical": true,
+  "withdrawnUnusedPlanningAmendment": {
+    "path": "registration-resumed-paths.json",
+    "sha256": "c1af905ac8df0b242c4b550df04d0ff430bf932ed8dd3ba793ece2f7d9c34650",
+    "reason": "Shared workspace free space fell below the unchanged256MiB preflight; no acquisition or replay used this planning file."
+  },
+  "oldTemporaryRootExists": false,
+  "lostTemporaryData": "Acquisition003 partial raw/gzip payloads and the duplicate acquisition002 temporary manifest were lost at environment reset. Acquisition002 gzip disposal predates reset and has its own preserved authorization/hash receipt. Persistent source/guard/failure receipts remain unchanged.",
+  "originalAcquisition003Cause": "External SIGKILL; source of signal and resource cause remain unknown.",
+  "acquisitionStarted": false,
+  "replayStarted": false
+}

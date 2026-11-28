@@ -1,0 +1,222 @@
+{
+  "status": "passed",
+  "yamlVersion": "2.9.1",
+  "checked": [
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-firefox-report.mjs",
+      "syntax": "Node module"
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-chromium-restart-report.mjs",
+      "syntax": "Node module"
+    },
+    {
+      "job": "registration",
+      "step": 2,
+      "syntax": "Bash"
+    },
+    {
+      "job": "registration",
+      "step": 3,
+      "syntax": "Bash"
+    },
+    {
+      "job": "registration",
+      "step": 3,
+      "syntax": "Node heredoc"
+    },
+    {
+      "job": "registration",
+      "step": 4,
+      "syntax": "Bash"
+    },
+    {
+      "job": "registration",
+      "step": 4,
+      "syntax": "Node heredoc"
+    },
+    {
+      "job": "qualify",
+      "step": 3,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 4,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 5,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 6,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 7,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 9,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 10,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 11,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 12,
+      "syntax": "Bash"
+    },
+    {
+      "job": "qualify",
+      "step": 12,
+      "syntax": "Python heredoc"
+    },
+    {
+      "job": "firefox",
+      "step": 3,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 4,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 5,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 6,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 7,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 7,
+      "syntax": "Node heredoc"
+    },
+    {
+      "job": "firefox",
+      "step": 8,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 9,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 10,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 11,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 12,
+      "syntax": "Bash"
+    },
+    {
+      "job": "firefox",
+      "step": 12,
+      "syntax": "Python heredoc"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 3,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 4,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 5,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 6,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 7,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 8,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 9,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 10,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 11,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 12,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 13,
+      "syntax": "Bash"
+    },
+    {
+      "job": "chromium-restart",
+      "step": 13,
+      "syntax": "Python heredoc"
+    }
+  ],
+  "scope": "Syntax validation only; no import or browser acquisition"
+}
+(node:9) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:32) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:40) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:62) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)

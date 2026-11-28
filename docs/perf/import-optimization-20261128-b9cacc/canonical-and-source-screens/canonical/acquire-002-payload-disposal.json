@@ -1,0 +1,73 @@
+{
+  "reason": "Root approved deliberate disposal of reproducible payloads from resource-unqualified acquisition002 so a fresh capture can fit the unchanged192MiB combined retained-byte cap. No native timings existed.",
+  "captureManifestSha256": "150533375f89a1afcee3612bbcac8abd97366d4c6ea00c9aefa509385ace8a6e",
+  "preservedManifest": "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/acquire-002-capture-manifest.json",
+  "preservedGuard": "analysis/canonical-combined/acquire-002-guard.json",
+  "invalidation": "analysis/canonical-combined/acquire-002-invalid-resource-audit.json",
+  "payloads": [
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-000.bin.gz",
+      "bytes": 767597,
+      "sha256": "2a60eb4fcbbbfa67c50dcfb0eaf6d686596b67fcb50bbde47373636c0dbdddc7"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-001.bin.gz",
+      "bytes": 2260190,
+      "sha256": "56a164edf23d181922dde465be8dabe13450d18c9742e5aca26f45431ff833de"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-002.bin.gz",
+      "bytes": 2783118,
+      "sha256": "75e32664eff3af6f725f3e9d9186c8f8affdae9a74dfd2db4849aa18e53d3c4f"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-003.bin.gz",
+      "bytes": 3248993,
+      "sha256": "e25283b61a733a1fb20c90bf4e64594f10f749bde5530b6fb502061052f0b4b9"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-004.bin.gz",
+      "bytes": 3670095,
+      "sha256": "541418f29d14e37012011b0087afd1b31958accb639fb9b21bee2f7542f4f99c"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-005.bin.gz",
+      "bytes": 4184074,
+      "sha256": "36d9797a384c6c30ac0348d0b0fd240ef8a1c856d8413ec3c7f1cde06cf590ac"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-006.bin.gz",
+      "bytes": 4651908,
+      "sha256": "020dc2085c49958998cab5e702a1c6339990f211ff587eb9fd8b20b7f9b8a818"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-007.bin.gz",
+      "bytes": 5025344,
+      "sha256": "e04c5ce731f3577b24a4d2b9e2cb3d4e1d28a10848643499bdf062249714b30f"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-008.bin.gz",
+      "bytes": 5514830,
+      "sha256": "31c3d4761839e1732a321b98e719385361e34b33164f453607b2b54843ea2e9a"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-009.bin.gz",
+      "bytes": 5900887,
+      "sha256": "28208cc73aa49e4bf3d1772ef4611dbaa78458d59fb8d3a70db694197420aa56"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-010.bin.gz",
+      "bytes": 6297236,
+      "sha256": "91bef97e16fa8dc051b3aecf1be95a413a2dc0dc80746b19f9df1f20c6e1faa1"
+    },
+    {
+      "path": "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-002/native-011.bin.gz",
+      "bytes": 6730848,
+      "sha256": "455e6e27b98519f5ce559149b26da3abc06f7f8e19d4decaaea47265678ff64a"
+    }
+  ],
+  "bytesDisposed": 51035120,
+  "status": "disposed-after-hash-verification",
+  "manifestRetained": true,
+  "payloadsRemaining": 0
+}

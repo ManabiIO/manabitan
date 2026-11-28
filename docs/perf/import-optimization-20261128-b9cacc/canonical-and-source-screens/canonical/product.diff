@@ -1,0 +1,140 @@
+diff --git a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+index 2035b8e..16f1367 100644
+--- a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
++++ b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+@@ -52,6 +52,16 @@ uint32_t canonical_max_rows(void) { return MAX_ROWS; }
+ __attribute__((export_name("canonical_prefix_bytes")))
+ uint32_t canonical_prefix_bytes(void) { return PREFIX; }
+ 
++static inline void publish_counters(volatile uint32_t *h, uint32_t next,
++                                   uint32_t pending, uint32_t exact,
++                                   uint32_t resolved, uint32_t dense) {
++    h[1] = next;
++    h[2] = pending;
++    h[3] = exact;
++    h[4] = resolved;
++    h[5] = dense;
++}
++
+ // Header at 1024: journal progress, next cursor, pending count, exact count,
+ // resolved count, dense count, reserved. The journal count is volatile so a
+ // trap cannot hide an insertion from the synchronous JS rollback owner.
+@@ -87,28 +97,40 @@ int32_t scan_canonical(void) {
+     const uint8_t *flags = U8(FLAGS);
+     uint32_t *out = U32(OUT), *journal = U32(JOURNAL), *exact = U32(EXACT);
+     const uint32_t n = c[14] - c[13], mask = c[1] - 1;
++    // Validated authoritative pointers cannot reach this config or the fixed
++    // input columns below PREFIX. Snapshot immutable inputs across the journal
++    // barrier, while preserving volatile journal progress and every trap point.
++    const uint32_t row_count = c[12], first_unique = c[13], row_start = c[16];
++    const uint32_t base_offset = c[17], buffer_length = c[18];
++    const uint32_t capacity = c[10], slots_count = c[1];
++    const uint32_t lookup = c[19], reserve = c[20], trap_after = c[21];
++    // Only journal progress must reach memory before each mutation. Preserve
++    // every other header field at returns and the intentional trap boundary.
++    uint32_t next = c[15], pending = 0, exact_count = 0, resolved = 0, dense = c[11];
++    int32_t result = 0;
+     for (uint32_t i = c[15]; i < n; ++i) {
+-        const uint32_t unique = c[13] + i, global = rows[i];
+-        if (global < c[16] || (uint64_t)global - c[16] >= c[12]) { return -2; }
+-        const uint32_t row = global - c[16];
+-        if (identity[row] != unique) { return -2; }
+-        h[1] = i + 1;
++        const uint32_t unique = first_unique + i, global = rows[i];
++        if (global < row_start || (uint64_t)global - row_start >= row_count) { result = -2; goto finished; }
++        const uint32_t row = global - row_start;
++        if (identity[row] != unique) { result = -2; goto finished; }
++        next = i + 1;
+         if (flags[i] == 1) {
+-            ++h[4];
++            ++resolved;
+             continue;
+         }
+         const uint32_t *m = meta + row * 4;
+-        const uint64_t offset = (uint64_t)c[17] + m[0], end = offset + m[1];
+-        if (end > c[18] || offset > 0xffffffffu) { return -3; }
+-        uint32_t hash = m[2] ^ (m[3] * 0x9e3779b1u);
++        const uint32_t content_length = m[1], content_hash1 = m[2], content_hash2 = m[3];
++        const uint64_t offset = (uint64_t)base_offset + m[0], end = offset + content_length;
++        if (end > buffer_length || offset > 0xffffffffu) { result = -3; goto finished; }
++        uint32_t hash = content_hash1 ^ (content_hash2 * 0x9e3779b1u);
+         hash ^= hash >> 16;
+         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
+         while (slots[slot]) {
+             uint32_t index = slots[slot] - 1;
+-            if (index >= c[10] || ++probes >= c[1]) { return -4; }
+-            if (hash1[index] == m[2] && hash2[index] == m[3]) {
++            if (index >= capacity || ++probes >= slots_count) { result = -4; goto finished; }
++            if (hash1[index] == content_hash1 && hash2[index] == content_hash2) {
+                 pair = 1;
+-                if (c[19] && state[index] == 1) {
++                if (lookup && state[index] == 1) {
+                     existing = index;
+                     break;
+                 }
+@@ -116,27 +138,27 @@ int32_t scan_canonical(void) {
+             slot = (slot + 1) & mask;
+         }
+         if (existing != 0xffffffffu) {
+-            uint32_t j = h[3];
++            uint32_t j = exact_count;
+             exact[j * 2] = i;
+             exact[j * 2 + 1] = existing;
+-            h[3] = j + 1;
++            exact_count = j + 1;
+             // Do not inspect the following row before the exact-byte await.
+-            if (h[3] == EXACT_BATCH_SIZE) { return 1; }
++            if (exact_count == EXACT_BATCH_SIZE) { result = 1; goto finished; }
+             continue;
+         }
+         uint32_t staged = 0xffffffffu;
+-        if (c[20] && !pair) {
+-            const uint32_t index = h[5];
+-            if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
++        if (reserve && !pair) {
++            const uint32_t index = dense;
++            if (index >= capacity || state[index] != 0 || content_length == 0xffffffffu) { result = -5; goto finished; }
+             uint32_t j = h[0];
+             journal[j * 3] = slot;
+             journal[j * 3 + 1] = slots[slot];
+             journal[j * 3 + 2] = index;
+             h[0] = j + 1; // Commit rollback progress BEFORE authoritative mutation.
+             __asm__ __volatile__("" ::: "memory");
+-            hash1[index] = m[2];
+-            hash2[index] = m[3];
+-            length[index] = m[1];
++            hash1[index] = content_hash1;
++            hash2[index] = content_hash2;
++            length[index] = content_length;
+             s1[index] = sigs[i * 3];
+             s2[index] = sigs[i * 3 + 1];
+             s3[index] = sigs[i * 3 + 2];
+@@ -144,16 +166,21 @@ int32_t scan_canonical(void) {
+             state[index] = 2;
+             slots[slot] = index + 1;
+             staged = index;
+-            h[5] = index + 1;
+-            if (c[21] && h[0] == c[21]) { __builtin_trap(); }
++            dense = index + 1;
++            if (trap_after && h[0] == trap_after) {
++                publish_counters(h, next, pending, exact_count, resolved, dense);
++                __builtin_trap();
++            }
+         }
+-        uint32_t j = h[2]++;
++        uint32_t j = pending++;
+         out[j] = (uint32_t)offset;
+-        out[MAX_ROWS + j] = m[1];
+-        out[2u * MAX_ROWS + j] = m[2];
+-        out[3u * MAX_ROWS + j] = m[3];
++        out[MAX_ROWS + j] = content_length;
++        out[2u * MAX_ROWS + j] = content_hash1;
++        out[3u * MAX_ROWS + j] = content_hash2;
+         out[4u * MAX_ROWS + j] = unique;
+         out[5u * MAX_ROWS + j] = staged;
+     }
+-    return 0;
++finished:
++    publish_counters(h, next, pending, exact_count, resolved, dense);
++    return result;
+ }

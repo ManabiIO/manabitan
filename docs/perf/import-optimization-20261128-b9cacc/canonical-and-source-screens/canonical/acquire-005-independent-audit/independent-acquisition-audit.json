@@ -1,0 +1,1763 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Read-only raw acquisition/guard audit and untimed baseline-only semantic verification; no candidate load or performance observation",
+  "auditHelperSha256": "7240ac56419e965057ece3f4c1a34d23f928efa6a56ac2b839344534c3c79bf7",
+  "semanticObservations": [
+    {
+      "captureIndex": 0,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "0"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16330752,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 0,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 3045179392,
+          "temporaryBytes": 51108333
+        },
+        {
+          "rssBytes": 65028096,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 48697344,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 3035340800,
+          "temporaryBytes": 51108333
+        },
+        {
+          "rssBytes": 71847936,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 55517184,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 3031175168,
+          "temporaryBytes": 51108508
+        },
+        {
+          "rssBytes": 89804800,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 73474048,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 3019063296,
+          "temporaryBytes": 51108508
+        },
+        {
+          "rssBytes": 118153216,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 101822464,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 2988318720,
+          "temporaryBytes": 51108508
+        },
+        {
+          "rssBytes": 130473984,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 114143232,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 2979942400,
+          "temporaryBytes": 51108508
+        },
+        {
+          "rssBytes": 148697088,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 132366336,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 2963484672,
+          "temporaryBytes": 51108508
+        },
+        {
+          "rssBytes": 158789632,
+          "ownedPids": [
+            2,
+            21
+          ],
+          "rssByPid": {
+            "21": 142458880,
+            "2": 16330752
+          },
+          "MemAvailableBytes": 2955255808,
+          "temporaryBytes": 51108508
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "1db057060b12ea1b05bc64a46f6bc90650ae538504852fa26bba5c4ac2b40f8b",
+      "stderrSha256": "4ebe3d36389147b01b2db34597d8677f0a07536833da0543fdfb81680e48d621",
+      "positiveChildRssSamples": 7,
+      "conservativePeakRssBoundBytes": 160100352,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 0,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "2a60eb4fcbbbfa67c50dcfb0eaf6d686596b67fcb50bbde47373636c0dbdddc7",
+        "inputSha256": "6d779fbc6f67b1a48e2ca09ab6f1ba77c134da7beb79a2047088ae82dbf2ec84",
+        "returned": 0,
+        "header": [
+          34951,
+          34951,
+          34951,
+          0,
+          0,
+          34951,
+          0
+        ],
+        "outputSha256": "c018e2eccf614e7a7f6f693db07a22efa01a0dc9f6d0cda04288000208c2c72b",
+        "expectedOutputSha256": "c018e2eccf614e7a7f6f693db07a22efa01a0dc9f6d0cda04288000208c2c72b",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 142589952
+      }
+    },
+    {
+      "captureIndex": 1,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "1"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16461824,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 0,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2990608384,
+          "temporaryBytes": 51114629
+        },
+        {
+          "rssBytes": 67653632,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 51191808,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2977587200,
+          "temporaryBytes": 51114629
+        },
+        {
+          "rssBytes": 71196672,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 54734848,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2975645696,
+          "temporaryBytes": 51114804
+        },
+        {
+          "rssBytes": 94527488,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 78065664,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2952966144,
+          "temporaryBytes": 51114804
+        },
+        {
+          "rssBytes": 115765248,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 99303424,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2935992320,
+          "temporaryBytes": 51114804
+        },
+        {
+          "rssBytes": 131887104,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 115425280,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2919276544,
+          "temporaryBytes": 51114804
+        },
+        {
+          "rssBytes": 143818752,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 127356928,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2902016000,
+          "temporaryBytes": 51114804
+        },
+        {
+          "rssBytes": 160202752,
+          "ownedPids": [
+            2,
+            28
+          ],
+          "rssByPid": {
+            "28": 143740928,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2879938560,
+          "temporaryBytes": 51114804
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "90a71825033f37b7ce7a65b83f4f6f5af2a966d0c1ad5efcef5f797afb22be33",
+      "stderrSha256": "34f6d8cd193d6f8eda75957984e67011a3bdfab6383d950dbaa6bc473cf10640",
+      "positiveChildRssSamples": 7,
+      "conservativePeakRssBoundBytes": 161251328,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 1,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "56a164edf23d181922dde465be8dabe13450d18c9742e5aca26f45431ff833de",
+        "inputSha256": "03f32268126a2d4f18a23f4ad9467471878754364ee545a0400297ad548188be",
+        "returned": 0,
+        "header": [
+          32739,
+          32856,
+          32739,
+          117,
+          0,
+          67690,
+          0
+        ],
+        "outputSha256": "c60eff5b04668f483b609dd5fbd62bb0659062f6be5189461ea9d969f86817c7",
+        "expectedOutputSha256": "c60eff5b04668f483b609dd5fbd62bb0659062f6be5189461ea9d969f86817c7",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 143740928
+      }
+    },
+    {
+      "captureIndex": 2,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "2"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16461824,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 0,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2935762944,
+          "temporaryBytes": 51120928
+        },
+        {
+          "rssBytes": 68042752,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 51580928,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2932117504,
+          "temporaryBytes": 51120928
+        },
+        {
+          "rssBytes": 86265856,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 69804032,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2932117504,
+          "temporaryBytes": 51121103
+        },
+        {
+          "rssBytes": 136998912,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 120537088,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2882945024,
+          "temporaryBytes": 51121103
+        },
+        {
+          "rssBytes": 154431488,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 137969664,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2866286592,
+          "temporaryBytes": 51121103
+        },
+        {
+          "rssBytes": 160722944,
+          "ownedPids": [
+            2,
+            35
+          ],
+          "rssByPid": {
+            "35": 144261120,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2858057728,
+          "temporaryBytes": 51121103
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "286fcff98f3582a8ee354caa679d71f98505315610e21a71a1f0c5130e2f7658",
+      "stderrSha256": "f53aca577f2b28f53556f780dc2c207e860e4df552fd0a0916c34cf2d42053f1",
+      "positiveChildRssSamples": 5,
+      "conservativePeakRssBoundBytes": 161771520,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 2,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "75e32664eff3af6f725f3e9d9186c8f8affdae9a74dfd2db4849aa18e53d3c4f",
+        "inputSha256": "8289d0d21aa66fd615655d1cc45923863f1d1ae76fef6d49397ef9db03596cb1",
+        "returned": 0,
+        "header": [
+          32256,
+          32421,
+          32256,
+          165,
+          0,
+          99946,
+          0
+        ],
+        "outputSha256": "895b2fdc2ef54a8ae4ceaca29f323824c2f9a3978cdbcf996e992f78aaa1607f",
+        "expectedOutputSha256": "895b2fdc2ef54a8ae4ceaca29f323824c2f9a3978cdbcf996e992f78aaa1607f",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 144261120
+      }
+    },
+    {
+      "captureIndex": 3,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "3"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16461824,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 0,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2913357824,
+          "temporaryBytes": 51126642
+        },
+        {
+          "rssBytes": 65687552,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 49225728,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2902966272,
+          "temporaryBytes": 51126642
+        },
+        {
+          "rssBytes": 79323136,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 62861312,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2886369280,
+          "temporaryBytes": 51126817
+        },
+        {
+          "rssBytes": 115765248,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 99303424,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2845184000,
+          "temporaryBytes": 51126817
+        },
+        {
+          "rssBytes": 131493888,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 115032064,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2828726272,
+          "temporaryBytes": 51126817
+        },
+        {
+          "rssBytes": 141983744,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 125521920,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2820296704,
+          "temporaryBytes": 51126817
+        },
+        {
+          "rssBytes": 156008448,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 139546624,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2812067840,
+          "temporaryBytes": 51126817
+        },
+        {
+          "rssBytes": 160964608,
+          "ownedPids": [
+            2,
+            42
+          ],
+          "rssByPid": {
+            "42": 144502784,
+            "2": 16461824
+          },
+          "MemAvailableBytes": 2803838976,
+          "temporaryBytes": 51126817
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "84da2c2b98cd58c6f794f1153bae1d55251a74667842f2cd809c467acbd0b8cf",
+      "stderrSha256": "28d5a24074d61a340634ff26ef7ea1ffd3767e94871b04789f00596422170230",
+      "positiveChildRssSamples": 7,
+      "conservativePeakRssBoundBytes": 162299904,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 3,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "e25283b61a733a1fb20c90bf4e64594f10f749bde5530b6fb502061052f0b4b9",
+        "inputSha256": "d128a62fecd5e0f97b8565737fa26dcb843a1829ba75f1d0474a350f9b620527",
+        "returned": 0,
+        "header": [
+          28758,
+          28895,
+          28758,
+          137,
+          0,
+          128704,
+          0
+        ],
+        "outputSha256": "484f548e1995d6158234f4158385d49d4abecba4c5e08a80d52663b4a5772dda",
+        "expectedOutputSha256": "484f548e1995d6158234f4158385d49d4abecba4c5e08a80d52663b4a5772dda",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 144789504
+      }
+    },
+    {
+      "captureIndex": 4,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "4"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            49
+          ],
+          "rssByPid": {
+            "49": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2868609024,
+          "temporaryBytes": 51132945
+        },
+        {
+          "rssBytes": 67112960,
+          "ownedPids": [
+            2,
+            49
+          ],
+          "rssByPid": {
+            "49": 50520064,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2868609024,
+          "temporaryBytes": 51132945
+        },
+        {
+          "rssBytes": 87433216,
+          "ownedPids": [
+            2,
+            49
+          ],
+          "rssByPid": {
+            "49": 70840320,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2868604928,
+          "temporaryBytes": 51133120
+        },
+        {
+          "rssBytes": 136462336,
+          "ownedPids": [
+            2,
+            49
+          ],
+          "rssByPid": {
+            "49": 119869440,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2827862016,
+          "temporaryBytes": 51133120
+        },
+        {
+          "rssBytes": 161759232,
+          "ownedPids": [
+            2,
+            49
+          ],
+          "rssByPid": {
+            "49": 145166336,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2822643712,
+          "temporaryBytes": 51133120
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "1804ab9d7074a84b4e122a332e0e1d11f23ed67ddcc34e4762e22e157147c1b5",
+      "stderrSha256": "6779c3cd0a06605514953406d9a657019ad2e779e70b2091319d78053c8007ca",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 162807808,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 4,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "541418f29d14e37012011b0087afd1b31958accb639fb9b21bee2f7542f4f99c",
+        "inputSha256": "226e4b4e58a51e0fd5239eb6b7c61f0ef4746e8c07c00b33baba536a79150791",
+        "returned": 0,
+        "header": [
+          34159,
+          34677,
+          34159,
+          518,
+          0,
+          162863,
+          0
+        ],
+        "outputSha256": "278705a48a1c482aa60fb8dc0e4eaa536c266aea94c2f6f230530b79ab9acec9",
+        "expectedOutputSha256": "278705a48a1c482aa60fb8dc0e4eaa536c266aea94c2f6f230530b79ab9acec9",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 145297408
+      }
+    },
+    {
+      "captureIndex": 5,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "5"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            56
+          ],
+          "rssByPid": {
+            "56": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882539520,
+          "temporaryBytes": 51138367
+        },
+        {
+          "rssBytes": 68096000,
+          "ownedPids": [
+            2,
+            56
+          ],
+          "rssByPid": {
+            "56": 51503104,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882654208,
+          "temporaryBytes": 51138367
+        },
+        {
+          "rssBytes": 86843392,
+          "ownedPids": [
+            2,
+            56
+          ],
+          "rssByPid": {
+            "56": 70250496,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882760704,
+          "temporaryBytes": 51138542
+        },
+        {
+          "rssBytes": 133902336,
+          "ownedPids": [
+            2,
+            56
+          ],
+          "rssByPid": {
+            "56": 117309440,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2850021376,
+          "temporaryBytes": 51138542
+        },
+        {
+          "rssBytes": 162381824,
+          "ownedPids": [
+            2,
+            56
+          ],
+          "rssByPid": {
+            "56": 145788928,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2825334784,
+          "temporaryBytes": 51138542
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "2b20a669d216d7e6269f27556121c9944e4109768e034c705349859feeef8d86",
+      "stderrSha256": "f3d636e0457e49dfe391d857ca83b894ba3e7acb16f48d4cbb57b15951e3fb71",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 163299328,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 5,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "36d9797a384c6c30ac0348d0b0fd240ef8a1c856d8413ec3c7f1cde06cf590ac",
+        "inputSha256": "5286f58226251da2d43b5be352c2d31ef1fc6680d667d763deb4ec75fecb4a86",
+        "returned": 0,
+        "header": [
+          33543,
+          34006,
+          33543,
+          463,
+          0,
+          196406,
+          0
+        ],
+        "outputSha256": "d64c079e45481605fb58323f22b6367afc8b8ec1092df348a5d886ac3986b1cd",
+        "expectedOutputSha256": "d64c079e45481605fb58323f22b6367afc8b8ec1092df348a5d886ac3986b1cd",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 145788928
+      }
+    },
+    {
+      "captureIndex": 6,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "6"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            63
+          ],
+          "rssByPid": {
+            "63": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882793472,
+          "temporaryBytes": 51143789
+        },
+        {
+          "rssBytes": 66732032,
+          "ownedPids": [
+            2,
+            63
+          ],
+          "rssByPid": {
+            "63": 50139136,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882879488,
+          "temporaryBytes": 51143789
+        },
+        {
+          "rssBytes": 85217280,
+          "ownedPids": [
+            2,
+            63
+          ],
+          "rssByPid": {
+            "63": 68624384,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2882977792,
+          "temporaryBytes": 51143964
+        },
+        {
+          "rssBytes": 134373376,
+          "ownedPids": [
+            2,
+            63
+          ],
+          "rssByPid": {
+            "63": 117780480,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2849660928,
+          "temporaryBytes": 51143964
+        },
+        {
+          "rssBytes": 162820096,
+          "ownedPids": [
+            2,
+            63
+          ],
+          "rssByPid": {
+            "63": 146227200,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2813575168,
+          "temporaryBytes": 51143964
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "30fa06df489a5878a6f19fe75a166f59e10b49613972a0c35692bf4910dd4b40",
+      "stderrSha256": "f5cfba298a8cb4e568429de6222eb023218c35909144205907fd537e71779979",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 163737600,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 6,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "020dc2085c49958998cab5e702a1c6339990f211ff587eb9fd8b20b7f9b8a818",
+        "inputSha256": "7597e8dc9dc68fae728b2abaa54bf072ce1b34ca51100dc7ced9a2c041d59abe",
+        "returned": 0,
+        "header": [
+          24030,
+          24271,
+          24030,
+          241,
+          0,
+          220436,
+          0
+        ],
+        "outputSha256": "4118e423371bd4f48c2c81c56eab33dafdb6c7a04e684b7ca3585ed8d076d389",
+        "expectedOutputSha256": "4118e423371bd4f48c2c81c56eab33dafdb6c7a04e684b7ca3585ed8d076d389",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 146227200
+      }
+    },
+    {
+      "captureIndex": 7,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "7"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            70
+          ],
+          "rssByPid": {
+            "70": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2878881792,
+          "temporaryBytes": 51149211
+        },
+        {
+          "rssBytes": 66736128,
+          "ownedPids": [
+            2,
+            70
+          ],
+          "rssByPid": {
+            "70": 50143232,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2878939136,
+          "temporaryBytes": 51149211
+        },
+        {
+          "rssBytes": 84041728,
+          "ownedPids": [
+            2,
+            70
+          ],
+          "rssByPid": {
+            "70": 67448832,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2878939136,
+          "temporaryBytes": 51149386
+        },
+        {
+          "rssBytes": 134770688,
+          "ownedPids": [
+            2,
+            70
+          ],
+          "rssByPid": {
+            "70": 118177792,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2837995520,
+          "temporaryBytes": 51149386
+        },
+        {
+          "rssBytes": 163217408,
+          "ownedPids": [
+            2,
+            70
+          ],
+          "rssByPid": {
+            "70": 146624512,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2813308928,
+          "temporaryBytes": 51149386
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "0d76c4de7f8f886478a76fd1afca7ab7330df82ed80d2f69f9a4aed3dd32441a",
+      "stderrSha256": "641c113122724a05fd264bd7476b0dd941946021cd0d3f779cbf41d3f452a569",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 164265984,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 7,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "e04c5ce731f3577b24a4d2b9e2cb3d4e1d28a10848643499bdf062249714b30f",
+        "inputSha256": "2d92cdf931639177c7cc60a78ec2e493d36ec9f8aadf734f31f2ece0cd1a45e1",
+        "returned": 0,
+        "header": [
+          31330,
+          31906,
+          31330,
+          576,
+          0,
+          251766,
+          0
+        ],
+        "outputSha256": "3d6ca47701f3ec0d5c50651eab64cdd8aee3efe411904816bd3228fd5629bcfb",
+        "expectedOutputSha256": "3d6ca47701f3ec0d5c50651eab64cdd8aee3efe411904816bd3228fd5629bcfb",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 146755584
+      }
+    },
+    {
+      "captureIndex": 8,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "8"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            77
+          ],
+          "rssByPid": {
+            "77": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2869489664,
+          "temporaryBytes": 51154633
+        },
+        {
+          "rssBytes": 65163264,
+          "ownedPids": [
+            2,
+            77
+          ],
+          "rssByPid": {
+            "77": 48570368,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2869489664,
+          "temporaryBytes": 51154633
+        },
+        {
+          "rssBytes": 81158144,
+          "ownedPids": [
+            2,
+            77
+          ],
+          "rssByPid": {
+            "77": 64565248,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2869309440,
+          "temporaryBytes": 51154808
+        },
+        {
+          "rssBytes": 126513152,
+          "ownedPids": [
+            2,
+            77
+          ],
+          "rssByPid": {
+            "77": 109920256,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2844622848,
+          "temporaryBytes": 51154808
+        },
+        {
+          "rssBytes": 163872768,
+          "ownedPids": [
+            2,
+            77
+          ],
+          "rssByPid": {
+            "77": 147279872,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2833928192,
+          "temporaryBytes": 51154808
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "48e4890a1d64691849466ed8a932395935abe2c7f308d5ce3af7c6d96123ee3f",
+      "stderrSha256": "ce0c028421af01dca441e6badbe6672a5874251d4bd72b8844e33224a1a643a0",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 164790272,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 8,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "31c3d4761839e1732a321b98e719385361e34b33164f453607b2b54843ea2e9a",
+        "inputSha256": "90b4c8ec8a39d41b366d08f58d76d5d3cefb56c779f683d79611bacd11bb03b9",
+        "returned": 0,
+        "header": [
+          25442,
+          25774,
+          25442,
+          332,
+          0,
+          277208,
+          0
+        ],
+        "outputSha256": "c4fe36e1bda8f33f59568b9e3ae4a0b0e2f7b84d9e09944922af06b35c7ddf3c",
+        "expectedOutputSha256": "c4fe36e1bda8f33f59568b9e3ae4a0b0e2f7b84d9e09944922af06b35c7ddf3c",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 147279872
+      }
+    },
+    {
+      "captureIndex": 9,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "9"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16592896,
+          "ownedPids": [
+            2,
+            84
+          ],
+          "rssByPid": {
+            "84": 0,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2904666112,
+          "temporaryBytes": 51160055
+        },
+        {
+          "rssBytes": 67260416,
+          "ownedPids": [
+            2,
+            84
+          ],
+          "rssByPid": {
+            "84": 50667520,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2905059328,
+          "temporaryBytes": 51160055
+        },
+        {
+          "rssBytes": 84434944,
+          "ownedPids": [
+            2,
+            84
+          ],
+          "rssByPid": {
+            "84": 67842048,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2905243648,
+          "temporaryBytes": 51160230
+        },
+        {
+          "rssBytes": 135819264,
+          "ownedPids": [
+            2,
+            84
+          ],
+          "rssByPid": {
+            "84": 119226368,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2872328192,
+          "temporaryBytes": 51160230
+        },
+        {
+          "rssBytes": 164167680,
+          "ownedPids": [
+            2,
+            84
+          ],
+          "rssByPid": {
+            "84": 147574784,
+            "2": 16592896
+          },
+          "MemAvailableBytes": 2839412736,
+          "temporaryBytes": 51160230
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "71d78aea843680dbd0012e68b19011a28bcb2170684495376b9a7d9cd1c3a1af",
+      "stderrSha256": "083f3bb107e3176ec9a64eb9749d0d331fea654a83421aebabd3fc77a59161d1",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 165216256,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 9,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "28208cc73aa49e4bf3d1772ef4611dbaa78458d59fb8d3a70db694197420aa56",
+        "inputSha256": "bb17bcb1a83b2c35581a3022772017b332518c9c85b36dd78324547e5e0c0832",
+        "returned": 0,
+        "header": [
+          24806,
+          25109,
+          24806,
+          303,
+          0,
+          302014,
+          0
+        ],
+        "outputSha256": "72dfa487b4b7e0ce678e95e82339d24d8715bb3de3e30965b14c12fff70f1cb1",
+        "expectedOutputSha256": "72dfa487b4b7e0ce678e95e82339d24d8715bb3de3e30965b14c12fff70f1cb1",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 147705856
+      }
+    },
+    {
+      "captureIndex": 10,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "10"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16723968,
+          "ownedPids": [
+            2,
+            91
+          ],
+          "rssByPid": {
+            "91": 0,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2905161728,
+          "temporaryBytes": 51165479
+        },
+        {
+          "rssBytes": 66998272,
+          "ownedPids": [
+            2,
+            91
+          ],
+          "rssByPid": {
+            "91": 50274304,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2905161728,
+          "temporaryBytes": 51165479
+        },
+        {
+          "rssBytes": 85483520,
+          "ownedPids": [
+            2,
+            91
+          ],
+          "rssByPid": {
+            "91": 68759552,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2905161728,
+          "temporaryBytes": 51165654
+        },
+        {
+          "rssBytes": 136212480,
+          "ownedPids": [
+            2,
+            91
+          ],
+          "rssByPid": {
+            "91": 119488512,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2865442816,
+          "temporaryBytes": 51165654
+        },
+        {
+          "rssBytes": 164331520,
+          "ownedPids": [
+            2,
+            91
+          ],
+          "rssByPid": {
+            "91": 147607552,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2840756224,
+          "temporaryBytes": 51165654
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "ffed6643985a0485a9296b835d0609c1db45fcc4a72882a9f0fa476f96387548",
+      "stderrSha256": "70046333f3e6ef046bb95b0ee9d050001a2592311d25d37a47fa3b40efb9b252",
+      "positiveChildRssSamples": 4,
+      "conservativePeakRssBoundBytes": 165314560,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 10,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "91bef97e16fa8dc051b3aecf1be95a413a2dc0dc80746b19f9df1f20c6e1faa1",
+        "inputSha256": "f103321cc089c5913fe28cb37e0dbd29daaaab90aedf03ca3aed9909677b99d9",
+        "returned": 0,
+        "header": [
+          25651,
+          26102,
+          25651,
+          451,
+          0,
+          327665,
+          0
+        ],
+        "outputSha256": "b525e9e9d4712afe37bdea16ee389bc79132d0708f4097ac08e420b5cb205896",
+        "expectedOutputSha256": "b525e9e9d4712afe37bdea16ee389bc79132d0708f4097ac08e420b5cb205896",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 147804160
+      }
+    },
+    {
+      "captureIndex": 11,
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/verify-capture-baseline.mjs",
+        "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/registration-resumed-home.json",
+        "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128/acquisition-005/capture-manifest.json",
+        "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "11"
+      ],
+      "status": "passed",
+      "resourceSamples": [
+        {
+          "rssBytes": 16723968,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 0,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2906214400,
+          "temporaryBytes": 51170905
+        },
+        {
+          "rssBytes": 66564096,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 49840128,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2905616384,
+          "temporaryBytes": 51170905
+        },
+        {
+          "rssBytes": 79020032,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 62296064,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2904166400,
+          "temporaryBytes": 51171080
+        },
+        {
+          "rssBytes": 122019840,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 105295872,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2877296640,
+          "temporaryBytes": 51171080
+        },
+        {
+          "rssBytes": 165015552,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 148291584,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2834358272,
+          "temporaryBytes": 51171080
+        },
+        {
+          "rssBytes": 96620544,
+          "ownedPids": [
+            2,
+            98
+          ],
+          "rssByPid": {
+            "98": 79896576,
+            "2": 16723968
+          },
+          "MemAvailableBytes": 2876936192,
+          "temporaryBytes": 51172257
+        }
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "158e567cea11d65083ef919436ace1e53d87b8d8f76244d6fc5a7790e4ee0548",
+      "stderrSha256": "9a95232df367f92f1078d816727ef528ee147b9b88dbdcce877d2b2495b1592c",
+      "positiveChildRssSamples": 5,
+      "conservativePeakRssBoundBytes": 172486656,
+      "result": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "scope": "Independent untimed baseline-only semantic verification; no candidate load, clocks, replay registration, or performance observation",
+        "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+        "nodeVersion": "v22.22.0",
+        "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "nativeCalls": 1,
+        "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+        "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+        "captureIndex": 11,
+        "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "memoryBytes": 26214400,
+        "compressedSha256": "455e6e27b98519f5ce559149b26da3abc06f7f8e19d4decaaea47265678ff64a",
+        "inputSha256": "5d57e0fef82fbc201fab0f9e062b1bba533275f84c477734c4f99a9016a96317",
+        "returned": 0,
+        "header": [
+          34367,
+          35062,
+          34367,
+          695,
+          0,
+          362032,
+          0
+        ],
+        "outputSha256": "633103b1fac28fbdd5fad54e721e4573aded0b49300f54e4f8c8c294148e1f59",
+        "expectedOutputSha256": "633103b1fac28fbdd5fad54e721e4573aded0b49300f54e4f8c8c294148e1f59",
+        "semanticRanges": [
+          [
+            1024,
+            1052
+          ],
+          [
+            1088,
+            1176
+          ],
+          [
+            131072,
+            26214400
+          ]
+        ],
+        "processPeakRssBytes": 154976256
+      }
+    }
+  ],
+  "acquisitionResourceAudit": {
+    "guardSha256": "9519f9c62dc6ccb439a36c75b3bc7741b6cc377dfaf88c8450c8552e8f69576d",
+    "sampleCount": 131,
+    "positiveLaunchedSamples": 131,
+    "watchdogPid": 5,
+    "ownedProcessIdentities": [
+      {
+        "pid": 7,
+        "ppid": 5,
+        "pgrp": 7,
+        "session": 7,
+        "starttime": 1015740
+      },
+      {
+        "pid": 29,
+        "ppid": 7,
+        "pgrp": 7,
+        "session": 7,
+        "starttime": 1015760
+      },
+      {
+        "pid": 45,
+        "ppid": 7,
+        "pgrp": 7,
+        "session": 7,
+        "starttime": 1016404
+      }
+    ],
+    "maxSampledRssBytes": 481161216,
+    "preflightRetainedBytes": 4237,
+    "initialGuardReceiptBytes": 1812,
+    "manifestPriorRetainedBytes": 6049,
+    "minimumSampledMemAvailableBytes": 2113236992,
+    "maxTemporaryBytes": 152210013,
+    "finalTemporaryBytes": 51066586,
+    "maximumInterSampleGapSeconds": 0.09605938099957712,
+    "medianInterSampleGapSeconds": 0.050626144498892245,
+    "firstSampleGapSeconds": 0.0016458110003441107,
+    "lastSampleToReceiptGapSeconds": 0.051418512000964256,
+    "scope": "Recomputed raw process/RSS/resource receipt; sampling gaps are reported without inventing a retrospective threshold"
+  },
+  "corpusAudit": {
+    "manifestSha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+    "captures": 12,
+    "banks": 53,
+    "rows": 528299,
+    "uniqueRepresentatives": 366030,
+    "pendingRows": 362032,
+    "exactMatches": 3998,
+    "rawOwnedBytes": 101143985,
+    "compressedCaptureBytes": 51035120,
+    "sourceIdentities": {
+      "baseline": {
+        "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+      },
+      "candidate": {
+        "commit": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+        "tree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f"
+      }
+    }
+  },
+  "semanticVerifier": {
+    "helperSha256": "8057b18fefd40cdc0f5ca9e214fb6311dca96c9832f7cfe297b2e6523497ccb5",
+    "nodeSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+    "nodeVersion": "v22.22.0",
+    "baselineWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "separateFreshProcessPerCapture": true,
+    "nativeClocks": false,
+    "candidateModuleLoaded": false,
+    "resourceTimeoutClockOnly": true
+  },
+  "semanticCalls": 12,
+  "allCapturesUnchanged": true,
+  "replayAuthorized": false,
+  "performanceObservations": 0
+}

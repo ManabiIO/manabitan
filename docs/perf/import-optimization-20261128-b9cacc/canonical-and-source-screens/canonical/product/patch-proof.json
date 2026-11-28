@@ -1,0 +1,22 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "candidate": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+  "candidateTree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f",
+  "reconstructedTree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f",
+  "patchSha256": "bcac3838731eeec3b4271a1492152b62b8e67801108ae8f221b56759f9e6e199",
+  "patchBytes": 37106,
+  "changedFiles": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "test/data/dictionary-wasm/term-content-canonical-counters-baseline.wasm",
+    "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+    "test/term-content-canonical-counters.test.js",
+    "test/term-content-canonical-inputs.test.js",
+    "test/term-content-canonical-scan.test.js"
+  ],
+  "proof": "git read-tree baseline; git apply --cached --binary; git write-tree using an isolated temporary index",
+  "productWorktreeAndNormalIndexUnchanged": true,
+  "nativeOrTestExecution": false
+}

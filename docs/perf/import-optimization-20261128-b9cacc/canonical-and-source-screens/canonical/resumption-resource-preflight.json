@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only readiness inspection, not the actual stage guard and not authorization to acquire/replay",
+  "createdAtUtc": "2026-11-28T05:30:36.490700+00:00",
+  "amendedRegistrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "MemAvailableBeforeBytes": 3658149888,
+  "MemAvailableAfterBytes": 3506372608,
+  "aggregateCpuBusyFraction": 0.26962962962962966,
+  "cpuSampleSeconds": 3.0126613219999854,
+  "loadavg": "2.04 1.43 1.49 3/313 8",
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "temporaryFiles": [],
+  "retainedTemporaryBytes": 0,
+  "filesystems": {
+    "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128": {
+      "type": "tmpfs",
+      "availableBytes": 4739125248,
+      "deviceId": 41
+    },
+    "/workspace/scratch/b9cacc3542c2": {
+      "type": "ext2/ext3",
+      "availableBytes": 57417728,
+      "deviceId": 65040
+    },
+    "/tmp": {
+      "type": "tmpfs",
+      "availableBytes": 727879680,
+      "deviceId": 39
+    }
+  },
+  "cgroupPath": "0::/",
+  "cgroupFiles": {
+    "memory.max": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    },
+    "memory.current": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    },
+    "memory.events": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    },
+    "memory.high": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    },
+    "memory.swap.max": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    },
+    "cpu.max": {
+      "available": false,
+      "reason": "FileNotFoundError"
+    }
+  },
+  "requiredPathsExist": {
+    "fixture": true,
+    "baselineNodeModules": true,
+    "baselineGeneratedLibs": true,
+    "baselineParserWasm": true,
+    "baselineCanonicalWasm": true,
+    "workerAdapter": true
+  },
+  "limitsUnchanged": {
+    "minimumAvailableBytes": 1879048192,
+    "minimumTemporaryFreeBytes": 268435456,
+    "maxRssBytes": 1073741824,
+    "maxArenaBytes": 67108864,
+    "maxTemporaryBytes": 201326592,
+    "timeoutSeconds": 300,
+    "maximumPreflightCpuBusyFraction": 0.1,
+    "minimumRuntimeAvailableBytes": 536870912
+  },
+  "resourceEligibilityAtInspection": true,
+  "replayCpuEligibilityAtInspection": false,
+  "tmpfsAccounting": "Capture files consume tmpfs memory in addition to sampled process RSS. The separate192MiB retained-file cap and physical MemAvailable floor remain enforced; cgroup limits are unknown."
+}

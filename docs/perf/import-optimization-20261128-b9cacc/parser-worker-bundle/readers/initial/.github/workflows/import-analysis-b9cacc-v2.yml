@@ -1,0 +1,42 @@
+name: Audit frozen import evidence without rerunning imports
+
+on:
+  push:
+    branches: ['perf/import-analysis-20261128-b9cacc']
+    paths:
+      - '.github/workflows/import-analysis-b9cacc-v2.yml'
+      - 'dev/perf/import-analysis-b9cacc-v2.py'
+      - 'dev/perf/import-analysis-b9cacc-experiments.json'
+      - 'dev/perf/test_import_analysis_b9cacc.py'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate analysis-only code and negative controls
+        run: |
+          python -m py_compile dev/perf/import-analysis-b9cacc-v2.py dev/perf/test_import_analysis_b9cacc.py
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+          python -m unittest discover -s dev/perf -p 'test_import_analysis_b9cacc.py'
+      - name: Audit all six frozen score cells once without waiting for producers
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MANABITAN_AUDIT_EXPERIMENTS: score-validation
+        run: python dev/perf/import-analysis-b9cacc-v2.py
+      - name: Retain the compact audit and exact reader configuration
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frozen-import-evidence-audit-b9cacc
+          path: builds/perf/frozen-evidence-reader
+          if-no-files-found: warn
+          retention-days: 90

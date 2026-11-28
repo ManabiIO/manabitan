@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-11-28T05:36:13.712435+00:00",
+  "corrects": "acquire-004-preflight-failure.json status/source-branch wording",
+  "status": "initial-running-report-write-failed-before-child",
+  "errorFragmentsFromOriginalToolResult": [
+    "OSError: [Errno 28] No space left on device",
+    "component-watchdog.py line 146: persist()",
+    "component-watchdog.py line 114: args.guard_report.write_text(...)"
+  ],
+  "fullTracebackRetention": "Original tool result remains the original evidence; full text was not saved before context compaction. These are explicitly excerpts, not a reconstructed traceback.",
+  "sourceConclusion": "Frozen guard line146 occurs after all preflight checks passed and before Popen; no child process or acquisition output was created. Exact preflight numeric measurements were lost with the zero-byte receipt.",
+  "guardSha256": "8a90530c5672cec136b0c26fc9223e1e39225d53180f6d616a9e8910a2272057",
+  "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "originalGuardBytes": 0,
+  "nativeWorkStarted": false,
+  "timingStarted": false,
+  "replacementAuthorized": "One untimed acquisition005 storage repair; unchanged registration/guard, fresh report and console log under own home evidence path."
+}

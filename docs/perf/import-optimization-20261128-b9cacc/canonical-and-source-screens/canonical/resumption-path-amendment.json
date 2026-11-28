@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "status": "prospective-path-only-amendment-awaiting-root-review",
+  "createdAtUtc": "2026-11-28T05:29:06.120976+00:00",
+  "originalRegistrationSha256": "bf70ae2086942e673d310498cd7a69a8ac08e7ec3543805c6cbc7c7e8be3ae27",
+  "amendedRegistrationSha256": "c1af905ac8df0b242c4b550df04d0ff430bf932ed8dd3ba793ece2f7d9c34650",
+  "changes": [
+    {
+      "field": "nodeExecutable",
+      "old": "/home/agent/.cache/manabitan-b9cacc/node-runtime/node_modules/node/bin/node",
+      "new": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node"
+    },
+    {
+      "field": "temporaryRoot",
+      "old": "/home/agent/.cache/manabitan-b9cacc/canonical-combined",
+      "new": "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined-data"
+    }
+  ],
+  "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+  "matchingScheduleSerializations": [
+    {
+      "sortKeys": true,
+      "compact": true,
+      "trailingNewline": false
+    }
+  ],
+  "allOtherFieldsByteValueEquivalent": true,
+  "node": {
+    "path": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+    "version": "v22.22.0",
+    "bytes": 123405064,
+    "sha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+  },
+  "oldTemporaryRootExists": false,
+  "lostTemporaryData": "Acquisition003 partial raw/gzip payloads and acquisition002 temporary manifest copy were lost at environment reset. Acquisition002 gzip payloads had already been deliberately disposed under the earlier recorded approval. Persistent receipts are unchanged.",
+  "acquisitionStarted": false,
+  "replayStarted": false
+}

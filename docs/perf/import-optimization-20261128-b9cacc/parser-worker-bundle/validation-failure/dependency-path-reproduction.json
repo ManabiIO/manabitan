@@ -1,0 +1,62 @@
+{
+  "scope": "One unchanged library; esbuild options match production buildLib",
+  "dependencyFiles": {
+    "package.json": "1f9033ee5a6515e7d76938b7072941862d1ed228a6879cc7fe10cdeb75107989",
+    "dist/runtime/ucs2length.js": "1df012dd3d23fced07255a7204798004509687cb1f431ae0ab976db436bbd890",
+    "dist/runtime/ucs2length.js.map": "5ad0a6c09c26dd193c807813a9a22304d7c4534af6f13361032ecedaf58e8a7d",
+    "lib/runtime/ucs2length.ts": "a001c95dd2e835b9c61080254c117f02d425eb6760bd2c1d682ab63ed00d12f6"
+  },
+  "source": "5cddb243facb2473b2cdfa5cc37c2f7bec285879d00ad84428ca041d07a69812",
+  "results": {
+    "candidate": {
+      "tools": {
+        "node": "v22.22.0",
+        "esbuild": "0.25.1"
+      },
+      "outputs": {
+        "ucs2length.js": {
+          "bytes": 2302,
+          "sha256": "b33edbd49200fdfbcf6dbb938fc39fde55b6ea478fa324cb2f9788cd558ddb34"
+        },
+        "ucs2length.js.map": {
+          "bytes": 2087,
+          "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f"
+        }
+      }
+    },
+    "symlink": {
+      "tools": {
+        "node": "v22.22.0",
+        "esbuild": "0.25.1"
+      },
+      "outputs": {
+        "ucs2length.js": {
+          "bytes": 2308,
+          "sha256": "9fffda7534a5e3a1e5815e6dc7dba302e30e74f18676742738f19f83bc3d4d1c"
+        },
+        "ucs2length.js.map": {
+          "bytes": 2090,
+          "sha256": "831ab95d45cc568bdf19993e471ca5699ddcfbcc9f4b87cc639fb60ea5c288d1"
+        }
+      }
+    },
+    "hardlink": {
+      "tools": {
+        "node": "v22.22.0",
+        "esbuild": "0.25.1"
+      },
+      "outputs": {
+        "ucs2length.js": {
+          "bytes": 2302,
+          "sha256": "b33edbd49200fdfbcf6dbb938fc39fde55b6ea478fa324cb2f9788cd558ddb34"
+        },
+        "ucs2length.js.map": {
+          "bytes": 2087,
+          "sha256": "8cc187eb7b7c2f22e41b87433603900adc90a60e76d7bea5642d60c7e0eda00f"
+        }
+      }
+    }
+  },
+  "symlinkDiffers": true,
+  "independentHardlinkCopyIsByteIdentical": true
+}

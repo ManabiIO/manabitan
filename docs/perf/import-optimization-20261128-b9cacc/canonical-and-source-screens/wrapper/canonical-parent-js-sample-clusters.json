@@ -1,0 +1,3317 @@
+{
+  "scope": "One existing diagnostic trace. Counts only; no timeDelta reads/weighting, phase subtraction, new profile or performance inference. Nearest-anchor clusters are disjoint; inclusive anchor counts can overlap.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "traceSha256": "5b89ba263782ce409155bee286c51a1c7f6e181976321da71a6e9014ffac1d15",
+  "packageSha256": "ff679658d4155495d21b1ca6d08e5944e8f83a927513f969b0d8116d60c58cb4",
+  "pid": 3512,
+  "tid": 3541,
+  "profileId": "0x4",
+  "worker": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+  "sampleCount": 3701,
+  "sampledNodesWithPositionTicks": 0,
+  "nearestAnchorClusters": [
+    {
+      "category": "canonicalScanner",
+      "selfSamples": 345,
+      "javascriptSelfSamples": 43,
+      "wasmSelfSamples": 299,
+      "builtinOrUnattributedSelfSamples": 3,
+      "leaves": [
+        {
+          "url": "wasm://wasm/34e657a2",
+          "function": "wasm-function[4]",
+          "line": 1,
+          "column": 205,
+          "selfSamples": 299
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+          "function": "_scan",
+          "line": 159,
+          "column": 16,
+          "selfSamples": 15
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_readTermEntryContentMetaHashPairIndex",
+          "line": 7190,
+          "column": 43,
+          "selfSamples": 12
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+          "function": "",
+          "line": 352,
+          "column": 59,
+          "selfSamples": 11
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+          "function": "scan",
+          "line": 141,
+          "column": 15,
+          "selfSamples": 4
+        },
+        {
+          "url": "",
+          "function": "fetch",
+          "line": 0,
+          "column": 0,
+          "selfSamples": 3
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+          "function": "",
+          "line": 33,
+          "column": 26,
+          "selfSamples": 1
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 299,
+          "frames": [
+            {
+              "url": "wasm://wasm/34e657a2",
+              "function": "wasm-function[4]",
+              "line": 1,
+              "column": 205
+            },
+            {
+              "url": "wasm://wasm/362472d2",
+              "function": "js-to-wasm:iiii:i",
+              "line": 1,
+              "column": 1
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 13,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 12,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_readTermEntryContentMetaHashPairIndex",
+              "line": 7190,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "",
+              "line": 352,
+              "column": 59
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "adoptPendingColumns",
+              "line": 9099,
+              "column": 41
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 11,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "",
+              "line": 352,
+              "column": 59
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "adoptPendingColumns",
+              "line": 9099,
+              "column": 41
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 3,
+          "frames": [
+            {
+              "url": "",
+              "function": "fetch",
+              "line": 0,
+              "column": 0
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "",
+              "line": 33,
+              "column": 26
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "compileCanonicalScanModule",
+              "line": 31,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "scan",
+              "line": 141,
+              "column": 15
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            }
+          ]
+        },
+        {
+          "selfSamples": 2,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "scan",
+              "line": 141,
+              "column": 15
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+              "function": "_runPipeline",
+              "line": 2968,
+              "column": 23
+            }
+          ]
+        },
+        {
+          "selfSamples": 2,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "scan",
+              "line": 141,
+              "column": 15
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            }
+          ]
+        },
+        {
+          "selfSamples": 2,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "scan",
+              "line": 141,
+              "column": 15
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 1,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "",
+              "line": 33,
+              "column": 26
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "compileCanonicalScanModule",
+              "line": 31,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "scan",
+              "line": 141,
+              "column": 15
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "resolvedPlanPublication",
+      "selfSamples": 283,
+      "javascriptSelfSamples": 283,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_publishResolvedArtifactTermContentPlan",
+          "line": 9712,
+          "column": 44,
+          "selfSamples": 283
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 283,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_publishResolvedArtifactTermContentPlan",
+              "line": 9712,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "exactResolution",
+      "selfSamples": 68,
+      "javascriptSelfSamples": 68,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_termContentBytesEqualSpan",
+          "line": 6405,
+          "column": 31,
+          "selfSamples": 21
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "resolveExactCandidates",
+          "line": 9136,
+          "column": 44,
+          "selfSamples": 13
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+          "line": 6576,
+          "column": 58,
+          "selfSamples": 9
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_readTermContentSignature",
+          "line": 6355,
+          "column": 30,
+          "selfSamples": 7
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_findRecentTermContentSource",
+          "line": 6770,
+          "column": 33,
+          "selfSamples": 6
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/raw-term-content.js",
+          "function": "getRawTermContentBlockCompressionDictName",
+          "line": 73,
+          "column": 58,
+          "selfSamples": 6
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+          "line": 6464,
+          "column": 56,
+          "selfSamples": 3
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_canExactlyComparePersistedTermContent",
+          "line": 6512,
+          "column": 43,
+          "selfSamples": 2
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "",
+          "line": 9139,
+          "column": 117,
+          "selfSamples": 1
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 21,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_termContentBytesEqualSpan",
+              "line": 6405,
+              "column": 31
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 9,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 9,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 7,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_readTermContentSignature",
+              "line": 6355,
+              "column": 30
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+              "line": 6464,
+              "column": 56
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 6,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findRecentTermContentSource",
+              "line": 6770,
+              "column": 33
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 6,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/raw-term-content.js",
+              "function": "getRawTermContentBlockCompressionDictName",
+              "line": 73,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_canExactlyComparePersistedTermContent",
+              "line": 6512,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+              "line": 6464,
+              "column": 56
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 4,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 3,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+              "line": 6464,
+              "column": 56
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 2,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_canExactlyComparePersistedTermContent",
+              "line": 6512,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+              "line": 6464,
+              "column": 56
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+              "line": 6576,
+              "column": 58
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 1,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "",
+              "line": 9139,
+              "column": 117
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "resolveExactCandidates",
+              "line": 9136,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "metadataPublication",
+      "selfSamples": 34,
+      "javascriptSelfSamples": 34,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_tryPublishContiguousArtifactTermContentMetadata",
+          "line": 9792,
+          "column": 53,
+          "selfSamples": 22
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_publishArtifactTermContentMetadata",
+          "line": 9902,
+          "column": 40,
+          "selfSamples": 12
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 22,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_tryPublishContiguousArtifactTermContentMetadata",
+              "line": 9792,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_publishArtifactTermContentMetadata",
+              "line": 9902,
+              "column": 40
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 12,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_publishArtifactTermContentMetadata",
+              "line": 9902,
+              "column": 40
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "recentSourceCache",
+      "selfSamples": 34,
+      "javascriptSelfSamples": 34,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_cacheRecentPublishedTermContentSources",
+          "line": 6795,
+          "column": 44,
+          "selfSamples": 34
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 34,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_cacheRecentPublishedTermContentSources",
+              "line": 6795,
+              "column": 44
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_publishArtifactTermContentMetadata",
+              "line": 9902,
+              "column": 40
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "inFlightSourceRegistration",
+      "selfSamples": 32,
+      "javascriptSelfSamples": 32,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_registerInFlightTermContentSources",
+          "line": 6980,
+          "column": 40,
+          "selfSamples": 32
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 32,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_registerInFlightTermContentSources",
+              "line": 6980,
+              "column": 40
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "pendingColumnAdoption",
+      "selfSamples": 21,
+      "javascriptSelfSamples": 21,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "adoptPendingColumns",
+          "line": 9099,
+          "column": 41,
+          "selfSamples": 21
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 21,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "adoptPendingColumns",
+              "line": 9099,
+              "column": 41
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+              "function": "_scan",
+              "line": 159,
+              "column": 16
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "canonicalPreparation",
+      "selfSamples": 13,
+      "javascriptSelfSamples": 13,
+      "wasmSelfSamples": 0,
+      "builtinOrUnattributedSelfSamples": 0,
+      "leaves": [
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_resolveArtifactTermContentDedup",
+          "line": 8715,
+          "column": 43,
+          "selfSamples": 5
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-plan-resolution.js",
+          "function": "initializeTermContentPlanResolution",
+          "line": 27,
+          "column": 52,
+          "selfSamples": 5
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "_resizeTermContentMetadataArena",
+          "line": 7261,
+          "column": 36,
+          "selfSamples": 1
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+          "function": "getOrCreateTermContentPlanScratch",
+          "line": 257,
+          "column": 43,
+          "selfSamples": 1
+        },
+        {
+          "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/core/safe-performance.js",
+          "function": "now",
+          "line": 63,
+          "column": 8,
+          "selfSamples": 1
+        }
+      ],
+      "topStacks": [
+        {
+          "selfSamples": 5,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+              "function": "_runPipeline",
+              "line": 2968,
+              "column": 23
+            },
+            {
+              "url": "",
+              "function": "(root)",
+              "line": 0,
+              "column": 0
+            }
+          ]
+        },
+        {
+          "selfSamples": 5,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-plan-resolution.js",
+              "function": "initializeTermContentPlanResolution",
+              "line": 27,
+              "column": 52
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+              "function": "_runPipeline",
+              "line": 2968,
+              "column": 23
+            }
+          ]
+        },
+        {
+          "selfSamples": 1,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resizeTermContentMetadataArena",
+              "line": 7261,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_ensureTermEntryContentMetaHashPairCapacity",
+              "line": 7345,
+              "column": 48
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            }
+          ]
+        },
+        {
+          "selfSamples": 1,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "getOrCreateTermContentPlanScratch",
+              "line": 257,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+              "function": "_runPipeline",
+              "line": 2968,
+              "column": 23
+            }
+          ]
+        },
+        {
+          "selfSamples": 1,
+          "frames": [
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/core/safe-performance.js",
+              "function": "now",
+              "line": 63,
+              "column": 8
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_resolveArtifactTermContentDedup",
+              "line": 8715,
+              "column": 43
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+              "line": 8375,
+              "column": 53
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+              "function": "bulkAddArtifactTermsChunk",
+              "line": 5076,
+              "column": 36
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "processTermChunk",
+              "line": 1963,
+              "column": 38
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "",
+              "line": 2334,
+              "column": 29
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+              "function": "handleParsedChunk",
+              "line": 5176,
+              "column": 39
+            },
+            {
+              "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+              "function": "_runPipeline",
+              "line": 2968,
+              "column": 23
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "_scan",
+      "line": 159,
+      "column": 16,
+      "inclusiveSamples": 421,
+      "ownSelfSamples": 15
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_publishResolvedArtifactTermContentPlan",
+      "line": 9712,
+      "column": 44,
+      "inclusiveSamples": 283,
+      "ownSelfSamples": 283
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_publishArtifactTermContentMetadata",
+      "line": 9902,
+      "column": 40,
+      "inclusiveSamples": 68,
+      "ownSelfSamples": 12
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "resolveExactCandidates",
+      "line": 9136,
+      "column": 44,
+      "inclusiveSamples": 68,
+      "ownSelfSamples": 13
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+      "line": 6576,
+      "column": 58,
+      "inclusiveSamples": 54,
+      "ownSelfSamples": 9
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "adoptPendingColumns",
+      "line": 9099,
+      "column": 41,
+      "inclusiveSamples": 44,
+      "ownSelfSamples": 21
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_cacheRecentPublishedTermContentSources",
+      "line": 6795,
+      "column": 44,
+      "inclusiveSamples": 34,
+      "ownSelfSamples": 34
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_registerInFlightTermContentSources",
+      "line": 6980,
+      "column": 40,
+      "inclusiveSamples": 32,
+      "ownSelfSamples": 32
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "",
+      "line": 352,
+      "column": 59,
+      "inclusiveSamples": 23,
+      "ownSelfSamples": 11
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_tryPublishContiguousArtifactTermContentMetadata",
+      "line": 9792,
+      "column": 53,
+      "inclusiveSamples": 22,
+      "ownSelfSamples": 22
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_resolveArtifactTermContentDedup",
+      "line": 8715,
+      "column": 43,
+      "inclusiveSamples": 21,
+      "ownSelfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_termContentBytesEqualSpan",
+      "line": 6405,
+      "column": 31,
+      "inclusiveSamples": 21,
+      "ownSelfSamples": 21
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "scan",
+      "line": 141,
+      "column": 15,
+      "inclusiveSamples": 10,
+      "ownSelfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_findRecentTermContentSource",
+      "line": 6770,
+      "column": 33,
+      "inclusiveSamples": 6,
+      "ownSelfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-plan-resolution.js",
+      "function": "initializeTermContentPlanResolution",
+      "line": 27,
+      "column": 52,
+      "inclusiveSamples": 5,
+      "ownSelfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "",
+      "line": 33,
+      "column": 26,
+      "inclusiveSamples": 4,
+      "ownSelfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "compileCanonicalScanModule",
+      "line": 31,
+      "column": 43,
+      "inclusiveSamples": 4,
+      "ownSelfSamples": 0
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_ensureTermEntryContentMetaHashPairCapacity",
+      "line": 7345,
+      "column": 48,
+      "inclusiveSamples": 1,
+      "ownSelfSamples": 0
+    }
+  ],
+  "allParentSelf": [
+    {
+      "url": "",
+      "function": "(idle)",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1111
+    },
+    {
+      "url": "wasm://wasm/34e657a2",
+      "function": "wasm-function[4]",
+      "line": 1,
+      "column": 205,
+      "selfSamples": 299
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_publishResolvedArtifactTermContentPlan",
+      "line": 9712,
+      "column": 44,
+      "selfSamples": 283
+    },
+    {
+      "url": "",
+      "function": "postMessage",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 171
+    },
+    {
+      "url": "",
+      "function": "setTimeout",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 131
+    },
+    {
+      "url": "",
+      "function": "clearTimeout",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 127
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_encodeArtifactRecordFields",
+      "line": 5840,
+      "column": 32,
+      "selfSamples": 86
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_createLookupIndexChunk",
+      "line": 6244,
+      "column": 28,
+      "selfSamples": 76
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_encodeAndAppendArtifactChunkForState",
+      "line": 2456,
+      "column": 48,
+      "selfSamples": 73
+    },
+    {
+      "url": "",
+      "function": "write",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 67
+    },
+    {
+      "url": "",
+      "function": "(garbage collector)",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 63
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "createTermContentReferenceSlabs",
+      "line": 1323,
+      "column": 41,
+      "selfSamples": 63
+    },
+    {
+      "url": "",
+      "function": "Blob",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 55
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-source-pipeline.js",
+      "function": "read",
+      "line": 108,
+      "column": 15,
+      "selfSamples": 46
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-key-hash.js",
+      "function": "hashLargeTermKeyByteRange",
+      "line": 125,
+      "column": 35,
+      "selfSamples": 43
+    },
+    {
+      "url": "",
+      "function": "slice",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 38
+    },
+    {
+      "url": "",
+      "function": "(program)",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 37
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "parseCompactRecordFields",
+      "line": 192,
+      "column": 34,
+      "selfSamples": 35
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_cacheRecentPublishedTermContentSources",
+      "line": 6795,
+      "column": 44,
+      "selfSamples": 34
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_registerInFlightTermContentSources",
+      "line": 6980,
+      "column": 40,
+      "selfSamples": 32
+    },
+    {
+      "url": "",
+      "function": "clearInterval",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 29
+    },
+    {
+      "url": "",
+      "function": "setInterval",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 28
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-preinterned-plan.js",
+      "function": "hasCompletePreparedTermRecordPreinternedPlan",
+      "line": 568,
+      "column": 61,
+      "selfSamples": 28
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_bulkAddArtifactTermsChunkWithContentDedup",
+      "line": 8375,
+      "column": 53,
+      "selfSamples": 24
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "getArtifactContentLength",
+      "line": 310,
+      "column": 34,
+      "selfSamples": 23
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "planContentSpansIntoSlabs",
+      "line": 1454,
+      "column": 35,
+      "selfSamples": 22
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_tryPublishContiguousArtifactTermContentMetadata",
+      "line": 9792,
+      "column": 53,
+      "selfSamples": 22
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-key-hash.js",
+      "function": "round",
+      "line": 40,
+      "column": 15,
+      "selfSamples": 22
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "adoptPendingColumns",
+      "line": 9099,
+      "column": 41,
+      "selfSamples": 21
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_termContentBytesEqualSpan",
+      "line": 6405,
+      "column": 31,
+      "selfSamples": 21
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_importDictionary",
+      "line": 917,
+      "column": 28,
+      "selfSamples": 20
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_encodeArtifactChunkRecords",
+      "line": 5972,
+      "column": 38,
+      "selfSamples": 19
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "importDictionary",
+      "line": 869,
+      "column": 27,
+      "selfSamples": 15
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "_scan",
+      "line": 159,
+      "column": 16,
+      "selfSamples": 15
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "beginCompressWrappedSpans",
+      "line": 230,
+      "column": 30,
+      "selfSamples": 14
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "resolveExactCandidates",
+      "line": 9136,
+      "column": 44,
+      "selfSamples": 13
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_publishArtifactTermContentMetadata",
+      "line": 9902,
+      "column": 40,
+      "selfSamples": 12
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_readTermEntryContentMetaHashPairIndex",
+      "line": 7190,
+      "column": 43,
+      "selfSamples": 12
+    },
+    {
+      "url": "",
+      "function": "flush",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 11
+    },
+    {
+      "url": "",
+      "function": "truncate",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 11
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-key-hash.js",
+      "function": "rotateLeft",
+      "line": 31,
+      "column": 20,
+      "selfSamples": 11
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "",
+      "line": 352,
+      "column": 59,
+      "selfSamples": 11
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "validateTermContentSpans",
+      "line": 1269,
+      "column": 34,
+      "selfSamples": 10
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "createTermContentReferenceOffsets",
+      "line": 1407,
+      "column": 43,
+      "selfSamples": 10
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "",
+      "line": 130,
+      "column": 29,
+      "selfSamples": 10
+    },
+    {
+      "url": "",
+      "function": "arrayBuffer",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 9
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_findMatchingPersistedTermEntryContentMetaBatch",
+      "line": 6576,
+      "column": 58,
+      "selfSamples": 9
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "_runPipeline",
+      "line": 2968,
+      "column": 23,
+      "selfSamples": 7
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "shouldSelectInitialSharedBlockStorage",
+      "line": 1223,
+      "column": 47,
+      "selfSamples": 7
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "_onMessage",
+      "line": 404,
+      "column": 15,
+      "selfSamples": 7
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_readTermContentSignature",
+      "line": 6355,
+      "column": 30,
+      "selfSamples": 7
+    },
+    {
+      "url": "wasm://wasm/362472d2",
+      "function": "js-to-wasm:iiii:i",
+      "line": 1,
+      "column": 1,
+      "selfSamples": 7
+    },
+    {
+      "url": "",
+      "function": "fetch",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "",
+      "line": 795,
+      "column": 55,
+      "selfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "validateContentLength",
+      "line": 553,
+      "column": 31,
+      "selfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_findRecentTermContentSource",
+      "line": 6770,
+      "column": 33,
+      "selfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/raw-term-content.js",
+      "function": "getRawTermContentBlockCompressionDictName",
+      "line": 73,
+      "column": 58,
+      "selfSamples": 6
+    },
+    {
+      "url": "",
+      "function": "encode",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 6
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "getEntriesGenerator",
+      "line": 2508,
+      "column": 29,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "f",
+      "line": 7567,
+      "column": 30,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "runParallelParserJob",
+      "line": 3652,
+      "column": 30,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_resolveArtifactTermContentDedup",
+      "line": 8715,
+      "column": 43,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "_beginAppendSharedSpans",
+      "line": 794,
+      "column": 28,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_appendEncodedChunk",
+      "line": 6062,
+      "column": 30,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-plan-resolution.js",
+      "function": "initializeTermContentPlanResolution",
+      "line": 27,
+      "column": 52,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "finishBulkImport",
+      "line": 1478,
+      "column": 27,
+      "selfSamples": 5
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "exec",
+      "line": 7349,
+      "column": 19,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "onMessage",
+      "line": 3717,
+      "column": 27,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "bulkAddArtifactTermsChunk",
+      "line": 5076,
+      "column": 36,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "scan",
+      "line": 141,
+      "column": 15,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "",
+      "line": 888,
+      "column": 17,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "WhWasmUtilInstaller.target.scopedAllocPop",
+      "line": 3996,
+      "column": 36,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "",
+      "line": 380,
+      "column": 40,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "getSynchronousResolvedContentReferences",
+      "line": 369,
+      "column": 49,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "appendBatchFromArtifactChunkResolvedContent",
+      "line": 2165,
+      "column": 54,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "flushGroup",
+      "line": 1161,
+      "column": 28,
+      "selfSamples": 4
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-zip-read-scope.js",
+      "function": "read",
+      "line": 46,
+      "column": 15,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "getData",
+      "line": 2733,
+      "column": 16,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "finalize",
+      "line": 7625,
+      "column": 23,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "tryBeginAppendSpans",
+      "line": 752,
+      "column": 24,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-key-hash.js",
+      "function": "hashTermKeyByteRange",
+      "line": 60,
+      "column": 37,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-lookup-index-preparation.js",
+      "function": "isCompletePreparedTermLookupIndex",
+      "line": 208,
+      "column": 43,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_getMatchingPersistedTermEntryContentMetaCandidates",
+      "line": 6464,
+      "column": 56,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_appendResolvedArtifactTermRecords",
+      "line": 10131,
+      "column": 45,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_writeDataToActiveSegmentsInternal",
+      "line": 2235,
+      "column": 45,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-lookup-index-preparation.js",
+      "function": "hasCompletePreparedTermLookupIndexes",
+      "line": 229,
+      "column": 53,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[456]",
+      "line": 1,
+      "column": 119990,
+      "selfSamples": 3
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_onMessage",
+      "line": 107,
+      "column": 15,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "f",
+      "line": 6879,
+      "column": 41,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "getEntries",
+      "line": 2689,
+      "column": 19,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "readCommonFooter",
+      "line": 2858,
+      "column": 26,
+      "selfSamples": 2
+    },
+    {
+      "url": "",
+      "function": "",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1425]",
+      "line": 1,
+      "column": 418385,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_bulkInsertWithDescriptor",
+      "line": 5643,
+      "column": 36,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_startBulkImportSetup",
+      "line": 1364,
+      "column": 32,
+      "selfSamples": 2
+    },
+    {
+      "url": "",
+      "function": "removeEventListener",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "",
+      "line": 2334,
+      "column": 29,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/core/safe-performance.js",
+      "function": "now",
+      "line": 63,
+      "column": 8,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "validateContentOffset",
+      "line": 543,
+      "column": 31,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "parseCanonicalSafeInteger",
+      "line": 134,
+      "column": 35,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/raw-term-content.js",
+      "function": "writeRawTermContentCompactBlockReference",
+      "line": 120,
+      "column": 57,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_canExactlyComparePersistedTermContent",
+      "line": 6512,
+      "column": 43,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "",
+      "line": 737,
+      "column": 24,
+      "selfSamples": 2
+    },
+    {
+      "url": "",
+      "function": "getFileHandle",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "",
+      "line": 4204,
+      "column": 20,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_writeDataToActiveSegments",
+      "line": 2221,
+      "column": 37,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "_yieldToNextTask",
+      "line": 300,
+      "column": 21,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "_startDispatch",
+      "line": 367,
+      "column": 19,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_addTermContentBlockProfile",
+      "line": 9551,
+      "column": 32,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "append",
+      "line": 228,
+      "column": 9,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_readFileSequence",
+      "line": 4953,
+      "column": 28,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "__allocCStr",
+      "line": 3974,
+      "column": 32,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "get",
+      "line": 7821,
+      "column": 18,
+      "selfSamples": 2
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_startConcurrentLookup",
+      "line": 194,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_pruneImportOperations",
+      "line": 365,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_invokeAction",
+      "line": 533,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "decode",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_createProgressData",
+      "line": 3183,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "setExpectedImportBytes",
+      "line": 1554,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_postImportPortMessage",
+      "line": 301,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dense-zip-directory.js",
+      "function": "readDenseZipFileMap",
+      "line": 53,
+      "column": 42,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "readUint8Array",
+      "line": 1902,
+      "column": 23,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "Entry",
+      "line": 2466,
+      "column": 14,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "",
+      "line": 2467,
+      "column": 28,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_createArchiveFileMap",
+      "line": 3094,
+      "column": 26,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "Response",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_readAndValidateIndex",
+      "line": 3142,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "entry.getData",
+      "line": 2667,
+      "column": 23,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "initWriter",
+      "line": 2352,
+      "column": 20,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "runWorker2",
+      "line": 1705,
+      "column": 26,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "TransformStream",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "CodecStream",
+      "line": 1342,
+      "column": 14,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "Crc32Stream",
+      "line": 242,
+      "column": 14,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "isDictionaryIndex",
+      "line": 298,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[452]",
+      "line": 1,
+      "column": 119320,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "",
+      "line": 7678,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[344]",
+      "line": 1,
+      "column": 93595,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[161]",
+      "line": 1,
+      "column": 38398,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_getArchiveFiles",
+      "line": 4412,
+      "column": 21,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "compareDecimalIntegerStrings",
+      "line": 218,
+      "column": 38,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_getApproximateDeviceMemoryGiB",
+      "line": 12274,
+      "column": 35,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_validateUrl",
+      "line": 3318,
+      "column": 17,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "bulkAdd",
+      "line": 5008,
+      "column": 18,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "reset",
+      "line": 7645,
+      "column": 20,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[252]",
+      "line": 1,
+      "column": 87275,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1008]",
+      "line": 1,
+      "column": 282621,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[215]",
+      "line": 1,
+      "column": 78213,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "addWithResult",
+      "line": 5769,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1504]",
+      "line": 1,
+      "column": 456365,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-source-pipeline.js",
+      "function": "createImportRunPlan",
+      "line": 796,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-source-pipeline.js",
+      "function": "createCompressedImportRunPlan",
+      "line": 821,
+      "column": 34,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_listTermRecordStorageFileNames",
+      "line": 6901,
+      "column": 42,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-import-journal.js",
+      "function": "_write",
+      "line": 87,
+      "column": 17,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_runMutationExclusive",
+      "line": 164,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_getDeviceMemoryGiB",
+      "line": 2409,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_runExclusiveStorageMutation",
+      "line": 1026,
+      "column": 39,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[46]",
+      "line": 1,
+      "column": 14107,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "getSize",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "canUseParallelTermBankParser",
+      "line": 3446,
+      "column": 38,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "",
+      "line": 3565,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "_readTermBankFileFast",
+      "line": 5079,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "parseTermBankWithWasmColumnChunksParallelSources",
+      "line": 3339,
+      "column": 64,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "acquireRun",
+      "line": 2754,
+      "column": 15,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "",
+      "line": 3572,
+      "column": 47,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "",
+      "line": 3590,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "Worker",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "run",
+      "line": 2949,
+      "column": 14,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "loadParallelTermBankSource",
+      "line": 3429,
+      "column": 36,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "readCompressed",
+      "line": 1536,
+      "column": 34,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-source-pipeline.js",
+      "function": "read",
+      "line": 503,
+      "column": 9,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "observeParallelTermBankSourcePromise",
+      "line": 3416,
+      "column": 46,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "",
+      "line": 2975,
+      "column": 41,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "isCompressedTermBankSource",
+      "line": 4035,
+      "column": 36,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "_runWorkerLoop",
+      "line": 3076,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "sumParallelSourceByteLengths",
+      "line": 4007,
+      "column": 38,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_invalidateGlossarySearchIndex",
+      "line": 3529,
+      "column": 35,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1729]",
+      "line": 1,
+      "column": 533413,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1477]",
+      "line": 1,
+      "column": 444263,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "f",
+      "line": 3110,
+      "column": 30,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_resizeTermContentMetadataArena",
+      "line": 7261,
+      "column": 36,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-canonical-scan.js",
+      "function": "",
+      "line": 33,
+      "column": 26,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "_tryBeginPersistArtifactTermContent",
+      "line": 9570,
+      "column": 40,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "",
+      "line": 911,
+      "column": 46,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "validateRecordFields",
+      "line": 236,
+      "column": 30,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-key-hash.js",
+      "function": "hashTermKeyBytes",
+      "line": 48,
+      "column": 33,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_decodeDictionaryNameFromShardFileName",
+      "line": 7648,
+      "column": 43,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_recordExactLookupRouteChunk",
+      "line": 6152,
+      "column": 33,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "",
+      "line": 278,
+      "column": 19,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-block-store.js",
+      "function": "",
+      "line": 921,
+      "column": 29,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "",
+      "line": 7075,
+      "column": 16,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "settleResolve",
+      "line": 3829,
+      "column": 31,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "_waitForLead",
+      "line": 3174,
+      "column": 23,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "",
+      "line": 3653,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-import-metrics.js",
+      "function": "createTermImportMetrics",
+      "line": 68,
+      "column": 40,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1603]",
+      "line": 1,
+      "column": 480546,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "getOrCreateTermContentPlanScratch",
+      "line": 257,
+      "column": 43,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "validateTermContentCompressionBlockPlan",
+      "line": 75,
+      "column": 49,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "getRecordFieldsByteLength",
+      "line": 148,
+      "column": 35,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "_wakeLeadWaiters",
+      "line": 3195,
+      "column": 21,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[2632]",
+      "line": 1,
+      "column": 743775,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "WhWasmUtilInstaller.target.jstrlen",
+      "line": 3909,
+      "column": 29,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_getOrCreateShardState",
+      "line": 6944,
+      "column": 33,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "",
+      "line": 108,
+      "column": 48,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_appendBatchInternal",
+      "line": 862,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_queueWriteChunks",
+      "line": 1086,
+      "column": 22,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "_writePendingChunksCoalesced",
+      "line": 1156,
+      "column": 39,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "",
+      "line": 6384,
+      "column": 19,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "",
+      "line": 114,
+      "column": 29,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "",
+      "line": 247,
+      "column": 42,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "createArtifactTermRecordChunkWithResolvedContent",
+      "line": 353,
+      "column": 65,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "writeSafeU64Le",
+      "line": 513,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-database.js",
+      "function": "",
+      "line": 9139,
+      "column": 117,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "_yieldIfNeeded",
+      "line": 289,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "processTermChunk",
+      "line": 1963,
+      "column": 38,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "getSynchronousRecordFieldReferences",
+      "line": 422,
+      "column": 45,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-lookup-route.js",
+      "function": "buildTermLookupFilterFromBase",
+      "line": 78,
+      "column": 46,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "cleanup",
+      "line": 3779,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js",
+      "function": "_postImportProgress",
+      "line": 265,
+      "column": 24,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[2674]",
+      "line": 1,
+      "column": 753541,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "hasResolvedContentReferences",
+      "line": 328,
+      "column": 38,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "resolveTermContentZstdDictName",
+      "line": 874,
+      "column": 47,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "",
+      "line": 245,
+      "column": 47,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_getShardFileName",
+      "line": 7589,
+      "column": 22,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "_activateLeadSources",
+      "line": 3202,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "_dispatchWithSourceConsumed",
+      "line": 355,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-importer.js",
+      "function": "",
+      "line": 685,
+      "column": 34,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/zstd-term-content.js",
+      "function": "sourceConsumed",
+      "line": 374,
+      "column": 25,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "sum",
+      "line": 4239,
+      "column": 17,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser.js",
+      "function": "aggregateSequentialParseProfiles",
+      "line": 4234,
+      "column": 42,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/zip.js",
+      "function": "BlobWriter",
+      "line": 1914,
+      "column": 14,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "blob",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1972]",
+      "line": 1,
+      "column": 588658,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "string",
+      "line": 7571,
+      "column": 30,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[66]",
+      "line": 1,
+      "column": 16584,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "get",
+      "line": 7804,
+      "column": 19,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "heapWrappers",
+      "line": 3644,
+      "column": 33,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "__ptrAdd",
+      "line": 3593,
+      "column": 29,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "f",
+      "line": 6907,
+      "column": 40,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "setAssociatedPath",
+      "line": 10179,
+      "column": 22,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[942]",
+      "line": 1,
+      "column": 267197,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[955]",
+      "line": 1,
+      "column": 268905,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "seek",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_coalescePendingChunks",
+      "line": 7456,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-content-opfs-store.js",
+      "function": "",
+      "line": 434,
+      "column": 42,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_closeAllWritables",
+      "line": 6524,
+      "column": 29,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_flushPendingLookupIndexChunks",
+      "line": 6360,
+      "column": 41,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_flushLookupIndexFile",
+      "line": 6286,
+      "column": 32,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-import-index-writer.js",
+      "function": "_writeBytes",
+      "line": 267,
+      "column": 22,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "close",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "_endImportSession",
+      "line": 1498,
+      "column": 28,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-record-opfs-store.js",
+      "function": "endImportSession",
+      "line": 1486,
+      "column": 27,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "isInt32",
+      "line": 2969,
+      "column": 20,
+      "selfSamples": 1
+    },
+    {
+      "url": "",
+      "function": "URL",
+      "line": 0,
+      "column": 0,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/dictionary-import-journal.js",
+      "function": "_getRoot",
+      "line": 152,
+      "column": 19,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/sqlite3.wasm",
+      "function": "wasm-function[1004]",
+      "line": 1,
+      "column": 280099,
+      "selfSamples": 1
+    },
+    {
+      "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/lib/sqlite/index.mjs",
+      "function": "step",
+      "line": 7693,
+      "column": 19,
+      "selfSamples": 1
+    }
+  ]
+}

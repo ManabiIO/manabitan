@@ -1,0 +1,65 @@
+{
+  "source": "f21bda709a5b3374f4d5175f8234c94439936040",
+  "runId": 46103789342,
+  "jobId": 140851893579,
+  "jobConclusion": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run ./.github/actions/setup",
+      "conclusion": "success"
+    },
+    {
+      "name": "Require only the accepted two-line runtime restoration",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check changed JavaScript",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check main types",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run all existing unit tests",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check all release builds",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check the unchanged observation protocol",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run ./.github/actions/setup",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "units": {
+    "filesPassed": 669,
+    "testsPassed": 15135,
+    "testsSkipped": 47,
+    "totalTests": 15182
+  },
+  "protocolTests": 32,
+  "releaseDryBuildTargets": 7,
+  "limitation": "Validation success is not performance qualification. Existing unit logs include emitted errors from exercised failure/DOM paths; the unit runner and job concluded success."
+}

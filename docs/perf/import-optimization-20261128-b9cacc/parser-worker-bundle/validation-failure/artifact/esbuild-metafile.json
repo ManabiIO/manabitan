@@ -1,0 +1,394 @@
+{
+  "inputs": {
+    "ext/js/dictionary/term-key-hash.js": {
+      "bytes": 5175,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-lookup-route.js": {
+      "bytes": 4192,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/term-key-hash.js",
+          "kind": "import-statement",
+          "original": "./term-key-hash.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/dictionary-source-integrity-error.js": {
+      "bytes": 1008,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/core/event-dispatcher.js": {
+      "bytes": 4435,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/core/extension-error.js": {
+      "bytes": 3827,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/core/log.js": {
+      "bytes": 5703,
+      "imports": [
+        {
+          "path": "ext/js/core/event-dispatcher.js",
+          "kind": "import-statement",
+          "original": "./event-dispatcher.js"
+        },
+        {
+          "path": "ext/js/core/extension-error.js",
+          "kind": "import-statement",
+          "original": "./extension-error.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/core/safe-performance.js": {
+      "bytes": 2386,
+      "imports": [
+        {
+          "path": "ext/js/core/log.js",
+          "kind": "import-statement",
+          "original": "./log.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-bank-source-crc.js": {
+      "bytes": 3073,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/dictionary-source-integrity-error.js",
+          "kind": "import-statement",
+          "original": "./dictionary-source-integrity-error.js"
+        },
+        {
+          "path": "ext/js/core/safe-performance.js",
+          "kind": "import-statement",
+          "original": "../core/safe-performance.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/core/json.js": {
+      "bytes": 1504,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/media/media-util.js": {
+      "bytes": 6039,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/dictionary/dictionary-image-references.js": {
+      "bytes": 2694,
+      "imports": [
+        {
+          "path": "ext/js/core/json.js",
+          "kind": "import-statement",
+          "original": "../core/json.js"
+        },
+        {
+          "path": "ext/js/media/media-util.js",
+          "kind": "import-statement",
+          "original": "../media/media-util.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/core/retryable-promise-cache.js": {
+      "bytes": 1350,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-record-preinterned-plan.js": {
+      "bytes": 25435,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/term-key-hash.js",
+          "kind": "import-statement",
+          "original": "./term-key-hash.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-lookup-scratch.js": {
+      "bytes": 2970,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-lookup-index.js": {
+      "bytes": 67962,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/term-key-hash.js",
+          "kind": "import-statement",
+          "original": "./term-key-hash.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+          "kind": "import-statement",
+          "original": "./term-record-preinterned-plan.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-lookup-index-preparation.js": {
+      "bytes": 11139,
+      "imports": [
+        {
+          "path": "ext/js/core/safe-performance.js",
+          "kind": "import-statement",
+          "original": "../core/safe-performance.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-lookup-index.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-index.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+          "kind": "import-statement",
+          "original": "./term-record-preinterned-plan.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-bank-experiments.js": {
+      "bytes": 3523,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/core/to-error.js": {
+      "bytes": 1337,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/core/utilities.js": {
+      "bytes": 12427,
+      "imports": [
+        {
+          "path": "ext/js/core/log.js",
+          "kind": "import-statement",
+          "original": "./log.js"
+        },
+        {
+          "path": "ext/js/core/to-error.js",
+          "kind": "import-statement",
+          "original": "./to-error.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-bank-source-pipeline.js": {
+      "bytes": 47175,
+      "imports": [
+        {
+          "path": "ext/js/core/utilities.js",
+          "kind": "import-statement",
+          "original": "../core/utilities.js"
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-source-integrity-error.js",
+          "kind": "import-statement",
+          "original": "./dictionary-source-integrity-error.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-content-ownership.js": {
+      "bytes": 4250,
+      "imports": [],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "bytes": 210118,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/term-lookup-route.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-route.js"
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-source-integrity-error.js",
+          "kind": "import-statement",
+          "original": "./dictionary-source-integrity-error.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-source-crc.js",
+          "kind": "import-statement",
+          "original": "./term-bank-source-crc.js"
+        },
+        {
+          "path": "ext/js/core/json.js",
+          "kind": "import-statement",
+          "original": "../core/json.js"
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-image-references.js",
+          "kind": "import-statement",
+          "original": "./dictionary-image-references.js"
+        },
+        {
+          "path": "ext/js/media/media-util.js",
+          "kind": "import-statement",
+          "original": "../media/media-util.js"
+        },
+        {
+          "path": "ext/js/core/retryable-promise-cache.js",
+          "kind": "import-statement",
+          "original": "../core/retryable-promise-cache.js"
+        },
+        {
+          "path": "ext/js/core/safe-performance.js",
+          "kind": "import-statement",
+          "original": "../core/safe-performance.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+          "kind": "import-statement",
+          "original": "./term-record-preinterned-plan.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-lookup-scratch.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-scratch.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-index-preparation.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-experiments.js",
+          "kind": "import-statement",
+          "original": "./term-bank-experiments.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-source-pipeline.js",
+          "kind": "import-statement",
+          "original": "./term-bank-source-pipeline.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-content-ownership.js",
+          "kind": "import-statement",
+          "original": "./term-content-ownership.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+      "bytes": 16935,
+      "imports": [
+        {
+          "path": "ext/js/dictionary/term-lookup-route.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-route.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "kind": "import-statement",
+          "original": "./term-bank-wasm-parser.js"
+        },
+        {
+          "path": "ext/js/core/safe-performance.js",
+          "kind": "import-statement",
+          "original": "../core/safe-performance.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-experiments.js",
+          "kind": "import-statement",
+          "original": "./term-bank-experiments.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+          "kind": "import-statement",
+          "original": "./term-lookup-index-preparation.js"
+        },
+        {
+          "path": "ext/js/dictionary/term-content-ownership.js",
+          "kind": "import-statement",
+          "original": "./term-content-ownership.js"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "inputs": {
+        "ext/js/dictionary/term-key-hash.js": {
+          "bytesInOutput": 3356
+        },
+        "ext/js/dictionary/term-lookup-route.js": {
+          "bytesInOutput": 999
+        },
+        "ext/js/dictionary/dictionary-source-integrity-error.js": {
+          "bytesInOutput": 194
+        },
+        "ext/js/core/event-dispatcher.js": {
+          "bytesInOutput": 2880
+        },
+        "ext/js/core/extension-error.js": {
+          "bytesInOutput": 2426
+        },
+        "ext/js/core/log.js": {
+          "bytesInOutput": 3402
+        },
+        "ext/js/core/safe-performance.js": {
+          "bytesInOutput": 1088
+        },
+        "ext/js/dictionary/term-bank-source-crc.js": {
+          "bytesInOutput": 1563
+        },
+        "ext/js/core/json.js": {
+          "bytesInOutput": 58
+        },
+        "ext/js/media/media-util.js": {
+          "bytesInOutput": 1117
+        },
+        "ext/js/dictionary/dictionary-image-references.js": {
+          "bytesInOutput": 1587
+        },
+        "ext/js/core/retryable-promise-cache.js": {
+          "bytesInOutput": 546
+        },
+        "ext/js/dictionary/term-record-preinterned-plan.js": {
+          "bytesInOutput": 15166
+        },
+        "ext/js/dictionary/term-lookup-scratch.js": {
+          "bytesInOutput": 1606
+        },
+        "ext/js/dictionary/term-lookup-index.js": {
+          "bytesInOutput": 16173
+        },
+        "ext/js/dictionary/term-lookup-index-preparation.js": {
+          "bytesInOutput": 5127
+        },
+        "ext/js/dictionary/term-bank-experiments.js": {
+          "bytesInOutput": 1915
+        },
+        "ext/js/dictionary/term-bank-source-pipeline.js": {
+          "bytesInOutput": 469
+        },
+        "ext/js/dictionary/term-content-ownership.js": {
+          "bytesInOutput": 1212
+        },
+        "ext/js/dictionary/term-bank-wasm-parser.js": {
+          "bytesInOutput": 99058
+        },
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": {
+          "bytesInOutput": 12401
+        }
+      },
+      "bytes": 173270
+    }
+  }
+}

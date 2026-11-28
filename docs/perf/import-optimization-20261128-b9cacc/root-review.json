@@ -1,0 +1,46 @@
+{
+  "reviewedAtUtc": "2026-11-28T06:19:53.218312+00:00",
+  "rootReview": {
+    "canonicalPackManifestSha256": "5017fae4f540bc4974c069af85260827dbfce96cbeac445552719cea1ac6ee8c",
+    "all135HashedFilesAnd170SourceAliasesVerified": true,
+    "totalCanonicalPackBytes": 1364628,
+    "allFilesUtf8Decodable": true,
+    "transportTokenPatternCandidates": 0,
+    "newMasterReadmeFormatted": true,
+    "baselineAgentsPrettierCheck": "passed",
+    "validationScope": "Read-only evidence verification and formatting. No native/product/performance execution.",
+    "bundlePackManifestSha256": "6e965172840ec47e8e2bfff664f63aaacbba3d269addc43563354c7a64d45b17",
+    "all66BundleHashedFilesAnd62SourceAliasesVerified": true,
+    "bundlePackBytes": 1640365,
+    "bundleUtf8AndTransportScan": "passed",
+    "masterIndependentReview": "prior_import_work reviewed; control drift, interval units and headless-harness wording corrected",
+    "latestBundleStatusUtc": "2026-11-28T06:15:00Z",
+    "latestBundleStatus": "validation and Actionlint queued, no import observations",
+    "scoreLocalAdapter": {
+      "sha256": "7e336e45159404b606cc4f995caeea10550ff95604d6b53c17036b550bb0fc35",
+      "sourceReview": "passed",
+      "negativeRouteChecks": 3,
+      "baselineAndSupportSourceBindings": 13,
+      "scope": "Unlaunched transport-only adapter, unchangedc7a18audit andZIP verifier; no timing or source-acquisition bypass"
+    }
+  },
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimePromotion": false,
+  "prsCreated": [],
+  "snapshotUtc": "2026-11-28T06:10:16Z",
+  "hostedStatus": {
+    "bundle": {
+      "run": 46110124022,
+      "status": "validation queued; no timing"
+    },
+    "score": {
+      "run": 46103789342,
+      "cellsComplete": 4,
+      "vndbBA": "in_progress",
+      "jmdictAB": "queued",
+      "note": "Top-level workflow list omitted this run, but purpose-built jobs fetch still reports incomplete cells. Jobs/artifact completeness controls reader launch."
+    },
+    "repositoryQueuedWorkflowRuns": 257
+  },
+  "observations": "Raw records remain unchanged; this receipt documents only packaging review."
+}

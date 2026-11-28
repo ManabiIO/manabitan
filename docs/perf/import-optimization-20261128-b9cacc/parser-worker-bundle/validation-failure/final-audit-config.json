@@ -1,0 +1,43 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "expectedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "expectedAddedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+  ],
+  "runId": 46110124022,
+  "sourceBranch": "perf/parser-worker-bundle-20261128-b9cacc",
+  "expectedTrees": {
+    "A": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "B": "ee65e5a994b4017a443893dc7b0b268900538e94"
+  },
+  "expectedRuntimePayloads": {
+    "A": {
+      "js/dictionary/term-bank-wasm-parser.js": {
+        "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+        "bytes": 210111
+      },
+      "js/dictionary/term-bank-wasm-parser-worker.js": {
+        "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "bytes": 16935
+      }
+    },
+    "B": {
+      "js/dictionary/term-bank-wasm-parser.js": {
+        "sha256": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93",
+        "bytes": 210118
+      },
+      "js/dictionary/term-bank-wasm-parser-worker.js": {
+        "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "bytes": 16935
+      },
+      "js/dictionary/term-bank-wasm-parser-worker.bundle.js": {
+        "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6",
+        "bytes": 174314
+      }
+    }
+  },
+  "workflowHead": "7d77b3858b4f3f37e651f770f8f3a92c59d77036"
+}

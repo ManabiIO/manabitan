@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-11-28T05:33:22.827252+00:00",
+  "status": "preflight-failure-before-child-launch",
+  "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "guardSha256": "8a90530c5672cec136b0c26fc9223e1e39225d53180f6d616a9e8910a2272057",
+  "exitCode": 1,
+  "failure": "OSError28 while persist() wrote the preflight-blocked guard report at line146",
+  "sourceContext": [
+    {
+      "line": 138,
+      "source": "    persist()"
+    },
+    {
+      "line": 139,
+      "source": "    print(json.dumps({key:report[key] for key in [\"status\",\"failures\",\"preflight\"]}))"
+    },
+    {
+      "line": 140,
+      "source": "    raise SystemExit(2)"
+    },
+    {
+      "line": 141,
+      "source": ""
+    },
+    {
+      "line": 142,
+      "source": "cmd=[reg[\"nodeExecutable\"],reg[\"harness\"][\"path\"],args.mode,str(args.registration.resolve()),"
+    },
+    {
+      "line": 143,
+      "source": "     args.registration_sha256,str(args.output.resolve())]"
+    },
+    {
+      "line": 144,
+      "source": "report[\"command\"]=cmd"
+    },
+    {
+      "line": 145,
+      "source": "report[\"status\"]=\"running\""
+    },
+    {
+      "line": 146,
+      "source": "persist()"
+    },
+    {
+      "line": 147,
+      "source": "env=os.environ.copy()"
+    },
+    {
+      "line": 148,
+      "source": "env[\"NODE_OPTIONS\"]=\"--max-old-space-size=768\""
+    },
+    {
+      "line": 149,
+      "source": "env[\"NODE_DISABLE_COMPILE_CACHE\"]=\"1\""
+    },
+    {
+      "line": 150,
+      "source": "env[\"MANABITAN_CANONICAL_PREEXISTING_BYTES\"]=str(file_bytes())"
+    },
+    {
+      "line": 151,
+      "source": "log=args.guard_report.with_suffix(\".child.log\")"
+    },
+    {
+      "line": 152,
+      "source": "started=time.monotonic()"
+    },
+    {
+      "line": 153,
+      "source": "maximum_rss=0"
+    }
+  ],
+  "originalGuardReceipt": {
+    "path": "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined/acquire-004-guard.json",
+    "exists": true,
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "acquisitionOutputExists": false,
+  "nodeChildLaunched": false,
+  "firstUseOrReplayStarted": false,
+  "retainedTemporaryFilesBeforeFailureReceipt": [],
+  "resourceSnapshotAfterFailure": {
+    "meminfo": {
+      "MemTotal": "10206468 kB",
+      "MemFree": "2543756 kB",
+      "MemAvailable": "3342656 kB"
+    },
+    "filesystems": {
+      "/home/agent/.cache/manabitan-b9cacc/canonical-combined-resumed-20261128": {
+        "availableBytes": 4697985024
+      },
+      "/workspace/scratch/b9cacc3542c2/analysis/canonical-combined": {
+        "availableBytes": 158035968
+      }
+    }
+  },
+  "qualification": "Invalid acquisition attempt; no source capture or native timing. The preflight failure reason is available only if originalGuardParsed survived. The later resource snapshot is not the lost original preflight measurement."
+}

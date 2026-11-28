@@ -1,0 +1,87 @@
+{
+  "status": "failed-acquisition-no-timing",
+  "reason": "Launched Node process exited by SIGKILL (-9); no configured guard threshold fired. Cause is unknown.",
+  "guardSha256": "91602264ef9624c3c1efeae12102857dc658df713300147b78c8e8f438c5a39e",
+  "registrationSha256": "bf70ae2086942e673d310498cd7a69a8ac08e7ec3543805c6cbc7c7e8be3ae27",
+  "completedGroups": 7,
+  "capturedCalls": 7,
+  "completedRows": 310000,
+  "manifestStatus": "incomplete",
+  "sampledPidSets": [
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      5,
+      20
+    ]
+  ],
+  "positiveLaunchedRssSamples": 64,
+  "maximumTreeRssBytes": 446844928,
+  "minimumAvailableBytes": 1443995648,
+  "finalAvailableBytes": 1842814976,
+  "maximumTemporaryBytes": 89783148,
+  "finalTemporaryBytes": 89783148,
+  "lastResourceSamples": [
+    {
+      "elapsedSeconds": 3.154286287999639,
+      "rssBytes": 437170176,
+      "rssByPid": {
+        "5": 424718336,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 77626471,
+      "MemAvailableBytes": 1466560512
+    },
+    {
+      "elapsedSeconds": 3.2048387509994427,
+      "rssBytes": 444248064,
+      "rssByPid": {
+        "5": 431796224,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 77626471,
+      "MemAvailableBytes": 1451999232
+    },
+    {
+      "elapsedSeconds": 3.25548389999949,
+      "rssBytes": 445296640,
+      "rssByPid": {
+        "5": 432844800,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 77626471,
+      "MemAvailableBytes": 1443995648
+    },
+    {
+      "elapsedSeconds": 3.3058619809999072,
+      "rssBytes": 12451840,
+      "rssByPid": {
+        "5": 0,
+        "2": 12451840
+      },
+      "ownedPids": [
+        2,
+        5
+      ],
+      "temporaryBytes": 77626471,
+      "MemAvailableBytes": 1502314496
+    }
+  ],
+  "timingObservations": 0,
+  "payloadsRetained": true
+}

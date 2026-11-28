@@ -1,0 +1,57 @@
+{
+  "scope": "Independent source-only review, with reads of the existing generated bundle. No tests, builds, imports or timing run for this review.",
+  "publishedCandidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "localHead": "ae9e0d9c2cf0e63372397e551faf7d932cb86404",
+  "candidateTree": "ee65e5a994b4017a443893dc7b0b268900538e94",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceSha256": {
+    "dev/build-libs.js": "0bff6378a06b5ef5bafce40ac746bd809b48a7d9808294825e99489fcba63239",
+    "dev/bin/build.js": "f4c661fe2cf6b70d43fa61d8dd31d7146f6ece8ae316239b7058fbb1fae542a1",
+    "dev/data/manifest-variants.json": "6d90489abd50d9496e106b4416e83e09b086849194b1497052996065cc8a9bbc",
+    ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+    "web/build.mjs": "45e86747ec6fbadd7bf7695b75eed2b383fa5a0858149b8630badf014f4d7d05",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6",
+    "test/term-bank-worker-bundle.test.js": "9e4ca730233e5451cde228ae3b7711a6c66f29d681f9915c7a89a1af3dcc459d",
+    "test/web-asset-paths.test.js": "4bdd4731b5f5b43c2b81f4c54df7f5911d2df1333aa3815fb599bac7ff37084f"
+  },
+  "blockingFindings": [],
+  "checks": [
+    {
+      "area": "Build and package inclusion",
+      "finding": "dev/bin/build.js awaits buildLibs before creating any target package. The new generator runs inside buildLibs, and target exclusions do not remove the added worker. The static web builder copies the whole js tree and includes files in its asset digest manifest."
+    },
+    {
+      "area": "Relative URLs",
+      "finding": "The generated ESM is in the same dictionary directory as parser.js and the original worker. The only surviving import.meta.url paths remain ../../lib/term-bank-parser.wasm and the same-directory worker bundle. HTTP prefix, Chrome and Firefox URL bases remain unchanged."
+    },
+    {
+      "area": "CSP and origin",
+      "finding": "The checked Chrome/Firefox manifests retain self script sources and wasm-unsafe-eval. The change introduces no origin, inline script, eval, Function constructor, importScripts, or runtime module import in the generated bundle."
+    },
+    {
+      "area": "Initialization and readiness",
+      "finding": "The worker listener is installed before initialization messages are processed. initialize still validates and supplies the received WebAssembly.Module before parser initialization; ready is emitted only after that promise resolves. No top-level ready message can race listener installation in the parent."
+    },
+    {
+      "area": "Failure and cancellation",
+      "finding": "Parent Worker error/messageerror, initialization-error, abort and timeout handlers are unchanged. Startup failure still aborts peers, terminates created workers and awaits every ready waiter. Worker parse errors preserve the existing serialized error protocol and source-buffer return paths."
+    },
+    {
+      "area": "Module state and ownership",
+      "finding": "The closed first-party graph keeps one worker-local native cache and one supplied Module. Existing top-level constructors are retained; native exports, transfer lists, borrowed leases and options are source-identical. The entry calls the serial worker parse API; bundling does not add recursive parser worker startup."
+    },
+    {
+      "area": "Generated syntax and notices",
+      "finding": "The ES2020 ESM target matches the existing library bundler. All first-party input copyright lines and the full GPL header are included. The fixed generated asset hash matches the frozen candidate."
+    }
+  ],
+  "remainingValidation": [
+    "The focused tests use simulated message transport plus real structuredClone/native WASM, not a moz-extension Worker under browser CSP.",
+    "The proposed actual Firefox multi-bank import must require positive parser worker/group counts and no fallback, so serial fallback cannot masquerade as bundle coverage. The existing confirmation plan does so.",
+    "The tiny four-row unit parity case does not exercise the real compressed-source, large segmentation and borrowed-source shapes; unchanged whole-corpus browser semantic receipts and existing source-worker tests cover different scopes.",
+    "No source maps are generated. Error stacks identify bundled lines, an expected diagnostics change; error names/messages and serialized protocol are unchanged."
+  ],
+  "decision": "No additional source-only blocker found. Continue with the already planned real Chromium/Firefox import and lifecycle qualification; this review is not browser execution or performance evidence."
+}

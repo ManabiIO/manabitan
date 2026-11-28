@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "completedAtUtc": "2026-11-28T05:59:12.509088+00:00",
+  "status": "closed-no-new-experiment-or-product-change",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceSha256": {
+    "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+    "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+    "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+    "ext/js/dictionary/term-content-plan-resolution.js": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+    "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f"
+  },
+  "scope": "Read-only source, existing browser profiles, and retained source-derived input snapshots. No new native invocation, parser/browser import or timing. Publication run distribution covers first 11 of 12 groups only.",
+  "importantBoundary": "Do not subtract warm Node native-export timings from browser canonical wall counters; those workloads, code warmth and measured boundaries differ.",
+  "ordinaryBrowserMetrics": {
+    "dedupCanonicalScanMs": 93.39999999996508,
+    "dedupExactCompareMs": 13.200000000011642,
+    "dedupCapacityMs": 1.8999999999068677,
+    "dedupNativeCallCount": 12,
+    "dedupNativeScannedRows": 366030,
+    "dedupNativeBulkPendingRows": 362032,
+    "dedupNativeExactCandidates": 3998,
+    "dedupNativeCopiedInputBytes": 16788490,
+    "dedupNativeCopiedOutputBytes": 31984,
+    "dedupNativeFallbackCount": 0,
+    "dedupRecentSourceHitCount": 3998,
+    "dedupRecentSourceCacheMs": 33.100000000034925,
+    "dedupRecentSourceCacheBytes": 101143281,
+    "dedupRecentSourceAdoptedBytes": 101143281,
+    "parserEncodedContentBytes": 101143985,
+    "parserCompactContentMetadataGroups": 0,
+    "contentMetadataPublishMs": 93.90000000008149,
+    "contentMetadataIndexPublishMs": 65.60000000003492
+  },
+  "ordinaryReceiptSha256": "642957256a3cda96307710ec55df2a144c26fb84730bfd7975adcd6d9df2c974",
+  "profileAttribution": {
+    "importerSamples": 3701,
+    "resolvedPlanPublicationSelfSamples": 283,
+    "positionTicksPresent": false,
+    "limitation": "Function-entry self samples cannot establish eligible-run versus scalar branch or a precise CPU budget; no weighted-time inference."
+  },
+  "runDistribution": {
+    "sourceReport": "analysis/canonical-combined/publication-runs-readonly.json",
+    "sourceReportSha256": "c5355ddf8d9867d5a52071aa0aac28ddebdba98f8148d4165db9a86620c3bb73",
+    "observedGroups": 11,
+    "pendingRows": 327665,
+    "runs": 3175,
+    "medianRunLength": 48,
+    "histogram": {
+      "1": 86,
+      "2-7": 310,
+      "8-31": 801,
+      "32-127": 1290,
+      "128-511": 629,
+      "512+": 59
+    },
+    "viewsAvoidedByHypothetical2to7ScalarRuns": 620,
+    "viewsAvoidedByHypothetical2to31ScalarRuns": 2222,
+    "lastGroupObserved": false
+  },
+  "sourceConclusions": [
+    "Current ordinary JMdict uses full metadata input; its active wrapper bulk-copies metadata/identity/rows/signatures instead of executing the unique-metadata per-row JS packing loop.",
+    "All 3,998 ordinary exact candidates were recent-source hits, so this observed workload has no exact-read OPFS round trip to remove.",
+    "The qualified source-derived acquisition used one fixed 26,214,400-byte arena/one native instance. The separate ordinary browser capacity counter was 1.9 ms; no cross-boundary subtraction is made.",
+    "Common block-storage publication returns scalar compact-block codec, Float64 offsets and Uint32 lengths. Deferred resolution separately allocates all three targets; native pending indexes are separately allocated and sliced to count. Source supports eligibility but the CPU trace does not prove every runtime branch.",
+    "The eligible resolved-plan helper has one pending-index run-discovery pass, then required offset/length copies and flag fills; codec and alias guards are per-call. Small-run allocation reduction lacks evidence of material absolute benefit."
+  ],
+  "relatedHistory": [
+    {
+      "item": "#876",
+      "head": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+      "scope": "Recent-source publication validation/contiguity witness reuse",
+      "state": "closed-unmerged; independent whole-import evidence did not establish a gain",
+      "reportedBoverAPercent": -0.4756,
+      "reportedBoverCPercent": 1.389,
+      "reportedCoverAPercent": 0.944
+    },
+    {
+      "item": "#764 bulk-publication subset / #837",
+      "head": "845b2d84",
+      "scope": "Bulk metadata publication/coalesced descriptors",
+      "state": "subset already merged; not a fresh opportunity"
+    },
+    {
+      "item": "source-origin mapping prototype",
+      "head": "e93f74dc949f0144d0730018f43d1ae6620ee190",
+      "scope": "Retain source origin to preserve source-coordinate offsets and bulk cache mapping for trimmed views",
+      "state": "historical related prototype; archived performance outcome not established in this review, do not label rejected"
+    },
+    {
+      "item": "#824",
+      "scope": "Partial-owned-view cache adoption with full backing allocation accounting",
+      "state": "merged on current baseline"
+    },
+    {
+      "item": "resolved-span prefix",
+      "head": "03c03e8393f1683386b8a1ed5f4bb7062c314f6e",
+      "scope": "Record resolution dense-ID prefix validation reuse across a synchronous run",
+      "state": "already owned"
+    },
+    {
+      "item": "canonical preload",
+      "head": "931c78501ffc933fa8718fd2789562e3c650796b",
+      "scope": "Early WASM fetch and compile",
+      "state": "already owned"
+    },
+    {
+      "item": "#830",
+      "scope": "In-flight source span validation",
+      "state": "already owned"
+    }
+  ],
+  "historyProvenance": "See analysis/canonical-js-ownership-20261128-b9cacc.json and team source review; related historical prototypes are not asserted to have established performance gains.",
+  "lateCoordinateObservation": {
+    "fullOwnedViewIdea": "Keeping an entire already-charged immutable source view could avoid offset rebasing; dropped as related to existing source-origin work and no demonstrated material gain.",
+    "observedAffectedGroups": [
+      2,
+      7,
+      10
+    ],
+    "observedAffectedRows": 89237,
+    "minimumSourceOffsets": [
+      49,
+      289,
+      366
+    ],
+    "sumLeadingBytes": 704,
+    "ordinaryEncodedMinusAdoptedBytes": 704
+  },
+  "decision": "No new wrapper/publication benchmark, code variant, browser cohort or PR. Preserve the negative component result and wait for the already frozen hosted experiments."
+}

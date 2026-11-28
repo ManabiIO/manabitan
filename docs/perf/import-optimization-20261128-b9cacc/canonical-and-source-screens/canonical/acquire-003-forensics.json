@@ -1,0 +1,42 @@
+{
+  "status": "failed-acquisition-no-timing",
+  "waitStatus": -9,
+  "signal": "SIGKILL inferred directly from wait status-9; sender and cause not identified",
+  "configuredGuardTriggered": null,
+  "peakSampledTreeRssBytes": 446844928,
+  "minimumAvailableBytes": 1443995648,
+  "maximumAvailableBytes": 2112368640,
+  "maxSampleGapMs": 56.11309899995831,
+  "medianSampleGapMs": 50.42826399949263,
+  "sampleCount": 66,
+  "positiveLaunchedRssSamples": 64,
+  "observedProcessIdentities": [
+    {
+      "pid": 5,
+      "ppid": 2,
+      "pgrp": 5,
+      "session": 5,
+      "starttime": 743064
+    },
+    {
+      "pid": 20,
+      "ppid": 5,
+      "pgrp": 5,
+      "session": 5,
+      "starttime": 743079
+    }
+  ],
+  "observedThreads": null,
+  "threadLimitations": "Frozen watchdog did not retain /proc stat num_threads. Cannot recover observed OS thread counts after exit. The captured source manifest records exactly3parser worker instances using the production Node worker_threads adapter, all within launched Node PID5; this is a logical worker count, not a measured OS thread count.",
+  "lastNodeRssBytes": 432844800,
+  "finalNodeSampleRssBytes": 0,
+  "cleanupException": null,
+  "causeAssessment": "Unknown; no kernel/cgroup OOM record or explicit external sender was acquired. Do not label as OOM.",
+  "retainedPaths": [
+    "analysis/canonical-combined/acquire-003-guard.json",
+    "analysis/canonical-combined/acquire-003-guard.child.log",
+    "analysis/canonical-combined/acquire-003-capture-manifest.json",
+    "/home/agent/.cache/manabitan-b9cacc/canonical-combined/acquisition-003"
+  ],
+  "localRetryAuthorized": false
+}

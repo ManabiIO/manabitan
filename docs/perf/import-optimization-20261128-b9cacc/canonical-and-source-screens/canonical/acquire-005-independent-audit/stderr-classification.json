@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "scope": "Read-only classification; raw stderr bytes and hashes retained unchanged",
+  "expectedWarning": "(node:PID) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "rawFiles": [
+    {
+      "capture": 0,
+      "sha256": "4ebe3d36389147b01b2db34597d8677f0a07536833da0543fdfb81680e48d621",
+      "bytes": 175
+    },
+    {
+      "capture": 1,
+      "sha256": "34f6d8cd193d6f8eda75957984e67011a3bdfab6383d950dbaa6bc473cf10640",
+      "bytes": 175
+    },
+    {
+      "capture": 2,
+      "sha256": "f53aca577f2b28f53556f780dc2c207e860e4df552fd0a0916c34cf2d42053f1",
+      "bytes": 175
+    },
+    {
+      "capture": 3,
+      "sha256": "28d5a24074d61a340634ff26ef7ea1ffd3767e94871b04789f00596422170230",
+      "bytes": 175
+    },
+    {
+      "capture": 4,
+      "sha256": "6779c3cd0a06605514953406d9a657019ad2e779e70b2091319d78053c8007ca",
+      "bytes": 175
+    },
+    {
+      "capture": 5,
+      "sha256": "f3d636e0457e49dfe391d857ca83b894ba3e7acb16f48d4cbb57b15951e3fb71",
+      "bytes": 175
+    },
+    {
+      "capture": 6,
+      "sha256": "f5cfba298a8cb4e568429de6222eb023218c35909144205907fd537e71779979",
+      "bytes": 175
+    },
+    {
+      "capture": 7,
+      "sha256": "641c113122724a05fd264bd7476b0dd941946021cd0d3f779cbf41d3f452a569",
+      "bytes": 175
+    },
+    {
+      "capture": 8,
+      "sha256": "ce0c028421af01dca441e6badbe6672a5874251d4bd72b8844e33224a1a643a0",
+      "bytes": 175
+    },
+    {
+      "capture": 9,
+      "sha256": "083f3bb107e3176ec9a64eb9749d0d331fea654a83421aebabd3fc77a59161d1",
+      "bytes": 175
+    },
+    {
+      "capture": 10,
+      "sha256": "70046333f3e6ef046bb95b0ee9d050001a2592311d25d37a47fa3b40efb9b252",
+      "bytes": 175
+    },
+    {
+      "capture": 11,
+      "sha256": "9a95232df367f92f1078d816727ef528ee147b9b88dbdcce877d2b2495b1592c",
+      "bytes": 175
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "phase": "source-proposal-not-built-not-timed",
+  "sources": {
+    "inputs": {
+      "pull": 880,
+      "head": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5"
+    },
+    "counters": {
+      "pull": 864,
+      "head": "d147a60fc4845e898d98d8924968d6094b417007"
+    }
+  },
+  "files": [
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "bytes": 8532,
+      "sha256": "dc50ff2e2597e3e869583582abeb877e1174c6539d32de1870774fdfe780f126"
+    },
+    {
+      "path": "test/term-content-canonical-inputs.test.js",
+      "bytes": 8965,
+      "sha256": "5cfac31d8a56f039640ebf797410ffe312c30e4ff28d12158fa2da6fc3476805"
+    },
+    {
+      "path": "test/term-content-canonical-counters.test.js",
+      "bytes": 9761,
+      "sha256": "35e53877b90c1fbf1932a3beb13c5fedc31823afd5e2d859e7c7231b7b49a309"
+    },
+    {
+      "path": "test/term-content-canonical-scan.test.js",
+      "bytes": 62131,
+      "sha256": "c8ffe1115da2a9cfde11476cf63fee29bc7a0cd92b1ccf336bedb16c19578e4e"
+    },
+    {
+      "path": "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+      "bytes": 1624,
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "path": "test/data/dictionary-wasm/term-content-canonical-counters-baseline.wasm",
+      "bytes": 1624,
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    }
+  ]
+}

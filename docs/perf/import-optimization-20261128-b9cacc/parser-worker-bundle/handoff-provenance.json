@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "scope": "Existing source and evidence copied without build, native, test, browser, import, or performance execution; no branch/ref changes",
+  "observedStatusSnapshotUtc": "2026-11-28T06:06:00Z",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runtimeCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "workflowCommit": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+  "cleanSixFileCommit": "c0d62d7ef79e63fcf5c04968f2eab579ce3240a8",
+  "cleanSixFileTree": "1c38abd37b182987a507cac1fead6c54aaa6d914",
+  "confirmationCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+  "confirmationTree": "3ef7ad617844c276ff086ff3efeaa1ddb6b31611",
+  "initialReaderCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+  "futureReaderCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+  "sourceBinding": "Original source manifests/verification receipts and owner frozen-commit handoff retained; all local source bytes rehashed while copying. No remote source object or workflow was created.",
+  "currentSnapshot": {
+    "correctedQualificationRun": 46110124022,
+    "correctedQualificationStatus": "queued",
+    "correctedActionlintRun": 46110123879,
+    "originalFailedRun": 46104747758,
+    "originalImportTimingObservations": 0,
+    "confirmationLaunched": false,
+    "futureReaderRunAndWorkflowHeadBound": false
+  },
+  "existingValidationCounts": {
+    "confirmationSyntaxStaticChecks": 41,
+    "initialReaderNegativeControls": 14,
+    "futureReaderSyntheticControls": 15
+  },
+  "initialReaderLines": 575,
+  "componentBundle": {
+    "bytes": 174292,
+    "sha256": "52c328efdee007eb5bd64227c19421dda9eac984d96a27df3a54837c9d5b6be0"
+  },
+  "finalBundle": {
+    "bytes": 174314,
+    "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6",
+    "identitySource": "Existing frozen publication and validation artifact receipts; not rebuilt during handoff"
+  },
+  "componentToFinalDelta": {
+    "bytes": 22,
+    "changes": [
+      {
+        "bytes": 15,
+        "meaning": "Generated // @ts-nocheck line plus newline"
+      },
+      {
+        "bytes": 7,
+        "meaning": "Embedded nested-pool Worker URL gains .bundle"
+      }
+    ],
+    "scope": "HTTP startup redirect uses the component bytes; complete-import qualification must use final product bytes and production URL"
+  },
+  "failedValidationArtifact": {
+    "id": 15249361017,
+    "name": "parser-worker-bundle-validation-b9cacc",
+    "size_in_bytes": 3482,
+    "digest": "sha256:e11757bb584f26d5d1ef602f90319777a3ba99a724331fa7bc47f91a3b583ae4",
+    "workflow_run": {
+      "id": 46104747758,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/parser-worker-bundle-20261128-b9cacc",
+      "head_sha": "9da7dedd17535b4a0f8edb97e56756049bbad7a7"
+    }
+  },
+  "excludedAssets": [
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-startup.bundle.js",
+      "bytes": 174292,
+      "sha256": "52c328efdee007eb5bd64227c19421dda9eac984d96a27df3a54837c9d5b6be0",
+      "reason": "Generated component bundle excluded; exact hash retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/validation-artifact.zip",
+      "bytes": 3482,
+      "sha256": "e11757bb584f26d5d1ef602f90319777a3ba99a724331fa7bc47f91a3b583ae4",
+      "reason": "Reproducible generated/vendor assets excluded; public artifact identity retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/job-140854868947.log",
+      "bytes": 1070756,
+      "sha256": "cd9c703f322171529b8dbe8f0c41ebef9e9a356a7de4673d65355afc54f119e9",
+      "reason": "Full auxiliary job transport log omitted; diagnosis, build logs, public job ID and hash retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact-metadata.json",
+      "bytes": 771,
+      "sha256": "e19e3bc6433f2424013878effe8a3dee824c01932229b8ece8cdb1889bf0e6f2",
+      "reason": "Auxiliary transport/download URLs omitted; selected public identity fields preserved"
+    }
+  ],
+  "publicSourceReferences": {
+    "baseline": "https://github.com/ManabiIO/manabitan/commit/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "runtime": "https://github.com/ManabiIO/manabitan/commit/9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+    "workflow": "https://github.com/ManabiIO/manabitan/commit/7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+    "cleanProduct": "https://github.com/ManabiIO/manabitan/commit/c0d62d7ef79e63fcf5c04968f2eab579ce3240a8",
+    "confirmation": "https://github.com/ManabiIO/manabitan/commit/50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+    "initialReader": "https://github.com/ManabiIO/manabitan/commit/c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+    "futureReader": "https://github.com/ManabiIO/manabitan/commit/91f69660bc63d0faf2fed1fdeb2bb1919a272974"
+  },
+  "security": "No signed download URL, URL userinfo or credential value copied. Auxiliary transport metadata excluded. Raw localhost component request URLs retained as diagnostic evidence, not source references."
+}

@@ -1,0 +1,685 @@
+{
+  "scope": "Complete fixed six-cell parser source-limit trim study; every raw observation retained. No pooling or replacement runs.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "9707523b19c8c4ef175cf8d25cefbcae44afef05",
+  "runId": 46103041097,
+  "completedCellCount": 6,
+  "timedPlanReceipts": 120,
+  "allMediaReceipts": 12,
+  "memoryObservations": 24,
+  "decision": "Reject for PR. No replicated material whole-import gain on any dictionary; every paired median interval includes zero. Memory screens pass but do not rescue absent speed evidence.",
+  "cells": [
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15248726001,
+        "sha256": "2a965e8ecd26763fc2cccf1c5923ab59dfe531ae547356e59dc440a410e41653",
+        "bytes": 35101008,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.989791578051891,
+          0.995584988962483,
+          0.9800073143971789,
+          1.0916168748868302,
+          1.0083723220881593,
+          0.9651738361814933
+        ],
+        "medianPairedChangePercent": -0.7311716492812925,
+        "equalWorkChangePercent": 0.5002324312308293,
+        "worstPairChangePercent": 9.161687488683024,
+        "descriptiveBootstrap95Percent": [
+          -2.7409424710663877,
+          4.999459848749477
+        ],
+        "fasterPairs": 4
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.1097261451553568,
+          1.0072021484375286
+        ],
+        "medianPairedChangePercent": 5.846414679644285,
+        "equalWorkChangePercent": 5.831037649221349,
+        "worstPairChangePercent": 10.972614515535684,
+        "descriptiveBootstrap95Percent": [
+          0.7202148437528644,
+          10.972614515535684
+        ],
+        "fasterPairs": 0
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 4.349919822865633,
+            "medianPairedChangePercent": 1.738664002592999
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 3.2120448551608227,
+            "medianPairedChangePercent": 1.388125855819805
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 818252,
+              "candidate": 811112,
+              "changePercent": -0.8725918176796355
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1049810,
+              "candidate": 1045235,
+              "changePercent": -0.43579314352121257
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 805716,
+              "candidate": 840764,
+              "changePercent": 4.349919822865633
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1038186,
+              "candidate": 1071533,
+              "changePercent": 3.2120448551608227
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 413,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.388125855819805,
+            "maximumPairedChangePercent": 3.2120448551608227
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.738664002592999,
+            "maximumPairedChangePercent": 4.349919822865633
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15247478255,
+        "sha256": "bbd1ca55ae71d4cde674bc8d8ac2eccaabf9ab5f00dbe1c96ff59ab8fdf9a98c",
+        "bytes": 34984282,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          1.022790535838563,
+          1.324374667376246,
+          1.0072746167836004,
+          1.2937109537692677,
+          0.9432719905453222,
+          0.924136772242301
+        ],
+        "medianPairedChangePercent": 1.503257631108168,
+        "equalWorkChangePercent": 8.497095802828913,
+        "worstPairChangePercent": 32.4374667376246,
+        "descriptiveBootstrap95Percent": [
+          -6.629561860618849,
+          30.904281057275675
+        ],
+        "fasterPairs": 2
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.0121533721328413,
+          1.1215652173913195
+        ],
+        "medianPairedChangePercent": 6.685929476208052,
+        "equalWorkChangePercent": 6.642512077295959,
+        "worstPairChangePercent": 12.156521739131954,
+        "descriptiveBootstrap95Percent": [
+          1.215337213284129,
+          12.156521739131954
+        ],
+        "fasterPairs": 0
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 2.869481670777252,
+            "medianPairedChangePercent": 2.496399956730211
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.3252391181175724,
+            "medianPairedChangePercent": 2.1188390496806653
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 815516,
+              "candidate": 832832,
+              "changePercent": 2.12331824268317
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1045785,
+              "candidate": 1065785,
+              "changePercent": 1.912438981243758
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 807672,
+              "candidate": 830848,
+              "changePercent": 2.869481670777252
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1039549,
+              "candidate": 1063721,
+              "changePercent": 2.3252391181175724
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 296,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 2.1188390496806653,
+            "maximumPairedChangePercent": 2.3252391181175724
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.496399956730211,
+            "maximumPairedChangePercent": 2.869481670777252
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15248190116,
+        "sha256": "0e0ade5611024432613be5f824862512ca32cf3b4551eef3558d85028579ead2",
+        "bytes": 35031407,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9786727169597409,
+          0.9745986364636278,
+          0.9199545196134233,
+          0.9657267308574113,
+          1.0062384473197714,
+          1.0242041254322023
+        ],
+        "medianPairedChangePercent": -2.3364323288315614,
+        "equalWorkChangePercent": -2.2202740561447443,
+        "worstPairChangePercent": 2.4204125432202295,
+        "descriptiveBootstrap95Percent": [
+          -5.715937476458266,
+          1.5221286375986853
+        ],
+        "fasterPairs": 4
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          0.9661594367476525,
+          1.0025342702453097
+        ],
+        "medianPairedChangePercent": -1.56531465035189,
+        "equalWorkChangePercent": -1.5783153199555922,
+        "worstPairChangePercent": 0.2534270245309722,
+        "descriptiveBootstrap95Percent": [
+          -3.384056325234752,
+          0.2534270245309722
+        ],
+        "fasterPairs": 1
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 1.2274342680639538,
+            "medianPairedChangePercent": 0.5732440486337642
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.111097006902484,
+            "medianPairedChangePercent": 0.6658761192200324
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 800532,
+              "candidate": 799884,
+              "changePercent": -0.08094617079642541
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1030567,
+              "candidate": 1032841,
+              "changePercent": 0.22065523153758093
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 791244,
+              "candidate": 800956,
+              "changePercent": 1.2274342680639538
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1024123,
+              "candidate": 1035502,
+              "changePercent": 1.111097006902484
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 366,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.6658761192200324,
+            "maximumPairedChangePercent": 1.111097006902484
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.5732440486337642,
+            "maximumPairedChangePercent": 1.2274342680639538
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15248175191,
+        "sha256": "2a9ef61ae5619619f6c0d40b81211b8b7e777583a4e3ac8f8481bcf55f5b6321",
+        "bytes": 34944411,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9711086226203938,
+          0.9648090704888134,
+          1.0298472659438096,
+          0.9840401276789783,
+          1.0030225528946826,
+          1.0130817318823326
+        ],
+        "medianPairedChangePercent": -0.6468659713169567,
+        "equalWorkChangePercent": -0.6279791178033234,
+        "worstPairChangePercent": 2.9847265943809598,
+        "descriptiveBootstrap95Percent": [
+          -3.2041153445396375,
+          2.146449891307123
+        ],
+        "fasterPairs": 3
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          0.9458306675197095,
+          0.9790695029007006
+        ],
+        "medianPairedChangePercent": -3.754991478979497,
+        "equalWorkChangePercent": -3.808685123012312,
+        "worstPairChangePercent": -2.0930497099299394,
+        "descriptiveBootstrap95Percent": [
+          -5.416933248029054,
+          -2.0930497099299394
+        ],
+        "fasterPairs": 2
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 1.185154434583624,
+            "medianPairedChangePercent": -0.2630178807923267
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.894990867240586,
+            "medianPairedChangePercent": -0.18421563578333022
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 785652,
+              "candidate": 772208,
+              "changePercent": -1.7111901961682774
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1016604,
+              "candidate": 1003760,
+              "changePercent": -1.2634221388072464
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 790108,
+              "candidate": 799472,
+              "changePercent": 1.185154434583624
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1022692,
+              "candidate": 1031845,
+              "changePercent": 0.894990867240586
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 275,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.18421563578333022,
+            "maximumPairedChangePercent": 0.894990867240586
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.2630178807923267,
+            "maximumPairedChangePercent": 1.185154434583624
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15248965852,
+        "sha256": "65fe2b060d4a74752e82da34c3d89745bd857c9a2251e25731cb960a81028b06",
+        "bytes": 35294016,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9963819240927675,
+          1.0359981383359544,
+          1.0023947456463234,
+          1.0083137112841918,
+          1.0407681381320444,
+          1.0049582370712677
+        ],
+        "medianPairedChangePercent": 0.6635974177729764,
+        "equalWorkChangePercent": 1.4672293793576596,
+        "worstPairChangePercent": 4.0768138132044385,
+        "descriptiveBootstrap95Percent": [
+          -0.061166513045463056,
+          3.8383138233999414
+        ],
+        "fasterPairs": 1
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          0.9622881283165363,
+          1.0168148364060423
+        ],
+        "medianPairedChangePercent": -1.0448517638710686,
+        "equalWorkChangePercent": -1.1253237626294488,
+        "worstPairChangePercent": 1.681483640604231,
+        "descriptiveBootstrap95Percent": [
+          -3.7711871683463682,
+          1.681483640604231
+        ],
+        "fasterPairs": 1
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -0.008010381454359727,
+            "medianPairedChangePercent": -1.5448220307462235
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -0.7867077494814523,
+            "medianPairedChangePercent": -1.7552734937727077
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1033348,
+              "candidate": 1001504,
+              "changePercent": -3.0816336800380872
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1266668,
+              "candidate": 1232166,
+              "changePercent": -2.723839238063963
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 998704,
+              "candidate": 998624,
+              "changePercent": -0.008010381454359727
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1231334,
+              "candidate": 1221647,
+              "changePercent": -0.7867077494814523
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 606,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -1.7552734937727077,
+            "maximumPairedChangePercent": -0.7867077494814523
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -1.5448220307462235,
+            "maximumPairedChangePercent": -0.008010381454359727
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "auditErrors": [],
+      "artifact": {
+        "id": 15248522774,
+        "sha256": "e7e72e993157b52422034de282cb7790481c3a4f4a2080fa2a6b71dc1a58412c",
+        "bytes": 35112863,
+        "metadataDigestVerified": true,
+        "workflowMetadataVerified": true
+      },
+      "validatedTimedReceipts": 20,
+      "validatedAllMediaReceipts": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9623289178365507,
+          1.0522918155825605,
+          0.9994806602388924,
+          0.9289176783492848,
+          0.9438447519676435,
+          1.0247331078840978
+        ],
+        "medianPairedChangePercent": -1.9095210962278397,
+        "equalWorkChangePercent": -1.58994422708707,
+        "worstPairChangePercent": 5.229181558256046,
+        "descriptiveBootstrap95Percent": [
+          -6.361878484153582,
+          3.851246173332923
+        ],
+        "fasterPairs": 4
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.0106666070350436,
+          0.9788604196058748
+        ],
+        "medianPairedChangePercent": -0.5236486679540797,
+        "equalWorkChangePercent": -0.5097840184967173,
+        "worstPairChangePercent": 1.066660703504363,
+        "descriptiveBootstrap95Percent": [
+          -2.1139580394125224,
+          1.066660703504363
+        ],
+        "fasterPairs": 1
+      },
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -4.234843808836142,
+            "medianPairedChangePercent": -5.115721110466659
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -2.8250165367794677,
+            "medianPairedChangePercent": -4.280686589525773
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1030404,
+              "candidate": 986768,
+              "changePercent": -4.234843808836142
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1253267,
+              "candidate": 1217862,
+              "changePercent": -2.8250165367794677
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1077144,
+              "candidate": 1012552,
+              "changePercent": -5.9965984120971765
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1308897,
+              "candidate": 1233814,
+              "changePercent": -5.736356642272078
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ]
+      },
+      "independentRawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 431,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -4.280686589525773,
+            "maximumPairedChangePercent": -2.8250165367794677
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -5.115721110466659,
+            "maximumPairedChangePercent": -4.234843808836142
+          }
+        }
+      },
+      "limits": "Per-host timing only; no pooling. ZIP digest and summary/raw/canonical receipts checked. Raw memory scans independently replayed. Nested package bytes were not independently reopened."
+    }
+  ]
+}

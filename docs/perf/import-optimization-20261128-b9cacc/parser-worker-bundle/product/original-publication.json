@@ -1,0 +1,102 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "branch": "perf/parser-worker-bundle-20261128-b9cacc",
+  "publishedCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "tree": "ee65e5a994b4017a443893dc7b0b268900538e94",
+  "reviewedLocalCommit": "ae9e0d9c2cf0e63372397e551faf7d932cb86404",
+  "identicalLocalAndRemoteTree": true,
+  "qualificationRun": 46104747758,
+  "actionlintRun": 46104747651,
+  "hostedGateObservations": [
+    {
+      "observedAtUtc": "2026-11-28 04:35:44 UTC",
+      "runId": 46104747651,
+      "jobId": 140854868382,
+      "name": "actionlint",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "generatedBundle": {
+    "path": "ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js",
+    "bytes": 174314,
+    "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6"
+  },
+  "componentToProductBoundary": {
+    "componentBundleBytes": 174292,
+    "productBundleBytes": 174314,
+    "deltaBytes": 22,
+    "changes": [
+      {"bytes": 15, "description": "Generated // @ts-nocheck line and newline"},
+      {"bytes": 7, "description": "Embedded nested-pool Worker URL gains .bundle"}
+    ],
+    "componentMethod": "HTTP startup harness redirected the parent Worker request to the generated bundle. Its embedded nested-pool URL still targeted the original source worker; that pool path is guarded in the worker environment.",
+    "qualificationMethod": "Hosted complete imports use the exact final 174314-byte product bundle and production Worker URL; these are authoritative for product performance."
+  },
+  "exactPackageDelta": {
+    "changed": [
+      "js/dictionary/term-bank-wasm-parser.js"
+    ],
+    "added": [
+      "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+    ],
+    "removed": []
+  },
+  "localValidation": [
+    {
+      "check": "Focused worker/URL native-WASM protocol/parity, startup cancellation and worker policy",
+      "status": "passed",
+      "tests": 15,
+      "files": 4,
+      "scope": "Vitest native WASM and simulated browser transport; no real browser import"
+    },
+    {
+      "check": "Narrowed transitive TypeScript of builder and new/updated tests",
+      "status": "passed"
+    },
+    {
+      "check": "build:libs",
+      "status": "passed"
+    },
+    {
+      "check": "All seven target dry builds",
+      "status": "passed"
+    },
+    {
+      "check": "Protocol and strict package helper tests",
+      "status": "passed",
+      "tests": 40
+    },
+    {
+      "check": "Workflow YAML, shell syntax and embedded Python syntax",
+      "status": "passed"
+    },
+    {
+      "check": "Final deterministic bundle/digest/closed-graph proof",
+      "status": "passed"
+    },
+    {
+      "check": "Focused test-file ESLint after style corrections",
+      "status": "passed"
+    },
+    {
+      "check": "Initial multi-file ESLint before build:libs",
+      "status": "failed",
+      "reason": "Own worktree's generated libraries were absent; resolved by build:libs"
+    },
+    {
+      "check": "Multi-file ESLint after build:libs",
+      "status": "incomplete",
+      "exitCode": 134,
+      "reason": "Repository config/type analysis exceeded the prospectively limited 512 MiB Node heap"
+    },
+    {
+      "check": "Build-file-only ESLint",
+      "status": "incomplete",
+      "exitCode": 137,
+      "reason": "Killed under local resource pressure; no lint verdict"
+    }
+  ],
+  "hostedGates": "Normal JS lint, main/dev/test types, all unit/options tests, all target builds and actual baseline/candidate package comparisons precede six full-import cells. No timing observation exists until validation succeeds.",
+  "scope": "Experiment branch only; no PR. Local HTTP startup component is not a whole-import gain claim."
+}

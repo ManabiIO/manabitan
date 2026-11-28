@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "scope": "Existing source/raw-byte integrity, historical receipt fields, prospective unbound config and documentation links only; no build, native, test, browser, API or performance execution",
+  "originalSourceRecords": 62,
+  "uniqueOriginalFiles": 59,
+  "allOriginalBytesUnchanged": true,
+  "historicalCheckCounts": {
+    "confirmationSyntaxStatic": 41,
+    "initialReaderNegative": 14,
+    "futureReaderSynthetic": 15
+  },
+  "futureRunAndWorkflowHeadStillNull": true,
+  "cleanProductPatchHashMatches": true,
+  "sixProductFilesMatchFrozenRuntimeReceipt": true,
+  "previousCanonicalPackManifestUnchanged": "5017fae4f540bc4974c069af85260827dbfce96cbeac445552719cea1ac6ee8c",
+  "missingReadmeLinks": [],
+  "newReadmePrettierCheck": "passed"
+}

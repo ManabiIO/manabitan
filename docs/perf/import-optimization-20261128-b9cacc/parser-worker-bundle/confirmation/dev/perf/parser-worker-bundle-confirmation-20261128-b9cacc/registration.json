@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "status": "prepared-not-published-not-launched",
+  "prospectiveCriteriaRegisteredAtUtc": "2026-11-28 04:10:55 UTC",
+  "prospectivePlanSha256": "d14aff3875c62c92e0608f8a9fcf847c9879acb5fd984d7817172c77702e080e",
+  "initialQualificationRun": 46110124022,
+  "initialActionlintRun": 46110123879,
+  "initialWorkflowHead": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+  "initialBranch": "perf/parser-worker-bundle-20261128-b9cacc",
+  "workflowBranch": "perf/parser-worker-bundle-confirmation-20261128-b9cacc",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "harness": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "candidateTree": "ee65e5a994b4017a443893dc7b0b268900538e94",
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "nodeVersion": "v22.22.0",
+  "dictionary": "jmdict",
+  "initialOrders": [
+    "AB",
+    "BA"
+  ],
+  "pairsPerHost": 12,
+  "warmupPairsPerHost": 2,
+  "identicalControlPairsPerHost": 4,
+  "flags": {},
+  "forceWorkerCount": false,
+  "headedFallbackAllowed": false,
+  "changedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "addedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+  ],
+  "removedPackageEntries": [],
+  "expectedRuntimePayloads": {
+    "js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93",
+      "bytes": 210118
+    },
+    "js/dictionary/term-bank-wasm-parser-worker.js": {
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "bytes": 16935
+    },
+    "js/dictionary/term-bank-wasm-parser-worker.bundle.js": {
+      "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6",
+      "bytes": 174314
+    }
+  },
+  "sourceFileSha256": {
+    "dev/perf/import-qualification-20261125-a7f7.py": "e5f0d91568db7aec3f88ef2cfa54bbe67b91991623e37a452833793f11ebac7e",
+    ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+    "test/firefox/extension-two-dictionary-import.e2e.js": "67b19eb5555f00d592ff1e2223b46a9ba838ca3adabe17f11816c2273b8f6340",
+    "test/chromium/restart-interruption.e2e.js": "29332614fff8d4ca1eae19f53852a41a2c6f0a744129afac940e5a639041d009",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "performanceReview": {
+    "minimumMedianPairedGainPercent": 3,
+    "minimumMedianPairedAbsoluteSavingMs": 20,
+    "equalWorkRatioStrictlyBelow": 1,
+    "minimumFasterPairs": 10,
+    "descriptiveBootstrapUpperBoundStrictlyBelowPercent": 0,
+    "bootstrapResamples": 10000,
+    "bootstrapSeed": 897,
+    "gainMustExceedAbsoluteIdenticalControlMedianDrift": true,
+    "controlSubtraction": false,
+    "poolHosts": false,
+    "preserveAllCompletedAndFailedCohorts": true
+  },
+  "memory": {
+    "separate": true,
+    "ABHostSchedule": "ABBA",
+    "BAHostSchedule": "BAAB",
+    "maximumMedianPairedIncreasePercent": 5,
+    "maximumIndividualPairedIncreasePercent": 10,
+    "everyObservationQualified": true
+  },
+  "reliability": {
+    "firefoxFocusedScenario": "Jitendex + JMdict",
+    "firefoxSuccessWithSkipsAccepted": false,
+    "firefoxPositiveParallelWorkerEvidenceRequired": true,
+    "chromiumRestartOracle": "Existing unchanged 9da7 workflow enforcer with additive source/package/harness identity checks",
+    "chromiumRestartParallelParserCancellationClaim": false
+  },
+  "restartEnforcerOriginalSha256": "115dfe21fc848bba205154cafac0aa1711ba809eaff88cccaa4ad5caf8d9c98a",
+  "originalFailedValidation": {
+    "runId": 46104747758,
+    "workflowHead": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+    "timingObservations": 0,
+    "reason": "Dependency directory symlink changed unrelated esbuild labels/maps; corrected by workflow-only hardlink staging with runtime/harness and exact gates preserved"
+  },
+  "launchCondition": "Parent must first review all six corrected initial cells and approve. Initial qualification and Actionlint must be completed successfully at the exact registered workflow head while runtime and harness remain 9da7. No automatic reruns or sample replacement.",
+  "ordinaryObservationsPerHost": 36,
+  "measuredObservationsPerHost": 32,
+  "warmupObservationsPerHost": 4,
+  "expectedBaselineRuntimePayloads": {
+    "js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "bytes": 210111
+    },
+    "js/dictionary/term-bank-wasm-parser-worker.js": {
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "bytes": 16935
+    }
+  }
+}

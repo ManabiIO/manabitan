@@ -1,0 +1,55 @@
+{
+  "auditSha256": "0d2841c82cf582b11d5b3952b4546ff01e262eec09ff7ba5aee79a88e5e2721e",
+  "auditBytes": 8782,
+  "candidateVsControl": {
+    "A": {
+      "medianSavingsMs": 0.5832239999995181,
+      "medianPairedChangePercent": -5.134788604722617,
+      "fasterBlocks": 8
+    },
+    "C": {
+      "medianSavingsMs": 0.139854999990348,
+      "medianPairedChangePercent": -1.1661883385746086,
+      "fasterBlocks": 7
+    }
+  },
+  "control": {
+    "medianSavingsMs": -0.5210659999947893,
+    "medianPairedChangePercent": 3.247480241588885
+  },
+  "controlRangePercent": [
+    -24.65154165326919,
+    190.172485281527
+  ],
+  "firstUsePerArm": {
+    "A": {
+      "compileMs": 2.991616999999991,
+      "instantiateMs": 0.06424000000001229,
+      "kernelMs": 3.637483000000003
+    },
+    "B": {
+      "compileMs": 2.726715000000013,
+      "instantiateMs": 0.06721600000000194,
+      "kernelMs": 3.1953980000000115
+    },
+    "C": {
+      "compileMs": 2.679448000000008,
+      "instantiateMs": 0.06744199999999978,
+      "kernelMs": 3.2566290000000038
+    }
+  },
+  "nonpositiveRootSamples": [
+    {
+      "sample": 0,
+      "elapsedSeconds": 0.0028168930002721027,
+      "rootPresent": true,
+      "rootRssBytes": 0,
+      "ownedPids": [
+        5,
+        7
+      ]
+    }
+  ],
+  "allRawInputsUnchanged": true,
+  "passesRegisteredContinuationGate": false
+}

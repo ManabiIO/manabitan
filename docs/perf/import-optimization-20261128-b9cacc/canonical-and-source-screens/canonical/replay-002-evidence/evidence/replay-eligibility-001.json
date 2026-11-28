@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-28T05:43:20.690922+00:00",
+  "kind": "read-only eligibility check; no native process or timing",
+  "aggregateCpuBusyFraction": 0.016278209396966337,
+  "seconds": 3.001043195999955,
+  "MemAvailableBytes": 4220293120,
+  "temporaryFilesystemFreeBytes": 4578934784,
+  "retainedTemporaryBytes": 51176050,
+  "cpuGate": 0.1,
+  "nativeReplayStarted": false
+}

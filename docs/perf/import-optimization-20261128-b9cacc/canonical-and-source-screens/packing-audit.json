@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "scope": "Packaging-only source-byte, file-link, raw-observation-count and source-alias verification; no product code, test, native export, or timing executed",
+  "originalSourceAliasesVerified": 170,
+  "uniqueStoredOriginalFiles": 120,
+  "rawWarmupObservations": 108,
+  "rawMeasuredObservations": 432,
+  "rawFirstUseObservations": 9,
+  "allRawSemanticReceiptsVerified": true,
+  "rawObservationBytesUnmodified": true,
+  "excludedLargeCaptures": 12,
+  "excludedLargeCaptureBytes": 51035120,
+  "publicLinkHostsObserved": [
+    "github.com",
+    "www.gnu.org"
+  ],
+  "selectedSourceUrlsWithQueryOrUserInfo": 0,
+  "missingReadmeLinks": [],
+  "noRuntimeRefOrProductChange": true,
+  "newReadmeFormatting": {
+    "prettierVersion": "3.4.2",
+    "nodeVersion": "v22.22.0",
+    "writeAndCheckPassed": true,
+    "readmeBytesUnchangedByFormatter": true,
+    "receipt": "formatting/README-formatting-receipt.json"
+  }
+}

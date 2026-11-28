@@ -1,0 +1,127 @@
+{
+  "scope": "Deterministic generated-asset and package proof; no elapsed-time or memory claim",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "esbuild": "0.25.1",
+  "filename": "ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js",
+  "bytes": 174314,
+  "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6",
+  "sources": [
+    {
+      "path": "ext/js/dictionary/term-key-hash.js",
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-route.js",
+      "bytes": 4192,
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-source-integrity-error.js",
+      "bytes": 1008,
+      "sha256": "50888da9c9e084d3c17a2baf9e5ce2bea36d2ad266b3b909826920d323504059"
+    },
+    {
+      "path": "ext/js/core/event-dispatcher.js",
+      "bytes": 4435,
+      "sha256": "e6c3ad40c2ff50bb3d5350c61d0de5a33481993db8a8b902b7b58200fb9a294a"
+    },
+    {
+      "path": "ext/js/core/extension-error.js",
+      "bytes": 3827,
+      "sha256": "73980b7372ea23ef3bdb809b03602210ced1f45b988079c82d3a3081bd764284"
+    },
+    {
+      "path": "ext/js/core/log.js",
+      "bytes": 5703,
+      "sha256": "f2974071c8fe45070f9fcbf7a33353805c254d53c35042999714eb3ce14e7791"
+    },
+    {
+      "path": "ext/js/core/safe-performance.js",
+      "bytes": 2386,
+      "sha256": "492fe81d7671ba8755d2da06a56289355307d5949c9017df42156d1d0af5a6a2"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-source-crc.js",
+      "bytes": 3073,
+      "sha256": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3"
+    },
+    {
+      "path": "ext/js/core/json.js",
+      "bytes": 1504,
+      "sha256": "b06cc571c7640fc18772599dfa20c84955463997bc35bfea2b9878a3ccb3458f"
+    },
+    {
+      "path": "ext/js/media/media-util.js",
+      "bytes": 6039,
+      "sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-image-references.js",
+      "bytes": 2694,
+      "sha256": "dd461816f58678ee25ef244cab0ad5ddadfd1a5b6ff2106e6c3995b9d8164c51"
+    },
+    {
+      "path": "ext/js/core/retryable-promise-cache.js",
+      "bytes": 1350,
+      "sha256": "7d54a27eb7fcd7bdc8ecb6b1529264a8dc59d9678c2d4c4c8a1a57955cb932e6"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "bytes": 25435,
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-scratch.js",
+      "bytes": 2970,
+      "sha256": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index.js",
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "bytes": 11139,
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-experiments.js",
+      "bytes": 3523,
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb"
+    },
+    {
+      "path": "ext/js/core/to-error.js",
+      "bytes": 1337,
+      "sha256": "4878316377cf5022df944cc6e389a3c7e5f8ea2d9bcf630ca2ab0ea33120818f"
+    },
+    {
+      "path": "ext/js/core/utilities.js",
+      "bytes": 12427,
+      "sha256": "e1e7544a5369e1af43d89b7758a305221455315935c167e4043071c8785786b6"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-source-pipeline.js",
+      "bytes": 47175,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "bytes": 4250,
+      "sha256": "190373fc0abf327aefd0c2fcd48f2ca7f4db263fe1452a04c8f3ee58c33a72fe"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210118,
+      "sha256": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "bytes": 16935,
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    }
+  ],
+  "metafileNote": "The raw esbuild metafile precedes the complete GPL/copyright prefix; final packaged bytes and digest are recorded above."
+}

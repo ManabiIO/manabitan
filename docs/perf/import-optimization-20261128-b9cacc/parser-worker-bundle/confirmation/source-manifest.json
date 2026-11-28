@@ -1,0 +1,47 @@
+{
+  "commit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+  "tree": "3ef7ad617844c276ff086ff3efeaa1ddb6b31611",
+  "parent": "97dd817f36c5eb930e856a13d5f0686a01dcbec6",
+  "branchPublished": false,
+  "workflowLaunched": false,
+  "files": [
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-chromium-restart-report.mjs",
+      "sha256": "fc4b8ca0a1535a4f4ff67144bc6fff538982b86afc8d483c76e84bcbb155b666",
+      "bytes": 7749
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py",
+      "sha256": "077bcc38e2f8997f4b3f9516eb952e235c3e4c217387608a0dbb3407a7045f2d",
+      "bytes": 4987
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-jmdict-confirmation.py",
+      "sha256": "a0c24eaf67dd49e48ce203e06780f70bf45f32eab8e66362f693d9d327625652",
+      "bytes": 6242
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-firefox-report.mjs",
+      "sha256": "80356e1eaeaf20d29f494cf9fa7895141d0f68dee2f056ed907094c9dbc4921f",
+      "bytes": 15212
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py",
+      "sha256": "e9da4d580cb7e7634d76f3e22156859c1566d7a9f7c4aa92cef9591e0d92f5bd",
+      "bytes": 4792
+    },
+    {
+      "path": "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json",
+      "sha256": "bddab0dbd3cc9b97c3fcbb97875e05fa407f446872c0c513eb93c4af16e9c291",
+      "bytes": 4806
+    },
+    {
+      "path": ".github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml",
+      "sha256": "61d10be82eec12f3fb218cd2d69e09729f68b7bcf3cfb27610d3d24310cca7e0",
+      "bytes": 27138
+    }
+  ],
+  "scope": "Only source labels, post-cohort package proof, and prospective static-validation gate changed; schedule/statistics/runtime/harness unchanged",
+  "staticValidationExecuted": false,
+  "staticValidationPreparedBeforeAcquisition": true
+}

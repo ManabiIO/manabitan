@@ -1,0 +1,846 @@
+{
+  "schemaVersion": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "scope": "Symbol identity only; no import, tuning, or performance claim",
+  "status": "passed",
+  "commands": [
+    {
+      "label": "clang-version",
+      "argv": [
+        "/usr/bin/clang-21",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "lld-version",
+      "argv": [
+        "/usr/bin/wasm-ld-21",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "node-version",
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "existing-wasm-check",
+      "argv": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "a6b6cf1c3278e4d6074cc813af34bd985ec7e9fb1675c9e8ecd80ec8948cc079",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile-term-content-canonical-scan-v1.wasm",
+      "argv": [
+        "/usr/bin/clang-21",
+        "-fuse-ld=/usr/bin/wasm-ld-21",
+        "--target=wasm32",
+        "-O3",
+        "-nostdlib",
+        "-Wl,--no-entry",
+        "-Wl,--import-memory",
+        "-Wl,-z,stack-size=65536",
+        "-o",
+        "/home/runner/work/manabitan/manabitan/builds/perf/native-symbol-map-b9cacc/named-modules/term-content-canonical-scan-v1.wasm",
+        "/home/runner/work/manabitan/manabitan/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile-term-bank-parser.wasm",
+      "argv": [
+        "/usr/bin/clang-21",
+        "-fuse-ld=/usr/bin/wasm-ld-21",
+        "--target=wasm32-freestanding",
+        "-O3",
+        "-matomics",
+        "-mbulk-memory",
+        "-msimd128",
+        "-nostdlib",
+        "-Wl,--no-entry",
+        "-Wl,--shared-memory",
+        "-Wl,--max-memory=4294967296",
+        "-Wl,--export=wasm_reset_heap",
+        "-Wl,--export=wasm_alloc",
+        "-Wl,--export=wasm_get_last_parse_capacity",
+        "-Wl,--export=wasm_get_last_content_capacity",
+        "-Wl,--export=inflate_and_join_term_banks",
+        "-Wl,--export=verify_term_bank_source_crcs",
+        "-Wl,--export=inflate_zip_media_batch",
+        "-Wl,--export=project_single_glossary_image_path",
+        "-Wl,--export=parse_term_bank",
+        "-Wl,--export=parse_term_bank_with_media_hints",
+        "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+        "-Wl,--export=build_term_string_plan",
+        "-Wl,--export=encode_term_lookup_index",
+        "-Wl,--export=compact_term_lookup_keys",
+        "-Wl,--export=encode_term_content",
+        "-Wl,--export=encode_term_content_no_hash",
+        "-Wl,--export=encode_term_content_token_binary",
+        "-Wl,--export=encode_term_content_token_binary_dedup",
+        "-o",
+        "/home/runner/work/manabitan/manabitan/builds/perf/native-symbol-map-b9cacc/named-modules/term-bank-parser.wasm",
+        "/home/runner/work/manabitan/manabitan/ext/js/dictionary/wasm/term-bank-parser.c",
+        "/home/runner/work/manabitan/manabitan/ext/js/dictionary/wasm/term-bank-inflate.c"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "returncode": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "targets": {
+    "term-content-canonical-scan-v1.wasm": {
+      "strippedSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "namedSha256": "536cafe76913e5e2277e6e5031559caf65e96b1d85d1012119aea98e02a374b3",
+      "noncustomSectionsEqual": true,
+      "noncustomSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "sections": [
+        {
+          "id": 1,
+          "bytes": 7,
+          "sha256": "49ee9ee94fe4352331688992d6b081a1eb16f085731ce82938cd1e67c0cac966"
+        },
+        {
+          "id": 2,
+          "bytes": 17,
+          "sha256": "1fc1da5e207c3ad96751bb98d0205c095fe2ffe32087983fdb3f3933f29c0220"
+        },
+        {
+          "id": 3,
+          "bytes": 8,
+          "sha256": "83f47a823c24a89f7cae3d4faf1050ead243a54e41dede338878ab58b8b998f9"
+        },
+        {
+          "id": 4,
+          "bytes": 7,
+          "sha256": "c76f4de1180ab83342c9dc7647fdc8b3999dd865c2bd7154574050855d80c7e0"
+        },
+        {
+          "id": 6,
+          "bytes": 10,
+          "sha256": "5d27efc2fd815990a9b0326d729c461c8b9e0e839c58f5d781d23d5b6472df40"
+        },
+        {
+          "id": 7,
+          "bytes": 113,
+          "sha256": "9f1c0d3091aef561cbf90320df79900b7e377c20f8329737efddadef2ad77fc6"
+        },
+        {
+          "id": 10,
+          "bytes": 1454,
+          "sha256": "40d4ca53581725f9ed4fce20e7310bce4b7ae5f0939b8beeca902f154c5feab6"
+        },
+        {
+          "id": 0,
+          "bytes": 174,
+          "sha256": "28cfc768267d44b3d663a364d60b34f77c1211d533949674366121711731f749"
+        },
+        {
+          "id": 0,
+          "bytes": 58,
+          "sha256": "706abcc157ba291bf625b52c8e3e7c203ebe927c89047892c14a224250018ca7"
+        },
+        {
+          "id": 0,
+          "bytes": 151,
+          "sha256": "b50a3cb070fec5f84e7560fd1b3a74d3ba464d3fcdd952795238eb27a97fc499"
+        }
+      ],
+      "functions": [
+        {
+          "index": 0,
+          "name": "canonical_abi_version",
+          "exports": [
+            "canonical_abi_version"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 4,
+          "bodySha256": "2081bbd72af55bbe68bb95776ccc561e4581ce8b232c74f53fff6df83bfd2c2e"
+        },
+        {
+          "index": 1,
+          "name": "canonical_layout_end",
+          "exports": [
+            "canonical_layout_end"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 7,
+          "bodySha256": "62197476e11241b9f5c2287e402a0bc0f25ab34c09dc3b21c443120a78eb90af"
+        },
+        {
+          "index": 2,
+          "name": "canonical_max_rows",
+          "exports": [
+            "canonical_max_rows"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 6,
+          "bodySha256": "60767378ed98439ba59f822064432bfecb2e271dfc45a8092bd1c216b9d88bb4"
+        },
+        {
+          "index": 3,
+          "name": "canonical_prefix_bytes",
+          "exports": [
+            "canonical_prefix_bytes"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 7,
+          "bodySha256": "c585a6873ac3de21ee9ec6127e4c99a57bae57d37da1ecb7815dcf842cbb4cd1"
+        },
+        {
+          "index": 4,
+          "name": "scan_canonical",
+          "exports": [
+            "scan_canonical"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 1420,
+          "bodySha256": "2789a4a9fa44a1d5ec787f13bd404af353e9e2714251e75e8ee87fb24f0eb890"
+        }
+      ],
+      "onlyRemovedArgument": "-Wl,--strip-all"
+    },
+    "term-bank-parser.wasm": {
+      "strippedSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "namedSha256": "5b89a49b9a34d21360f5db24f6dc19dc4dad0d96c321ecd7a79e447a13413bb9",
+      "noncustomSectionsEqual": true,
+      "noncustomSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "sections": [
+        {
+          "id": 1,
+          "bytes": 256,
+          "sha256": "b0c5c9aa04b6590cf0c7258664415c5939982ddcf38e08ee43a51aedd84348be"
+        },
+        {
+          "id": 3,
+          "bytes": 54,
+          "sha256": "832f7136ea7625712815ec1ec5d111174f1b60c85e6550519a72f8b757eb92f6"
+        },
+        {
+          "id": 5,
+          "bytes": 8,
+          "sha256": "b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8"
+        },
+        {
+          "id": 6,
+          "bytes": 15,
+          "sha256": "355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b"
+        },
+        {
+          "id": 7,
+          "bytes": 540,
+          "sha256": "37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da"
+        },
+        {
+          "id": 8,
+          "bytes": 3,
+          "sha256": "9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e"
+        },
+        {
+          "id": 12,
+          "bytes": 3,
+          "sha256": "39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba"
+        },
+        {
+          "id": 10,
+          "bytes": 65245,
+          "sha256": "7f5b3059637ff87c5f8b8b0c46196b8ddeee1374bb07b0fd82396b08df3ac033"
+        },
+        {
+          "id": 11,
+          "bytes": 1527,
+          "sha256": "391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59"
+        },
+        {
+          "id": 0,
+          "bytes": 1359,
+          "sha256": "a38aae66b4bbe1e863d0c47d4905ee22642536b96bad1a620fe54a080ce2fcd2"
+        },
+        {
+          "id": 0,
+          "bytes": 58,
+          "sha256": "706abcc157ba291bf625b52c8e3e7c203ebe927c89047892c14a224250018ca7"
+        },
+        {
+          "id": 0,
+          "bytes": 169,
+          "sha256": "9cc544793e4a50dc85d2919dbfaeee021c8ccc096a4f0429c07c2e7d4c279499"
+        }
+      ],
+      "functions": [
+        {
+          "index": 0,
+          "name": "__wasm_init_memory",
+          "exports": [],
+          "typeIndex": 0,
+          "bodyBytes": 91,
+          "bodySha256": "9e2aafd60a515a9aa0d9d89039fe4cf06b48a7ee15e8e19d77d2a908743b127a"
+        },
+        {
+          "index": 1,
+          "name": "inflate_and_join_term_banks",
+          "exports": [
+            "inflate_and_join_term_banks"
+          ],
+          "typeIndex": 1,
+          "bodyBytes": 798,
+          "bodySha256": "97cb65dbdff6d30eeede646efdafc2874707d587d5146c4fb4fa1151c19d0039"
+        },
+        {
+          "index": 2,
+          "name": "crc32_bytes",
+          "exports": [],
+          "typeIndex": 2,
+          "bodyBytes": 6609,
+          "bodySha256": "2caa2f5395a9fdd4c1f17016812dfc0bee5f26d6bcdfaa8ab7077c7d2a9e000c"
+        },
+        {
+          "index": 3,
+          "name": "inflate_zip_media_batch",
+          "exports": [
+            "inflate_zip_media_batch"
+          ],
+          "typeIndex": 3,
+          "bodyBytes": 432,
+          "bodySha256": "ef85d258a2bbbc878b22582f0559c401cdd5b48a9bc3d94fe31dba2444e4ac1e"
+        },
+        {
+          "index": 4,
+          "name": "verify_term_bank_source_crcs",
+          "exports": [
+            "verify_term_bank_source_crcs"
+          ],
+          "typeIndex": 4,
+          "bodyBytes": 3115,
+          "bodySha256": "f732499578e4fef1830a96c6159563a8528ede2b8b8516aaffa72928753d5f40"
+        },
+        {
+          "index": 5,
+          "name": "crc32_update_gap",
+          "exports": [],
+          "typeIndex": 5,
+          "bodyBytes": 538,
+          "bodySha256": "b1911c65c5b7c27c7fe8157a1d444177f0d6ead606937700011d742bbc8786ec"
+        },
+        {
+          "index": 6,
+          "name": "wasm_reset_heap",
+          "exports": [
+            "wasm_reset_heap"
+          ],
+          "typeIndex": 0,
+          "bodyBytes": 17,
+          "bodySha256": "4b8b3411363bf2b9b1384f4173a055ddd05f07020c448035ad3138d89df1e38c"
+        },
+        {
+          "index": 7,
+          "name": "wasm_alloc",
+          "exports": [
+            "wasm_alloc"
+          ],
+          "typeIndex": 6,
+          "bodyBytes": 149,
+          "bodySha256": "7deecc8e5b83163c0768fdd5ffed6d2a20a8841dd36dfe3c52c299d48da134cf"
+        },
+        {
+          "index": 8,
+          "name": "wasm_get_last_parse_capacity",
+          "exports": [
+            "wasm_get_last_parse_capacity"
+          ],
+          "typeIndex": 7,
+          "bodyBytes": 11,
+          "bodySha256": "a8ad71189d825e7aac5029b9fd43d9b0670986faa16c019beca34c05f1d68f73"
+        },
+        {
+          "index": 9,
+          "name": "wasm_get_last_content_capacity",
+          "exports": [
+            "wasm_get_last_content_capacity"
+          ],
+          "typeIndex": 7,
+          "bodyBytes": 11,
+          "bodySha256": "2aca4eb7de5b8ee46a4125a4c9a9a2f9821e193e395ffcf9627077fb6ac045bf"
+        },
+        {
+          "index": 10,
+          "name": "project_single_glossary_image_path",
+          "exports": [
+            "project_single_glossary_image_path"
+          ],
+          "typeIndex": 8,
+          "bodyBytes": 272,
+          "bodySha256": "511b8d4e865de4c7a8e514b88fbd8dbc7d19f7dc92235bcda508d5b68431b579"
+        },
+        {
+          "index": 11,
+          "name": "project_glossary_image_value",
+          "exports": [],
+          "typeIndex": 9,
+          "bodyBytes": 4209,
+          "bodySha256": "00fa79f6d413699ce078818e44b9d2b4fd1a423858f9d8e8a35550d987e25b7d"
+        },
+        {
+          "index": 12,
+          "name": "parse_value_span",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 651,
+          "bodySha256": "edad48b166938c9abc934900c56dbd7d41090ca4771f0a140faf31b6c4d6c0bf"
+        },
+        {
+          "index": 13,
+          "name": "parse_composite_span_impl",
+          "exports": [],
+          "typeIndex": 11,
+          "bodyBytes": 6069,
+          "bodySha256": "606f73fde78f50053994b2f0f405c76dc3c215d08b4edcaf8745b93c97f5aa49"
+        },
+        {
+          "index": 14,
+          "name": "json_string_matches_ascii_escaped",
+          "exports": [],
+          "typeIndex": 12,
+          "bodyBytes": 543,
+          "bodySha256": "28aa76c732ff7dfbafc859b9c4096f6538d4b68b9dbf00310b5d936b6c7e08fe"
+        },
+        {
+          "index": 15,
+          "name": "parse_term_bank",
+          "exports": [
+            "parse_term_bank"
+          ],
+          "typeIndex": 9,
+          "bodyBytes": 27,
+          "bodySha256": "cfa19a23d788d146b30f5db568a378cfa9e1850f99e154ec9eb50ea9fff04cf2"
+        },
+        {
+          "index": 16,
+          "name": "parse_term_bank_impl",
+          "exports": [],
+          "typeIndex": 11,
+          "bodyBytes": 1411,
+          "bodySha256": "9bbe79cfb691fccc476f973d4c1a6bed305c863551a67ab723745d862a8c85d0"
+        },
+        {
+          "index": 17,
+          "name": "next_term_bank",
+          "exports": [],
+          "typeIndex": 6,
+          "bodyBytes": 481,
+          "bodySha256": "4d8a7e91094b70d63a2ba91f4307a3f9b6e9b537ec6e5d81387d70b96037ea46"
+        },
+        {
+          "index": 18,
+          "name": "parse_row_single_pass",
+          "exports": [],
+          "typeIndex": 1,
+          "bodyBytes": 5940,
+          "bodySha256": "5a17b2c124fc140375ba14330921f492fa32cdcfa19fa7af9803bbf148f83cf7"
+        },
+        {
+          "index": 19,
+          "name": "next_term_row",
+          "exports": [],
+          "typeIndex": 2,
+          "bodyBytes": 297,
+          "bodySha256": "90bfd572c4bff7e2b03e78bf1192af36137532cf309b5b230c8765e2855c05a2"
+        },
+        {
+          "index": 20,
+          "name": "parse_term_bank_with_media_hints",
+          "exports": [
+            "parse_term_bank_with_media_hints"
+          ],
+          "typeIndex": 9,
+          "bodyBytes": 27,
+          "bodySha256": "a5de0dc91ad6bd88b8f7ab81382257639bbd25915cb7476cb16e921783496e68"
+        },
+        {
+          "index": 21,
+          "name": "encode_term_content",
+          "exports": [
+            "encode_term_content"
+          ],
+          "typeIndex": 13,
+          "bodyBytes": 22,
+          "bodySha256": "a3fabdf394bf917316752f307fd50b1ef2a80cb7b811fae0eb26833a0a6f83a5"
+        },
+        {
+          "index": 22,
+          "name": "encode_term_content_impl",
+          "exports": [],
+          "typeIndex": 9,
+          "bodyBytes": 1411,
+          "bodySha256": "a2f3571b7f8b218eeae74865d316267d156dafbc097866375c42bf26c27e8757"
+        },
+        {
+          "index": 23,
+          "name": "write_normalized_glossary_value",
+          "exports": [],
+          "typeIndex": 9,
+          "bodyBytes": 2368,
+          "bodySha256": "4b34e3ffe44ad5b9673e5244c68bf3ef3d7856fa53a1061fe3a503bd0992ca78"
+        },
+        {
+          "index": 24,
+          "name": "hash_content_xxh32_pair",
+          "exports": [],
+          "typeIndex": 14,
+          "bodyBytes": 1011,
+          "bodySha256": "4d12b25ac896ddcd5071ae90e31c6d9ab5ec1ba4804c03099f5f136e9e3ceb32"
+        },
+        {
+          "index": 25,
+          "name": "encode_term_content_no_hash",
+          "exports": [
+            "encode_term_content_no_hash"
+          ],
+          "typeIndex": 13,
+          "bodyBytes": 22,
+          "bodySha256": "a5e4e9a880429e29ed937f371491d79995ded404fa6678cac627ff568f566482"
+        },
+        {
+          "index": 26,
+          "name": "encode_term_content_token_binary",
+          "exports": [
+            "encode_term_content_token_binary"
+          ],
+          "typeIndex": 13,
+          "bodyBytes": 523,
+          "bodySha256": "dd14ba0da12deca200a5e0a6329ce5981a33e922b33fbe6d274a5b55e2f0b704"
+        },
+        {
+          "index": 27,
+          "name": "encode_term_content_token_binary_row",
+          "exports": [],
+          "typeIndex": 4,
+          "bodyBytes": 3435,
+          "bodySha256": "f220eb8d272eca6e8a4db0716a6b72cbda8494c0e677f2d817f2b0e876da5f01"
+        },
+        {
+          "index": 28,
+          "name": "build_term_string_plan",
+          "exports": [
+            "build_term_string_plan"
+          ],
+          "typeIndex": 15,
+          "bodyBytes": 1406,
+          "bodySha256": "130599d1a3bd0a3118842ce5fd600edff7c21dedfa37784b01659acb4885ba3b"
+        },
+        {
+          "index": 29,
+          "name": "decode_escaped_key",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 1497,
+          "bodySha256": "f03f95ef86bd692566807833a6fa25912818e687d5daa937962a04a37d90f025"
+        },
+        {
+          "index": 30,
+          "name": "hash_content_xxh32",
+          "exports": [],
+          "typeIndex": 5,
+          "bodyBytes": 491,
+          "bodySha256": "f3550a45084d3787b068b8b1d74460e38bd090a5c00ebc58060fd408f3128679"
+        },
+        {
+          "index": 31,
+          "name": "copy_valid_utf8",
+          "exports": [],
+          "typeIndex": 5,
+          "bodyBytes": 409,
+          "bodySha256": "7d75912efd31497f49e568dd3b27d1a927daaf6b14cd4b511b5b14f258e4d53d"
+        },
+        {
+          "index": 32,
+          "name": "content_bytes_equal",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 170,
+          "bodySha256": "2edca084810c1374dda5876dfd51452b0a067a4ce426504b1c5fa315a736199d"
+        },
+        {
+          "index": 33,
+          "name": "key_hex4",
+          "exports": [],
+          "typeIndex": 6,
+          "bodyBytes": 340,
+          "bodySha256": "4c79c1187dce00816a98dee95cc268117abfc4e50c83ecc467ad3d492e7f3172"
+        },
+        {
+          "index": 34,
+          "name": "encode_term_lookup_index",
+          "exports": [
+            "encode_term_lookup_index"
+          ],
+          "typeIndex": 16,
+          "bodyBytes": 3895,
+          "bodySha256": "c7297cd15cade623f05fc1ea10d77e2282c8d983ceabf4f68a17fa8f082080a2"
+        },
+        {
+          "index": 35,
+          "name": "encode_term_content_token_binary_dedup",
+          "exports": [
+            "encode_term_content_token_binary_dedup"
+          ],
+          "typeIndex": 17,
+          "bodyBytes": 1070,
+          "bodySha256": "9df638f088383f67f6ad1a5a8cbc925aca85a5eabe54df57a27dafd6200151a5"
+        },
+        {
+          "index": 36,
+          "name": "parse_and_encode_term_bank_token_binary_dedup",
+          "exports": [
+            "parse_and_encode_term_bank_token_binary_dedup"
+          ],
+          "typeIndex": 18,
+          "bodyBytes": 4748,
+          "bodySha256": "fc486ebb568965721508792ae6167f32ef4651bf0a4cb04c32e1607e79b6fc0d"
+        },
+        {
+          "index": 37,
+          "name": "scan_scalar_span",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 153,
+          "bodySha256": "4d2d34fe24e310aa82016b149d9e7227e3bdc42b411bd7e1f29fe96160a4e497"
+        },
+        {
+          "index": 38,
+          "name": "parse_int32_token",
+          "exports": [],
+          "typeIndex": 12,
+          "bodyBytes": 304,
+          "bodySha256": "a99884222a053cf93244be78b44116c63a2a932b8aba591159abff29737a615a"
+        },
+        {
+          "index": 39,
+          "name": "raw_term_content_hash",
+          "exports": [],
+          "typeIndex": 2,
+          "bodyBytes": 148,
+          "bodySha256": "19cf65f5552fa5c6510ec225f0821e12f9c0770f3243920f7358c9eb2f0f629d"
+        },
+        {
+          "index": 40,
+          "name": "raw_term_content_tokens_equal",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 1104,
+          "bodySha256": "de65f450852285054ef701ee3708293a2e0aafdc6297096552136eac24758eae"
+        },
+        {
+          "index": 41,
+          "name": "raw_term_content_quick_signature",
+          "exports": [],
+          "typeIndex": 2,
+          "bodyBytes": 436,
+          "bodySha256": "dd159f0f7391d485407ca18dea72fd37bd3b49f8a3e8ab2cfcf9d9bfa0f7a01a"
+        },
+        {
+          "index": 42,
+          "name": "reuse_validated_glossary",
+          "exports": [],
+          "typeIndex": 4,
+          "bodyBytes": 700,
+          "bodySha256": "fedf9555c245d495ca945b56c6e226722ed5739012d11f703da670ab22dd93f0"
+        },
+        {
+          "index": 43,
+          "name": "is_valid_json_number",
+          "exports": [],
+          "typeIndex": 5,
+          "bodyBytes": 406,
+          "bodySha256": "20e3a57f1d8c4483a2b424c888f4a036ba7b848fc544ea763899d9e782961dfd"
+        },
+        {
+          "index": 44,
+          "name": "next_format3_field",
+          "exports": [],
+          "typeIndex": 5,
+          "bodyBytes": 180,
+          "bodySha256": "03803b34e780842ca2e65c3fa9d616f4221110928d34089099e2a752f6640e58"
+        },
+        {
+          "index": 45,
+          "name": "parse_value_span_with_glossary_hints",
+          "exports": [],
+          "typeIndex": 11,
+          "bodyBytes": 80,
+          "bodySha256": "7381ba516a7d6c08eb688cd67a0bb44b3d8d9abb2160ebbffeb55953f1c5ad45"
+        },
+        {
+          "index": 46,
+          "name": "compact_term_lookup_keys",
+          "exports": [
+            "compact_term_lookup_keys"
+          ],
+          "typeIndex": 19,
+          "bodyBytes": 825,
+          "bodySha256": "e10a1c7538efeb9022f9edb1621709e7d3db541c71ba6cd9d9c0287b08723633"
+        },
+        {
+          "index": 47,
+          "name": "parse_scalar_span",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 424,
+          "bodySha256": "1f94ed389d5a6ef67459e3b5cccb5332c157aad1cc40e27d5785a604ac29a618"
+        },
+        {
+          "index": 48,
+          "name": "libdeflate_deflate_decompress_ex",
+          "exports": [],
+          "typeIndex": 9,
+          "bodyBytes": 3913,
+          "bodySha256": "b1675447da7753f9fa63952e9bfd35f2751aa25dc3e566b7b7ed6e02f7e6d8cc"
+        },
+        {
+          "index": 49,
+          "name": "build_decode_table",
+          "exports": [],
+          "typeIndex": 11,
+          "bodyBytes": 1832,
+          "bodySha256": "7f3f8b622310d6b46c7ad745622be9f5f760022802532cd15fb75f95d480ccf7"
+        },
+        {
+          "index": 50,
+          "name": "term_bank_inflate",
+          "exports": [],
+          "typeIndex": 10,
+          "bodyBytes": 127,
+          "bodySha256": "ffef4372e93be54238103603e6edb9f567a2e3c1a3530196e4371e14b5c019f2"
+        }
+      ],
+      "onlyRemovedArgument": "-Wl,--strip-all"
+    }
+  },
+  "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+  "sourceIdentity": {
+    "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+    "ext/js/dictionary/wasm/vendor/libdeflate/common_defs.h": "00ff4bdc24e0003fb9a3f18e692d21cc59200f09920d327fa1341a33915bbc71",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_constants.h": "72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/deflate_decompress.c": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f",
+    "ext/js/dictionary/wasm/vendor/libdeflate/lib/lib_common.h": "e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea",
+    "ext/js/dictionary/wasm/vendor/libdeflate/libdeflate.h": "1bb50a3ff8c6980c1031c0e9bb324cf99df51379fdca77a358644cca841765cc",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz.h": "619fbff2e98605a83f327a2879d52f219b5edaa579036a657937910f0707a43b",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_common.h": "e015eb5bc667062cbd53451438dd49bb9904c6a7765c806b765f6f735cf01a06",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_export.h": "195259dc89fb3f83a96426a90ee03dc45acef113150cd3475ea9cfbf1f7784f3",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.c": "05930a45b5d9fdd5786c4e631373cdfec32b7be50ec0906d3b98caa503e068f3",
+    "ext/js/dictionary/wasm/vendor/miniz/miniz_tinfl.h": "da4850920fdf09f8877d9affabe1ebba1852ce4b1ebbd121f2ba7a7ea8e57e5d",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/bin/build-dictionary-wasm.js": "27fef161414a1bb3fb4e674607a04da6c9a34b9561c5e1a7b7a6a71194e5f54a",
+    "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17",
+    "dev/json.js": "27e9a08a46a8e4f56e15d8302506d138b352749b8c270d51889f9141e60c2bcc",
+    "ext/js/core/json.js": "b06cc571c7640fc18772599dfa20c84955463997bc35bfea2b9878a3ccb3458f",
+    "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+  },
+  "manifest": {
+    "format": 1,
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
+    "sourceFileCount": 14,
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+        ],
+        "arguments": [
+          "--target=wasm32",
+          "-O3",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--import-memory",
+          "-Wl,-z,stack-size=65536",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "ext/js/dictionary/wasm/term-bank-inflate.c"
+        ],
+        "arguments": [
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=verify_term_bank_source_crcs",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=project_single_glossary_image_path",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+      }
+    ]
+  },
+  "tools": {
+    "compiler": "/usr/bin/clang-21",
+    "linker": "/usr/bin/wasm-ld-21",
+    "versions": {
+      "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+      "linker": "Ubuntu LLD 21.1.8\n",
+      "node": "v22.22.0\n"
+    }
+  },
+  "trackedProductCleanAfter": true
+}

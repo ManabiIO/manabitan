@@ -1,0 +1,20 @@
+{
+  "traceSha256": "5b89ba263782ce409155bee286c51a1c7f6e181976321da71a6e9014ffac1d15",
+  "profileOwner": {
+    "pid": 3512,
+    "tid": 3541,
+    "id": "0x4"
+  },
+  "workerIdentity": {
+    "pid": 3512,
+    "tid": 3541,
+    "workerThreadId": 3541,
+    "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/background/offscreen-dictionary-worker.js"
+  },
+  "profileChunkEmission": {
+    "pid": 3512,
+    "tid": 3588,
+    "events": 81
+  },
+  "scope": "The sampled importer owner is 3541; 3588 emits ProfileChunk events. No sample-count change, weighted time, or new profile."
+}

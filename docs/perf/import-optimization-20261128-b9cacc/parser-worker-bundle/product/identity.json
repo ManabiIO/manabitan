@@ -1,0 +1,104 @@
+{
+  "status": "prepared-unreferenced-not-promoted",
+  "cleanCommit": "c0d62d7ef79e63fcf5c04968f2eab579ce3240a8",
+  "cleanTree": "1c38abd37b182987a507cac1fead6c54aaa6d914",
+  "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "measuredSource": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "measuredTree": "ee65e5a994b4017a443893dc7b0b268900538e94",
+  "productFiles": [
+    {
+      "path": ".gitignore",
+      "blob": "bd5f92ce53ea468201fb13af0de3353cfd274a24",
+      "status": "modified",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 277,
+      "sha256": "698286f683b5b934532679ab9ff4bf401ae52e9a132fbd05868cd84ba266e3a0"
+    },
+    {
+      "path": "dev/build-libs.js",
+      "blob": "fd76b979289c0a48dee66eb8f5299bbae9bced9e",
+      "status": "modified",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 6352,
+      "sha256": "0bff6378a06b5ef5bafce40ac746bd809b48a7d9808294825e99489fcba63239"
+    },
+    {
+      "path": "eslint.config.js",
+      "blob": "ab46ffe79b9c3634b5bab4f7473645af795758c0",
+      "status": "modified",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 39416,
+      "sha256": "efcd9cc4ec9e6c4a9226a603ab6cfc7e66e502b77e46dbd34b97d445008ca06f"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "blob": "000b8592c4183d63230cd4a8e6ffbe73abd0f51a",
+      "status": "modified",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 210118,
+      "sha256": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93"
+    },
+    {
+      "path": "test/term-bank-worker-bundle.test.js",
+      "blob": "a115b436e747a8c4b8ba4dc3dc4781957bb55496",
+      "status": "added",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 7505,
+      "sha256": "9e4ca730233e5451cde228ae3b7711a6c66f29d681f9915c7a89a1af3dcc459d"
+    },
+    {
+      "path": "test/web-asset-paths.test.js",
+      "blob": "eee441835725f7fa00652d800e4ffd3311eef6ba",
+      "status": "modified",
+      "mode": "100644",
+      "identicalToMeasuredSource": true,
+      "bytes": 4703,
+      "sha256": "4bdd4731b5f5b43c2b81f4c54df7f5911d2df1333aa3815fb599bac7ff37084f"
+    }
+  ],
+  "excludedQualificationFiles": [
+    {
+      "path": ".github/workflows/import-parser-worker-bundle-b9cacc.yml",
+      "measuredBlob": "c5def272824b7efc397d5a7839447714a8c3a826",
+      "status": "added"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/package_entries.py",
+      "measuredBlob": "3e8dff6a1072a8ab2fe8e3a4fe28b5590d4026fa",
+      "status": "added"
+    },
+    {
+      "path": "dev/perf/import-memory-20261125-a7f7/test_package_entries.py",
+      "measuredBlob": "b851a6a23863756fc41ebc383d048fb407dd5f7a",
+      "status": "added"
+    },
+    {
+      "path": "dev/perf/import-qualification-20261125-a7f7.py",
+      "measuredBlob": "41e06825ff3dbbac1bfd91f2af872730e234d460",
+      "status": "modified"
+    }
+  ],
+  "originalLocalProductCommit": "21007024b791b35bd7809491fc009cfa5c724572",
+  "originalLocalProductDifference": [
+    "dev/build-libs.js: measured source adds JSDoc return/throw contracts",
+    "test/term-bank-worker-bundle.test.js: measured source has type/lint documentation and Uint8Array.from source buffer fixture"
+  ],
+  "proof": "Both clean and measured commits directly parent the same9e10 baseline. Their base-to-head deltas are respectively exact6 and exact10 files; all6 product blob IDs and modes match. The remaining4 qualification-only files are excluded. GitHub three-dot compare between these sibling commits includes baseline-to-head changes and is not used as a direct tree-delta proof.",
+  "limitations": [
+    "No branch/ref or PR created; source-only Git objects do not launch workflows.",
+    "No tests or timing rerun for this extraction; prior validation belongs to frozen measured source9da7.",
+    "No full-import result or promotion claim. Corrected qualification run46110124022 remains separately frozen."
+  ],
+  "patch": {
+    "path": "product.patch",
+    "bytes": 12869,
+    "sha256": "b91526cb0c65a1b0007196c006f4218d751617ced763edc4bd38ff7b9f21ad44",
+    "whitespaceCheck": "pass"
+  },
+  "localReadProof": "All six local measured-source git blobs rehashed and matched the remote clean-tree blobs and100644 modes; no checkout/build/validation run."
+}

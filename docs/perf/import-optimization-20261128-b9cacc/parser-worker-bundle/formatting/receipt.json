@@ -1,0 +1,35 @@
+{
+  "scope": "New handoff README only; frozen/copied sources and raw records untouched",
+  "prettierVersion": "3.4.2",
+  "lockedVersionMatched": true,
+  "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+  "nodeVersion": "v22.22.0",
+  "runtimeIdentityBasis": "Previously verified unchanged Node22 runtime; no installation",
+  "prettierEntrySha256": "9aee781035e9f56b49124e92984ee379b69e333b401ac5c8b5e27e3e14783bde",
+  "readmeBeforeSha256": "2754ca68199ea44f7cfa66ca33d20058e221090f0a9a7c048e3f7083f40f166a",
+  "readmeAfterSha256": "2754ca68199ea44f7cfa66ca33d20058e221090f0a9a7c048e3f7083f40f166a",
+  "commands": [
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/baseline/node_modules/prettier/bin/prettier.cjs",
+        "--write",
+        "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-handoff-20261128-b9cacc/README.md"
+      ],
+      "exitCode": 0,
+      "log": "README-write.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/baseline/node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-handoff-20261128-b9cacc/README.md"
+      ],
+      "exitCode": 0,
+      "log": "README-check.log"
+    }
+  ],
+  "baselineAGENTSCheck": "Passed separately by parent; not rerun during packaging",
+  "precisionUpdate": "Recorded identical-control drift,23-source-module count including entry,95% paired-percent bound, and autonomous existing-authorization continuation condition"
+}

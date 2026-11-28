@@ -1,0 +1,186 @@
+{
+  "runId": 46101323881,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "15b77f6a453dac57bd4bd2a9bc0ba3a7ccb733e2",
+  "expectedCells": 6,
+  "completedCells": 6,
+  "allCellsAcquired": true,
+  "rows": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": 0.05377325644941866,
+      "equalWorkPercent": -0.7522920058268046,
+      "interval": [
+        -3.568863759382501,
+        1.2987702955004288
+      ],
+      "fasterPairs": 3,
+      "controlPairedMedianPercent": -0.19804761922681546,
+      "memoryPassed": false,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 7.069395278691282,
+          "medianPairedChangePercent": 5.319658801025162
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 5.563198970150451,
+          "medianPairedChangePercent": 4.127337031601219
+        }
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": -0.8562347719415886,
+      "equalWorkPercent": -0.6469194312803794,
+      "interval": [
+        -1.819225820524073,
+        0.7925241185741561
+      ],
+      "fasterPairs": 4,
+      "controlPairedMedianPercent": -2.7066466755671703,
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.2961729609727848,
+          "medianPairedChangePercent": -0.37255253093257945
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 0.07955395057686054,
+          "medianPairedChangePercent": -0.14274541638428784
+        }
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": 0.25554781324239606,
+      "equalWorkPercent": -4.478879800512736,
+      "interval": [
+        -13.008383049523387,
+        2.3860252901276358
+      ],
+      "fasterPairs": 3,
+      "controlPairedMedianPercent": 4.2481656084062625,
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 3.1522261269688823,
+          "medianPairedChangePercent": 1.1698114822290107
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 2.260192801265415,
+          "medianPairedChangePercent": 0.5705222942181898
+        }
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": -1.876699824675243,
+      "equalWorkPercent": -2.0332019321510186,
+      "interval": [
+        -3.5258884432513016,
+        -0.6497706760701605
+      ],
+      "fasterPairs": 6,
+      "controlPairedMedianPercent": 1.2583935432912252,
+      "memoryPassed": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.31069078016859875,
+          "medianPairedChangePercent": -1.6722601267852577
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -0.06621337398871052,
+          "medianPairedChangePercent": -1.1387343147570173
+        }
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": -2.3001684378512355,
+      "equalWorkPercent": -2.6674534756431556,
+      "interval": [
+        -4.738802369417661,
+        -0.8470225176113289
+      ],
+      "fasterPairs": 6,
+      "controlPairedMedianPercent": -0.21780420908449338,
+      "memoryPassed": false,
+      "memoryEveryObservationQualified": false,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "memoryQualificationReason": "Three observations exceeded the registered 250 ms scan-gap limit; maxima unavailable, not a measured regression."
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "auditStatus": "verified",
+      "completeAcquisition": true,
+      "pairs": 6,
+      "pairedMedianPercent": 0.9991509312495372,
+      "equalWorkPercent": 0.30443543065343803,
+      "interval": [
+        -1.5062254708632539,
+        1.5470155756727166
+      ],
+      "fasterPairs": 1,
+      "controlPairedMedianPercent": -0.9328616584453608,
+      "memoryPassed": true,
+      "memoryEveryObservationQualified": true,
+      "memoryMetrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 2.2709670281035654,
+          "medianPairedChangePercent": 1.5542833293462066
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.7644565204226303,
+          "medianPairedChangePercent": 1.606717201574015
+        }
+      }
+    }
+  ],
+  "interpretation": "Each host is a separate cohort. Negative duration change means faster. Do not pool hosts or present interval estimates as confirmation of a gain.",
+  "hostedReaderCrossCheck": {
+    "runId": 46101845254,
+    "jobId": 140845829372,
+    "sourceRunCompleted": true,
+    "waitTimedOut": false,
+    "allSixAgreed": true,
+    "checkedCells": [
+      "jmdict-AB",
+      "jmdict-BA",
+      "jitendex-BA",
+      "jitendex-AB",
+      "vndb-AB",
+      "vndb-BA"
+    ]
+  },
+  "decision": "No replicated complete-import speedup across independent order hosts; JMdict primary target is neutral, with one memory regression gate failure. Keep as rejected experiment, no optimization PR."
+}

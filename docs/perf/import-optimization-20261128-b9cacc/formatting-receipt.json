@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+    "/workspace/scratch/b9cacc3542c2/manabitan/node_modules/prettier/bin/prettier.cjs",
+    "/workspace/scratch/b9cacc3542c2/manabitan/AGENTS.md",
+    "/workspace/scratch/b9cacc3542c2/analysis/import-research-checkpoint-20261128-b9cacc/README.md",
+    "--check"
+  ],
+  "exitCode": 0,
+  "stdout": "Checking formatting...\nAll matched files use Prettier code style!\n",
+  "stderr": "(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "runtime": "Node22.22.0",
+  "prettier": "locked3.4.2",
+  "scope": "Baseline instructions and new master README only; frozen historical evidence not reformatted."
+}

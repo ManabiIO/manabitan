@@ -1,0 +1,16 @@
+{
+  "validationStatus": "passed-expected-resource-rejection",
+  "scope": "Independent infrastructure control only; no dictionary or native timing",
+  "guardReceiptSha256": "eb67a48333ca5a2aa30c6950fe83e0716d67e5c90611f2253b8db06eb7a25ef3",
+  "leaderPid": 5,
+  "descendantPid": 12,
+  "testRssLimitBytes": 100663296,
+  "maxSampledTreeRssBytes": 109576192,
+  "maxSampledRssWithoutDescendantBytes": 67768320,
+  "descendantWasRequiredToTriggerLimit": true,
+  "positiveLaunchedRssSamples": 6,
+  "samePidNamespace": true,
+  "ownedGroupOnly": true,
+  "cleanupException": null,
+  "actualCanonicalRssLimitUnchangedBytes": 1073741824
+}

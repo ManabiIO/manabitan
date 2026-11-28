@@ -1,0 +1,1989 @@
+{
+  "scope": "Sampled parent worker stacks around parser startup; sample intervals are not exact function spans",
+  "profileId": "0x4",
+  "parentTid": 3541,
+  "groups": [
+    {
+      "firstAt": 311890032,
+      "lastAt": 311890191,
+      "samples": 2,
+      "deltaSumMs": 0.301,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311890357,
+      "lastAt": 311890357,
+      "samples": 1,
+      "deltaSumMs": 0.166,
+      "stack": [
+        {
+          "function": "write",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "_write",
+          "file": "dictionary-import-journal.js",
+          "line": 87
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311890547,
+      "lastAt": 311890547,
+      "samples": 1,
+      "deltaSumMs": 0.19,
+      "stack": [
+        {
+          "function": "_write",
+          "file": "dictionary-import-journal.js",
+          "line": 87
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311890711,
+      "lastAt": 311891269,
+      "samples": 3,
+      "deltaSumMs": 0.722,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311891424,
+      "lastAt": 311891424,
+      "samples": 1,
+      "deltaSumMs": 0.155,
+      "stack": [
+        {
+          "function": "_runMutationExclusive",
+          "file": "term-content-opfs-store.js",
+          "line": 164
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311891584,
+      "lastAt": 311891584,
+      "samples": 1,
+      "deltaSumMs": 0.16,
+      "stack": [
+        {
+          "function": "_getDeviceMemoryGiB",
+          "file": "term-content-opfs-store.js",
+          "line": 2409
+        },
+        {
+          "function": "_computeQueuedWriteBudgetBytes",
+          "file": "term-content-opfs-store.js",
+          "line": 2364
+        },
+        {
+          "function": "",
+          "file": "term-content-opfs-store.js",
+          "line": 219
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311891766,
+      "lastAt": 311892234,
+      "samples": 4,
+      "deltaSumMs": 0.65,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311892392,
+      "lastAt": 311892392,
+      "samples": 1,
+      "deltaSumMs": 0.158,
+      "stack": [
+        {
+          "function": "_runExclusiveStorageMutation",
+          "file": "term-record-opfs-store.js",
+          "line": 1026
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311892552,
+      "lastAt": 311892552,
+      "samples": 1,
+      "deltaSumMs": 0.16,
+      "stack": [
+        {
+          "function": "wasm-function[46]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "wasm-function[148]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "js-to-wasm:iiii:i",
+          "file": "362472d2",
+          "line": 1
+        },
+        {
+          "function": "",
+          "file": "index.mjs",
+          "line": 4204
+        },
+        {
+          "function": "finalize",
+          "file": "index.mjs",
+          "line": 7625
+        },
+        {
+          "function": "exec",
+          "file": "index.mjs",
+          "line": 7349
+        },
+        {
+          "function": "execBestEffort",
+          "file": "dictionary-database.js",
+          "line": 12624
+        },
+        {
+          "function": "_applyImportPragmas",
+          "file": "dictionary-database.js",
+          "line": 12618
+        },
+        {
+          "function": "_startBulkImportSetup",
+          "file": "dictionary-database.js",
+          "line": 1364
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311892711,
+      "lastAt": 311892711,
+      "samples": 1,
+      "deltaSumMs": 0.159,
+      "stack": [
+        {
+          "function": "getSize",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "xFileSize",
+          "file": "index.mjs",
+          "line": 9863
+        },
+        {
+          "function": "wasm-to-js",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "wasm-function[824]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "wasm-function[813]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "wasm-function[204]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "wasm-function[161]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "wasm-function[142]",
+          "file": "sqlite3.wasm",
+          "line": 1
+        },
+        {
+          "function": "js-to-wasm:iiii:i",
+          "file": "362472d2",
+          "line": 1
+        },
+        {
+          "function": "",
+          "file": "index.mjs",
+          "line": 4204
+        },
+        {
+          "function": "step",
+          "file": "index.mjs",
+          "line": 7693
+        },
+        {
+          "function": "exec",
+          "file": "index.mjs",
+          "line": 7349
+        },
+        {
+          "function": "_beginImmediateTransaction",
+          "file": "dictionary-database.js",
+          "line": 12566
+        },
+        {
+          "function": "_startBulkImportSetup",
+          "file": "dictionary-database.js",
+          "line": 1364
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311892869,
+      "lastAt": 311893019,
+      "samples": 2,
+      "deltaSumMs": 0.308,
+      "stack": [
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311893144,
+      "lastAt": 311893144,
+      "samples": 1,
+      "deltaSumMs": 0.125,
+      "stack": [
+        {
+          "function": "canUseParallelTermBankParser",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3446
+        },
+        {
+          "function": "prewarmParallelTermBankParser",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3227
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311893324,
+      "lastAt": 311893324,
+      "samples": 1,
+      "deltaSumMs": 0.18,
+      "stack": [
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3565
+        },
+        {
+          "function": "waitForParallelParserModule",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3564
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "_getWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2801
+        },
+        {
+          "function": "prewarm",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2730
+        },
+        {
+          "function": "prewarmParallelTermBankParser",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3227
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311893476,
+      "lastAt": 311893631,
+      "samples": 2,
+      "deltaSumMs": 0.307,
+      "stack": [
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311893812,
+      "lastAt": 311893812,
+      "samples": 1,
+      "deltaSumMs": 0.181,
+      "stack": [
+        {
+          "function": "_readTermBankFileFast",
+          "file": "dictionary-importer.js",
+          "line": 5079
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311893977,
+      "lastAt": 311893977,
+      "samples": 1,
+      "deltaSumMs": 0.165,
+      "stack": [
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3339
+        },
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelCompressedLazy",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3317
+        },
+        {
+          "function": "_readTermBankFileFast",
+          "file": "dictionary-importer.js",
+          "line": 5079
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311894137,
+      "lastAt": 311894137,
+      "samples": 1,
+      "deltaSumMs": 0.16,
+      "stack": [
+        {
+          "function": "acquireRun",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2754
+        },
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3339
+        },
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelCompressedLazy",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3317
+        },
+        {
+          "function": "_readTermBankFileFast",
+          "file": "dictionary-importer.js",
+          "line": 5079
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311894346,
+      "lastAt": 311894346,
+      "samples": 1,
+      "deltaSumMs": 0.209,
+      "stack": [
+        {
+          "function": "setInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3825
+        },
+        {
+          "function": "waitForParallelWork",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3824
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3339
+        },
+        {
+          "function": "parseTermBankWithWasmColumnChunksParallelCompressedLazy",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3317
+        },
+        {
+          "function": "_readTermBankFileFast",
+          "file": "dictionary-importer.js",
+          "line": 5079
+        },
+        {
+          "function": "_importDictionary",
+          "file": "dictionary-importer.js",
+          "line": 917
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311894446,
+      "lastAt": 311894617,
+      "samples": 3,
+      "deltaSumMs": 0.271,
+      "stack": [
+        {
+          "function": "fetch",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 145
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311894764,
+      "lastAt": 311895672,
+      "samples": 6,
+      "deltaSumMs": 1.055,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311895835,
+      "lastAt": 311895835,
+      "samples": 1,
+      "deltaSumMs": 0.163,
+      "stack": [
+        {
+          "function": "arrayBuffer",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 145
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311896182,
+      "lastAt": 311896575,
+      "samples": 3,
+      "deltaSumMs": 0.74,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311896739,
+      "lastAt": 311896739,
+      "samples": 1,
+      "deltaSumMs": 0.164,
+      "stack": [
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3572
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311896939,
+      "lastAt": 311896939,
+      "samples": 1,
+      "deltaSumMs": 0.2,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311896968,
+      "lastAt": 311896968,
+      "samples": 1,
+      "deltaSumMs": 0.029,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897037,
+      "lastAt": 311897037,
+      "samples": 1,
+      "deltaSumMs": 0.069,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897050,
+      "lastAt": 311897050,
+      "samples": 1,
+      "deltaSumMs": 0.013,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897094,
+      "lastAt": 311897094,
+      "samples": 1,
+      "deltaSumMs": 0.044,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897104,
+      "lastAt": 311897104,
+      "samples": 1,
+      "deltaSumMs": 0.01,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311896921,
+      "lastAt": 311896921,
+      "samples": 1,
+      "deltaSumMs": -0.183,
+      "stack": [
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3590
+        },
+        {
+          "function": "waitForParallelParserWorkerReady",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3589
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897074,
+      "lastAt": 311897074,
+      "samples": 1,
+      "deltaSumMs": 0.153,
+      "stack": [
+        {
+          "function": "Worker",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "createParallelParserWorkers",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3529
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311897238,
+      "lastAt": 311943939,
+      "samples": 203,
+      "deltaSumMs": 46.86499999999998,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311943956,
+      "lastAt": 311943956,
+      "samples": 1,
+      "deltaSumMs": 0.017,
+      "stack": [
+        {
+          "function": "(program)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311944066,
+      "lastAt": 311944072,
+      "samples": 2,
+      "deltaSumMs": 0.116,
+      "stack": [
+        {
+          "function": "clearTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3619
+        },
+        {
+          "function": "onMessage",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3596
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311944258,
+      "lastAt": 311944935,
+      "samples": 6,
+      "deltaSumMs": 0.863,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311944964,
+      "lastAt": 311944964,
+      "samples": 1,
+      "deltaSumMs": 0.029,
+      "stack": [
+        {
+          "function": "clearTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3619
+        },
+        {
+          "function": "onMessage",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3596
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311944920,
+      "lastAt": 311949428,
+      "samples": 18,
+      "deltaSumMs": 4.4639999999999995,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311949454,
+      "lastAt": 311949454,
+      "samples": 1,
+      "deltaSumMs": 0.026,
+      "stack": [
+        {
+          "function": "clearTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3619
+        },
+        {
+          "function": "onMessage",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3596
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311948809,
+      "lastAt": 311948809,
+      "samples": 1,
+      "deltaSumMs": -0.645,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311949462,
+      "lastAt": 311949462,
+      "samples": 1,
+      "deltaSumMs": 0.653,
+      "stack": [
+        {
+          "function": "removeEventListener",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3619
+        },
+        {
+          "function": "onMessage",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3596
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311949525,
+      "lastAt": 311949525,
+      "samples": 1,
+      "deltaSumMs": 0.063,
+      "stack": [
+        {
+          "function": "clearInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3827
+        },
+        {
+          "function": "settleResolve",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3829
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311949627,
+      "lastAt": 311949627,
+      "samples": 1,
+      "deltaSumMs": 0.102,
+      "stack": [
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311949911,
+      "lastAt": 311949911,
+      "samples": 1,
+      "deltaSumMs": 0.284,
+      "stack": [
+        {
+          "function": "loadParallelTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3429
+        },
+        {
+          "function": "_activateLeadSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3202
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950084,
+      "lastAt": 311950084,
+      "samples": 1,
+      "deltaSumMs": 0.173,
+      "stack": [
+        {
+          "function": "readCompressed",
+          "file": "dictionary-importer.js",
+          "line": 1536
+        },
+        {
+          "function": "read",
+          "file": "term-bank-source-pipeline.js",
+          "line": 503
+        },
+        {
+          "function": "",
+          "file": "term-bank-source-pipeline.js",
+          "line": 849
+        },
+        {
+          "function": "loadParallelTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3429
+        },
+        {
+          "function": "_activateLeadSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3202
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950243,
+      "lastAt": 311950243,
+      "samples": 1,
+      "deltaSumMs": 0.159,
+      "stack": [
+        {
+          "function": "arrayBuffer",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "_getArchiveBytes",
+          "file": "term-bank-source-pipeline.js",
+          "line": 467
+        },
+        {
+          "function": "read",
+          "file": "term-bank-source-pipeline.js",
+          "line": 108
+        },
+        {
+          "function": "readCompressed",
+          "file": "dictionary-importer.js",
+          "line": 1536
+        },
+        {
+          "function": "read",
+          "file": "term-bank-source-pipeline.js",
+          "line": 503
+        },
+        {
+          "function": "",
+          "file": "term-bank-source-pipeline.js",
+          "line": 849
+        },
+        {
+          "function": "loadParallelTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3429
+        },
+        {
+          "function": "_activateLeadSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3202
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950391,
+      "lastAt": 311950391,
+      "samples": 1,
+      "deltaSumMs": 0.148,
+      "stack": [
+        {
+          "function": "read",
+          "file": "term-bank-source-pipeline.js",
+          "line": 503
+        },
+        {
+          "function": "",
+          "file": "term-bank-source-pipeline.js",
+          "line": 849
+        },
+        {
+          "function": "loadParallelTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3429
+        },
+        {
+          "function": "_activateLeadSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3202
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950642,
+      "lastAt": 311950642,
+      "samples": 1,
+      "deltaSumMs": 0.251,
+      "stack": [
+        {
+          "function": "observeParallelTermBankSourcePromise",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3416
+        },
+        {
+          "function": "loadParallelTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3429
+        },
+        {
+          "function": "_activateLeadSources",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3202
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950786,
+      "lastAt": 311950786,
+      "samples": 1,
+      "deltaSumMs": 0.144,
+      "stack": [
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2975
+        },
+        {
+          "function": "_runPipeline",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2968
+        },
+        {
+          "function": "run",
+          "file": "term-bank-wasm-parser.js",
+          "line": 2949
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311950889,
+      "lastAt": 311950919,
+      "samples": 3,
+      "deltaSumMs": 0.133,
+      "stack": [
+        {
+          "function": "setInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3825
+        },
+        {
+          "function": "waitForParallelWork",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3824
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311951013,
+      "lastAt": 311960082,
+      "samples": 53,
+      "deltaSumMs": 9.162999999999998,
+      "stack": [
+        {
+          "function": "(idle)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311960240,
+      "lastAt": 311969583,
+      "samples": 46,
+      "deltaSumMs": 9.501000000000001,
+      "stack": [
+        {
+          "function": "read",
+          "file": "term-bank-source-pipeline.js",
+          "line": 108
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311969758,
+      "lastAt": 311969758,
+      "samples": 1,
+      "deltaSumMs": 0.175,
+      "stack": [
+        {
+          "function": "(garbage collector)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311969924,
+      "lastAt": 311969924,
+      "samples": 1,
+      "deltaSumMs": 0.166,
+      "stack": [
+        {
+          "function": "(program)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970019,
+      "lastAt": 311970050,
+      "samples": 3,
+      "deltaSumMs": 0.126,
+      "stack": [
+        {
+          "function": "clearInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "cleanup",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3827
+        },
+        {
+          "function": "settleResolve",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3829
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970138,
+      "lastAt": 311970138,
+      "samples": 1,
+      "deltaSumMs": 0.088,
+      "stack": [
+        {
+          "function": "isCompressedTermBankSource",
+          "file": "term-bank-wasm-parser.js",
+          "line": 4035
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3087
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970289,
+      "lastAt": 311970289,
+      "samples": 1,
+      "deltaSumMs": 0.151,
+      "stack": [
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970451,
+      "lastAt": 311970451,
+      "samples": 1,
+      "deltaSumMs": 0.162,
+      "stack": [
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970660,
+      "lastAt": 311970660,
+      "samples": 1,
+      "deltaSumMs": 0.209,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970672,
+      "lastAt": 311970672,
+      "samples": 1,
+      "deltaSumMs": 0.012,
+      "stack": [
+        {
+          "function": "setInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970634,
+      "lastAt": 311970634,
+      "samples": 1,
+      "deltaSumMs": -0.038,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970820,
+      "lastAt": 311970864,
+      "samples": 2,
+      "deltaSumMs": 0.22999999999999998,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970915,
+      "lastAt": 311970915,
+      "samples": 1,
+      "deltaSumMs": 0.051,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970921,
+      "lastAt": 311970921,
+      "samples": 1,
+      "deltaSumMs": 0.006,
+      "stack": [
+        {
+          "function": "setInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970954,
+      "lastAt": 311970954,
+      "samples": 1,
+      "deltaSumMs": 0.033,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970979,
+      "lastAt": 311970979,
+      "samples": 1,
+      "deltaSumMs": 0.025,
+      "stack": [
+        {
+          "function": "sumParallelSourceByteLengths",
+          "file": "term-bank-wasm-parser.js",
+          "line": 4007
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311970996,
+      "lastAt": 311970996,
+      "samples": 1,
+      "deltaSumMs": 0.017,
+      "stack": [
+        {
+          "function": "setTimeout",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311971013,
+      "lastAt": 311971013,
+      "samples": 1,
+      "deltaSumMs": 0.017,
+      "stack": [
+        {
+          "function": "setInterval",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311973205,
+      "lastAt": 311973199,
+      "samples": 2,
+      "deltaSumMs": 2.1860000000000004,
+      "stack": [
+        {
+          "function": "postMessage",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3653
+        },
+        {
+          "function": "runParallelParserJob",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3652
+        },
+        {
+          "function": "_runWorkerLoop",
+          "file": "term-bank-wasm-parser.js",
+          "line": 3076
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "firstAt": 311973533,
+      "lastAt": 311973533,
+      "samples": 1,
+      "deltaSumMs": 0.334,
+      "stack": [
+        {
+          "function": "(garbage collector)",
+          "file": "",
+          "line": 0
+        },
+        {
+          "function": "(root)",
+          "file": "",
+          "line": 0
+        }
+      ]
+    }
+  ]
+}

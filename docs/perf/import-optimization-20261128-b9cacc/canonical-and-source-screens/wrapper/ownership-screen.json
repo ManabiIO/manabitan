@@ -1,0 +1,229 @@
+{
+  "observedAt": "2026-11-28T05:54:42Z",
+  "scope": "Read-only ownership/history screen for surrounding canonical JavaScript paths on baseline9e10; targeted search, not exhaustive proof of absence.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "branches": [
+    {
+      "branch": "perf/canonical-column-spacing-20261128",
+      "head": "3158e782aa8c5efa30a4633e1e86750fd7772f34",
+      "date": "2026-11-28T04:21:38Z",
+      "message": "Experiment: separate canonical metadata columns in a cold JMdict screen\n\nRegister one fixed Node22 A/B/C diagnostic with actual production JMdict shapes, exact logical output parity, and identical controls. No complete-import or speedup claim.",
+      "files": [
+        ".github/scripts/canonical-column-spacing-4a779.mjs",
+        ".github/scripts/canonical-column-spacing-run-4a779.py",
+        ".github/workflows/canonical-column-spacing-lab-4a779.yml",
+        "ext/js/dictionary/term-content-metadata-arena.js",
+        "test/term-content-metadata-arena.test.js"
+      ]
+    },
+    {
+      "branch": "perf/canonical-component-20261128-0f1f",
+      "head": "d5b8ae03474c326db559837713955a2b3fe74c9b",
+      "date": "2026-11-28T05:27:59Z",
+      "message": "Freeze two canonical outlining component experiments\n\nCompare the full row helper and smaller reservation helper independently in pinned Chromium, each with12balancedAB/BApairs and6AAcontrols over two passes of all12exact JMdict native arenas. Require all source/output/controller identities, retain failures and separate cold and later native-only intervals. This does not establish complete-import performance.",
+      "files": [
+        ".github/workflows/canonical-component-20261128-0f1f.yml",
+        "dev/perf/canonical-component-20261128-0f1f/analyze.py",
+        "dev/perf/canonical-component-20261128-0f1f/build.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/capture.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/check-harness.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/common.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/observe.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/protocol.json",
+        "dev/perf/canonical-component-20261128-0f1f/protocol.md",
+        "dev/perf/canonical-component-20261128-0f1f/run.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/snapshot-inventory.json",
+        "dev/perf/canonical-component-20261128-0f1f/source-inventory.json",
+        "dev/perf/canonical-component-20261128-0f1f/variants/reservation-helper.c",
+        "dev/perf/canonical-component-20261128-0f1f/variants/row-helper.c",
+        "dev/perf/canonical-component-20261128-0f1f/verify.mjs",
+        "dev/perf/canonical-component-20261128-0f1f/worker.mjs"
+      ]
+    },
+    {
+      "branch": "perf/canonical-scanner-preload-20261128-511a8",
+      "head": "931c78501ffc933fa8718fd2789562e3c650796b"
+    },
+    {
+      "branch": "perf/native-sidecar-canonical-20261128-beb5",
+      "head": "570ccc3968046269cb00d2053e49d3c32367031a",
+      "date": "2026-11-28T05:24:37Z",
+      "message": "perf: reuse canonical arena for lookup sidecar checksums",
+      "files": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-content-canonical-layout.js",
+        "ext/js/dictionary/term-content-canonical-scan.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "test/term-lookup-native-checksum.test.js"
+      ]
+    },
+    {
+      "branch": "test/canonical-sidecar-browser-20261128-beb5",
+      "head": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+      "date": "2026-11-28T05:27:07Z",
+      "message": "test: qualify frozen canonical sidecar checksums\n\nRegister 12 paired imports per dictionary, four independent identical-code controls, exhaustive media, unchanged semantic/storage/package gates and separately sampled memory. Parallel per-PID reads retain original eligibility and coverage thresholds. Preserve source reviews and prior setup failures.",
+      "files": [
+        ".github/workflows/canonical-sidecar-browser-beb5.yml",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/audit-canonical-sidecar-browser.py",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/candidate-freeze.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/canonical-checksum-js-independent.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/canonical-checksum-native-independent.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/canonical-checksum-wasm-trap-independent.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/root-sampler-audit.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/root-sampler-tests.log",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/sampler-initial-incomplete-checkout-failure.log",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/sampler-source-proof.json",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/sampler-tests.log",
+        "dev/perf/canonical-sidecar-acquisition-20261128-beb5/verify-parallel-memory-acquisition.py",
+        "dev/perf/canonical-sidecar-qualification-20261128-beb5.json",
+        "dev/perf/import-memory-20261125-a7f7/README.md",
+        "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+        "dev/perf/import-memory-20261125-a7f7/parallel-acquisition-provenance.json",
+        "dev/perf/import-memory-20261125-a7f7/test_parallel_acquisition.py",
+        "dev/perf/import-qualification-20261128-beb5.py"
+      ]
+    },
+    {
+      "branch": "perf/764-bulk-metadata-publication-20261123",
+      "head": "845b2d84e35bba35fa0557ce37adfd06dd30c098",
+      "date": "2026-11-23T10:06:05Z",
+      "message": "Align publication test fixture with current state type",
+      "files": [
+        "test/dictionary-content-publication-range.test.js"
+      ]
+    },
+    {
+      "branch": "perf/jmdict-canonical-scan-20261123-fd1e",
+      "head": "8282d596809d76ca2960f926719d94877925489e",
+      "date": "2026-11-23T21:02:58Z",
+      "message": "perf: compact canonical import rollback journals",
+      "files": [
+        "dev/bin/audit-release-packages.js",
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v2.wasm",
+        "dev/dictionary-wasm.js",
+        "dev/perf/canonical-journal-20261123/README.md",
+        "dev/perf/canonical-journal-20261123/native-parity-raw.json.gz",
+        "dev/perf/canonical-journal-20261123/native-parity-runner.mjs.txt",
+        "dev/perf/canonical-journal-20261123/native-parity.json",
+        "dev/perf/canonical-journal-20261123/owner-parity-initial-compact-assertion.json.gz",
+        "dev/perf/canonical-journal-20261123/owner-parity-runner.mjs.txt",
+        "dev/perf/canonical-journal-20261123/owner-parity.json",
+        "dev/perf/canonical-journal-20261123/unit-incomplete.log.gz",
+        "ext/js/dictionary/term-content-canonical-layout.js",
+        "ext/js/dictionary/term-content-canonical-scan.js",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v2.c",
+        "test/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "test/dictionary-database-deferred-plan-scratch.test.js",
+        "test/dictionary-wasm-build.test.js",
+        "test/release-package-native-assets.test.js",
+        "test/term-content-canonical-scan.test.js",
+        "test/term-content-unique-metadata.test.js"
+      ]
+    },
+    {
+      "branch": "perf/resolved-span-prefix-20261128-92c09",
+      "head": "03c03e8393f1683386b8a1ed5f4bb7062c314f6e",
+      "date": "2026-11-28T05:28:00Z",
+      "message": "perf: validate resolved content spans once within each dense prefix\n\nReuse a per-run scalar proof for repeated private content IDs, preserving malformed-input validation and resetting after every awaited append. Include focused regression coverage and one fixed independent browser qualification study; local component controls were inconclusive.",
+      "files": [
+        ".github/workflows/import-resolved-span-prefix-92c09.yml",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "test/term-record-validation-prefix.test.js"
+      ]
+    }
+  ],
+  "prs": [
+    {
+      "number": 837,
+      "title": "Optimize contiguous term content metadata publication",
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head": "845b2d84e35bba35fa0557ce37adfd06dd30c098",
+      "branch": "perf/764-bulk-metadata-publication-20261123",
+      "mergeCommit": "d15f1dce48092458adfc91e13a7056854edea15f"
+    },
+    {
+      "number": 876,
+      "title": "perf: reuse synchronous content publication checks when retaining source bytes",
+      "state": "closed",
+      "draft": true,
+      "merged": false,
+      "head": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+      "branch": "perf/jmdict-cache-publication-20261124-3aac",
+      "mergeCommit": "2b6ddb3e2f6d733fe6bde3631a076d5178a8c6c8"
+    },
+    {
+      "number": 914,
+      "title": "perf: preflight content publication in existing native scratch",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "b273513dab4fa409a0213a2db470e52b4a0f559c",
+      "branch": "perf/jmdict-import-20261125-2754",
+      "mergeCommit": null
+    },
+    {
+      "number": 759,
+      "title": "Batch contiguous term-content publication columns",
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head": "f1dc623ab985144deb1c7fce852adea3af6ee73f",
+      "branch": "perf/jmdict-plan-publication-runs-20261119",
+      "mergeCommit": "594f7fde31c6a69262115ccce733c17a3382b2c8"
+    },
+    {
+      "number": 744,
+      "title": "Derive content references from compression block boundaries",
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head": "60adb9c24cfc164b0d415d07b26f17a7b2c0ada8",
+      "branch": "perf/derive-term-content-references-20261118",
+      "mergeCommit": "1670c1e56821cf6c8571b48a33d36a7e51476760"
+    },
+    {
+      "number": 898,
+      "title": "Reduce repeated compact reference writes during imports",
+      "state": "closed",
+      "draft": true,
+      "merged": true,
+      "head": "449a421f7ac66e474dd16e5efd491dfa2e3e3155",
+      "branch": "perf/jitendex-import-20261125-8ca6",
+      "mergeCommit": "0871ff227f2bffb7562af34b014b84ea03693212"
+    },
+    {
+      "number": 622,
+      "title": "Calculate term-content reference offsets by slab",
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head": "0aa718216ce57ec24319c22264b121b68867b0d8",
+      "branch": "codex/slab-reference-offsets-20261022",
+      "mergeCommit": "e1bad8dc930816e4793744cc38f279817cd500b3"
+    },
+    {
+      "number": 856,
+      "title": "perf: compact native import rollback journals",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "8282d596809d76ca2960f926719d94877925489e",
+      "branch": "perf/jmdict-canonical-scan-20261123-fd1e",
+      "mergeCommit": null
+    }
+  ],
+  "findings": [
+    "Proposed synchronous publication->recent-source-cache proof reuse directly overlaps rejected PR876. Its publishedContiguous argument skips sampled and full per-index state checks and the contiguity recheck, retains span bounds and byte checks, and guards staged.indexes aliasing of recent-source mapping tables.",
+    "PR764 bulk-publication subset already merged as PR837. The still-open broad PR764 is not evidence that that subset is absent.",
+    "No newer run-discovery/two-subarray optimization in _publishResolvedArtifactTermContentPlan found in targeted PR and branch-name searches. This is search coverage, not an assertion of globally exclusive ownership.",
+    "New resolved-span-prefix branch owns per-run repeated content-reference validation in term-record-opfs-store.js, distinct from publication run discovery.",
+    "Other current independent directions: metadata arena column spacing, native helper outlining, native sidecar checksum in canonical arena, canonical scanner preload. Do not duplicate those experiments.",
+    "Already integrated: PR942 deferred resolution scratch, PR936 reservation validation eligibility, PR960 bounded last-definition retention, PR964 arena growth high-water copy avoidance, PR742 output-copy elision. These are not fresh generic candidates."
+  ]
+}

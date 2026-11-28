@@ -1,0 +1,12 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "run": 46102776159,
+  "artifact": 15245833865,
+  "files": {
+    "trace/run-1.trace.json": "5b89ba263782ce409155bee286c51a1c7f6e181976321da71a6e9014ffac1d15",
+    "parser-startup-parent-cpu.json": "81a8c570da13412ab0a54f9ede9e439321dd636ef2f3eeacef679345095b6530",
+    "parser-bundle-critical-path.md": "a30920164e1bd706292af800149d6e53e679f43858f9c1eccaba84f1c327c209",
+    "acquisition.json": "595e6e49f9e8accf53b59e4944e2f037e46b8cc5474cc925026460aa8eb3b807",
+    "artifact-identity.json": "db6ac423bcf8943ab553e1c7d1b8f5a2f878fa91a72255afa493b78c207da0cd"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "supportSourceCommit": "a00869305bba93c7c957236868ea3b81beedd1ec",
+  "supportSha256": {
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py": "077bcc38e2f8997f4b3f9516eb952e235c3e4c217387608a0dbb3407a7045f2d"
+  },
+  "scope": "Unbound prospective twelve-pair confirmation reader. Bind the actual published workflow head and run only after approved launch. Initial six-pair reader unchanged; no benchmark execution.",
+  "experiments": {
+    "parser-worker-bundle-confirmation": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "workflowHead": null,
+      "runId": null,
+      "sourceBranch": "perf/parser-worker-bundle-confirmation-20261128-b9cacc",
+      "workflowPath": ".github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml",
+      "artifactPrefix": "parser-worker-bundle-confirmation",
+      "pairs": 12,
+      "expectedPackageEntries": [
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "expectedAddedPackageEntries": [
+        "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+      ],
+      "expectedAuxiliaryArtifacts": [
+        "parser-worker-bundle-confirmation-registration-b9cacc",
+        "parser-worker-bundle-confirmation-firefox-b9cacc",
+        "parser-worker-bundle-confirmation-chromium-restart-b9cacc"
+      ],
+      "expectedTrees": {
+        "A": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+        "B": "ee65e5a994b4017a443893dc7b0b268900538e94"
+      },
+      "expectedRuntimePayloads": {
+        "A": {
+          "js/dictionary/term-bank-wasm-parser.js": {
+            "bytes": 210111,
+            "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+          },
+          "js/dictionary/term-bank-wasm-parser-worker.js": {
+            "bytes": 16935,
+            "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+          }
+        },
+        "B": {
+          "js/dictionary/term-bank-wasm-parser.js": {
+            "bytes": 210118,
+            "sha256": "a50ece06f92ec2c9999400b86b0588d93e488f5bc6a379e563e1dbf7ce92ca93"
+          },
+          "js/dictionary/term-bank-wasm-parser-worker.js": {
+            "bytes": 16935,
+            "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+          },
+          "js/dictionary/term-bank-wasm-parser-worker.bundle.js": {
+            "bytes": 174314,
+            "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6"
+          }
+        }
+      }
+    }
+  }
+}

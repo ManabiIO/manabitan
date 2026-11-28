@@ -1,0 +1,2032 @@
+{
+  "boundary": "Parser prewarm in fresh page contexts; injected no-op worker module-evaluated event; HTTP localhost no-store; component only, not extension import",
+  "root": "/home/agent/b9cacc-parser-startup",
+  "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "host": {
+    "cpuCount": 9,
+    "availableParallelism": 9,
+    "loadavg": [
+      5.09,
+      4.7,
+      2.85
+    ]
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 1.059999999939464
+        },
+        {
+          "name": "fetch-response",
+          "ms": 4.28000000002794
+        },
+        {
+          "name": "buffer-start",
+          "ms": 4.319999999948777
+        },
+        {
+          "name": "buffer-end",
+          "ms": 5.03000000002794,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 5.099999999976717
+        },
+        {
+          "name": "compile-end",
+          "ms": 6.48499999998603
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 6.64000000001397,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 6.799999999930151,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 7.0799999999580905,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 7.28000000002794,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 7.385000000009313,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 7.415000000037253,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 7.434999999939464,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 7.505000000004657,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 7.525000000023283,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 7.535000000032596,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 7.589999999967404,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 7.6049999999813735,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 7.614999999990687,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 7.665000000037253,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 7.674999999930151,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 155.84499999997206,
+          "id": 1,
+          "workerTimeMs": 154.195068359375
+        },
+        {
+          "name": "worker-ready",
+          "ms": 158.90000000002328,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 175.375,
+          "id": 4,
+          "workerTimeMs": 175.284912109375
+        },
+        {
+          "name": "worker-ready",
+          "ms": 176.1350000000093,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 183.55999999993946,
+          "id": 3,
+          "workerTimeMs": 183.46484375
+        },
+        {
+          "name": "worker-ready",
+          "ms": 184.1799999999348,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 185.78000000002794,
+          "id": 2,
+          "workerTimeMs": 185.735107421875
+        },
+        {
+          "name": "worker-ready",
+          "ms": 186.27000000001863,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 190.7949999999255,
+          "id": 5,
+          "workerTimeMs": 190.72998046875
+        },
+        {
+          "name": "worker-ready",
+          "ms": 191.25,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 191.27500000002328,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 1,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.4899999999906868
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.834999999962747
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.9200000000419095
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.599999999976717,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.675000000046566
+        },
+        {
+          "name": "compile-end",
+          "ms": 4.305000000051223
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.39000000001397,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.4799999999813735,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.614999999990687,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.71999999997206,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.78000000002794,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.839999999967404,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.849999999976717,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.915000000037253,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.930000000051223,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.935000000055879,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.959999999962747,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.964999999967404,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.964999999967404,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.994999999995343,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.994999999995343,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 98.29500000004191,
+          "id": 1,
+          "workerTimeMs": 98.13006835943088
+        },
+        {
+          "name": "worker-ready",
+          "ms": 99.49499999999534,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 110.55000000004657,
+          "id": 3,
+          "workerTimeMs": 110.47503906255588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 111.22499999997672,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 122.47999999998137,
+          "id": 2,
+          "workerTimeMs": 122.28998046880588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 123.13000000000466,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 125.21999999997206,
+          "id": 4,
+          "workerTimeMs": 124.91009765630588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 126.19999999995343,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 127.40000000002328,
+          "id": 5,
+          "workerTimeMs": 127.33001953130588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 128.10499999998137,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 128.125,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 2,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7399999999906868
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.8999999999068677
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.974999999976717
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.875,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.924999999930151
+        },
+        {
+          "name": "compile-end",
+          "ms": 4.474999999976717
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.59499999997206,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.724999999976717,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.919999999925494,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.9799999999813735,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.049999999930151,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.064999999944121,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.0799999999580905,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.135000000009313,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.1399999998975545,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.149999999906868,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.199999999953434,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.209999999962747,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.21999999997206,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.2649999998975545,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.364999999990687,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 113.48999999999069,
+          "id": 2,
+          "workerTimeMs": 113.22999999998137
+        },
+        {
+          "name": "worker-ready",
+          "ms": 114.32999999995809,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 125.34999999997672,
+          "id": 1,
+          "workerTimeMs": 125.28004882810637
+        },
+        {
+          "name": "worker-ready",
+          "ms": 125.85999999998603,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 130.56999999994878,
+          "id": 5,
+          "workerTimeMs": 130.49000976560637
+        },
+        {
+          "name": "worker-ready",
+          "ms": 131.09999999997672,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 135.31999999994878,
+          "id": 4,
+          "workerTimeMs": 135.26002929685637
+        },
+        {
+          "name": "worker-ready",
+          "ms": 136.1799999999348,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 151.61999999999534,
+          "id": 3,
+          "workerTimeMs": 151.54518554685637
+        },
+        {
+          "name": "worker-ready",
+          "ms": 152.0799999999581,
+          "id": 3
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 152.10999999998603,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 3,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7600000000093132
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.925000000046566
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.974999999976717
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.6550000000279397,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.700000000069849
+        },
+        {
+          "name": "compile-end",
+          "ms": 4.665000000037253
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.785000000032596,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.915000000037253,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.099999999976717,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.175000000046566,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.25,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.2700000000186265,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.28000000002794,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.3299999999580905,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.34499999997206,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.349999999976717,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.39000000001397,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.3950000000186265,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.40500000002794,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.4549999999580905,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.459999999962747,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 90.32000000006519,
+          "id": 1,
+          "workerTimeMs": 90.04486328130588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 91.10499999998137,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 101.49499999999534,
+          "id": 2,
+          "workerTimeMs": 101.42499023443088
+        },
+        {
+          "name": "worker-ready",
+          "ms": 102.07000000006519,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 109.56500000006054,
+          "id": 3,
+          "workerTimeMs": 109.49994140630588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 110.18500000005588,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 112.4100000000326,
+          "id": 4,
+          "workerTimeMs": 112.26971679693088
+        },
+        {
+          "name": "worker-ready",
+          "ms": 113.36999999999534,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 116.10499999998137,
+          "id": 5,
+          "workerTimeMs": 116.06488281255588
+        },
+        {
+          "name": "worker-ready",
+          "ms": 116.8399999999674,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 116.86999999999534,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 4,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.5649999999441206
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.1600000000325963
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.209999999962747
+        },
+        {
+          "name": "buffer-end",
+          "ms": 2.8399999999674037,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 2.8850000000093132
+        },
+        {
+          "name": "compile-end",
+          "ms": 3.5200000000186265
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 3.6350000000093132,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 3.73499999998603,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 3.9149999999208376,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 3.949999999953434,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.0200000000186265,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.03000000002794,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.0799999999580905,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.09499999997206,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.1049999999813735,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.255000000004657,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.2700000000186265,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.28000000002794,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.34499999997206,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.3549999999813735,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 112.83499999996275,
+          "id": 1,
+          "workerTimeMs": 112.55003906250931
+        },
+        {
+          "name": "worker-ready",
+          "ms": 113.64500000001863,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 127.06999999994878,
+          "id": 2,
+          "workerTimeMs": 127.01488281250931
+        },
+        {
+          "name": "worker-ready",
+          "ms": 127.84499999997206,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 133.25500000000466,
+          "id": 3,
+          "workerTimeMs": 133.1701562500093
+        },
+        {
+          "name": "worker-ready",
+          "ms": 134.05999999993946,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 135.5899999999674,
+          "id": 5,
+          "workerTimeMs": 135.5251367187593
+        },
+        {
+          "name": "worker-ready",
+          "ms": 136.14500000001863,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 136.61999999999534,
+          "id": 4,
+          "workerTimeMs": 136.5800683593843
+        },
+        {
+          "name": "worker-ready",
+          "ms": 137.5,
+          "id": 4
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 137.51500000001397,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 5,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7100000000791624
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.4600000000791624
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.51500000001397
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.2700000000186265,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.3200000000651926
+        },
+        {
+          "name": "compile-end",
+          "ms": 3.89000000001397
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.01500000001397,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.185000000055879,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.385000000009313,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.455000000074506,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.535000000032596,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.560000000055879,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.575000000069849,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.619999999995343,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.635000000009313,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.64000000001397,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.680000000051223,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.690000000060536,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.690000000060536,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.739999999990687,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.75,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 89.39500000001863,
+          "id": 1,
+          "workerTimeMs": 89.13990234374069
+        },
+        {
+          "name": "worker-ready",
+          "ms": 91.02500000002328,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 98.15500000002794,
+          "id": 2,
+          "workerTimeMs": 98.10010742186569
+        },
+        {
+          "name": "worker-ready",
+          "ms": 99.68500000005588,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 103.52500000002328,
+          "id": 4,
+          "workerTimeMs": 103.40967773436569
+        },
+        {
+          "name": "worker-ready",
+          "ms": 104.47500000009313,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 112.98000000009779,
+          "id": 3,
+          "workerTimeMs": 112.91480468749069
+        },
+        {
+          "name": "worker-ready",
+          "ms": 113.4100000000326,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 140.6350000000093,
+          "id": 5,
+          "workerTimeMs": 140.5500585937407
+        },
+        {
+          "name": "worker-ready",
+          "ms": 141.34000000008382,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 141.36999999999534,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 6,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.6450000000186265
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.39000000001397
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.4350000000558794
+        },
+        {
+          "name": "buffer-end",
+          "ms": 2.8950000000186265,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 2.9200000000419095
+        },
+        {
+          "name": "compile-end",
+          "ms": 3.5200000000186265
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 3.6049999999813735,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 3.700000000069849,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 3.900000000023283,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 3.9300000000512227,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 3.9949999999953434,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.010000000009313,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.025000000023283,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.090000000083819,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.1049999999813735,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.114999999990687,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.180000000051223,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.195000000065193,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.200000000069849,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.305000000051223,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.315000000060536,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 115.85499999998137,
+          "id": 1,
+          "workerTimeMs": 115.36499999999069
+        },
+        {
+          "name": "worker-ready",
+          "ms": 117.46500000008382,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 130.4200000000419,
+          "id": 5,
+          "workerTimeMs": 130.3549902343657
+        },
+        {
+          "name": "worker-ready",
+          "ms": 131.47499999997672,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 136.11999999999534,
+          "id": 2,
+          "workerTimeMs": 136.0649511718657
+        },
+        {
+          "name": "worker-ready",
+          "ms": 136.77000000001863,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 145.81500000006054,
+          "id": 4,
+          "workerTimeMs": 145.6853124999907
+        },
+        {
+          "name": "worker-ready",
+          "ms": 146.4100000000326,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 147.17500000004657,
+          "id": 3,
+          "workerTimeMs": 147.1250097656157
+        },
+        {
+          "name": "worker-ready",
+          "ms": 147.94000000006054,
+          "id": 3
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 147.9550000000745,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 7,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7399999999906868
+        },
+        {
+          "name": "fetch-response",
+          "ms": 74.38000000000466
+        },
+        {
+          "name": "buffer-start",
+          "ms": 74.79000000003725
+        },
+        {
+          "name": "buffer-end",
+          "ms": 75.80500000005122,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 75.93000000005122
+        },
+        {
+          "name": "compile-end",
+          "ms": 77.2149999999674
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 77.4550000000745,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 77.7850000000326,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 78.04000000003725,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 78.14000000001397,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 78.21000000007916,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 78.24499999999534,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 78.25500000000466,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 78.31500000006054,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 78.32000000006519,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 78.3300000000745,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 78.35999999998603,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 78.35999999998603,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 78.36999999999534,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 78.39000000001397,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 78.39500000001863,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 219.7149999999674,
+          "id": 1,
+          "workerTimeMs": 219.46009765623603
+        },
+        {
+          "name": "worker-ready",
+          "ms": 221.71999999997206,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 227.5350000000326,
+          "id": 3,
+          "workerTimeMs": 227.44496093748603
+        },
+        {
+          "name": "worker-ready",
+          "ms": 228.01500000001397,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 230.3399999999674,
+          "id": 4,
+          "workerTimeMs": 230.23499999998603
+        },
+        {
+          "name": "worker-ready",
+          "ms": 231.0450000000419,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 231.92500000004657,
+          "id": 2,
+          "workerTimeMs": 231.84999023436103
+        },
+        {
+          "name": "worker-ready",
+          "ms": 233.77500000002328,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 235.2149999999674,
+          "id": 5,
+          "workerTimeMs": 235.14979492186103
+        },
+        {
+          "name": "worker-ready",
+          "ms": 235.89000000001397,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 235.93000000005122,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 8,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7349999999860302
+        },
+        {
+          "name": "fetch-response",
+          "ms": 3.449999999953434
+        },
+        {
+          "name": "buffer-start",
+          "ms": 3.5
+        },
+        {
+          "name": "buffer-end",
+          "ms": 4.154999999911524,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 4.2049999999580905
+        },
+        {
+          "name": "compile-end",
+          "ms": 5.09499999997206
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.214999999967404,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.380000000004657,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.574999999953434,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.625,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.7049999999580905,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.7299999999813735,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.744999999995343,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.789999999920838,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.804999999934807,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.809999999939464,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.849999999976717,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.8549999999813735,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.864999999990687,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.894999999902211,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.904999999911524,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 122.78999999992084,
+          "id": 2,
+          "workerTimeMs": 122.57493164052721
+        },
+        {
+          "name": "worker-ready",
+          "ms": 123.7149999999674,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 138.68499999993946,
+          "id": 1,
+          "workerTimeMs": 138.6298632811522
+        },
+        {
+          "name": "worker-ready",
+          "ms": 139.38999999989755,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 147.7049999999581,
+          "id": 3,
+          "workerTimeMs": 147.6298632811522
+        },
+        {
+          "name": "worker-ready",
+          "ms": 148.47999999998137,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 150.04999999993015,
+          "id": 4,
+          "workerTimeMs": 150.0048632811522
+        },
+        {
+          "name": "worker-ready",
+          "ms": 150.60999999998603,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 155.0549999999348,
+          "id": 5,
+          "workerTimeMs": 154.9748339842772
+        },
+        {
+          "name": "worker-ready",
+          "ms": 155.67499999993015,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 155.69999999995343,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 9,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.7700000000186265
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.8850000000093132
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.934999999939464
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.6350000000093132,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.684999999939464
+        },
+        {
+          "name": "compile-end",
+          "ms": 4.339999999967404
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.489999999990687,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.614999999990687,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.839999999967404,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.880000000004657,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.9549999999580905,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.9799999999813735,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.989999999990687,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.049999999930151,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.054999999934807,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.064999999944121,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.114999999990687,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.125,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.130000000004657,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.179999999934807,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.189999999944121,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 113.86999999999534,
+          "id": 1,
+          "workerTimeMs": 113.62010742188431
+        },
+        {
+          "name": "worker-ready",
+          "ms": 115.625,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 138.93499999993946,
+          "id": 3,
+          "workerTimeMs": 138.8798730468843
+        },
+        {
+          "name": "worker-ready",
+          "ms": 139.7149999999674,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 143.41499999992084,
+          "id": 2,
+          "workerTimeMs": 143.3498437500093
+        },
+        {
+          "name": "worker-ready",
+          "ms": 145.68499999993946,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 146.55999999993946,
+          "id": 4,
+          "workerTimeMs": 146.4948632812593
+        },
+        {
+          "name": "worker-ready",
+          "ms": 147.09999999997672,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 149.8649999999907,
+          "id": 5,
+          "workerTimeMs": 149.7997949218843
+        },
+        {
+          "name": "worker-ready",
+          "ms": 150.41499999992084,
+          "id": 5
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 150.44499999994878,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 10,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.5799999999580905
+        },
+        {
+          "name": "fetch-response",
+          "ms": 3.6799999999348074
+        },
+        {
+          "name": "buffer-start",
+          "ms": 3.7850000000325963
+        },
+        {
+          "name": "buffer-end",
+          "ms": 4.444999999948777,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 4.494999999995343
+        },
+        {
+          "name": "compile-end",
+          "ms": 5.510000000009313
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 5.650000000023283,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 5.834999999962747,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 5.98499999998603,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 6.025000000023283,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 6.084999999962747,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 6.099999999976717,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 6.114999999990687,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 6.14000000001397,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 6.150000000023283,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 6.15500000002794,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 6.174999999930151,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 6.184999999939464,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 6.184999999939464,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 6.209999999962747,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 6.214999999967404,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 126.05499999993481,
+          "id": 1,
+          "workerTimeMs": 125.7698632812826
+        },
+        {
+          "name": "worker-ready",
+          "ms": 127.375,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 143.58499999996275,
+          "id": 2,
+          "workerTimeMs": 143.5049707031576
+        },
+        {
+          "name": "worker-ready",
+          "ms": 144.3399999999674,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 148.10499999998137,
+          "id": 5,
+          "workerTimeMs": 148.0049707031576
+        },
+        {
+          "name": "worker-ready",
+          "ms": 148.84499999997206,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 153.07499999995343,
+          "id": 4,
+          "workerTimeMs": 152.7998925781576
+        },
+        {
+          "name": "worker-ready",
+          "ms": 153.5449999999255,
+          "id": 4
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 159.51500000001397,
+          "id": 3,
+          "workerTimeMs": 159.4449121094076
+        },
+        {
+          "name": "worker-ready",
+          "ms": 160.50500000000466,
+          "id": 3
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 160.53999999992084,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    },
+    {
+      "trial": 11,
+      "events": [
+        {
+          "name": "fetch-start",
+          "ms": 0.690000000060536
+        },
+        {
+          "name": "fetch-response",
+          "ms": 2.575000000069849
+        },
+        {
+          "name": "buffer-start",
+          "ms": 2.6199999999953434
+        },
+        {
+          "name": "buffer-end",
+          "ms": 3.375,
+          "bytes": 67659
+        },
+        {
+          "name": "compile-start",
+          "ms": 3.415000000037253
+        },
+        {
+          "name": "compile-end",
+          "ms": 4.075000000069849
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.210000000079162,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.335000000079162,
+          "id": 1
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.5,
+          "id": 1
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.540000000037253,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.625,
+          "id": 2
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.6450000000186265,
+          "id": 2
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.65500000002794,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.715000000083819,
+          "id": 3
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.730000000097789,
+          "id": 3
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.7350000001024455,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.790000000037253,
+          "id": 4
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.800000000046566,
+          "id": 4
+        },
+        {
+          "name": "worker-construct-start",
+          "ms": 4.810000000055879,
+          "id": 5
+        },
+        {
+          "name": "worker-construct-end",
+          "ms": 4.8600000001024455,
+          "id": 5
+        },
+        {
+          "name": "worker-initialize-send",
+          "ms": 4.864999999990687,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 115.76000000000931,
+          "id": 1,
+          "workerTimeMs": 115.59498046874069
+        },
+        {
+          "name": "worker-ready",
+          "ms": 116.75500000000466,
+          "id": 1
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 131.48500000010245,
+          "id": 2,
+          "workerTimeMs": 131.4248144531157
+        },
+        {
+          "name": "worker-ready",
+          "ms": 133.7850000000326,
+          "id": 2
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 141.84500000008848,
+          "id": 3,
+          "workerTimeMs": 141.7700292968657
+        },
+        {
+          "name": "worker-ready",
+          "ms": 142.5350000000326,
+          "id": 3
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 144.0800000000745,
+          "id": 5,
+          "workerTimeMs": 144.0100195312407
+        },
+        {
+          "name": "worker-ready",
+          "ms": 146.4450000000652,
+          "id": 5
+        },
+        {
+          "name": "worker-module-evaluated-received",
+          "ms": 152.61999999999534,
+          "id": 4,
+          "workerTimeMs": 152.5549414062407
+        },
+        {
+          "name": "worker-ready",
+          "ms": 153.2850000000326,
+          "id": 4
+        },
+        {
+          "name": "prewarm-end",
+          "ms": 153.30500000005122,
+          "ready": true
+        }
+      ],
+      "hardwareConcurrency": 9,
+      "deviceMemory": 8,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+    }
+  ]
+}

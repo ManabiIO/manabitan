@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "mode": "acquire",
+  "status": "preflight-blocked",
+  "registrationSha256": "37e8bdf5e7ab46f2d444c2a15875db4a2d368cae9d90217e881f74543a0c431a",
+  "harnessSha256": "860212a3021b8eaaf755cc54d176fccc6665d5f583bcdfa9f1a1ab11888963dd",
+  "watchdogSha256": "729a7a205470752eb19887e3dbff8ceb8c93c19f5ba5e5400c2141db8383b458",
+  "limits": {
+    "minimumAvailableBytes": 1879048192,
+    "minimumTemporaryFreeBytes": 268435456,
+    "maxRssBytes": 1073741824,
+    "maxArenaBytes": 67108864,
+    "maxTemporaryBytes": 201326592,
+    "timeoutSeconds": 300,
+    "maximumPreflightCpuBusyFraction": 0.1,
+    "minimumRuntimeAvailableBytes": 536870912
+  },
+  "sampleIntervalSeconds": 0.05,
+  "scope": "Sampled RSS of owned process tree; host aggregate counters are not complete visibility into other users' jobs",
+  "samples": [],
+  "preflight": {
+    "MemAvailableBytes": 1761128448,
+    "temporaryFilesystemFreeBytes": 2840862720,
+    "retainedTemporaryBytes": 0,
+    "aggregateCpuBusyFraction": 0.3445223164883807,
+    "cpuSampleSeconds": 3.000875826999618,
+    "loadavg": "2.20 2.34 2.40 3/269 4",
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "logicalCpuCount": 9,
+    "cpuPressure": null,
+    "cgroupCpuMax": null
+  },
+  "failures": [
+    "MemAvailable below registered threshold"
+  ]
+}

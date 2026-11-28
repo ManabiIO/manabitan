@@ -1,0 +1,495 @@
+name: Parser worker bundle independent confirmation
+
+on:
+  push:
+    branches:
+      - perf/parser-worker-bundle-confirmation-20261128-b9cacc
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: parser-worker-bundle-confirmation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  registration:
+    name: Verify frozen registration and completed initial qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: control
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+      - name: Install the frozen syntax-parser dependencies without build scripts
+        run: npm ci --ignore-scripts
+      - name: Validate Python, JavaScript, YAML and every embedded shell script before acquisition
+        run: |
+          python -m py_compile \
+            dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py \
+            dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-jmdict-confirmation.py \
+            dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {parseDocument} from 'yaml';
+          const folder = 'dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc';
+          const filename = '.github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml';
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const installed = JSON.parse(fs.readFileSync('node_modules/yaml/package.json', 'utf8'));
+          assert.equal(lock.packages['node_modules/yaml'].version, '2.9.1');
+          assert.equal(installed.version, lock.packages['node_modules/yaml'].version);
+          const document = parseDocument(fs.readFileSync(filename, 'utf8'), {uniqueKeys: true, strict: true});
+          assert.deepEqual(document.errors, [], 'Workflow YAML must parse without errors');
+          const workflow = document.toJS();
+          const checked = [];
+          for (const name of ['assert-firefox-report.mjs', 'assert-chromium-restart-report.mjs']) {
+            execFileSync(process.execPath, ['--check', folder + '/' + name]);
+            checked.push({path: folder + '/' + name, syntax: 'Node module'});
+          }
+          for (const [jobName, job] of Object.entries(workflow.jobs)) {
+            for (const [index, step] of job.steps.entries()) {
+              if (typeof step.run !== 'string') { continue; }
+              execFileSync('bash', ['-n'], {input: step.run});
+              checked.push({job: jobName, step: index, syntax: 'Bash'});
+              const heredocs = [...step.run.matchAll(/^.*<<'(NODE|PY|PYCODE)'\n([\s\S]*?)^\1$/gm)];
+              for (const [, kind, body] of heredocs) {
+                if (kind === 'NODE') {
+                  execFileSync(process.execPath, ['--input-type=module', '--check'], {input: body});
+                } else {
+                  execFileSync('python', ['-c', 'import ast,sys; ast.parse(sys.stdin.read())'], {input: body});
+                }
+                checked.push({job: jobName, step: index, syntax: kind === 'NODE' ? 'Node heredoc' : 'Python heredoc'});
+              }
+            }
+          }
+          fs.mkdirSync('confirmation-registration-evidence', {recursive: true});
+          const proof = {status: 'passed', yamlVersion: installed.version, checked,
+            scope: 'Syntax validation only; no import or browser acquisition'};
+          fs.writeFileSync('confirmation-registration-evidence/static-validation.json', JSON.stringify(proof, null, 2) + '\n', {flag: 'wx'});
+          console.log(JSON.stringify(proof, null, 2));
+          NODE
+      - name: Require exact frozen sources and successful initial gates
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const folder = 'dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc';
+          const receipt = {status: 'failed', workflowHead: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID};
+          fs.mkdirSync('confirmation-registration-evidence', {recursive: true});
+          try {
+            const reg = JSON.parse(fs.readFileSync(folder + '/registration.json', 'utf8'));
+            receipt.registration = reg;
+            assert.equal(process.env.GITHUB_REPOSITORY, 'ManabiIO/manabitan');
+            assert.equal(process.env.GITHUB_REF_NAME, reg.workflowBranch);
+            assert.equal(process.env.GITHUB_RUN_ATTEMPT, '1');
+            assert.equal(reg.baseline, '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2');
+            assert.equal(reg.candidate, '9da7dedd17535b4a0f8edb97e56756049bbad7a7');
+            assert.equal(reg.harness, reg.candidate);
+            assert.equal(reg.initialWorkflowHead, '7d77b3858b4f3f37e651f770f8f3a92c59d77036');
+            assert.equal(reg.initialQualificationRun, 46110124022);
+            assert.equal(reg.initialActionlintRun, 46110123879);
+            assert.equal(reg.pairsPerHost, 12);
+            assert.equal(reg.ordinaryObservationsPerHost, 36);
+            assert.equal(reg.measuredObservationsPerHost, 32);
+            assert.equal(reg.warmupObservationsPerHost, 4);
+            assert.deepEqual(reg.flags, {});
+            const git = (...args) => execFileSync('git', args, {encoding: 'utf8'}).trim();
+            assert.equal(git('rev-parse', reg.candidate + '^{tree}'), reg.candidateTree);
+            assert.equal(git('rev-parse', reg.baseline + '^{tree}'), reg.baselineTree);
+            assert.equal(git('rev-parse', 'HEAD'), process.env.GITHUB_SHA);
+            const changed = git('diff', '--name-status', reg.candidate, 'HEAD').split('\n').filter(Boolean).sort();
+            const paths = ['.github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml',
+              ...['registration.json', 'confirmation_criteria.py', 'assert-jmdict-confirmation.py',
+                'assert-firefox-report.mjs', 'assert-chromium-restart-report.mjs', 'record-runtime-identity.py'].map((name) => folder + '/' + name)];
+            assert.deepEqual(changed, paths.map((name) => 'A\t' + name).sort(),
+              'Control branch must contain exactly this reviewed added registration/workflow/asserter set');
+            receipt.changedFiles = changed;
+            const get = async (suffix) => {
+              const response = await fetch('https://api.github.com/repos/ManabiIO/manabitan/' + suffix, {headers: {
+                Authorization: 'Bearer ' + process.env.GITHUB_TOKEN, Accept: 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'}});
+              assert.equal(response.status, 200, 'Initial qualification metadata unavailable');
+              return response.json();
+            };
+            const runs = await Promise.all([reg.initialQualificationRun, reg.initialActionlintRun].map((id) => get('actions/runs/' + id)));
+            for (const run of runs) {
+              assert.equal(run.head_sha, reg.initialWorkflowHead);
+              assert.equal(run.head_branch, reg.initialBranch);
+              assert.equal(run.event, 'push');
+              assert.equal(run.run_attempt, 1);
+              assert.equal(run.status, 'completed');
+              assert.equal(run.conclusion, 'success');
+            }
+            const jobs = (await get('actions/runs/' + reg.initialQualificationRun + '/jobs?per_page=100')).jobs;
+            const expectedNames = ['Validate parser worker bundle and every package target',
+              ...['jmdict', 'jitendex', 'vndb'].flatMap((name) => ['AB', 'BA'].map((order) => name + ' (' + order + ')'))].sort();
+            assert.deepEqual(jobs.map((job) => job.name).sort(), expectedNames);
+            assert(jobs.every((job) => job.status === 'completed' && job.conclusion === 'success'));
+            receipt.initialRuns = runs.map(({id, head_sha, status, conclusion}) => ({id, head_sha, status, conclusion}));
+            receipt.initialJobs = jobs.map(({id, name, conclusion}) => ({id, name, conclusion}));
+            receipt.status = 'passed';
+          } catch (error) {
+            receipt.failure = {name: error?.name ?? 'Error', message: String(error?.message ?? error)};
+            process.exitCode = 1;
+          } finally {
+            fs.writeFileSync('confirmation-registration-evidence/source.json', JSON.stringify(receipt, null, 2) + '\n', {flag: 'wx'});
+            console.log(JSON.stringify(receipt, null, 2));
+          }
+          NODE
+      - name: Retain registration receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-confirmation-registration-b9cacc
+          path: control/confirmation-registration-evidence
+          if-no-files-found: error
+          retention-days: 90
+  qualify:
+    needs: registration
+    name: JMdict confirmation (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: runtime
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
+      PERF_WORKFLOW_HEAD: ${{ github.sha }}
+      PERF_DICTIONARY: jmdict
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
+          path: runtime
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: runtime/package-lock.json
+      # Exact commands from the frozen .github/actions/setup/action.yml, with
+      # an explicit runtime working directory and a separate control checkout.
+      - name: Install frozen runtime dependencies
+        run: npm ci
+      - name: Build runtime libraries and license page
+        run: |
+          npm run build:libs
+          npm run license-report:html
+      - name: Record exact clean runtime and generated worker before acquisition
+        run: |
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py \
+            --registration ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json \
+            --output builds/perf/confirmation-runtime-before.json
+      - name: Check the unchanged observation protocol
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: runtime/builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('runtime/test/perf/dictionaries.lock.json') }}
+      - name: Compare imports with independent order reversal and identical-code controls
+        id: compare
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-added-package-entry js/dictionary/term-bank-wasm-parser-worker.bundle.js \
+            --evidence "builds/perf/parser-worker-bundle-confirmation-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Require the prospectively registered per-host review criteria
+        run: |
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-jmdict-confirmation.py \
+            "builds/perf/parser-worker-bundle-confirmation-$PERF_DICTIONARY-$PERF_ORDER" --order "$PERF_ORDER"
+      - name: Attach the frozen registration and controller/runtime identities
+        if: always()
+        run: |
+          evidence="builds/perf/parser-worker-bundle-confirmation-$PERF_DICTIONARY-$PERF_ORDER"
+          mkdir -p "$evidence"
+          cp ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json "$evidence/control-registration.json"
+          if [[ -f builds/perf/confirmation-runtime-before.json ]]; then
+            cp builds/perf/confirmation-runtime-before.json "$evidence/runtime-before.json"
+          fi
+      - name: Print source identities, every observation, analysis, and failure context
+        if: always()
+        env:
+          EVIDENCE_DIR: builds/perf/parser-worker-bundle-confirmation-jmdict-${{ matrix.order }}
+          QUALIFICATION_OUTCOME: ${{ steps.compare.outcome }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+
+          root = pathlib.Path(os.environ["EVIDENCE_DIR"])
+          print(json.dumps({"baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"], "workflowHead": os.environ["PERF_WORKFLOW_HEAD"], "harnessCommit": os.environ["PERF_CANDIDATE"], "dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"], "outcome": os.environ["QUALIFICATION_OUTCOME"], "evidence": str(root)}, indent=2))
+          for name in ("control-registration.json", "runtime-before.json", "registered-plan.json", "source-identities.json", "analysis.json", "confirmation-review.json", "observations.json", "memory/memory-comparison.json", "memory/memory-audit.json", "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
+              path = root / name
+              if not path.is_file():
+                  print(f"{name}: unavailable")
+                  continue
+              try:
+                  data = json.loads(path.read_text())
+                  if name == "source-identities.json":
+                      data = {**{key: value for key, value in data.items() if key != "arms"}, "arms": {arm: {key: value for key, value in identity.items() if key != "entries"} for arm, identity in data["arms"].items()}}
+                  print(f"{name}:")
+                  print(json.dumps(data, indent=2, sort_keys=True))
+              except Exception as error:
+                  print(f"{name}: {type(error).__name__}: {error}")
+          if os.environ["QUALIFICATION_OUTCOME"] != "success":
+              logs = sorted(root.rglob("*.log"), key=lambda path: path.stat().st_mtime) if root.exists() else []
+              for path in logs[-5:]:
+                  print(f"Failure context: {path.relative_to(root)} (last 40 lines)")
+                  lines = path.read_text(errors="replace").splitlines()
+                  print("\n".join(lines[-40:])[-12000:])
+          PY
+      - name: Retain all observations, separate memory runs, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-confirmation-jmdict-${{ matrix.order }}-b9cacc
+          path: runtime/builds/perf/parser-worker-bundle-confirmation-jmdict-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 90
+  firefox:
+    name: Firefox real multi-bank bundle smoke
+    needs: registration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: runtime
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
+          path: runtime
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: runtime/package-lock.json
+      # Exact commands from the frozen .github/actions/setup/action.yml, with
+      # an explicit runtime working directory and a separate control checkout.
+      - name: Install frozen runtime dependencies
+        run: npm ci
+      - name: Build runtime libraries and license page
+        run: |
+          npm run build:libs
+          npm run license-report:html
+      - name: Build frozen Firefox development package
+        run: |
+          npm run build -- --target firefox-dev
+          cp builds/manabitan-firefox-dev.zip builds/manabitan-firefox-dev.xpi
+      - name: Install Firefox Developer Edition using the existing repository workflow route
+        run: |
+          curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o "$RUNNER_TEMP/firefox-devedition.tar.bz2"
+          mkdir -p "$RUNNER_TEMP/firefox-devedition"
+          tar -xf "$RUNNER_TEMP/firefox-devedition.tar.bz2" -C "$RUNNER_TEMP/firefox-devedition"
+          echo "MANABITAN_FIREFOX_BINARY=$RUNNER_TEMP/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
+      - name: Pin every cache file the unchanged focused Firefox harness eagerly ensures
+        run: |
+          node --input-type=module <<'NODE'
+          import {mkdir} from 'node:fs/promises';
+          import {loadDictionaryFixtures, ensureFixtureFile} from './dev/perf/dictionary-fixtures.js';
+          const fixtures = await loadDictionaryFixtures();
+          await mkdir('builds/e2e-dictionary-cache', {recursive: true});
+          for (const id of ['jmdict', 'jitendex', 'jmnedict']) {
+            const fixture = fixtures[id];
+            await ensureFixtureFile(fixture, 'builds/e2e-dictionary-cache/' + fixture.cacheFile);
+          }
+          NODE
+      - name: Bind Firefox source, harness, XPI, generated worker and browser binary
+        run: |
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py \
+            --registration ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json \
+            --package builds/manabitan-firefox-dev.xpi --browser-binary "$MANABITAN_FIREFOX_BINARY" \
+            --output builds/perf/parser-worker-bundle-firefox/runtime-before.json
+      - name: Run unchanged focused Firefox extension harness with real locked multi-bank dictionaries
+        env:
+          MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/runtime/builds/manabitan-firefox-dev.xpi
+          MANABITAN_FIREFOX_HEADLESS: '0'
+          MANABITAN_FIREFOX_RECOMMENDED_SECONDARY: JMdict
+          MANABITAN_FIREFOX_FOCUSED_BASELINE_ONLY: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: xvfb-run -a npm run test:e2e:firefox-extension
+      - name: Reject skips and require actual bundled parallel-worker and content evidence
+        if: always()
+        run: |
+          node ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-firefox-report.mjs \
+            --report builds/firefox-e2e-import-report.json --fixture-lock test/perf/dictionaries.lock.json \
+            --harness test/firefox/extension-two-dictionary-import.e2e.js \
+            --output builds/perf/parser-worker-bundle-firefox/report-audit.json
+      - name: Recheck frozen Firefox runtime and package after the harness
+        if: always()
+        run: |
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py \
+            --registration ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json \
+            --package builds/manabitan-firefox-dev.xpi --browser-binary "$MANABITAN_FIREFOX_BINARY" \
+            --output builds/perf/parser-worker-bundle-firefox/runtime-after.json
+      - name: Print Firefox audit and failure context
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import pathlib
+          root = pathlib.Path('builds/perf/parser-worker-bundle-firefox')
+          for p in sorted(root.glob('*.json')):
+              print(p.name)
+              print(p.read_text())
+          log = pathlib.Path('builds/firefox-e2e-import-report-geckodriver.log')
+          if log.exists():
+              print('Geckodriver tail:\n' + '\n'.join(log.read_text(errors='replace').splitlines()[-60:]))
+          PYCODE
+      - name: Retain Firefox reports, exact runtime proof and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-confirmation-firefox-b9cacc
+          path: |
+            runtime/builds/perf/parser-worker-bundle-firefox
+            runtime/builds/firefox-e2e-import-report.html
+            runtime/builds/firefox-e2e-import-report.json
+            runtime/builds/firefox-e2e-import-report-geckodriver.log
+            runtime/builds/firefox-e2e-import-report-live.json
+            runtime/builds/firefox-e2e-import-report-crash/
+          if-no-files-found: error
+          retention-days: 90
+  chromium-restart:
+    name: Existing Chromium restart and interruption oracle
+    needs: registration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: runtime
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
+          path: runtime
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: runtime/package-lock.json
+      # Exact commands from the frozen .github/actions/setup/action.yml, with
+      # an explicit runtime working directory and a separate control checkout.
+      - name: Install frozen runtime dependencies
+        run: npm ci
+      - name: Build runtime libraries and license page
+        run: |
+          npm run build:libs
+          npm run license-report:html
+      - name: Build frozen stable-key Chromium package
+        run: npm run build -- --target chrome-playwright
+      - name: Install pinned Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test the existing owned process-tree selector
+        run: npm run test:unit -- test/chromium/restart-interruption-process-tree.test.js
+      - name: Create a fresh evidence directory
+        run: |
+          evidence_dir=$(mktemp -d "$RUNNER_TEMP/manabitan-bundle-restart.XXXXXX")
+          printf 'MANABITAN_RESTART_EVIDENCE_DIR=%s\n' "$evidence_dir" >> "$GITHUB_ENV"
+          printf 'MANABITAN_RESTART_RUNTIME_IDENTITY=%s\n' "$GITHUB_WORKSPACE/runtime/builds/perf/parser-worker-bundle-restart/runtime-before.json" >> "$GITHUB_ENV"
+      - name: Bind the original runtime package and generated worker
+        run: |
+          browser_binary=$(node --input-type=module -e "import {chromium} from 'playwright'; process.stdout.write(chromium.executablePath())")
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py \
+            --registration ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json \
+            --package builds/manabitan-chrome-playwright.zip --browser-binary "$browser_binary" \
+            --output builds/perf/parser-worker-bundle-restart/runtime-before.json
+      - name: Run the unchanged witnessed interruption recovery campaign
+        run: xvfb-run -a npm run test:e2e:chromium-restart-interruption
+      - name: Enforce the unchanged full recovery oracle plus frozen source and package identity
+        if: always()
+        run: node ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-chromium-restart-report.mjs
+      - name: Verify the generated worker survived the existing test-only storage instrumentation unchanged
+        if: always()
+        run: |
+          python ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py \
+            --registration ../control/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json \
+            --package builds/manabitan-chrome-playwright.zip \
+            --extracted-bundle "$MANABITAN_RESTART_EVIDENCE_DIR/unpacked-extension/js/dictionary/term-bank-wasm-parser-worker.bundle.js" \
+            --output builds/perf/parser-worker-bundle-restart/runtime-after.json
+      - name: Print recovery evidence without treating it as performance timing
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import os
+          import pathlib
+          root = pathlib.Path('builds/perf/parser-worker-bundle-restart')
+          for p in sorted(root.glob('*.json')):
+              print(p.name)
+              print(p.read_text())
+          evidence = os.environ.get('MANABITAN_RESTART_EVIDENCE_DIR')
+          if evidence:
+              p = pathlib.Path(evidence) / 'restart-interruption-campaign.json'
+              if p.is_file():
+                  print(p.read_text())
+          PYCODE
+      - name: Retain every recovery witness, source identity and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-confirmation-chromium-restart-b9cacc
+          path: |
+            runtime/builds/perf/parser-worker-bundle-restart
+            ${{ env.MANABITAN_RESTART_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 90

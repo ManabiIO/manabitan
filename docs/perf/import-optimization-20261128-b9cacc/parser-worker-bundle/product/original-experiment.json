@@ -1,0 +1,12 @@
+{
+  "runId": 46104747758,
+  "sourceBranch": "perf/parser-worker-bundle-20261128-b9cacc",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "expectedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "expectedAddedPackageEntries": [
+    "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+  ]
+}

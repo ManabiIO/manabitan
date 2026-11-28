@@ -1,0 +1,52 @@
+{
+  "scope": "Only new evidence README formatted and checked; copied historical Markdown, JSON, guards and timing records unchanged",
+  "prettierVersion": "3.4.2",
+  "lockedVersionMatched": true,
+  "prettierEntrySha256": "9aee781035e9f56b49124e92984ee379b69e333b401ac5c8b5e27e3e14783bde",
+  "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "nodeVersion": "v22.22.0",
+  "nodeExecutable": "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+  "nodeIdentitySource": "Node SHA-256 is bound by canonical/resumption-home-independent-review.json; no toolchain install",
+  "readmeBeforeSha256": "5044150bf029022bb37833937a25b0a40476aa93e38382bcd47281479a5e126a",
+  "readmeAfterSha256": "5044150bf029022bb37833937a25b0a40476aa93e38382bcd47281479a5e126a",
+  "commands": [
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "--version"
+      ],
+      "exitCode": 0,
+      "log": "node-version.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/baseline/node_modules/prettier/bin/prettier.cjs",
+        "--version"
+      ],
+      "exitCode": 0,
+      "log": "prettier-version.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/baseline/node_modules/prettier/bin/prettier.cjs",
+        "--write",
+        "/workspace/scratch/b9cacc3542c2/analysis/profile-analysis-evidence-20261128-b9cacc/README.md"
+      ],
+      "exitCode": 0,
+      "log": "README-write.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/83b3b3bfba02/node-v22.22.0-linux-x64/bin/node",
+        "/workspace/scratch/b9cacc3542c2/baseline/node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "/workspace/scratch/b9cacc3542c2/analysis/profile-analysis-evidence-20261128-b9cacc/README.md"
+      ],
+      "exitCode": 0,
+      "log": "README-check.log"
+    }
+  ],
+  "AGENTSCheck": "Parent owns the separate baseline AGENTS.md minimum check; no claim it ran here"
+}

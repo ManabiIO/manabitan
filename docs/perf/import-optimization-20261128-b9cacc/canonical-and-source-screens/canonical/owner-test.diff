@@ -1,0 +1,60 @@
+diff --git a/test/term-content-canonical-scan.test.js b/test/term-content-canonical-scan.test.js
+index 4879a0a..0eb9144 100644
+--- a/test/term-content-canonical-scan.test.js
++++ b/test/term-content-canonical-scan.test.js
+@@ -55,7 +55,7 @@ function useProductionScanner(db, _bytes, hooks = {}) {
+     };
+ }
+ 
+-test('production canonical kernel: 63 differential, boundary, rollback and full record/index byte controls', async () => {
++test('production canonical kernel: 64 differential, boundary, rollback and full record/index byte controls', async () => {
+     const checks = [],
+         totals = {
+             calls: 0,
+@@ -304,7 +304,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+         collect(controller);
+         checks.push(`${candidates} candidate await ordering, mixed misses, arena growth`);
+     }
+-    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-view', 'exact-read']) {
++    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-view', 'exact-read', 'exact-cancel']) {
+         const a = fixture(40, {existing: true}),
+             b = fixture(40, {existing: true});
+         const priorA = metadata(a),
+@@ -330,13 +330,17 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+             if (fault === 'late-row') {
+                 f.plan.uniqueRowIndexes[20] = 0;
+             }
+-            if (fault === 'exact-read') {
++            if (fault === 'exact-read' || fault === 'exact-cancel') {
+                 f.db._readTermEntryContentBytesDetailed = async () => {
++                    if (fault === 'exact-cancel') {
++                        // eslint-disable-next-line @stylistic/semi
++                        throw new DOMException('Exact read cancelled', 'AbortError')
++                    }
+                     throw new Error('read fault');
+                 };
+             }
+         }
+-        if (['late-source', 'late-identity', 'late-row', 'exact-read'].includes(fault)) {
++        if (['late-source', 'late-identity', 'late-row', 'exact-read', 'exact-cancel'].includes(fault)) {
+             await assert.rejects(a.db._resolveArtifactTermContentDedup(a.chunk, true));
+             await assert.rejects(b.db._resolveArtifactTermContentDedup(b.chunk, true));
+             // Native can undo an unaccepted segment precisely, baseline rollback leaves reusable IDs.
+@@ -347,7 +351,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+         for (const f of [a, b]) {
+             assert.equal(f.db._getTermEntryContentMetaByHashPair(1, 0x9e3779b9).offset, 100);
+         }
+-        if (fault !== 'exact-read') {
++        if (fault !== 'exact-read' && fault !== 'exact-cancel') {
+             assert.equal(b.db._termEntryContentMetaDenseCount, 27); // only the 27 earlier published entries
+             assert.deepEqual(b.plan.pendingEpochs, new Uint32Array(40).fill(87));
+         }
+@@ -1061,7 +1065,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full
+     }
+     assert.ok(layout.usedBytes <= layout.PREFIX);
+     assert.equal(layout.usedBytes, 8263840);
+-    assert.equal(checks.length, 63);
++    assert.equal(checks.length, 64);
+ });
+ 
+ test('production typed pending IDs: storage and record failure, old-entry preservation, free-ID retry (4 controls)', async () => {

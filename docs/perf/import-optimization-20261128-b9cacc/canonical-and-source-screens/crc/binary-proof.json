@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "83912e61edb0bf4c8148ef3db309ed944f9babaf",
+  "module": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+  "scope": "Read-only comparison of published module bytes; no native rebuild, test execution, import, or timing.",
+  "parserSourceSha256": "d3b8b0877fc2bea0572ed077b0ad211e2fcd8a31ae5f9d6bcccb9d7c4fb6083c",
+  "proofScriptSha256": "98bac447f9027285c95791a22a0ee4ad588b1f6d8183805de2e4e0b12bdc5687",
+  "modules": {
+    "baseline": {
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "bytes": 67659
+    },
+    "candidate": {
+      "sha256": "b362d9b0106c28e9cb495d66c650463c771e165cb8ebadc4a66adda973466fd9",
+      "bytes": 67943
+    }
+  },
+  "sections": [
+    {
+      "id": 1,
+      "equal": true,
+      "baselineBytes": 256,
+      "candidateBytes": 256,
+      "baselineSha256": "b0c5c9aa04b6590cf0c7258664415c5939982ddcf38e08ee43a51aedd84348be",
+      "candidateSha256": "b0c5c9aa04b6590cf0c7258664415c5939982ddcf38e08ee43a51aedd84348be"
+    },
+    {
+      "id": 3,
+      "equal": true,
+      "baselineBytes": 54,
+      "candidateBytes": 54,
+      "baselineSha256": "832f7136ea7625712815ec1ec5d111174f1b60c85e6550519a72f8b757eb92f6",
+      "candidateSha256": "832f7136ea7625712815ec1ec5d111174f1b60c85e6550519a72f8b757eb92f6"
+    },
+    {
+      "id": 5,
+      "equal": true,
+      "baselineBytes": 8,
+      "candidateBytes": 8,
+      "baselineSha256": "b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8",
+      "candidateSha256": "b77ef18efe7aa66da2a2f06008dee071461cb244678f20bedbc41d1377e338b8"
+    },
+    {
+      "id": 6,
+      "equal": true,
+      "baselineBytes": 15,
+      "candidateBytes": 15,
+      "baselineSha256": "355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b",
+      "candidateSha256": "355e9b58a1fde306dc25afda878a437ca1dc66ef7416cf9dc6461907cf5a118b"
+    },
+    {
+      "id": 7,
+      "equal": true,
+      "baselineBytes": 540,
+      "candidateBytes": 540,
+      "baselineSha256": "37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da",
+      "candidateSha256": "37c16be1e4e855b651a013d11e891e5b72c643c715189e3294366b2f11eb58da"
+    },
+    {
+      "id": 8,
+      "equal": true,
+      "baselineBytes": 3,
+      "candidateBytes": 3,
+      "baselineSha256": "9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e",
+      "candidateSha256": "9dc27716310d8e7b99af8e9e4fd17dde3e15969631022500d4de2c4f4106ad2e"
+    },
+    {
+      "id": 12,
+      "equal": true,
+      "baselineBytes": 3,
+      "candidateBytes": 3,
+      "baselineSha256": "39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba",
+      "candidateSha256": "39834bb6648d5cce2e9922b98baad53b6822c4dee3dc1db41c2e76c7fd8237ba"
+    },
+    {
+      "id": 10,
+      "equal": false,
+      "baselineBytes": 65245,
+      "candidateBytes": 65529,
+      "baselineSha256": "7f5b3059637ff87c5f8b8b0c46196b8ddeee1374bb07b0fd82396b08df3ac033",
+      "candidateSha256": "cf1db01efa83fd96b47c0b8fc6afb02b61bd2925769fcf85dcb4a78504cf24da"
+    },
+    {
+      "id": 11,
+      "equal": true,
+      "baselineBytes": 1527,
+      "candidateBytes": 1527,
+      "baselineSha256": "391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59",
+      "candidateSha256": "391e3759b1c781a2c05be4ee3bd4c53dd2ec1f8a2d187c47e6d1f093abbfbe59"
+    }
+  ],
+  "functionCount": 51,
+  "changedFunctions": [
+    {
+      "index": 5,
+      "baseline": {
+        "index": 5,
+        "name": null,
+        "exports": [],
+        "typeIndex": 5,
+        "bodyBytes": 538,
+        "bodySha256": "b1911c65c5b7c27c7fe8157a1d444177f0d6ead606937700011d742bbc8786ec"
+      },
+      "candidate": {
+        "index": 5,
+        "name": null,
+        "exports": [],
+        "typeIndex": 5,
+        "bodyBytes": 822,
+        "bodySha256": "8d9de852419c77c5f948ce9fd2cd9c6586c0b14240909c323114a9f68bb86aa7"
+      }
+    }
+  ],
+  "nonCodeSectionsByteIdentical": true,
+  "functionTypesAndExportsIdentical": true,
+  "testExportAbsent": true,
+  "moduleSizeDeltaBytes": 284
+}

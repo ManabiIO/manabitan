@@ -1,0 +1,1024 @@
+{
+  "schemaVersion": 1,
+  "status": "qualified-source-derived-component",
+  "timingScope": "Untimed source-derived acquisition with raw persistence substitute; not a browser memory capture",
+  "registrationSha256": "37e8bdf5e7ab46f2d444c2a15875db4a2d368cae9d90217e881f74543a0c431a",
+  "harnessSha256": "860212a3021b8eaaf755cc54d176fccc6665d5f583bcdfa9f1a1ab11888963dd",
+  "identities": {
+    "baseline": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+    },
+    "candidate": {
+      "commit": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+      "tree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f"
+    }
+  },
+  "priorRetainedTemporaryBytes": 0,
+  "groups": [
+    {
+      "census": {
+        "group": 0,
+        "rowCount": 50000,
+        "uniqueCount": 34951,
+        "pendingContentCount": 34951,
+        "sourceBytes": 14543374,
+        "ownedContentBytes": 8486982
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 34951,
+      "exactMatches": 0,
+      "recentSourceHits": 0,
+      "rawBase": 0
+    },
+    {
+      "census": {
+        "group": 1,
+        "rowCount": 40000,
+        "uniqueCount": 32856,
+        "pendingContentCount": 32739,
+        "sourceBytes": 13240716,
+        "ownedContentBytes": 9427894
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json",
+        "term_bank_9.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 32739,
+      "exactMatches": 117,
+      "recentSourceHits": 117,
+      "rawBase": 8486982
+    },
+    {
+      "census": {
+        "group": 2,
+        "rowCount": 40000,
+        "uniqueCount": 32421,
+        "pendingContentCount": 32256,
+        "sourceBytes": 13257737,
+        "ownedContentBytes": 9272798
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json",
+        "term_bank_13.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 32256,
+      "exactMatches": 165,
+      "recentSourceHits": 165,
+      "rawBase": 17914876
+    },
+    {
+      "census": {
+        "group": 3,
+        "rowCount": 40000,
+        "uniqueCount": 28895,
+        "pendingContentCount": 28758,
+        "sourceBytes": 14088207,
+        "ownedContentBytes": 8619220
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json",
+        "term_bank_17.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 28758,
+      "exactMatches": 137,
+      "recentSourceHits": 137,
+      "rawBase": 27187674
+    },
+    {
+      "census": {
+        "group": 4,
+        "rowCount": 50000,
+        "uniqueCount": 34677,
+        "pendingContentCount": 34159,
+        "sourceBytes": 15138615,
+        "ownedContentBytes": 8782091
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 34159,
+      "exactMatches": 518,
+      "recentSourceHits": 518,
+      "rawBase": 35806894
+    },
+    {
+      "census": {
+        "group": 5,
+        "rowCount": 50000,
+        "uniqueCount": 34006,
+        "pendingContentCount": 33543,
+        "sourceBytes": 15955653,
+        "ownedContentBytes": 9009676
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 33543,
+      "exactMatches": 463,
+      "recentSourceHits": 463,
+      "rawBase": 44588985
+    },
+    {
+      "census": {
+        "group": 6,
+        "rowCount": 40000,
+        "uniqueCount": 24271,
+        "pendingContentCount": 24030,
+        "sourceBytes": 13702906,
+        "ownedContentBytes": 7077918
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_28.json",
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 24030,
+      "exactMatches": 241,
+      "recentSourceHits": 241,
+      "rawBase": 53598661
+    },
+    {
+      "census": {
+        "group": 7,
+        "rowCount": 50000,
+        "uniqueCount": 31906,
+        "pendingContentCount": 31330,
+        "sourceBytes": 14307906,
+        "ownedContentBytes": 7502995
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_32.json",
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 31330,
+      "exactMatches": 576,
+      "recentSourceHits": 576,
+      "rawBase": 60676579
+    },
+    {
+      "census": {
+        "group": 8,
+        "rowCount": 40000,
+        "uniqueCount": 25774,
+        "pendingContentCount": 25442,
+        "sourceBytes": 14119170,
+        "ownedContentBytes": 7850259
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 25442,
+      "exactMatches": 332,
+      "recentSourceHits": 332,
+      "rawBase": 68179574
+    },
+    {
+      "census": {
+        "group": 9,
+        "rowCount": 40000,
+        "uniqueCount": 25109,
+        "pendingContentCount": 24806,
+        "sourceBytes": 13775196,
+        "ownedContentBytes": 7597844
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 24806,
+      "exactMatches": 303,
+      "recentSourceHits": 303,
+      "rawBase": 76029833
+    },
+    {
+      "census": {
+        "group": 10,
+        "rowCount": 40000,
+        "uniqueCount": 26102,
+        "pendingContentCount": 25651,
+        "sourceBytes": 13936647,
+        "ownedContentBytes": 7885247
+      },
+      "dictionaryTotalRows": 590020,
+      "sourceFiles": [
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 25651,
+      "exactMatches": 451,
+      "recentSourceHits": 451,
+      "rawBase": 83627677
+    },
+    {
+      "census": {
+        "group": 11,
+        "rowCount": 48299,
+        "uniqueCount": 35062,
+        "pendingContentCount": 34367,
+        "sourceBytes": 15551396,
+        "ownedContentBytes": 9631061
+      },
+      "dictionaryTotalRows": 528299,
+      "sourceFiles": [
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ],
+      "nativeCalls": 1,
+      "nativePendingRows": 34367,
+      "exactMatches": 695,
+      "recentSourceHits": 695,
+      "rawBase": 91512924
+    }
+  ],
+  "captures": [
+    {
+      "index": 0,
+      "group": 0,
+      "memoryBytes": 26214400,
+      "inputSha256": "6d779fbc6f67b1a48e2ca09ab6f1ba77c134da7beb79a2047088ae82dbf2ec84",
+      "compressedSha256": "2a60eb4fcbbbfa67c50dcfb0eaf6d686596b67fcb50bbde47373636c0dbdddc7",
+      "compressedBytes": 767597,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        0,
+        50000,
+        0,
+        34951,
+        0,
+        0,
+        0,
+        8486982,
+        0,
+        1,
+        0
+      ],
+      "beforeDense": 0,
+      "beforePending": 0,
+      "file": "native-000.bin.gz",
+      "header": [
+        34951,
+        34951,
+        34951,
+        0,
+        0,
+        34951,
+        0
+      ],
+      "outputSha256": "c018e2eccf614e7a7f6f693db07a22efa01a0dc9f6d0cda04288000208c2c72b",
+      "expectedReturn": 0
+    },
+    {
+      "index": 1,
+      "group": 1,
+      "memoryBytes": 26214400,
+      "inputSha256": "03f32268126a2d4f18a23f4ad9467471878754364ee545a0400297ad548188be",
+      "compressedSha256": "56a164edf23d181922dde465be8dabe13450d18c9742e5aca26f45431ff833de",
+      "compressedBytes": 2260190,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        34951,
+        40000,
+        0,
+        32856,
+        0,
+        0,
+        0,
+        9427894,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 34951,
+      "beforePending": 0,
+      "file": "native-001.bin.gz",
+      "header": [
+        32739,
+        32856,
+        32739,
+        117,
+        0,
+        67690,
+        0
+      ],
+      "outputSha256": "c60eff5b04668f483b609dd5fbd62bb0659062f6be5189461ea9d969f86817c7",
+      "expectedReturn": 0
+    },
+    {
+      "index": 2,
+      "group": 2,
+      "memoryBytes": 26214400,
+      "inputSha256": "8289d0d21aa66fd615655d1cc45923863f1d1ae76fef6d49397ef9db03596cb1",
+      "compressedSha256": "75e32664eff3af6f725f3e9d9186c8f8affdae9a74dfd2db4849aa18e53d3c4f",
+      "compressedBytes": 2783118,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        67690,
+        40000,
+        0,
+        32421,
+        0,
+        0,
+        0,
+        9272798,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 67690,
+      "beforePending": 0,
+      "file": "native-002.bin.gz",
+      "header": [
+        32256,
+        32421,
+        32256,
+        165,
+        0,
+        99946,
+        0
+      ],
+      "outputSha256": "895b2fdc2ef54a8ae4ceaca29f323824c2f9a3978cdbcf996e992f78aaa1607f",
+      "expectedReturn": 0
+    },
+    {
+      "index": 3,
+      "group": 3,
+      "memoryBytes": 26214400,
+      "inputSha256": "d128a62fecd5e0f97b8565737fa26dcb843a1829ba75f1d0474a350f9b620527",
+      "compressedSha256": "e25283b61a733a1fb20c90bf4e64594f10f749bde5530b6fb502061052f0b4b9",
+      "compressedBytes": 3248993,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        99946,
+        40000,
+        0,
+        28895,
+        0,
+        0,
+        0,
+        8619220,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 99946,
+      "beforePending": 0,
+      "file": "native-003.bin.gz",
+      "header": [
+        28758,
+        28895,
+        28758,
+        137,
+        0,
+        128704,
+        0
+      ],
+      "outputSha256": "484f548e1995d6158234f4158385d49d4abecba4c5e08a80d52663b4a5772dda",
+      "expectedReturn": 0
+    },
+    {
+      "index": 4,
+      "group": 4,
+      "memoryBytes": 26214400,
+      "inputSha256": "226e4b4e58a51e0fd5239eb6b7c61f0ef4746e8c07c00b33baba536a79150791",
+      "compressedSha256": "541418f29d14e37012011b0087afd1b31958accb639fb9b21bee2f7542f4f99c",
+      "compressedBytes": 3670095,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        128704,
+        50000,
+        0,
+        34677,
+        0,
+        0,
+        0,
+        8782091,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 128704,
+      "beforePending": 0,
+      "file": "native-004.bin.gz",
+      "header": [
+        34159,
+        34677,
+        34159,
+        518,
+        0,
+        162863,
+        0
+      ],
+      "outputSha256": "278705a48a1c482aa60fb8dc0e4eaa536c266aea94c2f6f230530b79ab9acec9",
+      "expectedReturn": 0
+    },
+    {
+      "index": 5,
+      "group": 5,
+      "memoryBytes": 26214400,
+      "inputSha256": "5286f58226251da2d43b5be352c2d31ef1fc6680d667d763deb4ec75fecb4a86",
+      "compressedSha256": "36d9797a384c6c30ac0348d0b0fd240ef8a1c856d8413ec3c7f1cde06cf590ac",
+      "compressedBytes": 4184074,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        162863,
+        50000,
+        0,
+        34006,
+        0,
+        0,
+        0,
+        9009676,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 162863,
+      "beforePending": 0,
+      "file": "native-005.bin.gz",
+      "header": [
+        33543,
+        34006,
+        33543,
+        463,
+        0,
+        196406,
+        0
+      ],
+      "outputSha256": "d64c079e45481605fb58323f22b6367afc8b8ec1092df348a5d886ac3986b1cd",
+      "expectedReturn": 0
+    },
+    {
+      "index": 6,
+      "group": 6,
+      "memoryBytes": 26214400,
+      "inputSha256": "7597e8dc9dc68fae728b2abaa54bf072ce1b34ca51100dc7ced9a2c041d59abe",
+      "compressedSha256": "020dc2085c49958998cab5e702a1c6339990f211ff587eb9fd8b20b7f9b8a818",
+      "compressedBytes": 4651908,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        196406,
+        40000,
+        0,
+        24271,
+        0,
+        0,
+        0,
+        7077918,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 196406,
+      "beforePending": 0,
+      "file": "native-006.bin.gz",
+      "header": [
+        24030,
+        24271,
+        24030,
+        241,
+        0,
+        220436,
+        0
+      ],
+      "outputSha256": "4118e423371bd4f48c2c81c56eab33dafdb6c7a04e684b7ca3585ed8d076d389",
+      "expectedReturn": 0
+    },
+    {
+      "index": 7,
+      "group": 7,
+      "memoryBytes": 26214400,
+      "inputSha256": "2d92cdf931639177c7cc60a78ec2e493d36ec9f8aadf734f31f2ece0cd1a45e1",
+      "compressedSha256": "e04c5ce731f3577b24a4d2b9e2cb3d4e1d28a10848643499bdf062249714b30f",
+      "compressedBytes": 5025344,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        220436,
+        50000,
+        0,
+        31906,
+        0,
+        0,
+        0,
+        7502995,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 220436,
+      "beforePending": 0,
+      "file": "native-007.bin.gz",
+      "header": [
+        31330,
+        31906,
+        31330,
+        576,
+        0,
+        251766,
+        0
+      ],
+      "outputSha256": "3d6ca47701f3ec0d5c50651eab64cdd8aee3efe411904816bd3228fd5629bcfb",
+      "expectedReturn": 0
+    },
+    {
+      "index": 8,
+      "group": 8,
+      "memoryBytes": 26214400,
+      "inputSha256": "90b4c8ec8a39d41b366d08f58d76d5d3cefb56c779f683d79611bacd11bb03b9",
+      "compressedSha256": "31c3d4761839e1732a321b98e719385361e34b33164f453607b2b54843ea2e9a",
+      "compressedBytes": 5514830,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        251766,
+        40000,
+        0,
+        25774,
+        0,
+        0,
+        0,
+        7850259,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 251766,
+      "beforePending": 0,
+      "file": "native-008.bin.gz",
+      "header": [
+        25442,
+        25774,
+        25442,
+        332,
+        0,
+        277208,
+        0
+      ],
+      "outputSha256": "c4fe36e1bda8f33f59568b9e3ae4a0b0e2f7b84d9e09944922af06b35c7ddf3c",
+      "expectedReturn": 0
+    },
+    {
+      "index": 9,
+      "group": 9,
+      "memoryBytes": 26214400,
+      "inputSha256": "bb17bcb1a83b2c35581a3022772017b332518c9c85b36dd78324547e5e0c0832",
+      "compressedSha256": "28208cc73aa49e4bf3d1772ef4611dbaa78458d59fb8d3a70db694197420aa56",
+      "compressedBytes": 5900887,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        277208,
+        40000,
+        0,
+        25109,
+        0,
+        0,
+        0,
+        7597844,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 277208,
+      "beforePending": 0,
+      "file": "native-009.bin.gz",
+      "header": [
+        24806,
+        25109,
+        24806,
+        303,
+        0,
+        302014,
+        0
+      ],
+      "outputSha256": "72dfa487b4b7e0ce678e95e82339d24d8715bb3de3e30965b14c12fff70f1cb1",
+      "expectedReturn": 0
+    },
+    {
+      "index": 10,
+      "group": 10,
+      "memoryBytes": 26214400,
+      "inputSha256": "f103321cc089c5913fe28cb37e0dbd29daaaab90aedf03ca3aed9909677b99d9",
+      "compressedSha256": "91bef97e16fa8dc051b3aecf1be95a413a2dc0dc80746b19f9df1f20c6e1faa1",
+      "compressedBytes": 6297236,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        302014,
+        40000,
+        0,
+        26102,
+        0,
+        0,
+        0,
+        7885247,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 302014,
+      "beforePending": 0,
+      "file": "native-010.bin.gz",
+      "header": [
+        25651,
+        26102,
+        25651,
+        451,
+        0,
+        327665,
+        0
+      ],
+      "outputSha256": "b525e9e9d4712afe37bdea16ee389bc79132d0708f4097ac08e420b5cb205896",
+      "expectedReturn": 0
+    },
+    {
+      "index": 11,
+      "group": 11,
+      "memoryBytes": 26214400,
+      "inputSha256": "5d57e0fef82fbc201fab0f9e062b1bba533275f84c477734c4f99a9016a96317",
+      "compressedSha256": "455e6e27b98519f5ce559149b26da3abc06f7f8e19d4decaaea47265678ff64a",
+      "compressedBytes": 6730848,
+      "config": [
+        8388608,
+        1048576,
+        12582912,
+        14680064,
+        16777216,
+        17301504,
+        19398656,
+        19922944,
+        22020096,
+        24117248,
+        524288,
+        327665,
+        48299,
+        0,
+        35062,
+        0,
+        0,
+        0,
+        9631061,
+        1,
+        1,
+        0
+      ],
+      "beforeDense": 327665,
+      "beforePending": 0,
+      "file": "native-011.bin.gz",
+      "header": [
+        34367,
+        35062,
+        34367,
+        695,
+        0,
+        362032,
+        0
+      ],
+      "outputSha256": "633103b1fac28fbdd5fad54e721e4573aded0b49300f54e4f8c8c294148e1f59",
+      "expectedReturn": 0
+    }
+  ],
+  "sourceGroups": [
+    {
+      "id": 1,
+      "files": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json"
+      ],
+      "rawSourceBytes": 14543374,
+      "transferredBytes": 1100565
+    },
+    {
+      "id": 2,
+      "files": [
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json",
+        "term_bank_9.json"
+      ],
+      "rawSourceBytes": 13240716,
+      "transferredBytes": 1154201
+    },
+    {
+      "id": 3,
+      "files": [
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json",
+        "term_bank_13.json"
+      ],
+      "rawSourceBytes": 13257737,
+      "transferredBytes": 1161307
+    },
+    {
+      "id": 4,
+      "files": [
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json",
+        "term_bank_17.json"
+      ],
+      "rawSourceBytes": 14088207,
+      "transferredBytes": 1022712
+    },
+    {
+      "id": 5,
+      "files": [
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json"
+      ],
+      "rawSourceBytes": 15138615,
+      "transferredBytes": 1385907
+    },
+    {
+      "id": 6,
+      "files": [
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json"
+      ],
+      "rawSourceBytes": 15955653,
+      "transferredBytes": 1584174
+    },
+    {
+      "id": 7,
+      "files": [
+        "term_bank_28.json",
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json"
+      ],
+      "rawSourceBytes": 13702906,
+      "transferredBytes": 1185652
+    },
+    {
+      "id": 8,
+      "files": [
+        "term_bank_32.json",
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "rawSourceBytes": 14307906,
+      "transferredBytes": 1307152
+    },
+    {
+      "id": 9,
+      "files": [
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "rawSourceBytes": 14119170,
+      "transferredBytes": 1331640
+    },
+    {
+      "id": 10,
+      "files": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "rawSourceBytes": 13775196,
+      "transferredBytes": 1339761
+    },
+    {
+      "id": 11,
+      "files": [
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "rawSourceBytes": 13936647,
+      "transferredBytes": 1389897
+    },
+    {
+      "id": 12,
+      "files": [
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ],
+      "rawSourceBytes": 15551396,
+      "transferredBytes": 1669881
+    }
+  ],
+  "parserWorkers": 3,
+  "nativeStats": {
+    "calls": 12,
+    "rows": 366030,
+    "inserted": 362032,
+    "fallbacks": 0,
+    "instances": 1,
+    "copiedInputBytes": 16788490,
+    "copiedOutputBytes": 31984,
+    "copiedTableBytes": 0,
+    "copiedGlossaryBytes": 0,
+    "scatterRows": 0,
+    "nativeMissJsScatterRows": 0,
+    "nativePendingRows": 362032,
+    "exactDescriptorRows": 3998,
+    "failedExactAppendRows": 0,
+    "snapshotBytes": 0,
+    "adoptedColumnBytes": 8688768,
+    "synchronousRollbacks": 0,
+    "fallbackEligibility": 0,
+    "fallbackAsset": 0,
+    "fallbackUnsupported": 0,
+    "fallbackReason": ""
+  },
+  "rawBytes": 101143985,
+  "compressedBytes": 51035120,
+  "finalIdentities": {
+    "baseline": {
+      "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+    },
+    "candidate": {
+      "commit": "0285d5bd779cc1f4225bd41826613b6c00b08516",
+      "tree": "e1f60ce0a28bee8caeca32ebdc023e4a89eec96f"
+    }
+  },
+  "finalFixtureIdentity": {
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766
+  },
+  "rawSourceFileRemovedAfterVerifiedAcquisition": true,
+  "resourceQualificationRequiresIndependentWatchdog": true
+}

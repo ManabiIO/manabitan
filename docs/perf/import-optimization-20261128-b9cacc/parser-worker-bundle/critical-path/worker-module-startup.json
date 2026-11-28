@@ -1,0 +1,326 @@
+{
+  "scope": "One instrumented current-baseline extension trace; module loading and compilation spans, not worker-ready timing, comparative gain, or import-time attribution",
+  "workers": [
+    {
+      "tid": 3589,
+      "moduleCount": 23,
+      "firstCompileAt": 311904741,
+      "lastCompileEndAt": 311939667,
+      "compileDurationSumMs": 4.658,
+      "compileThreadDurationSumMs": 4.478,
+      "workerKnownAt": 311902318,
+      "evaluation": [
+        {
+          "at": 311944044,
+          "ms": 0.226
+        }
+      ],
+      "firstToLastCompileWallMs": 34.926,
+      "workerKnownToLastCompileMs": 37.349,
+      "earlyEvents": [
+        {
+          "name": "HandlePostMessage",
+          "at": 311944454,
+          "durationMs": 0.48,
+          "data": {
+            "traceId": "12911010840666286219"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311944498,
+          "durationMs": 0.2,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "17094743620658639231",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439793,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 311944915,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439795,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "initialize",
+                "lineNumber": 65,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666281328"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 311971027,
+          "durationMs": 112.266,
+          "data": {
+            "traceId": "12911010840666281406"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311971038,
+          "durationMs": 0.351,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "17094743620658639231",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439857,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 312083255,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439874,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "parse",
+                "lineNumber": 230,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666281415"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 312086280,
+          "durationMs": 115.84,
+          "data": {
+            "traceId": "12911010840666281018"
+          }
+        }
+      ]
+    },
+    {
+      "tid": 3590,
+      "moduleCount": 23,
+      "firstCompileAt": 311905905,
+      "lastCompileEndAt": 311937458,
+      "compileDurationSumMs": 4.194,
+      "compileThreadDurationSumMs": 4.162,
+      "workerKnownAt": 311903105,
+      "evaluation": [
+        {
+          "at": 311942445,
+          "ms": 0.312
+        }
+      ],
+      "firstToLastCompileWallMs": 31.553,
+      "workerKnownToLastCompileMs": 34.353,
+      "earlyEvents": [
+        {
+          "name": "HandlePostMessage",
+          "at": 311942999,
+          "durationMs": 0.82,
+          "data": {
+            "traceId": "12911010840666286214"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311943116,
+          "durationMs": 0.362,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "14754854335031764180",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439700,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 311943788,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439695,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "initialize",
+                "lineNumber": 65,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666281228"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 311971025,
+          "durationMs": 105.193,
+          "data": {
+            "traceId": "12911010840666281402"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311971038,
+          "durationMs": 0.698,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "14754854335031764180",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439856,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 312075377,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439883,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "parse",
+                "lineNumber": 230,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666281425"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 312076307,
+          "durationMs": 55.009,
+          "data": {
+            "traceId": "12911010840666281417"
+          }
+        }
+      ]
+    },
+    {
+      "tid": 3591,
+      "moduleCount": 23,
+      "firstCompileAt": 311906991,
+      "lastCompileEndAt": 311943701,
+      "compileDurationSumMs": 7.019,
+      "compileThreadDurationSumMs": 4.11,
+      "workerKnownAt": 311905776,
+      "evaluation": [
+        {
+          "at": 311948680,
+          "ms": 0.215
+        }
+      ],
+      "firstToLastCompileWallMs": 36.71,
+      "workerKnownToLastCompileMs": 37.925,
+      "earlyEvents": [
+        {
+          "name": "HandlePostMessage",
+          "at": 311949077,
+          "durationMs": 0.348,
+          "data": {
+            "traceId": "12911010840666286333"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311949122,
+          "durationMs": 0.125,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "4977623904558763279",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439764,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 311949408,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439766,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "initialize",
+                "lineNumber": 65,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666281303"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 311971154,
+          "durationMs": 160.516,
+          "data": {
+            "traceId": "12911010840666281398"
+          }
+        },
+        {
+          "name": "FunctionCall",
+          "at": 311971161,
+          "durationMs": 0.234,
+          "data": {
+            "columnNumber": 19,
+            "functionName": "onMessage",
+            "isolate": "4977623904558763279",
+            "lineNumber": 45,
+            "sampleTraceId": 3694308622439853,
+            "scriptId": "3",
+            "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+          }
+        },
+        {
+          "name": "SchedulePostMessage",
+          "at": 312131610,
+          "durationMs": 0.0,
+          "data": {
+            "sampleTraceId": 3694308622439429,
+            "stackTrace": [
+              {
+                "columnNumber": 14,
+                "functionName": "parse",
+                "lineNumber": 230,
+                "scriptId": "3",
+                "url": "chrome-extension://ofidkbafnlgoonbaopnbpdelkblopojg/js/dictionary/term-bank-wasm-parser-worker.js"
+              }
+            ],
+            "traceId": "12911010840666280970"
+          }
+        },
+        {
+          "name": "HandlePostMessage",
+          "at": 312149360,
+          "durationMs": 72.076,
+          "data": {
+            "traceId": "12911010840666281069"
+          }
+        }
+      ]
+    }
+  ]
+}

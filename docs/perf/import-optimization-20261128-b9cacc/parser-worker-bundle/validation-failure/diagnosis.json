@@ -1,0 +1,51 @@
+{
+  "failedRunId": 46104747758,
+  "failedJobId": 140854868947,
+  "workflowHead": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "runtimeCandidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "stage": "Strict all-target package comparison; stopped on first unexpected member delta",
+  "expectedChanged": [
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "expectedAdded": [
+    "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+  ],
+  "actualChangedAtFailure": [
+    "js/dictionary/term-bank-wasm-parser.js",
+    "lib/handlebars.js",
+    "lib/handlebars.js.map",
+    "lib/hangul-js.js",
+    "lib/hangul-js.js.map",
+    "lib/kanji-processor.js",
+    "lib/kanji-processor.js.map",
+    "lib/linkedom.js",
+    "lib/linkedom.js.map",
+    "lib/parse5.js",
+    "lib/parse5.js.map",
+    "lib/resvg-wasm.js",
+    "lib/resvg-wasm.js.map",
+    "lib/ucs2length.js",
+    "lib/ucs2length.js.map",
+    "lib/z-worker.js",
+    "lib/z-worker.js.map",
+    "lib/zip.js",
+    "lib/zip.js.map"
+  ],
+  "bundleProof": {
+    "bytes": 174314,
+    "sha256": "f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6"
+  },
+  "evidenceArtifact": {
+    "id": 15249361017,
+    "bytes": 3482,
+    "sha256": "e11757bb584f26d5d1ef602f90319777a3ba99a724331fa7bc47f91a3b583ae4"
+  },
+  "timingObservations": 0,
+  "comparisonJobStatus": "skipped",
+  "diagnosis": "Dependency symlink changes esbuild root-relative source labels and source-map paths; not generated parser nondeterminism or a permitted product change",
+  "reproduction": "dependency-path-reproduction.json",
+  "proposedCorrection": "Workflow-only independent dependency directory hierarchy with hardlinked immutable files; runtime/harness remain 9da7; unchanged package allowlist and bundle digest",
+  "correctedWorkflowSha256": "d29c393c519430dbea6a59228f9171edd0c2b03803ea5ca6329b4abe9d4f4c27",
+  "publicationStatus": "unpublished pending parent review"
+}

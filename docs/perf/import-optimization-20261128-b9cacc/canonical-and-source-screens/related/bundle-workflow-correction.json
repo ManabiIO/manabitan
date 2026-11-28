@@ -1,0 +1,44 @@
+{
+  "branch": "perf/parser-worker-bundle-20261128-b9cacc",
+  "workflowHead": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+  "workflowTree": "e67b5ca99525d348fe6be969cf8dabc026602229",
+  "parent": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "runtimeCandidate": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "runtimeTree": "ee65e5a994b4017a443893dc7b0b268900538e94",
+  "harnessCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "changedFiles": [
+    {
+      "filename": ".github/workflows/import-parser-worker-bundle-b9cacc.yml",
+      "status": "modified",
+      "additions": 45,
+      "deletions": 6
+    }
+  ],
+  "workflowSha256": "d29c393c519430dbea6a59228f9171edd0c2b03803ea5ca6329b4abe9d4f4c27",
+  "originalFailedRun": 46104747758,
+  "originalTimingObservations": 0,
+  "runs": [
+    {
+      "id": 46110123879,
+      "name": "Lint GitHub Actions workflows",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110123879",
+      "runAttempt": 1
+    },
+    {
+      "id": 46110124022,
+      "name": "Import parser worker bundle qualification",
+      "status": "queued",
+      "conclusion": null,
+      "headSha": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/46110124022",
+      "runAttempt": 1
+    }
+  ],
+  "force": false,
+  "publishedAfterParentAndIndependentReview": true,
+  "correction": "Independent directory hierarchy with hardlinked immutable dependencies; exact all-target gate unchanged"
+}

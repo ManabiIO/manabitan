@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "auditHelperSha256": "4f9d4f9381b12f7b08547b669919e310ddf680aa98f50769a2098c51b81d9ce3",
+  "scope": "Independent read-only raw arithmetic, schedule, semantic-receipt and resource audit; no new native execution or observation",
+  "files": {
+    "acquisition-005/replay-analysis.json": {
+      "sha256": "e960a8d392f9222d32e1105251628744bd60cf8e6c5bf6d1c4bf08e44ced5e5a",
+      "bytes": 11220
+    },
+    "acquisition-005/observations.jsonl": {
+      "sha256": "57adea39ac5af30b9609d429d9d2a431781e3f3ec7eed988acb0a1b302763fb8",
+      "bytes": 66467
+    },
+    "acquisition-005/replay-registration.json": {
+      "sha256": "ed4d8b811c98da272d3d766c4f4d8ef16b3684ec072cf43726998f4b0e7decd3",
+      "bytes": 948
+    },
+    "acquisition-005/first-use-observations.jsonl": {
+      "sha256": "4b2bd148c34592a81aa3eceb9a1d6eefddec863059d0d6f1bada578030c88e58",
+      "bytes": 3444
+    },
+    "acquisition-005/blocks.jsonl": {
+      "sha256": "eb23efaf2de1c7d0be6f6c1065755088eeecd52b79e8a04af9c358d4b5cdbcb8",
+      "bytes": 1999
+    },
+    "acquisition-005/capture-manifest.json": {
+      "sha256": "fbdbc376ab1b28963d44c2a193cdeff242965578806fc4c8dcd78fdf565844d6",
+      "bytes": 23550
+    },
+    "evidence/replay-002-guard.json": {
+      "sha256": "c0022add32b64758763ddaf9f50c780d430b9bcd0ddefd6daef12a84607fab8b",
+      "bytes": 145472
+    },
+    "evidence/replay-002-console.log": {
+      "sha256": "b4ac3b7b4ee4394bca13e220e9afdf08fda1999e0848ad500a0478af2167921b",
+      "bytes": 163
+    },
+    "evidence/replay-002-guard.child.log": {
+      "sha256": "51cdb01fd94651375cd7bcff8efcf19dddc462fbcdca9fc015763570ed310505",
+      "bytes": 4138
+    },
+    "evidence/replay-001-guard.json": {
+      "sha256": "9601eed915d01ca131dcd744e81538278680e6c2a8ececc4fd3364f82a81f757",
+      "bytes": 1425
+    }
+  },
+  "nativeExecutionsByReviewer": 0,
+  "registrationSha256": "8aee7f3c605ec0b276b47e38f500800ff046dbaebab01baeb8cc684c02feffd6",
+  "scheduleSha256": "4fca181d615f994bb3a266609a0919b7084f8099dd055dfdf8707437d6c646c9",
+  "firstUse": {
+    "count": 9,
+    "orders": [
+      "ABC",
+      "BCA",
+      "CAB"
+    ],
+    "separateOnly": true,
+    "scope": "Fresh Node process, first module compile/instance and first scan_canonical invocation; ABI exports run before its clock; OS caches uncontrolled",
+    "perArm": {
+      "A": {
+        "compileMs": {
+          "values": [
+            3.673935,
+            2.7435920000000067,
+            2.991616999999991
+          ],
+          "median": 2.991616999999991
+        },
+        "instantiateMs": {
+          "values": [
+            0.09946099999999092,
+            0.06424000000001229,
+            0.05137099999998895
+          ],
+          "median": 0.06424000000001229
+        },
+        "kernelMs": {
+          "values": [
+            3.637483000000003,
+            4.975551999999993,
+            3.5294680000000085
+          ],
+          "median": 3.637483000000003
+        }
+      },
+      "B": {
+        "compileMs": {
+          "values": [
+            2.904506999999967,
+            2.726715000000013,
+            2.648621999999989
+          ],
+          "median": 2.726715000000013
+        },
+        "instantiateMs": {
+          "values": [
+            0.08335699999997814,
+            0.06720999999998867,
+            0.06721600000000194
+          ],
+          "median": 0.06721600000000194
+        },
+        "kernelMs": {
+          "values": [
+            3.1953980000000115,
+            3.2652909999999906,
+            3.129708999999991
+          ],
+          "median": 3.1953980000000115
+        }
+      },
+      "C": {
+        "compileMs": {
+          "values": [
+            2.800426999999985,
+            2.4964390000000094,
+            2.679448000000008
+          ],
+          "median": 2.679448000000008
+        },
+        "instantiateMs": {
+          "values": [
+            0.08172400000000835,
+            0.05510499999999752,
+            0.06744199999999978
+          ],
+          "median": 0.06744199999999978
+        },
+        "kernelMs": {
+          "values": [
+            3.753895,
+            3.2566290000000038,
+            3.169661999999988
+          ],
+          "median": 3.2566290000000038
+        }
+      }
+    }
+  },
+  "cohort": {
+    "firstUseCalls": 9,
+    "warmupBlocks": 3,
+    "warmupCalls": 108,
+    "measuredBlocks": 12,
+    "measuredCalls": 432,
+    "allReceiptsVerified": true,
+    "timedOutputMemoryReexecutionByReviewer": false,
+    "semanticEvidenceScope": "Every raw returned/verified receipt matched the frozen harness and manifest; the 12 baseline oracle snapshots were independently recomputed before replay"
+  },
+  "medianCorpusKernelMs": {
+    "A": 11.591712000003554,
+    "B": 10.891552999998567,
+    "C": 12.258399999996982
+  },
+  "candidateVsControl": {
+    "A": {
+      "medianSavingsMs": 0.5832239999995181,
+      "medianPairedChangePercent": -5.134788604722617,
+      "fasterBlocks": 8,
+      "savingsMs": [
+        0.8153620000002775,
+        0.3510859999987588,
+        3.6292559999983496,
+        2.402251999996224,
+        1.3857740000021295,
+        -0.9597049999993033,
+        1.1047450000078243,
+        -2.7760509999934584,
+        0.348946000005526,
+        4.256034999991243,
+        -5.73558800000319,
+        -5.511530999989191
+      ],
+      "changesPercent": [
+        -7.030200316593027,
+        -3.239376892852208,
+        -25.299402783802183,
+        -16.85985504990767,
+        -12.545950473639333,
+        9.55807979704424,
+        -9.535638417717651,
+        27.538461874148034,
+        -3.2265097779825447,
+        -26.124884637983627,
+        29.875401355851714,
+        33.64441396594242
+      ]
+    },
+    "C": {
+      "medianSavingsMs": 0.139854999990348,
+      "medianPairedChangePercent": -1.1661883385746086,
+      "fasterBlocks": 7,
+      "savingsMs": [
+        -0.23430499999722088,
+        0.039685999996436294,
+        30.90992499999811,
+        0.39559299999746145,
+        6.676533999998355,
+        -0.9251000000003842,
+        -0.1310620000003837,
+        -1.2456960000017716,
+        3.5591420000018843,
+        0.24002399998425972,
+        21.6401070000029,
+        -4.504003999998531
+      ],
+      "changesPercent": [
+        2.2212533478988217,
+        -0.37700424214258677,
+        -74.25648502003115,
+        -3.2315211878928385,
+        -40.86919548971587,
+        9.181790418368042,
+        1.2663452766348282,
+        10.728596974594407,
+        -25.376829818204214,
+        -1.9553724350066304,
+        -46.46386406784716,
+        25.90109894976078
+      ]
+    }
+  },
+  "identicalCodeControl": {
+    "medianSavingsMs": -0.5210659999947893,
+    "medianPairedChangePercent": 3.247480241588885,
+    "savingsMs": [
+      1.0496669999974984,
+      0.3114000000023225,
+      -27.28066899999976,
+      2.0066589999987627,
+      -5.290759999996226,
+      -0.034604999998919084,
+      1.235807000008208,
+      -1.5303549999916868,
+      -3.2101959999963583,
+      4.0160110000069835,
+      -27.37569500000609,
+      -1.0075269999906595
+    ],
+    "changesPercent": [
+      -9.050420887528677,
+      -2.8732047545195982,
+      190.172485281527,
+      -14.083443316781496,
+      47.89930603963035,
+      0.3446448141529057,
+      -10.666903861143705,
+      15.181141420414178,
+      29.682898738098928,
+      -24.65154165326919,
+      142.59390240723536,
+      6.150315669024864
+    ]
+  },
+  "criteria": {
+    "A": {
+      "absoluteSavings": false,
+      "percentageSavings": false,
+      "fasterBlocks": false
+    },
+    "C": {
+      "absoluteSavings": false,
+      "percentageSavings": false,
+      "fasterBlocks": false
+    },
+    "control": {
+      "milliseconds": false,
+      "percentage": false
+    }
+  },
+  "passesRegisteredContinuationGate": false,
+  "resource": {
+    "sampleCount": 495,
+    "positiveLaunchedSamples": 494,
+    "observedOwnedProcesses": 11,
+    "preflightCpuBusyFraction": 0.005919348871624153,
+    "maximumInterSampleGapSeconds": 0.14002598200022476,
+    "medianInterSampleGapSeconds": 0.05049242549921473,
+    "firstSampleGapSeconds": 0.0028168930002721027,
+    "lastSampleToReceiptGapSeconds": 0.05152865499985637,
+    "maxSampledRssBytes": 275877888,
+    "minimumSampledMemAvailableBytes": 3070513152,
+    "maxTemporaryBytes": 51268923,
+    "actualPostReceiptTemporaryBytes": 51412744,
+    "scope": "Stage resource monitoring only; this is not a browser memory or complete-import timing observation"
+  },
+  "earlierEligibility": {
+    "status": "preflight-blocked",
+    "cpuBusyFraction": 0.2187964338781575,
+    "childLaunched": false,
+    "timingObservations": 0
+  },
+  "allRawInputsUnchanged": true,
+  "stage3Authorized": false,
+  "conclusion": "Registered continuation screen failed; no stage3, full-import gain claim, or PR is supported by this cohort"
+}

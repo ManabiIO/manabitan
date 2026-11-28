@@ -1,0 +1,590 @@
+{
+  "schemaVersion": 1,
+  "scope": "Every listed source is byte-preserved; identical bytes stored once with every original path mapped",
+  "records": [
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-clean-candidate/identity.json",
+      "storedAt": "product/identity.json",
+      "bytes": 4366,
+      "sha256": "6eabefea0811331469afacbc743c75a1710ace1b4b02f55eeb8cc2e99380704e",
+      "role": "clean-six-file-product",
+      "sourceCommit": "c0d62d7ef79e63fcf5c04968f2eab579ce3240a8",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-clean-candidate/product.patch",
+      "storedAt": "product/product.patch",
+      "bytes": 12869,
+      "sha256": "b91526cb0c65a1b0007196c006f4218d751617ced763edc4bd38ff7b9f21ad44",
+      "role": "clean-six-file-product",
+      "sourceCommit": "c0d62d7ef79e63fcf5c04968f2eab579ce3240a8",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-startup.mjs",
+      "storedAt": "startup/parser-bundle-startup.mjs",
+      "bytes": 15022,
+      "sha256": "bc42cdf2a8f47f4b348aa57006a53c82c13b38cc1548e4947146186bf6dcf660",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-startup.json",
+      "storedAt": "startup/parser-bundle-startup.json",
+      "bytes": 1109324,
+      "sha256": "01857856b81f55e0550f7fe8ce3f866b09f4f7d812b48a63d8f9667d39b32312",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-startup.metafile.json",
+      "storedAt": "startup/parser-bundle-startup.metafile.json",
+      "bytes": 11460,
+      "sha256": "daea2d403cfdf3216e9353a880f3ec9526e576995ece292d97247642642ee283",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-startup-measure.mjs",
+      "storedAt": "startup/parser-startup-measure.mjs",
+      "bytes": 7057,
+      "sha256": "d53de30dc0916347143be55e3bb3eb4e4595b96e41308f57ca4ba2d797631699",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-startup-baseline.json",
+      "storedAt": "startup/parser-startup-baseline.json",
+      "bytes": 49383,
+      "sha256": "32e693f3d503658f2e8617eca28f7f4625ccc1a9fcfb04cf327ed287adbdd631",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-startup-graphs.json",
+      "storedAt": "startup/parser-startup-graphs.json",
+      "bytes": 12178,
+      "sha256": "81b493419c713977f2d2931f08595f998efa3efc3b8751544a951be45f70e1ae",
+      "role": "local-component-or-loader-screen-on-baseline",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/current-profile/parser-bundle-critical-path.md",
+      "storedAt": "critical-path/parser-bundle-critical-path.md",
+      "bytes": 4748,
+      "sha256": "a30920164e1bd706292af800149d6e53e679f43858f9c1eccaba84f1c327c209",
+      "role": "existing-exact-baseline-trace-analysis",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/current-profile/parser-bundle-critical-path-provenance.json",
+      "storedAt": "critical-path/parser-bundle-critical-path-provenance.json",
+      "bytes": 627,
+      "sha256": "33ba7f6e5a604a3b05b41abda014f97cbcbed5e843d3cd44761190e792552340",
+      "role": "existing-exact-baseline-trace-analysis",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/current-profile/parser-startup-parent-cpu.json",
+      "storedAt": "critical-path/parser-startup-parent-cpu.json",
+      "bytes": 43129,
+      "sha256": "81a8c570da13412ab0a54f9ede9e439321dd636ef2f3eeacef679345095b6530",
+      "role": "existing-exact-baseline-trace-analysis",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/current-profile/worker-module-startup.json",
+      "storedAt": "critical-path/worker-module-startup.json",
+      "bytes": 9805,
+      "sha256": "846d02c6ae5b737d5301efc4d8a2286a1b938313ed0fd042bc8b5277eb383921",
+      "role": "existing-exact-baseline-trace-analysis",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/current-profile/parser-module-startup-audit.json",
+      "storedAt": "critical-path/parser-module-startup-audit.json",
+      "bytes": 8515,
+      "sha256": "4bc28b014e5f130a9a9edaf0bb9d039041af40e2f70d66ae464e1d1657bf9494",
+      "role": "existing-exact-baseline-trace-analysis",
+      "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-independent-source-review.json",
+      "storedAt": "critical-path/independent-source-review.json",
+      "bytes": 4936,
+      "sha256": "472f11bb7b21b654ce2d10dbeeb9fbcd6473eb665814aa92d0619ec5a0b97dd3",
+      "role": "source-only-review",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-worker-bundle-publication.json",
+      "storedAt": "product/original-publication.json",
+      "bytes": 3733,
+      "sha256": "acf1581dd1bf475649a52cf1016449cf8286d5b38537d0c323661e08c1ad39ac",
+      "role": "frozen-runtime-publication-and-validation-history",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/hosted/parser-worker-bundle-experiment.json",
+      "storedAt": "product/original-experiment.json",
+      "bytes": 386,
+      "sha256": "75fb56d11bec1838d3eedde72451816acd7f9b0b71a9996a593aa84f7f60ef05",
+      "role": "original-failed-qualification-registration",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/diagnosis.json",
+      "storedAt": "validation-failure/diagnosis.json",
+      "bytes": 1959,
+      "sha256": "66430cdef154774255ed1fc951b76b946209c278122bee8bfce9c0f9a97fed2b",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/final-jobs.json",
+      "storedAt": "validation-failure/final-jobs.json",
+      "bytes": 3306,
+      "sha256": "bf854be9be87887079f4197babf96fe26bcd0d81d25d2c95ef43f84f9d995f56",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/workflow-correction.patch",
+      "storedAt": "validation-failure/workflow-correction.patch",
+      "bytes": 5735,
+      "sha256": "baa8ac1d60f3f7dd7c65394aa41f6feb05705faf10c14252ad7ee9d0cd1089ce",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/workflow-correction-static.json",
+      "storedAt": "validation-failure/workflow-correction-static.json",
+      "bytes": 1035,
+      "sha256": "c1c2106512ddc9296a60afebcf7c01a8f6fecd4287a12a1ee7720d96b7291ec9",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/workflow-correction-publication.json",
+      "storedAt": "validation-failure/workflow-correction-publication.json",
+      "bytes": 1653,
+      "sha256": "a993b1896549acce7b965f3342e0fc1a81ad6b7ec20fac57c1854a8a6d37eaf1",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/reproduce-dependency-paths.py",
+      "storedAt": "validation-failure/reproduce-dependency-paths.py",
+      "bytes": 3910,
+      "sha256": "8ba9232e5a3881478a4014f5b9ca679a4f6c270e42cc1a4c5bae35336efcdcc3",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/dependency-path-reproduction.json",
+      "storedAt": "validation-failure/dependency-path-reproduction.json",
+      "bytes": 1992,
+      "sha256": "e0134de05a53e72727f4d4113e5d28fc77cc7ec60cf384e6fc3e3acacca2d42e",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/original-audit-config.json",
+      "storedAt": "validation-failure/original-audit-config.json",
+      "bytes": 1457,
+      "sha256": "70c49f4c0bc288497ac246482bb24f9c33b1c16c4bebf2385e4050276175c335",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact/bundle.json",
+      "storedAt": "validation-failure/artifact/bundle.json",
+      "bytes": 4539,
+      "sha256": "f9eb7830e7b37e5cff8476ab8ada40049dd42cc3aeee2c9b1e56e28e4899e6dc",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact/esbuild-metafile.json",
+      "storedAt": "validation-failure/artifact/esbuild-metafile.json",
+      "bytes": 11461,
+      "sha256": "4fa9af6549de6751a69686566682aeed9518ea8c555217d719cc2e0f2ef5f908",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact/candidate-build.log",
+      "storedAt": "validation-failure/artifact/candidate-build.log",
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact/baseline-build.log",
+      "storedAt": "validation-failure/artifact/candidate-build.log",
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/dependency-path-reproduction-002/build-one.mjs",
+      "storedAt": "validation-failure/dependency-path-reproduction-002/build-one.mjs",
+      "bytes": 473,
+      "sha256": "bcb6a0e1969fd5b926d5a0f2c8261c96020a80f7a14959ef9471204f5ea0df54",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/dependency-path-reproduction-002/ucs2length.js.diff",
+      "storedAt": "validation-failure/dependency-path-reproduction-002/ucs2length.js.diff",
+      "bytes": 476,
+      "sha256": "7f0de08da6dacb453b48f0fa92339be74ef0460c75d9c4924b41b4371ef8e607",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/dependency-path-reproduction-002/ucs2length.js.map.diff",
+      "storedAt": "validation-failure/dependency-path-reproduction-002/ucs2length.js.map.diff",
+      "bytes": 2280,
+      "sha256": "abd0d4a2ac5195722dbfe1a5aa24c641114e25bd1ab9369c0af15b7dc20fb167",
+      "role": "original-validation-failure-and-workflow-only-correction",
+      "sourceCommit": "9da7dedd17535b4a0f8edb97e56756049bbad7a7",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-worker-bundle-audit-config.json",
+      "storedAt": "validation-failure/final-audit-config.json",
+      "bytes": 1519,
+      "sha256": "4edecd251b3c2429fc8e2a4c4c65cfa5d576257597e514b3fafcc83252157dfe",
+      "role": "corrected-workflow-runtime-distinct-audit-config",
+      "sourceCommit": "7d77b3858b4f3f37e651f770f8f3a92c59d77036",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/.github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml",
+      "storedAt": "confirmation/.github/workflows/import-parser-worker-bundle-confirmation-b9cacc.yml",
+      "bytes": 27138,
+      "sha256": "61d10be82eec12f3fb218cd2d69e09729f68b7bcf3cfb27610d3d24310cca7e0",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/confirmation-registration-evidence/static-validation.json",
+      "storedAt": "confirmation/confirmation-registration-evidence/static-validation.json",
+      "bytes": 3643,
+      "sha256": "434ad024c163495d195fb54fa465709278123963e0484611e460a0738e2ff5d6",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-chromium-restart-report.mjs",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-chromium-restart-report.mjs",
+      "bytes": 7749,
+      "sha256": "fc4b8ca0a1535a4f4ff67144bc6fff538982b86afc8d483c76e84bcbb155b666",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-firefox-report.mjs",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-firefox-report.mjs",
+      "bytes": 15212,
+      "sha256": "80356e1eaeaf20d29f494cf9fa7895141d0f68dee2f056ed907094c9dbc4921f",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-jmdict-confirmation.py",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/assert-jmdict-confirmation.py",
+      "bytes": 6242,
+      "sha256": "a0c24eaf67dd49e48ce203e06780f70bf45f32eab8e66362f693d9d327625652",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py",
+      "bytes": 4987,
+      "sha256": "077bcc38e2f8997f4b3f9516eb952e235c3e4c217387608a0dbb3407a7045f2d",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/record-runtime-identity.py",
+      "bytes": 4792,
+      "sha256": "e9da4d580cb7e7634d76f3e22156859c1566d7a9f7c4aa92cef9591e0d92f5bd",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/registration.json",
+      "bytes": 4806,
+      "sha256": "bddab0dbd3cc9b97c3fcbb97875e05fa407f446872c0c513eb93c4af16e9c291",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/local-static-validation.json",
+      "storedAt": "confirmation/local-static-validation.json",
+      "bytes": 490,
+      "sha256": "c73521db4989bfc160a310f5cbd03119da7a5bfd89cfddac94475ccce2a29b18",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/local-static-validation.log",
+      "storedAt": "confirmation/local-static-validation.log",
+      "bytes": 4692,
+      "sha256": "88b9952f550b684cccd8ac438dce0b904872dcb4d7810957c68090458de6df36",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-review-50fcb/source-manifest.json",
+      "storedAt": "confirmation/source-manifest.json",
+      "bytes": 2013,
+      "sha256": "d99729cb993586844b2fa222ba1ff8e4ec351c9c40c63c8961df59543d61d814",
+      "role": "final-frozen-confirmation-and-existing-41-static-checks",
+      "sourceCommit": "50fcb1152888d8ec4ed1c4d3d1ecff3876f34185",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-plan.md",
+      "storedAt": "confirmation/history/parser-bundle-confirmation-plan.md",
+      "bytes": 7737,
+      "sha256": "d14aff3875c62c92e0608f8a9fcf847c9879acb5fd984d7817172c77702e080e",
+      "role": "original-prospective-plan-not-final-source",
+      "sourceCommit": null,
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-registration.json",
+      "storedAt": "confirmation/history/parser-bundle-confirmation-registration.json",
+      "bytes": 591,
+      "sha256": "220ec29a341f725f94176ff35bf5e316705d85a41904b59f24751a5b4143b101",
+      "role": "original-prospective-plan-not-final-source",
+      "sourceCommit": null,
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/.github/workflows/import-analysis-b9cacc-v2.yml",
+      "storedAt": "readers/initial/.github/workflows/import-analysis-b9cacc-v2.yml",
+      "bytes": 1618,
+      "sha256": "deef251d62fbfa6f427f3373968db050d477f420654fe4ae65ff7674615caa88",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-analysis-b9cacc-experiments.json",
+      "storedAt": "readers/initial/dev/perf/import-analysis-b9cacc-experiments.json",
+      "bytes": 3988,
+      "sha256": "82ab57d37b683eed39e8ddc1dc3a09dd55298deed511f888f5c8aa824d1508cb",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-analysis-b9cacc-review.json",
+      "storedAt": "readers/initial/dev/perf/import-analysis-b9cacc-review.json",
+      "bytes": 2235,
+      "sha256": "e407c0a929e77c05451e443436f43af65ba910f146414dd35b33580e32b2b8f1",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-analysis-b9cacc-v2.py",
+      "storedAt": "readers/initial/dev/perf/import-analysis-b9cacc-v2.py",
+      "bytes": 34785,
+      "sha256": "02e55354804c9c44275c8aaacb95a9d3a5949865dd74e707caff54b9c0dec650",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/test_import_analysis_b9cacc.py",
+      "storedAt": "readers/initial/dev/perf/test_import_analysis_b9cacc.py",
+      "bytes": 7544,
+      "sha256": "9cc2062e18b241f4bce6e037cbca335cf4ba076e4c0316b4cd8baa9c465fb081",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/negative-controls.log",
+      "storedAt": "readers/initial/negative-controls.log",
+      "bytes": 2386,
+      "sha256": "d147abfe5df2aa7f8e2059156d9a16ef25beaee8b375c3bc54a3495e084cab3f",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/test/perf/dictionaries.lock.json",
+      "storedAt": "readers/initial/test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/verification.json",
+      "storedAt": "readers/initial/verification.json",
+      "bytes": 1474,
+      "sha256": "44120582aa292507caf5e0df4991d4d2e9a33be8d0faefbab4f708d70c6b0919",
+      "role": "frozen-six-pair-reader-and-existing-14-controls",
+      "sourceCommit": "c7a18f22ff374503bbe73596552bb9d9f628fc2b",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "storedAt": "readers/support/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "role": "source-hash-pinned-shared-reader-dependency",
+      "sourceCommit": "a00869305bba93c7c957236868ea3b81beedd1ec",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "storedAt": "readers/support/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "role": "source-hash-pinned-shared-reader-dependency",
+      "sourceCommit": "a00869305bba93c7c957236868ea3b81beedd1ec",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "storedAt": "readers/support/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "role": "source-hash-pinned-shared-reader-dependency",
+      "sourceCommit": "a00869305bba93c7c957236868ea3b81beedd1ec",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "storedAt": "readers/support/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "role": "source-hash-pinned-shared-reader-dependency",
+      "sourceCommit": "a00869305bba93c7c957236868ea3b81beedd1ec",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-reader-proposed/dev/perf/import-analysis-parser-bundle-confirmation.json",
+      "storedAt": "readers/future/dev/perf/import-analysis-parser-bundle-confirmation.json",
+      "bytes": 3136,
+      "sha256": "a4c97efa00d89cf56cdfda9511c002b7d3a8496ec0b489c9accda8c153631ba5",
+      "role": "frozen-unbound-twelve-pair-reader-and-existing-15-controls",
+      "sourceCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-reader-proposed/dev/perf/import-analysis-parser-bundle-confirmation.py",
+      "storedAt": "readers/future/dev/perf/import-analysis-parser-bundle-confirmation.py",
+      "bytes": 37453,
+      "sha256": "a2570ffbfc35be6f73f6b05a1a6d52131327f64bf31bb8146e0ca87a0fcad838",
+      "role": "frozen-unbound-twelve-pair-reader-and-existing-15-controls",
+      "sourceCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-reader-proposed/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py",
+      "storedAt": "confirmation/dev/perf/parser-worker-bundle-confirmation-20261128-b9cacc/confirmation_criteria.py",
+      "bytes": 4987,
+      "sha256": "077bcc38e2f8997f4b3f9516eb952e235c3e4c217387608a0dbb3407a7045f2d",
+      "role": "frozen-unbound-twelve-pair-reader-and-existing-15-controls",
+      "sourceCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-reader-proposed/reader-static-validation.json",
+      "storedAt": "readers/future/reader-static-validation.json",
+      "bytes": 895,
+      "sha256": "c3c09f863cc63b8a9d332a13afa11e4f052aa30906804569413d7d50917be55c",
+      "role": "frozen-unbound-twelve-pair-reader-and-existing-15-controls",
+      "sourceCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+      "bytePreserved": true
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-confirmation-reader-proposed/test/perf/dictionaries.lock.json",
+      "storedAt": "readers/initial/test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "role": "frozen-unbound-twelve-pair-reader-and-existing-15-controls",
+      "sourceCommit": "91f69660bc63d0faf2fed1fdeb2bb1919a272974",
+      "bytePreserved": true
+    }
+  ],
+  "excluded": [
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-startup.bundle.js",
+      "bytes": 174292,
+      "sha256": "52c328efdee007eb5bd64227c19421dda9eac984d96a27df3a54837c9d5b6be0",
+      "reason": "Generated component bundle excluded; exact hash retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/validation-artifact.zip",
+      "bytes": 3482,
+      "sha256": "e11757bb584f26d5d1ef602f90319777a3ba99a724331fa7bc47f91a3b583ae4",
+      "reason": "Reproducible generated/vendor assets excluded; public artifact identity retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/job-140854868947.log",
+      "bytes": 1070756,
+      "sha256": "cd9c703f322171529b8dbe8f0c41ebef9e9a356a7de4673d65355afc54f119e9",
+      "reason": "Full auxiliary job transport log omitted; diagnosis, build logs, public job ID and hash retained"
+    },
+    {
+      "source": "/workspace/scratch/b9cacc3542c2/analysis/parser-bundle-validation-failure/artifact-metadata.json",
+      "bytes": 771,
+      "sha256": "e19e3bc6433f2424013878effe8a3dee824c01932229b8ece8cdb1889bf0e6f2",
+      "reason": "Auxiliary transport/download URLs omitted; selected public identity fields preserved"
+    }
+  ]
+}

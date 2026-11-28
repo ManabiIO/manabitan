@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "scope": "Source-only synthetic reader controls; no artifact API, import, browser or timing acquisition",
+  "supportRoot": "/workspace/scratch/b9cacc3542c2/manabitan",
+  "checks": [
+    "AB exact12pair+4control+2warmup schedule",
+    "AB paired statistics equal frozen criteria",
+    "AB incomplete/reordered cohort rejected",
+    "BA exact12pair+4control+2warmup schedule",
+    "BA paired statistics equal frozen criteria",
+    "BA incomplete/reordered cohort rejected",
+    "unbound future run/head rejected before API",
+    "rejected pairs",
+    "rejected baseline",
+    "rejected candidate",
+    "rejected sourceBranch",
+    "rejected workflowHead",
+    "rejected runId",
+    "rejected expectedPackageEntries",
+    "rejected expectedAddedPackageEntries"
+  ],
+  "controlCount": 15,
+  "futureRunAndHeadRemainUnbound": true,
+  "initialSixPairReaderUnmodified": true
+}
