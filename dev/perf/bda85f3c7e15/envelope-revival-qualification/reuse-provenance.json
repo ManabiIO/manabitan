@@ -1,0 +1,26 @@
+{
+  "status": "source-bound unpublished draft; no source gate or acquisition",
+  "sourceDirectory": "/workspace/scratch/bda85f3c7e15/prior-audit/qualification-plan",
+  "files": [
+    {
+      "staged": "reuse/import-qualification-bda85f3c7e15.py",
+      "publishAs": "dev/perf/import-qualification-bda85f3c7e15.py",
+      "sha256": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22"
+    },
+    {
+      "staged": "reuse/import_qualification_controls.py",
+      "publishAs": "dev/perf/bda85f3c7e15/import_qualification_controls.py",
+      "sha256": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43"
+    },
+    {
+      "staged": "reuse/test_import_qualification_controls.py",
+      "publishAs": "dev/perf/bda85f3c7e15/test_import_qualification_controls.py",
+      "sha256": "4eb52b18b61c4b18ca60d03bfdb632f9cebf8f6b94caaedc3cb62101b001a4fd"
+    }
+  ],
+  "memoryModules": "Use existing exact9e10 modules; all four hashes bound in plan",
+  "mainFourVariantDraftModified": false,
+  "candidateSource": "c32168f66de7407592d048b7cb2459b92573abc4",
+  "candidateTree": "af54c1cd60f2b537bc13153a2e209d6aab33988a",
+  "sourceBinding": "source-binding-provenance.json"
+}

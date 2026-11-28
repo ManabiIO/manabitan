@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "status": "source-registered-unpublished-source-gate-not-run",
+  "createdAtUtc": "2026-11-28T06:12:23.634652+00:00",
+  "remote": {
+    "branch": "perf/import-envelope-worker-bda85f3c7e15",
+    "commit": "c32168f66de7407592d048b7cb2459b92573abc4",
+    "tree": "af54c1cd60f2b537bc13153a2e209d6aab33988a",
+    "parents": [
+      "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+    ],
+    "url": "https://github.com/ManabiIO/manabitan/commit/c32168f66de7407592d048b7cb2459b92573abc4",
+    "identityVerifiedWith": "GitHub git/commits GET; tree equals parent-verified local source manifest"
+  },
+  "localSourceManifest": {
+    "originalPath": "lookup-worker-source-manifest.json",
+    "sha256": "9a55153bc631a4e65dd79f73f8e457332fd9df2ee99e4867ac69a8bb385b4242",
+    "content": {
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "commit": "8415a0843a7e467f56bbe6c43135f7cf3555fdd7",
+      "tree": "af54c1cd60f2b537bc13153a2e209d6aab33988a",
+      "changes": [
+        {
+          "status": "M",
+          "path": "eslint.config.js",
+          "blob": "6f80da3c9f923065012c1f69829c7fc6d034ff91",
+          "sha256": "96c6c2fd4d4c51b43a76da116d853d14c003c04553cda325b2dde56968bfc0c2",
+          "bytes": 39471
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "blob": "a78445db5b3beb2f3c08fcb312ba54232874ab5b",
+          "sha256": "75c13c88583ef1918e1fbd1ef968bccdd5b0460950953955b37f9f39003c6213",
+          "bytes": 613673
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/dictionary-importer.js",
+          "blob": "5bad31de21b9c0f6f13d7ec406a6b32211c30466",
+          "sha256": "2e049fd54a943c97028f01da927a67a6ae43b8fd0487ad5b1c832bf673c9705e",
+          "bytes": 345854
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "blob": "fffc4edc5201f7509047339ea4b3f6a6c1e75ef9",
+          "sha256": "6120ddd7f1f5b365ed0924358656dc903bbeab9b13d02868a316f4173790dd4e",
+          "bytes": 210613
+        },
+        {
+          "status": "A",
+          "path": "ext/js/dictionary/term-lookup-index-ownership.js",
+          "blob": "267a01526c5bdbe07c39bc801c1634443db5bf58",
+          "sha256": "7241d0d7e977de8fb847bc477677b36bb581eae8dc289dad6a6b561d6a2bad01",
+          "bytes": 23329
+        },
+        {
+          "status": "A",
+          "path": "ext/js/dictionary/term-record-import-index-chunk.js",
+          "blob": "5afefb319b05dd839b822fcdd6811fecc9bd8713",
+          "sha256": "b2107c52b90af130a7d8e3d837391d0a8ccdecbf770583b1f584d800e09b67df",
+          "bytes": 2688
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/term-record-import-index-worker-client.js",
+          "blob": "1656e6b77a6fd2246355754575ecfd96b8b4127e",
+          "sha256": "f1cfb95759bc01ba94f396979518628ad51467605ef875641187bf00afdf003e",
+          "bytes": 19357
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/term-record-import-index-worker.js",
+          "blob": "dfb5b4507d515156df3bb6ef8a80e59a891a258f",
+          "sha256": "340fa23b659f80cc1e991a2141be4fb900d4c9d78298cf8a74b80a49e392c5ba",
+          "bytes": 4100
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/term-record-import-index-writer.js",
+          "blob": "6c05cf19e7c565b916a395e188f9b13c00c5e862",
+          "sha256": "10d21a735b9b02ee4e11750038c05538590c3253b04f1e26b4f8099bbfdc0f74",
+          "bytes": 14290
+        },
+        {
+          "status": "M",
+          "path": "ext/js/dictionary/term-record-opfs-store.js",
+          "blob": "ccadb88fae70caaa387c4681dafa35c6bc5ab3a3",
+          "sha256": "ed90485da91fa7186608254010e1ec53ffec629cb42d25e15ac4fae5b4809c3b",
+          "bytes": 374819
+        },
+        {
+          "status": "A",
+          "path": "test/term-record-import-index-owned-envelope.test.js",
+          "blob": "d0f83d52fd27ea872b51e0f2e955953a3c60b333",
+          "sha256": "0e1e24f365899cbf505793de5e3a6d8d1ad44a7a21e23703d88bc8812a1396a3",
+          "bytes": 33262
+        },
+        {
+          "status": "A",
+          "path": "test/term-record-import-index-parser-ownership.test.js",
+          "blob": "a312a08a082eab89ec084be9c92239e646aca1c8",
+          "sha256": "a18aaa47956acdabe0d77bbb6e10824f1a27d1786dcf29635d1bf5f8bb48f21c",
+          "bytes": 12506
+        },
+        {
+          "status": "A",
+          "path": "test/term-record-import-index-projected-media.test.js",
+          "blob": "b278a4a1be33f4c53cd5e882537139274fd11e5b",
+          "sha256": "61b903fabb4024fc9abe5257c2e68fee89727781399fa9ee096eada967f11d65",
+          "bytes": 8006
+        },
+        {
+          "status": "M",
+          "path": "test/term-record-import-index-worker-client.test.js",
+          "blob": "8ba2edf6fdebfde9ea1fc77f99122b3abf27d360",
+          "sha256": "c1149a32e07862459857aab0148b8c892bd0d5cab66c6e785fa087aa39dd0bd7",
+          "bytes": 16048
+        },
+        {
+          "status": "M",
+          "path": "test/term-record-import-index-worker.test.js",
+          "blob": "0a0124a9c85fca137e48781694200b04870f65b6",
+          "sha256": "755cb017641e0d47bc05519ca1496f59bf71b4e04bab508decc4a0a8cd1a30b1",
+          "bytes": 25545
+        },
+        {
+          "status": "M",
+          "path": "test/term-record-import-index-writer.test.js",
+          "blob": "590d9606b0dd891ec1a49e1bb36fc93df9666f2b",
+          "sha256": "565ac2c69fa49a29f0a2dedba47ceea0a832eedfbe4be19b4cfdf42354546cdd",
+          "bytes": 21173
+        },
+        {
+          "status": "M",
+          "path": "test/term-record-opfs-store.test.js",
+          "blob": "4736b0c168156023f962c9f7c8c71310bcbfdcc4",
+          "sha256": "618d3470d13b9a57530f0eee7c71198458003be2d6c9c84c154dcf41541a4213",
+          "bytes": 354436
+        },
+        {
+          "status": "A",
+          "path": "test/util/import-index-chunk-fixture.js",
+          "blob": "86d7147b4480a967fabeb8592d8fbebb4e1cf713",
+          "sha256": "7992ff64600b74576dbf05763cb933033a2c2c37b2c875e29f4110ea4f3f54e2",
+          "bytes": 5011
+        },
+        {
+          "status": "A",
+          "path": "test/util/import-index-protocol-fixture.js",
+          "blob": "ffb8dd54d2952dc52240a100b42af1b7fe04b2b5",
+          "sha256": "91ccd5a2b3c866a7555376008314015408b38c71ad3a9a98a9a6167f591b795c",
+          "bytes": 2121
+        }
+      ],
+      "counterPhase": "bulk-finalization",
+      "counterKeys": [
+        "termRecordLookupIndexWorkerOwnedEnvelopeCount",
+        "termRecordLookupIndexWorkerOwnedEnvelopeBytes"
+      ],
+      "validation": {
+        "finalOwnership": {
+          "passed": 102,
+          "files": 3,
+          "log": "/workspace/scratch/bda85f3c7e15/lookup-worker-final-ownership-tests.log"
+        },
+        "finalProtocolAffected": {
+          "passed": 22,
+          "skipped": 55,
+          "files": 3,
+          "log": "/workspace/scratch/bda85f3c7e15/lookup-worker-final-protocol-tests.log"
+        },
+        "finalSparseRoutes": {
+          "passed": 4,
+          "skipped": 203,
+          "files": 1,
+          "log": "/workspace/scratch/bda85f3c7e15/lookup-worker-final-route-tests.log"
+        },
+        "existingProtocolEarlier": {
+          "passed": 55,
+          "note": "Passed before fixture filename collision was fixed and affected22 were rerun; no runtime defect exposed."
+        },
+        "scopedLint": {
+          "initialLog": "/workspace/scratch/bda85f3c7e15/lookup-worker-scoped-eslint.log",
+          "fixedLog": "/workspace/scratch/bda85f3c7e15/lookup-worker-scoped-eslint-fixed.log",
+          "finalExit": 0,
+          "note": "Initial19-path pass found48 errors on10files; those10 passed after narrow fixes, remaining9 unchanged and clean."
+        }
+      },
+      "notRun": [
+        "Full TypeScript",
+        "Full unit suite",
+        "Build dry-run",
+        "Browser or dictionary corpus benchmarks",
+        "CI"
+      ],
+      "reviewCheckpoint": "d30d1ec225e0141e757e0178bd30016f924da116"
+    }
+  },
+  "localManifestCheck": {
+    "filesIndependentlyHashed": 19,
+    "allByteCountsAndSha256Match": true,
+    "head": "8415a0843a7e467f56bbe6c43135f7cf3555fdd7",
+    "tree": "af54c1cd60f2b537bc13153a2e209d6aab33988a"
+  },
+  "registration": {
+    "sha": "c32168f66de7407592d048b7cb2459b92573abc4",
+    "tree": "af54c1cd60f2b537bc13153a2e209d6aab33988a",
+    "expectedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/dictionary-importer.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/term-lookup-index-ownership.js",
+      "js/dictionary/term-record-import-index-chunk.js",
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "expectedAddedPackageEntries": [
+      "js/dictionary/term-lookup-index-ownership.js",
+      "js/dictionary/term-record-import-index-chunk.js"
+    ],
+    "lintPaths": [
+      "eslint.config.js",
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/dictionary-importer.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-lookup-index-ownership.js",
+      "ext/js/dictionary/term-record-import-index-chunk.js",
+      "ext/js/dictionary/term-record-import-index-worker-client.js",
+      "ext/js/dictionary/term-record-import-index-worker.js",
+      "ext/js/dictionary/term-record-import-index-writer.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/term-record-import-index-owned-envelope.test.js",
+      "test/term-record-import-index-parser-ownership.test.js",
+      "test/term-record-import-index-projected-media.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js",
+      "test/util/import-index-chunk-fixture.js",
+      "test/util/import-index-protocol-fixture.js"
+    ],
+    "focusedTests": [
+      "test/term-record-import-index-owned-envelope.test.js",
+      "test/term-record-import-index-parser-ownership.test.js",
+      "test/term-record-import-index-projected-media.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js"
+    ]
+  },
+  "counterBinding": {
+    "phase": "bulk-finalization",
+    "countField": "termRecordLookupIndexWorkerOwnedEnvelopeCount",
+    "bytesField": "termRecordLookupIndexWorkerOwnedEnvelopeBytes",
+    "event": "Confirmed against frozen source c32168f66de7407592d048b7cb2459b92573abc4, tree af54c1cd60f2b537bc13153a2e209d6aab33988a: increment only after actual WorkerImportIndexWriter owned-parts write acknowledgement (including any periodic flush required by the unchanged writer), completed40-byte header receipt validation and route-header patch. Count full logical chunk.byteLength. Registration/admission and eager/local writes do not count.",
+    "sourceChain": [
+      "term-record-import-index-worker-client.js validates complete header receipts before its write promise settles",
+      "term-record-opfs-store.js patches preserved route headers then increments actual-worker count and full logical chunk.byteLength",
+      "term-record-opfs-store.js endImportSession exposes count/bytes",
+      "dictionary-database.js finishBulkImport copies count/bytes into finalization details",
+      "dictionary-importer.js copies finalization details into the bulk-finalization ordinary phase"
+    ],
+    "legacyOrInactive": 0,
+    "ordinaryParticipationMeasuredYet": false
+  },
+  "pendingSnapshot": {
+    "directory": "before-source-binding",
+    "files": {
+      "README.md": "5fab6bb3de97a7f909ca541db5b0591607d77ee64fec1c8078cb670814efd032",
+      "draft-verification.json": "c3adf8fbf77236b385d35ac7f42220bac9386ed956466f154a53a6ceb251b3ee",
+      "envelope-revival-plan.json": "dde510113ea4e6db18501363ac8641993626fad0938bb4f6e6c260568de12e17",
+      "import-envelope-revival-qualification-bda85f3c7e15.yml": "4f2ebd697e12b24a9ed72c11622a5b8412ce5ac2d41e381d672740765f65ebe8",
+      "reuse/import-qualification-bda85f3c7e15.py": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22",
+      "reuse/import_qualification_controls.py": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43",
+      "reuse/test_import_qualification_controls.py": "4eb52b18b61c4b18ca60d03bfdb632f9cebf8f6b94caaedc3cb62101b001a4fd",
+      "reuse-provenance.json": "39c90c79f4d3759af1b0945afee7a65254f76046201558096229bfe2c8c772ec",
+      "revival_qualification.py": "da8c9bf4ab4fa1cbf0dc574410421e44b8e75678f34e2fce767931e849a4d37c",
+      "test_revival_qualification.py": "8fe103a8e3d8967a5cb5ecaf03a48ee4b478f7253dbeef585eb86ba3d0f51b50"
+    },
+    "count": 10,
+    "publishedByThisMap": false,
+    "scope": "Exact previous local draft, also retained in prior functions.store checkpoint; historical snapshot not included in ready publication map."
+  },
+  "invariants": {
+    "wrapperByteIdentical": true,
+    "acquisitionDriverByteIdentical": true,
+    "controlsByteIdentical": true,
+    "memoryModulesByteIdentical": true,
+    "matrixUnchanged": true,
+    "statisticsUnchanged": true,
+    "failurePolicyUnchanged": true,
+    "sourceGateRun": false,
+    "acquisitionLaunched": false,
+    "publishedByThisPreparation": false
+  }
+}

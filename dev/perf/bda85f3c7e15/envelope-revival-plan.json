@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "status": "READY_FOR_PROSPECTIVE_ACQUISITION",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": {
+    "sha": "c32168f66de7407592d048b7cb2459b92573abc4",
+    "tree": "af54c1cd60f2b537bc13153a2e209d6aab33988a",
+    "expectedPackageEntries": [
+      "js/dictionary/dictionary-database.js",
+      "js/dictionary/dictionary-importer.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/term-lookup-index-ownership.js",
+      "js/dictionary/term-record-import-index-chunk.js",
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "expectedAddedPackageEntries": [
+      "js/dictionary/term-lookup-index-ownership.js",
+      "js/dictionary/term-record-import-index-chunk.js"
+    ],
+    "lintPaths": [
+      "eslint.config.js",
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/dictionary-importer.js",
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "ext/js/dictionary/term-lookup-index-ownership.js",
+      "ext/js/dictionary/term-record-import-index-chunk.js",
+      "ext/js/dictionary/term-record-import-index-worker-client.js",
+      "ext/js/dictionary/term-record-import-index-worker.js",
+      "ext/js/dictionary/term-record-import-index-writer.js",
+      "ext/js/dictionary/term-record-opfs-store.js",
+      "test/term-record-import-index-owned-envelope.test.js",
+      "test/term-record-import-index-parser-ownership.test.js",
+      "test/term-record-import-index-projected-media.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js",
+      "test/util/import-index-chunk-fixture.js",
+      "test/util/import-index-protocol-fixture.js"
+    ],
+    "focusedTests": [
+      "test/term-record-import-index-owned-envelope.test.js",
+      "test/term-record-import-index-parser-ownership.test.js",
+      "test/term-record-import-index-projected-media.test.js",
+      "test/term-record-import-index-worker-client.test.js",
+      "test/term-record-import-index-worker.test.js",
+      "test/term-record-import-index-writer.test.js",
+      "test/term-record-opfs-store.test.js"
+    ]
+  },
+  "participation": {
+    "status": "CONFIRMED_SOURCE_BOUND",
+    "phase": "bulk-finalization",
+    "countField": "termRecordLookupIndexWorkerOwnedEnvelopeCount",
+    "bytesField": "termRecordLookupIndexWorkerOwnedEnvelopeBytes",
+    "positiveOnly": {
+      "dictionary": "vndb",
+      "arm": "B"
+    },
+    "missingLegacyCounters": 0,
+    "allPresentCounters": "nonnegative safe integers; count and bytes must be jointly zero or jointly positive",
+    "semanticEvent": "Confirmed against frozen source c32168f66de7407592d048b7cb2459b92573abc4, tree af54c1cd60f2b537bc13153a2e209d6aab33988a: increment only after actual WorkerImportIndexWriter owned-parts write acknowledgement (including any periodic flush required by the unchanged writer), completed40-byte header receipt validation and route-header patch. Count full logical chunk.byteLength. Registration/admission and eager/local writes do not count."
+  },
+  "matrix": [
+    {
+      "dictionary": "vndb",
+      "initialOrder": "AB",
+      "candidatePairs": 12,
+      "controlPairs": 4,
+      "warmupImports": 4,
+      "candidateImports": 24,
+      "controlImports": 8,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 42
+    },
+    {
+      "dictionary": "vndb",
+      "initialOrder": "BA",
+      "candidatePairs": 12,
+      "controlPairs": 4,
+      "warmupImports": 4,
+      "candidateImports": 24,
+      "controlImports": 8,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 42
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "AB",
+      "candidatePairs": 6,
+      "controlPairs": 2,
+      "warmupImports": 4,
+      "candidateImports": 12,
+      "controlImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 26
+    },
+    {
+      "dictionary": "jmdict",
+      "initialOrder": "BA",
+      "candidatePairs": 6,
+      "controlPairs": 2,
+      "warmupImports": 4,
+      "candidateImports": 12,
+      "controlImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 26
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "AB",
+      "candidatePairs": 6,
+      "controlPairs": 2,
+      "warmupImports": 4,
+      "candidateImports": 12,
+      "controlImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 26
+    },
+    {
+      "dictionary": "jitendex",
+      "initialOrder": "BA",
+      "candidatePairs": 6,
+      "controlPairs": 2,
+      "warmupImports": 4,
+      "candidateImports": 12,
+      "controlImports": 4,
+      "exhaustiveMediaImports": 2,
+      "memoryImports": 4,
+      "totalImports": 26
+    }
+  ],
+  "totalHosts": 6,
+  "totalPlannedImports": 188,
+  "flagsByArm": {
+    "A": null,
+    "B": null,
+    "C": null
+  },
+  "vndbSahAllocationUnits": [
+    37,
+    37
+  ],
+  "lockedToolingSha256": {
+    "dev/perf/import-qualification-bda85f3c7e15.py": "02fc073178644ec8b4ce17ef013bc74114e24d9bc2df820ba5520d994da0db22",
+    "dev/perf/bda85f3c7e15/import_qualification_controls.py": "c722d6e654e30f8336adfa758bdb7f87efe97e40af04a58b005345b02c42dd43",
+    "dev/perf/bda85f3c7e15/test_import_qualification_controls.py": "4eb52b18b61c4b18ca60d03bfdb632f9cebf8f6b94caaedc3cb62101b001a4fd",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+  },
+  "memory": {
+    "scope": "Separate process-tree observations after timing and exhaustive media, on every dictionary and host",
+    "minimumFullyCoveredScans": 5,
+    "maximumCoveredGapMs": 250,
+    "maximumBracketGapMs": 250,
+    "betweenScanWaitMs": 25,
+    "maximumMedianPairedIncreasePercent": 5,
+    "maximumIndividualPairedIncreasePercent": 10,
+    "everyObservationMustQualify": true,
+    "rawAuditRequired": true,
+    "retryOrReplacement": false
+  },
+  "timing": {
+    "minimumLatencyImprovementPercent": null,
+    "candidateOrder": "alternate AB/BA starting with each independently hosted initial order",
+    "sameCodeControls": "A/C after every third candidate pair, alternating AC/CA with opposite initial ordering by host",
+    "summary": "Existing paired median percent and paired milliseconds; equal work, worst pair, faster count and descriptive10000-resample95%interval withseed897",
+    "boundary": "Browser file-input change to post-UI state completion; physical paint not guaranteed",
+    "noOutlierDrops": true,
+    "noHostPooling": true,
+    "noControlSubtraction": true,
+    "noAdaptivePairIncrease": true,
+    "memoryTimingAuthoritative": false
+  },
+  "sourceGate": {
+    "requiredBeforeEveryAcquisition": true,
+    "steps": [
+      "scoped ESLint on registered runtime/test/config paths",
+      "main TypeScript",
+      "test TypeScript",
+      "registered focused Vitest cases",
+      "full unit suite",
+      "all-target dry build"
+    ],
+    "workerLimitForUnitTests": 2,
+    "requiresExactCandidateShaAndTree": true
+  },
+  "failurePolicy": "Retain every completed and failed observation. Existing driver stops a cell at first failed ordinary import; memory attempts remain fixed and unqualified values remain null. No rerun, replacement, threshold relaxation or added pairs to seek a favorable outcome.",
+  "participationAuditBoundary": "Separate post-acquisition audit of every retained summary; no loop, timing-statistic, browser-instrumentation or memory-observer edits. Both original driver qualification and this additional receipt audit must pass; neither is a speedup claim.",
+  "historicalEvidence": "Original #877/#878/#879 source and failed5%target decisions remain historical. Old Jitendex+12.222016380%private pair remains a measured breach; oldVNDB269.392052/263.308525msgaps remain unqualified."
+}

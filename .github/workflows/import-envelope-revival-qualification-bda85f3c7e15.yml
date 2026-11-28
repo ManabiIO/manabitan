@@ -1,0 +1,127 @@
+# UNPUBLISHED DRAFT. Source c32168f is registered; the full source gate remains required before acquisition.
+name: Owned envelope revival qualification bda85f3c7e15
+
+on:
+  push:
+    branches:
+      - perf/import-envelope-revival-qualification-bda85f3c7e15
+    paths:
+      - .github/workflows/import-envelope-revival-qualification-bda85f3c7e15.yml
+      - dev/perf/import-qualification-bda85f3c7e15.py
+      - dev/perf/bda85f3c7e15/envelope-revival-plan.json
+      - dev/perf/bda85f3c7e15/revival_qualification.py
+      - dev/perf/bda85f3c7e15/test_revival_qualification.py
+      - dev/perf/bda85f3c7e15/import_qualification_controls.py
+      - dev/perf/bda85f3c7e15/test_import_qualification_controls.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-envelope-revival-qualification-bda85f3c7e15-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REVIVAL_PLAN: dev/perf/bda85f3c7e15/envelope-revival-plan.json
+  REVIVAL_WRAPPER: dev/perf/bda85f3c7e15/revival_qualification.py
+  REVIVAL_EVIDENCE: builds/perf/import-envelope-revival-bda85f3c7e15
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Require exact source, package and counter registration
+        run: |
+          set -euo pipefail
+          mkdir -p "$REVIVAL_EVIDENCE/source-validation"
+          cp "$REVIVAL_PLAN" "$REVIVAL_EVIDENCE/source-validation/frozen-revival-plan.json"
+          python3 "$REVIVAL_WRAPPER" check --plan "$REVIVAL_PLAN" --repo-root "$GITHUB_WORKSPACE" \
+            2>&1 | tee "$REVIVAL_EVIDENCE/source-validation/registration.log"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Check the small wrapper and unchanged observer protocol
+        run: |
+          python3 -m unittest discover -s dev/perf/bda85f3c7e15 -p 'test_revival_qualification.py' -v
+          python3 -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v
+      - name: Validate the exact candidate source before any import
+        run: |
+          python3 "$REVIVAL_WRAPPER" validate-source \
+            --plan "$REVIVAL_PLAN" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --worktree "$RUNNER_TEMP/envelope-revival-source-validation" \
+            --output "$REVIVAL_EVIDENCE/source-validation"
+      - name: Retain source-gate receipts and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: envelope-revival-source-validation-bda85f3c7e15
+          path: builds/perf/import-envelope-revival-bda85f3c7e15/source-validation
+          if-no-files-found: error
+          retention-days: 90
+
+  qualification:
+    needs: validation
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/import-envelope-revival-qualification-bda85f3c7e15'
+    name: Revival / ${{ matrix.dictionary }} / ${{ matrix.initial_order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        dictionary: [vndb, jmdict, jitendex]
+        initial_order: [AB, BA]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify the same frozen registration and tooling
+        run: python3 "$REVIVAL_WRAPPER" check --plan "$REVIVAL_PLAN" --repo-root "$GITHUB_WORKSPACE"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Fetch the registered source objects
+        run: |
+          set -euo pipefail
+          mapfile -t revival_sources < <(python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); print(p["baseline"]); print(p["candidate"]["sha"])' "$REVIVAL_PLAN")
+          test "${#revival_sources[@]}" -eq 2
+          git fetch --no-tags --depth=1 origin "${revival_sources[@]}"
+      - name: Install the locked Playwright Chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Restore the pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed cell and its separate participation audit
+        env:
+          REVIVAL_DICTIONARY: ${{ matrix.dictionary }}
+          REVIVAL_ORDER: ${{ matrix.initial_order }}
+        run: |
+          python3 "$REVIVAL_WRAPPER" run \
+            --plan "$REVIVAL_PLAN" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --dictionary "$REVIVAL_DICTIONARY" \
+            --initial-order "$REVIVAL_ORDER" \
+            --output "$REVIVAL_EVIDENCE/$REVIVAL_DICTIONARY-$REVIVAL_ORDER"
+      - name: Retain every completed or failed receipt and original package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: envelope-revival-bda85f3c7e15-${{ matrix.dictionary }}-${{ matrix.initial_order }}
+          # Explicit paths exclude the sibling acquisition-sources worktrees/dependencies.
+          path: |
+            builds/perf/import-envelope-revival-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/acquisition
+            builds/perf/import-envelope-revival-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/*.json
+            builds/perf/import-envelope-revival-bda85f3c7e15/${{ matrix.dictionary }}-${{ matrix.initial_order }}/driver.log
+          if-no-files-found: error
+          retention-days: 90
