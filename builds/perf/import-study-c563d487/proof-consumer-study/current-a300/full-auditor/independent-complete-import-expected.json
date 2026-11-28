@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:44:07.216Z",
+  "role": "Independent read-only audit of the separately frozen current-a300/61ac cohort. Exact source/tooling/workflow/run/provenance identities are bound before reading any full observations; the only auditor code change is the prospectively accepted77/77 storage gate.",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "runId": 46141233321,
+  "sourceTrees": {
+    "A": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "B": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+  },
+  "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "browser": {
+    "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+    "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "version": "153.0.8010.12",
+    "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+  },
+  "nodeVersion": "v22.22.0",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "lockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "packageEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "packageEntryCount": 582,
+  "packageHashes": {
+    "A": {
+      "js/dictionary/wasm/term-bank-parser.c": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+      "lib/term-bank-parser.wasm": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+    },
+    "B": {
+      "js/dictionary/wasm/term-bank-parser.c": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "lib/term-bank-parser.wasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+    }
+  },
+  "sourceHashes": {
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "fixtures": {
+    "jmdict": {
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    "jitendex": {
+      "cacheFile": "jitendex-yomitan.zip",
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "label": "Jitendex",
+      "mediaBytes": 4992155,
+      "mediaFiles": 236,
+      "release": "2026.10.03.0",
+      "revision": "2026.10.03.0",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ],
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+    },
+    "vndb": {
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "expectedTitle": "VNDB Characters by Bee",
+      "label": "VNDB",
+      "mediaBytes": 188131284,
+      "mediaFiles": 146570,
+      "mediaRows": 146570,
+      "optional": true,
+      "release": "1.0.0",
+      "revision": "395525135651",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "termRows": 6648310,
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+    }
+  },
+  "summaryFixtureHashes": {
+    "jmdict": "4336fb06e8fc7c1d5d0050ee13bc924a054080aaabc99dcf39ecaa862c8ebbdf",
+    "jitendex": "c0960358910697c8746365da4790b0406b074795a7140b68bb681e176e8a6bbc",
+    "vndb": "d6ba3ef5a17d4b4fc1cc8d909c54964ec0cf40be74083047ce4b3586f47c6154"
+  },
+  "storageBytes": {
+    "jmdict": 43684317,
+    "jitendex": 67630172,
+    "vndb": 609340619
+  },
+  "targetDictionary": "vndb",
+  "targetMinimumReductionPercent": 2,
+  "minimumFasterPairs": 9,
+  "nonTargetMinimumSlowdownPercent": 1,
+  "minimumSlowerPairs": 9,
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "requireProvenance": true,
+  "provenanceHashes": {
+    "source-binding.json": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+    "fresh-correctness-proof.json": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+    "storage-prerequisite-decision.json": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+    "full-qualification-binding.json": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e"
+  },
+  "criteriaInterpretation": "Separate dictionary/order-cell statistics only. Distinct job assignments do not establish physical-host independence. Frozen target thresholds, materially smaller identical-code variation, all correctness/storage/package/memory gates and non-target tradeoffs require root review. No pooling, control subtraction, outlier removal, selected retry or automatic promotion. Prospective current-source VNDB77/77 follows the separately accepted excluded baseline prerequisite.",
+  "memoryHarnessSha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+}

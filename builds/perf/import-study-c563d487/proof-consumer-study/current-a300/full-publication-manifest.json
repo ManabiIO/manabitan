@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:42:06.035340+00:00",
+  "repository": "ManabiIO/manabitan",
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+  "fileCount": 23,
+  "totalBytes": 257942,
+  "productTreeUnchanged": true,
+  "fullAcquisitionStarted": false,
+  "files": [
+    {
+      "path": ".github/workflows/import-suffix-proof-982-qualification-c563d487.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/.github/workflows/import-suffix-proof-982-qualification-c563d487.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/workflow.final.yml",
+      "bytes": 23024,
+      "sha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+      "gitBlobSha1": "b1cf13be67f3e423c364ac34b2f7b621f86d419f"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/verify-fresh-correctness.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/verify-fresh-correctness.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/verify-fresh-correctness.py",
+      "bytes": 20715,
+      "sha256": "6cc9f18e7677ec22792e95f6184a8b806d2c6106aa90b97db1209db5a3710e39",
+      "gitBlobSha1": "993b8336400d177c5d6a2f10fab4b3e7e2eee5a9"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/source-binding.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/source-binding.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/source-binding.json",
+      "bytes": 7368,
+      "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+      "gitBlobSha1": "2a84523b47528a92f29e638a6d16604808c3d112"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/prospective-review-criteria.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/prospective-review-criteria.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/prospective-review-criteria.json",
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-proof.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-proof.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/fresh-correctness-proof.json",
+      "bytes": 13911,
+      "sha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+      "gitBlobSha1": "20dab47b885098f3bf1d4a334b0379fd82ca3c75"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/storage-prerequisite-decision.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/storage-prerequisite-decision.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/storage-prerequisite-decision.json",
+      "bytes": 2366,
+      "sha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+      "gitBlobSha1": "f14e1cb131bb3c893a06685c559f089dd7b905cc"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/full-qualification-binding.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/full-qualification-binding.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/full-qualification-binding.json",
+      "bytes": 4887,
+      "sha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+      "gitBlobSha1": "187897af74f8e0ade9d990310106efc04f4395d9"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/archive-evidence.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/archive-evidence.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/archive-evidence.py",
+      "bytes": 6895,
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+      "gitBlobSha1": "e994ee477e5b996b5453e17626a65785ff2dacaa"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-root-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-root-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/fresh-correctness-root-review.json",
+      "bytes": 2315,
+      "sha256": "ab4179ccdf64140bd18cb5b5153ed5803b5d221a279d58c61c976ec432129eaf",
+      "gitBlobSha1": "1c20a5820ec1a5f9c0aff842aea8f0da07bdb66a"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/pipeline-full-protocol-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/pipeline-full-protocol-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/pipeline-full-protocol-review.json",
+      "bytes": 4474,
+      "sha256": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5",
+      "gitBlobSha1": "aacb8be0dbfdc7844a562719ae1fd1b7b23877f9"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/offline-original-proof-replay.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/offline-original-proof-replay.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/offline-original-proof-replay.json",
+      "bytes": 1796,
+      "sha256": "4c7ae5e4af0a1ea5179ed6eb8e25c31da5f47a568eb94fe519d68c99c547c056",
+      "gitBlobSha1": "7249b482b85460e0b48aaaac2cd7c20f50267a71"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/workflow-final-static-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/workflow-final-static-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/workflow-final-static-review.json",
+      "bytes": 778,
+      "sha256": "fb2e6190845ff3aa556c6e43149ffa09b6aad8b0d6ff0637c3b73997c93758f1",
+      "gitBlobSha1": "5a51c90cd79aa84f25cc1b5e7e2187854829a9e6"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/compose-workflow.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/compose-workflow.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/compose-workflow.py",
+      "bytes": 8335,
+      "sha256": "b9239817b5772ecbf34feceab49e09318ab850ddf692a57e04e489c6e7a3d137",
+      "gitBlobSha1": "09ce07628874f32d3476b0fb29a437f0fb2e1aa0"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/original-faf6-workflow.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/original-faf6-workflow.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/original-faf6-workflow.yml",
+      "bytes": 20767,
+      "sha256": "46d6037dbcf9e85b6811a9da83f2bd6a74e9b6b01dcc3889b00009adea75fcf2",
+      "gitBlobSha1": "b70bcddfec6db7fe4dbf2dfb622d5a2a135fc2af"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/workflow-composition.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/workflow-composition.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/workflow.final.composition.json",
+      "bytes": 7076,
+      "sha256": "1906d01e1e96eff0567eba354be7b27962e65555dea1c3a085d8613e658abe7f",
+      "gitBlobSha1": "8e160199ee8b5aa5f4620ad8131e8b2f1b0e1bfe"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/full-qualification-binding.pre-authorization.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/full-qualification-binding.pre-authorization.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/full-qualification-binding.pre-authorization.json",
+      "bytes": 4807,
+      "sha256": "6369b9d12fa3568e1d49981784516e73e62a19f4e3a04fbc92e5e32a5b6bd753",
+      "gitBlobSha1": "83c565a2e55fc78c12aaa97bbb3d0cc1693b5041"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/workflow.pre-authorization.yml",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/workflow.pre-authorization.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/workflow.review-v2.yml",
+      "bytes": 23024,
+      "sha256": "5e69e4f47088deaa185eb6bb54a6ad7ba2081f631a92485ec847ef38c9756ac5",
+      "gitBlobSha1": "a3fbdedd338b639f3938bd9a07da4281213422f5"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/full-qualification-binding.pre-host-wording.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/full-qualification-binding.pre-host-wording.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/full-qualification-binding.pre-host-wording.json",
+      "bytes": 4724,
+      "sha256": "c5392f8f5022821099d3c2007f77b3c372f551b3398564f57b279be093b695b7",
+      "gitBlobSha1": "a8371383316eb0f1a00b43ef978f7f4fe6c9bf86"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/verify-fresh-correctness.draft.py",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/history/verify-fresh-correctness.draft.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/verify-fresh-correctness.draft.py",
+      "bytes": 19442,
+      "sha256": "aeef16b55df3b4a42f3d8bea1b48d3c2ba783f8e782a7fbe096333be0dd3a921",
+      "gitBlobSha1": "8e40638d67b82224d7783b31d568966f7f07817e"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-original-artifact-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/fresh-correctness-original-artifact-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-prerequisite-evidence/correctness/independent-original-replay-1/independent-original-correctness-audit.json",
+      "bytes": 34284,
+      "sha256": "01df98e4886a6a58d0b197f09fa777b1b29a045f8214b0ce713c5be2935e38ac",
+      "gitBlobSha1": "6c57d15fb504424cbd247caa80282212b753ce88"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/storage-independent-raw-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/storage-independent-raw-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-prerequisite-evidence/pipeline-storage-review/independent-storage-preflight-review.json",
+      "bytes": 34626,
+      "sha256": "da89772449153f29405c9b45c3799d9e79fefa618033ae3a6df0ed67c81eeca5",
+      "gitBlobSha1": "ee68557987f06cd49310b015495530e14213d041"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/root-full-protocol-review.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/root-full-protocol-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/root-remote-continuation-20261128/a300-full-protocol-root-prepublication-review.json",
+      "bytes": 3735,
+      "sha256": "93fc55cb361cd3a5853d26a4dcde295199f24f13985a1a0ae83e6da2ac523384",
+      "gitBlobSha1": "9a6c1a537faa34dcec5c05b6157de176d31dc755"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/preparation-record.json",
+      "localPath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/tree/dev/perf/numeric-suffix-proof-consumer-982-qualification-c563d487/preparation-record.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-preparation/preparation-record.json",
+      "bytes": 3087,
+      "sha256": "682e77f396e98f25c86a3e7c71462ad3550934f8956eca31b715d2ce4585092a",
+      "gitBlobSha1": "64fa86e46558a1862ab208d663f514a6b0002d19"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:43:09.431604+00:00",
+  "kind": "independent-final-current-a300-full-publication-identity-review",
+  "reviewer": "pipeline_audit",
+  "result": "PASS",
+  "manifest": {
+    "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-qualification-publication/manifest.json",
+    "sha256": "088ebb3a624104d4902479f3e8725770d56b4ba661e86d3b2c7edad096819b91",
+    "fileCount": 23,
+    "totalBytes": 257942
+  },
+  "sourceReviewSha256": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5",
+  "rootAuthorizationSha256": "93fc55cb361cd3a5853d26a4dcde295199f24f13985a1a0ae83e6da2ac523384",
+  "bindingBeforeSha256": "6369b9d12fa3568e1d49981784516e73e62a19f4e3a04fbc92e5e32a5b6bd753",
+  "bindingAfterSha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+  "bindingChangedFields": [
+    "acquisitionAuthorized",
+    "authorizationState"
+  ],
+  "workflowBeforeSha256": "5e69e4f47088deaa185eb6bb54a6ad7ba2081f631a92485ec847ef38c9756ac5",
+  "workflowAfterSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "workflowChange": "Exactly three occurrences of the binding SHA256; every command, threshold, timer, observer option and evidence path remains identical to the reviewed workflow.",
+  "all23FileSizesSha256GitBlobIdsAndSourceCopiesVerified": true,
+  "noHiddenOrUnlistedFiles": true,
+  "noSymlinks": true,
+  "onlyNewIsolatedWorkflowAndTooling": true,
+  "allReviewedRuntimeSourcesUnchanged": true,
+  "parent": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "prerequisites": "Fresh61ac correctness and source-bound excluded baseline77/77 storage review are complete; full observations have not been acquired by this review.",
+  "readOnlyInspectionHistory": "First identity check selected the now-authorized active binding as the before image and stopped at the expected-delta assertion. Corrected selection uses the unchanged pre-authorization6369 file. No source, stage, manifest or acquisition changed.",
+  "noSourceNativeTestsBrowserMeasurementsOrRefUpdates": true
+}

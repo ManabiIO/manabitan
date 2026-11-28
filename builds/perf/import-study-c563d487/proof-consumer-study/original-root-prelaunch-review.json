@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:31:58.156314+00:00",
+  "scope": "Root read-only source/protocol and final staged identity review; no native execution, compilation or observations",
+  "manifestSha256": "dd62ae8c26d8116f1df4b0a955324b3b1ff7e586a8fbfb824e13b01db50181f5",
+  "bindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "parentCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "parentTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "files": 69,
+  "bytes": 862556,
+  "allSizesSha256GitBlobIdsVerified": true,
+  "allReviewedCoreFixtureAndReviewHashesMatchFinalBinding": true,
+  "finalized": true,
+  "pending": [],
+  "workflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "review": [
+    "Core exact build/correctness receipts and successful-artifact restore separate from timing; fixedNode/compiler/source/locks validated.",
+    "Original measured child changes only separate diagnostic field labels; clocks, groups, flags, warmups,48 schedule and heap stay unchanged.",
+    "Positive VNDB proof requirement and Python version provenance occur outside clocks; raw failures and unattempted schedule retained.",
+    "Corrected malformed fixture setup is one-time; diagnostic hook accepts only the intended getter export. Both earlier defects/drafts are preserved before any acquisition.",
+    "58 focused tests and independent source/global-branch/publication proofs reviewed; actual native/full f28 correctness remains a required job gate.",
+    "Component gates do not authorize an import/PR claim; later source-bound252 full observations and unchanged memory gates remain required if screen qualifies."
+  ],
+  "decision": "No remaining blocker to one isolated source-bound launch after peer final identity pass."
+}

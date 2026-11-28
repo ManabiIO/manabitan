@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:00:21.843966+00:00",
+  "scope": "Independent primary-log source/schedule/parity and numeric replay only; original stdout/member/native-oracle bytes are separately reconciled against the original artifact.",
+  "dictionary": "jmdict",
+  "runId": 46136965050,
+  "jobId": 140955527852,
+  "toolingHead": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+  "toolingTree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "manifestSha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+  },
+  "candidate": {
+    "root": "/home/runner/work/manabitan/suffix-proof-candidate",
+    "head": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+    "cSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+    "wasmSha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+    "trackedWasmSha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+    "manifestSha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+    "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "primaryBuildAudit": {
+    "bytes": 16870,
+    "sha256": "6c4a78ad65a86374a2a9933be68440f6236750977950acced240e127ae68322a"
+  },
+  "baselineSourceReview": {
+    "bytes": 3463,
+    "sha256": "73ddbe657077c90889b5f65e2cf9097726b1d076decf06c6838547f7241ded59"
+  },
+  "sourceAndProtocolChecksPassed": true,
+  "rawTaggedRecords": 52,
+  "measuredChildren": 16,
+  "excludedDiagnosticChildren": 1,
+  "all17ChildIdentityAndWorkloadChecksPassed": true,
+  "all16CompactObservationRecordsMatchRawChildren": true,
+  "allTenSummaryRecomputationsExact": true,
+  "arithmeticProducer": {
+    "version": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+    "versionInfo": [
+      3,
+      14,
+      4,
+      "final",
+      0
+    ],
+    "implementation": "cpython"
+  },
+  "summary": {
+    "candidate.elapsedMs": {
+      "pairedChangesPercent": [
+        8.100854124603085,
+        -3.2003912817672675,
+        -0.10722910488224491,
+        2.9489302530471218
+      ],
+      "medianPairedChangePercent": 1.4208505740824384,
+      "equalWorkChangePercent": 1.8503426965908565,
+      "fasterPairs": 2,
+      "firstValues": [
+        443.3664580000004,
+        466.1438770000002,
+        462.67382399999974,
+        444.95209699999964
+      ],
+      "secondValues": [
+        479.2829280000001,
+        451.22544900000025,
+        462.17770300000007,
+        458.07342400000016
+      ],
+      "medianPairedDifferenceMs": 6.312603000000422
+    },
+    "identicalControl.elapsedMs": {
+      "pairedChangesPercent": [
+        -1.2859589138205396,
+        1.9203578428081514,
+        -0.4285225977703533,
+        1.012276882405283
+      ],
+      "medianPairedChangePercent": 0.29187714231746487,
+      "equalWorkChangePercent": 0.3014098270431642,
+      "fasterPairs": 2,
+      "firstValues": [
+        448.7599050000001,
+        442.77273800000034,
+        448.8911460000004,
+        454.6301590000003
+      ],
+      "secondValues": [
+        442.98903700000005,
+        451.2755589999997,
+        446.9675460000001,
+        459.2322749999996
+      ],
+      "medianPairedDifferenceMs": 1.3392579999995178
+    },
+    "candidate.cpuMs": {
+      "pairedChangesPercent": [
+        7.248842112052167,
+        -7.0389219675718095,
+        -4.128858697340698,
+        4.466792710889411
+      ],
+      "medianPairedChangePercent": 0.1689670067743565,
+      "equalWorkChangePercent": -0.12048140680777086,
+      "fasterPairs": 2,
+      "firstValues": [
+        496.1619999999999,
+        541.134,
+        547.1729999999999,
+        497.18
+      ],
+      "secondValues": [
+        532.1280000000002,
+        503.044,
+        524.5809999999999,
+        519.388
+      ],
+      "medianPairedDifferenceMs": -0.19199999999997885
+    },
+    "identicalControl.cpuMs": {
+      "pairedChangesPercent": [
+        -4.940655215648871,
+        2.470147274763801,
+        2.434174518736687,
+        0.20356155318239644
+      ],
+      "medianPairedChangePercent": 1.3188680359595417,
+      "equalWorkChangePercent": 0.01004850109043165,
+      "fasterPairs": 1,
+      "firstValues": [
+        520.0120000000001,
+        505.3140000000001,
+        507.93399999999997,
+        516.797
+      ],
+      "secondValues": [
+        494.32000000000005,
+        517.796,
+        520.298,
+        517.849
+      ],
+      "medianPairedDifferenceMs": 6.708000000000027
+    },
+    "candidate.parseMs": {
+      "pairedChangesPercent": [
+        12.423731550088203,
+        -4.961280793122025,
+        -0.423322351742339,
+        4.194360772799377
+      ],
+      "medianPairedChangePercent": 1.885519210528519,
+      "equalWorkChangePercent": 2.611201386522022,
+      "fasterPairs": 2,
+      "firstValues": [
+        291.1148059999998,
+        314.25540399999977,
+        310.1402499999997,
+        293.241847
+      ],
+      "secondValues": [
+        327.28212799999983,
+        298.66431099999977,
+        308.8273570000001,
+        305.54146800000035
+      ],
+      "medianPairedDifferenceMs": 5.493364000000383
+    },
+    "identicalControl.parseMs": {
+      "pairedChangesPercent": [
+        -5.0686747887496715,
+        -0.9656269229481929,
+        2.488647259815102,
+        2.455035068288791
+      ],
+      "medianPairedChangePercent": 0.7447040726702991,
+      "equalWorkChangePercent": -0.3137441638702998,
+      "fasterPairs": 2,
+      "firstValues": [
+        307.209609,
+        301.387827,
+        296.1505279999999,
+        298.7960169999999
+      ],
+      "secondValues": [
+        291.63815300000056,
+        298.4775449999995,
+        303.5206699999999,
+        306.131564
+      ],
+      "medianPairedDifferenceMs": 2.2126324999998133
+    },
+    "candidate.nativeParseMs": {
+      "pairedChangesPercent": [
+        14.00778210116731,
+        -3.985507246376807,
+        1.454545454545464,
+        4.633204633204624
+      ],
+      "medianPairedChangePercent": 3.043875043875044,
+      "equalWorkChangePercent": 3.842549203373946,
+      "fasterPairs": 1,
+      "firstValues": [
+        257,
+        276,
+        275,
+        259
+      ],
+      "secondValues": [
+        293,
+        265,
+        279,
+        271
+      ],
+      "medianPairedDifferenceMs": 8.0
+    },
+    "identicalControl.nativeParseMs": {
+      "pairedChangesPercent": [
+        -4.693140794223827,
+        -2.985074626865669,
+        1.8587360594795488,
+        4.961832061068705
+      ],
+      "medianPairedChangePercent": -0.5631692836930602,
+      "equalWorkChangePercent": -0.27881040892193676,
+      "fasterPairs": 2,
+      "firstValues": [
+        277,
+        268,
+        269,
+        262
+      ],
+      "secondValues": [
+        264,
+        260,
+        274,
+        275
+      ],
+      "medianPairedDifferenceMs": -1.5
+    },
+    "candidate.lookupMs": {
+      "pairedChangesPercent": [
+        3.2343977001302093,
+        7.367677353898916,
+        -4.5086974139932785,
+        -3.1470706257312853
+      ],
+      "medianPairedChangePercent": 0.04366353719946203,
+      "equalWorkChangePercent": 0.8116249114759722,
+      "fasterPairs": 2,
+      "firstValues": [
+        24.788540999999896,
+        23.051213000000416,
+        20.551855999999816,
+        25.725511000000097
+      ],
+      "secondValues": [
+        25.590300999999727,
+        24.74955200000045,
+        19.625235000000202,
+        24.915910999999824
+      ],
+      "medianPairedDifferenceMs": -0.00392000000022108
+    },
+    "identicalControl.lookupMs": {
+      "pairedChangesPercent": [
+        0.45429966141976585,
+        3.5956119988008517,
+        6.928225104660335,
+        -22.86557889248815
+      ],
+      "medianPairedChangePercent": 2.0249558301103088,
+      "equalWorkChangePercent": -3.9279824131215113,
+      "fasterPairs": 1,
+      "firstValues": [
+        20.821279000000004,
+        24.778479999999718,
+        19.758133999999927,
+        25.988850000000184
+      ],
+      "secondValues": [
+        20.915870000000268,
+        25.669418000000178,
+        21.127022000000352,
+        20.046348999999736
+      ],
+      "medianPairedDifferenceMs": 0.4927645000003622
+    }
+  },
+  "mechanicalCounts": {
+    "attempts": 0,
+    "boundedRanges": 0,
+    "tailRejected": 0,
+    "fullRejected": 0,
+    "hits": 0,
+    "hitBytes": 0,
+    "potentialRangeBytes": 0,
+    "eligibleStreakRows": 154409,
+    "numericRejected": 154409,
+    "actualSuffixSuccessRows": 0,
+    "scoreTokenEndScansAvoided": 0,
+    "sequenceTokenEndScansAvoided": 0,
+    "numericCopyRows": 0,
+    "scoreConversionsAvoided": 0,
+    "sequenceConversionsAvoided": 0,
+    "ordinaryContentComparisonsAvoided": 0
+  },
+  "componentGate": {
+    "targetPromotionSignal": false,
+    "nonTargetRiskSignal": false,
+    "largestAbsoluteControlChangePercent": 1.9203578428081514
+  },
+  "rows": 528299,
+  "digest": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+  "indexBytes": 19491860,
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "host": "Linux runnervm3lb7s 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux",
+  "browser": null,
+  "originalLog": {
+    "bytes": 134641,
+    "sha256": "336754fe98e57fdf49c56a9433a704338ec08720497e8dd756b95c5a28e45943"
+  },
+  "originalRecords": {
+    "bytes": 108716,
+    "sha256": "5992eaedf86838438ebd12c11fcdef30fb394c26bd71d00a65286b38b652b32d"
+  },
+  "auditor": {
+    "bytes": 14750,
+    "sha256": "a877ade74c01ec84b9985e1732f5eaf048ef620b3a4cb07cac73ea8b5016eba3"
+  },
+  "timingModified": false,
+  "limitations": [
+    "One fixed four-pair host per corpus; no cross-host pooling or control subtraction.",
+    "No full-browser or process-memory qualification is inferred from component or diagnostic results.",
+    "A non-triggered non-target risk rule does not establish equivalence or non-regression.",
+    "Exact f28 results do not transfer to newer develop source."
+  ]
+}

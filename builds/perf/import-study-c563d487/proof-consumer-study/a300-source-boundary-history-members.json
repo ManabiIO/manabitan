@@ -1,0 +1,54 @@
+{
+  "kind": "deterministic-lossless-evidence-representation",
+  "archive": {
+    "bytes": 222146,
+    "sha256": "50f9f592d579b152c638075f033cab1a2fc916a30e1dac36b0b0bd5dde716a83",
+    "gitBlobSha1": "4df4fd538b6ce075f8283f42687f1d55e55f89d5"
+  },
+  "memberCount": 7,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/full-observer-source-contract.json",
+      "bytes": 15648,
+      "sha256": "53d1fdd55d2871741b1dffdec25a74e4296cecd477fc8b799770422d258a4b2a",
+      "gitBlobSha1": "dc64bcd00a2b17426306ce4ed58948608fc6fcfc"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/independent-source-boundary-review.json",
+      "bytes": 13438,
+      "sha256": "dfec08104588ef733b0ee3d0d7a2f5201ce8646cb191a19bd9773a2b0a26dc5a",
+      "gitBlobSha1": "47f15c071c3123f5804aa9360e0299b44d18809d"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/primary-tree-boundary.json",
+      "bytes": 40219,
+      "sha256": "02ca43a6f1e747489119529269fc3db389f427e2f34182060ab546ad7e683272",
+      "gitBlobSha1": "29992fc81d75f6b09a708f06171229aabc781c62"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/selected-primary-source-blobs.json",
+      "bytes": 162,
+      "sha256": "b9b13f396acf576e3400e2aad35681c8559eba85345be7f6b63f439f9678a299",
+      "gitBlobSha1": "fc1d060fb4ea70ee3473532ae1733d0264305286"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/selected-primary-source-texts.json",
+      "bytes": 879410,
+      "sha256": "dd7581adaf46efddbfc03bfcac9efdc9806be432aaba579c5a98b3c66cb1d7b5",
+      "gitBlobSha1": "74c3120f9c7addaebd6b434dfdf12ff68fe18df5"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/source-retrieval-attempt-1.json",
+      "bytes": 547,
+      "sha256": "78d7c70dd7cb0f1c9b100d68d394879f0eb9599bd0f49649314e4ae406ae8e61",
+      "gitBlobSha1": "f995c5cc9a00923c3aa3126c02922e8d17968e4f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-a300-preflight/storage-primary-source-texts.json",
+      "bytes": 318931,
+      "sha256": "65b8da25eef7c26f5c23956eb12ccbb4e44614e44dc585696b8fbe08e6468af9",
+      "gitBlobSha1": "0f6230806b987eacf9fa2d11f2f92d46abaa92c6"
+    }
+  ],
+  "inputBytesChanged": false
+}

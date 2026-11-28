@@ -1,0 +1,47 @@
+{
+  "kind": "prospective-current-a300-storage-policy-approval",
+  "recordedAtUtc": "2026-11-28T11:35:55.530879+00:00",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "prerequisiteRun": 46139360578,
+  "prerequisiteJobs": {
+    "jmdict": 140962634770,
+    "jitendex": 140962634795,
+    "vndb": 140962634718
+  },
+  "baselineObservationsPerCorpus": 1,
+  "candidateObservations": 0,
+  "allPrerequisiteDurationsExcluded": true,
+  "sourceStorageReviewSha256": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de",
+  "independentRawStorageReviewSha256": "da89772449153f29405c9b45c3799d9e79fefa618033ae3a6df0ed67c81eeca5",
+  "rootRawPriorShapeReviewSha256": "15ed47122b1b0c2cb4fb7c1ef79cdd816c131ea1119a1e53471918d03a6c6253",
+  "fullStoragePolicyApproved": true,
+  "prospectiveVndbSahAllocationUnits": [
+    77,
+    77
+  ],
+  "allocationUnitBytes": 4096,
+  "knownProductPathSetUnchanged": true,
+  "sahFiles": 8,
+  "reserveFiles": 7,
+  "reserveFileBytes": 4096,
+  "exactCanonicalStorageEqualityAcrossEveryFullObservationRequired": true,
+  "freshBaselineTotalLogicalBytes": {
+    "jmdict": 43684317,
+    "jitendex": 67630172,
+    "vndb": 609340619
+  },
+  "observedActiveSahAllocationBytes": {
+    "jmdict": 339968,
+    "jitendex": 5623808,
+    "vndb": 315392
+  },
+  "rationale": "Fresh a300 inventories satisfy unchanged structural rules and preserve exact non-SAH product paths/sizes; all three have +163840 bytes of active allocation versus prior source, consistent with the additive schema. No per-table or SQLite-page-size attribution is inferred. A fixed exact77/77 VNDB range is registered prospectively before separate candidate comparison.",
+  "limitations": [
+    "One excluded baseline observation per corpus establishes this observed shape only, not future stability or candidate equivalence.",
+    "Every complete-import observation must independently pass the unchanged canonicalizer and exact storage comparison; any mismatch holds the cohort without selective retry or relaxed bounds."
+  ],
+  "unchangedPerformanceCriteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "full252AcquisitionAuthorizedByThisRecord": false,
+  "remainingLaunchGate": "Root and peer review of final frozen full workflow/source binding/manifest before publication."
+}

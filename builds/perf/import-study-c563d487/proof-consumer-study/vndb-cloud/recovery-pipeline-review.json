@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent read-only source review of original VNDB artifact recovery",
+  "reviewer": "pipeline_audit",
+  "publicationReportedByRoot": "55676ce568881d8f177a4f5b26d6b25781aafb38",
+  "reviewed": {
+    "script": {
+      "gitBlobSha1": "c5c97fae0609b0398205d96702c62afcb52d2720",
+      "sha256": "71abc32cb48ec9259c6bb186f05aed13c98c724e4956b79a9918f81ec43f03ed",
+      "bytes": 16145
+    },
+    "workflow": {
+      "gitBlobSha1": "69484a8b0c260f536bbbd1179bb2130c5776111c",
+      "sha256": "246f94868b9955e1fc1a46ad31d3540a9fafc957f010a5875d38a0109acebcdd",
+      "bytes": 1300
+    }
+  },
+  "scope": "Source and immutable input-identity review only. No local executor, tests, native execution, artifact replay, benchmark or downloads were run by this review.",
+  "verdict": "No source blocker found within the declared transport/byte-preservation scope.",
+  "checks": [
+    "Workflow permissions are contents:read/actions:read; checkout does not persist credentials. The only executed payload is the reviewed recovery script, pinned by SHA256.",
+    "Every initial HTTP request is constrained to the named repository API; redirects require HTTPS and cross-host redirects remove Authorization.",
+    "Exact original artifact ID/name/run/head/size/digest and successful original run/job are checked before reading the ZIP.",
+    "ZIP inspection bounds member count, per-member and total decoded bytes; rejects duplicate/unsafe/nonregular/encrypted/unknown-compression entries and requires the exact61-file producer inventory.",
+    "All17 original child statuses are checked for successful exit and exact stdout/stderr SHA256. Diagnostic/source/correctness-artifact/binding links are separately verified.",
+    "The exact original ZIP remains preserved. Repackaged files use a new deterministic ZIP identity with byte-roundtrip checks; the original ZIP hash is never assigned to the derived archive.",
+    "6144-byte base64 chunks carry deterministic file metadata and whole SHA256/Gitblob identities. Files are written exclusively, and failures are retained.",
+    "No recovered artifact source, WASM, benchmark, compiler, observer or test is executed.",
+    "The manifest explicitly states frozen component auditor6e007d90/core26ae replay is not performed; transport success is not original-auditor completion."
+  ],
+  "completionConsumerRequirement": "The COMPLETE log record is emitted before the final primary_agrees assertion. Consumers must require successful recovery-job conclusion AND primaryAgrees:true for the final original-log-byte gate; COMPLETE alone is insufficient. A mismatch remains a preserved failure and must not be silently relabeled.",
+  "limitations": [
+    "No current execution result is reviewed here.",
+    "Original VNDB independent semantic/arithmetic replay remains a distinct pending layer.",
+    "Source-bound component timings and all performance gates are unchanged."
+  ],
+  "changesRequested": [],
+  "rootAndOwnerNotified": true
+}

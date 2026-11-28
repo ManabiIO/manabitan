@@ -1,0 +1,9 @@
+{
+  "sourceOnly": true,
+  "correctedAuditorSha256": "a8ea0b6f7829a2479b58b4d4af89097500a168d0a2896b40046783856a639fc8",
+  "oldAuditorSha256": "2bae98638f350a9ffb8bc4691598abcca9816f3996ad39490521b1e433e6cc10",
+  "exactSingleReplacement": true,
+  "fullChildAndPlanEqualityPreserved": true,
+  "compactProjectionMatchesFrozenProducer": true,
+  "scope": "Same original bytes, postprocessing only; original frozen 6e00 not executed."
+}

@@ -1,0 +1,743 @@
+{
+  "schemaVersion": 1,
+  "kind": "normalized-purpose-built-connector-job-snapshot",
+  "recordedAtUtc": "2026-11-28 11:44:43 UTC",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46141233321,
+  "toolingCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "response": {
+    "jobs": [
+      {
+        "id": 140967406330,
+        "name": "Bind exact product to fresh current correctness",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Verify frozen qualification tooling and syntax",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Fetch only frozen source and correctness commits",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Bind the eight-file product to fresh exact-head correctness",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Retain original correctness artifact and every binding outcome",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          }
+        ]
+      },
+      {
+        "id": 140967463694,
+        "name": "vndb (BA)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      },
+      {
+        "id": 140967463725,
+        "name": "vndb (AB)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      },
+      {
+        "id": 140967463737,
+        "name": "jitendex (BA)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      },
+      {
+        "id": 140967463739,
+        "name": "jitendex (AB)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      },
+      {
+        "id": 140967463778,
+        "name": "jmdict (BA)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      },
+      {
+        "id": 140967463788,
+        "name": "jmdict (AB)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 46141233321,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned browser before any observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Validate the independent observer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Fetch frozen product sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Bind the unchanged observer to the frozen baseline",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run registered complete-import and separate memory cohorts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Preserve prospective criteria and exact correctness provenance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Print every raw observation and final result as compact JSON lines",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Preserve all original non-package evidence in bounded log chunks",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Retain all original evidence including failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/cache@caa296126883cff596d87d8935842f9db880ef25",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 28
+          }
+        ]
+      }
+    ]
+  },
+  "noPerformanceObservationsInspected": true
+}

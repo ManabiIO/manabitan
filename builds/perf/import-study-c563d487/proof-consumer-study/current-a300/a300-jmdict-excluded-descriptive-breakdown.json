@@ -1,0 +1,152 @@
+{
+  "kind": "single-excluded-current-baseline-jmdict-descriptive-breakdown",
+  "recordedAtUtc": "2026-11-28T11:36:32.038032+00:00",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "run": 46139360578,
+  "job": 140962634770,
+  "archiveSha256": "dc2cdd0aa49e6397d80440e42d59eaa32a99037d03054089f643bef9f0cbdfae",
+  "reportSha256": "57fe4b5faf269b483dfe70366ece041a92fa99eafd33a0bdaeede89a5771bb1e",
+  "browserTiming": {
+    "sequenceBefore": 0,
+    "sequence": 1,
+    "startedAtMs": 4341.5,
+    "completedAtMs": 5428.400000000009,
+    "nextFrameAtMs": 5430.600000000006,
+    "trigger": "file-input-change",
+    "errorCount": 0
+  },
+  "stepTimingSummary": {
+    "dictionaries": [
+      {
+        "dictionaryIndex": 1,
+        "steps": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "label": "Starting import state",
+            "elapsedMs": 0.3000000000029104,
+            "heapDeltaBytes": 0,
+            "finalOpenStep": false
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "label": "Initializing import",
+            "elapsedMs": 8.5,
+            "heapDeltaBytes": 0,
+            "finalOpenStep": false
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "label": "Loading dictionary",
+            "elapsedMs": 12.39999999999418,
+            "heapDeltaBytes": 0,
+            "finalOpenStep": false
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "label": "Importing data",
+            "elapsedMs": 996.1000000000058,
+            "heapDeltaBytes": -249875,
+            "finalOpenStep": false
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "label": "Finalizing import",
+            "elapsedMs": 51.39999999999418,
+            "heapDeltaBytes": 456383,
+            "finalOpenStep": true
+          }
+        ]
+      }
+    ],
+    "aggregateByStep": [
+      {
+        "stepDisplay": "Step 1 of 5",
+        "count": 1,
+        "totalElapsedMs": 0.3000000000029104
+      },
+      {
+        "stepDisplay": "Step 2 of 5",
+        "count": 1,
+        "totalElapsedMs": 8.5
+      },
+      {
+        "stepDisplay": "Step 3 of 5",
+        "count": 1,
+        "totalElapsedMs": 12.39999999999418
+      },
+      {
+        "stepDisplay": "Step 4 of 5",
+        "count": 1,
+        "totalElapsedMs": 996.1000000000058
+      },
+      {
+        "stepDisplay": "Step 5 of 5",
+        "count": 1,
+        "totalElapsedMs": 51.39999999999418
+      }
+    ]
+  },
+  "step4Breakdown": {
+    "dictionaries": [
+      {
+        "title": "JMdict [2026-11-22]",
+        "termParseMs": 323,
+        "termSerializationMs": 0,
+        "bulkAddTermsMs": 611,
+        "bulkAddTagsMetaMs": 13,
+        "mediaResolveMs": 0,
+        "mediaWriteMs": 0,
+        "accountedMs": 947,
+        "otherMs": 45,
+        "parserWorkerCount": 3,
+        "parserPipelineGroupsPerWorker": 4,
+        "parserGroupCount": 12
+      }
+    ],
+    "aggregate": {
+      "termParseMs": 323,
+      "termSerializationMs": 0,
+      "bulkAddTermsMs": 611,
+      "bulkAddTagsMetaMs": 13,
+      "mediaResolveMs": 0,
+      "mediaWriteMs": 0,
+      "accountedMs": 947,
+      "otherMs": 45
+    }
+  },
+  "selectedTermFileCounters": {
+    "bulkAddTermsMs": 611,
+    "contentAppendMs": 576.0999999999913,
+    "dedupScanMs": 137.59999999999127,
+    "dedupCanonicalScanMs": 117.19999999999709,
+    "contentStoreMs": 438.5,
+    "contentCompressMs": 385.6999999999971,
+    "contentMetadataMs": 143.60000000003492,
+    "contentMetadataIndexPublishMs": 121.10000000000582,
+    "termRecordEncodeMs": 56.49999999998545,
+    "termRecordWriteMs": 69.0000000000291,
+    "termRecordValidationMs": 42.49999999998545,
+    "parserParallelWorkerCount": 3,
+    "parserParallelGroupCount": 12,
+    "parserParallelWorkerWallMs": 859,
+    "parserParseBankMs": 1058,
+    "parserSourceInflateMs": 466.5000000000291,
+    "parserResultCopyMs": 175.3000000000029,
+    "parserOrderedSinkWaitMs": 1591.6000000000058,
+    "parserValidatedGlossaryReuseCount": 54641,
+    "parserRecentContentDedupHitCount": 154416,
+    "parserSourceCrcMs": 0,
+    "parserSourceCrcScannedBytes": 0,
+    "parserSourceCrcReusedBytes": 0
+  },
+  "interpretation": [
+    "This is one excluded baseline observation, never a candidate comparison or authoritative gain estimate.",
+    "Production path uses3parserworkers and12groups; the separate f28 component study used8JMdictgroups and is not pooled with this measurement.",
+    "Step4 aggregation attributes323ms to term parsing and611ms to bulk-add terms. Nested content compression/dedup/metadata counters and cumulative worker timings overlap; they cannot be summed into independent critical-path savings.",
+    "Deferred CRC reports0scanned/reused bytes, retaining the prior reason that a CRC-witness backfill does not offer a JMdict opportunity under existing gates.",
+    "Detailed current CPU hotspot profiling would be required before treating any inclusive counter as a new optimization target."
+  ],
+  "newAcquisition": false,
+  "performanceGainClaim": false,
+  "newCandidateProposed": false
+}

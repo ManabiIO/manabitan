@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "kind": "deterministic-lossless-evidence-representation",
+  "archive": {
+    "bytes": 43674,
+    "sha256": "be9edf6eef90b5df064d4b1794e53b980e24662534b750304c7f890376e8d49c",
+    "gitBlobSha1": "7eaa65ea2a6e0062a9c7e1940301981c1b61075b"
+  },
+  "memberCount": 22,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/final-raw-auditor-preparation.json",
+      "bytes": 1462,
+      "sha256": "be8686c09fb6637515c0cac4675e9c1545492c3b2dc02ee51669eee9b9414d28",
+      "gitBlobSha1": "b45bc6bb4a96ef894d495d1735d7d56417f5e9fa"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-audit.js",
+      "bytes": 34024,
+      "sha256": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003",
+      "gitBlobSha1": "51d7049be8023b967c5cf97f3383ca407292e241"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-expected.json",
+      "bytes": 6838,
+      "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+      "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/independent-complete-import-expected.review.json",
+      "bytes": 6245,
+      "sha256": "fd48f0c356fdb43a10ddaf7f07cc75eac5accc26bea6f903325358e9d58eada2",
+      "gitBlobSha1": "c97da88d7859d791b7753bb5fa9dd1c470ea3046"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/output-provenance-amendment.json",
+      "bytes": 1194,
+      "sha256": "71229509900831a58cd2cf92160188880d5882fd2e1b7e6964c25c85c94cca3c",
+      "gitBlobSha1": "15d5ed51e0e97a2d190dbfd78ec566edb09dadfe"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/output-provenance-amendment.patch",
+      "bytes": 1631,
+      "sha256": "c4ca5d2fe35ca282878de4fc7bbd5771bac3ab903497fce38331d20c0539be7a",
+      "gitBlobSha1": "9f14a6be1e2b33cc70f1da769517f4aea310fe01"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/output-provenance-independent-review.json",
+      "bytes": 882,
+      "sha256": "e825b408a7490319bf60a1a530b0639302c42018fca1ab7825132590ced4b56b",
+      "gitBlobSha1": "ecab7f29432f05fb1189503a6f120d3c97ad699b"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/primary-auditor-independent-review.json",
+      "bytes": 1251,
+      "sha256": "2882c238b4c745ca35a466d18955117bdcbedaaf722436e95c3427f4d309dae3",
+      "gitBlobSha1": "8deb580f8dba136b6149cc5a3829415527aa8fc6"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/primary-auditor-preparation.json",
+      "bytes": 812,
+      "sha256": "37be0ad6d3c643b6c8c8b08bc95f7b6a665dfe644c125693b5098542b250e9e1",
+      "gitBlobSha1": "4637c541fb95f3f3d309ee6ecdacab2a91ac6cf9"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/primary-auditor-prospective-77.patch",
+      "bytes": 2306,
+      "sha256": "ab28b7f0bc9c1d0b29082e87215c05659a086d81a1a4ae22bae48414c509da0c",
+      "gitBlobSha1": "6ce8108c4998a552c5ee73fa7d687a9bfc1f8fe1"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/publication-binding.draft.json",
+      "bytes": 2995,
+      "sha256": "defc51b8385d1dcdb1e818ac6d83d9a45dc4688eec04cf780321cdc96d9ff7bf",
+      "gitBlobSha1": "c7d83b92053080244649a622955f1eb2b6aaa3ff"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/publication-binding.json",
+      "bytes": 4147,
+      "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+      "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit-v2.py",
+      "bytes": 34623,
+      "sha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+      "gitBlobSha1": "bf755667b8f62cef383c96f0c8cb43db4774d6a5"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit.py",
+      "bytes": 34446,
+      "sha256": "743a0564c2b644eb2861893429ea35f6a99a86375543758ff0132b3b6ef136b8",
+      "gitBlobSha1": "2258c8f7ecfe1917fa4a1c4efe4b5f935d35e8c9"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-evidence-audit.py.patch",
+      "bytes": 5660,
+      "sha256": "096d5daef79d591dec80d3b87a43e856eeefb29e1c8713a692b5fc94e08995d3",
+      "gitBlobSha1": "afe4a1cbdae9996dcad187669de6497d91e8efba"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-tooling-independent-source-review.json",
+      "bytes": 2584,
+      "sha256": "04ac4f3f8847b119d901a149c761acf57b79c8df1119ff9a04f1fb403a936d58",
+      "gitBlobSha1": "490dc56c1f07aed459cd432774ed648ab6c6cdc3"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-tooling-review-attempt-1.json",
+      "bytes": 365,
+      "sha256": "1186c7adf8270a412dee01732593f74eda7889634a9931931c64565d4ca72ad8",
+      "gitBlobSha1": "6a115c4b59b6ab0fa1115117873b8d0c7e39bede"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/raw-tooling-review-attempt-2.json",
+      "bytes": 337,
+      "sha256": "fa84f44811b8652047f247103a34b19f26022a2bca24406acdb1c807f1a83083",
+      "gitBlobSha1": "1019ae17b2768faefe59c557cce7025a2ff81bec"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/recover-raw-archive-v2.py",
+      "bytes": 12954,
+      "sha256": "d23e55c961851b39dc0a000e4274500655bf3beee4f76f47ec0d6bce94a70330",
+      "gitBlobSha1": "66ccde540f093449baca577c064b399f115b15e6"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/recover-raw-archive.py",
+      "bytes": 12848,
+      "sha256": "6b5295b5794a64c6ed1b2dee7195672ed1b265e3eb22a6c586fe18cf64571806",
+      "gitBlobSha1": "0d567e0485683653bc285488435d9894ced9acb8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/recover-raw-archive.py.patch",
+      "bytes": 1918,
+      "sha256": "bc6bb3373d2aad23f4dc04f0358e98dae83b8d706d04d77de2a4e07bffa0d81d",
+      "gitBlobSha1": "178508b43b9fe37f2d456a3a892cb8a291abd01f"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-982-full-audit/source-preparation-receipt.json",
+      "bytes": 1997,
+      "sha256": "c752bcd271b3064fd58c95a3e5af52d21a12115a084c176e51aeca60634137cc",
+      "gitBlobSha1": "871a8a5b2ef7f4cbde5dbf23064748e1cb630969"
+    }
+  ],
+  "inputBytesChanged": false,
+  "newObservationProcessed": false
+}

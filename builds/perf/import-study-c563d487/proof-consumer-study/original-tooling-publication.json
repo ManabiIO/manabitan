@@ -1,0 +1,19 @@
+{
+  "branch": "perf/numeric-suffix-proof-consumer-screen-20261128-c563d487",
+  "head": "c9583864b4185470f1e043fd49799a08369b258a",
+  "tree": "69257c47755062c6759b68332454e4427bf7902d",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "publishedAtUtc": "2026-11-28 10:32:52 UTC",
+  "files": 69,
+  "totalBytes": 862556,
+  "manifestSha256": "dd62ae8c26d8116f1df4b0a955324b3b1ff7e586a8fbfb824e13b01db50181f5",
+  "bindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "workflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "rootFinalReviewSha256": "7ce5dcc460868f07682b59796afd0c4cbccd8b412be5706612b9f47b964782e7",
+  "independentFinalReviewSha256": "1d9276775a6d8e16fd6098b09d3e7dca40f063accd775fed32dcf23582266045",
+  "scope": "One source-bound build/correctness and fixed48 component screen. No product code branch or PR.",
+  "noGainTransfer": true,
+  "noRetries": true
+}

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T10:56:59.363316+00:00",
+  "scope": "Append-only coverage extension to the bounded CRC consumer source review, from already retained production reports only. No native execution, corpus decode, instrumentation, timing or new performance observation.",
+  "previousNoteSha256": "51e06287485efbfffb70974d54562b4c68e2ce36e102c73af9c3cc60a43e1001",
+  "reports": {
+    "jitendex": {
+      "sourceArchive": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence.zip",
+      "sourceArchiveSha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+      "reportMember": "control-01-A/run-1.json",
+      "reportSha256": "5f1a93d96b6eb491c466da9c67e552d8e4e1cc148537feb2c8d94a5c926e9bbb",
+      "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "termRows": 436555,
+      "counts": {
+        "parserValidatedGlossaryReuseCount": 85996,
+        "parserRecentContentDedupHitCount": 73242,
+        "parserSourceCrcScannedBytes": 0,
+        "parserSourceCrcReusedBytes": 0,
+        "parserSourceCrcReusedGlossaryCount": 0,
+        "parserSourceCompressedBytes": 33829614,
+        "parserSourceUncompressedBytes": 538927310,
+        "parserParallelGroupCount": 22
+      },
+      "aggregateCompressionRatio": 15.930637281288519
+    },
+    "vndb": {
+      "sourceArchive": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence.zip",
+      "sourceArchiveSha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+      "reportMember": "control-01-A/run-1.json",
+      "reportSha256": "18a62600829ab7af52d64a51a6ace6fc375587e3c30315a71d5c1edd187d6866",
+      "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "termRows": 6648310,
+      "counts": {
+        "parserValidatedGlossaryReuseCount": 6490145,
+        "parserRecentContentDedupHitCount": 6490301,
+        "parserSourceCrcScannedBytes": 568284368,
+        "parserSourceCrcReusedBytes": 3699708599,
+        "parserSourceCrcReusedGlossaryCount": 6490145,
+        "parserSourceCompressedBytes": 86850424,
+        "parserSourceUncompressedBytes": 4267992967,
+        "parserParallelGroupCount": 170
+      },
+      "aggregateCompressionRatio": 49.141878305625774
+    }
+  },
+  "lockedJitendexDecision": "No deferred-CRC work on the retained production route: all22 groups contribute zero deferred scanned/reused bytes. Its historical glossary/content marginals do not establish the intersection, but this consumer has no applicable CRC work here.",
+  "lockedVndbDecision": "Deferred CRC is active; scanned plus reused bytes cover the entire original source. This mechanism must not be classified universally inapplicable. Retained aggregate counters do not establish a worthwhile incremental opportunity.",
+  "vndbMissingWitnessBounds": {
+    "rows": 6648310,
+    "rawContentHits": 6490301,
+    "existingGlossaryWitnessRows": 6490145,
+    "minimumMissingWitnessRows": 156,
+    "maximumMissingWitnessRows": 158165,
+    "derivation": "For sets H(raw full-content hit) and G(existing grammar witness), max(0,|H|-|G|) <= |H\\G| <= min(|H|,N-|G|). No subset/intersection assumption.",
+    "exactIntersectionAvailable": false,
+    "additionalGlossaryBytesAvailable": false,
+    "speedupMeasured": false
+  },
+  "groupingDistinction": {
+    "retainedFullImportVndbGroups": 170,
+    "frozenF28ComponentVndbGroups": 167,
+    "frozenF28ComponentVndbFusedGroups": 166,
+    "interpretation": "These are different workload partitions; no group-count or row-counter equivalence is asserted."
+  },
+  "sourceCompatibility": "The retained baseline is dcfc; its native CRC consumer and parser admission bytes are identical to exact f28, independently bound in the preceding note. The records are not new f28 measurements.",
+  "decision": "Do not implement or instrument now. JMdict and Jitendex are inactive under unchanged admission; VNDB has an unresolved missing-witness intersection with row bounds only, no byte or gain claim. Current frozen corrected component acquisition remains priority."
+}

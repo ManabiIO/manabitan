@@ -1,0 +1,503 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:30:55.035092+00:00",
+  "scope": "Exact workflow and isolated experiment tooling publication; no product-tree changes and no pre-existing measurements.",
+  "parentCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "parentTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "workflowPath": ".github/workflows/import-suffix-proof-component-c563d487.yml",
+  "workflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "bindingPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+  "bindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "priorUnpublishedManifestSha256": "2fc5cdd66786d45cadfb133412cd2611bcb4eb13d3415e5cec9f490a59390660",
+  "files": [
+    {
+      "path": ".github/workflows/import-suffix-proof-component-c563d487.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/workflow.yml",
+      "bytes": 4992,
+      "sha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+      "gitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/baseline-compare.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/baseline-compare.json",
+      "bytes": 93120,
+      "sha256": "b758126ecf7e6bc6875460a9f55cbe89f924d7b902a964ebb13831d9bfed6404",
+      "gitBlobSha1": "062f219bceda3810eb40c1c6a0ee0a8483694b72"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/baseline-develop-snapshot.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/baseline-develop-snapshot.json",
+      "bytes": 5986,
+      "sha256": "d9ca48d4a88804475f02669075d60c0e7736f683aa22a78c0a6181717d35d3ca",
+      "gitBlobSha1": "419474b5a5b28b813271a693ef7253d8145eefdb"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/baseline-receipt.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/baseline-receipt.json",
+      "bytes": 3870,
+      "sha256": "c522bbb98c474c0e09995e95428127da3b27cc2213791d2c9de77bb5c2821091",
+      "gitBlobSha1": "d4ce3d1b8f4bac82aa47da2519b55602edb37e61"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/binding.json",
+      "bytes": 3820,
+      "sha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+      "gitBlobSha1": "3406bfbd1e350f2591fbda79a44c21258b069da2"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.c",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/candidate.c",
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/candidate.patch",
+      "bytes": 11918,
+      "sha256": "db770f3cc4ff7f76e0d7352c4404f5d5732400ba1984c8b66c16d2eb8522bb77",
+      "gitBlobSha1": "69e9b28b298f76356dbd11545a546e19af0e79c6"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/diagnostic-fields.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/diagnostic-fields.json",
+      "bytes": 381,
+      "sha256": "1a2f2012ce72e72c5d5338e7e96bb5cbb439820a4c84934be490ecd72d52c2f5",
+      "gitBlobSha1": "340ace7b455753d8887ec3176553eeda6d4d7c3f"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/emit-build-evidence.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/emit-build-evidence.py",
+      "bytes": 2850,
+      "sha256": "e58336a3cce2ff97590ba73c0ebbcc496b4c1829fb38f652eedca1e88b9df77b",
+      "gitBlobSha1": "ba2e4c7e30cacd1b748cb7d7c48a68caa2fce8ae"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/before-python-provenance-prepare-and-validate.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/before-python-provenance-prepare-and-validate.py",
+      "bytes": 10927,
+      "sha256": "4bef9eae629fb037d33cf85c1594535b10989650684f3e44a06a3c593372e4dd",
+      "gitBlobSha1": "885e8b9a58c1361b2fd039835cddea2bc0f55381"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/before-python-provenance-prepare-component.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/before-python-provenance-prepare-component.py",
+      "bytes": 7741,
+      "sha256": "961efa9f6d7a06a177a032f095a3b690daaf5c1beb86a6cd2af51262192f3816",
+      "gitBlobSha1": "6dbaf9255dc1378b2d699ee59b0e07b934796fc3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/before-python-provenance-run.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/before-python-provenance-run.py",
+      "bytes": 15455,
+      "sha256": "4cd1c2e728b7624118099e529a3ffba2b24ea0ec50cf5788063b755e0ae758d0",
+      "gitBlobSha1": "4690b561312ecedd22a8a6d8b8fa7643d7f72b34"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/binding-before-finalization.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/binding-before-finalization.json",
+      "bytes": 3203,
+      "sha256": "e8be653d5a594fc5327d7aff1b4302c288634245cef62b91fdc93b6b43931812",
+      "gitBlobSha1": "4f8dc4ddb39743d45b7cc5ce39a7acd58b3bf499"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/binding-before-getter-guard.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/binding-before-getter-guard.json",
+      "bytes": 3817,
+      "sha256": "0377604a2f6856801770e1b8b02e1b07c9caf3165b1ace1c82732cc715954da8",
+      "gitBlobSha1": "c02adbaa0ffc50157ad861a29142ab646a99229a"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/binding-finalization.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/binding-finalization.patch",
+      "bytes": 4130,
+      "sha256": "4d46dbbdebe82e935fa88aa34a495e00d6091db950b496d17ba31e84b80ad097",
+      "gitBlobSha1": "0f3aca94da8032e8254fa1ed6c6533407ee3da1b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/binding-getter-guard-finalization.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/binding-getter-guard-finalization.patch",
+      "bytes": 2214,
+      "sha256": "ae18e49709cb91c3a6a65b17ad374de144e52e95db6fc4b4ebd4573e6694a8fd",
+      "gitBlobSha1": "0a73ff93ac6d2dd315e44d7116712c3aafb2f313"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/criteria-draft-completeness-receipt.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/criteria-draft-completeness-receipt.json",
+      "bytes": 592,
+      "sha256": "aa3a7f63df5d3cd1e87be5e28c3d1541b2f9a51488366c1f24268a68f0ebc56a",
+      "gitBlobSha1": "b075df788a8f5f458a7f2c6e56ef1c5d8948dfa8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/finalization-inspection-failure.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/finalization-inspection-failure.json",
+      "bytes": 440,
+      "sha256": "eac337821ea2b4c4bc5bbd0d1cf4207e54316be2f570e561a13c4c282ab22625",
+      "gitBlobSha1": "09c92e030ab02940d6ab052e24fdece578341451"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/historical-llhttp-guarded-qa.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/historical-llhttp-guarded-qa.json",
+      "bytes": 515,
+      "sha256": "3772459799f2f2b7164f5eaea641887887d8df16ba0d69e7ced4136c9d8e493e",
+      "gitBlobSha1": "e73834bd430081f6caea61bb60e75e3b7de5b58f"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/historical-llhttp-instance-trace.stderr",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/historical-llhttp-instance-trace.stderr",
+      "bytes": 1704,
+      "sha256": "b9470e62d1208cfc502e76ecb83f3fdcff871f23108ac2dbbdbd0efb0696d341",
+      "gitBlobSha1": "eaf88579c67d09488b59755f2d3179985fe14b15"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/historical-llhttp-smoke-failure.stderr",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/historical-llhttp-smoke-failure.stderr",
+      "bytes": 870,
+      "sha256": "1aff0e142b3b870c869fcf3ab431cb0fa03ab92d9e5f157e88d05f8eb53fb7bc",
+      "gitBlobSha1": "561a5213de95f951bbe22baadb97f64e419527cb"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/initial-qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/initial-qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 7068,
+      "sha256": "641fa033deac8c374f2218f34ad6035d8e3a8764732698cf7fac7467f58f374f",
+      "gitBlobSha1": "e8da50a547d15cf04587b50f334fa562ed0159a2"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/initial-qualification/term-bank-row-suffix-proof-fixtures.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/initial-qualification/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 5409,
+      "sha256": "11b83837a59cad54ea4537411219586ae5286e09a96384b6260183f2b574f7d1",
+      "gitBlobSha1": "6c384e848fe3342867514ea4388e0bb385330de3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/positive-target-proof-gate-amendment.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/positive-target-proof-gate-amendment.json",
+      "bytes": 640,
+      "sha256": "9c0ba374fdec883d56e6a916743a8213689f2b743af02b7af6ee0bb7cbb728b1",
+      "gitBlobSha1": "265887dc7505c5037e8a9e6faca0ab210f3ed4b8"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/preparation-record-before-getter-guard.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/preparation-record-before-getter-guard.json",
+      "bytes": 4431,
+      "sha256": "8e7d75c60f6e33ddff1a7ae5a87b92582ad6b14a075b08538436cc5422927405",
+      "gitBlobSha1": "209a10fecb75ebe5b2d50d726b0a3075d1bc7390"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/prospective-review-criteria-before-full-nontarget-field.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/prospective-review-criteria-before-full-nontarget-field.json",
+      "bytes": 4990,
+      "sha256": "ba15187e9bb71e14907d9652b64b1093ac1433ce910ea454029709c736a0a55f",
+      "gitBlobSha1": "aecc8876389af2d6f70693e631207fc6424761fa"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/publication-before-getter-guard-manifest.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/publication-before-getter-guard-manifest.json",
+      "bytes": 24548,
+      "sha256": "2fc5cdd66786d45cadfb133412cd2611bcb4eb13d3415e5cec9f490a59390660",
+      "gitBlobSha1": "8423381dcc9b6207244853a88a6ed38eeb62a4b3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/publication-before-getter-guard-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/publication-before-getter-guard-review.json",
+      "bytes": 2845,
+      "sha256": "19d8c49290eeaa4e8c9ee0abb051dfb18a594c9bc2a2718950831438842ce0f7",
+      "gitBlobSha1": "4f5b68344e31b858d2e61ece7a804b7dc7031f3d"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/python-provenance-amendment.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/python-provenance-amendment.json",
+      "bytes": 1026,
+      "sha256": "3f74112068855bd17a847ae723d579500a2977968347f884ed9549a1493f62da",
+      "gitBlobSha1": "bff3a83191ca083c20d7e97ed3f8dde256ae3ee9"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/run-before-positive-target-proof-gate.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/run-before-positive-target-proof-gate.py",
+      "bytes": 15292,
+      "sha256": "8c352524078559a2d91995677504cfd563218fa62985a2da1a3b3725a6bea663",
+      "gitBlobSha1": "ea56247f78ed4a18aad7472584fb41be3527646a"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-before-final-proof-fixtures.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-before-final-proof-fixtures.mjs",
+      "bytes": 13576,
+      "sha256": "fbaf9e6a9354dcfc79a8a9aacdd30c20e738d7e59e4ae4fe7314d07f10c421ee",
+      "gitBlobSha1": "ac24241ec49cd21929b25271f468f49e4d864d6c"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-before-getter-guard.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-before-getter-guard.mjs",
+      "bytes": 13814,
+      "sha256": "0dadc58659258280fb0532163d1742180a2af3360e38515c0023e5a3bd00065f",
+      "gitBlobSha1": "6d5096942b708cf1e5d72466d346a1d43c9f9f35"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-before-null-fixture-placement-fix.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-before-null-fixture-placement-fix.mjs",
+      "bytes": 13814,
+      "sha256": "1aea93b362c4da856d18d744976b05ea9a686cfe2841f5923fd09e2ae478452a",
+      "gitBlobSha1": "10e808b44d03e4ffc029184ced7da49c25b9c831"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-getter-guard-amendment.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-getter-guard-amendment.json",
+      "bytes": 2216,
+      "sha256": "c232705d99151c042a2c18e2c296231012d789f2430c0d98c14eb859cd9d8813",
+      "gitBlobSha1": "1d3969214cc9e67b2854583df728e320c1b47842"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-getter-guard.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-getter-guard.patch",
+      "bytes": 593,
+      "sha256": "19d60786ea351518c010b1908978f11eae207666cf5119b5b01ebda40c01e18b",
+      "gitBlobSha1": "23f44f204faaa30cb390e24d2b37d501c7fd2a3b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-null-fixture-placement-failure.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-null-fixture-placement-failure.json",
+      "bytes": 858,
+      "sha256": "ad96c90f8e57c49c2df8028d43da32b5b2f32f4e2c210c8bf6273e8447b7c438",
+      "gitBlobSha1": "fed7c9f4e7ca63b52a7e62e7685d7a14c97aae6f"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/history/smoke-null-fixture-placement.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/history/smoke-null-fixture-placement.patch",
+      "bytes": 1236,
+      "sha256": "a54802dc966b534b7537842884d76c2583f4064dfbe288281bd0296096ef7c4f",
+      "gitBlobSha1": "feac85c65b589bd11410f3a29d77402592da063b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/native-oracle.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/native-oracle.mjs",
+      "bytes": 13009,
+      "sha256": "fca3d561d443aec6623fe5e2864228157e16eb74d5cc477804bfea6f6b4d323d",
+      "gitBlobSha1": "68b360b98e74224924d05c7fa2afadd4bdc16fec"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/original-native-oracle.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/original-native-oracle.mjs",
+      "bytes": 13002,
+      "sha256": "5a906f810f418ad7392f2817d8964633375c794000e789ad412b820d92622419",
+      "gitBlobSha1": "31092901c621e3fb447ccc20dbe4c372e1ddf6c4"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/original-prepare.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/original-prepare.py",
+      "bytes": 3907,
+      "sha256": "ab3cf0c594435a73e436793da539ea4b120f3b442078945705fe162cd9aedb4b",
+      "gitBlobSha1": "170f1b84fb839870cae67299b7cd31ccb83effce"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/original-run.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/original-run.py",
+      "bytes": 9585,
+      "sha256": "89de28e704f3c3b0fc1330d7b80b1400820feb93519f93cdbdf70e1f09db72b1",
+      "gitBlobSha1": "5535b7fddd4906918f4dd1d21c6734b4b66ce553"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/original-screen.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/original-screen.mjs",
+      "bytes": 18723,
+      "sha256": "5873393e76535146a49d0b18a4e77d3038b014c884556f9e1ecf4c9d5ac4d60d",
+      "gitBlobSha1": "06d6113bcac97877203aae1c26ae2fb07cb6b3ea"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/original-smoke.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/original-smoke.mjs",
+      "bytes": 10583,
+      "sha256": "155a9ae2b50b6a4886ee815f7d9cb65712374623b957e074492e564ac07d7515",
+      "gitBlobSha1": "e2518e6bac259a5530c77b88da70df57af6de630"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/pipeline-core-protocol-review-v2.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/pipeline-core-protocol-review-v2.json",
+      "bytes": 6465,
+      "sha256": "c3f3e5ca7ffd701c3d2ef049930a57eb302cee6ade5891b69edebe6900e98870",
+      "gitBlobSha1": "007e36655e912e5d3508ce0f4c8a504e474d47ec"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/pipeline-core-protocol-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/pipeline-core-protocol-review.json",
+      "bytes": 5769,
+      "sha256": "9d646be9734e0fd9fdb24657ef1be7b869cc8956c93fbf57ff358519802d4def",
+      "gitBlobSha1": "e298ec7a5ca4338bc1865cbb45cdd7695a6a37f4"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/pipeline-smoke-getter-guard-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/pipeline-smoke-getter-guard-review.json",
+      "bytes": 1901,
+      "sha256": "919d2943fce07a8350133a31072347040e62a4ff2cfc955349b199c28fef1193",
+      "gitBlobSha1": "e4f23e492f9461b41d3bc444ae54317fa71bcd44"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/preparation-record.json",
+      "bytes": 4946,
+      "sha256": "444a0d18c8482db7664352fee034a69ddf3e47e1388547ccdf394360eafab53a",
+      "gitBlobSha1": "549409f3482d5c72bd55e70876802d69ed9cb622"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/prepare-and-validate.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/prepare-and-validate.py",
+      "bytes": 11060,
+      "sha256": "8bd9aec058cfe2e4b358cc3a004531ec47ea6b694609cdf6dbf6e0b948a83505",
+      "gitBlobSha1": "d4ad800bf3a246d8a10ef6a5b48229661b78008c"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/prepare-component.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/prepare-component.py",
+      "bytes": 7874,
+      "sha256": "1d3677cbd8d21d71a1b6f23c69942dc34ad15337b78b0dd868d9e1b9664480af",
+      "gitBlobSha1": "8bff08d7933bddb99ff450f6e2a87a2471eb2cfa"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/prepare-diagnostic.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/prepare-diagnostic.py",
+      "bytes": 6685,
+      "sha256": "cf376b5320b8d1f3a7808f97f7b0ecc59b699e83f0d8e1614b81035ab60eff13",
+      "gitBlobSha1": "1a4b9ca8ba6b1335bc21cc3d294e83604a34f871"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/prospective-review-criteria.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/prospective-review-criteria.json",
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+      "gitBlobSha1": "7be75e1ab4dc20bb089dae463478687f4fc3e02d"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/qualification/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+      "gitBlobSha1": "e2d82bb52863b8cf817c46f3057b8c0c7405925b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-reuse.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/qualification/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-token-end-fixtures.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/qualification/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-token-ends.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/qualification/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/diagnostic-source-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/diagnostic-source-review.json",
+      "bytes": 2793,
+      "sha256": "37e6fabddfcce81854dc4518121c9814bba78d0c269bfbad1ebe83d6d4ce5775",
+      "gitBlobSha1": "46923796d740f7088429b0e28482e96dc556ce23"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/pipeline-final-source-test-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/pipeline-final-source-test-review.json",
+      "bytes": 4889,
+      "sha256": "78847a0e95c2b6c607cae4228a0594b31b6b601adb7d9f0a668bcf32e4324790",
+      "gitBlobSha1": "9c4d0027fcd813f5e51152f0bd39027d2f4b71fe"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/pipeline-source-span-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/pipeline-source-span-review.json",
+      "bytes": 3031,
+      "sha256": "afd788ecce016c3442db3911a75f66a36006bc3fc4454092b971d9ec07dabd80",
+      "gitBlobSha1": "6ccc8b648f6ea730df8984ea67cba740b425a6f9"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/root-final-source-test-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/root-final-source-test-review.json",
+      "bytes": 2600,
+      "sha256": "d4a64bbd01c578f0871674e0517fa326509b3c5f7bb3087d16dd724d5349da61",
+      "gitBlobSha1": "dddf681293e2d231cf22a51f7272aa492aace6e3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/root-source-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/root-source-review.json",
+      "bytes": 2956,
+      "sha256": "1d6eb264a4028ed965f5f839c8119c991ebcaa863566f3d078dd1839d003e3d7",
+      "gitBlobSha1": "9460a539c3e2be8fbfd501cc7bd53305a6009f03"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/reviews/static-preflight-receipt.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/static-preflight-reports/static-preflight-receipt.json",
+      "bytes": 8836,
+      "sha256": "896542b76c044e398000fd3e8ac5dd9ca2d63d72bbc576224578ff7d24c01df6",
+      "gitBlobSha1": "16456e659e5ef5d35fd72861459fb5de99a36a5a"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/run.py",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/run.py",
+      "bytes": 15588,
+      "sha256": "c35901deca2f042aab22c0756dad08f5458593cd500a4cfe099c9bd6aa3c03f4",
+      "gitBlobSha1": "97221e76e3a00504166ef42cd64a1c185360dd0c"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/screen-change-proof.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/screen-change-proof.json",
+      "bytes": 996,
+      "sha256": "564bbd4342aa971a9041749e55602c1fb44e60b0fd6184617e1f4062603d0d8d",
+      "gitBlobSha1": "d2c5689ae2c0b86e5c2e7cc8251688ae0e96b372"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/screen.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/screen.mjs",
+      "bytes": 18924,
+      "sha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c",
+      "gitBlobSha1": "975a91b1950c53896a4250633400ec80db29370f"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/smoke.mjs",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/smoke.mjs",
+      "bytes": 13909,
+      "sha256": "cfbbe6977dd89e249b8c220cb217cedc378821a2d8a6725a6c1ae58cfb66cf42",
+      "gitBlobSha1": "cae5ab1709f55e4c6ef3cdc9b3b573cb3daa1e4b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/source-only-diagnostic-1/diagnostic-build.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/source-only-diagnostic-1/diagnostic-build.json",
+      "bytes": 945,
+      "sha256": "283c9ff9227f7d3282487464fb972a741445d655cea4ded6b2d4d076122131cb",
+      "gitBlobSha1": "8592f88a50104bd086962e22b9d513ea21d77ac3"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/source-only-diagnostic-1/diagnostic-source.c",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/source-only-diagnostic-1/diagnostic-source.c",
+      "bytes": 166145,
+      "sha256": "a73b93ab2e55ac68508663b13544ba51d310230a3c3801df5fbf9817bf1ffef8",
+      "gitBlobSha1": "f5ff379eaea227b99ebc9f59c3eb9126da8678e0"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/workflow.yml",
+      "bytes": 4992,
+      "sha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+      "gitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+    }
+  ],
+  "fileCount": 69,
+  "totalBytes": 862556,
+  "productTreeChanged": false,
+  "newMeasuredObservations": 0
+}

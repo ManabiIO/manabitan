@@ -1,0 +1,75 @@
+{
+  "kind": "root-concrete-current-a300-full-protocol-review",
+  "recordedAtUtc": "2026-11-28T11:40:50.156754+00:00",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "reviewedFiles": {
+    "workflow.review-v2.yml": {
+      "bytes": 23024,
+      "sha256": "5e69e4f47088deaa185eb6bb54a6ad7ba2081f631a92485ec847ef38c9756ac5"
+    },
+    "workflow.review-v2.diff": {
+      "bytes": 14791,
+      "sha256": "1ea74377c2674e612b0720e4085f95c9554e6d08992bc1b4d640b0c0c7c2201d"
+    },
+    "full-qualification-binding.json": {
+      "bytes": 4807,
+      "sha256": "6369b9d12fa3568e1d49981784516e73e62a19f4e3a04fbc92e5e32a5b6bd753"
+    },
+    "source-binding.json": {
+      "bytes": 7368,
+      "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+    },
+    "fresh-correctness-proof.json": {
+      "bytes": 13911,
+      "sha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8"
+    },
+    "verify-fresh-correctness.py": {
+      "bytes": 20715,
+      "sha256": "6cc9f18e7677ec22792e95f6184a8b806d2c6106aa90b97db1209db5a3710e39"
+    },
+    "prospective-review-criteria.json": {
+      "bytes": 5506,
+      "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+    },
+    "storage-prerequisite-decision.json": {
+      "bytes": 2366,
+      "sha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99"
+    },
+    "archive-evidence.py": {
+      "bytes": 6895,
+      "sha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f"
+    },
+    "offline-original-proof-replay.json": {
+      "bytes": 1796,
+      "sha256": "4c7ae5e4af0a1ea5179ed6eb8e25c31da5f47a568eb94fe519d68c99c547c056"
+    }
+  },
+  "approvedPreparedWorkflow": true,
+  "reviewScope": [
+    "Read full fresh correctness verifier and its precise native/sevenbuild-target additions",
+    "Reviewed complete workflow diff against the previous faf6 fixed252 protocol",
+    "Verified all source IDs, original fresh artifact146783B/3d17262d and source-clean11-command result",
+    "Checked all numerical7812target/non-target/memorygates unchanged",
+    "Checked fixed sixordercells12candidatepairs4identicalpairs/42observationspercell, fail-fastfalse, noattemptreplacement",
+    "Accepted source-specific77/77 storage policy with exact knownpaths/eightSAH/seven4096 reserves and exactall-observation equality",
+    "Verified early exact browserbinary/Nodegate before any observation",
+    "Read original-artifact helper selfcheck receipt; no new test/native/performance execution claimed",
+    "Reviewed changed-package-entry allowlist limited to nativeC+runtimeWASM and unchanged acquisition/extraction/archive blocks"
+  ],
+  "allowedFinalization": {
+    "bindingChangesOnly": [
+      "acquisitionAuthorized:false->true",
+      "authorizationState:record rootandpeer approval of this concrete protocol"
+    ],
+    "workflowChangesOnly": [
+      "replace occurrences of the bindingSHA256 with finalizedbindingSHA256"
+    ],
+    "nonAcquisitionAdditionsAllowed": [
+      "immutable source-review/identity/preservation receipts and reviewed independent auditor data"
+    ]
+  },
+  "launchCondition": "Publish the separate tooling branch only after peer review and root verifies the complete final manifest and exact isolated Git tree. No additional source/criteria/observer/runtime/clock/worker/cache/cap changes are authorized by this record.",
+  "afterLaunch": "All252plannedobservations remain fixed; failedorpartialdata retained, noselectedretry, no pooling/controlsubtraction/outlierremoval; product PR onlyafter completegain/correctness/non-target/memory/storage review.",
+  "productPullRequestAuthorizedByThisRecord": false
+}

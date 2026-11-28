@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "scope": "Supplemental read-only reconciliation of original native-oracle JSONL receipts; no native execution, metadata reconstruction, or performance acquisition.",
+  "complete": true,
+  "originalRunId": 46136965050,
+  "originalJobId": 140955527816,
+  "originalArtifactId": 15260432499,
+  "originalArtifactSha256": "6630e77afbb10681aee5faef58bd0b4aad47cd52b94715e93b346041ff18b3f5",
+  "cloudByteBridgeGitBlob": "d5d2ac37a09e0898483d0955fd03509d9e374796",
+  "records": {
+    "bytes": 1776831,
+    "sha256": "2a0decbc96401edd279c78dd842f91c03f662dd284852ec71048cdec041a03e7",
+    "gitBlobSha1": "f3165c591dc9761f5232a59fd24ea8dbd7c8634b",
+    "count": 3554,
+    "pairedAttempts": 3554
+  },
+  "synthetic": {
+    "cases": 1112,
+    "comparisons": 2224,
+    "validComparisons": 44,
+    "invalidComparisons": 2180,
+    "wordsRepresented": 1186974
+  },
+  "corpus": {
+    "parse_term_bank": {
+      "banks": 665,
+      "rows": 6648310,
+      "words": 113021270,
+      "bytes": 4267992967
+    },
+    "parse_term_bank_with_media_hints": {
+      "banks": 665,
+      "rows": 6648310,
+      "words": 113021270,
+      "bytes": 4267992967
+    }
+  },
+  "checks": [
+    "Exact immutable source/WASM/fixture/archive bindings",
+    "All 3,554 original baseline/candidate attempt arrays exactly equal",
+    "Each unique input appears once through each strict export",
+    "All 17 words per valid row and all prefilled words on each synthetic failure represented by original hashes",
+    "Every locked bank 1..665 present; row, span and summary counts reconcile"
+  ],
+  "limitations": [
+    "Raw metadata words are not present in the retained JSONL; aggregate metadata digests are not recomputed from words in this replay.",
+    "Exact word equality was performed by the frozen original native oracle during acquisition, as its source and successful receipts record.",
+    "These strict exports exercise the unchanged raw parser; fused proof activation is independently covered by original smoke, counters and rich-output parity.",
+    "The original frozen Python component auditor 6e007d90 was not run on VNDB during the executor outage; this supplement does not relabel it as executed."
+  ],
+  "auditorSha256": "16052d5e83ad668566b50590cbad70292da9adff826ba1d253b125cb6ec5ddb5"
+}

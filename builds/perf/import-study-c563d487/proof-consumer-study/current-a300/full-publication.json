@@ -1,0 +1,37 @@
+{
+  "kind": "fresh-a300-full-qualification-publication",
+  "startedAtUtc": "2026-11-28 11:43:36 UTC",
+  "publishedAtUtc": "2026-11-28 11:43:37 UTC",
+  "repository": "ManabiIO/manabitan",
+  "branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487",
+  "head": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "tree": "b0fd76d25763d484e057f1306bea913adc55cfd1",
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "manifestSha256": "088ebb3a624104d4902479f3e8725770d56b4ba661e86d3b2c7edad096819b91",
+  "fileCount": 23,
+  "totalBytes": 257942,
+  "rootPreparedReviewSha256": "93fc55cb361cd3a5853d26a4dcde295199f24f13985a1a0ae83e6da2ac523384",
+  "peerProtocolReviewSha256": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5",
+  "peerFinalIdentitySha256": "3920c17642bc72fba4ca9b141c06302863ef29af91e9ae42611da0dd08c905a3",
+  "narrowFinalization": {
+    "manifestSha256": "088ebb3a624104d4902479f3e8725770d56b4ba661e86d3b2c7edad096819b91",
+    "oldBindingSha256": "6369b9d12fa3568e1d49981784516e73e62a19f4e3a04fbc92e5e32a5b6bd753",
+    "newBindingSha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+    "changedBindingFields": [
+      "acquisitionAuthorized",
+      "authorizationState"
+    ],
+    "workflowHashSubstitutions": 3,
+    "otherWorkflowBytesIdentical": true,
+    "all23FilesDualHashed": true,
+    "approved": true
+  },
+  "exact23AddedPathsAndBlobIdentitiesVerifiedBeforePublication": true,
+  "productFilesChanged": false,
+  "productPrOpened": false,
+  "plannedObservations": 252,
+  "runStatus": "Awaiting observed Actions run identity; no result claimed",
+  "branchToolResult": {
+    "branch": "perf/import-suffix-proof-982-qualification-20261128-c563d487"
+  }
+}

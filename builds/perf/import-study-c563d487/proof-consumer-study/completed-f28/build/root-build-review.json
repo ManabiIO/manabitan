@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "root",
+  "recordedAtUtc": "2026-11-28T10:57:44.382982+00:00",
+  "scope": "Review of independent primary-log and original-artifact audits; no build, test or benchmark execution by this review",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "toolingHead": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+  "runId": 46136965050,
+  "jobId": 140954302987,
+  "auditSha256": {
+    "primary": "6c4a78ad65a86374a2a9933be68440f6236750977950acced240e127ae68322a",
+    "independent": "f06ee5607c2edc2a16c52466f9da422b163157e311914b604d7b22ebf2ac6a00"
+  },
+  "correctnessPass": true,
+  "commandReceipts": 26,
+  "unitFilesPassed": 674,
+  "unitTestsPassed": 15225,
+  "unitTestsSkipped": 47,
+  "optionsPassed": 32,
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "focusedCases": 58,
+  "syntheticOracle": {
+    "syntheticCases": 1112,
+    "syntheticComparisons": 2224,
+    "corpus": {
+      "parse_term_bank": {
+        "banks": 0,
+        "rows": 0
+      },
+      "parse_term_bank_with_media_hints": {
+        "banks": 0,
+        "rows": 0
+      }
+    },
+    "recordsSha256": "4f9ee6c33bee4566d7293154476becb7256f2d6a55fdf67bfef3e342dd9f0faa",
+    "scope": "Producer compares all17 words through both raw strict exports. This replay validates every archived attempt hash/length/result and source binding; raw word arrays are not archived. Fused proof activation is separate."
+  },
+  "product": {
+    "cSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+    "wasmSha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+    "manifestSha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+    "wasmBytes": 70091
+  },
+  "artifact": {
+    "artifactId": 15260257444,
+    "sizeBytes": 315161,
+    "sha256": "8f48ef25c5c8a9283981192db8402fadcdbba7cc3a02290b278c3d229470c1ee"
+  },
+  "postCorrectnessByteProof": {
+    "files": 39,
+    "chunks": 81,
+    "bytes": 308292,
+    "manifestSha256": "eaf7887cde3249e7f2f5dd5c9e8212f4400805f471335138d64875a02055011e",
+    "allBytesMatchOriginalArtifact": true
+  },
+  "originalFailurePreserved": {
+    "runId": 46135694884,
+    "correctnessPass": false,
+    "performanceObservations": 0
+  },
+  "limits": [
+    "The original failed run remains failed; this separate corrected run establishes exact-f28 correctness.",
+    "No component or full-import gain is established by correctness.",
+    "No correctness or performance result transfers automatically to newer a300 source."
+  ]
+}

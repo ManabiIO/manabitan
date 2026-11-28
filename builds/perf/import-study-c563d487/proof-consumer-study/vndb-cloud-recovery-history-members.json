@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "kind": "deterministic-lossless-evidence-representation",
+  "archive": {
+    "bytes": 30164,
+    "sha256": "a081a3cadafaef1eea6d76855e14a6d176d319afa44414f32e19c898eab8d55d",
+    "gitBlobSha1": "72b70e672224b099ab81a1cd1dd39b193cc0df12"
+  },
+  "memberCount": 12,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/cloud-auditor-v1.js",
+      "bytes": 15445,
+      "sha256": "2bae98638f350a9ffb8bc4691598abcca9816f3996ad39490521b1e433e6cc10",
+      "gitBlobSha1": "d081a289bde6cd5ac345eb88853f9bc7c8952bb1"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/cloud-auditor-v2.js",
+      "bytes": 15837,
+      "sha256": "a8ea0b6f7829a2479b58b4d4af89097500a168d0a2896b40046783856a639fc8",
+      "gitBlobSha1": "847441d22d5212420f3df81271b8ab3722820e34"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/cloud-byte-helper.js",
+      "bytes": 4296,
+      "sha256": "70aba211c279b54c24dff2f3e4e7bc6efbf4282e84c665167ef2f3821e7cbfe0",
+      "gitBlobSha1": "00c49121ff880189acd6d5896304c01fcde01333"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/cloud-original-artifact-reconciliation.json",
+      "bytes": 18707,
+      "sha256": "f4bc21fbf178c1e28202f14578d32e0a1ef07ff04d6505e73b2827f3e90d3581",
+      "gitBlobSha1": "d5d2ac37a09e0898483d0955fd03509d9e374796"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/cloud-postprocessor-attempt-1.json",
+      "bytes": 248,
+      "sha256": "46a07806b1c9a45221449f625329870942f3bd4f605d1b95f2b20977d0c72301",
+      "gitBlobSha1": "e9a893f109c018294435ae7799a2a6ec33b9f63c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/complete-artifact-and-postprocessing-inventory.json",
+      "bytes": 5228,
+      "sha256": "57dc0c45b0f5d847997d95c2d0c8cbd7451d81c63c43db7c5e7608fdd89a30f9",
+      "gitBlobSha1": "4b69ed4b21b58102eef4416daa73706512d069b9"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/native-oracle-receipt-audit.js",
+      "bytes": 7440,
+      "sha256": "16052d5e83ad668566b50590cbad70292da9adff826ba1d253b125cb6ec5ddb5",
+      "gitBlobSha1": "1b14758da42a10906e494ee65dfb5cd368121da8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/native-oracle-receipt-audit.json",
+      "bytes": 2281,
+      "sha256": "6f9b943d127b6584a7f618a1483da9b9e43e6d72818dafec797d2e3a93ed63ba",
+      "gitBlobSha1": "270223f126525f731db4e3078e2b64eda4202254"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/projection-amendment.json",
+      "bytes": 2038,
+      "sha256": "c168d10bfff2b25dfca85715ed1e563c062610a31a75a54e170a99fbfffa79c8",
+      "gitBlobSha1": "8607c6b3ca705b73a1bc6965b4f9ab160b949aa1"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/recover.py",
+      "bytes": 16145,
+      "sha256": "71abc32cb48ec9259c6bb186f05aed13c98c724e4956b79a9918f81ec43f03ed",
+      "gitBlobSha1": "c5c97fae0609b0398205d96702c62afcb52d2720"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/recovery-manifest.json",
+      "bytes": 26141,
+      "sha256": "3c4a292bcb9ff3da4dac9f577de476ae073e2c333151db033a34b45b44b95a84",
+      "gitBlobSha1": "73ca7c03aba49d06c770fe7297a556728b4b7213"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-corrected-evidence/vndb/cloud-recovery-preserved-1/recovery-workflow.yml",
+      "bytes": 1300,
+      "sha256": "246f94868b9955e1fc1a46ad31d3540a9fafc957f010a5875d38a0109acebcdd",
+      "gitBlobSha1": "69484a8b0c260f536bbbd1179bb2130c5776111c"
+    }
+  ],
+  "inputBytesChanged": false,
+  "nativeOrMeasurementExecuted": false
+}

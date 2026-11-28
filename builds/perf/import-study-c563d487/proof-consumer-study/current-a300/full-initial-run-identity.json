@@ -1,0 +1,55 @@
+{
+  "kind": "initial-current-a300-full-run-identity",
+  "observedAtUtc": "2026-11-28 11:45:41 UTC",
+  "runId": 46141233321,
+  "runAttempt": 1,
+  "workflowHead": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "validation": [
+    {
+      "id": 140967406330,
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-11-28T11:43:53Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 140967463694,
+      "name": "vndb (BA)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    },
+    {
+      "id": 140967463725,
+      "name": "vndb (AB)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    },
+    {
+      "id": 140967463737,
+      "name": "jitendex (BA)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    },
+    {
+      "id": 140967463739,
+      "name": "jitendex (AB)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    },
+    {
+      "id": 140967463778,
+      "name": "jmdict (BA)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    },
+    {
+      "id": 140967463788,
+      "name": "jmdict (AB)",
+      "statusAtFirstObservation": "in_progress",
+      "startedAt": "2026-11-28T11:43:55Z"
+    }
+  ],
+  "performanceResultClaim": false,
+  "productPrOpened": false
+}

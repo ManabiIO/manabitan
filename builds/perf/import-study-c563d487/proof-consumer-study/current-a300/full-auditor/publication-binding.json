@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "finalized": true,
+  "status": "Frozen identity-only completion for exact published full cohort; no current full observations read.",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "baselineTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "candidateTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "productFiles": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 70091,
+      "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "gitBlobSha1": "ff499838f2e1ef5a209de4639e22f5681dbf7c0d"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+      "gitBlobSha1": "a7d307b072092a026c7a200d1995441cbd9b2ba8"
+    },
+    {
+      "path": "test/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 10092,
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c"
+    },
+    {
+      "path": "test/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6382,
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab"
+    },
+    {
+      "path": "test/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+    }
+  ],
+  "vndbSahAllocationUnits": [
+    77,
+    77
+  ],
+  "storageBytes": {
+    "jmdict": 43684317,
+    "jitendex": 67630172,
+    "vndb": 609340619
+  },
+  "packageEntryCount": 582,
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "runId": 46141233321,
+  "jobs": {
+    "jmdict-AB": 140967463788,
+    "jmdict-BA": 140967463778,
+    "jitendex-AB": 140967463739,
+    "jitendex-BA": 140967463737,
+    "vndb-AB": 140967463725,
+    "vndb-BA": 140967463694
+  },
+  "expectedSha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+  "sourcePrefix": "suffix-proof-982-c563d487",
+  "noOldSourcePooling": true,
+  "finalizedAt": "2026-11-28T11:45:34.513273+00:00",
+  "workflowTree": "b0fd76d25763d484e057f1306bea913adc55cfd1",
+  "fullQualificationBindingSha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+  "validationJobId": 140967406330,
+  "primaryAuditorSha256": "638d04155eadc4956a7c1a2702f40a7f04a23303520f239fcb2a689cd420a003",
+  "rawAuditorSha256": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+  "recoverySha256": "d23e55c961851b39dc0a000e4274500655bf3beee4f76f47ec0d6bce94a70330",
+  "provenanceHashes": {
+    "source-binding.json": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+    "fresh-correctness-proof.json": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+    "storage-prerequisite-decision.json": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+    "full-qualification-binding.json": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e"
+  }
+}

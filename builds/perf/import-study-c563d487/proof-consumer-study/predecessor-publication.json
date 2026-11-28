@@ -1,0 +1,19 @@
+{
+  "branch": "perf/import-study-evidence-20261128-c563d487",
+  "commit": "a5f664fcb20debdd30de12ff76656358f45ebbb6",
+  "tree": "5c381af2deb8aab5733e59e0587976ba5e886aac",
+  "parent": "74ca99b51983dd7a0b4ef5d5dea662b9caa9fc19",
+  "publishedAtUtc": "2026-11-28 10:13:25 UTC",
+  "fileCount": 47,
+  "totalBytes": 30924114,
+  "canonicalSha256": "d988a3322a308ee48b18900cc90c2c9d7d1e565b1785ae5fd4d1bd71ee50339a",
+  "indexSha256": "00587fd36a7cd2208d4fa7959734152dff67c169a63d8d9385a06e45fef16d57",
+  "manifestGitBlob": "68a2e854772f1fcee1f53df5184c83b59a7d57ad",
+  "verificationGitBlob": "433c5a0cb289d3122b0f68ca2820ad3aba122fe3",
+  "cohortRun": 46130093248,
+  "sourceBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "sourceCandidate": "4cd1abfabcb92c09694f107ff8e856add52e07df",
+  "decision": "Both VNDB target timing gates failed; no performance PR.",
+  "noRuntimeChange": true,
+  "noProductPr": true
+}

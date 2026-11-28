@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 11:19:28 UTC",
+  "reviewer": "root",
+  "scope": "Pre-acquisition source, fixed protocol and exact payload review; fresh correctness and excluded baseline observations have not yet run.",
+  "manifestGitBlobSha1": "79b37a12acb6fde21de7d81851b9ba8ef4269272",
+  "manifestSha256": "04dea9f59968535a8f0cc83ed26e93aa8dcb2c7040edf73b89bd0e7ff6f64311",
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "candidateTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+  "files": 15,
+  "bytes": 203995,
+  "peerSourceReviewSha256": "6627fe331fbaf0c583e8f5e9a55b6f597db1fa002bd176948d93abcbaa1a1800",
+  "peerIdentityReviewSha256": "65ddb798361b13f401224d4006668a16f75c05303ae328c7062c95eaff407c38",
+  "checks": {
+    "all15RemoteGitBlobsShaAndSizesReverified": true,
+    "oneWorkflowAndIsolatedToolingOnly": true,
+    "exactEightProductFilesAndParentBound": true,
+    "freshCompleteCorrectnessBeforeAnyBaselineObservation": true,
+    "exactThreeIndependentSingleBaselineObservations": true,
+    "unchangedObserverMarkerOverlaySamplerAndProductionFlags": true,
+    "pinnedBrowserHashAndVersionBeforeInvocation": true,
+    "childExitCodePropagatedAfterSavingEvidence": true,
+    "allFailuresRetainedNoSelectedRetries": true,
+    "structuralStorageReviewRequired": true,
+    "noAcceptedAllocationBound": true,
+    "noAutomatic252Comparison": true,
+    "allDurationsExcludedFromPerformanceClaims": true
+  },
+  "reason": "The a300 metadata schema changed from the source of the historical exact VNDB allocation. Observe current baseline layout before freezing a new source-specific allocation expectation; do not alter production limits or infer candidate gain.",
+  "limitations": [
+    "Source-only review during executor outage; workflow performs Python syntax validation before execution.",
+    "No a300 correctness, storage compatibility, performance or memory conclusion exists yet.",
+    "Original f28 component source remains separate. Original frozen VNDB 6e00 replay did not execute; a separately identified original-byte cloud audit is in progress.",
+    "The later full252 plan requires a separate frozen source/protocol review after all current baseline inventories are reviewed."
+  ]
+}

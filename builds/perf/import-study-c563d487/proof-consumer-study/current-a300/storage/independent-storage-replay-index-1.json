@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "complete": true,
+  "sourceSha256": "997b045f6c1ad458caa8f48ff50329d3d46fc9be46698df8a6cb350f077b611a",
+  "observations": [
+    {
+      "dictionary": "jmdict",
+      "audit": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-prerequisite-evidence/jmdict/raw-recovery-1/independent-storage-source-report-audit-1.json",
+      "storageBytes": 43684317,
+      "rawScans": 92,
+      "sahFiles": 8
+    },
+    {
+      "dictionary": "jitendex",
+      "audit": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-prerequisite-evidence/jitendex/raw-recovery-1/independent-storage-source-report-audit-1.json",
+      "storageBytes": 67630172,
+      "rawScans": 85,
+      "sahFiles": 8
+    },
+    {
+      "dictionary": "vndb",
+      "audit": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-982-prerequisite-evidence/vndb/raw-recovery-1/independent-storage-source-report-audit-1.json",
+      "storageBytes": 609340619,
+      "rawScans": 141,
+      "sahFiles": 8
+    }
+  ],
+  "candidateObservations": 0,
+  "same582EntryPackageMap": true,
+  "noPerformanceComparison": true
+}

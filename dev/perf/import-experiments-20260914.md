@@ -1,5 +1,63 @@
 # Codex instructions: import optimization experiments
 
+## 2026-11-28: full-suffix proof consumption passes a VNDB component screen; fresh-source browser qualification remains separate
+
+A source-distinct follow-up now consumes an already validated full-row suffix equality proof in the native fused parser. It skips token-end rescans when bounded full-suffix equality succeeds. Numeric-value reuse and the ordinary full-content comparison bypass occur only after the current expression and reading pass the existing key validation and interning path. The bounded equality helper, admission predicate, strict grammar, global-content branch and completed-index publication contract remain unchanged. This is a separate candidate from the closed `4cd1abfa` study below; none of that study's observations is replaced or pooled with this screen.
+
+The corrected [component run 46136965050](https://github.com/ManabiIO/manabitan/actions/runs/46136965050), tooling `2c6761f83bd88a8d88b269ef31e5e15fa6840c22`, completed all **48 measured children and three separate diagnostic children** against the frozen `f28c2801fcfd9416f220b46b9cbafeee901c1cb2` baseline. VNDB passes the predeclared component screen. JMdict and Jitendex remain inconclusive, with adverse native-phase directions retained. **No complete-import improvement or performance PR is established by these component measurements.**
+
+### Component outcomes and exact scope
+
+Each dictionary retains four alternating candidate pairs and four adjacent identical-code pairs, fresh Node 22 children, two excluded warmups per measured child, the original compressed inputs and fixed groups of 7/10/4 banks. The boundary includes inflate/CRC, strict native parsing and completed lookup-index production. VNDB explicitly enables the native escaped-key route. These are component measurements, not production-browser imports or process-memory qualification.
+
+Changes below are paired candidate/baseline percentages; negative values are faster. All controls and all original child outputs remain included.
+
+| Corpus | Median component elapsed change | Faster pairs | Median native-phase change | Median CPU change | Identical-code elapsed range |
+| --- | ---: | ---: | ---: | ---: | --- |
+| JMdict | +1.4209% | 2/4 | +3.0439% | +0.1690% | [-1.2860%, +1.9204%] |
+| Jitendex | +0.2792% | 2/4 | +1.7385% | +0.5044% | [-2.8985%, +0.9612%] |
+| VNDB | -13.0363% | 4/4 | -15.9357% | -12.7847% | [-8.8740%, -0.0681%] |
+
+VNDB's four elapsed pairs are all faster, its median reduction exceeds 2%, and it exceeds the largest absolute identical-code change. The large **-8.8740% control pair is retained**; controls were not subtracted and no observation was replaced. VNDB lookup time moves in the opposite direction, +0.5125% at the paired median. JMdict/Jitendex each have only one of four faster native-phase pairs and zero suffix proofs in their diagnostic runs. Their elapsed results do not trigger the declared non-target hold rule, but they do not prove equivalence or non-regression.
+
+The separate VNDB diagnostic records 6,324,582 successful suffix proofs and exactly as many token-end scan skips, numeric consumers and ordinary content-comparison skips. The full rich row/dedup/media digests match for all 528,299 JMdict rows, 436,555 Jitendex rows and 6,648,310 VNDB rows. Diagnostic durations are excluded from paired results. The [component cloud index](../../builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/cloud-component-index.json) preserves all primary arithmetic, exact source identities, controls and phase directions.
+
+### Original failed correctness and the narrow correction remain visible
+
+The original [run 46135694884](https://github.com/ManabiIO/manabitan/actions/runs/46135694884), tooling `c9583864b4185470f1e043fd49799a08369b258a`, failed one newly added test before any component acquisition: a wide sequence value was preserved correctly through the baseline's Float64 fallback, while the test incorrectly required a nonempty optional native prepared-index result. The original result remains **15,224 passing tests, one failure, 47 skipped tests and 0/48 component observations**.
+
+A separately reviewed test correction adds an explicit expectation of zero optional native indexes for that one wide-sequence fixture, checks Float64 preservation of 2,147,483,648, and keeps full enabled/disabled output parity. Every other fixture retains its positive native-index requirement. The C/WASM, criteria, timers, inputs and component schedule are unchanged. The corrected build passed all 26 original commands: 15,225 tests in 674 files, 47 skips, 32 options tests, seven named dry builds, all 58 focused cases, six smoke modes and 1,112 synthetic cases through both strict exports. Exact product bytes, command logs and the original binary diff are retained in the whole original build ZIP.
+
+The original failed build ZIP and audit are preserved separately. The corrected build and all three component ZIPs have independent artifact audits. During the execution outage, VNDB first received a separate read-only cloud recovery and reconciliation; its original snapshot explicitly says the frozen local auditor had not run. That cloud postprocessor's first compact-observation/full-plan envelope mismatch, exact correction and peer reviews remain available. After recovery, the unchanged frozen component auditor passed VNDB on its first execution against the exact original ZIP. This later completion is a separate bridge, not a rewrite of the earlier cloud snapshot. One strict-base64 restoration failure caused by a terminal newline is also retained. None of these steps reran a browser, native parser, benchmark or acquisition.
+
+### The newer a300 source received fresh correctness and excluded storage observations
+
+Develop advanced to `a300da36d00df8e353c5679b1528b50a1299b75f` through #982, changing importer/storage behavior. All fourteen native manifest inputs and eleven explicitly bound component source columns remain unchanged, but this does not transfer `f28` correctness or performance to the new importer. Exact recovered product bytes were composed as the eight-file child `61ac55c50d9ade7b90dbeb9299de18e094e25044`, tree `b8f6cfa6a83a87c2c494224a26804c95b7221f3f`, without changing production JavaScript, settings or import limits.
+
+The separate [prerequisite run 46139360578](https://github.com/ManabiIO/manabitan/actions/runs/46139360578), tooling `4b1d90e0cfbc4d19322105a92b1b3c0d9792436c`, ran fresh correctness at that exact current product. All eleven commands passed once, including pinned native reproduction, lint, strict main/test types, **15,921 tests in 701 files**, 47 skips, 58 focused cases, 32 options tests and seven dry builds. Root primary-log and independent original-artifact reviews agree on the source-clean result, all eight product identities and every original command receipt.
+
+The same prerequisite then acquired exactly one excluded **baseline-only** storage observation per corpus using the unchanged benchmark/harness, locked browser and fixtures, production flags and a7f7 memory sampler. No candidate storage observation or timing comparison occurred. Raw benchmark duration fields are preserved, but these observations are excluded from the performance cohorts.
+
+| Baseline corpus | Total logical OPFS bytes | Active SAH bytes | 4,096-byte allocation units |
+| --- | ---: | ---: | ---: |
+| JMdict | 43,684,317 | 339,968 | 83 |
+| Jitendex | 67,630,172 | 5,623,808 | 1,373 |
+| VNDB | 609,340,619 | 315,392 | 77 |
+
+All three original inventories retain the exact known non-SAH product paths and sizes, eight SAH files and seven 4,096-byte reserve files. Each active allocation and total is exactly **163,840 bytes, or forty allocation units**, larger than the corresponding prior `dcfc` baseline; output digests remain unchanged. This is an observed allocation difference, not an attribution of forty SQLite pages to particular tables.
+
+The source review explains why the old VNDB 37/37 requirement could not be carried forward: a300 initializes new metadata tables and can later discover optimization work, while the configured minimum pool of eight SAH files is unchanged. Fresh legacy physical paths alone do not prove the root epoch at the later post-restart inventory. Independent raw replay checks all 87 original non-package members, source/browser/package/fixture bindings and report/inventory equality. A complementary replay checks all 318 raw process scans; all three memory observations qualify. No outer release-package copies were downloaded for that replay.
+
+At **11:35:55 UTC**, before any new full comparison, root approved the exact prospective VNDB bound **77/77** after the source and original-report reviews. The unchanged validator still requires eight SAH files, seven reserve files, the complete known product path set and exact canonical bytes across every future observation. The old 37/37 bound rejects the new baseline, as expected. This source-specific prerequisite does not authorize a later mismatch to widen the bound, and it supplies no candidate-memory or speed claim.
+
+### Evidence preservation and next qualification boundary
+
+The [evidence index](../../builds/perf/import-study-c563d487/proof-consumer-study/index.json) binds the original failed run, corrected source/test lineage, all completed component primary records and original ZIPs, cloud recovery history, later frozen-auditor completion, fresh-a300 correctness and excluded storage reports. New deterministic archives are labeled as storage representations and include exact member hashes; they are not assigned unavailable historical hashes. Published tooling remains referenced by exact commit rather than duplicated.
+
+The checkpoint also preserves the scoped retirement of three obsolete outer transport ZIPs after complete selected-member verification and durable publication of their non-package contents, plus the later byte-identical hardlink compaction receipt. No raw observations were deleted. The three storage-review setup/projection failures and corrected read-only auditor sources remain alongside the successful replay; they affected evidence processing only.
+
+The separate [full qualification run 46141233321](https://github.com/ManabiIO/manabitan/actions/runs/46141233321) launched once with tooling `e8f2ccf9738839a901703890fb0061bb5eeae743`, tree `b0fd76d25763d484e057f1306bea913adc55cfd1`, directly on a300. All 23 published tooling files match the reviewed manifest. The source/correctness-binding job succeeded; at the independent **11:44:43 UTC** status snapshot, all six comparison jobs were in progress. This checkpoint includes the launch and prerequisites, **no full-browser performance-cell results**. The frozen 252-report plan retains twelve alternating candidate pairs, four identical-code pairs, four warmups, two media observations and four separate memory observations per corpus/order job, with the declared latency, non-target, memory and exact-byte storage gates unchanged. Distinct job assignments do not establish physical-hardware independence.
+
 ## 2026-11-28: current-base numeric suffix qualification completed; no performance PR
 
 The separately frozen comparison of `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16` against numeric-suffix candidate `4cd1abfabcb92c09694f107ff8e856add52e07df` is complete. **Neither VNDB host met the predeclared performance threshold, so this candidate is not promoted to a performance PR.** The conclusion includes all six terminal cells, with no selected retries, omitted observations, pooled hosts or transfer from the earlier `9e10d3b3` study. The prior checkpoint remains unchanged.

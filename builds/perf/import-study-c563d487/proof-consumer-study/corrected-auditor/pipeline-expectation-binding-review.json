@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:50:41.160522+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent exact identity/schema delta review for the corrected cohort auditor expectations. No build, native/test/corpus/timing execution or new observation processing.",
+  "originalExpected": {
+    "sha256": "766b4371ffe2a3203a8ee40642b99c8807c2a5183d16157ee70f6b83bcb62c52",
+    "bytes": 28275
+  },
+  "correctedExpected": {
+    "sha256": "ae80191962e44d378237922b923d9411d42b53ab6149fc680d8907b05974fad9",
+    "bytes": 28504
+  },
+  "preparationReceipt": {
+    "sha256": "08853365dd95b973e50855c5a8a775de164e42dd8e612b7d5992dbf146c7cef8",
+    "bytes": 2515
+  },
+  "publication": {
+    "runId": 46136965050,
+    "runAttempt": 1,
+    "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+    "tree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+    "branch": "perf/numeric-suffix-proof-consumer-corrected-20261128-c563d487",
+    "workflowPath": ".github/workflows/import-suffix-proof-component-c563d487.yml"
+  },
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "changedTopLevelFields": [
+    "binding",
+    "bindingSha256",
+    "publication",
+    "recordedAt"
+  ],
+  "unchangedAuditorSources": {
+    "evidence_core.py": {
+      "sha256": "26ae504a358edf263b45c9da575e02a548dfe00f50e370ff502e20ee90f88aaf",
+      "bytes": 12886
+    },
+    "audit-component.py": {
+      "sha256": "6e007d90376d3195d14d0949e7aa23d72bc8bfe438cdec510b4ef29d3979da66",
+      "bytes": 20755
+    },
+    "audit-build.py": {
+      "sha256": "77947b8202fbadf59e4bd1677ae7fe437a37a0159c1a65d727a440b7969a7f92",
+      "bytes": 23250
+    }
+  },
+  "checks": {
+    "correctedBindingEqualsFinalReviewedPublishedBytes": true,
+    "publicationMatchesRootVerifiedCommitTreeAndBranch": true,
+    "newRunIdentityBoundToOriginalOwnerDiscoveryBeforeMeasurements": true,
+    "all11BaselineSourceAnd14NativeInputColumnsUnchanged": true,
+    "allRuntimeFlagsGroupsWarmupsClocksCriteriaFixtureDataCountersAndArithmeticExpectationsUnchanged": true,
+    "originalExpectedAndAuditorSourcesPreserved": true,
+    "onlyWorkflowAndTwoQualificationHashesVaryWithinRuntimeBinding": true
+  },
+  "decision": "No source/schema/identity blocker. Use this new expected file only for the separately named corrected run. The original failed run remains bound to766b and cannot be relabeled. Actual artifact audits and all declared gates remain pending.",
+  "newMeasurements": false
+}

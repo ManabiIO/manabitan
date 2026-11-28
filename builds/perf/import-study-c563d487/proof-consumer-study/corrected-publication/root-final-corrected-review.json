@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:48:40.645482+00:00",
+  "reviewer": "root",
+  "scope": "Read-only source/test/protocol identity review before separate corrected validation; no benchmark or native execution",
+  "parentCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "parentTree": "69257c47755062c6759b68332454e4427bf7902d",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "manifestSha256": "f5667f97a4415ea504f64cfafa73250104d1f78ba20ff800dd65dcb1c8d2d152",
+  "fileCount": 26,
+  "bytes": 173128,
+  "modifiedPaths": [
+    ".github/workflows/import-suffix-proof-component-c563d487.yml",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml"
+  ],
+  "addedFileCount": 20,
+  "originalStage69BytesUnchanged": true,
+  "originalRun": 46135694884,
+  "originalCorrectnessPassed": false,
+  "originalPerformanceObservations": 0,
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "correction": {
+    "exactOneWideSequenceFixture": 2147483648,
+    "banksFlagsCounterExpectationsNamesUnchanged": true,
+    "bothModesRequireFloat64AndExactValue": true,
+    "bothModesRequireEmptyOptionalIndexesForWideCase": true,
+    "allOtherCasesStillRequireNonemptyIndexes": true,
+    "completeRowsContentAndIndexParityRemains": true,
+    "sourceContractParserSha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+  },
+  "protocol": {
+    "onlyWorkflowNameAndBranchChanged": true,
+    "sameCandidateAndTimingAndCorpusSchedule": true,
+    "all26CorrectnessCommandsStillRequired": true,
+    "originalFailedRunAndTestsPreserved": true,
+    "fullNativeValidationStillRequired": true
+  },
+  "decision": "Ready for separately identified full correctness and unchanged first component acquisition, contingent on final overlay identity review. No performance or correctness gain yet."
+}

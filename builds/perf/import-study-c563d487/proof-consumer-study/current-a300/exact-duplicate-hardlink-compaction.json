@@ -1,0 +1,178 @@
+{
+  "kind": "frozen-exact-duplicate-hardlink-compaction",
+  "files": [
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/vndb-AB/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/vndb-AB/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2341048,
+      "sha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/jmdict-BA/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/jmdict-BA/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2140209,
+      "sha256": "b209b91fcde954f03a7729fec7310270de9916370c4a474a4377d856bdd4654a",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/vndb-BA/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/vndb-BA/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2374529,
+      "sha256": "0612d8aa9869534e84b37eb8eac0f5f878b77b262f69d8d74f81025e43b8b992",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/jmdict-AB/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/jmdict-AB/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2254309,
+      "sha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/jitendex-BA/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/jitendex-BA/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2247702,
+      "sha256": "41a2adad3a8aa2c74481557caf1f8dc1f991d590da564402554c5e868b7531e9",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/tree/builds/perf/import-study-c563d487/current-full-results/jitendex-AB/raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-full-evidence/jitendex-AB/raw-recovery-v2/raw-evidence.zip",
+      "bytes": 2246717,
+      "sha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/dev/perf/import-experiments-20260914.md",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/import-study-current-cohort-final-20261128/inputs/published-parent-canonical.md",
+      "bytes": 148025,
+      "sha256": "a80aa6d3df7d065bb741031eed3d80e14891aa7466673ccb5f47021e41782c64",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/successor/independent-artifact-audit.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-evidence/independent-artifact-audit.json",
+      "bytes": 174950,
+      "sha256": "f129f1ab560a6e79a01c7e399a3ee78c0e1facc90673e7bea101e082edbfa061",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/successor/original-artifact.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-evidence/original-artifact.zip",
+      "bytes": 2878668,
+      "sha256": "e1752357f7354360eb0b1f20abb090a21fda0f0696c904da9a1c56f5e1b336d0",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/current-base/build-original-artifact.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-evidence/original-artifact.zip",
+      "bytes": 136615,
+      "sha256": "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/vndb-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/vndb-AB/selected-raw-evidence.zip",
+      "bytes": 2220779,
+      "sha256": "0d3c3f81c17bf537353cdacd30ce9fe16e4fde364caa7e64f8ba2d0e2be9965f",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/jmdict-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jmdict-BA/selected-raw-evidence.zip",
+      "bytes": 2163767,
+      "sha256": "5944efd5908097d11c9c7d525d77b575a9459e2d1ee61475616f66caeea4ecad",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/vndb-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/vndb-BA/selected-raw-evidence.zip",
+      "bytes": 2396766,
+      "sha256": "d3ee624ea318ef12e7692fa558482262c2f654bcda99fcb45aed8db6bef29b9e",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/jmdict-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jmdict-AB/selected-raw-evidence.zip",
+      "bytes": 2058646,
+      "sha256": "58d765122bdcb7b9b6d4f23531bc149f2a7e02250097315af9f40943d92361a1",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/jitendex-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jitendex-BA/selected-raw-evidence.zip",
+      "bytes": 2150348,
+      "sha256": "2ae0483446ae4a43714c66671e03aab68cc650ffaa8d1dcce49acd77ccc7b342",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-post-outage-supplement-20261128/tree/builds/perf/import-study-c563d487/post-outage-supplement/numeric-old-base/jitendex-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jitendex-AB/selected-raw-evidence.zip",
+      "bytes": 2070148,
+      "sha256": "a627aec230c79f1573bb9e9f992db036ba6b014108a9c7db3a3e3e168f813923",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/successor/primary-log-audit.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-evidence/primary-log-audit.json",
+      "bytes": 192712,
+      "sha256": "16252ce1ddf6c526b38e1996c48d98e757617b955381107c8f9cbd193f120193",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/current-base/build-original-artifact.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-972-build-evidence/original-artifact.zip",
+      "bytes": 136615,
+      "sha256": "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/vndb-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/vndb-AB/selected-raw-evidence.zip",
+      "bytes": 2220779,
+      "sha256": "0d3c3f81c17bf537353cdacd30ce9fe16e4fde364caa7e64f8ba2d0e2be9965f",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/jmdict-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jmdict-BA/selected-raw-evidence.zip",
+      "bytes": 2163767,
+      "sha256": "5944efd5908097d11c9c7d525d77b575a9459e2d1ee61475616f66caeea4ecad",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/vndb-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/vndb-BA/selected-raw-evidence.zip",
+      "bytes": 2396766,
+      "sha256": "d3ee624ea318ef12e7692fa558482262c2f654bcda99fcb45aed8db6bef29b9e",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/jmdict-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jmdict-AB/selected-raw-evidence.zip",
+      "bytes": 2058646,
+      "sha256": "58d765122bdcb7b9b6d4f23531bc149f2a7e02250097315af9f40943d92361a1",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/jitendex-BA/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jitendex-BA/selected-raw-evidence.zip",
+      "bytes": 2150348,
+      "sha256": "2ae0483446ae4a43714c66671e03aab68cc650ffaa8d1dcce49acd77ccc7b342",
+      "alreadySameInode": false
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/experiments/import-study-numeric-full-followup-20261128/tree/builds/perf/import-study-c563d487/numeric-full-followup/numeric-old-base/jitendex-AB/selected-raw-evidence.zip",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/experiments/row-suffix-numeric-full-evidence/jitendex-AB/selected-raw-evidence.zip",
+      "bytes": 2070148,
+      "sha256": "a627aec230c79f1573bb9e9f992db036ba6b014108a9c7db3a3e3e168f813923",
+      "alreadySameInode": false
+    }
+  ],
+  "totalBytes": 43393007,
+  "mutationsPerformed": true,
+  "completedAtUtc": "2026-11-28T11:26:38.165339+00:00",
+  "bytesFreed": 43393007,
+  "scope": "Only completed frozen evidence stage copies; original paths and all content bytes retained. No worktree/source/benchmark changes."
+}

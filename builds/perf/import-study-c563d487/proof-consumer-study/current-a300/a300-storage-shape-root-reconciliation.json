@@ -1,0 +1,221 @@
+{
+  "kind": "cross-source-storage-shape-review-only",
+  "recordedAtUtc": "2026-11-28T11:31:07.672173+00:00",
+  "priorSource": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "freshSource": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "unchangedCanonicalizerSha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+  "results": [
+    {
+      "dictionary": "jmdict",
+      "priorArchiveSha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f",
+      "priorMember": "control-01-A/run-1.json",
+      "priorMemberSha256": "e21b3abbc4c4375e84e8bb9935061a29fb6704906b506891abab122ceebe010d",
+      "freshInventorySha256": "bf18e595e12b882bc4454fdec408e691f06a74ce703c49e0089d0b6ae6c97732",
+      "allKnownProductPathsAndSizesExactlyEqual": true,
+      "priorActiveSahBytes": 176128,
+      "freshActiveSahBytes": 339968,
+      "activeAllocationDifferenceBytes": 163840,
+      "allocationUnitBytes": 4096,
+      "allocationUnitDifference": 40,
+      "outputDigestEqual": true,
+      "freshTotalBytes": 43684317,
+      "freshCanonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43684317,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 339968
+          }
+        ]
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "priorArchiveSha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+      "priorMember": "control-01-A/run-1.json",
+      "priorMemberSha256": "5f1a93d96b6eb491c466da9c67e552d8e4e1cc148537feb2c8d94a5c926e9bbb",
+      "freshInventorySha256": "c59f85de67f121c5be769488e7494143711fa7d6364db6ecb9d9a9bf52c1b017",
+      "allKnownProductPathsAndSizesExactlyEqual": true,
+      "priorActiveSahBytes": 5459968,
+      "freshActiveSahBytes": 5623808,
+      "activeAllocationDifferenceBytes": 163840,
+      "allocationUnitBytes": 4096,
+      "allocationUnitDifference": 40,
+      "outputDigestEqual": true,
+      "freshTotalBytes": 67630172,
+      "freshCanonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 67630172,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 38386795
+          },
+          {
+            "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23590852
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 5623808
+          }
+        ]
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "priorArchiveSha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+      "priorMember": "control-01-A/run-1.json",
+      "priorMemberSha256": "18a62600829ab7af52d64a51a6ace6fc375587e3c30315a71d5c1edd187d6866",
+      "freshInventorySha256": "73e75be96d916dd54df7a153b869ef3625ba7f352a0383127315d13f14e4cdd3",
+      "allKnownProductPathsAndSizesExactlyEqual": true,
+      "priorActiveSahBytes": 151552,
+      "freshActiveSahBytes": 315392,
+      "activeAllocationDifferenceBytes": 163840,
+      "allocationUnitBytes": 4096,
+      "allocationUnitDifference": 40,
+      "outputDigestEqual": true,
+      "freshTotalBytes": 609340619,
+      "freshCanonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609340619,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/{generation}.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 315392
+          }
+        ]
+      }
+    }
+  ],
+  "performanceComparison": false,
+  "sourceCohortsPooled": false,
+  "allNewFullObservationsStillRequireExactCanonicalEquality": true,
+  "candidateStorageObserved": false,
+  "futureFullAcquisitionLaunched": false
+}

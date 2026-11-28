@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:39:25.605041+00:00",
+  "scope": "Independent primary terminal-log and Actions metadata audit only; no acquisition retry or artifact-byte qualification.",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46135694884,
+  "jobId": 140950386103,
+  "head": "c9583864b4185470f1e043fd49799a08369b258a",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "fixtureSha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+  "focusedTestSha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+  "bindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "result": "failed-correctness-no-measurements",
+  "buildStepReceipts": {
+    "planned": 26,
+    "observed": 16,
+    "passed": 15,
+    "failed": 1,
+    "unreached": 10
+  },
+  "executedSteps": [
+    {
+      "label": "fetch-baseline",
+      "command": [
+        "git",
+        "fetch",
+        "--no-tags",
+        "origin",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "startedEpoch": 1795862009.7916462,
+      "finishedEpoch": 1795862014.92422,
+      "exitCode": 0,
+      "logSha256": "a7fcabf40a25081cdec8f56a3e6f5c418be338c4d465f7418cb32fe0b7be1a7e"
+    },
+    {
+      "label": "create-baseline",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-baseline",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "startedEpoch": 1795862014.9245863,
+      "finishedEpoch": 1795862015.4945664,
+      "exitCode": 0,
+      "logSha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0"
+    },
+    {
+      "label": "create-candidate",
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-candidate",
+        "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+      ],
+      "startedEpoch": 1795862015.4948192,
+      "finishedEpoch": 1795862016.052623,
+      "exitCode": 0,
+      "logSha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0"
+    },
+    {
+      "label": "dependencies-baseline",
+      "command": [
+        "cp",
+        "-a",
+        "/home/runner/work/manabitan/manabitan/node_modules",
+        "/home/runner/work/manabitan/suffix-proof-baseline/node_modules"
+      ],
+      "startedEpoch": 1795862016.3661213,
+      "finishedEpoch": 1795862016.8274174,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dependencies-candidate",
+      "command": [
+        "cp",
+        "-a",
+        "/home/runner/work/manabitan/manabitan/node_modules",
+        "/home/runner/work/manabitan/suffix-proof-candidate/node_modules"
+      ],
+      "startedEpoch": 1795862016.872865,
+      "finishedEpoch": 1795862017.3546224,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "reproduce-baseline",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "startedEpoch": 1795862017.3549936,
+      "finishedEpoch": 1795862019.6488209,
+      "exitCode": 0,
+      "logSha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089"
+    },
+    {
+      "label": "build-baseline-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "startedEpoch": 1795862019.6491141,
+      "finishedEpoch": 1795862020.0280182,
+      "exitCode": 0,
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "label": "apply-check",
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.patch"
+      ],
+      "startedEpoch": 1795862020.0283935,
+      "finishedEpoch": 1795862020.0307407,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "apply-patch",
+      "command": [
+        "git",
+        "apply",
+        "/home/runner/work/manabitan/manabitan/dev/perf/numeric-suffix-proof-consumer-c563d487/candidate.patch"
+      ],
+      "startedEpoch": 1795862020.0309803,
+      "finishedEpoch": 1795862020.0331745,
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "build-native-candidate",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--write"
+      ],
+      "startedEpoch": 1795862020.033556,
+      "finishedEpoch": 1795862021.2673016,
+      "exitCode": 0,
+      "logSha256": "cf4f7192147d4091e7cea8773cc245f6c7dd26de731a780baa837efe9248b6d6"
+    },
+    {
+      "label": "build-candidate-libraries",
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "startedEpoch": 1795862021.2675943,
+      "finishedEpoch": 1795862021.6460228,
+      "exitCode": 0,
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "label": "reproduce-candidate",
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "startedEpoch": 1795862021.646363,
+      "finishedEpoch": 1795862022.8646684,
+      "exitCode": 0,
+      "logSha256": "15eb2180bf0d2314162895555b06f101cab58581d3daba4104a61089861ecbd5"
+    },
+    {
+      "label": "scoped-lint",
+      "command": [
+        "npx",
+        "eslint",
+        "test/term-bank-row-suffix-proof-consumer.test.js",
+        "test/term-bank-row-suffix-proof-fixtures.js",
+        "test/term-bank-row-suffix-reuse.test.js",
+        "test/term-bank-row-suffix-token-end-fixtures.js",
+        "test/term-bank-row-suffix-token-ends.test.js"
+      ],
+      "startedEpoch": 1795862022.9602282,
+      "finishedEpoch": 1795862025.8526433,
+      "exitCode": 0,
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "label": "strict-main-types",
+      "command": [
+        "npm",
+        "run",
+        "test:ts:main"
+      ],
+      "startedEpoch": 1795862025.8529637,
+      "finishedEpoch": 1795862034.2626665,
+      "exitCode": 0,
+      "logSha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    {
+      "label": "strict-test-types",
+      "command": [
+        "npm",
+        "run",
+        "test:ts:test"
+      ],
+      "startedEpoch": 1795862034.262984,
+      "finishedEpoch": 1795862054.166193,
+      "exitCode": 0,
+      "logSha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    {
+      "label": "complete-unit-suite",
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "startedEpoch": 1795862054.1665397,
+      "finishedEpoch": 1795862240.7206733,
+      "exitCode": 1,
+      "logSha256": "541129b98857eccccee8fc38f2881fe497495c12caabbb2d4043eb33b8887f55"
+    }
+  ],
+  "unitTotals": {
+    "filesPassed": 673,
+    "filesFailed": 1,
+    "filesTotal": 674,
+    "testsPassed": 15224,
+    "testsFailed": 1,
+    "testsSkipped": 47,
+    "testsTotal": 15272
+  },
+  "failure": {
+    "test": "overflowing sequence after a complete proof",
+    "path": "test/term-bank-row-suffix-proof-consumer.test.js",
+    "line": 148,
+    "column": 38,
+    "assertion": "expect(value.indexes.length).toBeGreaterThan(0)",
+    "actual": 0,
+    "precedingRowEqualityAssertionPassed": true,
+    "interpretation": "Unclassified pending exact baseline/fallback contract analysis; no test expectation or product source changed."
+  },
+  "unreachedGates": [
+    "options suite",
+    "all-target dry build suite",
+    "diagnostic build",
+    "synthetic raw native oracle",
+    "all six semantic/diagnostic smoke modes"
+  ],
+  "candidateWasmReportedByBuildCheck": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+  "compiledArtifactBindingPass": null,
+  "artifact": {
+    "id": 15259817852,
+    "name": "suffix-proof-built-source-1",
+    "size_in_bytes": 143191,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15259817852",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15259817852/zip",
+    "expired": false,
+    "created_at": "2026-11-28T10:37:21Z",
+    "expires_at": "2026-12-12T10:37:21Z",
+    "updated_at": "2026-11-28T10:37:21Z",
+    "digest": "sha256:83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+    "workflow_run": {
+      "id": 46135694884,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/numeric-suffix-proof-consumer-screen-20261128-c563d487",
+      "head_sha": "c9583864b4185470f1e043fd49799a08369b258a"
+    }
+  },
+  "jobLog": {
+    "bytes": 50112,
+    "sha256": "454e7cd10e8a23783790e6bf833c9e448a83eb0fec672247c1dde9305e396fd1"
+  },
+  "primaryRecords": {
+    "bytes": 9651,
+    "sha256": "08a0d4ac4e68d49f98187b7083b66b0ef71ec50718ce808bae4544c656783a2b"
+  },
+  "artifactApi": {
+    "bytes": 881,
+    "sha256": "7e0ade1ea476607a51d66d0c45f223be507970d3edc2297f193383f7ea75d202"
+  },
+  "terminalJobs": {
+    "bytes": 3788,
+    "sha256": "02636bee97e9ff549d871ac685708f3b41a3000b5b7ecb81c4863a2c70952ae6"
+  },
+  "measuredObservations": 0,
+  "plannedMeasuredObservations": 48,
+  "correctnessPass": false,
+  "componentJobsSkipped": true,
+  "retryPerformed": false,
+  "promotionAllowed": false
+}

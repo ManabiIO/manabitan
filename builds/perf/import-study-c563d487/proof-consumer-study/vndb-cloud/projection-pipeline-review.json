@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "pipeline_audit",
+  "kind": "Narrow independent source review of cloud postprocessor observation-projection correction",
+  "source": {
+    "amendment": {
+      "gitBlobSha1": "8607c6b3ca705b73a1bc6965b4f9ab160b949aa1",
+      "sha256": "c168d10bfff2b25dfca85715ed1e563c062610a31a75a54e170a99fbfffa79c8",
+      "bytes": 2038
+    },
+    "oldAuditor": {
+      "gitBlob": "d081a289bde6cd5ac345eb88853f9bc7c8952bb1",
+      "sha256": "2bae98638f350a9ffb8bc4691598abcca9816f3996ad39490521b1e433e6cc10"
+    },
+    "newAuditor": {
+      "gitBlob": "847441d22d5212420f3df81271b8ab3722820e34",
+      "sha256": "a8ea0b6f7829a2479b58b4d4af89097500a168d0a2896b40046783856a639fc8"
+    },
+    "originalFailureGitBlobSha1": "e9a893f109c018294435ae7799a2a6ec33b9f63c",
+    "producer": {
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/run.py",
+      "gitBlob": "97221e76e3a00504166ef42cd64a1c185360dd0c",
+      "sha256": "c35901deca2f042aab22c0756dad08f5458593cd500a4cfe099c9bd6aa3c03f4"
+    }
+  },
+  "checks": {
+    "exactSingleReplacement": true,
+    "oldAndNewAuditorBytesIndependentlyGitAndSha256Verified": true,
+    "producerBytesIndependentlyGitAndSha256Verified": true
+  },
+  "producerContract": [
+    "Frozen run.py lines148-149 prints CHILD_RECEIPT containing the full original child JSON before adding observationStartedEpoch.",
+    "Lines162-163 add the recorded child-start epoch to the full data object.",
+    "Line178 saves {pair, arm, result:fullAugmentedChild} in result.json.",
+    "Lines180-181 prints OBSERVATION as dictionary/pair/arm plus exactly rows,digest,elapsedMs,cpuMs,inflateMs,inflateCpuMs,parseMs,lookupMs,nativeParseMs,fusedAttempts,fusedFallbacks,maxWasmHeapBytes."
+  ],
+  "correction": "Replace impossible equality between the compact printed OBSERVATION and full nested plan observation with two exact comparisons: full augmented child against result.json observation; producer-defined compact projection against primary OBSERVATION.",
+  "preserved": [
+    "Full original stdout object equals independent primary CHILD_RECEIPT.result.",
+    "Full original status equals primary CHILD_STATUS and its stdout/stderr hashes.",
+    "Every full child property remains in the plan equality; the compact projection is not used to truncate the raw child check.",
+    "Original failed auditor and failure witness remain immutable.",
+    "No original bytes, timing, source, observer, thresholds or acquisition are changed."
+  ],
+  "verdict": "PASS for this single source-contract correction before the separately labeled cloud replay.",
+  "scopeLimits": [
+    "No actual artifact replay or new data processing performed by this review.",
+    "This is not execution of the unavailable frozen6e007d90/core26ae auditor and makes no such completion claim.",
+    "All other cloud auditor behavior remains outside this narrow delta review; its actual completion requires independent result evidence."
+  ]
+}

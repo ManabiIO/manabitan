@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28 10:33:36 UTC",
+  "scope": "Primary read-only Actions discovery; original fixed cohort, no retry or modification.",
+  "runId": 46135694884,
+  "head": "c9583864b4185470f1e043fd49799a08369b258a",
+  "tree": "69257c47755062c6759b68332454e4427bf7902d",
+  "branch": "perf/numeric-suffix-proof-consumer-screen-20261128-c563d487",
+  "runAttempt": 1,
+  "createdAt": "2026-11-28T10:32:54Z",
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/46135694884",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "manifestSha256": "dd62ae8c26d8116f1df4b0a955324b3b1ff7e586a8fbfb824e13b01db50181f5",
+  "bindingSha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "workflowSha256": "216bc2ea500d240159a1392f3471f86eecbbf3246b45fb77274f6201cc2a11d8",
+  "correctnessJobId": 140950386103,
+  "firstObservedStatus": "in_progress",
+  "firstObservedStep": "Set up pinned source dependencies",
+  "plannedMeasuredChildren": 48,
+  "plannedSeparateDiagnosticChildren": 3,
+  "compiledProductIdentities": null,
+  "limits": [
+    "Candidate native output is not yet available; this receipt does not assert compilation or correctness success.",
+    "The fixed 48 component observations are separate from any browser or memory qualification."
+  ]
+}

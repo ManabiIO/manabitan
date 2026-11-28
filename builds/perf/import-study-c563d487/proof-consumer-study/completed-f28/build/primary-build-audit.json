@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:57:17.565366+00:00",
+  "scope": "Independent primary-log and exact emitted-byte replay; no benchmark acquisition or complete-artifact replay. Original archive is separately audited by row_suffix_experiment.",
+  "runId": 46136965050,
+  "jobId": 140954302987,
+  "head": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+  "tree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "baseline": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+    "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "manifestSha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+  },
+  "records": 149,
+  "successfulCommandReceipts": 26,
+  "unitTotals": {
+    "filesPassed": 674,
+    "testsPassed": 15225,
+    "testsSkipped": 47
+  },
+  "optionsTestsPassed": 32,
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "smokeParity": {
+    "passed": true,
+    "validCases": 34,
+    "malformedCases": 13,
+    "resultRecords": 35,
+    "diagnosticHits": 43,
+    "disabledAttempts": 0,
+    "disabledHits": 0
+  },
+  "productFiles": {
+    "ext/js/dictionary/wasm/term-bank-parser.c": {
+      "path": "product/ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94",
+      "chunkBytes": 6144,
+      "chunkCount": 27
+    },
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+      "path": "product/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 70091,
+      "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "gitBlobSha1": "ff499838f2e1ef5a209de4639e22f5681dbf7c0d",
+      "chunkBytes": 6144,
+      "chunkCount": 12
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "path": "product/dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+      "gitBlobSha1": "a7d307b072092a026c7a200d1995441cbd9b2ba8",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    "test/term-bank-row-suffix-proof-consumer.test.js": {
+      "path": "product/test/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 10092,
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    },
+    "test/term-bank-row-suffix-proof-fixtures.js": {
+      "path": "product/test/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6382,
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    },
+    "test/term-bank-row-suffix-reuse.test.js": {
+      "path": "product/test/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+      "chunkBytes": 6144,
+      "chunkCount": 3
+    },
+    "test/term-bank-row-suffix-token-end-fixtures.js": {
+      "path": "product/test/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    "test/term-bank-row-suffix-token-ends.test.js": {
+      "path": "product/test/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    }
+  },
+  "sourceCompiler": {
+    "node": "v22.22.0",
+    "python": {
+      "version": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+      "versionInfo": [
+        3,
+        14,
+        4,
+        "final",
+        0
+      ],
+      "implementation": "cpython"
+    },
+    "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin\n",
+    "linker": "Ubuntu LLD 21.1.8\n"
+  },
+  "diagnosticWasmSha256": "656dc9bf1e8f2090e798b50025b30a9851e8eee5cdc023e9970354636d5e2ac6",
+  "diagnosticSourceSha256": "a73b93ab2e55ac68508663b13544ba51d310230a3c3801df5fbf9817bf1ffef8",
+  "emittedFileCount": 39,
+  "emittedChunkCount": 81,
+  "emittedBytes": 308292,
+  "emittedManifestSha256": "eaf7887cde3249e7f2f5dd5c9e8212f4400805f471335138d64875a02055011e",
+  "emittedFiles": [
+    {
+      "path": "product/ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94",
+      "chunkBytes": 6144,
+      "chunkCount": 27
+    },
+    {
+      "path": "product/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 70091,
+      "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "gitBlobSha1": "ff499838f2e1ef5a209de4639e22f5681dbf7c0d",
+      "chunkBytes": 6144,
+      "chunkCount": 12
+    },
+    {
+      "path": "product/dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+      "gitBlobSha1": "a7d307b072092a026c7a200d1995441cbd9b2ba8",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "product/test/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 10092,
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    },
+    {
+      "path": "product/test/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6382,
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    },
+    {
+      "path": "product/test/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b",
+      "chunkBytes": 6144,
+      "chunkCount": 3
+    },
+    {
+      "path": "product/test/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "product/test/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4",
+      "chunkBytes": 6144,
+      "chunkCount": 2
+    },
+    {
+      "path": "preparation-start.json",
+      "bytes": 4881,
+      "sha256": "ee2cfda98dae0f28f4e308063cfe4c7fa24c43f818682b9dc898fd93d0682408",
+      "gitBlobSha1": "4fb4c779a135b27d02357da61cdedfe01cfc7b00",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "compiled-source-binding.json",
+      "bytes": 1926,
+      "sha256": "1d5185f056f9ba2f042533099e6d3d93727ddeddf829669a90a33789c071d04e",
+      "gitBlobSha1": "e85331fe1150c46414718432fdc4a063eb73f2b6",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "result.json",
+      "bytes": 5061,
+      "sha256": "62dcb0d045fa8bc886c0296a968fd866b68fdf7abb99ac94ea2391d19acb454d",
+      "gitBlobSha1": "7c9e28b73db1556764294579625631d7f893a82e",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "diagnostic-build.json",
+      "bytes": 2699,
+      "sha256": "34a200d931ca590269773cc841df2f9c3b4077bc616a83118758769fef2f3f4f",
+      "gitBlobSha1": "3884a05885c8d6687beffbb212e674f413273880",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-parity.json",
+      "bytes": 158,
+      "sha256": "223c99fd1b55d1b4eede6468942925eaf84ee8da6beafdae7eaca8a7c8317b76",
+      "gitBlobSha1": "e6ff50e8d9f4affab51fdf08ab18468ed99dc98e",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "all-dry-build-targets.receipt.json",
+      "bytes": 407,
+      "sha256": "13432ed338ea3e2a438a183606f0237f78b918ac5897dc6108321df830658c1d",
+      "gitBlobSha1": "9e0c2dc43382d0a05ac636b666bacd86e93bb7a0",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "apply-check.receipt.json",
+      "bytes": 505,
+      "sha256": "d8265ca0a0c1d69b0bccc55b9ace566e5a32508708da5879e4e88264e7f0b662",
+      "gitBlobSha1": "aa66d94a04d3b9074d9aeed7dcc8f3bcc6f5a59d",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "apply-patch.receipt.json",
+      "bytes": 490,
+      "sha256": "e8c8b3959eeddd3e6c34783b056fb88d90d286a312859f5b2d2ba159e7036a9d",
+      "gitBlobSha1": "aa319b5269277fa271db66a13174d390ccd1ff3e",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "build-baseline-libraries.receipt.json",
+      "bytes": 408,
+      "sha256": "164c461305d661f3bb47bb51c719455e844ddbab7ebbc3d7cffc4a7fd58b7dfa",
+      "gitBlobSha1": "4eb861662e64a9e9958470ce6028a9d6baeaf79b",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "build-candidate-libraries.receipt.json",
+      "bytes": 411,
+      "sha256": "1687843a8cd561c6f956bedf0585ddd37030885f5cba6a2dfaa6ebc21d3478b2",
+      "gitBlobSha1": "ae6773a6ac0f4baf96a24410cfebd2d2f2f508e1",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "build-counter-only-module.receipt.json",
+      "bytes": 617,
+      "sha256": "b63d602be375fc231494486c56af51f47d94d24b9dcb5ad261cd9bebbb22160a",
+      "gitBlobSha1": "e8a02692867dd0dbc41ea9c3500b38454631c147",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "build-native-candidate.receipt.json",
+      "bytes": 444,
+      "sha256": "14aacc754012c3cce74a6f951c30e1e4ea6985890b19b92753ffc6f96406eb58",
+      "gitBlobSha1": "5e84ade10f9fd292eff23e1d75025b2942eb0fb4",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "complete-unit-suite.receipt.json",
+      "bytes": 436,
+      "sha256": "2d61eeaf3951f45087ff9425f9bfbf9fe4a39c3da3bb9cb0ab77ec466d4e1521",
+      "gitBlobSha1": "70f7d24db5219b842c74dd829940274a062424bb",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "create-baseline.receipt.json",
+      "bytes": 506,
+      "sha256": "d3ac1682a77c255dcca8008d01b400cd50e32d7232df633fef33f284ccb70684",
+      "gitBlobSha1": "dac441933ea6283ff96bf0a1149d6d8b3f5765f1",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "create-candidate.receipt.json",
+      "bytes": 508,
+      "sha256": "c278234d3161acfd9848f84c9eb8d28c3c7d7ebc1a4554cb05fc1ac25f549a68",
+      "gitBlobSha1": "1fcb707b36dd76ab8487f57b6a22731e2add2ec6",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "dependencies-baseline.receipt.json",
+      "bytes": 502,
+      "sha256": "0ffb4b4590bd0bb1b5dc056e7b50421c9ee5bb23f932e0e98a83b5e2ae66bdfb",
+      "gitBlobSha1": "3e1bc7bfab1ee172e27555bd2e585c7f71b1c027",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "dependencies-candidate.receipt.json",
+      "bytes": 504,
+      "sha256": "e16867c5ea54e31c64015c30b7933ca2d065baa64aa9e28b90ac3d41fe7a18be",
+      "gitBlobSha1": "b1083a45dc51fcbbe955cb4b921e8384e6316be0",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "fetch-baseline.receipt.json",
+      "bytes": 450,
+      "sha256": "a1cd4231e1868e74e6e7f74da155c7b4ad92f1abc2cb96a90234083acf0a3f8e",
+      "gitBlobSha1": "dfc66b9d9d0cfef16ea4d7d49379d185e765d4ba",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "options-unit-suite.receipt.json",
+      "bytes": 443,
+      "sha256": "d47e181c29dc1c915d9b5ef27e4e4861386aa812870509395aba35358653d121",
+      "gitBlobSha1": "740bb86f342848baeafdbe8d27f5fd61e848cecc",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "reproduce-baseline.receipt.json",
+      "bytes": 438,
+      "sha256": "dc094606ae70c3be2c8cf1ea366916ffaa9672dfa37294d7e5dd97b2a73cc03d",
+      "gitBlobSha1": "4702e545624085aa1b74c145cee9afbfb6473c5f",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "reproduce-candidate.receipt.json",
+      "bytes": 441,
+      "sha256": "34b9684922624e92f93ff55d6d51fc72cf4b7867e19d85f6ae747dce9ee25abc",
+      "gitBlobSha1": "5460e4bf388e3e18d43c2e9f785286cbcd58c42a",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "scoped-lint.receipt.json",
+      "bytes": 642,
+      "sha256": "ba4477fadf992504187097606cd17f650bd38d86dbbce6256cd372776889bfaf",
+      "gitBlobSha1": "fbc1fa584309423e1e1d5bdd69a69f595400c127",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-baseline.receipt.json",
+      "bytes": 629,
+      "sha256": "2fd3a88a1a97ff6dca59e5640e654751c739ce9360119b8904aa11a18317fa74",
+      "gitBlobSha1": "a9713aa153e459660724d16a3e5848cc68b15c46",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-candidate.receipt.json",
+      "bytes": 631,
+      "sha256": "d3b783917f1a02be87f4d01efeb46f2f7ef5c6fc85a2e4a44960c9ddde2def8f",
+      "gitBlobSha1": "25f438a20fd012c62f91cfb79076471c83bc14d8",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-diagnostic.receipt.json",
+      "bytes": 719,
+      "sha256": "3b474bac7a28c16f7ee30bb54bf5946057c4fdc25d45d17e7e8129d95e9855c2",
+      "gitBlobSha1": "8cae2784e7fa1a31a831c32c17d15b0bb81774f3",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-disabled-baseline.receipt.json",
+      "bytes": 662,
+      "sha256": "6d8d5cd35a9e27bb1604c4db1c9fa9282e76850c7926e0cf1ade376f2548ae9f",
+      "gitBlobSha1": "365c5b2e5485b509d042ed4126532c28a5dc070a",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-disabled-candidate.receipt.json",
+      "bytes": 661,
+      "sha256": "c35919e7b147a4f8f2798c2379a76839574cec44e65c83a8ca238b179a50aed3",
+      "gitBlobSha1": "b34a0c60adb5d988403b36030fd59d7e2dcb07db",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "smoke-disabled-diagnostic.receipt.json",
+      "bytes": 752,
+      "sha256": "08b4f184869eaf5944bb6b2c32bfe4ad112962a143f290eddc73dd3d3c2dc75d",
+      "gitBlobSha1": "6a503b53447e99f28a72b03dde76def4a53debab",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "strict-main-types.receipt.json",
+      "bytes": 405,
+      "sha256": "d3338f03985d17b9ca6172fdd3bb2bfbe6d92832963828f9203c89fe37dc1a8c",
+      "gitBlobSha1": "53ae3a12dc45972d77123c8cfdbd637bbe6f657f",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "strict-test-types.receipt.json",
+      "bytes": 405,
+      "sha256": "f95333cce7d393de6f7c866296bbc340747ad82ab148a1fe257ecc40285d2226",
+      "gitBlobSha1": "5323812e3edaf1eecd9f18930b548250854513c2",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    },
+    {
+      "path": "synthetic-raw-native-oracle.receipt.json",
+      "bytes": 769,
+      "sha256": "35a6b5950492ebc4b6ab00b4967ee73b2571533df4d0fd6d07bd73b484a38778",
+      "gitBlobSha1": "d51650d6a323f47ef90ad378a08fb541d8f2f120",
+      "chunkBytes": 6144,
+      "chunkCount": 1
+    }
+  ],
+  "checks": {
+    "all149TagsReparsedFromOriginalLog": true,
+    "all26StepsChronologicalAndSuccessful": true,
+    "all39EmittedFilesLengthSha256GitBlobExact": true,
+    "all26EmittedReceiptsEqualPrimarySteps": true,
+    "sourceToolingBindingExact": true,
+    "allEightProductFilesExact": true,
+    "nativeManifestOnlySourceDigestAndParserBinaryChanged": true,
+    "allCorrectnessGatesReportedPassed": true
+  },
+  "originalJobLog": {
+    "bytes": 508961,
+    "sha256": "cfc09cf53f9573bfb0e185372283bdcd9d463a79733df15674636f107d834df7"
+  },
+  "originalRecords": {
+    "bytes": 475482,
+    "sha256": "2f51d871131d054017893a4c7d7b34f7a207eb38a549ca1e642f5d89867776e6"
+  },
+  "correctnessPass": true,
+  "performanceDecision": null,
+  "noOldFailedRunPromoted": true
+}

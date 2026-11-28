@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-28T10:53:47.004934+00:00",
+  "scope": "Bounded exact-source and retained-frontier review. No implementation, native execution, corpus decode, timing or new performance observation.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "sourceEvidence": {
+    "nativeC": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prior-streak-selector-972-composition/baseline-term-bank-parser.c",
+      "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+    },
+    "parserJs": {
+      "path": "/workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    "independentExactF28GitBinding": {
+      "path": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-audit/baseline-source-binding.json",
+      "sha256": "c1268eec75571658fe07172a59ab60ff12a736b03d0e7876d06292130d382caf"
+    }
+  },
+  "conclusion": "No defensible new JMdict candidate identified under unchanged admission/caches/caps and already-rejected-selector constraints.",
+  "distinctUnusedConsumer": {
+    "name": "Publish an already-proven raw full-content match to the separate CRC witness array after deduplication",
+    "sourceProof": "Native raw_term_content_tokens_equal proves glossary length and full raw equality; recent_match is an earlier completed row. The CRC verifier accepts earlier-row equality witnesses and overwrites them in source order with CRC values. The fused caller currently publishes the grammar-time glossary witness before this later full-content match is known.",
+    "minimalConceptOnly": "If an ordinary recent full-content match was established and the existing grammar witness was absent, assign its earlier row ID to the separate CRC array only. Do not change local glossary_witness, glossary reuse statistics, probe budget or recent-content streak. Never use canonical content IDs as raw witnesses.",
+    "historicalOpportunity": {
+      "rows": 107437,
+      "glossaryBytes": 25143779,
+      "equalGlossaryRows": 0,
+      "equalGlossaryBytes": 0,
+      "candidateBytesOffered": 0
+    },
+    "historicalOpportunityReceipt": {
+      "path": "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/run-2/independent-reconciliation.json",
+      "sha256": "8860d4ddcb25767b911c3c1ad18feb859289cd886d8b6135762a4296096db1df",
+      "baseline": "9e10d3b3; historical untimed shadow counts, not newly acquired f28 native measurements"
+    },
+    "unchangedActivationRule": {
+      "minSourceBytes": 4194304,
+      "minCompressionRatio": 32,
+      "multipleBanks": true,
+      "reuseGlossaryCrcTransaction": true,
+      "validatedGlossaryReuse": true,
+      "fusedNotSkipped": true
+    },
+    "lockedJmdictMetadataOnly": {
+      "archiveSha256FromExistingPinnedReceipt": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "operation": "Read existing ZIP central directory only; no member inflation or parser",
+      "groups": [
+        {
+          "firstBank": 1,
+          "bankCount": 7,
+          "compressedBytes": 1677217,
+          "uncompressedBytes": 21154390,
+          "compressionRatio": 12.612792500910734,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 8,
+          "bankCount": 7,
+          "compressedBytes": 2033152,
+          "uncompressedBytes": 23198587,
+          "compressionRatio": 11.41015870923571,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 15,
+          "bankCount": 7,
+          "compressedBytes": 1857285,
+          "uncompressedBytes": 23034325,
+          "compressionRatio": 12.402148835531435,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 22,
+          "bankCount": 7,
+          "compressedBytes": 2160332,
+          "uncompressedBytes": 22163587,
+          "compressionRatio": 10.259343008389452,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 29,
+          "bankCount": 7,
+          "compressedBytes": 1870017,
+          "uncompressedBytes": 21516089,
+          "compressionRatio": 11.50582534811181,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 36,
+          "bankCount": 7,
+          "compressedBytes": 2306584,
+          "uncompressedBytes": 24220064,
+          "compressionRatio": 10.500404060723563,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 43,
+          "bankCount": 7,
+          "compressedBytes": 2402055,
+          "uncompressedBytes": 24070554,
+          "compressionRatio": 10.020817175293654,
+          "passesUnchangedCrcAdmission": false
+        },
+        {
+          "firstBank": 50,
+          "bankCount": 4,
+          "compressedBytes": 1326207,
+          "uncompressedBytes": 12259927,
+          "compressionRatio": 9.244354011100832,
+          "passesUnchangedCrcAdmission": false
+        }
+      ]
+    },
+    "decision": "Do not implement for JMdict: all eight production-shaped seven-bank groups fail the existing ratio gate, so no CRC work would be saved. Changing that gate is outside this recommendation."
+  },
+  "alreadyConsumedProofs": [
+    "Grammar-time glossary witnesses already avoid composite validation, copy all three hints, avoid a second glossary equality, copy an existing quick signature when remaining raw fields match, and reuse CRC when the unchanged route admits it.",
+    "The ordinary recent full-content match already reuses all four content metadata words and unique-content index, avoiding token encoding, content hashing and canonical content equality.",
+    "Adjacent bounded equal raw keys already reuse earlier validated string indexes; reading aliases already reuse the current expression index.",
+    "The ae886 candidate separately consumes complete suffix equality for numeric values and ordinary content matching; numeric-only grammar/token-end alternatives overlap the prior #735/#761/#899/#972 work."
+  ],
+  "priorHeaderOrderReceipt": {
+    "path": "/workspace/scratch/c563d487c718/experiments/header-comparison-order/independent-result-audit.json",
+    "sha256": "e352383d7aa40137f86a36dd46e0261c262fc4b15fd83ce17e40ae78b6defd7f",
+    "modeledSimdBytesPerOperandSaved": 73244,
+    "extraEqualityCalls": 23006,
+    "decision": "Drop before product implementation: only 73,244 modeled source-SIMD bytes per operand saved across the corpus, with 23,006 more equality calls. No prototype, benchmark, performance PR, or speedup conclusion."
+  },
+  "limitations": [
+    "This bounded review is not an exhaustive search for all possible import improvements.",
+    "No speedup can be inferred from byte-count opportunities, and no already-failed selector or threshold was retuned."
+  ]
+}

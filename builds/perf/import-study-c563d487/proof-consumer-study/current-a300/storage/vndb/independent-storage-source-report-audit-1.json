@@ -1,0 +1,264 @@
+{
+  "schema": 1,
+  "complete": true,
+  "dictionary": "vndb",
+  "scope": "Original excluded baseline source, five command logs, report/summary/storage/package-map and raw per-process scan reconciliation; no benchmark, browser or native execution.",
+  "auditedAt": "2026-11-28T11:36:54.131854+00:00",
+  "auditorSha256": "997b045f6c1ad458caa8f48ff50329d3d46fc9be46698df8a6cb350f077b611a",
+  "memoryReconstructionSourceSha256": "a49f2d50a9098af8c275002a61b5019d6118ffb619fcb12a7352442715997a1c",
+  "unchangedMemoryHelperSha256": {
+    "pick": "46e3d027eb7722706ed3978a3f3149368837005723c3d50d0190b4520cd121bf",
+    "tree_identity": "78d458667d321fa115466c45498bc696c58dd0da7d05f5fca495a295e79c7385",
+    "exited_zombie": "e6c020d3047d54099246c9f30c19973c4c42dbba034e0077488b989d145f2e88",
+    "reconstruct_memory": "349855ea538d94f4073a56e3c248d83efb719c0ad82e29f35585bbb9259d783e"
+  },
+  "archive": {
+    "bytes": 342887,
+    "sha256": "872f60b2e061580e85a8e48745de351b4cc54def10776d274a49d53edb178313",
+    "gitBlobSha1": "ed344b0d01571f1947fba7d5729b5f8e3d4659b4"
+  },
+  "recoveryReceiptSha256": "d06261382ce86a205c9ddc5b6fc6c08c2c01b30ad66fefdfb74d122c6b3e123e",
+  "originalReportSha256": "005a5e1990d8caaaf64e9ee1a7fae156e264722dacda86cae5ce7ad6cc4c8b9c",
+  "originalSummarySha256": "a5a36e05ea3b27158c64e9905eaf1c082008d31f905f83e8254abd4761157e15",
+  "originalInventorySha256": "e01c14bf4f7cbb565ca4ee6e67b99a1accedbe7b27ecd73150cc34938c7c9109",
+  "commandReceipts": [
+    {
+      "command": [
+        "node",
+        "dev/perf/prepare-dictionaries.js",
+        "vndb"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865063.354565,
+      "label": "prepare-locked-fixture",
+      "logSha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4",
+      "retried": false,
+      "startedEpoch": 1795865061.9299536
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-982-prerequisite-baseline",
+        "a300da36d00df8e353c5679b1528b50a1299b75f"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865063.9699192,
+      "label": "create-baseline",
+      "logSha256": "61566832b554f29a7ed2495611d98601b37d5d2fa5d545af54a1401a97c55469",
+      "retried": false,
+      "startedEpoch": 1795865063.354888
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-prerequisite-baseline",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865065.0596857,
+      "label": "build-libraries",
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "retried": false,
+      "startedEpoch": 1795865064.494198
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "license-report:html"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-prerequisite-baseline",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865065.4247687,
+      "label": "license-page",
+      "logSha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd",
+      "retried": false,
+      "startedEpoch": 1795865065.05998
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--",
+        "--target",
+        "chrome"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-prerequisite-baseline",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865068.3460693,
+      "label": "release-package",
+      "logSha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046",
+      "retried": false,
+      "startedEpoch": 1795865065.4250588
+    }
+  ],
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "observations": 1,
+  "candidateObservations": 0,
+  "comparison": false,
+  "authoritativeTiming": false,
+  "storage": {
+    "kind": "OPFS logical file sizes after restart and verification",
+    "bytes": 609340619,
+    "files": [
+      {
+        "path": "manabitan-dictionary-media-v1/2a027869-101b-4703-ac2e-62fa80c3e0a8.bin",
+        "bytes": 199563210
+      },
+      {
+        "path": "manabitan-term-content.bin",
+        "bytes": 7533449
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+        "bytes": 38
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+        "bytes": 399513708
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+        "bytes": 26
+      },
+      {
+        "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+        "bytes": 2386124
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/ckjz54pqu5d",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/cvqgdmm7o2k",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/e54mz6abuhf",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/gijmon92u8",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/j440rjuxz",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/k40h5r7h1x",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/p223qbpea8k",
+        "bytes": 4096
+      },
+      {
+        "path": "manabitan/sqlite-sahpool-v1/.opaque/um6wik9a12",
+        "bytes": 315392
+      }
+    ]
+  },
+  "sahFileCount": 8,
+  "nonSahFiles": [
+    {
+      "path": "manabitan-dictionary-media-v1/2a027869-101b-4703-ac2e-62fa80c3e0a8.bin",
+      "bytes": 199563210
+    },
+    {
+      "path": "manabitan-term-content.bin",
+      "bytes": 7533449
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "bytes": 38
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "bytes": 399513708
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "bytes": 26
+    },
+    {
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+      "bytes": 2386124
+    }
+  ],
+  "package": {
+    "entries": 582,
+    "entryMapSha256": "279b0b9c62d21a879003f2331e13dbc70375943fe0b60cc2d46282983725b934",
+    "wholeZipSha256": "47dfac536586f07f38f0ca2ea40823bf338ef7afb40e5b876a74b0f4aeaf4548",
+    "bytes": 17060417,
+    "excludedFiles": [
+      {
+        "path": "package-A.zip",
+        "bytes": 17060417,
+        "sha256": "47dfac536586f07f38f0ca2ea40823bf338ef7afb40e5b876a74b0f4aeaf4548",
+        "reason": "Reproducible release-package copy; complete source/package-entry maps remain included"
+      }
+    ],
+    "originalPackageDownloaded": false
+  },
+  "originalMemoryScanReplay": {
+    "schemaVersion": 3,
+    "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+    "authoritativeTiming": false,
+    "qualifiedForWholeTreePss": true,
+    "qualificationFailures": [],
+    "sampleCount": 57,
+    "stableFullyReadTreeSampleCount": 57,
+    "observedProcessCountRange": [
+      9,
+      9
+    ],
+    "samplesWithUnavailableSmaps": 0,
+    "samplesWithUnreadableAddressSpaces": 0,
+    "confirmedExitedZombieObservationCount": 0,
+    "confirmedExitedZombieIdentityCount": 0,
+    "windowDurationMs": 7917.225387,
+    "preImportBracketGapMs": 68.533257,
+    "postImportBracketGapMs": 113.465357,
+    "maximumCoveredSampleGapMs": 198.474925,
+    "allObservedSampleCount": 141,
+    "overlappingImportSampleCount": 57,
+    "fullyContainedImportSampleCount": 55,
+    "stableFullyReadImportSampleCount": 55,
+    "maxSampledPssKiB": 1232796,
+    "maxSampledPrivateKiB": 1010136,
+    "rawProcessReadCount": 866,
+    "maximumGapProof": [
+      {
+        "leftNs": 254054278677,
+        "rightNs": 254252753602,
+        "gapMs": 198.474925
+      }
+    ]
+  },
+  "semanticRows": 6648310,
+  "lookupObservations": 72,
+  "sourceProvenanceColumns": 11,
+  "fullQualificationAccepted": false,
+  "limitations": [
+    "Only selected original raw archives were downloaded/recovered; the original outer storage ZIP and release package were not downloaded.",
+    "The original producer hashed actual package members; this replay binds its exact582-entry map and package SHA/size to the report, without independently reading the omitted package bytes.",
+    "One excluded baseline per dictionary is descriptive prerequisite evidence; no candidate comparison or performance conclusion is made.",
+    "The prospective storage policy is independently reviewed by root/pipeline; this replay does not silently set or relax that policy."
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:35:04.284094+00:00",
+  "scope": "Independent offline replay of exact retained primary Git file responses and declared screen inventory; no candidate execution or observations.",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "sourceBindingSha256": "c1268eec75571658fe07172a59ab60ff12a736b03d0e7876d06292130d382caf",
+  "sourceFetchReceiptSha256": "139a77c324aeb6b7b50470104e62634e36dc53db86afdd2e35b1ba3923f7ac51",
+  "screenSha256": "ca4a0a01b2a12bcbfb9cf881d646438418097b1da02d342fa4e013de1dcec84c",
+  "sourceFiles": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "gitBlobSha1": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+      "bytes": 210111
+    },
+    "ext/js/dictionary/term-bank-experiments.js": {
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "gitBlobSha1": "38ffe9035ffad5a4cb00de5406ce2dda5b823b4c",
+      "bytes": 3523
+    },
+    "ext/js/dictionary/term-lookup-scratch.js": {
+      "sha256": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1",
+      "gitBlobSha1": "147e31b6536e9ad5323d6a679e3623b12124541f",
+      "bytes": 2970
+    },
+    "ext/js/dictionary/term-lookup-index-preparation.js": {
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+      "gitBlobSha1": "9f50eed5f3e42986bce7c6338993f5a66a1c42a5",
+      "bytes": 11139
+    },
+    "ext/js/dictionary/term-lookup-index.js": {
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "gitBlobSha1": "e0d30279b67300cb47d519a1b8d809eb4ba784f6",
+      "bytes": 67962
+    },
+    "ext/js/dictionary/term-record-preinterned-plan.js": {
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a",
+      "gitBlobSha1": "a91ec492ae9f576c5f079e21071efc72cfe9cd4f",
+      "bytes": 25435
+    },
+    "ext/js/dictionary/wasm/term-bank-parser.c": {
+      "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+      "gitBlobSha1": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+      "bytes": 161067
+    },
+    "ext/js/dictionary/term-bank-source-pipeline.js": {
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "gitBlobSha1": "8fc3ba89987cac5da4f6ac18a1b76e05ceeb9831",
+      "bytes": 47175
+    },
+    "ext/js/dictionary/dense-zip-directory.js": {
+      "sha256": "94c9d2a2c1f7142521906b9740a44823d7d1b43cc98240d9db85a4e80233287b",
+      "gitBlobSha1": "99b4d6761b4946526d03a4979c5724f90f408524",
+      "bytes": 9309
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "sha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770",
+      "gitBlobSha1": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+      "bytes": 2588
+    },
+    "package-lock.json": {
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "gitBlobSha1": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+      "bytes": 333801
+    }
+  },
+  "checks": {
+    "exactElevenDeclaredPaths": true,
+    "allDecodedBytesSha256GitBlobAndLengthMatch": true
+  },
+  "sourceBoundaries": "Source bytes were originally fetched from exact f28 by row_suffix_experiment; this check independently decodes/hash-verifies those original responses. Actual compiled candidate WASM/manifest remain pending the build artifact."
+}

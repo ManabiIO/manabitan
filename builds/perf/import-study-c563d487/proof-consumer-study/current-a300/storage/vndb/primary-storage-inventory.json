@@ -1,0 +1,789 @@
+{
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidateObserved": false,
+  "dictionary": "vndb",
+  "files": {
+    "markers.jsonl": "3b51c1ea8d276b9187c36530baa9c7251aaed630e8c1f31f6a8d2d0a403944fd",
+    "memory.json": "bb9f0d4334cfc90c63eb512c5818ef1a54b430e254ceea23b36125f35bf60db3",
+    "run-1.json": "005a5e1990d8caaaf64e9ee1a7fae156e264722dacda86cae5ce7ad6cc4c8b9c",
+    "summary.json": "a5a36e05ea3b27158c64e9905eaf1c082008d31f905f83e8254abd4761157e15"
+  },
+  "fullQualificationLaunched": false,
+  "manualStructuralReviewRequired": true,
+  "prospectiveFullStorageBound": null,
+  "reportStatus": "success",
+  "summaryGitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "summarySource": {
+    "dirty": true,
+    "gitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "sha256": {
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "47dfac536586f07f38f0ca2ea40823bf338ef7afb40e5b876a74b0f4aeaf4548",
+      "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "validation": {
+    "contentReadable": true,
+    "lookup": {
+      "observations": [
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 0,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 3.7000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 0,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 2.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 1.3999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 1.900000000023283,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 0,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 0,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 3.3999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 0,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 2.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 1.8999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 0,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 1.2999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 0,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 13.299999999988358,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 1.8999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 0,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        },
+        {
+          "elapsedMs": 1.400000000023283,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 1,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 1.1000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 1,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 1.1999999999534339,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 1,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1.1000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 1,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 1,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 1.1000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 1,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 1.1999999999534339,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 1,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 1.6000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 1,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        },
+        {
+          "elapsedMs": 0.8999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 2,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 1.1999999999534339,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 2,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 0.8999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 2,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 2,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 2,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 1.6000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 2,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 2,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 2,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 3,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 3,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 3,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 3,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 3,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 0.8999999999650754,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 3,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 3,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 1.599999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 3,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 4,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 4,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 0.9000000000232831,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 4,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 4,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 1.2999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 4,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 0.9000000000232831,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 4,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 4,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 1.6000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 4,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 5,
+          "results": 1,
+          "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e",
+          "term": "フォーニ"
+        },
+        {
+          "elapsedMs": 1.2999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 5,
+          "results": 1,
+          "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef",
+          "term": "あいこ先生"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 1,
+          "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f",
+          "term": "鎧衣 美琴たん"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 1,
+          "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758",
+          "term": "右代宮金蔵社長"
+        },
+        {
+          "elapsedMs": 1,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 5,
+          "results": 1,
+          "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f",
+          "term": "Kamala Copperheart"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 5,
+          "results": 1,
+          "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14",
+          "term": "榊亜実先輩"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 18,
+          "pass": 5,
+          "results": 2,
+          "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72",
+          "term": "RestaurantOwnerちゃん"
+        },
+        {
+          "elapsedMs": 1.099999999976717,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 1,
+          "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149",
+          "term": "Osamu博士"
+        },
+        {
+          "elapsedMs": 1.2000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 14,
+          "pass": 5,
+          "results": 1,
+          "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8",
+          "term": "Lynrd Skynrdたん"
+        },
+        {
+          "elapsedMs": 0.9000000000232831,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 5,
+          "results": 1,
+          "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2",
+          "term": "霧姫・アイスマン坊"
+        },
+        {
+          "elapsedMs": 1.6000000000349246,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 1,
+          "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773",
+          "term": "Tyler博士"
+        },
+        {
+          "elapsedMs": 6,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 12,
+          "pass": 5,
+          "results": 1,
+          "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173",
+          "term": "クレイグ・ウァジェト部長"
+        }
+      ],
+      "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing"
+    },
+    "media": {
+      "bytes": 86256,
+      "files": 64,
+      "mode": "sample",
+      "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+      "totalBytes": 188131284,
+      "totalFiles": 146570
+    },
+    "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+    "probeCount": 12,
+    "probeTerms": [
+      "フォーニ",
+      "あいこ先生",
+      "鎧衣 美琴たん",
+      "右代宮金蔵社長",
+      "Kamala Copperheart",
+      "榊亜実先輩",
+      "RestaurantOwnerちゃん",
+      "Osamu博士",
+      "Lynrd Skynrdたん",
+      "霧姫・アイスマン坊",
+      "Tyler博士",
+      "クレイグ・ウァジェト部長"
+    ],
+    "restart": {
+      "contentReadable": true,
+      "mediaFiles": 146570,
+      "probeCount": 12,
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "title": "VNDB Characters by Bee"
+    },
+    "revision": "395525135651",
+    "storage": {
+      "bytes": 609340619,
+      "files": [
+        {
+          "bytes": 199563210,
+          "path": "manabitan-dictionary-media-v1/2a027869-101b-4703-ac2e-62fa80c3e0a8.bin"
+        },
+        {
+          "bytes": 7533449,
+          "path": "manabitan-term-content.bin"
+        },
+        {
+          "bytes": 38,
+          "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+        },
+        {
+          "bytes": 399513708,
+          "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+        },
+        {
+          "bytes": 26,
+          "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+        },
+        {
+          "bytes": 2386124,
+          "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/ckjz54pqu5d"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/cvqgdmm7o2k"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/e54mz6abuhf"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/gijmon92u8"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/j440rjuxz"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/k40h5r7h1x"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/p223qbpea8k"
+        },
+        {
+          "bytes": 315392,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/um6wik9a12"
+        }
+      ],
+      "kind": "OPFS logical file sizes after restart and verification"
+    },
+    "termRows": 6648310,
+    "title": "VNDB Characters by Bee"
+  }
+}

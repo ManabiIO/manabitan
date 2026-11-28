@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:48:34.978348+00:00",
+  "reviewer": "pipeline_audit",
+  "scope": "Independent final exact-byte overlay/binding review. No build, tests, native, corpus, timing, branch or ref mutation.",
+  "manifest": {
+    "bytes": 15372,
+    "sha256": "f5667f97a4415ea504f64cfafa73250104d1f78ba20ff800dd65dcb1c8d2d152",
+    "gitBlobSha1": "70aa522bb8073046958afb61cdabd5ed79cae08c"
+  },
+  "parentCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "parentTree": "69257c47755062c6759b68332454e4427bf7902d",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "activeCoreReviewSha256": "3b59d68c0f103c33c78921c3eefaf80b7f560d27d35db8e421ad3cfb8c925373",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "fileCount": 26,
+  "totalBytes": 173128,
+  "modifiedPaths": [
+    ".github/workflows/import-suffix-proof-component-c563d487.yml",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml"
+  ],
+  "addedFiles": 20,
+  "checks": {
+    "all26StagedSourceSizeSha256GitBlobIdentities": true,
+    "all69OriginalPublishedStageFilesUnchanged": true,
+    "onlyWorkflowAndIsolatedToolingPaths": true,
+    "all17ActiveCoreFilesExactlyMatchReviewedBytes": true,
+    "allToolingQualificationAndReviewBindingsResolve": true,
+    "bindingFinalizedWithNoPendingFields": true,
+    "bindingChangesLimitedToReviewedWorkflowTestsAndReviewMetadata": true,
+    "bothWorkflowCopiesByteIdentical": true,
+    "originalBindingPreparationAndBothFailedTestSourcesPreserved": true,
+    "allProductionSourceRuntimeCriteriaClockAndScheduleBytesUnchanged": true,
+    "noHiddenUnlistedOrSymlinkFiles": true
+  },
+  "originalFailure": {
+    "runId": 46135694884,
+    "measuredObservations": 0,
+    "disposition": "Preserved correctness failure; a separate complete validation is required before new component acquisition."
+  },
+  "decision": "No remaining identity or scope blocker for root to publish this exact reviewed successor overlay. This review authorizes no performance conclusion and performs no publication.",
+  "newMeasurements": false
+}

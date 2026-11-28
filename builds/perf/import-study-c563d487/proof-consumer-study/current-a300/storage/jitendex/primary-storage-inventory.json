@@ -1,0 +1,777 @@
+{
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidateObserved": false,
+  "dictionary": "jitendex",
+  "files": {
+    "markers.jsonl": "78a7d5fcf503a0223258b9243d65fad68b051d141dfb790da5d03e580526c617",
+    "memory.json": "2c8b447cb42bb32ef56b3c374d415176d76a0e6d1509d430019d481611fd4e8d",
+    "run-1.json": "fe19bce2d5ce2d5411d3b7f342a5d397d51a977dcbb281c6ffd67ef2a9abd911",
+    "summary.json": "756e159d502189e7c4ec2296b0193ba6ec87041c744a978d09d755b1ee27d0dc"
+  },
+  "fullQualificationLaunched": false,
+  "manualStructuralReviewRequired": true,
+  "prospectiveFullStorageBound": null,
+  "reportStatus": "success",
+  "summaryGitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "summarySource": {
+    "dirty": true,
+    "gitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "sha256": {
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "c4b6a4b4f2cfd3a4b03af5f51dae4380079c8d1eb73a5d23d9cadfd2f48faebe",
+      "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "validation": {
+    "contentReadable": true,
+    "lookup": {
+      "observations": [
+        {
+          "elapsedMs": 6.7000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 0,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 14.89999999999418,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 0,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 34.19999999999709,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 0,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 24.90000000000873,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 0,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 22.90000000000873,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 0,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 13.19999999999709,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 6.69999999999709,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 0,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 4,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 0,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 20.69999999999709,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 0,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 4.900000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 0,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 3.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 0,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 3.1000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 0,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        },
+        {
+          "elapsedMs": 2.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 1,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 2.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 1,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 3,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 1,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 3.1999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 1,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 3.3000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 1,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 3,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 3.1000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 1,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 2.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 1,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 3,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 1,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 2.400000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 1,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 1.7000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 1,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 1,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 2,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 2,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 2.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 2,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 2.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 2,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 2.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 2,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 2.1000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 2.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 2,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 2.3000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 2,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 2.599999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 2,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 2.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 2,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 2.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 2,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 2,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 3,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 3,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 3,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 2.400000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 3,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 3,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 3,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 3,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 3,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 3,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 3,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 3,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 4,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 4,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 4,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 1.7000000000116415,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 4,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 4,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 4,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 4,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 4,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 4,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 4,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 4,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 5,
+          "results": 1,
+          "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 1.9000000000087311,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 5,
+          "results": 1,
+          "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+          "term": "お坊っちゃん"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 5,
+          "results": 1,
+          "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+          "term": "吃逆"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 5,
+          "results": 1,
+          "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+          "term": "どうやら"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 5,
+          "results": 1,
+          "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+          "term": "鈎爪"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 1,
+          "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+          "term": "心ここに在らず"
+        },
+        {
+          "elapsedMs": 1.9000000000087311,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 5,
+          "results": 2,
+          "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+          "term": "居残り手當て"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 5,
+          "results": 2,
+          "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+          "term": "水墨山水"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 2,
+          "pass": 5,
+          "results": 2,
+          "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+          "term": "野犬"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 7,
+          "pass": 5,
+          "results": 2,
+          "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+          "term": "寫真加工アプリ"
+        },
+        {
+          "elapsedMs": 1.9000000000087311,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 5,
+          "results": 2,
+          "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+          "term": "気まＺ"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 5,
+          "results": 1,
+          "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+          "term": "ＪＭｄｉｃｔ"
+        }
+      ],
+      "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing"
+    },
+    "media": {
+      "bytes": 1302012,
+      "files": 64,
+      "mode": "sample",
+      "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087",
+      "totalBytes": 4992155,
+      "totalFiles": 236
+    },
+    "outputDigestSha256": "754fc8c99cea76757778abe6b30f16a293c91bba3d45a68dcb9e3e9bac3ca215",
+    "probeCount": 12,
+    "probeTerms": [
+      "ヽ",
+      "お坊っちゃん",
+      "吃逆",
+      "どうやら",
+      "鈎爪",
+      "心ここに在らず",
+      "居残り手當て",
+      "水墨山水",
+      "野犬",
+      "寫真加工アプリ",
+      "気まＺ",
+      "ＪＭｄｉｃｔ"
+    ],
+    "restart": {
+      "contentReadable": true,
+      "mediaFiles": 236,
+      "probeCount": 12,
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "title": "Jitendex.org [2026-10-03]"
+    },
+    "revision": "2026.10.03.0",
+    "storage": {
+      "bytes": 67630172,
+      "files": [
+        {
+          "bytes": 38386795,
+          "path": "manabitan-term-content.bin"
+        },
+        {
+          "bytes": 45,
+          "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr"
+        },
+        {
+          "bytes": 23590852,
+          "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/5l9skznj667"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/bszalk2nbq7"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/kef8sj6hti"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/qct47nv01ar"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/r9t1pn8gunj"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/w06zl6ded8q"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/yb5fl6p35o"
+        },
+        {
+          "bytes": 5623808,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/yq2b69dl3ic"
+        }
+      ],
+      "kind": "OPFS logical file sizes after restart and verification"
+    },
+    "termRows": 436555,
+    "title": "Jitendex.org [2026-10-03]"
+  }
+}

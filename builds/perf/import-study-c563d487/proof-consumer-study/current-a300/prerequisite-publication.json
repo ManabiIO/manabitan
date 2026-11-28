@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "branch": "perf/import-suffix-proof-982-prerequisite-20261128-c563d487",
+  "head": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+  "tree": "c83cc5aa64eccb4637c438e7d3c74544c2e73a95",
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "publishedAtUtc": "2026-11-28 11:19:48 UTC",
+  "manifestGitBlobSha1": "79b37a12acb6fde21de7d81851b9ba8ef4269272",
+  "manifestSha256": "04dea9f59968535a8f0cc83ed26e93aa8dcb2c7040edf73b89bd0e7ff6f64311",
+  "rootReview": {
+    "gitBlobSha1": "af4d650899cd6aef280020c39cd0ca89d94c3b58",
+    "sha256": "ae5eeab08d1f9109b96b9e50a8a9531fda1b4fd6be227d58692424234550bea3",
+    "bytes": 2366,
+    "review": {
+      "schemaVersion": 1,
+      "recordedAtUtc": "2026-11-28 11:19:28 UTC",
+      "reviewer": "root",
+      "scope": "Pre-acquisition source, fixed protocol and exact payload review; fresh correctness and excluded baseline observations have not yet run.",
+      "manifestGitBlobSha1": "79b37a12acb6fde21de7d81851b9ba8ef4269272",
+      "manifestSha256": "04dea9f59968535a8f0cc83ed26e93aa8dcb2c7040edf73b89bd0e7ff6f64311",
+      "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+      "candidateTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+      "files": 15,
+      "bytes": 203995,
+      "peerSourceReviewSha256": "6627fe331fbaf0c583e8f5e9a55b6f597db1fa002bd176948d93abcbaa1a1800",
+      "peerIdentityReviewSha256": "65ddb798361b13f401224d4006668a16f75c05303ae328c7062c95eaff407c38",
+      "checks": {
+        "all15RemoteGitBlobsShaAndSizesReverified": true,
+        "oneWorkflowAndIsolatedToolingOnly": true,
+        "exactEightProductFilesAndParentBound": true,
+        "freshCompleteCorrectnessBeforeAnyBaselineObservation": true,
+        "exactThreeIndependentSingleBaselineObservations": true,
+        "unchangedObserverMarkerOverlaySamplerAndProductionFlags": true,
+        "pinnedBrowserHashAndVersionBeforeInvocation": true,
+        "childExitCodePropagatedAfterSavingEvidence": true,
+        "allFailuresRetainedNoSelectedRetries": true,
+        "structuralStorageReviewRequired": true,
+        "noAcceptedAllocationBound": true,
+        "noAutomatic252Comparison": true,
+        "allDurationsExcludedFromPerformanceClaims": true
+      },
+      "reason": "The a300 metadata schema changed from the source of the historical exact VNDB allocation. Observe current baseline layout before freezing a new source-specific allocation expectation; do not alter production limits or infer candidate gain.",
+      "limitations": [
+        "Source-only review during executor outage; workflow performs Python syntax validation before execution.",
+        "No a300 correctness, storage compatibility, performance or memory conclusion exists yet.",
+        "Original f28 component source remains separate. Original frozen VNDB 6e00 replay did not execute; a separately identified original-byte cloud audit is in progress.",
+        "The later full252 plan requires a separate frozen source/protocol review after all current baseline inventories are reviewed."
+      ]
+    }
+  },
+  "files": 15,
+  "bytes": 203995,
+  "comparison": {
+    "head": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+    "verified": true,
+    "files": [
+      {
+        "path": ".github/workflows/import-suffix-proof-982-prerequisite-c563d487.yml",
+        "status": "added",
+        "gitBlobSha1": "4330483d22843fafec37ccc856340862eb19a93e"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/a300-source-inventory.json",
+        "status": "added",
+        "gitBlobSha1": "ead1b75b3ca69ca4caf04ad7297d8395df54b425"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/archive-evidence.py",
+        "status": "added",
+        "gitBlobSha1": "e994ee477e5b996b5453e17626a65785ff2dacaa"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/composition-checks.json",
+        "status": "added",
+        "gitBlobSha1": "195b85a05a35ad1988367f364321835a16c398cc"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/history/prerequisite-before-browser-gate.py",
+        "status": "added",
+        "gitBlobSha1": "24d283fedfc6b6d93208e761d79563ab96d38fc7"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/history/prerequisite-before-exit-guard.py",
+        "status": "added",
+        "gitBlobSha1": "bfc237efc53d61692919eb2b4329c8df44deab13"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/history/prerequisite-before-inventory-log.py",
+        "status": "added",
+        "gitBlobSha1": "b095ae82998868218ad10c5cb1826b7d75836865"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/history/source-binding-before-browser-gate.json",
+        "status": "added",
+        "gitBlobSha1": "192d4cc54b6cc6a58e17af3c84ff92dca0e644a5"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/history/workflow-before-browser-gate.yml",
+        "status": "added",
+        "gitBlobSha1": "27ebe1160f4dc9d8bda733b37b4a85eed87f3cda"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/independent-review.json",
+        "status": "added",
+        "gitBlobSha1": "f5b30dc54d572fd2d6411ba962bf96c53bed87c9"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/preparation-record.json",
+        "status": "added",
+        "gitBlobSha1": "936a76a818be939a4cdbccd3a51dafcdf90cc8e2"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prerequisite.py",
+        "status": "added",
+        "gitBlobSha1": "34ecffaaaa8142ea1b67b666e3b1b1a2dc02d6b9"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/prospective-review-criteria.json",
+        "status": "added",
+        "gitBlobSha1": "4f14bc48bfe99957f10baaed3fa21d7f87913263"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/source-binding.json",
+        "status": "added",
+        "gitBlobSha1": "2a84523b47528a92f29e638a6d16604808c3d112"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/storage-compatibility-source-review.json",
+        "status": "added",
+        "gitBlobSha1": "8eef0b64df6f6cef378f9edee0824001ab1319ff"
+      }
+    ]
+  },
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "productPr": false,
+  "full252Launched": false
+}

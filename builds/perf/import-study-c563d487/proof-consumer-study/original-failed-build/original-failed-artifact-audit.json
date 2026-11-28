@@ -1,0 +1,350 @@
+{
+  "schema": 1,
+  "artifactAuditComplete": true,
+  "correctnessPass": false,
+  "recordedAt": "2026-11-28T10:46:00.470003+00:00",
+  "scope": "Original failed preparation prefix only; exact artifact/native/test/command provenance. No success result synthesized, no native execution or measurements.",
+  "artifact": {
+    "schema": 1,
+    "cell": "build",
+    "runId": 46135694884,
+    "runAttempt": 1,
+    "jobId": 140950386103,
+    "artifactId": 15259817852,
+    "artifactName": "suffix-proof-built-source-1",
+    "sizeBytes": 143191,
+    "sha256": "83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+    "headSha": "c9583864b4185470f1e043fd49799a08369b258a",
+    "originalApiRecord": {
+      "id": 15259817852,
+      "name": "suffix-proof-built-source-1",
+      "size_in_bytes": 143191,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15259817852",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15259817852/zip",
+      "expired": false,
+      "created_at": "2026-11-28T10:37:21Z",
+      "expires_at": "2026-12-12T10:37:21Z",
+      "updated_at": "2026-11-28T10:37:21Z",
+      "digest": "sha256:83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+      "workflow_run": {
+        "id": 46135694884,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/numeric-suffix-proof-consumer-screen-20261128-c563d487",
+        "head_sha": "c9583864b4185470f1e043fd49799a08369b258a"
+      }
+    }
+  },
+  "primaryLogSha256": "454e7cd10e8a23783790e6bf833c9e448a83eb0fec672247c1dde9305e396fd1",
+  "expectedSha256": "766b4371ffe2a3203a8ee40642b99c8807c2a5183d16157ee70f6b83bcb62c52",
+  "sourceAndCompiledBytesBound": true,
+  "productFiles": {
+    "ext/js/dictionary/wasm/term-bank-parser.c": {
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "bytes": 164931,
+      "gitBlobSha1": "9fa8a4cc10948d2338b1bd5cd22504ae2446ea94"
+    },
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+      "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "bytes": 70091,
+      "gitBlobSha1": "ff499838f2e1ef5a209de4639e22f5681dbf7c0d"
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+      "bytes": 2588,
+      "gitBlobSha1": "a7d307b072092a026c7a200d1995441cbd9b2ba8"
+    },
+    "test/term-bank-row-suffix-proof-consumer.test.js": {
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+      "bytes": 9228,
+      "gitBlobSha1": "7be75e1ab4dc20bb089dae463478687f4fc3e02d"
+    },
+    "test/term-bank-row-suffix-proof-fixtures.js": {
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+      "bytes": 6179,
+      "gitBlobSha1": "e2d82bb52863b8cf817c46f3057b8c0c7405925b"
+    },
+    "test/term-bank-row-suffix-reuse.test.js": {
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "bytes": 15101,
+      "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+    },
+    "test/term-bank-row-suffix-token-end-fixtures.js": {
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "bytes": 3037,
+      "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+    },
+    "test/term-bank-row-suffix-token-ends.test.js": {
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "bytes": 7560,
+      "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+    }
+  },
+  "sourceDigest": "2457445640a1dc21c4908b5c38d8d7987846a0d189e8e0d357312944a732ccb8",
+  "all16CommandReceiptsAndLogsMatchPrimary": true,
+  "completedCommandLabels": [
+    "fetch-baseline",
+    "create-baseline",
+    "create-candidate",
+    "dependencies-baseline",
+    "dependencies-candidate",
+    "reproduce-baseline",
+    "build-baseline-libraries",
+    "apply-check",
+    "apply-patch",
+    "build-native-candidate",
+    "build-candidate-libraries",
+    "reproduce-candidate",
+    "scoped-lint",
+    "strict-main-types",
+    "strict-test-types",
+    "complete-unit-suite"
+  ],
+  "successfulPrefixCommands": 15,
+  "failedCommand": "complete-unit-suite",
+  "failedCommandExitCode": 1,
+  "unattemptedCommandLabels": [
+    "options-unit-suite",
+    "all-dry-build-targets",
+    "build-counter-only-module",
+    "synthetic-raw-native-oracle",
+    "smoke-baseline",
+    "smoke-candidate",
+    "smoke-diagnostic",
+    "smoke-disabled-baseline",
+    "smoke-disabled-candidate",
+    "smoke-disabled-diagnostic"
+  ],
+  "tests": {
+    "passed": 15224,
+    "failed": 1,
+    "skipped": 47,
+    "filesPassed": 673,
+    "filesFailed": 1,
+    "failure": "New wide-sequence fixture asserted a nonempty optional native-index map; decoded rows had already passed."
+  },
+  "componentObservations": 0,
+  "diagnosticChildren": 0,
+  "originalPreparationSucceeded": false,
+  "binaryDiffReversesToExactBaseline": true,
+  "originalCompiledBindingSha256": "f29d4718d2e84a5b99a31a345fcebaa405a657e18ecf32130cf30a0ba7eb36ca",
+  "members": {
+    "apply-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": 0
+    },
+    "apply-patch.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": 0
+    },
+    "apply-check.receipt.json": {
+      "bytes": 505,
+      "sha256": "b492c17066635e0ed8f9481ac95925cb8c57a6c22e057c9f931fbd22c0ad5967",
+      "crc32": 3448979830
+    },
+    "apply-patch.receipt.json": {
+      "bytes": 490,
+      "sha256": "f4ee19aa17023a095bdca44c6580f76ed2bd6eddccac259036319b49635712fc",
+      "crc32": 984022766
+    },
+    "build-baseline-libraries.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "crc32": 321773622
+    },
+    "build-baseline-libraries.receipt.json": {
+      "bytes": 409,
+      "sha256": "522aa041b567863a16dc40cf0b084c726674fc088867f75d294bcffa0550eba8",
+      "crc32": 3420076545
+    },
+    "build-candidate-libraries.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "crc32": 321773622
+    },
+    "build-candidate-libraries.receipt.json": {
+      "bytes": 411,
+      "sha256": "c2991e767a94e8e89dd1370807117d3d23b76d898ea70df7e1b22e9ac28e76b1",
+      "crc32": 1167387408
+    },
+    "build-native-candidate.log": {
+      "bytes": 500,
+      "sha256": "cf4f7192147d4091e7cea8773cc245f6c7dd26de731a780baa837efe9248b6d6",
+      "crc32": 2055631942
+    },
+    "build-native-candidate.receipt.json": {
+      "bytes": 443,
+      "sha256": "43f1abe8deab9a96ccd858086bed227c6fd11efe3e04558227abb1e6fcc1b95a",
+      "crc32": 2839172923
+    },
+    "compiled-source-binding.json": {
+      "bytes": 1926,
+      "sha256": "f29d4718d2e84a5b99a31a345fcebaa405a657e18ecf32130cf30a0ba7eb36ca",
+      "crc32": 1395737213
+    },
+    "complete-unit-suite.log": {
+      "bytes": 604659,
+      "sha256": "541129b98857eccccee8fc38f2881fe497495c12caabbb2d4043eb33b8887f55",
+      "crc32": 899055167
+    },
+    "complete-unit-suite.receipt.json": {
+      "bytes": 436,
+      "sha256": "17988d8a01d95a33af6a7b94b4ef0c35f39e56c1cc159057c916cc25e955c14e",
+      "crc32": 1826513820
+    },
+    "create-baseline.log": {
+      "bytes": 160,
+      "sha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0",
+      "crc32": 3043096071
+    },
+    "create-baseline.receipt.json": {
+      "bytes": 507,
+      "sha256": "488c061543f9c9c95d91ad213ca0c37bcf1769c927c796c24391fd1c1b0b3cf7",
+      "crc32": 2560794905
+    },
+    "create-candidate.log": {
+      "bytes": 160,
+      "sha256": "1f69a1dbdf7187d7909bd8c579df4dcbec3a12568947e0f7c8f0d5e60247e2f0",
+      "crc32": 3043096071
+    },
+    "create-candidate.receipt.json": {
+      "bytes": 508,
+      "sha256": "5f968a4db1d81b8af0a9f31e1fd5f9575b6eff0d7bb733d294dc865d37961aa8",
+      "crc32": 2310220941
+    },
+    "dependencies-baseline.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": 0
+    },
+    "dependencies-baseline.receipt.json": {
+      "bytes": 502,
+      "sha256": "a59036b68baf6429820e7fd8a012cbda9104d970992b1e790cfe4043413ca82c",
+      "crc32": 2031916019
+    },
+    "dependencies-candidate.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": 0
+    },
+    "dependencies-candidate.receipt.json": {
+      "bytes": 503,
+      "sha256": "23f3f83d219fb24b9590c626a7d883bf8d8e5dd2a787f1274769323e5b14f253",
+      "crc32": 1104089552
+    },
+    "fetch-baseline.log": {
+      "bytes": 123,
+      "sha256": "a7fcabf40a25081cdec8f56a3e6f5c418be338c4d465f7418cb32fe0b7be1a7e",
+      "crc32": 2783972064
+    },
+    "fetch-baseline.receipt.json": {
+      "bytes": 448,
+      "sha256": "ab1fd57931dc39db461d8a5722e830c3cb56fe7ec3a9fe6bb8b2081ab6124cb1",
+      "crc32": 3467994219
+    },
+    "preparation-start.json": {
+      "bytes": 4655,
+      "sha256": "274810b48c318d8e6d9321f20617d9649f043fdbd3c2ab56396a0436d9aa1644",
+      "crc32": 2640083722
+    },
+    "product/dev/data/dictionary-wasm/manifest.json": {
+      "bytes": 2588,
+      "sha256": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459",
+      "crc32": 1881855903
+    },
+    "product/dev/data/dictionary-wasm/term-bank-parser.wasm": {
+      "bytes": 70091,
+      "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "crc32": 369509786
+    },
+    "product/ext/js/dictionary/wasm/term-bank-parser.c": {
+      "bytes": 164931,
+      "sha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "crc32": 573730424
+    },
+    "product/test/term-bank-row-suffix-proof-consumer.test.js": {
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+      "crc32": 2287117095
+    },
+    "product/test/term-bank-row-suffix-proof-fixtures.js": {
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+      "crc32": 1496694048
+    },
+    "product/test/term-bank-row-suffix-reuse.test.js": {
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "crc32": 3105920180
+    },
+    "product/test/term-bank-row-suffix-token-end-fixtures.js": {
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "crc32": 2468008079
+    },
+    "rebuilt-candidate.diff": {
+      "bytes": 22916,
+      "sha256": "85d8e55820886ec9c5f37c01b371ed76de0e3c18314d9e97641ca4025684c869",
+      "crc32": 3708497019
+    },
+    "reproduce-baseline.log": {
+      "bytes": 500,
+      "sha256": "b0c29cfdc729fb242e772813e4a9c54a2fd3e3023bd9aca0032b240cadfde089",
+      "crc32": 4141964139
+    },
+    "product/test/term-bank-row-suffix-token-ends.test.js": {
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "crc32": 449146510
+    },
+    "reproduce-baseline.receipt.json": {
+      "bytes": 439,
+      "sha256": "81f7accb5a975e2a951c65447b2ee94c394ae7113fd01521d3374a979f720229",
+      "crc32": 361166916
+    },
+    "reproduce-candidate.log": {
+      "bytes": 500,
+      "sha256": "15eb2180bf0d2314162895555b06f101cab58581d3daba4104a61089861ecbd5",
+      "crc32": 1379888233
+    },
+    "reproduce-candidate.receipt.json": {
+      "bytes": 440,
+      "sha256": "6615879659a285c1a1e15d5ae1222e15719bf5d48bede1884c1f0bab9b6a6234",
+      "crc32": 1769453367
+    },
+    "scoped-lint.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "crc32": 390850769
+    },
+    "scoped-lint.receipt.json": {
+      "bytes": 643,
+      "sha256": "b4b0455d8739938adf536daf9e19b92536551749ab1e983de98735e520f2bf16",
+      "crc32": 2514454867
+    },
+    "strict-main-types.log": {
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d",
+      "crc32": 189494261
+    },
+    "strict-test-types.log": {
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c",
+      "crc32": 1705139753
+    },
+    "strict-main-types.receipt.json": {
+      "bytes": 405,
+      "sha256": "601b20a7cebd9759f350122c6ffa13d10b641990f8d9599f3a6d44626dcc93d5",
+      "crc32": 4015576284
+    },
+    "strict-test-types.receipt.json": {
+      "bytes": 403,
+      "sha256": "5242526b298a098888b2413a997cecdeacaaec6f73b61948b829ee51427d2bb3",
+      "crc32": 2708831255
+    }
+  },
+  "auditorSha256": "024f1a2c5777c9d5ccc073cc1d6bf6f621dd95171677369dd02b51ad745daa12",
+  "interpretation": "The source-built bytes are identified, but this original run failed correctness and cannot qualify performance. Any reviewed test-contract correction is a separate cohort."
+}

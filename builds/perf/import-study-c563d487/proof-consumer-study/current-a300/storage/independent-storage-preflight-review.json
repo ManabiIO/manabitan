@@ -1,0 +1,915 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:35:17.827204+00:00",
+  "kind": "independent-original-storage-preflight-and-prospective-contract-review",
+  "reviewer": "pipeline_audit",
+  "source": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "tooling": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+    "runId": 46139360578,
+    "bindingSha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+    "sourceInventorySha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+    "unchangedCanonicalizerSha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "reviewScript": {
+      "bytes": 15207,
+      "sha256": "b5c40a7e4d1534e01a20b64f422b319a6748678684b3b0bba5c0be5c0ee2febb",
+      "gitBlobSha1": "3ff38dcdf47c9cef2e59fc7ef31905b958f8e52d"
+    }
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "jobId": 140962634770,
+      "primaryLog": {
+        "bytes": 486790,
+        "sha256": "cb1529bebaa7e2f3bafdc519be339c4df4e8b567acd8299d39a7cb03c005b5d1",
+        "gitBlobSha1": "2f82c3d21cb1ceb2a92d54f881fbe1849fc8f0cb"
+      },
+      "selectedArchive": {
+        "bytes": 283384,
+        "gitBlobSha1": "ed6fab4b9ef5197e242460550e97059fb4b03944",
+        "sha256": "dc2cdd0aa49e6397d80440e42d59eaa32a99037d03054089f643bef9f0cbdfae"
+      },
+      "originalManifestSha256": "3d16e17402f2f7e92178da8e7a25a335e5a50bf7f65ff22ee3170def0b418115",
+      "members": [
+        {
+          "bytes": 49784,
+          "path": "a300-source-inventory.json",
+          "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87"
+        },
+        {
+          "bytes": 140,
+          "path": "baseline-only/markers.jsonl",
+          "sha256": "2dc0161465a5e7d4862b591ba91b93376a048fa2d01e20987553d077c7dea55f"
+        },
+        {
+          "bytes": 2199175,
+          "path": "baseline-only/memory.json",
+          "sha256": "2e476d7cd3064d5b881f07baeff763ec9fdbb9dd64374269d867398ee7972980"
+        },
+        {
+          "bytes": 83540,
+          "path": "baseline-only/run-1.html",
+          "sha256": "b637004081f124c9d1fa32d19d0ef47c8b9806739cc2cf3c939e5c454c27ee6f"
+        },
+        {
+          "bytes": 151144,
+          "path": "baseline-only/run-1.json",
+          "sha256": "57fe4b5faf269b483dfe70366ece041a92fa99eafd33a0bdaeede89a5771bb1e"
+        },
+        {
+          "bytes": 1737,
+          "path": "baseline-only/run.log",
+          "sha256": "f9aa22626cb13a9c9c3252ba36b78365268943d1a043211bc376fc3f20e2acfa"
+        },
+        {
+          "bytes": 59061,
+          "path": "baseline-only/summary.json",
+          "sha256": "9a5770f442743351ca90c0b0d84e7f0e0c3f4cf58cac0fe564804cb6fb77a232"
+        },
+        {
+          "bytes": 228,
+          "path": "browser-identity.json",
+          "sha256": "0c380565933d2b7a5949926404bf89326b1f4f1d5b32ae238282e6fab7cf9eef"
+        },
+        {
+          "bytes": 60,
+          "path": "build-libraries.log",
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "bytes": 388,
+          "path": "build-libraries.receipt.json",
+          "sha256": "1817a4cc17e7ae031580517e9bbfad4f62c15bcffe85c79ff3c5daa08e5708fb"
+        },
+        {
+          "bytes": 138,
+          "path": "create-baseline.log",
+          "sha256": "61566832b554f29a7ed2495611d98601b37d5d2fa5d545af54a1401a97c55469"
+        },
+        {
+          "bytes": 495,
+          "path": "create-baseline.receipt.json",
+          "sha256": "cd19e0c62a2ba6d1103cee5c9a29093f73f43edd50d0717500829797049a086a"
+        },
+        {
+          "bytes": 326351,
+          "path": "harness-instrumented.js",
+          "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+        },
+        {
+          "bytes": 325917,
+          "path": "harness-original.js",
+          "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+        },
+        {
+          "bytes": 215,
+          "path": "license-page.log",
+          "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        {
+          "bytes": 395,
+          "path": "license-page.receipt.json",
+          "sha256": "3a4d72d7cc841ebfdeae43432b3cca133cb5cd7383d510dbddef1ff256cdbdce"
+        },
+        {
+          "bytes": 1301,
+          "path": "observation-plan.json",
+          "sha256": "79b9207ae4b02853ca69e75e0ed16db8adf8799eedf254ee4870c2f8a575cbb9"
+        },
+        {
+          "bytes": 108341,
+          "path": "package-entries.json",
+          "sha256": "d4cd8f0b552bdbab29d2b741b2c33f822a106899ba1c023842fb2e9486f3d10d"
+        },
+        {
+          "bytes": 157,
+          "path": "prepare-locked-fixture.log",
+          "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+        },
+        {
+          "bytes": 392,
+          "path": "prepare-locked-fixture.receipt.json",
+          "sha256": "8da46ee7269146e7721253bcf94b3a58bc0c749794c93f23ff50f5bc7bd84137"
+        },
+        {
+          "bytes": 5506,
+          "path": "prospective-review-criteria.json",
+          "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+        },
+        {
+          "bytes": 128,
+          "path": "release-package.log",
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "bytes": 424,
+          "path": "release-package.receipt.json",
+          "sha256": "52ff88f59d47996bae04b9ec04ec8b40429bbbe984133d47c852f98e6741737b"
+        },
+        {
+          "bytes": 986,
+          "path": "result.json",
+          "sha256": "fe7ef3a829987dc74ee6635836c76415f3b7a5d2e99d6f58b33d6d25845e1f5f"
+        },
+        {
+          "bytes": 1960,
+          "path": "sampled-summary.json",
+          "sha256": "0dde6de03b92017a22407fe477d035f333b6b2244078411c9923834e0139f768"
+        },
+        {
+          "bytes": 7368,
+          "path": "source-binding.json",
+          "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+        },
+        {
+          "bytes": 2848,
+          "path": "source-proof.json",
+          "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c"
+        },
+        {
+          "bytes": 3529,
+          "path": "start.json",
+          "sha256": "6d8f97145b31e2a4b461e3305e9fe39b9c9fb87aad7a016385bd2b8ccdb778b0"
+        },
+        {
+          "bytes": 28101,
+          "path": "storage-inventory.json",
+          "sha256": "6e2986bf86a72d9f450c197c835f1f6119a706c4bd9b28b1f555d7eadc5eff41"
+        }
+      ],
+      "excluded": [
+        {
+          "bytes": 17060417,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "df98e1a0ea8f1cbb445a4b1c2b1718e51fa63a8cb3d03f79755b997d591cbfb3"
+        }
+      ],
+      "all29MemberShaSizeAndCrcChecksPassed": true,
+      "rawReport": {
+        "bytes": 151144,
+        "sha256": "57fe4b5faf269b483dfe70366ece041a92fa99eafd33a0bdaeede89a5771bb1e",
+        "gitBlobSha1": "e8b0ca386be7626d191a16dc905f3bfe72929ef4"
+      },
+      "rawSummary": {
+        "bytes": 59061,
+        "sha256": "9a5770f442743351ca90c0b0d84e7f0e0c3f4cf58cac0fe564804cb6fb77a232",
+        "gitBlobSha1": "c47f5ecc457c852183fa29592d0a83b2526e7881"
+      },
+      "inventory": {
+        "bytes": 28101,
+        "sha256": "6e2986bf86a72d9f450c197c835f1f6119a706c4bd9b28b1f555d7eadc5eff41",
+        "gitBlobSha1": "25011f25220b4fc26743041053a4aba40178f1a2"
+      },
+      "sourceProof": {
+        "bytes": 2848,
+        "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c",
+        "gitBlobSha1": "334b054d7d0c9e40e67920bc1f419b4ee613236a"
+      },
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "browser": {
+        "path": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "canonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 43684317,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 19566680
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23748952
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 339968
+          }
+        ]
+      },
+      "activeSahBytes": 339968,
+      "activeSahAllocationUnits4096": 83,
+      "rawMemorySamples": 92,
+      "memoryQualified": true,
+      "maximumCoveredSampleGapMs": 206.673454,
+      "priorStorageReference": {
+        "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "selectedArchive": {
+          "bytes": 2254309,
+          "sha256": "4d369eb261c426afa9ff9360f7e6d1f97b5701e195f1b002561c30360ef8117f",
+          "gitBlobSha1": "711ee1cdf778b26ca24288acfc00fbbda5317b8d"
+        },
+        "member": "control-01-A/run-1.json",
+        "memberSha256": "e21b3abbc4c4375e84e8bb9935061a29fb6704906b506891abab122ceebe010d",
+        "activeSahBytes": 176128,
+        "nonSahPathsAndExactSizesUnchanged": true,
+        "outputDigestUnchanged": true,
+        "activeAndTotalDifferenceBytes": 163840,
+        "allocationUnitBytes": 4096,
+        "allocationUnitDifference": 40
+      },
+      "observationClass": "One excluded baseline-only storage prerequisite; no candidate observation or performance comparison."
+    },
+    {
+      "dictionary": "jitendex",
+      "jobId": 140962634795,
+      "primaryLog": {
+        "bytes": 495744,
+        "sha256": "adc502e29f268fd460368add60751e373c486a2caa4fa436950523452363d6ea",
+        "gitBlobSha1": "f838da263c86031125aac0668ecd6ae839fffe04"
+      },
+      "selectedArchive": {
+        "bytes": 290433,
+        "gitBlobSha1": "73781495a16e6733de56fc31a0005dfca6c6acc4",
+        "sha256": "913fb896be3c78043aa731f5e17fd8f9689270bddbf25f366fa9ed9277be5055"
+      },
+      "originalManifestSha256": "e24b7504f45c4ee5d3d0e0e85e9883d464862e383351cff3deab6a08ebd65a6c",
+      "members": [
+        {
+          "bytes": 49784,
+          "path": "a300-source-inventory.json",
+          "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87"
+        },
+        {
+          "bytes": 138,
+          "path": "baseline-only/markers.jsonl",
+          "sha256": "78a7d5fcf503a0223258b9243d65fad68b051d141dfb790da5d03e580526c617"
+        },
+        {
+          "bytes": 2256501,
+          "path": "baseline-only/memory.json",
+          "sha256": "2c8b447cb42bb32ef56b3c374d415176d76a0e6d1509d430019d481611fd4e8d"
+        },
+        {
+          "bytes": 83832,
+          "path": "baseline-only/run-1.html",
+          "sha256": "2d45f45f0a8e32c5a43e4757b76dd346593818d6822a640ae98e8879e50ca6a5"
+        },
+        {
+          "bytes": 151280,
+          "path": "baseline-only/run-1.json",
+          "sha256": "fe19bce2d5ce2d5411d3b7f342a5d397d51a977dcbb281c6ffd67ef2a9abd911"
+        },
+        {
+          "bytes": 1757,
+          "path": "baseline-only/run.log",
+          "sha256": "a093d1e7289b2a33bdb27af533d60a96ae2d8c2470e500d7c6b6cc5750f3526d"
+        },
+        {
+          "bytes": 59444,
+          "path": "baseline-only/summary.json",
+          "sha256": "756e159d502189e7c4ec2296b0193ba6ec87041c744a978d09d755b1ee27d0dc"
+        },
+        {
+          "bytes": 228,
+          "path": "browser-identity.json",
+          "sha256": "0c380565933d2b7a5949926404bf89326b1f4f1d5b32ae238282e6fab7cf9eef"
+        },
+        {
+          "bytes": 60,
+          "path": "build-libraries.log",
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "bytes": 389,
+          "path": "build-libraries.receipt.json",
+          "sha256": "5290abc06bc1339e1d0042908bf2f2ec2bba71ef509a9160952eae35e534ae76"
+        },
+        {
+          "bytes": 138,
+          "path": "create-baseline.log",
+          "sha256": "61566832b554f29a7ed2495611d98601b37d5d2fa5d545af54a1401a97c55469"
+        },
+        {
+          "bytes": 494,
+          "path": "create-baseline.receipt.json",
+          "sha256": "789dff4caf680d9dae8785a5acfbd4ee1e374eab344d5d9c3cb6b84e96609266"
+        },
+        {
+          "bytes": 326351,
+          "path": "harness-instrumented.js",
+          "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+        },
+        {
+          "bytes": 325917,
+          "path": "harness-original.js",
+          "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+        },
+        {
+          "bytes": 215,
+          "path": "license-page.log",
+          "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        {
+          "bytes": 395,
+          "path": "license-page.receipt.json",
+          "sha256": "7aefff20815a91fa6223180c129b5835c159d8e2a5f43236c0cbeb75a5a28869"
+        },
+        {
+          "bytes": 1307,
+          "path": "observation-plan.json",
+          "sha256": "b484b2406ad10cf5c077b2195b9d529ffc36c2ac7f390ad49e95679815e51a36"
+        },
+        {
+          "bytes": 108341,
+          "path": "package-entries.json",
+          "sha256": "47f9e753dd82dc21269b16e996b07f33f00cd7b804c1c01b86750dbb37d2c8fd"
+        },
+        {
+          "bytes": 169,
+          "path": "prepare-locked-fixture.log",
+          "sha256": "f5b95e5225fed2af6fb0c993938f1634a9bb30264bf34ccc1f681aa0114e8ce3"
+        },
+        {
+          "bytes": 395,
+          "path": "prepare-locked-fixture.receipt.json",
+          "sha256": "9e0f02cefaca6ebe0266fad99ca6880156aaaf930491b2ddcbc7e36e024dfbe3"
+        },
+        {
+          "bytes": 5506,
+          "path": "prospective-review-criteria.json",
+          "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+        },
+        {
+          "bytes": 128,
+          "path": "release-package.log",
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "bytes": 424,
+          "path": "release-package.receipt.json",
+          "sha256": "7181902a91c9d00b548b8e5d037a23499dada76ef7d85d8fbb07687d16fcab5a"
+        },
+        {
+          "bytes": 988,
+          "path": "result.json",
+          "sha256": "46da97d5b447f1e7fcdc11f77400f6069ac061cd9c26ef8e87e32c3d18ff835d"
+        },
+        {
+          "bytes": 1964,
+          "path": "sampled-summary.json",
+          "sha256": "0c13ab03f4b09febf10c79335788e12ac3328447d26faf38b390c14db4c19abe"
+        },
+        {
+          "bytes": 7368,
+          "path": "source-binding.json",
+          "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+        },
+        {
+          "bytes": 2848,
+          "path": "source-proof.json",
+          "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c"
+        },
+        {
+          "bytes": 3531,
+          "path": "start.json",
+          "sha256": "ad01de8ac1dc57fda6b434d7df2dd5c949a5dd4efea96533848c1906a76754af"
+        },
+        {
+          "bytes": 27604,
+          "path": "storage-inventory.json",
+          "sha256": "d467ed1d025814289ff270d9919c16c9d87ff04759a66efdb88d89ed4f3d2abe"
+        }
+      ],
+      "excluded": [
+        {
+          "bytes": 17060417,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "c4b6a4b4f2cfd3a4b03af5f51dae4380079c8d1eb73a5d23d9cadfd2f48faebe"
+        }
+      ],
+      "all29MemberShaSizeAndCrcChecksPassed": true,
+      "rawReport": {
+        "bytes": 151280,
+        "sha256": "fe19bce2d5ce2d5411d3b7f342a5d397d51a977dcbb281c6ffd67ef2a9abd911",
+        "gitBlobSha1": "2f45b404e1058c3039826a3bd09cceccf323a873"
+      },
+      "rawSummary": {
+        "bytes": 59444,
+        "sha256": "756e159d502189e7c4ec2296b0193ba6ec87041c744a978d09d755b1ee27d0dc",
+        "gitBlobSha1": "c24cfbdaa122be3fd82c0d335bf0cb082409e3c8"
+      },
+      "inventory": {
+        "bytes": 27604,
+        "sha256": "d467ed1d025814289ff270d9919c16c9d87ff04759a66efdb88d89ed4f3d2abe",
+        "gitBlobSha1": "a8313ba210b8d8d4b76ba713b7f0bfe5ae8af698"
+      },
+      "sourceProof": {
+        "bytes": 2848,
+        "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c",
+        "gitBlobSha1": "334b054d7d0c9e40e67920bc1f419b4ee613236a"
+      },
+      "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "browser": {
+        "path": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "canonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 67630172,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 38386795
+          },
+          {
+            "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+            "bytes": 45
+          },
+          {
+            "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+            "bytes": 23590852
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 5623808
+          }
+        ]
+      },
+      "activeSahBytes": 5623808,
+      "activeSahAllocationUnits4096": 1373,
+      "rawMemorySamples": 85,
+      "memoryQualified": true,
+      "maximumCoveredSampleGapMs": 237.307618,
+      "priorStorageReference": {
+        "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "selectedArchive": {
+          "bytes": 2246717,
+          "sha256": "a93f3c2fa3dd805784eee5ddd9c400264ee8d0d37f0b21b5c0a14fb3990bc317",
+          "gitBlobSha1": "f8c66c72dc8bf93ffbffea932174596c620db582"
+        },
+        "member": "control-01-A/run-1.json",
+        "memberSha256": "5f1a93d96b6eb491c466da9c67e552d8e4e1cc148537feb2c8d94a5c926e9bbb",
+        "activeSahBytes": 5459968,
+        "nonSahPathsAndExactSizesUnchanged": true,
+        "outputDigestUnchanged": true,
+        "activeAndTotalDifferenceBytes": 163840,
+        "allocationUnitBytes": 4096,
+        "allocationUnitDifference": 40
+      },
+      "observationClass": "One excluded baseline-only storage prerequisite; no candidate observation or performance comparison."
+    },
+    {
+      "dictionary": "vndb",
+      "jobId": 140962634718,
+      "primaryLog": {
+        "bytes": 567129,
+        "sha256": "f322e023fa8a63df461b4dd7baa0d92b7cc568c64505444b45fea8f39df44aaf",
+        "gitBlobSha1": "6e3afd2fd06b42e44b60a488758e967e080b603e"
+      },
+      "selectedArchive": {
+        "bytes": 342887,
+        "gitBlobSha1": "ed344b0d01571f1947fba7d5729b5f8e3d4659b4",
+        "sha256": "872f60b2e061580e85a8e48745de351b4cc54def10776d274a49d53edb178313"
+      },
+      "originalManifestSha256": "4437d3183406129b79ffdf6a7445c3479e625e7ca5676f835c6c345cf09c5d07",
+      "members": [
+        {
+          "bytes": 49784,
+          "path": "a300-source-inventory.json",
+          "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87"
+        },
+        {
+          "bytes": 140,
+          "path": "baseline-only/markers.jsonl",
+          "sha256": "3b51c1ea8d276b9187c36530baa9c7251aaed630e8c1f31f6a8d2d0a403944fd"
+        },
+        {
+          "bytes": 4185243,
+          "path": "baseline-only/memory.json",
+          "sha256": "bb9f0d4334cfc90c63eb512c5818ef1a54b430e254ceea23b36125f35bf60db3"
+        },
+        {
+          "bytes": 84492,
+          "path": "baseline-only/run-1.html",
+          "sha256": "b3313dcb21a90485ca0d29f42ad6a69234c537a304def0eb91eff6ba033fc3ff"
+        },
+        {
+          "bytes": 153200,
+          "path": "baseline-only/run-1.json",
+          "sha256": "005a5e1990d8caaaf64e9ee1a7fae156e264722dacda86cae5ce7ad6cc4c8b9c"
+        },
+        {
+          "bytes": 1721,
+          "path": "baseline-only/run.log",
+          "sha256": "660b7fecbb287acf6557de8c0cb58c2d86087093ca0aa197aeb9ce23d52e6599"
+        },
+        {
+          "bytes": 59919,
+          "path": "baseline-only/summary.json",
+          "sha256": "a5a36e05ea3b27158c64e9905eaf1c082008d31f905f83e8254abd4761157e15"
+        },
+        {
+          "bytes": 228,
+          "path": "browser-identity.json",
+          "sha256": "0c380565933d2b7a5949926404bf89326b1f4f1d5b32ae238282e6fab7cf9eef"
+        },
+        {
+          "bytes": 60,
+          "path": "build-libraries.log",
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "bytes": 388,
+          "path": "build-libraries.receipt.json",
+          "sha256": "448a25822a173319b0858cc5a7aecba1e1ad17f4f913e44f464fa4e2b3dd4689"
+        },
+        {
+          "bytes": 138,
+          "path": "create-baseline.log",
+          "sha256": "61566832b554f29a7ed2495611d98601b37d5d2fa5d545af54a1401a97c55469"
+        },
+        {
+          "bytes": 495,
+          "path": "create-baseline.receipt.json",
+          "sha256": "f46ca939589e53aeb9ccf2f7b3916a2c9a586463daa66bf1a8b52886e7119fe3"
+        },
+        {
+          "bytes": 326351,
+          "path": "harness-instrumented.js",
+          "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+        },
+        {
+          "bytes": 325917,
+          "path": "harness-original.js",
+          "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+        },
+        {
+          "bytes": 215,
+          "path": "license-page.log",
+          "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        {
+          "bytes": 393,
+          "path": "license-page.receipt.json",
+          "sha256": "8702cf017ec1b9455083326a9d97efb4cfbcc4f56dd275251e70d483d2d0bff7"
+        },
+        {
+          "bytes": 1295,
+          "path": "observation-plan.json",
+          "sha256": "c748f813adda87c6a7c697ce3210a7164b33195208c06057be7ba8e7284036e6"
+        },
+        {
+          "bytes": 108341,
+          "path": "package-entries.json",
+          "sha256": "0e2a5b7e75767270405e388c5dffa82ec8e22ef3ff31c34466e1c3e29a180069"
+        },
+        {
+          "bytes": 171,
+          "path": "prepare-locked-fixture.log",
+          "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+        },
+        {
+          "bytes": 390,
+          "path": "prepare-locked-fixture.receipt.json",
+          "sha256": "b0a435bb3b8b6025f3c0a33b841ca66207f087da76873da1c45d2343a72646d7"
+        },
+        {
+          "bytes": 5506,
+          "path": "prospective-review-criteria.json",
+          "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d"
+        },
+        {
+          "bytes": 128,
+          "path": "release-package.log",
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "bytes": 424,
+          "path": "release-package.receipt.json",
+          "sha256": "11165a2dccf0a98af1a1a7d57344889d04013f7085731aa21d33315ea3c26acf"
+        },
+        {
+          "bytes": 984,
+          "path": "result.json",
+          "sha256": "8b590ec78bc1f5c93b1df4f5d9f37d8ba98b0032f129904a8360065902a81b6a"
+        },
+        {
+          "bytes": 1967,
+          "path": "sampled-summary.json",
+          "sha256": "4284ce19f70a30eb42dd493ef4390d38b3fe3af7ed90d24bec95a1ec87117892"
+        },
+        {
+          "bytes": 7368,
+          "path": "source-binding.json",
+          "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+        },
+        {
+          "bytes": 2848,
+          "path": "source-proof.json",
+          "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c"
+        },
+        {
+          "bytes": 3527,
+          "path": "start.json",
+          "sha256": "5edf0dfbffa8b23effba6b2d05487be33c4321ada92c9539abf0657d405ae110"
+        },
+        {
+          "bytes": 28596,
+          "path": "storage-inventory.json",
+          "sha256": "e01c14bf4f7cbb565ca4ee6e67b99a1accedbe7b27ecd73150cc34938c7c9109"
+        }
+      ],
+      "excluded": [
+        {
+          "bytes": 17060417,
+          "path": "package-A.zip",
+          "reason": "Reproducible release-package copy; complete source/package-entry maps remain included",
+          "sha256": "47dfac536586f07f38f0ca2ea40823bf338ef7afb40e5b876a74b0f4aeaf4548"
+        }
+      ],
+      "all29MemberShaSizeAndCrcChecksPassed": true,
+      "rawReport": {
+        "bytes": 153200,
+        "sha256": "005a5e1990d8caaaf64e9ee1a7fae156e264722dacda86cae5ce7ad6cc4c8b9c",
+        "gitBlobSha1": "6834241c2206baf87cc9a1a257ae5e52d1b1237a"
+      },
+      "rawSummary": {
+        "bytes": 59919,
+        "sha256": "a5a36e05ea3b27158c64e9905eaf1c082008d31f905f83e8254abd4761157e15",
+        "gitBlobSha1": "0d99ada1ea1d3026b71f54bfe4dda780e3b84c2c"
+      },
+      "inventory": {
+        "bytes": 28596,
+        "sha256": "e01c14bf4f7cbb565ca4ee6e67b99a1accedbe7b27ecd73150cc34938c7c9109",
+        "gitBlobSha1": "8b9e3df4a059abb50a234333fc7be8bdb7c4b19a"
+      },
+      "sourceProof": {
+        "bytes": 2848,
+        "sha256": "545c7b137612e4e9084ba748f930d92a0a359fd3b4ea90d59a51705c285b4f0c",
+        "gitBlobSha1": "334b054d7d0c9e40e67920bc1f419b4ee613236a"
+      },
+      "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      },
+      "browser": {
+        "path": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "canonicalStorage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609340619,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/{generation}.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+            "bytes": 315392
+          }
+        ]
+      },
+      "activeSahBytes": 315392,
+      "activeSahAllocationUnits4096": 77,
+      "rawMemorySamples": 141,
+      "memoryQualified": true,
+      "maximumCoveredSampleGapMs": 198.474925,
+      "priorStorageReference": {
+        "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "selectedArchive": {
+          "bytes": 2341048,
+          "sha256": "0c5b307d520c391c731e49f1d6efb6f6f4095601d52387b7622d16cc0386c5f0",
+          "gitBlobSha1": "3bef9d10e9ffccee7513666407e7e7040ef24f69"
+        },
+        "member": "control-01-A/run-1.json",
+        "memberSha256": "18a62600829ab7af52d64a51a6ace6fc375587e3c30315a71d5c1edd187d6866",
+        "activeSahBytes": 151552,
+        "nonSahPathsAndExactSizesUnchanged": true,
+        "outputDigestUnchanged": true,
+        "activeAndTotalDifferenceBytes": 163840,
+        "allocationUnitBytes": 4096,
+        "allocationUnitDifference": 40
+      },
+      "observationClass": "One excluded baseline-only storage prerequisite; no candidate observation or performance comparison."
+    }
+  ],
+  "decision": {
+    "sourceAndRawStorageContractReviewed": true,
+    "recommendedProspectiveVndbSahAllocationUnits": [
+      77,
+      77
+    ],
+    "keepEightSahSeven4096ReserveRule": true,
+    "keepAllKnownProductPathsAndExactCrossObservationBytes": true,
+    "changeProductionSourceObserverTimersFlagsOrOtherGates": false,
+    "candidateStorageObserved": false,
+    "fullQualificationAuthorizedByThisReceipt": false
+  },
+  "limits": [
+    "Three single excluded baseline observations establish the observed source-specific contract, not its frequency or candidate nonregression.",
+    "The forty 4096-byte allocation units are an exact observed size difference; this review does not identify forty SQLite pages or attribute every unit to a particular table.",
+    "a300 source creates new metadata and preserves the minimum/reserve-eight SAH configuration; exact sizes come from these original reports.",
+    "Legacy product paths do not independently prove the optimizer/root epoch at the later post-restart inventory.",
+    "The raw benchmark retains its normal authoritativeTiming field, but these prerequisite observations are excluded from candidate timing analyses and no durations were evaluated.",
+    "Only original non-package evidence was reconstructed; the outer transport/release package was not downloaded. Its excluded digest/size and complete package-entry map remain preserved.",
+    "Future full observations must independently pass all original source, workload, semantic, package, memory, eight-SAH and exact cross-observation storage gates; mismatches remain failures, not permission to widen the bound."
+  ]
+}

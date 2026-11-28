@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "scope": "Lossless corrected static/reviewer preparation receipts only. Published corrected tooling/input bytes are referenced. No native/test/acquisition execution by this staging operation.",
+  "archive": {
+    "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-private-preparation-history.tar.gz",
+    "bytes": 3627,
+    "sha256": "f0a2d6c1824481f2ccb7f61394a0751414b6e0be5789064953c472610885920f"
+  },
+  "memberCount": 25,
+  "uncompressedBytes": 12009,
+  "members": [
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/pipeline-correction-review-attempt-1.json",
+      "bytes": 527,
+      "sha256": "4f8c40c10decbfa7da93fdbb0322b3f30e6d91ac9b3d036b008e114a9bd591b2"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/contract-analysis.json",
+      "bytes": 1934,
+      "sha256": "a8accb670bd57edd3e03143d36b13ea89935faa6e402ec2fb5b66bcf54791db4"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/scoped-lint.json",
+      "bytes": 1662,
+      "sha256": "a5c40927f9135e7489789f909c3873cf94a9baa23a55c7d849b6f7abda59ed0b"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/scoped-lint.status.json",
+      "bytes": 1161,
+      "sha256": "688c91daecf52be345affc259d13d6c1eafa1904138518050c11e97bf7404c69"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/scoped-lint.stderr",
+      "bytes": 1148,
+      "sha256": "467dbb6ab2c58fa18e2f5c09e0d47db126f1962cb306cdcafde58d50ef478d85"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/scoped-lint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/strict-targeted-types.status.json",
+      "bytes": 795,
+      "sha256": "d2be847fd9edf65e76f4f2a81630a466a8a0dde803f43061dd4b6b084307390a"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/strict-targeted-types.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/strict-targeted-types.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-0.status.json",
+      "bytes": 679,
+      "sha256": "016dfcb1c91dafeafceaf780a51807ac77dfa128380afff52d40a452fe0a27ef"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-0.stderr",
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-0.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-1.status.json",
+      "bytes": 674,
+      "sha256": "12ee0c88c41ff5382d71a6ae1d211ac6a52b440f1f6b44dcafa7caa3765e9ebe"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-1.stderr",
+      "bytes": 175,
+      "sha256": "84336e09f9c0a345a4a73eca39b2d51e444ce40180e89f516a0d99adc233b163"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-2.status.json",
+      "bytes": 670,
+      "sha256": "2438b7fc6ab67c54a7ec12c8b95c939bd8d6b236912baba833fdf249e6213583"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-2.stderr",
+      "bytes": 175,
+      "sha256": "e36aac0ec25f0df90bec7253e7660583368ffc4ba4765c22cf5519dda8bb96be"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-2.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-3.status.json",
+      "bytes": 678,
+      "sha256": "8b8c38ed5d60bae94b1114850a0f464d03935230447eb5840745178aba847541"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-3.stderr",
+      "bytes": 175,
+      "sha256": "4bab9aebb28c30e50cf26b894915105f7422518f071df726227981b4d63b39dc"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-3.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-4.status.json",
+      "bytes": 675,
+      "sha256": "9c45bf0adef454905d1fae781ffa3de843ef07d1ec6db30a355154807ac0eed8"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-4.stderr",
+      "bytes": 175,
+      "sha256": "0d5d67f1b9c5fb3ff11dd2ee455a8343b3b569eb21461af1dd0ad224462b3c0d"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/syntax-4.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "staging/initial-preparation-attempt-1.json",
+      "bytes": 532,
+      "sha256": "571945fd72199ca761b0fa3e03c0eab2a1c67f8d6ba526cfdffc341648aab27d"
+    }
+  ],
+  "durableCorrectedToolingReferences": [
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/original/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "gitBlobSha1": "7be75e1ab4dc20bb089dae463478687f4fc3e02d"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/original/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-fixtures.js",
+      "gitBlobSha1": "e2d82bb52863b8cf817c46f3057b8c0c7405925b"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/pipeline-corrected-test-review.json",
+      "bytes": 2782,
+      "sha256": "639dc4ee69ecc28e1714c21af7deb1cb0a44056cf8ac54848b8f3ca5d4577ef5",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-corrected-test-review.json",
+      "gitBlobSha1": "df7430fd682eca80f788b80f5da59d797c6d7ead"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/qualification-contract-correction.patch",
+      "bytes": 4809,
+      "sha256": "3afd3d7928de309fbc49ab3fbfb7fa06c4295b543fb083f5e8b52d6137eb6813",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/qualification-contract-correction.patch",
+      "gitBlobSha1": "aea30d5969cf7bd03614449c1232d2b3f0d2de47"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/correction-receipt.json",
+      "bytes": 5486,
+      "sha256": "cab5e0ae45e7152fa89655fcb26cbf1054446a93564786cff206a08957f58a20",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/owner-correction-receipt.json",
+      "gitBlobSha1": "35fc50e9959b858e713298118b1ca124d2df9161"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/reports/fixture-data-equality.json",
+      "bytes": 462,
+      "sha256": "8609e9906060a5ab0e48e95995daf03244a17f1fe3cf2d99434636bd011b2cbc",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/fixture-data-equality.json",
+      "gitBlobSha1": "f009cfd56526ed250280f81ddda6cbf554d0858a"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/test/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 10092,
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c"
+    },
+    {
+      "path": "numeric-suffix-proof-consumer-regression-correction/test/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6382,
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+      "repositoryPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+      "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab"
+    }
+  ]
+}

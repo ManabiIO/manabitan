@@ -1,0 +1,152 @@
+{
+  "branch": "perf/numeric-suffix-proof-consumer-corrected-20261128-c563d487",
+  "head": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+  "tree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+  "parent": "c9583864b4185470f1e043fd49799a08369b258a",
+  "createdAtUtc": "2026-11-28 10:49:17 UTC",
+  "manifestSha256": "f5667f97a4415ea504f64cfafa73250104d1f78ba20ff800dd65dcb1c8d2d152",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "rootReviewSha256": "c7e6b63399fec1e4815fbc073249b7da1d699908d87891648d2f4a8127e69d6a",
+  "peerReviewSha256": "4903c06970612d0fec7fca3d2c19b80815c32dfb463278b00a136537818aa829",
+  "files": 26,
+  "bytes": 173128,
+  "compare": {
+    "head": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+    "parent": "c9583864b4185470f1e043fd49799a08369b258a",
+    "total_commits": 1,
+    "files": [
+      {
+        "path": ".github/workflows/import-suffix-proof-component-c563d487.yml",
+        "sha": "73daac9d97a60e3c3d680647d44f27ab50566af1",
+        "status": "modified"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+        "sha": "077939b2907ae10cc0cf1b3154a4d2686a466a75",
+        "status": "modified"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/binding.patch",
+        "sha": "6def6f95835d4cf42b71e3a4b5538cf1f236da87",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/correction-record.json",
+        "sha": "a7048662d82f1fa87af47dea812ce6d9c692534e",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/fixture-data-equality.json",
+        "sha": "f009cfd56526ed250280f81ddda6cbf554d0858a",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-binding.json",
+        "sha": "3406bfbd1e350f2591fbda79a44c21258b069da2",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/original-artifact-api.json",
+        "sha": "ee4336185bd83581488738f324e53af7259ef9a7",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/original-terminal-jobs.json",
+        "sha": "b46ae73f10d4656201b653efe5c8636a56ec4b27",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-build-records.json",
+        "sha": "4cf4898399f7262cef9b1d42ed6b1f767e4dd02a",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-failure-audit.json",
+        "sha": "934b479d52a122660140dbe0e5e6f1fb2a8cbbc2",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-job.log",
+        "sha": "3d2a79e1afa334222fac2ec2f41740dd1ed2ad07",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-preparation-record.json",
+        "sha": "549409f3482d5c72bd55e70876802d69ed9cb622",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-consumer.test.js",
+        "sha": "7be75e1ab4dc20bb089dae463478687f4fc3e02d",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-fixtures.js",
+        "sha": "e2d82bb52863b8cf817c46f3057b8c0c7405925b",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/owner-correction-receipt.json",
+        "sha": "35fc50e9959b858e713298118b1ca124d2df9161",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-corrected-test-review.json",
+        "sha": "df7430fd682eca80f788b80f5da59d797c6d7ead",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-wide-sequence-contract-review.json",
+        "sha": "ede40301850102f6c758b0da8dc900e5608d139a",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-workflow-delta-review.json",
+        "sha": "ec3736bf11cec43295c0392f2b3adc46b3c53b8b",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/qualification-contract-correction.patch",
+        "sha": "aea30d5969cf7bd03614449c1232d2b3f0d2de47",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/workflow-preparation.json",
+        "sha": "172f7af00cdac85cfacd6444017cf4e77c4e1c6e",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/workflow.patch",
+        "sha": "978f47bf5a94756bf813d97160f9c88b2f0fbb05",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/pipeline-core-protocol-review-v3.json",
+        "sha": "9b912ecb3071ca8f183ff5d6e4a3c633595c5b0c",
+        "status": "added"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+        "sha": "5736f8e04b61801db99efc81019901beb8340c7e",
+        "status": "modified"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+        "sha": "be7549df55765ebaa6ae11e5d01fae1c93db822c",
+        "status": "modified"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+        "sha": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab",
+        "status": "modified"
+      },
+      {
+        "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml",
+        "sha": "73daac9d97a60e3c3d680647d44f27ab50566af1",
+        "status": "modified"
+      }
+    ],
+    "verified": true
+  },
+  "noProductPr": true
+}

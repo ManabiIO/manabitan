@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T10:47:31.844066+00:00",
+  "scope": "Minimal reviewed overlay on the original published tooling; original failed run and source remain immutable.",
+  "parentCommit": "c9583864b4185470f1e043fd49799a08369b258a",
+  "parentTree": "69257c47755062c6759b68332454e4427bf7902d",
+  "baselineCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+  "workflowPath": ".github/workflows/import-suffix-proof-component-c563d487.yml",
+  "workflowSha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+  "bindingPath": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "candidateCSourceSha256": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+  "originalRunId": 46135694884,
+  "originalMeasuredObservations": 0,
+  "files": [
+    {
+      "path": ".github/workflows/import-suffix-proof-component-c563d487.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/workflow.yml",
+      "bytes": 5005,
+      "sha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+      "gitBlobSha1": "73daac9d97a60e3c3d680647d44f27ab50566af1",
+      "status": "modified",
+      "previousGitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/binding.json",
+      "bytes": 4044,
+      "sha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+      "gitBlobSha1": "077939b2907ae10cc0cf1b3154a4d2686a466a75",
+      "status": "modified",
+      "previousGitBlobSha1": "3406bfbd1e350f2591fbda79a44c21258b069da2"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/binding.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/binding.patch",
+      "bytes": 3780,
+      "sha256": "00b43441cd14a17f4c64445da4d784b5f471752ee380430ab150cf823b22a4f3",
+      "gitBlobSha1": "6def6f95835d4cf42b71e3a4b5538cf1f236da87",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/correction-record.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/correction-record.json",
+      "bytes": 6482,
+      "sha256": "c635c99d8ffb86ed0d7ac503d38d19e008856d8225bbd44f26e19aa7eb431b33",
+      "gitBlobSha1": "a7048662d82f1fa87af47dea812ce6d9c692534e",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/fixture-data-equality.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/reports/fixture-data-equality.json",
+      "bytes": 462,
+      "sha256": "8609e9906060a5ab0e48e95995daf03244a17f1fe3cf2d99434636bd011b2cbc",
+      "gitBlobSha1": "f009cfd56526ed250280f81ddda6cbf554d0858a",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-binding.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/binding.json",
+      "bytes": 3820,
+      "sha256": "5c22870daa3bd61b35c822f990dd9c12e93fe51daa05f253e24e8e5af475cd28",
+      "gitBlobSha1": "3406bfbd1e350f2591fbda79a44c21258b069da2",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/original-artifact-api.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-evidence/build-failed/original-artifact-api.json",
+      "bytes": 881,
+      "sha256": "7e0ade1ea476607a51d66d0c45f223be507970d3edc2297f193383f7ea75d202",
+      "gitBlobSha1": "ee4336185bd83581488738f324e53af7259ef9a7",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/original-terminal-jobs.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-evidence/build-failed/original-terminal-jobs.json",
+      "bytes": 3788,
+      "sha256": "02636bee97e9ff549d871ac685708f3b41a3000b5b7ecb81c4863a2c70952ae6",
+      "gitBlobSha1": "b46ae73f10d4656201b653efe5c8636a56ec4b27",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-build-records.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-evidence/build-failed/primary-build-records.json",
+      "bytes": 9651,
+      "sha256": "08a0d4ac4e68d49f98187b7083b66b0ef71ec50718ce808bae4544c656783a2b",
+      "gitBlobSha1": "4cf4898399f7262cef9b1d42ed6b1f767e4dd02a",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-failure-audit.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-evidence/build-failed/primary-failure-audit.json",
+      "bytes": 9777,
+      "sha256": "4787b946dbbec181e97326387860fd2a1ae3373da85ec448dcdd9ab65ce06733",
+      "gitBlobSha1": "934b479d52a122660140dbe0e5e6f1fb2a8cbbc2",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-failure/primary-job.log",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-evidence/build-failed/primary-job.log",
+      "bytes": 50112,
+      "sha256": "454e7cd10e8a23783790e6bf833c9e448a83eb0fec672247c1dde9305e396fd1",
+      "gitBlobSha1": "3d2a79e1afa334222fac2ec2f41740dd1ed2ad07",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-preparation-record.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-hosted/preparation-record.json",
+      "bytes": 4946,
+      "sha256": "444a0d18c8482db7664352fee034a69ddf3e47e1388547ccdf394360eafab53a",
+      "gitBlobSha1": "549409f3482d5c72bd55e70876802d69ed9cb622",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/original/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 9228,
+      "sha256": "1e9fbf674dfeed08c9e6f0bd335156b9fc1b54af61c43c4c9361259759e1431f",
+      "gitBlobSha1": "7be75e1ab4dc20bb089dae463478687f4fc3e02d",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/original-qualification/term-bank-row-suffix-proof-fixtures.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/original/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6179,
+      "sha256": "c9e6e8caca15fd0c3812245232f069f6266f5440dc3a38b2a9cce57d7b36f510",
+      "gitBlobSha1": "e2d82bb52863b8cf817c46f3057b8c0c7405925b",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/owner-correction-receipt.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/reports/correction-receipt.json",
+      "bytes": 5486,
+      "sha256": "cab5e0ae45e7152fa89655fcb26cbf1054446a93564786cff206a08957f58a20",
+      "gitBlobSha1": "35fc50e9959b858e713298118b1ca124d2df9161",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-corrected-test-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/pipeline-corrected-test-review.json",
+      "bytes": 2782,
+      "sha256": "639dc4ee69ecc28e1714c21af7deb1cb0a44056cf8ac54848b8f3ca5d4577ef5",
+      "gitBlobSha1": "df7430fd682eca80f788b80f5da59d797c6d7ead",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-wide-sequence-contract-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer/pipeline-wide-sequence-contract-review.json",
+      "bytes": 8485,
+      "sha256": "da5897e642a8c5d549e4c466926fb718035f25a9c492e680f29fdb706c846b63",
+      "gitBlobSha1": "ede40301850102f6c758b0da8dc900e5608d139a",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/pipeline-workflow-delta-review.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/pipeline-workflow-delta-review.json",
+      "bytes": 1058,
+      "sha256": "d8c805972a654636216c598322873a1095982f08f108f990f48eaa2f10765058",
+      "gitBlobSha1": "ec3736bf11cec43295c0392f2b3adc46b3c53b8b",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/qualification-contract-correction.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/qualification-contract-correction.patch",
+      "bytes": 4809,
+      "sha256": "3afd3d7928de309fbc49ab3fbfb7fa06c4295b543fb083f5e8b52d6137eb6813",
+      "gitBlobSha1": "aea30d5969cf7bd03614449c1232d2b3f0d2de47",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/workflow-preparation.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/workflow-preparation.json",
+      "bytes": 1300,
+      "sha256": "86875e8892adea5624be3c1f1e8ccea8396d3b8ec301eb18665a483401091aec",
+      "gitBlobSha1": "172f7af00cdac85cfacd6444017cf4e77c4e1c6e",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/corrections/wide-sequence-optional-index/workflow.patch",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/workflow.patch",
+      "bytes": 402,
+      "sha256": "fcaf1815fad5ec7b08f2f260727ebc0d036d59dcb668bfe6999d851166c63337",
+      "gitBlobSha1": "978f47bf5a94756bf813d97160f9c88b2f0fbb05",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/pipeline-core-protocol-review-v3.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/pipeline-core-protocol-review-v3.json",
+      "bytes": 7461,
+      "sha256": "3b59d68c0f103c33c78921c3eefaf80b7f560d27d35db8e421ad3cfb8c925373",
+      "gitBlobSha1": "9b912ecb3071ca8f183ff5d6e4a3c633595c5b0c",
+      "status": "added",
+      "previousGitBlobSha1": null
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/preparation-record.json",
+      "bytes": 1711,
+      "sha256": "6e31833c15d195880def494f1a3f271e1da4502d0cb182b7e9b229872379384b",
+      "gitBlobSha1": "5736f8e04b61801db99efc81019901beb8340c7e",
+      "status": "modified",
+      "previousGitBlobSha1": "549409f3482d5c72bd55e70876802d69ed9cb622"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/test/term-bank-row-suffix-proof-consumer.test.js",
+      "bytes": 10092,
+      "sha256": "a0555e2722459d2d1c9e1014fc39f6538d023ac8cd112b1c30eda8b3414c1732",
+      "gitBlobSha1": "be7549df55765ebaa6ae11e5d01fae1c93db822c",
+      "status": "modified",
+      "previousGitBlobSha1": "7be75e1ab4dc20bb089dae463478687f4fc3e02d"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-regression-correction/test/term-bank-row-suffix-proof-fixtures.js",
+      "bytes": 6382,
+      "sha256": "a49494534a0a3401e0e5ab80c876f08338ab9f2b3f822ab80a45b2b5a3a8cff4",
+      "gitBlobSha1": "ba12246112f0ede0bf52829821d6b0e40ca3e3ab",
+      "status": "modified",
+      "previousGitBlobSha1": "e2d82bb52863b8cf817c46f3057b8c0c7405925b"
+    },
+    {
+      "path": "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml",
+      "sourcePath": "/workspace/scratch/c563d487c718/experiments/numeric-suffix-proof-consumer-corrected/workflow.yml",
+      "bytes": 5005,
+      "sha256": "c05a4a1fd816ad3074d9fc7a05a989dea7d44dd1852b9fea2b454137c5dc35f8",
+      "gitBlobSha1": "73daac9d97a60e3c3d680647d44f27ab50566af1",
+      "status": "modified",
+      "previousGitBlobSha1": "e5e828da1fa55774502727b7f3470371b70824d2"
+    }
+  ],
+  "fileCount": 26,
+  "totalBytes": 173128,
+  "modifiedPaths": [
+    ".github/workflows/import-suffix-proof-component-c563d487.yml",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/binding.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/preparation-record.json",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-consumer.test.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/qualification/term-bank-row-suffix-proof-fixtures.js",
+    "dev/perf/numeric-suffix-proof-consumer-c563d487/workflow.yml"
+  ],
+  "addedFiles": 20,
+  "productTreeChanged": false,
+  "acquisitionRuntimeChanged": false,
+  "newMeasuredObservations": 0,
+  "plannedMeasuredObservations": 48
+}

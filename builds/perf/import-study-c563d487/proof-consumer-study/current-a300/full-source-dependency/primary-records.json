@@ -1,0 +1,303 @@
+[
+  {
+    "line": 211,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "git",
+        "worktree",
+        "add",
+        "--detach",
+        "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+        "61ac55c50d9ade7b90dbeb9299de18e094e25044"
+      ],
+      "cwd": "/home/runner/work/manabitan/manabitan",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864820.9519997,
+      "label": "create-candidate",
+      "logSha256": "85fa4610a4bdd51d741e4eafd39865a7624786cd7550218cb89d92740fdd5239",
+      "retried": false,
+      "startedEpoch": 1795864820.4874947
+    }
+  },
+  {
+    "line": 212,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864825.0775788,
+      "label": "dependencies",
+      "logSha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a",
+      "retried": false,
+      "startedEpoch": 1795864820.952241
+    }
+  },
+  {
+    "line": 213,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "build:libs"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864825.4424908,
+      "label": "build-libraries",
+      "logSha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c",
+      "retried": false,
+      "startedEpoch": 1795864825.0778174
+    }
+  },
+  {
+    "line": 214,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "license-report:html"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864825.7571323,
+      "label": "license-page",
+      "logSha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd",
+      "retried": false,
+      "startedEpoch": 1795864825.4427314
+    }
+  },
+  {
+    "line": 215,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "build:dictionary-wasm",
+        "--",
+        "--check"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864829.1763697,
+      "label": "reproduce-native",
+      "logSha256": "15eb2180bf0d2314162895555b06f101cab58581d3daba4104a61089861ecbd5",
+      "retried": false,
+      "startedEpoch": 1795864825.7574177
+    }
+  },
+  {
+    "line": 216,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npx",
+        "eslint",
+        "test/term-bank-row-suffix-proof-consumer.test.js",
+        "test/term-bank-row-suffix-proof-fixtures.js",
+        "test/term-bank-row-suffix-reuse.test.js",
+        "test/term-bank-row-suffix-token-end-fixtures.js",
+        "test/term-bank-row-suffix-token-ends.test.js"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864831.6992466,
+      "label": "scoped-lint",
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "retried": false,
+      "startedEpoch": 1795864829.1766253
+    }
+  },
+  {
+    "line": 217,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "test:ts:main"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864838.9525802,
+      "label": "strict-main-types",
+      "logSha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d",
+      "retried": false,
+      "startedEpoch": 1795864831.6995118
+    }
+  },
+  {
+    "line": 218,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "test:ts:test"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795864855.2219508,
+      "label": "strict-test-types",
+      "logSha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c",
+      "retried": false,
+      "startedEpoch": 1795864838.9528463
+    }
+  },
+  {
+    "line": 219,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865024.3608947,
+      "label": "complete-unit-suite",
+      "logSha256": "bdc13f7db26e17be21730918a1080bf2f6a68c573e26c975b78e7201e9f9eef5",
+      "retried": false,
+      "startedEpoch": 1795864855.2222302
+    }
+  },
+  {
+    "line": 220,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "test:unit:options",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865024.8764496,
+      "label": "options-unit-suite",
+      "logSha256": "d8606ba45c4a379145a6ffb44da2f61b5cfe5b56d3b442029e16d2e3c7ab1473",
+      "retried": false,
+      "startedEpoch": 1795865024.3616939
+    }
+  },
+  {
+    "line": 221,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_COMMAND_RECEIPT",
+    "value": {
+      "command": [
+        "npm",
+        "run",
+        "test:build"
+      ],
+      "cwd": "/home/runner/work/manabitan/suffix-proof-982-correctness-candidate",
+      "exception": null,
+      "exitCode": 0,
+      "finishedEpoch": 1795865025.2416928,
+      "label": "all-dry-build-targets",
+      "logSha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda",
+      "retried": false,
+      "startedEpoch": 1795865024.8767242
+    }
+  },
+  {
+    "line": 222,
+    "tag": "MANABITAN_FRESH_CORRECTNESS_RESULT",
+    "value": {
+      "allElevenCommandsPassed": true,
+      "baseline": {
+        "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "parents": [
+          "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+          "a7e39ddfdc4d0c6761e31f329b93e2e6cc93687a"
+        ],
+        "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+      },
+      "benchmarkExecuted": false,
+      "candidate": {
+        "commit": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+        "parents": [
+          "a300da36d00df8e353c5679b1528b50a1299b75f"
+        ],
+        "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+      },
+      "complete": true,
+      "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "dryBuildTargets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "focusedCaseCounts": {
+        "test/term-bank-row-suffix-proof-consumer.test.js": 17,
+        "test/term-bank-row-suffix-reuse.test.js": 32,
+        "test/term-bank-row-suffix-token-ends.test.js": 9
+      },
+      "freshCorrectnessProofSha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+      "nativeCheck": {
+        "mode": "check",
+        "targets": [
+          {
+            "name": "term-content-canonical-scan-v1.wasm",
+            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+          },
+          {
+            "name": "term-bank-parser.wasm",
+            "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+          }
+        ],
+        "toolchain": {
+          "compilerVersion": "21.1.8",
+          "linkerVersion": "21.1.8"
+        }
+      },
+      "newTestsExecuted": false,
+      "optionsPassed": 32,
+      "originalCorrectness": {
+        "artifactBytes": 146783,
+        "artifactGitBlobSha1": "b9123d6e64bfd0f7faa3abb3aabdc693ed7c0577",
+        "artifactId": 15261456718,
+        "artifactSha256": "3d17262def25c405f1add4f4923694059479bbae83af4e9a93960985a4ba48a7",
+        "jobId": 140961651044,
+        "runId": 46139360578,
+        "toolingCommit": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+        "toolingTree": "c83cc5aa64eccb4637c438e7d3c74544c2e73a95"
+      },
+      "requiredExactHeadRepositoryChecksRemainRequiredBeforeMerge": true,
+      "sameFreshExactHead": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+      "sameFreshExactTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+      "scope": "The exact current-a300 product passed fresh correctness once in the prerequisite run; this dependency verifies all original bytes and successful receipts.",
+      "sourceBindingSha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+      "unitCounts": {
+        "files": 701,
+        "passed": 15921,
+        "skipped": 47
+      },
+      "workflowHead": "e8f2ccf9738839a901703890fb0061bb5eeae743"
+    }
+  }
+]

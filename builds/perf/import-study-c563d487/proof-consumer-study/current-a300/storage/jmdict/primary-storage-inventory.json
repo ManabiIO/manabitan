@@ -1,0 +1,777 @@
+{
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidateObserved": false,
+  "dictionary": "jmdict",
+  "files": {
+    "markers.jsonl": "2dc0161465a5e7d4862b591ba91b93376a048fa2d01e20987553d077c7dea55f",
+    "memory.json": "2e476d7cd3064d5b881f07baeff763ec9fdbb9dd64374269d867398ee7972980",
+    "run-1.json": "57fe4b5faf269b483dfe70366ece041a92fa99eafd33a0bdaeede89a5771bb1e",
+    "summary.json": "9a5770f442743351ca90c0b0d84e7f0e0c3f4cf58cac0fe564804cb6fb77a232"
+  },
+  "fullQualificationLaunched": false,
+  "manualStructuralReviewRequired": true,
+  "prospectiveFullStorageBound": null,
+  "reportStatus": "success",
+  "summaryGitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "summarySource": {
+    "dirty": true,
+    "gitSha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "sha256": {
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "df98e1a0ea8f1cbb445a4b1c2b1718e51fa63a8cb3d03f79755b997d591cbfb3",
+      "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "ext/js/pages/settings/dictionary-import-controller.js": "2b37a4abe82e5e99a1b016313ab847b00488bbc104780bd8778dcda80efdb999",
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "validation": {
+    "contentReadable": true,
+    "lookup": {
+      "observations": [
+        {
+          "elapsedMs": 12.900000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 0,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 12.89999999999418,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 0,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 23.69999999999709,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 0,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 5.80000000000291,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 0,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 3.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 0,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 7.400000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 0,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 2.599999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 0,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 5.900000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 0,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 15.30000000000291,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 0,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 18.30000000000291,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 0,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 15.60000000000582,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 0,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 9.700000000011642,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 0,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        },
+        {
+          "elapsedMs": 3.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 1,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 2.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 1,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 2.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 1,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 3,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 1,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 1,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 4.400000000008731,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 1,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 3,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 1,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 3.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 1,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 1,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 1.3000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 1,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 1.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 1,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 1,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 2,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 2,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 2,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 2,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 2,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 2,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 2,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 2.1000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 2,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 1.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 2,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 2,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 2,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 2,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 3,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 1.8999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 3,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 3,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 3,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 3,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 2.2999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 3,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 3,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 3,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 3,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 3,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 3,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 3,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 4,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 4,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 4,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 4,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 4,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 4,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 4,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 4,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 1.5999999999912689,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 4,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 1.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 4,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 2.099999999991269,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 4,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 4,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 1,
+          "pass": 5,
+          "results": 1,
+          "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c",
+          "term": "ヽ"
+        },
+        {
+          "elapsedMs": 2,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 5,
+          "results": 1,
+          "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f",
+          "term": "タカリ"
+        },
+        {
+          "elapsedMs": 1.7999999999883585,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 5,
+          "results": 1,
+          "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08",
+          "term": "アケイシャ"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 5,
+          "results": 1,
+          "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f",
+          "term": "エープリル・フール"
+        },
+        {
+          "elapsedMs": 1.4000000000087311,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 5,
+          "results": 1,
+          "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d",
+          "term": "理にかなう"
+        },
+        {
+          "elapsedMs": 1.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 5,
+          "results": 1,
+          "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94",
+          "term": "インターロック回路"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 5,
+          "results": 1,
+          "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86",
+          "term": "緊急電話"
+        },
+        {
+          "elapsedMs": 1.8000000000029104,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 5,
+          "pass": 5,
+          "results": 1,
+          "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c",
+          "term": "若しもの事"
+        },
+        {
+          "elapsedMs": 1.3999999999941792,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 4,
+          "pass": 5,
+          "results": 1,
+          "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18",
+          "term": "タワレコ"
+        },
+        {
+          "elapsedMs": 1.5,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 6,
+          "pass": 5,
+          "results": 1,
+          "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef",
+          "term": "全国信連協会"
+        },
+        {
+          "elapsedMs": 1.6000000000058208,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 9,
+          "pass": 5,
+          "results": 1,
+          "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711",
+          "term": "ニルスのふしぎな旅"
+        },
+        {
+          "elapsedMs": 1.6999999999970896,
+          "hasExactHeadwordMatch": true,
+          "originalTextLength": 3,
+          "pass": 5,
+          "results": 1,
+          "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf",
+          "term": "アテン"
+        }
+      ],
+      "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing"
+    },
+    "media": {
+      "bytes": 0,
+      "files": 0,
+      "mode": "sample",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "totalBytes": 0,
+      "totalFiles": 0
+    },
+    "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+    "probeCount": 12,
+    "probeTerms": [
+      "ヽ",
+      "タカリ",
+      "アケイシャ",
+      "エープリル・フール",
+      "理にかなう",
+      "インターロック回路",
+      "緊急電話",
+      "若しもの事",
+      "タワレコ",
+      "全国信連協会",
+      "ニルスのふしぎな旅",
+      "アテン"
+    ],
+    "restart": {
+      "contentReadable": true,
+      "mediaFiles": 0,
+      "probeCount": 12,
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "title": "JMdict [2026-11-22]"
+    },
+    "revision": "JMdict.2026-11-22",
+    "storage": {
+      "bytes": 43684317,
+      "files": [
+        {
+          "bytes": 19566680,
+          "path": "manabitan-term-content.bin"
+        },
+        {
+          "bytes": 45,
+          "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr"
+        },
+        {
+          "bytes": 23748952,
+          "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/0gi34vqxdp2"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/7wd4d2wyb6"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/ctpaxbc9l0d"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/erv9sd6hw5h"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/hmlxj8p902d"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/jbjz0hun4w"
+        },
+        {
+          "bytes": 4096,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/q9k5380eoxi"
+        },
+        {
+          "bytes": 339968,
+          "path": "manabitan/sqlite-sahpool-v1/.opaque/y8gsbikuqgm"
+        }
+      ],
+      "kind": "OPFS logical file sizes after restart and verification"
+    },
+    "termRows": 528299,
+    "title": "JMdict [2026-11-22]"
+  }
+}

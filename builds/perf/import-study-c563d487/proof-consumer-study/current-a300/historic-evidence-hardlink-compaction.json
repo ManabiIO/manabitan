@@ -1,0 +1,1051 @@
+{
+  "kind": "historic-tracked-evidence-exact-hardlink-compaction",
+  "recordedAtUtc": "2026-11-28T11:45:13.504100+00:00",
+  "scope": "Only byte-identical historic builds/perf regular files in two inactive worktrees, retaining every path and byte. Active source files and worktree diffs untouched.",
+  "files": [
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full-evidence-index.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full-evidence-index.json",
+      "bytes": 322455,
+      "sha256": "e1588a6210cd9ebcf007150569bbb9199873a7b768ba6043e0dafe2bf6ff4b72"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/evidence.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/evidence.json",
+      "bytes": 162644,
+      "sha256": "8d3535c9c815f273aceb8752b01368fcc05106f67c8701b19b5a0d945734d458"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/index.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/index.json",
+      "bytes": 213021,
+      "sha256": "05c7e4e1c4d0cdc6117f5630694cc89ea1df9321be961e951d84e98d58f74dd9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jitendex-0.tar.gz",
+      "bytes": 887192,
+      "sha256": "23bc92dad326cc40127b1aa4569968b00d7734296e45a164325114129b81a5c1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jmdict-0.tar.gz",
+      "bytes": 875750,
+      "sha256": "c8cb7aeb979a0c59497005d54a3a5559e1cd44386521846360b756c2d6120c30"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/integer-fields-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-jmdict-0.tar.gz",
+      "bytes": 883972,
+      "sha256": "1a2344c8db6484b73c5ece14e57e988b90f89a780b3477b19f1f5cf23790de28"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-vndb-0.tar.gz",
+      "bytes": 902517,
+      "sha256": "6189933f0bd6df3be62fbcdcd45e3621ab45762f3ad1d840c74baa735aa6aaaa"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jmdict-0.tar.gz",
+      "bytes": 874445,
+      "sha256": "f7c2c30222dde39a8f2bb677da283171d4cfebd8e8b1475610737ca5d822f828"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/integer-fields-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-vndb-0.tar.gz",
+      "bytes": 908929,
+      "sha256": "cdf307347729ab9066576344570190c1a7686fc908d8689e3ea87558f3d01796"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/integer-fields-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-jitendex-0.tar.gz",
+      "bytes": 894039,
+      "sha256": "9e3b284ab82cbb55cfd8fe278dd63409f41b8e8c07aa9528f17019d4763c7c4f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jitendex-0.tar.gz",
+      "bytes": 885567,
+      "sha256": "bdbb81ea260088d7b5eaa2c6bbc73360432e3ebdd52475f1b87c2143ccd463b8"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-screen-20261125-ef009/full/single-image-projection-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-vndb-0.tar.gz",
+      "bytes": 901279,
+      "sha256": "1e283408b9c0b3f31c93e889220b14f8aba3fa1d5e5251518b22925e9c791460"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-2.tar.gz",
+      "bytes": 737921,
+      "sha256": "516552e529f95ea1e8681d200225b41751d9fbc3756ccf6f0c72af9acaf37fb3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-1.tar.gz",
+      "bytes": 601293,
+      "sha256": "fbe66937418c4344857ebbe30a7a4db0d20f220c6be86316790fd2a77f0812f0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-1.tar.gz",
+      "bytes": 779774,
+      "sha256": "4dc212c65a781ccc391b2de0b0502988049322f8c541a5f05a20fa8d3a4dcb31"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-2.tar.gz",
+      "bytes": 656264,
+      "sha256": "fb209a54869dc815db0c1ee408c1b3062fb8009aefd60d66866c4ac03dcc2474"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-2.tar.gz",
+      "bytes": 687250,
+      "sha256": "7bf7f4670b1695cc55c3d5abc81a723d5d762398c03450cbe8c707e013718ba9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-1.tar.gz",
+      "bytes": 620125,
+      "sha256": "8f5c98fc1648831db9007edfce8df564eba5ef0e5c76914a9ebbc315d79bd8c0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-oracle.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-oracle.json",
+      "bytes": 578308,
+      "sha256": "73cd4cdd23b623ee08d56e5f4f9357134814a3737a79f48f7e4724467fddd06c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-counts.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-counts.json",
+      "bytes": 545524,
+      "sha256": "ff28d3b6d13262b2067515702beb4bbafae0080ca54c55f5cab5b6e9b4d133c5"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-oracle.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-oracle.json",
+      "bytes": 544665,
+      "sha256": "3ce83e9e6d8b5e66bd114a695787c116c3cb3c2752eceaf819c8f9953c6f69b3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-initial-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-initial-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback.json",
+      "bytes": 122592,
+      "sha256": "bfb31b9ec5bd832f27c2957e90581e08f9adf4011a44e6f61b01ea55cdd0b281"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback.json",
+      "bytes": 122870,
+      "sha256": "73297dd6290b7e888775e25c100735b580f16cb73a81b3c0121fd14702ee2fab"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen.json",
+      "bytes": 122871,
+      "sha256": "d6f330fd3b07e43565a18df2936eca55dca04b3a9a16fe0057034526de067374"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback.json",
+      "bytes": 122476,
+      "sha256": "4d2c339d4635206c9b3b2f27be0cc1c7d16e1eb38f2ff02feeca0ae1cb83b44f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen.json",
+      "bytes": 122528,
+      "sha256": "656bc9ec3c0775b655f4d27c3daf4a4ff6dcd5e8d97d1aa3ba831863c1b0066f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen.json",
+      "bytes": 122593,
+      "sha256": "62f9b22fcc714fdba55ff21cef093258e59d38356911ca004e0bf32c720573ae"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback.json",
+      "bytes": 122527,
+      "sha256": "efae378a2a031e1d015b8711add040f5f4f58e0c58003114b07312ce71ec9bb1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen.json",
+      "bytes": 122477,
+      "sha256": "df810f1f58ae530478201e9dc5b6fdbaf59168fc9a7f6f4b1718a3b50eb6f800"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e/diagnostic/summary.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e/diagnostic/summary.json",
+      "bytes": 115179,
+      "sha256": "da8a6c1ddb662806daa0e7184ea1db85b7e07ade3d81bd62130d99615985f548"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.tar.gz",
+      "bytes": 1669135,
+      "sha256": "8119fed32507a66258f9b4b6109b4493c07a1001e2fc33ad45364b5c9c05efc7"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.tar.gz",
+      "bytes": 1676078,
+      "sha256": "aee95d08147dbe0894cd98019e13e486ffa8bfd750ee5bf2d7bef43ef8c50b2c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.tar.gz",
+      "bytes": 731617,
+      "sha256": "8730208951af80c4ce0d85023d042bfa78dbbffa36fcce5b6a59c2309f2ae9eb"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.tar.gz",
+      "bytes": 726660,
+      "sha256": "5edd6f7d662169124a85e0486d44852c885038047aa73226a7102a3a380e9b80"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.tar.gz",
+      "bytes": 509068,
+      "sha256": "3e2a52bb333b3293b0016ea04d61b1f7ee5deb30605d30ede8ce54357c137651"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.tar.gz",
+      "bytes": 945233,
+      "sha256": "726e076d8273b328cb585705bc56cf555c52d29da1f1a74efff68f1aae74c090"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.tar.gz",
+      "bytes": 2360896,
+      "sha256": "097ed05009c8a1c0a46a8f0b5549724d0a350adc71225ee7c2db9e55d3aa270d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.tar.gz",
+      "bytes": 954032,
+      "sha256": "b46ba261a72955726bb46a8b92873db78059cdb6b24a4f590402ef7e97d81842"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.tar.gz",
+      "bytes": 968082,
+      "sha256": "5c2fa801a976ccc3e3b1786766f79d46e6b815e7f7dd5b1c17d656fea116de79"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-vndb-forward-45472377306-1--22caf219471515bb.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-vndb-forward-45472377306-1--22caf219471515bb.tar.gz",
+      "bytes": 989037,
+      "sha256": "b178f57aec8ccde81f6e4209b58c1950a14face184fda19e201b8060947f0d4e"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/activation-corrected-45470204352--0c40bf29632237a2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/activation-corrected-45470204352--0c40bf29632237a2.tar.gz",
+      "bytes": 315091,
+      "sha256": "4850e5ebf0a54b2b3a3f89c23a62bd5fc030e91fa9259ade4806976ca30d6c8d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/activation-failures-45468163108--a171fe3b0c339149.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/activation-failures-45468163108--a171fe3b0c339149.tar.gz",
+      "bytes": 321826,
+      "sha256": "b8b96abe0d3fe9508715ea1fabad110c236ac3d06ae3f613a7b51925a5b0f001"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--1440cd889178f215.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--1440cd889178f215.tar.gz",
+      "bytes": 123033,
+      "sha256": "15c662e1060964b32da3ee1a2ee4d8b0d73f0ed8d8a57d35580b071031a8b4d0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--97d2dced0021c240.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--97d2dced0021c240.tar.gz",
+      "bytes": 142386,
+      "sha256": "98c440fee9af80dd80bee6bb67a1cf4aa30ee9a08eaf1649d6cbfa41574857f7"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--8bbe743a4acc6b09.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--8bbe743a4acc6b09.tar.gz",
+      "bytes": 116250,
+      "sha256": "19e5ecc1b1e6489ecbb9d61d596e18f78fd1703ac1fd3bd6403d1cc13f7e2890"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/supporting/vndb-audit--c49686d7852be538.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/vndb-audit--c49686d7852be538.tar.gz",
+      "bytes": 262640,
+      "sha256": "a281f9fd4042b9aec0358e88f75f4a24c95aeda0111f65c38950004148e07c40"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.tar.gz",
+      "bytes": 868289,
+      "sha256": "adaff77ac8ce03ac1e02d8e36c643b8c57c183f9c046162ce15872365ee0a04f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.tar.gz",
+      "bytes": 712550,
+      "sha256": "f8068617d6636226003af0f5a7b3212575036e55b8c0e7cea16bf687dc79e654"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.tar.gz",
+      "bytes": 815976,
+      "sha256": "e800e1df75e03b0988ca24ab7e5dcce30cf9feacee75bf94637515e006874476"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.tar.gz",
+      "bytes": 681241,
+      "sha256": "63b2d06183c17736d6c42f470cf3dbfa48ebc6d884656185636b93aff8f91aac"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.tar.gz",
+      "bytes": 988361,
+      "sha256": "12f3dd1698c0d819108271f1cba7a94efdd6279aee10502d3be89f872e8c1c68"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.tar.gz",
+      "bytes": 988857,
+      "sha256": "a9cbaafc7d068fad6bbb2808bff0ac762cdce923b614db2935ff96d48c158720"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.tar.gz",
+      "bytes": 1601796,
+      "sha256": "aada3a36c8b9b09041809a80b88467cb01cdfb59cf29719a7784b8a4cb74aa78"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.tar.gz",
+      "bytes": 1583161,
+      "sha256": "81ae7d32dcefc22f97bc3889d49ecb8483415a0d007e604a89a487bd5813e05d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.tar.gz",
+      "bytes": 1596503,
+      "sha256": "17d7f7e887dabd0de1e0e62c5b3f2ce6fd3e2f5c41599985069a578cab11c061"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.tar.gz",
+      "bytes": 1578119,
+      "sha256": "1c5c9047b5b0d8278effab6ee7d3600eccd583ee0c6f899ff21f059d7bbf6429"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.tar.gz",
+      "bytes": 922900,
+      "sha256": "6965b605be71d978733c6d5cba5b53e27137ef3af08db8fcb78a0d36a7fd4381"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.tar.gz",
+      "bytes": 935251,
+      "sha256": "46c4e291fbca28b78f7f3be5e4adce1bc85bbad2b273cba73d3baa5ccd9db868"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.tar.gz",
+      "bytes": 931296,
+      "sha256": "1f9780074ef05b6d362e94b448f59e24585f08616cc77c8ee2906c9d55c0ed05"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.tar.gz",
+      "bytes": 924631,
+      "sha256": "f08e918410a7a543e874262cc7644a71015abb0af0aa7fe1d778d3e0c78b0b63"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.tar.gz",
+      "bytes": 540438,
+      "sha256": "4eebab2d1c0725e036705c5f12a7e97baa72c095ea4b0ccc281a6b99276b58c9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.tar.gz",
+      "bytes": 930717,
+      "sha256": "0d3b9be2f18d6bbec772beb514712059207bf208425f897f759f138264f4e072"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.tar.gz",
+      "bytes": 392255,
+      "sha256": "92a8051fc85d08162b2d1a449bae2cdf01a8e0ca719b9fbd550d289c7cbc4f90"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.tar.gz",
+      "bytes": 924619,
+      "sha256": "b3f62dd98f904349e641a4247344b7488dbd169635fef1d756622692bfd8acff"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.tar.gz",
+      "bytes": 244727,
+      "sha256": "46ae37a85bdfc84d73a975e3dda6a179093bba9ca61f588e7db03e4ecfa8a138"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.json",
+      "bytes": 121774,
+      "sha256": "960f6592f213881831c36784c8b5ab92d3e1d39e073e343f19eac3c16cb3086c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.json",
+      "bytes": 121774,
+      "sha256": "8ed0aa12aa465ffe25b731cb5814d04d90cf4b90cdc60c88a31e8245e8d94b82"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.json",
+      "bytes": 105950,
+      "sha256": "299994cd31f0ccaa992bc2f5746888911973dd7548212d22e305360916d3e8fd"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.json",
+      "bytes": 105938,
+      "sha256": "1cdc7f9d2738d6b31e000b0f983712360d6ac2b0edb8451881bd15d15766b807"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.json",
+      "bytes": 105950,
+      "sha256": "9279a6cc154a144dc8751e34340f348214dff4fa756743d907f1725dcedda37c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.json",
+      "bytes": 105938,
+      "sha256": "fc35414e5fdd50722d70d9f9464bbd602a187529a890f1cc8f34d5df5e2cc620"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/metadata-hosted/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/metadata-hosted/archive-manifest.json",
+      "bytes": 241127,
+      "sha256": "4cf8e742a44a24863882646b353fee12ba9592231e2729dfefca532fc54b5724"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/metadata-hosted/metadata-hosted-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/metadata-hosted/metadata-hosted-20261125-2754.text.tar.gz",
+      "bytes": 7442713,
+      "sha256": "8452048da897cfe77fa9479cd7d699588610edb779e6e39137ea3c09eac61ed3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/media-memory/media-memory-45642179064.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-memory/media-memory-45642179064.text.tar.gz",
+      "bytes": 2912149,
+      "sha256": "cb0e31c84c9b90f41a727e3833fda82547298cf636c2a4814203abff20044a18"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/media-timing/media-timing-45642169759.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-timing/media-timing-45642169759.text.tar.gz",
+      "bytes": 2848626,
+      "sha256": "5e40ca5d689ac40c942cd1767b943ed0f1dfd350704b84321fb82f81ad0580fa"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/media-timing/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-timing/archive-manifest.json",
+      "bytes": 123544,
+      "sha256": "37f862b60b2f36bcc88c2acd1a806092bf2a342d562bf93d9f1ca6fe548093e6"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/crc-hosted/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/crc-hosted/archive-manifest.json",
+      "bytes": 239020,
+      "sha256": "9590dd2aca954d16821692e678bf8298213913d4bd3986ce48c6534a58984995"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/crc-hosted/crc-hosted-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/crc-hosted/crc-hosted-20261125-2754.text.tar.gz",
+      "bytes": 7299991,
+      "sha256": "a68429f3674bc1f19946f5a2adf35acbc351d1812d151fb54c2188284d2c1404"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/publication-receipt/builds/perf/import-20261125-2754/components/component-receipts-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/components/component-receipts-20261125-2754.text.tar.gz",
+      "bytes": 438507,
+      "sha256": "f86217f090ca0dda6e1c7018f992ddcaf1a3e9adf3b6363f889b4c2d4dce8f1a"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full-evidence-index.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full-evidence-index.json",
+      "bytes": 322455,
+      "sha256": "e1588a6210cd9ebcf007150569bbb9199873a7b768ba6043e0dafe2bf6ff4b72"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/evidence.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/evidence.json",
+      "bytes": 162644,
+      "sha256": "8d3535c9c815f273aceb8752b01368fcc05106f67c8701b19b5a0d945734d458"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/index.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/index.json",
+      "bytes": 213021,
+      "sha256": "05c7e4e1c4d0cdc6117f5630694cc89ea1df9321be961e951d84e98d58f74dd9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jitendex-0.tar.gz",
+      "bytes": 887192,
+      "sha256": "23bc92dad326cc40127b1aa4569968b00d7734296e45a164325114129b81a5c1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jmdict-0.tar.gz",
+      "bytes": 875750,
+      "sha256": "c8cb7aeb979a0c59497005d54a3a5559e1cd44386521846360b756c2d6120c30"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/integer-fields-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-jmdict-0.tar.gz",
+      "bytes": 883972,
+      "sha256": "1a2344c8db6484b73c5ece14e57e988b90f89a780b3477b19f1f5cf23790de28"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-vndb-0.tar.gz",
+      "bytes": 902517,
+      "sha256": "6189933f0bd6df3be62fbcdcd45e3621ab45762f3ad1d840c74baa735aa6aaaa"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jmdict-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/structured-metadata-keys-jmdict-0.tar.gz",
+      "bytes": 874445,
+      "sha256": "f7c2c30222dde39a8f2bb677da283171d4cfebd8e8b1475610737ca5d822f828"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/integer-fields-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-vndb-0.tar.gz",
+      "bytes": 908929,
+      "sha256": "cdf307347729ab9066576344570190c1a7686fc908d8689e3ea87558f3d01796"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/integer-fields-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/integer-fields-jitendex-0.tar.gz",
+      "bytes": 894039,
+      "sha256": "9e3b284ab82cbb55cfd8fe278dd63409f41b8e8c07aa9528f17019d4763c7c4f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jitendex-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-jitendex-0.tar.gz",
+      "bytes": 885567,
+      "sha256": "bdbb81ea260088d7b5eaa2c6bbc73360432e3ebdd52475f1b87c2143ccd463b8"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-screen-20261125-ef009/full/single-image-projection-vndb-0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-screen-20261125-ef009/full/single-image-projection-vndb-0.tar.gz",
+      "bytes": 901279,
+      "sha256": "1e283408b9c0b3f31c93e889220b14f8aba3fa1d5e5251518b22925e9c791460"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-2.tar.gz",
+      "bytes": 737921,
+      "sha256": "516552e529f95ea1e8681d200225b41751d9fbc3756ccf6f0c72af9acaf37fb3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-1.tar.gz",
+      "bytes": 601293,
+      "sha256": "fbe66937418c4344857ebbe30a7a4db0d20f220c6be86316790fd2a77f0812f0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/vndb-1.tar.gz",
+      "bytes": 779774,
+      "sha256": "4dc212c65a781ccc391b2de0b0502988049322f8c541a5f05a20fa8d3a4dcb31"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jmdict-2.tar.gz",
+      "bytes": 656264,
+      "sha256": "fb209a54869dc815db0c1ee408c1b3062fb8009aefd60d66866c4ac03dcc2474"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-2.tar.gz",
+      "bytes": 687250,
+      "sha256": "7bf7f4670b1695cc55c3d5abc81a723d5d762398c03450cbe8c707e013718ba9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-1.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-vndb-20261125-ef009/memory/full/jitendex-1.tar.gz",
+      "bytes": 620125,
+      "sha256": "8f5c98fc1648831db9007edfce8df564eba5ef0e5c76914a9ebbc315d79bd8c0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-oracle.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-oracle.json",
+      "bytes": 578308,
+      "sha256": "73cd4cdd23b623ee08d56e5f4f9357134814a3737a79f48f7e4724467fddd06c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-counts.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-counts.json",
+      "bytes": 545524,
+      "sha256": "ff28d3b6d13262b2067515702beb4bbafae0080ca54c55f5cab5b6e9b4d133c5"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-oracle.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-oracle.json",
+      "bytes": 544665,
+      "sha256": "3ce83e9e6d8b5e66bd114a695787c116c3cb3c2752eceaf819c8f9953c6f69b3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-initial-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-initial-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--97d2dced0021c240/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--8bbe743a4acc6b09/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication-plan.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication-plan.json",
+      "bytes": 160483,
+      "sha256": "0c97001a929e00f029d2b7ee25ee24a2f986e10b6b848430ed53bf757163caa1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/session-receipts--1440cd889178f215/evidence-publication.json",
+      "bytes": 163415,
+      "sha256": "562304bef13072f5f3bdc20783d8885c9f996ce6ba32fa92701214702bbf0d88"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback.json",
+      "bytes": 122592,
+      "sha256": "bfb31b9ec5bd832f27c2957e90581e08f9adf4011a44e6f61b01ea55cdd0b281"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback.json",
+      "bytes": 122870,
+      "sha256": "73297dd6290b7e888775e25c100735b580f16cb73a81b3c0121fd14702ee2fab"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen.json",
+      "bytes": 122871,
+      "sha256": "d6f330fd3b07e43565a18df2936eca55dca04b3a9a16fe0057034526de067374"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback.json",
+      "bytes": 122476,
+      "sha256": "4d2c339d4635206c9b3b2f27be0cc1c7d16e1eb38f2ff02feeca0ae1cb83b44f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen.json",
+      "bytes": 122528,
+      "sha256": "656bc9ec3c0775b655f4d27c3daf4a4ff6dcd5e8d97d1aa3ba831863c1b0066f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen.json",
+      "bytes": 122593,
+      "sha256": "62f9b22fcc714fdba55ff21cef093258e59d38356911ca004e0bf32c720573ae"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback.json",
+      "bytes": 122527,
+      "sha256": "efae378a2a031e1d015b8711add040f5f4f58e0c58003114b07312ce71ec9bb1"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen.json",
+      "bytes": 122477,
+      "sha256": "df810f1f58ae530478201e9dc5b6fdbaf59168fc9a7f6f4b1718a3b50eb6f800"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e/diagnostic/summary.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e/diagnostic/summary.json",
+      "bytes": 115179,
+      "sha256": "da8a6c1ddb662806daa0e7184ea1db85b7e07ade3d81bd62130d99615985f548"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.tar.gz",
+      "bytes": 1669135,
+      "sha256": "8119fed32507a66258f9b4b6109b4493c07a1001e2fc33ad45364b5c9c05efc7"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.tar.gz",
+      "bytes": 1676078,
+      "sha256": "aee95d08147dbe0894cd98019e13e486ffa8bfd750ee5bf2d7bef43ef8c50b2c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.tar.gz",
+      "bytes": 731617,
+      "sha256": "8730208951af80c4ce0d85023d042bfa78dbbffa36fcce5b6a59c2309f2ae9eb"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.tar.gz",
+      "bytes": 726660,
+      "sha256": "5edd6f7d662169124a85e0486d44852c885038047aa73226a7102a3a380e9b80"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.tar.gz",
+      "bytes": 509068,
+      "sha256": "3e2a52bb333b3293b0016ea04d61b1f7ee5deb30605d30ede8ce54357c137651"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.tar.gz",
+      "bytes": 945233,
+      "sha256": "726e076d8273b328cb585705bc56cf555c52d29da1f1a74efff68f1aae74c090"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.tar.gz",
+      "bytes": 2360896,
+      "sha256": "097ed05009c8a1c0a46a8f0b5549724d0a350adc71225ee7c2db9e55d3aa270d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.tar.gz",
+      "bytes": 954032,
+      "sha256": "b46ba261a72955726bb46a8b92873db78059cdb6b24a4f590402ef7e97d81842"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.tar.gz",
+      "bytes": 968082,
+      "sha256": "5c2fa801a976ccc3e3b1786766f79d46e6b815e7f7dd5b1c17d656fea116de79"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-vndb-forward-45472377306-1--22caf219471515bb.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-vndb-forward-45472377306-1--22caf219471515bb.tar.gz",
+      "bytes": 989037,
+      "sha256": "b178f57aec8ccde81f6e4209b58c1950a14face184fda19e201b8060947f0d4e"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/activation-corrected-45470204352--0c40bf29632237a2.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/activation-corrected-45470204352--0c40bf29632237a2.tar.gz",
+      "bytes": 315091,
+      "sha256": "4850e5ebf0a54b2b3a3f89c23a62bd5fc030e91fa9259ade4806976ca30d6c8d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/activation-failures-45468163108--a171fe3b0c339149.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/activation-failures-45468163108--a171fe3b0c339149.tar.gz",
+      "bytes": 321826,
+      "sha256": "b8b96abe0d3fe9508715ea1fabad110c236ac3d06ae3f613a7b51925a5b0f001"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--1440cd889178f215.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--1440cd889178f215.tar.gz",
+      "bytes": 123033,
+      "sha256": "15c662e1060964b32da3ee1a2ee4d8b0d73f0ed8d8a57d35580b071031a8b4d0"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--97d2dced0021c240.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--97d2dced0021c240.tar.gz",
+      "bytes": 142386,
+      "sha256": "98c440fee9af80dd80bee6bb67a1cf4aa30ee9a08eaf1649d6cbfa41574857f7"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--8bbe743a4acc6b09.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/session-receipts--8bbe743a4acc6b09.tar.gz",
+      "bytes": 116250,
+      "sha256": "19e5ecc1b1e6489ecbb9d61d596e18f78fd1703ac1fd3bd6403d1cc13f7e2890"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/supporting/vndb-audit--c49686d7852be538.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/supporting/vndb-audit--c49686d7852be538.tar.gz",
+      "bytes": 262640,
+      "sha256": "a281f9fd4042b9aec0358e88f75f4a24c95aeda0111f65c38950004148e07c40"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.tar.gz",
+      "bytes": 868289,
+      "sha256": "adaff77ac8ce03ac1e02d8e36c643b8c57c183f9c046162ce15872365ee0a04f"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.tar.gz",
+      "bytes": 712550,
+      "sha256": "f8068617d6636226003af0f5a7b3212575036e55b8c0e7cea16bf687dc79e654"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.tar.gz",
+      "bytes": 815976,
+      "sha256": "e800e1df75e03b0988ca24ab7e5dcce30cf9feacee75bf94637515e006874476"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.tar.gz",
+      "bytes": 681241,
+      "sha256": "63b2d06183c17736d6c42f470cf3dbfa48ebc6d884656185636b93aff8f91aac"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.tar.gz",
+      "bytes": 988361,
+      "sha256": "12f3dd1698c0d819108271f1cba7a94efdd6279aee10502d3be89f872e8c1c68"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.tar.gz",
+      "bytes": 988857,
+      "sha256": "a9cbaafc7d068fad6bbb2808bff0ac762cdce923b614db2935ff96d48c158720"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.tar.gz",
+      "bytes": 1601796,
+      "sha256": "aada3a36c8b9b09041809a80b88467cb01cdfb59cf29719a7784b8a4cb74aa78"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.tar.gz",
+      "bytes": 1583161,
+      "sha256": "81ae7d32dcefc22f97bc3889d49ecb8483415a0d007e604a89a487bd5813e05d"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.tar.gz",
+      "bytes": 1596503,
+      "sha256": "17d7f7e887dabd0de1e0e62c5b3f2ce6fd3e2f5c41599985069a578cab11c061"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.tar.gz",
+      "bytes": 1578119,
+      "sha256": "1c5c9047b5b0d8278effab6ee7d3600eccd583ee0c6f899ff21f059d7bbf6429"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.tar.gz",
+      "bytes": 922900,
+      "sha256": "6965b605be71d978733c6d5cba5b53e27137ef3af08db8fcb78a0d36a7fd4381"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.tar.gz",
+      "bytes": 935251,
+      "sha256": "46c4e291fbca28b78f7f3be5e4adce1bc85bbad2b273cba73d3baa5ccd9db868"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.tar.gz",
+      "bytes": 931296,
+      "sha256": "1f9780074ef05b6d362e94b448f59e24585f08616cc77c8ee2906c9d55c0ed05"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.tar.gz",
+      "bytes": 924631,
+      "sha256": "f08e918410a7a543e874262cc7644a71015abb0af0aa7fe1d778d3e0c78b0b63"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.tar.gz",
+      "bytes": 540438,
+      "sha256": "4eebab2d1c0725e036705c5f12a7e97baa72c095ea4b0ccc281a6b99276b58c9"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.tar.gz",
+      "bytes": 930717,
+      "sha256": "0d3b9be2f18d6bbec772beb514712059207bf208425f897f759f138264f4e072"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.tar.gz",
+      "bytes": 392255,
+      "sha256": "92a8051fc85d08162b2d1a449bae2cdf01a8e0ca719b9fbd550d289c7cbc4f90"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.tar.gz",
+      "bytes": 924619,
+      "sha256": "b3f62dd98f904349e641a4247344b7488dbd169635fef1d756622692bfd8acff"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.tar.gz",
+      "bytes": 244727,
+      "sha256": "46ae37a85bdfc84d73a975e3dda6a179093bba9ca61f588e7db03e4ecfa8a138"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-reverse-45475087387-1--8d832883908478fa.json",
+      "bytes": 121774,
+      "sha256": "960f6592f213881831c36784c8b5ab92d3e1d39e073e343f19eac3c16cb3086c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/media-qualification/import-media-qualification-storage-v1-vndb-forward-45475087387-1--873b6d407cb5fa81.json",
+      "bytes": 121774,
+      "sha256": "8ed0aa12aa465ffe25b731cb5814d04d90cf4b90cdc60c88a31e8245e8d94b82"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.json",
+      "bytes": 105950,
+      "sha256": "299994cd31f0ccaa992bc2f5746888911973dd7548212d22e305360916d3e8fd"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.json",
+      "bytes": 105938,
+      "sha256": "1cdc7f9d2738d6b31e000b0f983712360d6ac2b0edb8451881bd15d15766b807"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.json",
+      "bytes": 105950,
+      "sha256": "9279a6cc154a144dc8751e34340f348214dff4fa756743d907f1725dcedda37c"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.json",
+      "bytes": 105938,
+      "sha256": "fc35414e5fdd50722d70d9f9464bbd602a187529a890f1cc8f34d5df5e2cc620"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/metadata-hosted/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/metadata-hosted/archive-manifest.json",
+      "bytes": 241127,
+      "sha256": "4cf8e742a44a24863882646b353fee12ba9592231e2729dfefca532fc54b5724"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/metadata-hosted/metadata-hosted-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/metadata-hosted/metadata-hosted-20261125-2754.text.tar.gz",
+      "bytes": 7442713,
+      "sha256": "8452048da897cfe77fa9479cd7d699588610edb779e6e39137ea3c09eac61ed3"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/media-memory/media-memory-45642179064.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-memory/media-memory-45642179064.text.tar.gz",
+      "bytes": 2912149,
+      "sha256": "cb0e31c84c9b90f41a727e3833fda82547298cf636c2a4814203abff20044a18"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/media-timing/media-timing-45642169759.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-timing/media-timing-45642169759.text.tar.gz",
+      "bytes": 2848626,
+      "sha256": "5e40ca5d689ac40c942cd1767b943ed0f1dfd350704b84321fb82f81ad0580fa"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/media-timing/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/media-timing/archive-manifest.json",
+      "bytes": 123544,
+      "sha256": "37f862b60b2f36bcc88c2acd1a806092bf2a342d562bf93d9f1ca6fe548093e6"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/crc-hosted/archive-manifest.json",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/crc-hosted/archive-manifest.json",
+      "bytes": 239020,
+      "sha256": "9590dd2aca954d16821692e678bf8298213913d4bd3986ce48c6534a58984995"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/crc-hosted/crc-hosted-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/crc-hosted/crc-hosted-20261125-2754.text.tar.gz",
+      "bytes": 7299991,
+      "sha256": "a68429f3674bc1f19946f5a2adf35acbc351d1812d151fb54c2188284d2c1404"
+    },
+    {
+      "duplicate": "/workspace/scratch/c563d487c718/row-suffix/builds/perf/import-20261125-2754/components/component-receipts-20261125-2754.text.tar.gz",
+      "retainedExactCopy": "/workspace/scratch/c563d487c718/manabitan/builds/perf/import-20261125-2754/components/component-receipts-20261125-2754.text.tar.gz",
+      "bytes": 438507,
+      "sha256": "f86217f090ca0dda6e1c7018f992ddcaf1a3e9adf3b6363f889b4c2d4dce8f1a"
+    }
+  ],
+  "bytesReclaimable": 139759816,
+  "mutated": true,
+  "completedAtUtc": "2026-11-28T11:45:36.174657+00:00",
+  "allFilesMatchBothGitIndexes": true,
+  "worktreeStatusesUnchanged": true,
+  "beforeAndAfterStatus": {
+    "/workspace/scratch/c563d487c718/manabitan": "",
+    "/workspace/scratch/c563d487c718/publication-receipt": " M ext/js/dictionary/dictionary-database.js\n M test/dictionary-import-publication-cleanup.test.js\n M test/dictionary-import-reopen-recovery.test.js\n?? node_modules\n",
+    "/workspace/scratch/c563d487c718/row-suffix": " M ext/js/dictionary/wasm/term-bank-parser.c\n?? node_modules\n"
+  },
+  "bytesFreed": 139759816,
+  "freeBytes": 187019264
+}

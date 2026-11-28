@@ -1,0 +1,2694 @@
+{
+  "schemaVersion": 1,
+  "kind": "proof-consumer-completed-component-and-current-source-prerequisite-checkpoint",
+  "recordedAtUtc": "2026-11-28T11:47:41.301629+00:00",
+  "reviewer": "pipeline_audit",
+  "evidenceParent": {
+    "commit": "a5f664fcb20debdd30de12ff76656358f45ebbb6",
+    "tree": "5c381af2deb8aab5733e59e0587976ba5e886aac"
+  },
+  "canonical": {
+    "path": "dev/perf/import-experiments-20260914.md",
+    "bytes": 165996,
+    "sha256": "124eb59e5a456553e374ff055b95de42b133063add309d1353bad952ea5b4d1a",
+    "gitBlobSha1": "d5d9e53689fb02107b1cf2884d9e2d3c06afc1aa",
+    "parent": {
+      "bytes": 154941,
+      "sha256": "d988a3322a308ee48b18900cc90c2c9d7d1e565b1785ae5fd4d1bd71ee50339a",
+      "gitBlobSha1": "eea64f826f99e91540cbb7873d7c3921551ff6bf"
+    },
+    "insertedBytes": 11055,
+    "insertionSha256": "69e08130c3057e79d63f1ec6571acb98be1c2893e6694975fc6f8ae275dff369",
+    "insertionOffset": 55,
+    "pureInsertion": true,
+    "previousBodyReconstructedExactly": true
+  },
+  "decisions": {
+    "performancePrQualified": false,
+    "f28VndbComponentSignal": true,
+    "jmdictGainEstablished": false,
+    "nonTargetEquivalenceEstablished": false,
+    "currentA300CorrectnessPass": true,
+    "excludedBaselineStorageContractReviewed": true,
+    "currentFullQualification": "Launched separately; source dependency succeeded and all six jobs in progress at the explicit snapshot. No performance-cell results included."
+  },
+  "component": {
+    "runId": 46136965050,
+    "toolingHead": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+    "toolingTree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+    "sourcePair": {
+      "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+      "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+      "candidateC": "ae886af90a3313c219b59fe7fe25a38705de47c2e2e2763135fcfaf61dbf91cc",
+      "candidateWasm": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554",
+      "candidateManifest": "a53f0ddd532e216ef66c36cfc5c0c9c48d1afc45b4a4b6413ef1cea552494459"
+    },
+    "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "measuredObservations": 48,
+    "excludedDiagnosticChildren": 3,
+    "cloudPrimaryIndex": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/cloud-component-index.json",
+      "bytes": 37606,
+      "sha256": "411bd410cfdc08132b9f66daa184de8b90e0276baded4f39c86173a0097408f4",
+      "gitBlobSha1": "8015d6b17ca4bf1c3f83a0a26cc9412e7f0eefa6"
+    },
+    "additionalCloudReplaySource": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/cloud-component-replay.js",
+      "bytes": 7704,
+      "sha256": "d5d3afc9b8d0f4d1c3df87394a63c5faf67478907fe38d31cb39441a6d142170",
+      "gitBlobSha1": "eb6db5a2f228c8fe0c787b9ac524cdba617a0e7e"
+    },
+    "cells": [
+      {
+        "dictionary": "jmdict",
+        "measuredObservations": 16,
+        "excludedDiagnosticChildren": 1,
+        "rowsPerObservation": 528299,
+        "richOutputDigestSha256": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+        "calculated": {
+          "candidate.elapsedMs": {
+            "pairedChangesPercent": [
+              8.100854124603085,
+              -3.2003912817672675,
+              -0.10722910488224491,
+              2.9489302530471218
+            ],
+            "medianPairedChangePercent": 1.4208505740824384,
+            "equalWorkChangePercent": 1.8503426965908565,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              35.91646999999966,
+              -14.918427999999949,
+              -0.4961209999996754,
+              13.12132700000052
+            ],
+            "medianPairedMilliseconds": 6.312603000000422,
+            "leftValues": [
+              443.3664580000004,
+              466.1438770000002,
+              462.67382399999974,
+              444.95209699999964
+            ],
+            "rightValues": [
+              479.2829280000001,
+              451.22544900000025,
+              462.17770300000007,
+              458.07342400000016
+            ]
+          },
+          "identicalControl.elapsedMs": {
+            "pairedChangesPercent": [
+              -1.2859589138205396,
+              1.9203578428081514,
+              -0.4285225977703533,
+              1.012276882405283
+            ],
+            "medianPairedChangePercent": 0.29187714231746487,
+            "equalWorkChangePercent": 0.3014098270431642,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              -5.770868000000064,
+              8.502820999999358,
+              -1.923600000000306,
+              4.6021159999993415
+            ],
+            "medianPairedMilliseconds": 1.3392579999995178,
+            "leftValues": [
+              448.7599050000001,
+              442.77273800000034,
+              448.8911460000004,
+              454.6301590000003
+            ],
+            "rightValues": [
+              442.98903700000005,
+              451.2755589999997,
+              446.9675460000001,
+              459.2322749999996
+            ]
+          },
+          "candidate.cpuMs": {
+            "pairedChangesPercent": [
+              7.248842112052167,
+              -7.0389219675718095,
+              -4.128858697340698,
+              4.466792710889411
+            ],
+            "medianPairedChangePercent": 0.1689670067743565,
+            "equalWorkChangePercent": -0.12048140680777086,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              35.966000000000236,
+              -38.09000000000003,
+              -22.591999999999985,
+              22.208000000000027
+            ],
+            "medianPairedMilliseconds": -0.19199999999997885,
+            "leftValues": [
+              496.1619999999999,
+              541.134,
+              547.1729999999999,
+              497.18
+            ],
+            "rightValues": [
+              532.1280000000002,
+              503.044,
+              524.5809999999999,
+              519.388
+            ]
+          },
+          "identicalControl.cpuMs": {
+            "pairedChangesPercent": [
+              -4.940655215648871,
+              2.470147274763801,
+              2.434174518736687,
+              0.20356155318239644
+            ],
+            "medianPairedChangePercent": 1.3188680359595417,
+            "equalWorkChangePercent": 0.01004850109043165,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              -25.692000000000007,
+              12.481999999999971,
+              12.364000000000033,
+              1.052000000000021
+            ],
+            "medianPairedMilliseconds": 6.708000000000027,
+            "leftValues": [
+              520.0120000000001,
+              505.3140000000001,
+              507.93399999999997,
+              516.797
+            ],
+            "rightValues": [
+              494.32000000000005,
+              517.796,
+              520.298,
+              517.849
+            ]
+          },
+          "candidate.parseMs": {
+            "pairedChangesPercent": [
+              12.423731550088203,
+              -4.961280793122025,
+              -0.423322351742339,
+              4.194360772799377
+            ],
+            "medianPairedChangePercent": 1.885519210528519,
+            "equalWorkChangePercent": 2.611201386522022,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              36.16732200000001,
+              -15.591093,
+              -1.3128929999995762,
+              12.299621000000343
+            ],
+            "medianPairedMilliseconds": 5.493364000000383,
+            "leftValues": [
+              291.1148059999998,
+              314.25540399999977,
+              310.1402499999997,
+              293.241847
+            ],
+            "rightValues": [
+              327.28212799999983,
+              298.66431099999977,
+              308.8273570000001,
+              305.54146800000035
+            ]
+          },
+          "identicalControl.parseMs": {
+            "pairedChangesPercent": [
+              -5.0686747887496715,
+              -0.9656269229481929,
+              2.488647259815102,
+              2.455035068288791
+            ],
+            "medianPairedChangePercent": 0.7447040726702991,
+            "equalWorkChangePercent": -0.3137441638702998,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              -15.571455999999444,
+              -2.9102820000005067,
+              7.370141999999987,
+              7.335547000000133
+            ],
+            "medianPairedMilliseconds": 2.2126324999998133,
+            "leftValues": [
+              307.209609,
+              301.387827,
+              296.1505279999999,
+              298.7960169999999
+            ],
+            "rightValues": [
+              291.63815300000056,
+              298.4775449999995,
+              303.5206699999999,
+              306.131564
+            ]
+          },
+          "candidate.nativeParseMs": {
+            "pairedChangesPercent": [
+              14.00778210116731,
+              -3.985507246376807,
+              1.454545454545464,
+              4.633204633204624
+            ],
+            "medianPairedChangePercent": 3.043875043875044,
+            "equalWorkChangePercent": 3.842549203373946,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              36,
+              -11,
+              4,
+              12
+            ],
+            "medianPairedMilliseconds": 8,
+            "leftValues": [
+              257,
+              276,
+              275,
+              259
+            ],
+            "rightValues": [
+              293,
+              265,
+              279,
+              271
+            ]
+          },
+          "identicalControl.nativeParseMs": {
+            "pairedChangesPercent": [
+              -4.693140794223827,
+              -2.985074626865669,
+              1.8587360594795488,
+              4.961832061068705
+            ],
+            "medianPairedChangePercent": -0.5631692836930602,
+            "equalWorkChangePercent": -0.27881040892193676,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              -13,
+              -8,
+              5,
+              13
+            ],
+            "medianPairedMilliseconds": -1.5,
+            "leftValues": [
+              277,
+              268,
+              269,
+              262
+            ],
+            "rightValues": [
+              264,
+              260,
+              274,
+              275
+            ]
+          },
+          "candidate.lookupMs": {
+            "pairedChangesPercent": [
+              3.2343977001302093,
+              7.367677353898916,
+              -4.5086974139932785,
+              -3.1470706257312853
+            ],
+            "medianPairedChangePercent": 0.04366353719946203,
+            "equalWorkChangePercent": 0.8116249114759722,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              0.801759999999831,
+              1.6983390000000327,
+              -0.9266209999996136,
+              -0.8096000000002732
+            ],
+            "medianPairedMilliseconds": -0.00392000000022108,
+            "leftValues": [
+              24.788540999999896,
+              23.051213000000416,
+              20.551855999999816,
+              25.725511000000097
+            ],
+            "rightValues": [
+              25.590300999999727,
+              24.74955200000045,
+              19.625235000000202,
+              24.915910999999824
+            ]
+          },
+          "identicalControl.lookupMs": {
+            "pairedChangesPercent": [
+              0.45429966141976585,
+              3.5956119988008517,
+              6.928225104660335,
+              -22.86557889248815
+            ],
+            "medianPairedChangePercent": 2.0249558301103088,
+            "equalWorkChangePercent": -3.9279824131215113,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              0.0945910000002641,
+              0.8909380000004603,
+              1.3688880000004247,
+              -5.942501000000448
+            ],
+            "medianPairedMilliseconds": 0.4927645000003622,
+            "leftValues": [
+              20.821279000000004,
+              24.778479999999718,
+              19.758133999999927,
+              25.988850000000184
+            ],
+            "rightValues": [
+              20.915870000000268,
+              25.669418000000178,
+              21.127022000000352,
+              20.046348999999736
+            ]
+          }
+        },
+        "gate": {
+          "targetPromotionSignal": false,
+          "nonTargetRiskSignal": false,
+          "largestAbsoluteControlChangePercent": 1.9203578428081514
+        },
+        "mechanicalCounts": {
+          "attempts": 0,
+          "boundedRanges": 0,
+          "tailRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "potentialRangeBytes": 0,
+          "eligibleStreakRows": 154409,
+          "numericRejected": 154409,
+          "actualSuffixSuccessRows": 0,
+          "scoreTokenEndScansAvoided": 0,
+          "sequenceTokenEndScansAvoided": 0,
+          "numericCopyRows": 0,
+          "scoreConversionsAvoided": 0,
+          "sequenceConversionsAvoided": 0,
+          "ordinaryContentComparisonsAvoided": 0
+        },
+        "maxWasmHeapBytesByArm": {
+          "A": [
+            63963136,
+            63963136,
+            63963136,
+            63963136
+          ],
+          "B": [
+            63963136,
+            63963136,
+            63963136,
+            63963136
+          ],
+          "C": [
+            63963136,
+            63963136,
+            63963136,
+            63963136
+          ],
+          "D": [
+            63963136,
+            63963136,
+            63963136,
+            63963136
+          ]
+        },
+        "primaryAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/primary-component-audit.json",
+          "bytes": 10988,
+          "sha256": "803b6b97a831b844a3b1050cb7d1cbfbdb840355502e834d4f5217b5d0c53ba6",
+          "gitBlobSha1": "5919557aee2236c22a85588dd273cf43a1baf043"
+        },
+        "originalArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/independent-component-audit.json",
+          "bytes": 29408,
+          "sha256": "7ee11a3f2ba94a897f30a03718b7c6830e85bb0f7a4c56e464f337c0278ae4ea",
+          "gitBlobSha1": "f962d78116f8636594dd9692c3d69505c4f21dc0"
+        },
+        "originalArtifactZip": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/original-artifact.zip",
+          "bytes": 193334,
+          "sha256": "81a30e876da47cb4aa7433741e62fed291468df67f7eb3c9c9ad1e6e18a4d0da",
+          "gitBlobSha1": "2c6c961e4c83fd19f4d4fc42c26c767eee3a6c46"
+        },
+        "interpretation": "VNDB passes only the frozen component promotion screen; JMdict/Jitendex remain inconclusive, including adverse native phase directions. No browser memory or complete-import result transfers."
+      },
+      {
+        "dictionary": "jitendex",
+        "measuredObservations": 16,
+        "excludedDiagnosticChildren": 1,
+        "rowsPerObservation": 436555,
+        "richOutputDigestSha256": "00e4f6116857fc5343b8ea6cc7255cbcda5703ff99ceb07e3d492752bcc69927",
+        "calculated": {
+          "candidate.elapsedMs": {
+            "pairedChangesPercent": [
+              2.490382012856851,
+              -0.9801886796206971,
+              1.538510288847772,
+              -1.8623997237059986
+            ],
+            "medianPairedChangePercent": 0.2791608046135374,
+            "equalWorkChangePercent": 0.31437210229519064,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              25.400596999998015,
+              -9.657145000000583,
+              15.103621000001567,
+              -18.358272000001307
+            ],
+            "medianPairedMilliseconds": 2.7232380000004923,
+            "leftValues": [
+              1019.947818000001,
+              985.2332720000013,
+              981.7042569999985,
+              985.7321050000014
+            ],
+            "rightValues": [
+              1045.348414999999,
+              975.5761270000007,
+              996.8078780000001,
+              967.3738330000001
+            ]
+          },
+          "identicalControl.elapsedMs": {
+            "pairedChangesPercent": [
+              -0.048171411448272305,
+              -2.8985253388020493,
+              0.961212143765322,
+              -0.46528413903547117
+            ],
+            "medianPairedChangePercent": -0.25672777524187174,
+            "equalWorkChangePercent": -0.6349916030213398,
+            "fasterPairs": 3,
+            "pairedMilliseconds": [
+              -0.4759879999992336,
+              -29.481308000001718,
+              9.363570000003165,
+              -4.592273999999634
+            ],
+            "medianPairedMilliseconds": -2.5341309999994337,
+            "leftValues": [
+              988.1130440000002,
+              1017.1140340000015,
+              974.141874999998,
+              986.9827089999999
+            ],
+            "rightValues": [
+              987.6370560000009,
+              987.6327259999998,
+              983.5054450000011,
+              982.3904350000003
+            ]
+          },
+          "candidate.cpuMs": {
+            "pairedChangesPercent": [
+              3.3880201817251487,
+              -0.5344335352691187,
+              1.5431454822233404,
+              -1.7939633177682213
+            ],
+            "medianPairedChangePercent": 0.5043559734771108,
+            "equalWorkChangePercent": 0.6725296350943877,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              36.28800000000001,
+              -5.52599999999984,
+              15.97600000000034,
+              -18.632999999999583
+            ],
+            "medianPairedMilliseconds": 5.22500000000025,
+            "leftValues": [
+              1071.068,
+              1033.992,
+              1035.2879999999998,
+              1038.6499999999999
+            ],
+            "rightValues": [
+              1107.356,
+              1028.4660000000001,
+              1051.2640000000001,
+              1020.0170000000003
+            ]
+          },
+          "identicalControl.cpuMs": {
+            "pairedChangesPercent": [
+              0.04896650844745665,
+              -2.9554183135397705,
+              0.8384096735243984,
+              -0.49436132603575267
+            ],
+            "medianPairedChangePercent": -0.222697408794148,
+            "equalWorkChangePercent": -0.6621690230532717,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              0.5090000000000146,
+              -31.689000000000078,
+              8.631000000000085,
+              -5.15300000000002
+            ],
+            "medianPairedMilliseconds": -2.3220000000000027,
+            "leftValues": [
+              1039.486,
+              1072.234,
+              1029.4489999999998,
+              1042.355
+            ],
+            "rightValues": [
+              1039.9950000000001,
+              1040.5449999999998,
+              1038.08,
+              1037.202
+            ]
+          },
+          "candidate.parseMs": {
+            "pairedChangesPercent": [
+              3.11108160745015,
+              -0.303951942309566,
+              1.8122619984531463,
+              -0.9198136953594616
+            ],
+            "medianPairedChangePercent": 0.7541550280717901,
+            "equalWorkChangePercent": 0.9437408371544942,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              19.401835999999093,
+              -1.8331679999992048,
+              10.788909000002604,
+              -5.509295000000748
+            ],
+            "medianPairedMilliseconds": 4.4778705000017,
+            "leftValues": [
+              623.6363569999999,
+              603.1111319999995,
+              595.3283249999981,
+              598.9577050000007
+            ],
+            "rightValues": [
+              643.038192999999,
+              601.2779640000003,
+              606.1172340000007,
+              593.44841
+            ]
+          },
+          "identicalControl.parseMs": {
+            "pairedChangesPercent": [
+              -0.09668738423195267,
+              -3.340379386143577,
+              1.9696935001422444,
+              -0.7069421410283772
+            ],
+            "medianPairedChangePercent": -0.4018147626301649,
+            "equalWorkChangePercent": -0.5723761575839981,
+            "fasterPairs": 3,
+            "pairedMilliseconds": [
+              -0.5844590000028802,
+              -20.797775000002275,
+              11.763595999998415,
+              -4.32569199999989
+            ],
+            "medianPairedMilliseconds": -2.455075500001385,
+            "leftValues": [
+              604.4832060000012,
+              622.6171520000016,
+              597.2297720000006,
+              611.8876990000008
+            ],
+            "rightValues": [
+              603.8987469999984,
+              601.8193769999993,
+              608.993367999999,
+              607.5620070000009
+            ]
+          },
+          "candidate.nativeParseMs": {
+            "pairedChangesPercent": [
+              3.660565723793674,
+              0.8591065292096189,
+              2.617801047120416,
+              -0.519031141868509
+            ],
+            "medianPairedChangePercent": 1.7384537881650175,
+            "equalWorkChangePercent": 1.6709511568123503,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              22,
+              5,
+              15,
+              -3
+            ],
+            "medianPairedMilliseconds": 10,
+            "leftValues": [
+              601,
+              582,
+              573,
+              578
+            ],
+            "rightValues": [
+              623,
+              587,
+              588,
+              575
+            ]
+          },
+          "identicalControl.nativeParseMs": {
+            "pairedChangesPercent": [
+              0,
+              -3.9735099337748325,
+              1.7182130584192379,
+              -0.5059021922428353
+            ],
+            "medianPairedChangePercent": -0.25295109612141764,
+            "equalWorkChangePercent": -0.7185122569737912,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              0,
+              -24,
+              10,
+              -3
+            ],
+            "medianPairedMilliseconds": -1.5,
+            "leftValues": [
+              587,
+              604,
+              582,
+              593
+            ],
+            "rightValues": [
+              587,
+              580,
+              592,
+              590
+            ]
+          },
+          "candidate.lookupMs": {
+            "pairedChangesPercent": [
+              3.175789902043058,
+              -1.4292568871984934,
+              0.30215036584486654,
+              -0.4389737052917231
+            ],
+            "medianPairedChangePercent": -0.06841166972342827,
+            "equalWorkChangePercent": 0.4154605157803193,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              0.37779600000021674,
+              -0.1673449999998411,
+              0.03542299999980969,
+              -0.050913000000036845
+            ],
+            "medianPairedMilliseconds": -0.007745000000113578,
+            "leftValues": [
+              11.896126999999979,
+              11.708532000000105,
+              11.723633000000063,
+              11.59818899999982
+            ],
+            "rightValues": [
+              12.273923000000195,
+              11.541187000000264,
+              11.759055999999873,
+              11.547275999999783
+            ]
+          },
+          "identicalControl.lookupMs": {
+            "pairedChangesPercent": [
+              1.36196915729061,
+              -2.960800781107975,
+              0.9497839668178187,
+              0.05568272173872568
+            ],
+            "medianPairedChangePercent": 0.5027333442782722,
+            "equalWorkChangePercent": -0.1745078998777183,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              0.15809200000012424,
+              -0.3577269999982491,
+              0.11067899999989095,
+              0.0065990000016427075
+            ],
+            "medianPairedMilliseconds": 0.05863900000076683,
+            "leftValues": [
+              11.607605000000149,
+              12.082102999999279,
+              11.653070999999272,
+              11.85107299999845
+            ],
+            "rightValues": [
+              11.765697000000273,
+              11.72437600000103,
+              11.763749999999163,
+              11.857672000000093
+            ]
+          }
+        },
+        "gate": {
+          "targetPromotionSignal": false,
+          "nonTargetRiskSignal": false,
+          "largestAbsoluteControlChangePercent": 2.8985253388020493
+        },
+        "mechanicalCounts": {
+          "attempts": 0,
+          "boundedRanges": 0,
+          "tailRejected": 0,
+          "fullRejected": 0,
+          "hits": 0,
+          "hitBytes": 0,
+          "potentialRangeBytes": 0,
+          "eligibleStreakRows": 73243,
+          "numericRejected": 73243,
+          "actualSuffixSuccessRows": 0,
+          "scoreTokenEndScansAvoided": 0,
+          "sequenceTokenEndScansAvoided": 0,
+          "numericCopyRows": 0,
+          "scoreConversionsAvoided": 0,
+          "sequenceConversionsAvoided": 0,
+          "ordinaryContentComparisonsAvoided": 0
+        },
+        "maxWasmHeapBytesByArm": {
+          "A": [
+            73531392,
+            73531392,
+            73531392,
+            73531392
+          ],
+          "B": [
+            73531392,
+            73531392,
+            73531392,
+            73531392
+          ],
+          "C": [
+            73531392,
+            73531392,
+            73531392,
+            73531392
+          ],
+          "D": [
+            73531392,
+            73531392,
+            73531392,
+            73531392
+          ]
+        },
+        "primaryAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/primary-component-audit.json",
+          "bytes": 11568,
+          "sha256": "415bdbda67780b2d504ad49821a460de562d49906aa303b222d4d78226ab20be",
+          "gitBlobSha1": "cb830ad7047576e2c80b6e839376e32c0d5b4e8e"
+        },
+        "originalArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/independent-component-audit.json",
+          "bytes": 29444,
+          "sha256": "2d74199f9dec0c46b01949b08b97304bfe0380b6bf28b2320e56d5c5cb510b2f",
+          "gitBlobSha1": "7861282d2153f94f3bff619226091689d5ce49c8"
+        },
+        "originalArtifactZip": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/original-artifact.zip",
+          "bytes": 214255,
+          "sha256": "7dad7f5919e459bed984fd68c2acc83c405b94f615a51eae7b4235cfb504f736",
+          "gitBlobSha1": "3b711fd08ac44fbe9c45f155e5e4a99ee74d2551"
+        },
+        "interpretation": "VNDB passes only the frozen component promotion screen; JMdict/Jitendex remain inconclusive, including adverse native phase directions. No browser memory or complete-import result transfers."
+      },
+      {
+        "dictionary": "vndb",
+        "measuredObservations": 16,
+        "excludedDiagnosticChildren": 1,
+        "rowsPerObservation": 6648310,
+        "richOutputDigestSha256": "5dcd5e0ef85feb32eda261441814f369c31950c96590ebd534b4c7a3f4643694",
+        "calculated": {
+          "candidate.elapsedMs": {
+            "pairedChangesPercent": [
+              -13.575682537511147,
+              -12.496833463252822,
+              -15.309224441321112,
+              -9.326240175833844
+            ],
+            "medianPairedChangePercent": -13.036258000381984,
+            "equalWorkChangePercent": -12.67158405873321,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -396.7574319999967,
+              -391.1598650000042,
+              -478.7095550000013,
+              -288.3458139999875
+            ],
+            "medianPairedMilliseconds": -393.95864850000044,
+            "leftValues": [
+              2922.5597379999936,
+              3130.0718389999947,
+              3126.9353770000052,
+              3091.7691219999806
+            ],
+            "rightValues": [
+              2525.802305999997,
+              2738.9119739999906,
+              2648.225822000004,
+              2803.423307999993
+            ]
+          },
+          "identicalControl.elapsedMs": {
+            "pairedChangesPercent": [
+              -8.873952250017858,
+              -0.06808721837128218,
+              -0.15947546247889743,
+              -0.27095936619235816
+            ],
+            "medianPairedChangePercent": -0.2152174143356278,
+            "equalWorkChangePercent": -2.3825113856796976,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -264.8322470000303,
+              -1.8432770000217715,
+              -4.732378000001518,
+              -8.354369000005136
+            ],
+            "medianPairedMilliseconds": -6.543373500003327,
+            "leftValues": [
+              2984.3776430000225,
+              2707.2291160000104,
+              2967.464666000006,
+              3083.255293000003
+            ],
+            "rightValues": [
+              2719.5453959999923,
+              2705.3858389999887,
+              2962.7322880000047,
+              3074.9009239999978
+            ]
+          },
+          "candidate.cpuMs": {
+            "pairedChangesPercent": [
+              -13.333650023801924,
+              -12.235829280813048,
+              -15.386899801891818,
+              -9.47744514967005
+            ],
+            "medianPairedChangePercent": -12.784739652307486,
+            "equalWorkChangePercent": -12.60413195202773,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -398.57599999999866,
+              -390.6740000000027,
+              -491.1799999999985,
+              -299.71700000000146
+            ],
+            "medianPairedMilliseconds": -394.6250000000007,
+            "leftValues": [
+              2989.2489999999984,
+              3192.869,
+              3192.196,
+              3162.4240000000004
+            ],
+            "rightValues": [
+              2590.673,
+              2802.1949999999974,
+              2701.0160000000014,
+              2862.706999999999
+            ]
+          },
+          "identicalControl.cpuMs": {
+            "pairedChangesPercent": [
+              -8.967806727317429,
+              0.036373559689639734,
+              0.05091196007065424,
+              0.6153415153386854
+            ],
+            "medianPairedChangePercent": 0.043642759880146986,
+            "equalWorkChangePercent": -2.0954506548100937,
+            "fasterPairs": 1,
+            "pairedMilliseconds": [
+              -272.8900000000003,
+              1.0130000000003747,
+              1.5369999999979882,
+              19.2849999999994
+            ],
+            "medianPairedMilliseconds": 1.2749999999991815,
+            "leftValues": [
+              3042.996000000001,
+              2784.99,
+              3018.937000000001,
+              3134.032
+            ],
+            "rightValues": [
+              2770.1060000000007,
+              2786.003,
+              3020.473999999999,
+              3153.3169999999996
+            ]
+          },
+          "candidate.parseMs": {
+            "pairedChangesPercent": [
+              -15.37928504226641,
+              -14.259177938353263,
+              -17.455704216601852,
+              -10.643621040308915
+            ],
+            "medianPairedChangePercent": -14.819231490309836,
+            "equalWorkChangePercent": -14.429595747882196,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -393.2116760000017,
+              -394.05701000000136,
+              -482.6974959999843,
+              -290.27489500000866
+            ],
+            "medianPairedMilliseconds": -393.63434300000154,
+            "leftValues": [
+              2556.7617409999893,
+              2763.5324540000065,
+              2765.2708249999905,
+              2727.219372999997
+            ],
+            "rightValues": [
+              2163.5500649999876,
+              2369.475444000005,
+              2282.573329000006,
+              2436.9444779999885
+            ]
+          },
+          "identicalControl.parseMs": {
+            "pairedChangesPercent": [
+              -10.490508321354175,
+              -0.5135632592392025,
+              -0.06827246502318918,
+              -0.18919793348679548
+            ],
+            "medianPairedChangePercent": -0.351380596362999,
+            "equalWorkChangePercent": -2.862721159766257,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -275.60946800001057,
+              -12.058218000006491,
+              -1.7751989999887883,
+              -5.13641699998243
+            ],
+            "medianPairedMilliseconds": -8.59731749999446,
+            "leftValues": [
+              2627.227009000011,
+              2347.951841000002,
+              2600.16830999999,
+              2714.8377919999866
+            ],
+            "rightValues": [
+              2351.6175410000005,
+              2335.8936229999954,
+              2598.393111000001,
+              2709.701375000004
+            ]
+          },
+          "candidate.nativeParseMs": {
+            "pairedChangesPercent": [
+              -16.80997420464316,
+              -15.061434799841456,
+              -18.96483603318846,
+              -11.842633480529907
+            ],
+            "medianPairedChangePercent": -15.93570450224231,
+            "equalWorkChangePercent": -15.662040320129677,
+            "fasterPairs": 4,
+            "pairedMilliseconds": [
+              -391,
+              -380,
+              -480,
+              -295
+            ],
+            "medianPairedMilliseconds": -385.5,
+            "leftValues": [
+              2326,
+              2523,
+              2531,
+              2491
+            ],
+            "rightValues": [
+              1935,
+              2143,
+              2051,
+              2196
+            ]
+          },
+          "identicalControl.nativeParseMs": {
+            "pairedChangesPercent": [
+              -11.503322259136217,
+              -0.46926325668700253,
+              0.04219409282699704,
+              -0.4832863471606941
+            ],
+            "medianPairedChangePercent": -0.4762748019238483,
+            "equalWorkChangePercent": -3.1729131175468495,
+            "fasterPairs": 3,
+            "pairedMilliseconds": [
+              -277,
+              -10,
+              1,
+              -12
+            ],
+            "medianPairedMilliseconds": -11,
+            "leftValues": [
+              2408,
+              2131,
+              2370,
+              2483
+            ],
+            "rightValues": [
+              2131,
+              2121,
+              2371,
+              2471
+            ]
+          },
+          "candidate.lookupMs": {
+            "pairedChangesPercent": [
+              -1.610608527616464,
+              1.2281057815692442,
+              1.1458307980926286,
+              -0.12087193444870747
+            ],
+            "medianPairedChangePercent": 0.5124794318219605,
+            "equalWorkChangePercent": 0.15863203036927676,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              -1.5878620000175943,
+              1.2107089999963137,
+              1.120957000002818,
+              -0.11928699999953096
+            ],
+            "medianPairedMilliseconds": 0.5008350000016435,
+            "leftValues": [
+              98.58770600000935,
+              98.58344600000964,
+              97.82919099999708,
+              98.68874900000537
+            ],
+            "rightValues": [
+              96.99984399999175,
+              99.79415500000596,
+              98.9501479999999,
+              98.56946200000584
+            ]
+          },
+          "identicalControl.lookupMs": {
+            "pairedChangesPercent": [
+              1.5182537803094975,
+              1.6120662309717204,
+              -0.22199617048839215,
+              -1.1020727817598663
+            ],
+            "medianPairedChangePercent": 0.6481288049105527,
+            "equalWorkChangePercent": 0.4361526342161026,
+            "fasterPairs": 2,
+            "pairedMilliseconds": [
+              1.4596849999961705,
+              1.5621239999991303,
+              -0.21867400001701753,
+              -1.0972840000049473
+            ],
+            "medianPairedMilliseconds": 0.6205054999895765,
+            "leftValues": [
+              96.14235899999676,
+              96.90197400000852,
+              98.50350100001106,
+              99.56547500000215
+            ],
+            "rightValues": [
+              97.60204399999293,
+              98.46409800000765,
+              98.28482699999404,
+              98.4681909999972
+            ]
+          }
+        },
+        "gate": {
+          "targetPromotionSignal": true,
+          "nonTargetRiskSignal": false,
+          "largestAbsoluteControlChangePercent": 8.873952250017858
+        },
+        "mechanicalCounts": {
+          "attempts": 6482124,
+          "boundedRanges": 6482122,
+          "tailRejected": 145754,
+          "fullRejected": 11786,
+          "hits": 6324582,
+          "hitBytes": 3759301929,
+          "potentialRangeBytes": 3851883767,
+          "eligibleStreakRows": 6482124,
+          "numericRejected": 0,
+          "actualSuffixSuccessRows": 6324582,
+          "scoreTokenEndScansAvoided": 6324582,
+          "sequenceTokenEndScansAvoided": 6324582,
+          "numericCopyRows": 6324582,
+          "scoreConversionsAvoided": 6324582,
+          "sequenceConversionsAvoided": 6324582,
+          "ordinaryContentComparisonsAvoided": 6324582
+        },
+        "maxWasmHeapBytesByArm": {
+          "A": [
+            45219840,
+            45219840,
+            45219840,
+            45219840
+          ],
+          "B": [
+            45219840,
+            45219840,
+            45219840,
+            45219840
+          ],
+          "C": [
+            45219840,
+            45219840,
+            45219840,
+            45219840
+          ],
+          "D": [
+            45219840,
+            45219840,
+            45219840,
+            45219840
+          ]
+        },
+        "primaryAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/primary-component-audit.json",
+          "bytes": 11265,
+          "sha256": "61f3bbda4d34e2342d1dc0bbbc18f2e61772fdaacf07d355667c75c6aa5f63a2",
+          "gitBlobSha1": "4b7fd3718ef17182ab4a65d8ba8dde8f2b91520f"
+        },
+        "originalArtifactAudit": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/independent-component-audit.json",
+          "bytes": 29597,
+          "sha256": "ade67deebfbd7e7a699cc5445d03d2c2502075a79039646b051ac0dbe99a36ab",
+          "gitBlobSha1": "665cf70416b095f5c9887742b276514e63f04f91"
+        },
+        "originalArtifactZip": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/original-artifact.zip",
+          "bytes": 281122,
+          "sha256": "6630e77afbb10681aee5faef58bd0b4aad47cd52b94715e93b346041ff18b3f5",
+          "gitBlobSha1": "4ab0def4ad08b139d9a29ccc5c59e23ece913f8c"
+        },
+        "interpretation": "VNDB passes only the frozen component promotion screen; JMdict/Jitendex remain inconclusive, including adverse native phase directions. No browser memory or complete-import result transfers."
+      }
+    ],
+    "controlsRetained": true,
+    "pooledHostsSourcesOrSubtractedControls": false,
+    "failedCohortRerun": false,
+    "scope": "Compressed inflate/CRC/strict native parse/completed lookup component. Fixed7/10/4 bank groups, two excluded warmups/fresh Node22 child, four alternating candidate pairs and four adjacent identical-code pairs per corpus; VNDB explicitly enables native escaped keys.",
+    "fullBrowserOrProcessMemoryClaim": false
+  },
+  "correctnessLineage": {
+    "original": {
+      "runId": 46135694884,
+      "toolingHead": "c9583864b4185470f1e043fd49799a08369b258a",
+      "correctnessPass": false,
+      "componentObservations": 0,
+      "plannedComponentObservations": 48,
+      "successfulPrefixCommands": 15,
+      "failedCommand": "complete-unit-suite",
+      "tests": {
+        "passed": 15224,
+        "failed": 1,
+        "skipped": 47,
+        "filesPassed": 673,
+        "filesFailed": 1,
+        "failure": "New wide-sequence fixture asserted a nonempty optional native-index map; decoded rows had already passed."
+      },
+      "artifactAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-failed-artifact-audit.json",
+        "bytes": 13040,
+        "sha256": "9ac1dc22588add678deb0e7c64548349f0feebf7b91fdb5315e1daf37cd53293",
+        "gitBlobSha1": "5f7d09a3b1e8505c754f4eb81ad8557bbb116ff6"
+      },
+      "artifactZip": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-artifact.zip",
+        "bytes": 143191,
+        "sha256": "83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+        "gitBlobSha1": "7f80ccc0cc2bcf9060ccd6cf174d42fe0d9e64e5"
+      }
+    },
+    "correction": "One wide-sequence fixture explicitly permits zero optional native indexes while checking Float64 value2147483648 and complete enabled/disabled parity; all other index-positive assertions retained. Source/criteria/clocks/inputs/schedule unchanged.",
+    "corrected": {
+      "runId": 46136965050,
+      "jobId": 140954302987,
+      "correctnessPass": true,
+      "originalUnitTotals": [
+        "15225",
+        "47",
+        "15272"
+      ],
+      "focusedCases": 58,
+      "optionsPassed": 32,
+      "dryBuildTargets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "all26OriginalCommandsPass": true,
+      "artifactAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/independent-build-audit.json",
+        "bytes": 20316,
+        "sha256": "f06ee5607c2edc2a16c52466f9da422b163157e311914b604d7b22ebf2ac6a00",
+        "gitBlobSha1": "b9771d95fb6d854a39f40d9e5318f3216f880974"
+      },
+      "primaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/primary-build-audit.json",
+        "bytes": 16870,
+        "sha256": "6c4a78ad65a86374a2a9933be68440f6236750977950acced240e127ae68322a",
+        "gitBlobSha1": "c2bb74f2d9c0b022085fb5197e3d12634555c419"
+      },
+      "artifactZip": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/original-artifact.zip",
+        "bytes": 315161,
+        "sha256": "8f48ef25c5c8a9283981192db8402fadcdbba7cc3a02290b278c3d229470c1ee",
+        "gitBlobSha1": "0da0a6727cdce30b00b1995cfef4fe9aac95f84a"
+      }
+    }
+  },
+  "outageAndRecovery": {
+    "cloudBridge": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/cloud-original-artifact-reconciliation.json",
+      "bytes": 18707,
+      "sha256": "f4bc21fbf178c1e28202f14578d32e0a1ef07ff04d6505e73b2827f3e90d3581",
+      "gitBlobSha1": "d5d2ac37a09e0898483d0955fd03509d9e374796"
+    },
+    "cloudHistoricalFrozenAuditorExecuted": false,
+    "projectionFailureAndCorrectionPreserved": true,
+    "laterFrozenAudit": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/independent-component-audit.json",
+      "bytes": 29597,
+      "sha256": "ade67deebfbd7e7a699cc5445d03d2c2502075a79039646b051ac0dbe99a36ab",
+      "gitBlobSha1": "665cf70416b095f5c9887742b276514e63f04f91"
+    },
+    "laterOriginalFrozenAuditorPass": true,
+    "originalSnapshotsRewritten": false,
+    "wholeOriginalAndDerivedZipDistinct": true,
+    "derivedRecoveryZip": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/recovered-original-evidence.zip",
+      "bytes": 317346,
+      "sha256": "97fe273c32f6b885ffedb924190fca5d3cd5846243fea9f3f17a909f80080ddf",
+      "gitBlobSha1": "4b1b31ddaba9c0a7aca24c39963a73cab1f58843",
+      "storage": "existing-verified-git-blob",
+      "localCopyRequired": false,
+      "proof": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/complete-artifact-and-postprocessing-inventory.json",
+        "bytes": 5228,
+        "sha256": "57dc0c45b0f5d847997d95c2d0c8cbd7451d81c63c43db7c5e7608fdd89a30f9",
+        "gitBlobSha1": "4b69ed4b21b58102eef4416daa73706512d069b9"
+      },
+      "scope": "Exact previously verified derived recovery ZIP; attach existing immutable blob, no download/reconstruction or old-hash reassignment."
+    },
+    "strictBase64TerminalNewlineRestorationFailurePreserved": true,
+    "noMeasurementOrNativeRerun": true
+  },
+  "currentSource": {
+    "baseline": {
+      "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+    },
+    "candidate": {
+      "commit": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+      "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+      "soleParent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+      "files": 8
+    },
+    "productPublication": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/product-publication.json",
+      "bytes": 6078,
+      "sha256": "e83a62ff54034db1b60e79967a5b7288390569a747659ec123ef251f1858f29b",
+      "gitBlobSha1": "63ef1801a3adced50ad6088342fb7108d3d303e0"
+    },
+    "fourteenNativeAndElevenExplicitComponentInputsUnchangedFromF28": true,
+    "currentImporterPerformanceTransferred": false,
+    "publishedSourceInventory": {
+      "commit": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/a300-source-inventory.json",
+      "sha256": "8bb3036aa3916061d4b7fa30339505d591fc2eee80b262fb0d57a9a3ee492c87",
+      "gitBlobSha1": "ead1b75b3ca69ca4caf04ad7297d8395df54b425"
+    },
+    "publishedStorageSourceReview": {
+      "commit": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+      "path": "dev/perf/numeric-suffix-proof-consumer-982-prerequisite-c563d487/storage-compatibility-source-review.json",
+      "sha256": "3f5cfc05dd00c746b3809492f664632120a1e451ed5037fe67ef9c26abd318de",
+      "gitBlobSha1": "8eef0b64df6f6cef378f9edee0824001ab1319ff"
+    },
+    "freshPrerequisite": {
+      "runId": 46139360578,
+      "toolingHead": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+      "correctnessJobId": 140961651044,
+      "allElevenOriginalCommandsPass": true,
+      "correctnessOriginalAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/correctness/independent-original-correctness-audit.json",
+        "bytes": 34284,
+        "sha256": "01df98e4886a6a58d0b197f09fa777b1b29a045f8214b0ce713c5be2935e38ac",
+        "gitBlobSha1": "6c57d15fb504424cbd247caa80282212b753ce88"
+      },
+      "correctnessPrimaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/correctness/primary-correctness-audit.json",
+        "bytes": 18525,
+        "sha256": "1e1d417772464f4039cc0e7129cb774f73ded35019e916cca393295a862ae459",
+        "gitBlobSha1": "257793b078d9f925dc53559637b3cd2df62d4884"
+      },
+      "unit": {
+        "files": 701,
+        "passed": 15921,
+        "skipped": 47,
+        "focusedCases": 58
+      },
+      "options": {
+        "passed": 32
+      },
+      "dryBuildTargets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "storageBaselineObservationsPerCorpus": 1,
+      "candidateObservations": 0,
+      "performanceComparisons": 0,
+      "allDurationsExcluded": true
+    },
+    "storage": {
+      "rawIndependentReview": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/independent-storage-preflight-review.json",
+        "bytes": 34626,
+        "sha256": "da89772449153f29405c9b45c3799d9e79fefa618033ae3a6df0ed67c81eeca5",
+        "gitBlobSha1": "ee68557987f06cd49310b015495530e14213d041"
+      },
+      "complementaryProcessScanReplay": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/independent-storage-replay-index-1.json",
+        "bytes": 1161,
+        "sha256": "92613bd669bd662cc999eefd58761e0518cd7bbb06f76afb0ee2f1a3b398d3bb",
+        "gitBlobSha1": "e68a794454526dfdf7861ddfb87afbc69846b87d"
+      },
+      "rawProcessScans": 318,
+      "memoryObservationsQualified": 3,
+      "cells": [
+        {
+          "dictionary": "jmdict",
+          "jobId": 140962634770,
+          "canonicalStorage": {
+            "kind": "OPFS logical file sizes after restart and verification",
+            "bytes": 43684317,
+            "files": [
+              {
+                "path": "manabitan-term-content.bin",
+                "bytes": 19566680
+              },
+              {
+                "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+                "bytes": 45
+              },
+              {
+                "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+                "bytes": 23748952
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 339968
+              }
+            ]
+          },
+          "activeSahAllocationUnits4096": 83,
+          "rawMemorySamples": 92,
+          "nonSahBytesAndOutputUnchangedFromPrior": true,
+          "activeAndTotalDifferenceBytes": 163840,
+          "allocationUnitsDifference": 40,
+          "archive": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/original-non-package-evidence.zip",
+            "bytes": 283384,
+            "sha256": "dc2cdd0aa49e6397d80440e42d59eaa32a99037d03054089f643bef9f0cbdfae",
+            "gitBlobSha1": "ed6fab4b9ef5197e242460550e97059fb4b03944"
+          },
+          "inventory": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/primary-storage-inventory.json",
+            "bytes": 26778,
+            "sha256": "bf18e595e12b882bc4454fdec408e691f06a74ce703c49e0089d0b6ae6c97732",
+            "gitBlobSha1": "c70ae991d2b72450e2606c22585b17382356ec37"
+          },
+          "sourceAndMemoryAudit": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/independent-storage-source-report-audit-1.json",
+            "bytes": 8343,
+            "sha256": "0e0816635e19d2def94a12669bb222349959a4fb322c5a6cfac011ddd1d30660",
+            "gitBlobSha1": "dd4fe697db20dd44b5d478c25c4f9e0b37245eb2"
+          }
+        },
+        {
+          "dictionary": "jitendex",
+          "jobId": 140962634795,
+          "canonicalStorage": {
+            "kind": "OPFS logical file sizes after restart and verification",
+            "bytes": 67630172,
+            "files": [
+              {
+                "path": "manabitan-term-content.bin",
+                "bytes": 38386795
+              },
+              {
+                "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+                "bytes": 45
+              },
+              {
+                "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+                "bytes": 23590852
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 5623808
+              }
+            ]
+          },
+          "activeSahAllocationUnits4096": 1373,
+          "rawMemorySamples": 85,
+          "nonSahBytesAndOutputUnchangedFromPrior": true,
+          "activeAndTotalDifferenceBytes": 163840,
+          "allocationUnitsDifference": 40,
+          "archive": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/original-non-package-evidence.zip",
+            "bytes": 290433,
+            "sha256": "913fb896be3c78043aa731f5e17fd8f9689270bddbf25f366fa9ed9277be5055",
+            "gitBlobSha1": "73781495a16e6733de56fc31a0005dfca6c6acc4"
+          },
+          "inventory": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/primary-storage-inventory.json",
+            "bytes": 26554,
+            "sha256": "c59f85de67f121c5be769488e7494143711fa7d6364db6ecb9d9a9bf52c1b017",
+            "gitBlobSha1": "9e92609b6280b2bdd9a14366c667c4d66e663e1d"
+          },
+          "sourceAndMemoryAudit": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/independent-storage-source-report-audit-1.json",
+            "bytes": 8377,
+            "sha256": "d93f0c83fab675e0b41b18174263b1aa09a0e86efb8c4599aceb6161c3c77006",
+            "gitBlobSha1": "c246c0855ec6d6b423371a72e0171655bc2d25a1"
+          }
+        },
+        {
+          "dictionary": "vndb",
+          "jobId": 140962634718,
+          "canonicalStorage": {
+            "kind": "OPFS logical file sizes after restart and verification",
+            "bytes": 609340619,
+            "files": [
+              {
+                "path": "manabitan-dictionary-media-v1/{generation}.bin",
+                "bytes": 199563210
+              },
+              {
+                "path": "manabitan-term-content.bin",
+                "bytes": 7533449
+              },
+              {
+                "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+                "bytes": 38
+              },
+              {
+                "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+                "bytes": 399513708
+              },
+              {
+                "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+                "bytes": 26
+              },
+              {
+                "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+                "bytes": 2386124
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 4096
+              },
+              {
+                "path": "manabitan/sqlite-sahpool-v1/.opaque/{opaque}",
+                "bytes": 315392
+              }
+            ]
+          },
+          "activeSahAllocationUnits4096": 77,
+          "rawMemorySamples": 141,
+          "nonSahBytesAndOutputUnchangedFromPrior": true,
+          "activeAndTotalDifferenceBytes": 163840,
+          "allocationUnitsDifference": 40,
+          "archive": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/original-non-package-evidence.zip",
+            "bytes": 342887,
+            "sha256": "872f60b2e061580e85a8e48745de351b4cc54def10776d274a49d53edb178313",
+            "gitBlobSha1": "ed344b0d01571f1947fba7d5729b5f8e3d4659b4"
+          },
+          "inventory": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/primary-storage-inventory.json",
+            "bytes": 27399,
+            "sha256": "73e75be96d916dd54df7a153b869ef3625ba7f352a0383127315d13f14e4cdd3",
+            "gitBlobSha1": "91b868f4da6cc835eb904a09bc934554817dafed"
+          },
+          "sourceAndMemoryAudit": {
+            "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/independent-storage-source-report-audit-1.json",
+            "bytes": 9091,
+            "sha256": "88d984c10368afe19506ef9908c2042544486d745ef1aa194fa63ff8db559f6a",
+            "gitBlobSha1": "86caefe7237e4d718cd26f05bd2b3e6720859b3d"
+          }
+        }
+      ],
+      "rootProspectiveApproval": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/a300-prospective-storage-policy-root-approval.json",
+        "bytes": 2366,
+        "sha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+        "gitBlobSha1": "f14e1cb131bb3c893a06685c559f089dd7b905cc"
+      },
+      "vndbSahAllocationUnits": [
+        77,
+        77
+      ],
+      "allocationUnitBytes": 4096,
+      "physicalSqlitePageAttributionClaim": false,
+      "allOtherExactStorageGatesPreserved": true,
+      "candidateStorageObserved": false
+    },
+    "fullQualification": {
+      "runId": 46141233321,
+      "toolingHead": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+      "toolingTree": "b0fd76d25763d484e057f1306bea913adc55cfd1",
+      "publication": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-publication.json",
+        "bytes": 1727,
+        "sha256": "d45208a29e10ad3c2274835c1c24f533a59ac298deaa1ea55f2eff4fa3ca5d17",
+        "gitBlobSha1": "7cab7b6b39a1cfbd64c4762fffca1b48715e4e6f"
+      },
+      "manifest": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-publication-manifest.json",
+        "bytes": 16274,
+        "sha256": "088ebb3a624104d4902479f3e8725770d56b4ba661e86d3b2c7edad096819b91",
+        "gitBlobSha1": "1e68512e5bfd30b94af60f7603771ff0db314ae9"
+      },
+      "independentSourceReview": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-independent-protocol-review.json",
+        "bytes": 4474,
+        "sha256": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5",
+        "gitBlobSha1": "aacb8be0dbfdc7844a562719ae1fd1b7b23877f9"
+      },
+      "independentFinalIdentityReview": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-independent-final-identity-review.json",
+        "bytes": 2180,
+        "sha256": "3920c17642bc72fba4ca9b141c06302863ef29af91e9ae42611da0dd08c905a3",
+        "gitBlobSha1": "de908a475b27d3308a56c941aecef67ba24dc076"
+      },
+      "binding": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-qualification-binding.json",
+        "bytes": 4887,
+        "sha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+        "gitBlobSha1": "187897af74f8e0ade9d990310106efc04f4395d9"
+      },
+      "plannedObservations": 252,
+      "perJob": {
+        "excludedWarmup": 4,
+        "candidate": 24,
+        "identicalBaselineControl": 8,
+        "exhaustiveMedia": 2,
+        "separateMemory": 4
+      },
+      "separateJobAssignments": 6,
+      "physicalHostIndependenceEstablished": false,
+      "snapshot": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-launch-job-snapshot.json",
+        "bytes": 22740,
+        "sha256": "5362b6138b7c2b59fdd9ad3c2db6be47743651070e8825b11d514bcf5f8dea91",
+        "gitBlobSha1": "9d93d13c6a33f903f437703ade1c4f001a168d74"
+      },
+      "statusSnapshotUtc": "2026-11-28 11:44:43 UTC",
+      "validationJobId": 140967406330,
+      "validationStatus": "success",
+      "comparisonJobs": [
+        {
+          "id": 140967463694,
+          "name": "vndb (BA)",
+          "status": "in_progress"
+        },
+        {
+          "id": 140967463725,
+          "name": "vndb (AB)",
+          "status": "in_progress"
+        },
+        {
+          "id": 140967463737,
+          "name": "jitendex (BA)",
+          "status": "in_progress"
+        },
+        {
+          "id": 140967463739,
+          "name": "jitendex (AB)",
+          "status": "in_progress"
+        },
+        {
+          "id": 140967463778,
+          "name": "jmdict (BA)",
+          "status": "in_progress"
+        },
+        {
+          "id": 140967463788,
+          "name": "jmdict (AB)",
+          "status": "in_progress"
+        }
+      ],
+      "performanceCellResultsIncluded": 0,
+      "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+      "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+      "memory": {
+        "maxPollGapMs": 250,
+        "minStableFullyReadSamples": 5,
+        "maxPairedMedianGrowthPct": 5,
+        "maxAnyPairedGrowthPct": 10,
+        "scope": "Separate whole-browser process-tree observations, unchanged sampler and memory overlay; included raw scans and markers."
+      },
+      "sourceDependencyPrimaryAudit": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/independent-primary-validation-audit.json",
+        "bytes": 2903,
+        "sha256": "519da1b02a000af25789356ddc8adbeee23f6fc8d17458edfdd40ed94133ec63",
+        "gitBlobSha1": "e439d48e8f58712f0fd30576ffff52ba8277f12b"
+      },
+      "initialRunIdentity": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-initial-run-identity.json",
+        "bytes": 1404,
+        "sha256": "6400c7bd9ddcfdb9df64659f27eb7373a72e01d02857d9be0e33e465e6c68aa5",
+        "gitBlobSha1": "baf17c69f9ac97d41be677e384c41a098bd5f7fd"
+      },
+      "independentAuditorPreparation": {
+        "expected": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/independent-complete-import-expected.json",
+          "bytes": 6838,
+          "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+          "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf"
+        },
+        "rawPublicationBinding": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/publication-binding.json",
+          "bytes": 4147,
+          "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+          "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863"
+        },
+        "finalRawPreparation": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/final-raw-auditor-preparation.json",
+          "bytes": 1462,
+          "sha256": "be8686c09fb6637515c0cac4675e9c1545492c3b2dc02ee51669eee9b9414d28",
+          "gitBlobSha1": "b45bc6bb4a96ef894d495d1735d7d56417f5e9fa"
+        },
+        "history": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history.tar.gz",
+          "bytes": 43674,
+          "sha256": "be9edf6eef90b5df064d4b1794e53b980e24662534b750304c7f890376e8d49c",
+          "gitBlobSha1": "7eaa65ea2a6e0062a9c7e1940301981c1b61075b"
+        },
+        "noPerformanceObservationsProcessedForPreparation": true
+      }
+    }
+  },
+  "preservation": {
+    "existingInitialStagePreserved": true,
+    "existingCanonicalBytesPreserved": true,
+    "scopedRetirementAndHardlinkCompactionReceiptsRetained": true,
+    "allReadOnlyRecoveryAndPostprocessorFailuresRetained": true,
+    "archives": [
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-prerequisite-primary-and-review-history-members.json",
+          "bytes": 13930,
+          "sha256": "f6693049907366773285a5688c00639f896fabca152876d0cffd4512aa3763d7",
+          "gitBlobSha1": "00781bdd625fee3972a0514ce8c92f653b18e556"
+        },
+        "archive": {
+          "bytes": 2088839,
+          "sha256": "d1a97c07c0da0dbf5a46b51db2ee7742dc57c4e60ed086618e3af39228816371",
+          "gitBlobSha1": "1fbdc686da492964ee81e030b1efe2a3d53f7984"
+        },
+        "memberCount": 45
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-source-boundary-history-members.json",
+          "bytes": 2268,
+          "sha256": "c95336d4a107e83559676a9c4588851d54b9af334e1291be01947dc0852fb4b2",
+          "gitBlobSha1": "321f532b4db13f4a01d6ce7d47d57a9ee2ed7d37"
+        },
+        "archive": {
+          "bytes": 222146,
+          "sha256": "50f9f592d579b152c638075f033cab1a2fc916a30e1dac36b0b0bd5dde716a83",
+          "gitBlobSha1": "4df4fd538b6ce075f8283f42687f1d55e55f89d5"
+        },
+        "memberCount": 7
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28-primary-history-members.json",
+          "bytes": 9670,
+          "sha256": "c36287a6928f74fcad62f07eff293a3db895af07bda30cce8578fa6c82abad2b",
+          "gitBlobSha1": "75d913cc1ff56fc8c5aed8cb3701b0d5a4a20813"
+        },
+        "archive": {
+          "bytes": 532925,
+          "sha256": "8f34e8347bddc335efc130e74b11bc123e151e66515399322757a49c1fd1b368",
+          "gitBlobSha1": "4487d50a70b381037ad272d9ce418df443a42344"
+        },
+        "memberCount": 32
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-private-preparation-history-members.json",
+          "bytes": 9904,
+          "sha256": "cd4cb45499685c7a4f9ec3dfe4f4cd25b8fb5850d8a0054079a3b5142ddf6c20",
+          "gitBlobSha1": "8c37e782b264d6a6023ee7aadc9a1fe7d23cbe61"
+        },
+        "archive": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-private-preparation-history.tar.gz",
+          "bytes": 3627,
+          "sha256": "f0a2d6c1824481f2ccb7f61394a0751414b6e0be5789064953c472610885920f"
+        },
+        "memberCount": 25
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-preparation-history-members.json",
+          "bytes": 46530,
+          "sha256": "5b79e20092a39ed654b6267da2699871c1d3490994e78bcc3d781c7076c06458",
+          "gitBlobSha1": "f76e8c0fea9f6bbcdfa65bda83fffe59b43262aa"
+        },
+        "archive": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-preparation-history.tar.gz",
+          "bytes": 394547,
+          "sha256": "97becc43da48607f2f1e9b3ed837a0b1a7b9c92fc9b86ff2e4ba310e49d5ef95"
+        },
+        "memberCount": 72
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud-recovery-history-members.json",
+          "bytes": 4081,
+          "sha256": "3408d7a172de02acfb01449a8d6d0d3eaa7a8d2affdded9621a6f6fbb8c39f8e",
+          "gitBlobSha1": "e679b02d08a453be36ccc94d9bfe42c64b0dc821"
+        },
+        "archive": {
+          "bytes": 30164,
+          "sha256": "a081a3cadafaef1eea6d76855e14a6d176d319afa44414f32e19c898eab8d55d",
+          "gitBlobSha1": "72b70e672224b099ab81a1cd1dd39b193cc0df12"
+        },
+        "memberCount": 12
+      },
+      {
+        "manifest": {
+          "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history-members.json",
+          "bytes": 6478,
+          "sha256": "d53eca0c1a25b7ab989808d160298bf735a4cd236d436258e49de7a12615f645",
+          "gitBlobSha1": "8942c1ae261f149957cb2fba9fa1e14acb7413b2"
+        },
+        "archive": {
+          "bytes": 43674,
+          "sha256": "be9edf6eef90b5df064d4b1794e53b980e24662534b750304c7f890376e8d49c",
+          "gitBlobSha1": "7eaa65ea2a6e0062a9c7e1940301981c1b61075b"
+        },
+        "memberCount": 22
+      }
+    ],
+    "allOriginalRawObservationsRetained": true,
+    "originalRuntimeSourceOrFlagsChangedByCheckpoint": false,
+    "refsUpdatedByCheckpointPreparation": false,
+    "secondHistoricCompactionReceipt": {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/historic-evidence-hardlink-compaction.json",
+      "bytes": 85583,
+      "sha256": "625e290db0eac90d4689291ab8e902a9b96f95b1d6710528bf2511a481ea7331",
+      "gitBlobSha1": "5281e001a4604cb6d5bd4772f7869dee3ca829a3"
+    }
+  },
+  "replay": {
+    "safeScope": "Replay retained evidence into fresh scratch outputs. No browser/compiler/native parser/acquisition is needed for these integrity checks. Review each archived script's source-bound relative paths before invoking.",
+    "component": "Extract source-preparation-history.tar.gz and completed-f28-primary-history.tar.gz into a fresh scratch directory. Use archived numeric-suffix-proof-consumer-audit/audit-component.py with --expected corrected-auditor/expected.json --metadata the archived per-corpus artifact-metadata.json --archive completed-f28/<corpus>/original-artifact.zip --primary its archived primary-job.log --build-audit completed-f28/build/independent-build-audit.json --output a new empty directory --dictionary <corpus>. Keep evidence_core.py beside the auditor.",
+    "correctness": "The archived audit-build.py accepts the same --expected/--metadata/--archive/--primary inputs and a new --output. Original failed correctness remains governed by its separate audit-original-failure.py and immutable failure receipt.",
+    "storage": "Extract a300-prerequisite-primary-and-review-history.tar.gz preserving its experiments-relative paths. The pipeline-storage-review/review-storage.py binds all three exact primary logs and reconstructs their original selected ZIPs in memory; its prior dcfc controls are at the durable previous current-full-results evidence paths. The complementary audit-storage-original.py binds the prior a49f memory helper source. Use fresh output paths; do not overwrite the preserved audits.",
+    "publishedTooling": [
+      {
+        "commit": "c9583864b4185470f1e043fd49799a08369b258a",
+        "scope": "Original immutable failed component tooling"
+      },
+      {
+        "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+        "scope": "Test-contract-only corrected component cohort"
+      },
+      {
+        "commit": "55676ce568881d8f177a4f5b26d6b25781aafb38",
+        "scope": "Original VNDB artifact/log byte recovery only"
+      },
+      {
+        "commit": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+        "scope": "Fresh current-source correctness and excluded baseline storage prerequisite"
+      },
+      {
+        "commit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+        "scope": "Separately frozen full252 comparison; launch only in this checkpoint"
+      }
+    ]
+  },
+  "evidenceFileCount": 107,
+  "evidenceBytes": 6926587,
+  "evidenceFiles": [
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history-members.json",
+      "bytes": 6478,
+      "sha256": "d53eca0c1a25b7ab989808d160298bf735a4cd236d436258e49de7a12615f645",
+      "gitBlobSha1": "8942c1ae261f149957cb2fba9fa1e14acb7413b2",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-full-auditor-preparation-history.tar.gz",
+      "bytes": 43674,
+      "sha256": "be9edf6eef90b5df064d4b1794e53b980e24662534b750304c7f890376e8d49c",
+      "gitBlobSha1": "7eaa65ea2a6e0062a9c7e1940301981c1b61075b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-prerequisite-primary-and-review-history-members.json",
+      "bytes": 13930,
+      "sha256": "f6693049907366773285a5688c00639f896fabca152876d0cffd4512aa3763d7",
+      "gitBlobSha1": "00781bdd625fee3972a0514ce8c92f653b18e556",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-prerequisite-primary-and-review-history.tar.gz",
+      "bytes": 2088839,
+      "sha256": "d1a97c07c0da0dbf5a46b51db2ee7742dc57c4e60ed086618e3af39228816371",
+      "gitBlobSha1": "1fbdc686da492964ee81e030b1efe2a3d53f7984",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-source-boundary-history-members.json",
+      "bytes": 2268,
+      "sha256": "c95336d4a107e83559676a9c4588851d54b9af334e1291be01947dc0852fb4b2",
+      "gitBlobSha1": "321f532b4db13f4a01d6ce7d47d57a9ee2ed7d37",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/a300-source-boundary-history.tar.gz",
+      "bytes": 222146,
+      "sha256": "50f9f592d579b152c638075f033cab1a2fc916a30e1dac36b0b0bd5dde716a83",
+      "gitBlobSha1": "4df4fd538b6ce075f8283f42687f1d55e55f89d5",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/cloud-byte-helper.js",
+      "bytes": 4296,
+      "sha256": "70aba211c279b54c24dff2f3e4e7bc6efbf4282e84c665167ef2f3821e7cbfe0",
+      "gitBlobSha1": "00c49121ff880189acd6d5896304c01fcde01333",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/independent-build-audit.json",
+      "bytes": 20316,
+      "sha256": "f06ee5607c2edc2a16c52466f9da422b163157e311914b604d7b22ebf2ac6a00",
+      "gitBlobSha1": "b9771d95fb6d854a39f40d9e5318f3216f880974",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/original-artifact.zip",
+      "bytes": 315161,
+      "sha256": "8f48ef25c5c8a9283981192db8402fadcdbba7cc3a02290b278c3d229470c1ee",
+      "gitBlobSha1": "0da0a6727cdce30b00b1995cfef4fe9aac95f84a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/primary-build-audit.json",
+      "bytes": 16870,
+      "sha256": "6c4a78ad65a86374a2a9933be68440f6236750977950acced240e127ae68322a",
+      "gitBlobSha1": "c2bb74f2d9c0b022085fb5197e3d12634555c419",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/build/root-build-review.json",
+      "bytes": 2628,
+      "sha256": "a8b220f146770e96d000f2361871c8c40183bee76b3ee2adf011cd5741642356",
+      "gitBlobSha1": "1afd3ed8ae18a06ed84dd2a12cc4b770318cbe4b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/cloud-component-index.json",
+      "bytes": 37606,
+      "sha256": "411bd410cfdc08132b9f66daa184de8b90e0276baded4f39c86173a0097408f4",
+      "gitBlobSha1": "8015d6b17ca4bf1c3f83a0a26cc9412e7f0eefa6",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/cloud-component-replay.js",
+      "bytes": 7704,
+      "sha256": "d5d3afc9b8d0f4d1c3df87394a63c5faf67478907fe38d31cb39441a6d142170",
+      "gitBlobSha1": "eb6db5a2f228c8fe0c787b9ac524cdba617a0e7e",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/independent-component-audit.json",
+      "bytes": 29444,
+      "sha256": "2d74199f9dec0c46b01949b08b97304bfe0380b6bf28b2320e56d5c5cb510b2f",
+      "gitBlobSha1": "7861282d2153f94f3bff619226091689d5ce49c8",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/original-artifact.zip",
+      "bytes": 214255,
+      "sha256": "7dad7f5919e459bed984fd68c2acc83c405b94f615a51eae7b4235cfb504f736",
+      "gitBlobSha1": "3b711fd08ac44fbe9c45f155e5e4a99ee74d2551",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jitendex/primary-component-audit.json",
+      "bytes": 11568,
+      "sha256": "415bdbda67780b2d504ad49821a460de562d49906aa303b222d4d78226ab20be",
+      "gitBlobSha1": "cb830ad7047576e2c80b6e839376e32c0d5b4e8e",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/independent-component-audit.json",
+      "bytes": 29408,
+      "sha256": "7ee11a3f2ba94a897f30a03718b7c6830e85bb0f7a4c56e464f337c0278ae4ea",
+      "gitBlobSha1": "f962d78116f8636594dd9692c3d69505c4f21dc0",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/original-artifact.zip",
+      "bytes": 193334,
+      "sha256": "81a30e876da47cb4aa7433741e62fed291468df67f7eb3c9c9ad1e6e18a4d0da",
+      "gitBlobSha1": "2c6c961e4c83fd19f4d4fc42c26c767eee3a6c46",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/jmdict/primary-component-audit.json",
+      "bytes": 10988,
+      "sha256": "803b6b97a831b844a3b1050cb7d1cbfbdb840355502e834d4f5217b5d0c53ba6",
+      "gitBlobSha1": "5919557aee2236c22a85588dd273cf43a1baf043",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/independent-component-audit.json",
+      "bytes": 29597,
+      "sha256": "ade67deebfbd7e7a699cc5445d03d2c2502075a79039646b051ac0dbe99a36ab",
+      "gitBlobSha1": "665cf70416b095f5c9887742b276514e63f04f91",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/original-artifact.zip",
+      "bytes": 281122,
+      "sha256": "6630e77afbb10681aee5faef58bd0b4aad47cd52b94715e93b346041ff18b3f5",
+      "gitBlobSha1": "4ab0def4ad08b139d9a29ccc5c59e23ece913f8c",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28/vndb/primary-component-audit.json",
+      "bytes": 11265,
+      "sha256": "61f3bbda4d34e2342d1dc0bbbc18f2e61772fdaacf07d355667c75c6aa5f63a2",
+      "gitBlobSha1": "4b7fd3718ef17182ab4a65d8ba8dde8f2b91520f",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28-primary-history-members.json",
+      "bytes": 9670,
+      "sha256": "c36287a6928f74fcad62f07eff293a3db895af07bda30cce8578fa6c82abad2b",
+      "gitBlobSha1": "75d913cc1ff56fc8c5aed8cb3701b0d5a4a20813",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/completed-f28-primary-history.tar.gz",
+      "bytes": 532925,
+      "sha256": "8f34e8347bddc335efc130e74b11bc123e151e66515399322757a49c1fd1b368",
+      "gitBlobSha1": "4487d50a70b381037ad272d9ce418df443a42344",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-auditor/expected.json",
+      "bytes": 28504,
+      "sha256": "ae80191962e44d378237922b923d9411d42b53ab6149fc680d8907b05974fad9",
+      "gitBlobSha1": "e479f8c9093331e06cf47fbc08f0b2c438eaa4bb",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-auditor/pipeline-expectation-binding-review.json",
+      "bytes": 2487,
+      "sha256": "0060f8cd7a951a7d9b73b5cb35d13b6cbf02211b3a38befc9fbc43f4bf401d88",
+      "gitBlobSha1": "b65ded31cb1ba5650a6014b3524f1f2349d9471e",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-auditor/preparation-receipt.json",
+      "bytes": 2515,
+      "sha256": "08853365dd95b973e50855c5a8a775de164e42dd8e612b7d5992dbf146c7cef8",
+      "gitBlobSha1": "9b5f8159dc4b0014d93e15236efed7b04b981f8a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-auditor/prepare-expectation.py",
+      "bytes": 5358,
+      "sha256": "4199a5644de748c037fd260a8fceaca5c4d68c5254506db97221c5b263c40178",
+      "gitBlobSha1": "349544c1e109775303d83c4baae640645a07f225",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-private-preparation-history-members.json",
+      "bytes": 9904,
+      "sha256": "cd4cb45499685c7a4f9ec3dfe4f4cd25b8fb5850d8a0054079a3b5142ddf6c20",
+      "gitBlobSha1": "8c37e782b264d6a6023ee7aadc9a1fe7d23cbe61",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-private-preparation-history.tar.gz",
+      "bytes": 3627,
+      "sha256": "f0a2d6c1824481f2ccb7f61394a0751414b6e0be5789064953c472610885920f",
+      "gitBlobSha1": "1ddf5a4ca55c0c1c8d1a9c53f836c56feea8377b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-publication/independent-final-overlay-review.json",
+      "bytes": 2735,
+      "sha256": "4903c06970612d0fec7fca3d2c19b80815c32dfb463278b00a136537818aa829",
+      "gitBlobSha1": "c04c73f2427b0217f0b50bb6bc2f48c5e6661011",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-publication/latest-source-and-ownership-snapshot.json",
+      "bytes": 34676,
+      "sha256": "7a10038aab29fdb90691e96f855fc5678ef72c441d76c07eea3e2853b8c32a39",
+      "gitBlobSha1": "a1c410bd01e77077ee3fb3e051e64ef2511331a9",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-publication/manifest.json",
+      "bytes": 15372,
+      "sha256": "f5667f97a4415ea504f64cfafa73250104d1f78ba20ff800dd65dcb1c8d2d152",
+      "gitBlobSha1": "70aa522bb8073046958afb61cdabd5ed79cae08c",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-publication/publication.json",
+      "bytes": 6990,
+      "sha256": "8aa82613d4e5a0b892aede121774d472a23c885295f6598182cc824ad996383f",
+      "gitBlobSha1": "a186d326715b2ba33a001f28b7b60d48dcba4eee",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/corrected-publication/root-final-corrected-review.json",
+      "bytes": 2425,
+      "sha256": "c7e6b63399fec1e4815fbc073249b7da1d699908d87891648d2f4a8127e69d6a",
+      "gitBlobSha1": "43e3a718f4d83aaef0c09082f2f6378f1fc3b51c",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/a300-correctness-root-review.json",
+      "bytes": 2315,
+      "sha256": "ab4179ccdf64140bd18cb5b5153ed5803b5d221a279d58c61c976ec432129eaf",
+      "gitBlobSha1": "1c20a5820ec1a5f9c0aff842aea8f0da07bdb66a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/a300-jmdict-excluded-descriptive-breakdown.json",
+      "bytes": 5084,
+      "sha256": "854578c4b026f28bd80d593e23a804f3dc721da5bc701ca96a90c6825f1a804a",
+      "gitBlobSha1": "5c0d41218b09874c5d849617af469f759c5edd66",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/a300-prospective-storage-policy-root-approval.json",
+      "bytes": 2366,
+      "sha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+      "gitBlobSha1": "f14e1cb131bb3c893a06685c559f089dd7b905cc",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/a300-storage-shape-root-reconciliation.json",
+      "bytes": 7743,
+      "sha256": "15ed47122b1b0c2cb4fb7c1ef79cdd816c131ea1119a1e53471918d03a6c6253",
+      "gitBlobSha1": "b061988dfaf3ecab36ec16b1c947aa677ac38297",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/correctness/independent-original-correctness-audit.json",
+      "bytes": 34284,
+      "sha256": "01df98e4886a6a58d0b197f09fa777b1b29a045f8214b0ce713c5be2935e38ac",
+      "gitBlobSha1": "6c57d15fb504424cbd247caa80282212b753ce88",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/correctness/original-artifact.zip",
+      "bytes": 146783,
+      "sha256": "3d17262def25c405f1add4f4923694059479bbae83af4e9a93960985a4ba48a7",
+      "gitBlobSha1": "b9123d6e64bfd0f7faa3abb3aabdc693ed7c0577",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/correctness/primary-correctness-audit.json",
+      "bytes": 18525,
+      "sha256": "1e1d417772464f4039cc0e7129cb774f73ded35019e916cca393295a862ae459",
+      "gitBlobSha1": "257793b078d9f925dc53559637b3cd2df62d4884",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/exact-build-byte-reconstruction.json",
+      "bytes": 3471,
+      "sha256": "ab141abc7ae912193a9bd494299f2e0c8ff0bc9397eed6464ff647fe5896e4fa",
+      "gitBlobSha1": "564f9dd9614363b4f9c54af02f6212850dbfc7eb",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/exact-duplicate-hardlink-compaction.json",
+      "bytes": 12550,
+      "sha256": "d6dc5f62764696384ec948a1a4afe9af9621959ae7285c01b10c05aafc2fe642",
+      "gitBlobSha1": "d99860ef88ba8f26a1b3075365e7242c0a1e105b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/final-raw-auditor-preparation.json",
+      "bytes": 1462,
+      "sha256": "be8686c09fb6637515c0cac4675e9c1545492c3b2dc02ee51669eee9b9414d28",
+      "gitBlobSha1": "b45bc6bb4a96ef894d495d1735d7d56417f5e9fa",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/independent-complete-import-expected.json",
+      "bytes": 6838,
+      "sha256": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+      "gitBlobSha1": "2445afd3678cf5da1ec4c99a72327e2c9ebadfcf",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-auditor/publication-binding.json",
+      "bytes": 4147,
+      "sha256": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+      "gitBlobSha1": "43ffddfec5985f170ea1dcaf354c9fc8e3f2e863",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-independent-final-identity-review.json",
+      "bytes": 2180,
+      "sha256": "3920c17642bc72fba4ca9b141c06302863ef29af91e9ae42611da0dd08c905a3",
+      "gitBlobSha1": "de908a475b27d3308a56c941aecef67ba24dc076",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-independent-protocol-review.json",
+      "bytes": 4474,
+      "sha256": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5",
+      "gitBlobSha1": "aacb8be0dbfdc7844a562719ae1fd1b7b23877f9",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-initial-run-identity.json",
+      "bytes": 1404,
+      "sha256": "6400c7bd9ddcfdb9df64659f27eb7373a72e01d02857d9be0e33e465e6c68aa5",
+      "gitBlobSha1": "baf17c69f9ac97d41be677e384c41a098bd5f7fd",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-launch-job-snapshot.json",
+      "bytes": 22740,
+      "sha256": "5362b6138b7c2b59fdd9ad3c2db6be47743651070e8825b11d514bcf5f8dea91",
+      "gitBlobSha1": "9d93d13c6a33f903f437703ade1c4f001a168d74",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-publication-manifest.json",
+      "bytes": 16274,
+      "sha256": "088ebb3a624104d4902479f3e8725770d56b4ba661e86d3b2c7edad096819b91",
+      "gitBlobSha1": "1e68512e5bfd30b94af60f7603771ff0db314ae9",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-publication.json",
+      "bytes": 1727,
+      "sha256": "d45208a29e10ad3c2274835c1c24f533a59ac298deaa1ea55f2eff4fa3ca5d17",
+      "gitBlobSha1": "7cab7b6b39a1cfbd64c4762fffca1b48715e4e6f",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-qualification-binding.json",
+      "bytes": 4887,
+      "sha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+      "gitBlobSha1": "187897af74f8e0ade9d990310106efc04f4395d9",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-root-protocol-review.json",
+      "bytes": 3735,
+      "sha256": "93fc55cb361cd3a5853d26a4dcde295199f24f13985a1a0ae83e6da2ac523384",
+      "gitBlobSha1": "9a6c1a537faa34dcec5c05b6157de176d31dc755",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/artifact-api.json",
+      "bytes": 971,
+      "sha256": "11a6a1b777297faf3a063811d4fa77eaf6321cf6368e88a13e49e562b76e6b52",
+      "gitBlobSha1": "58d8a016f2cbf428f7c48916a21efa34165a839f",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/independent-primary-validation-audit.json",
+      "bytes": 2903,
+      "sha256": "519da1b02a000af25789356ddc8adbeee23f6fc8d17458edfdd40ed94133ec63",
+      "gitBlobSha1": "e439d48e8f58712f0fd30576ffff52ba8277f12b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/original-job-api.json",
+      "bytes": 3090,
+      "sha256": "4660f36968f9eedc74ac474f13feea217bbccd701fa0c83a154b3f761179bf33",
+      "gitBlobSha1": "8da474fa6e67e2e5f9c74537c2a2cd3fc8648efa",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/primary-job.log",
+      "bytes": 31266,
+      "sha256": "a8ba6af883eb9b874bbeaafe83f2d06fbb0e8bccb8ff434ca9cec0de963eccce",
+      "gitBlobSha1": "5eefb428f4621c88ceb00d089608b408b54bd752",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/full-source-dependency/primary-records.json",
+      "bytes": 9507,
+      "sha256": "1d418151f23c79618b917519e794e8732afd1d5e6a7d0eca964692a98baf8980",
+      "gitBlobSha1": "826691bd7fc3ab28d9c5433c6695abf29893fe3b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/historic-evidence-hardlink-compaction.json",
+      "bytes": 85583,
+      "sha256": "625e290db0eac90d4689291ab8e902a9b96f95b1d6710528bf2511a481ea7331",
+      "gitBlobSha1": "5281e001a4604cb6d5bd4772f7869dee3ca829a3",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/prerequisite-publication.json",
+      "bytes": 6869,
+      "sha256": "40ecd4376ecda399c86b96c69bd83c059c71b24a95039993765c8e3691876e1a",
+      "gitBlobSha1": "bc44ab65dcbb588cec719c21687cf66dbf41d746",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/prerequisite-root-review.json",
+      "bytes": 2366,
+      "sha256": "ae5eeab08d1f9109b96b9e50a8a9531fda1b4fd6be227d58692424234550bea3",
+      "gitBlobSha1": "af4d650899cd6aef280020c39cd0ca89d94c3b58",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/product-publication.json",
+      "bytes": 6078,
+      "sha256": "e83a62ff54034db1b60e79967a5b7288390569a747659ec123ef251f1858f29b",
+      "gitBlobSha1": "63ef1801a3adced50ad6088342fb7108d3d303e0",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/audit-storage-original.py",
+      "bytes": 18297,
+      "sha256": "997b045f6c1ad458caa8f48ff50329d3d46fc9be46698df8a6cb350f077b611a",
+      "gitBlobSha1": "33317638ba5a246ca1dfb8b367b0fd047cbe7197",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/independent-storage-preflight-review.json",
+      "bytes": 34626,
+      "sha256": "da89772449153f29405c9b45c3799d9e79fefa618033ae3a6df0ed67c81eeca5",
+      "gitBlobSha1": "ee68557987f06cd49310b015495530e14213d041",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/independent-storage-replay-index-1.json",
+      "bytes": 1161,
+      "sha256": "92613bd669bd662cc999eefd58761e0518cd7bbb06f76afb0ee2f1a3b398d3bb",
+      "gitBlobSha1": "e68a794454526dfdf7861ddfb87afbc69846b87d",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/independent-storage-source-report-audit-1.json",
+      "bytes": 8377,
+      "sha256": "d93f0c83fab675e0b41b18174263b1aa09a0e86efb8c4599aceb6161c3c77006",
+      "gitBlobSha1": "c246c0855ec6d6b423371a72e0171655bc2d25a1",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/original-non-package-evidence.zip",
+      "bytes": 290433,
+      "sha256": "913fb896be3c78043aa731f5e17fd8f9689270bddbf25f366fa9ed9277be5055",
+      "gitBlobSha1": "73781495a16e6733de56fc31a0005dfca6c6acc4",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jitendex/primary-storage-inventory.json",
+      "bytes": 26554,
+      "sha256": "c59f85de67f121c5be769488e7494143711fa7d6364db6ecb9d9a9bf52c1b017",
+      "gitBlobSha1": "9e92609b6280b2bdd9a14366c667c4d66e663e1d",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/independent-storage-source-report-audit-1.json",
+      "bytes": 8343,
+      "sha256": "0e0816635e19d2def94a12669bb222349959a4fb322c5a6cfac011ddd1d30660",
+      "gitBlobSha1": "dd4fe697db20dd44b5d478c25c4f9e0b37245eb2",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/original-non-package-evidence.zip",
+      "bytes": 283384,
+      "sha256": "dc2cdd0aa49e6397d80440e42d59eaa32a99037d03054089f643bef9f0cbdfae",
+      "gitBlobSha1": "ed6fab4b9ef5197e242460550e97059fb4b03944",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/jmdict/primary-storage-inventory.json",
+      "bytes": 26778,
+      "sha256": "bf18e595e12b882bc4454fdec408e691f06a74ce703c49e0089d0b6ae6c97732",
+      "gitBlobSha1": "c70ae991d2b72450e2606c22585b17382356ec37",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/independent-storage-source-report-audit-1.json",
+      "bytes": 9091,
+      "sha256": "88d984c10368afe19506ef9908c2042544486d745ef1aa194fa63ff8db559f6a",
+      "gitBlobSha1": "86caefe7237e4d718cd26f05bd2b3e6720859b3d",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/original-non-package-evidence.zip",
+      "bytes": 342887,
+      "sha256": "872f60b2e061580e85a8e48745de351b4cc54def10776d274a49d53edb178313",
+      "gitBlobSha1": "ed344b0d01571f1947fba7d5729b5f8e3d4659b4",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/current-a300/storage/vndb/primary-storage-inventory.json",
+      "bytes": 27399,
+      "sha256": "73e75be96d916dd54df7a153b869ef3625ba7f352a0383127315d13f14e4cdd3",
+      "gitBlobSha1": "91b868f4da6cc835eb904a09bc934554817dafed",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/artifact-metadata.json",
+      "bytes": 1184,
+      "sha256": "a9a3b10fd2e9e4c694f2b44e49a3d459154bad7b19c7ecbe2b722e5d16d2c178",
+      "gitBlobSha1": "7f1b917f54376bf4d972372e7f83e5e4b9639f4f",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/audit-original-failure.py",
+      "bytes": 11261,
+      "sha256": "024f1a2c5777c9d5ccc073cc1d6bf6f621dd95171677369dd02b51ad745daa12",
+      "gitBlobSha1": "16552e08a9825aff5f45150ce1a983d635af1463",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-artifact-api.json",
+      "bytes": 881,
+      "sha256": "7e0ade1ea476607a51d66d0c45f223be507970d3edc2297f193383f7ea75d202",
+      "gitBlobSha1": "ee4336185bd83581488738f324e53af7259ef9a7",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-artifact.zip",
+      "bytes": 143191,
+      "sha256": "83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+      "gitBlobSha1": "7f80ccc0cc2bcf9060ccd6cf174d42fe0d9e64e5",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-failed-artifact-audit.json",
+      "bytes": 13040,
+      "sha256": "9ac1dc22588add678deb0e7c64548349f0feebf7b91fdb5315e1daf37cd53293",
+      "gitBlobSha1": "5f7d09a3b1e8505c754f4eb81ad8557bbb116ff6",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/original-terminal-jobs.json",
+      "bytes": 3788,
+      "sha256": "02636bee97e9ff549d871ac685708f3b41a3000b5b7ecb81c4863a2c70952ae6",
+      "gitBlobSha1": "b46ae73f10d4656201b653efe5c8636a56ec4b27",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/primary-build-records.json",
+      "bytes": 9651,
+      "sha256": "08a0d4ac4e68d49f98187b7083b66b0ef71ec50718ce808bae4544c656783a2b",
+      "gitBlobSha1": "4cf4898399f7262cef9b1d42ed6b1f767e4dd02a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/primary-failure-audit.json",
+      "bytes": 9777,
+      "sha256": "4787b946dbbec181e97326387860fd2a1ae3373da85ec448dcdd9ab65ce06733",
+      "gitBlobSha1": "934b479d52a122660140dbe0e5e6f1fb2a8cbbc2",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-failed-build/primary-job.log",
+      "bytes": 50112,
+      "sha256": "454e7cd10e8a23783790e6bf833c9e448a83eb0fec672247c1dde9305e396fd1",
+      "gitBlobSha1": "3d2a79e1afa334222fac2ec2f41740dd1ed2ad07",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-launch/original-first-jobs.json",
+      "bytes": 2360,
+      "sha256": "22a08d4b65da74f63536b8141fa20ceb6ce61f3e0f258f58fa0ff4fd3bdcffa8",
+      "gitBlobSha1": "fddce0efee6483a9f4eb9d45b3ef322e58f28af2",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-launch/original-run-discovery.json",
+      "bytes": 24400,
+      "sha256": "545f70456418d4809e916fdc8891204ecf34b31014f9ae6ce45136b4fd0efd9e",
+      "gitBlobSha1": "4eb568915f937ef4c25cad6a91fbf45ba0241ec8",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-launch/primary-baseline-source-review.json",
+      "bytes": 3463,
+      "sha256": "73ddbe657077c90889b5f65e2cf9097726b1d076decf06c6838547f7241ded59",
+      "gitBlobSha1": "e864fb2f0a421dd5160dfce58b678acaf935a195",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-launch/primary-launch-receipt.json",
+      "bytes": 1470,
+      "sha256": "334acddcd3e884de14a4743526ff88c8a3849301378ebbd5544e38587f4c99a4",
+      "gitBlobSha1": "1708254e9d8d4687e029e0336c84c402b770fcac",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-root-prelaunch-review.json",
+      "bytes": 2005,
+      "sha256": "7ce5dcc460868f07682b59796afd0c4cbccd8b412be5706612b9f47b964782e7",
+      "gitBlobSha1": "49b328406336f2a728a4c1aa1dbbfa401f440180",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-tooling-identity-review.json",
+      "bytes": 2167,
+      "sha256": "1d9276775a6d8e16fd6098b09d3e7dca40f063accd775fed32dcf23582266045",
+      "gitBlobSha1": "39091977d2ea9b308f2d913d398a95ae34dff20a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-tooling-publication-manifest.json",
+      "bytes": 30364,
+      "sha256": "dd62ae8c26d8116f1df4b0a955324b3b1ff7e586a8fbfb824e13b01db50181f5",
+      "gitBlobSha1": "45f9710535a36f4b7520316a65c71437d3e6aa66",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/original-tooling-publication.json",
+      "bytes": 1128,
+      "sha256": "2eb9897b5e3560733a24404f611b75e3d7371e9e948d4e5653ceaf13c6a651dc",
+      "gitBlobSha1": "5f320982078507cea24f1f490c8f06850699e26b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/predecessor-publication.json",
+      "bytes": 910,
+      "sha256": "3338832b2b87f3f75ad7b7fa4ced156fe9fcb73653190437f3fd8336b6a29f43",
+      "gitBlobSha1": "ba58f1a2dc0ad36008abdcb8047071c66ba9fd67",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-frontier/crc-consumer-other-corpora-coverage.json",
+      "bytes": 4153,
+      "sha256": "d90659372a0dfa276efd6b705437dae3979751470c58e4c48713c4d24b6e22f6",
+      "gitBlobSha1": "3a4d38d93b6db96c920df9599d54bd58e31efb7a",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-frontier/jmdict-consumer-opportunity-review.json",
+      "bytes": 6912,
+      "sha256": "51e06287485efbfffb70974d54562b4c68e2ce36e102c73af9c3cc60a43e1001",
+      "gitBlobSha1": "13e9b0362659295e43d033f2c3d0acd257514901",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-preparation-history-members.json",
+      "bytes": 46530,
+      "sha256": "5b79e20092a39ed654b6267da2699871c1d3490994e78bcc3d781c7076c06458",
+      "gitBlobSha1": "f76e8c0fea9f6bbcdfa65bda83fffe59b43262aa",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/source-preparation-history.tar.gz",
+      "bytes": 394547,
+      "sha256": "97becc43da48607f2f1e9b3ed837a0b1a7b9c92fc9b86ff2e4ba310e49d5ef95",
+      "gitBlobSha1": "cdf0d5ecb7cd9a5547762f2cb1d49c0874f053b2",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/cloud-original-artifact-reconciliation.json",
+      "bytes": 18707,
+      "sha256": "f4bc21fbf178c1e28202f14578d32e0a1ef07ff04d6505e73b2827f3e90d3581",
+      "gitBlobSha1": "d5d2ac37a09e0898483d0955fd03509d9e374796",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/complete-artifact-and-postprocessing-inventory.json",
+      "bytes": 5228,
+      "sha256": "57dc0c45b0f5d847997d95c2d0c8cbd7451d81c63c43db7c5e7608fdd89a30f9",
+      "gitBlobSha1": "4b69ed4b21b58102eef4416daa73706512d069b9",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/native-oracle-receipt-audit.json",
+      "bytes": 2281,
+      "sha256": "6f9b943d127b6584a7f618a1483da9b9e43e6d72818dafec797d2e3a93ed63ba",
+      "gitBlobSha1": "270223f126525f731db4e3078e2b64eda4202254",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/projection-pipeline-review.json",
+      "bytes": 3018,
+      "sha256": "78b7744d2ed168ce8d0dcf0fe6cad9f5b7f0936f8a51ebd084d136e5921fdfff",
+      "gitBlobSha1": "80780765d0f98e2b5ae314703ff6fb94783dea1b",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/projection-root-review.json",
+      "bytes": 431,
+      "sha256": "e904c9b99b6afee27efaf4617a34f8b362e225566e242838a36748649a081c90",
+      "gitBlobSha1": "226c35f606cdaa64ade97ba13749b3eca8103338",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/recovery-pipeline-review.json",
+      "bytes": 3000,
+      "sha256": "8116aee7a9b3761386446851796c9fa5f3734650ac6fb349e70948c73219a40d",
+      "gitBlobSha1": "ab035e81a0c01af1bfffccc9dd50a33be96cc6a6",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud-recovery-history-members.json",
+      "bytes": 4081,
+      "sha256": "3408d7a172de02acfb01449a8d6d0d3eaa7a8d2affdded9621a6f6fbb8c39f8e",
+      "gitBlobSha1": "e679b02d08a453be36ccc94d9bfe42c64b0dc821",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud-recovery-history.tar.gz",
+      "bytes": 30164,
+      "sha256": "a081a3cadafaef1eea6d76855e14a6d176d319afa44414f32e19c898eab8d55d",
+      "gitBlobSha1": "72b70e672224b099ab81a1cd1dd39b193cc0df12",
+      "storage": "exact-local-staged-file"
+    },
+    {
+      "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/recovered-original-evidence.zip",
+      "bytes": 317346,
+      "sha256": "97fe273c32f6b885ffedb924190fca5d3cd5846243fea9f3f17a909f80080ddf",
+      "gitBlobSha1": "4b1b31ddaba9c0a7aca24c39963a73cab1f58843",
+      "storage": "existing-verified-git-blob",
+      "localCopyRequired": false,
+      "proof": {
+        "path": "builds/perf/import-study-c563d487/proof-consumer-study/vndb-cloud/complete-artifact-and-postprocessing-inventory.json",
+        "bytes": 5228,
+        "sha256": "57dc0c45b0f5d847997d95c2d0c8cbd7451d81c63c43db7c5e7608fdd89a30f9",
+        "gitBlobSha1": "4b69ed4b21b58102eef4416daa73706512d069b9"
+      },
+      "scope": "Exact previously verified derived recovery ZIP; attach existing immutable blob, no download/reconstruction or old-hash reassignment."
+    }
+  ]
+}

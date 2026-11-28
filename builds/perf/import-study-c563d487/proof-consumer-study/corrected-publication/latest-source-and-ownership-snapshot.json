@@ -1,0 +1,970 @@
+{
+  "recordedAtUtc": "2026-11-28 10:50:32 UTC",
+  "sourceBoundary": {
+    "frozenExperimentBaseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "observedDevelop": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+    "comparisonCommits": 6,
+    "files": [
+      {
+        "path": "dev/bin/audit-release-packages.js",
+        "status": "modified",
+        "gitBlobSha1": "c1fd9d04969df7d32550ae47065321cc0bc02fb6",
+        "changes": 8
+      },
+      {
+        "path": "dev/bin/build-zstd-trainer-wasm.js",
+        "status": "added",
+        "gitBlobSha1": "811ceb2063c53d018aab3363afd152d55bfd1bb6",
+        "changes": 183
+      },
+      {
+        "path": "dev/data/zstd-trainer-adapter.c",
+        "status": "added",
+        "gitBlobSha1": "14ddc7c344c2ddf2fd7c7b51ccb8a5bf1e568770",
+        "changes": 59
+      },
+      {
+        "path": "dev/data/zstd-trainer-wasm.PROVENANCE.md",
+        "status": "added",
+        "gitBlobSha1": "d076739d8a6420ec4cc319bc18c931014dfb5c4e",
+        "changes": 23
+      },
+      {
+        "path": "eslint.config.js",
+        "status": "modified",
+        "gitBlobSha1": "c8708f8647aff665bd5f96497025c488cd46406a",
+        "changes": 28
+      },
+      {
+        "path": "ext/js/background/backend.js",
+        "status": "modified",
+        "gitBlobSha1": "96528cecce42093792a551bdb788dfb61525fdf7",
+        "changes": 134
+      },
+      {
+        "path": "ext/js/background/dictionary-runtime-action-policy.js",
+        "status": "modified",
+        "gitBlobSha1": "959f5136ce8a2072a4a1779e04dbbf8b2ef57725",
+        "changes": 16
+      },
+      {
+        "path": "ext/js/background/dictionary-worker-client.js",
+        "status": "modified",
+        "gitBlobSha1": "04547d4ccb3e29c476594c2ad25d2f6aaaaafc10",
+        "changes": 19
+      },
+      {
+        "path": "ext/js/background/offscreen-dictionary-worker.js",
+        "status": "modified",
+        "gitBlobSha1": "9b09d261eb727ae2f014c7c3630fdc8f58c3dc71",
+        "changes": 142
+      },
+      {
+        "path": "ext/js/background/offscreen-proxy.js",
+        "status": "modified",
+        "gitBlobSha1": "fa268f3b2d36c0cc6421a896c3ef1d975d831441",
+        "changes": 37
+      },
+      {
+        "path": "ext/js/background/offscreen.js",
+        "status": "modified",
+        "gitBlobSha1": "a81f5f73b613f4460f49289136d7f0b6cd8d527c",
+        "changes": 24
+      },
+      {
+        "path": "ext/js/background/term-content-optimization-control.js",
+        "status": "added",
+        "gitBlobSha1": "f632a52e02296eba08b72a6413133a5ad82ad4ab",
+        "changes": 62
+      },
+      {
+        "path": "ext/js/comm/api.js",
+        "status": "modified",
+        "gitBlobSha1": "f70ca30bdb4f8d916fc0bea2d103d7c2d94a7121",
+        "changes": 20
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "status": "modified",
+        "gitBlobSha1": "1b3f8367f4b4863916e7c6189a07f5f750636d20",
+        "changes": 3199
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-import-journal.js",
+        "status": "modified",
+        "gitBlobSha1": "d0739ab78c49c39d18a96f1fdb9c02c72af45ea3",
+        "changes": 26
+      },
+      {
+        "path": "ext/js/dictionary/term-content-block-store.js",
+        "status": "modified",
+        "gitBlobSha1": "625604ccbf8f45d32f2975fe63c0265db35c0b83",
+        "changes": 573
+      },
+      {
+        "path": "ext/js/dictionary/term-content-frame-codec-worker-owner.js",
+        "status": "added",
+        "gitBlobSha1": "95f1706b4e886dbbce53a0197226cf0bc0c779b3",
+        "changes": 324
+      },
+      {
+        "path": "ext/js/dictionary/term-content-frame-codec-worker.js",
+        "status": "added",
+        "gitBlobSha1": "88b9e1a1db868dfce982b53ad4333f00c8d03f6c",
+        "changes": 167
+      },
+      {
+        "path": "ext/js/dictionary/term-content-identity-layout.js",
+        "status": "added",
+        "gitBlobSha1": "79428f64784c1af73261da706fb376594d72002b",
+        "changes": 86
+      },
+      {
+        "path": "ext/js/dictionary/term-content-idle-scheduler.js",
+        "status": "added",
+        "gitBlobSha1": "cfe978ad5bd9d40a33d3d3a301667364b539fef2",
+        "changes": 236
+      },
+      {
+        "path": "ext/js/dictionary/term-content-immutable-file-store.js",
+        "status": "added",
+        "gitBlobSha1": "dd7ab30e8c9bff091c2ae73466f4af83eab1d971",
+        "changes": 191
+      },
+      {
+        "path": "ext/js/dictionary/term-content-layout.js",
+        "status": "added",
+        "gitBlobSha1": "d8ee36a583ca474416d0effb9b1d250a5606ec8c",
+        "changes": 564
+      },
+      {
+        "path": "ext/js/dictionary/term-content-legacy-eligibility.js",
+        "status": "added",
+        "gitBlobSha1": "98efb7b71af46de67995f663b69685c0b3198043",
+        "changes": 123
+      },
+      {
+        "path": "ext/js/dictionary/term-content-opfs-store.js",
+        "status": "modified",
+        "gitBlobSha1": "814f264ee50a0ad31f0816c924fa036b62ede837",
+        "changes": 456
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-artifacts.js",
+        "status": "added",
+        "gitBlobSha1": "c1403d1ce3c27814d2ca8a9602e3de2f41f23291",
+        "changes": 125
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-batch-store.js",
+        "status": "added",
+        "gitBlobSha1": "d8335b0095140dadbe9089f053d294948ff2a047",
+        "changes": 578
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-candidate-source.js",
+        "status": "added",
+        "gitBlobSha1": "983a1a9a78eb67385d74cbbe7544ec801345cf91",
+        "changes": 170
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-checkpoint.js",
+        "status": "added",
+        "gitBlobSha1": "0b95a3ee549d24957e916cf6ee092b3e7fd2c437",
+        "changes": 218
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-controller.js",
+        "status": "added",
+        "gitBlobSha1": "b2dd4157fe0e4bbb7f03894c3b1d9162204ce1d2",
+        "changes": 1089
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-frame-reader.js",
+        "status": "added",
+        "gitBlobSha1": "7d920b94b2a36426a7a514404657e7862477d1de",
+        "changes": 188
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-headroom.js",
+        "status": "added",
+        "gitBlobSha1": "a40017310e3f3976bc7b1107e075e6763e4e3461",
+        "changes": 52
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-reclaimer.js",
+        "status": "added",
+        "gitBlobSha1": "5283551790550c2d24753565668ee2fb04effe0c",
+        "changes": 432
+      },
+      {
+        "path": "ext/js/dictionary/term-content-optimization-replacement.js",
+        "status": "added",
+        "gitBlobSha1": "c1ea333ba764ad7bcb00660fd9dfdd3b124394f2",
+        "changes": 312
+      },
+      {
+        "path": "ext/js/dictionary/term-content-physical-file-store.js",
+        "status": "added",
+        "gitBlobSha1": "c8c43d766f5aeb0114f40f881662e307b1bd3a13",
+        "changes": 298
+      },
+      {
+        "path": "ext/js/dictionary/term-content-region-repack-planner.js",
+        "status": "added",
+        "gitBlobSha1": "4d2cd577236ea11f0672e9dbd9f06f9a07004390",
+        "changes": 400
+      },
+      {
+        "path": "ext/js/dictionary/term-content-storage-snapshots.js",
+        "status": "added",
+        "gitBlobSha1": "067e295a7b8ca23588bcdf2a62e8062ed4529c48",
+        "changes": 145
+      },
+      {
+        "path": "ext/js/dictionary/term-content-training-sampler.js",
+        "status": "added",
+        "gitBlobSha1": "83ad77e8773df45c68c8ba5861599ac9798d2f41",
+        "changes": 337
+      },
+      {
+        "path": "ext/js/dictionary/term-content-zstd-codec.js",
+        "status": "added",
+        "gitBlobSha1": "70e8a6aacb33de7ea89e4ac475ddf5657de74756",
+        "changes": 27
+      },
+      {
+        "path": "ext/js/dictionary/term-content-zstd-frame-inspector.js",
+        "status": "added",
+        "gitBlobSha1": "99298cf2280936c8edcb943843290d3d1573a01c",
+        "changes": 204
+      },
+      {
+        "path": "ext/js/dictionary/term-key-hash.js",
+        "status": "modified",
+        "gitBlobSha1": "1cd9183901db06bc1a20e3c8b274f908a1fac27e",
+        "changes": 65
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "status": "modified",
+        "gitBlobSha1": "36b0ecc7fd9d4c638545aad44b7d44aa47cbb14b",
+        "changes": 504
+      },
+      {
+        "path": "ext/js/dictionary/trainer-worker.js",
+        "status": "added",
+        "gitBlobSha1": "b739f6ff1ed32127a8f02a685175daff89bec161",
+        "changes": 155
+      },
+      {
+        "path": "ext/js/dictionary/zstd-resource-error.js",
+        "status": "modified",
+        "gitBlobSha1": "5ae195aa750b9031f7c303455be267f334eb869c",
+        "changes": 1
+      },
+      {
+        "path": "ext/js/dictionary/zstd-term-content.js",
+        "status": "modified",
+        "gitBlobSha1": "5d425e840555028cf61ade055740b705dd9a20d0",
+        "changes": 93
+      },
+      {
+        "path": "ext/js/dictionary/zstd-trainer-module.js",
+        "status": "added",
+        "gitBlobSha1": "437ee7f38365d412ccc17519b9090f900828e009",
+        "changes": 3
+      },
+      {
+        "path": "ext/js/dictionary/zstd-trainer-worker-owner.js",
+        "status": "added",
+        "gitBlobSha1": "c6991b428d85051db898092f53e277015a9c6f4f",
+        "changes": 244
+      },
+      {
+        "path": "ext/js/dictionary/zstd-trainer.LICENSE",
+        "status": "added",
+        "gitBlobSha1": "75800288cc243f164b9d130f125e2ffae28f8e39",
+        "changes": 30
+      },
+      {
+        "path": "ext/js/dictionary/zstd-trainer.wasm",
+        "status": "added",
+        "gitBlobSha1": "9a288fc51d0593debdc757a80e7ed49b56fb917f",
+        "changes": 0
+      },
+      {
+        "path": "ext/js/pages/settings/dictionary-import-controller.js",
+        "status": "modified",
+        "gitBlobSha1": "39888b2a25a22fd91d2aa1239dea64fc4c636ded",
+        "changes": 90
+      },
+      {
+        "path": "ext/legal.html",
+        "status": "modified",
+        "gitBlobSha1": "fb40987bc9b4d076c6df4b20c3f461b15248748f",
+        "changes": 14
+      },
+      {
+        "path": "package.json",
+        "status": "modified",
+        "gitBlobSha1": "deebe199e2d0b57cfc4c769599545447207cbeef",
+        "changes": 1
+      },
+      {
+        "path": "test/api-import-owner-reconnect.test.js",
+        "status": "modified",
+        "gitBlobSha1": "9a7cb2fd6fb01570f7649188b9cd5ed6e9779692",
+        "changes": 2
+      },
+      {
+        "path": "test/codec-health.test.js",
+        "status": "modified",
+        "gitBlobSha1": "884ab0efc94aff4088f4561759a01405f54858c4",
+        "changes": 15
+      },
+      {
+        "path": "test/dictionary-database-import-cleanup.test.js",
+        "status": "modified",
+        "gitBlobSha1": "5e553b4d1f24272c3cc4c84c02fc8b31688ac4e0",
+        "changes": 78
+      },
+      {
+        "path": "test/dictionary-database-import-index-policy.test.js",
+        "status": "modified",
+        "gitBlobSha1": "11ff926764a90225cc965998a901069e3177bdfc",
+        "changes": 2
+      },
+      {
+        "path": "test/dictionary-database-online-optimization-schema.test.js",
+        "status": "added",
+        "gitBlobSha1": "2099c47a8d710f4cc35ee573cab28f5749ed6ff1",
+        "changes": 1788
+      },
+      {
+        "path": "test/dictionary-database-open-schema.test.js",
+        "status": "modified",
+        "gitBlobSha1": "0a3cbeaf86f804e6a99ae179133c5685f4e7ee1f",
+        "changes": 48
+      },
+      {
+        "path": "test/dictionary-import-index-cleanup.test.js",
+        "status": "modified",
+        "gitBlobSha1": "1f514f886e661f758b1b5dd52c421f9aeefc2a0a",
+        "changes": 4
+      },
+      {
+        "path": "test/dictionary-import-operation-ownership.test.js",
+        "status": "modified",
+        "gitBlobSha1": "c06d60745c66457c5f738c0d1784447603674e76",
+        "changes": 17
+      },
+      {
+        "path": "test/dictionary-import-owner-lifetime.test.js",
+        "status": "modified",
+        "gitBlobSha1": "fe1f87f802c289b054911b68b11308891949280a",
+        "changes": 48
+      },
+      {
+        "path": "test/dictionary-import-publication-cleanup.test.js",
+        "status": "modified",
+        "gitBlobSha1": "bc9dca741ea8c4061360f1e29a28e070eecb5f50",
+        "changes": 17
+      },
+      {
+        "path": "test/dictionary-import-run-ownership.test.js",
+        "status": "modified",
+        "gitBlobSha1": "a072f858fe30d41fb4b7dd92c9bbc80133c46afd",
+        "changes": 19
+      },
+      {
+        "path": "test/dictionary-purge-active-stores.test.js",
+        "status": "modified",
+        "gitBlobSha1": "a001aa7d06544d7cbe934e30df3a70a045f0602d",
+        "changes": 15
+      },
+      {
+        "path": "test/dictionary-schema-upgrade.test.js",
+        "status": "modified",
+        "gitBlobSha1": "da19e3c434189730bfd75e415bd86a269c68c997",
+        "changes": 3
+      },
+      {
+        "path": "test/dictionary-worker-client.test.js",
+        "status": "modified",
+        "gitBlobSha1": "0aa1ce9ea671956a1fd9a49bffa8f05372ecb539",
+        "changes": 27
+      },
+      {
+        "path": "test/offscreen-dictionary-mutation-cache.test.js",
+        "status": "modified",
+        "gitBlobSha1": "bed31340a693fa83a48eaa28d775de87d3393c1c",
+        "changes": 22
+      },
+      {
+        "path": "test/release-package-native-assets.test.js",
+        "status": "modified",
+        "gitBlobSha1": "11c6782d309b44f27343a5a2f6bb6725ef6bfcb3",
+        "changes": 9
+      },
+      {
+        "path": "test/reviewed-runtime-boundaries.test.js",
+        "status": "modified",
+        "gitBlobSha1": "f154caa3251daad849315989bf53caa41e670b0d",
+        "changes": 15
+      },
+      {
+        "path": "test/term-content-block-read-context.test.js",
+        "status": "added",
+        "gitBlobSha1": "78e437b611553ade1d7f5d7981be39f67514ea7d",
+        "changes": 375
+      },
+      {
+        "path": "test/term-content-block-store.test.js",
+        "status": "modified",
+        "gitBlobSha1": "c45ce0e5875016570e94ce37495c137060f33f96",
+        "changes": 52
+      },
+      {
+        "path": "test/term-content-canonical-frame-routing.test.js",
+        "status": "added",
+        "gitBlobSha1": "02dd853bf46b69b9fa3f32695ed2e763a70b9e81",
+        "changes": 431
+      },
+      {
+        "path": "test/term-content-cold-read-recovery.test.js",
+        "status": "modified",
+        "gitBlobSha1": "5b987bef5537d97de37fd63ff7666c6c0264f174",
+        "changes": 7
+      },
+      {
+        "path": "test/term-content-frame-codec-worker-owner.test.js",
+        "status": "added",
+        "gitBlobSha1": "847d86d4585e618e23d39dc3240fdb079e42c0e2",
+        "changes": 177
+      },
+      {
+        "path": "test/term-content-identity-layout.test.js",
+        "status": "added",
+        "gitBlobSha1": "fbe059311091270b77a436aa751722b934e6fc5e",
+        "changes": 68
+      },
+      {
+        "path": "test/term-content-idle-scheduler.test.js",
+        "status": "added",
+        "gitBlobSha1": "349d777c43f209e3b56c96e8e438d6677aef3d2e",
+        "changes": 345
+      },
+      {
+        "path": "test/term-content-immutable-file-store.test.js",
+        "status": "added",
+        "gitBlobSha1": "bffac689fb25604614f4deef72533c61574acbf3",
+        "changes": 152
+      },
+      {
+        "path": "test/term-content-import-arena.test.js",
+        "status": "added",
+        "gitBlobSha1": "bbf6dbb51a1328cf3e194fb31d4a5ed3bb5a9d86",
+        "changes": 227
+      },
+      {
+        "path": "test/term-content-layout.test.js",
+        "status": "added",
+        "gitBlobSha1": "582b9b50a5a906d568b86da85ed6b193db1cc5c6",
+        "changes": 537
+      },
+      {
+        "path": "test/term-content-legacy-eligibility.test.js",
+        "status": "added",
+        "gitBlobSha1": "160af3b7ffd1f99c3d14a56a6091488d3e7409d6",
+        "changes": 78
+      },
+      {
+        "path": "test/term-content-optimization-artifacts.test.js",
+        "status": "added",
+        "gitBlobSha1": "e8833df49934bf1e79d2493dbc94e598276c17d7",
+        "changes": 150
+      },
+      {
+        "path": "test/term-content-optimization-batch-store.test.js",
+        "status": "added",
+        "gitBlobSha1": "f80fbf01043372ff1f4d5e6e6535e6ea85cbdb61",
+        "changes": 252
+      },
+      {
+        "path": "test/term-content-optimization-candidate-source.test.js",
+        "status": "added",
+        "gitBlobSha1": "0eca4e8721019e9886ffddc31980b77d22c02eee",
+        "changes": 259
+      },
+      {
+        "path": "test/term-content-optimization-checkpoint.test.js",
+        "status": "added",
+        "gitBlobSha1": "e8f26b47d6d42c9890a6636b2b630c337b04313d",
+        "changes": 75
+      },
+      {
+        "path": "test/term-content-optimization-controller.test.js",
+        "status": "added",
+        "gitBlobSha1": "50439ef48c15c94557941ce249411ed840a39208",
+        "changes": 994
+      },
+      {
+        "path": "test/term-content-optimization-frame-reader.test.js",
+        "status": "added",
+        "gitBlobSha1": "41c82f54231ff77f1e01d3adb8b838a835079eb0",
+        "changes": 224
+      },
+      {
+        "path": "test/term-content-optimization-headroom.test.js",
+        "status": "added",
+        "gitBlobSha1": "2bf0d312e168e940676851beaff37a5c95941387",
+        "changes": 38
+      },
+      {
+        "path": "test/term-content-optimization-lifecycle.test.js",
+        "status": "added",
+        "gitBlobSha1": "9cdf4bb74b320cdf909f64fd6105cb7c95616fea",
+        "changes": 436
+      },
+      {
+        "path": "test/term-content-optimization-reclaimer.test.js",
+        "status": "added",
+        "gitBlobSha1": "e2e1c18cbac3b9f53d8fff5656210b6a44c6f108",
+        "changes": 291
+      },
+      {
+        "path": "test/term-content-optimization-replacement.test.js",
+        "status": "added",
+        "gitBlobSha1": "19ef167187c7f3d9a68450d9182c1986d38b3933",
+        "changes": 193
+      },
+      {
+        "path": "test/term-content-physical-file-store.test.js",
+        "status": "added",
+        "gitBlobSha1": "40f54036b785d641261cb440e1feb9ce5eae0b4b",
+        "changes": 200
+      },
+      {
+        "path": "test/term-content-region-repack-planner.test.js",
+        "status": "added",
+        "gitBlobSha1": "29b6f9e09143edf654b2f71f8accae5557fdfd6c",
+        "changes": 288
+      },
+      {
+        "path": "test/term-content-storage-snapshots.test.js",
+        "status": "added",
+        "gitBlobSha1": "0768ccaf10f2d572e16906db373ee247795d91df",
+        "changes": 97
+      },
+      {
+        "path": "test/term-content-training-sampler.test.js",
+        "status": "added",
+        "gitBlobSha1": "4b590707acc7189d8333073fb707fe5e216f8b79",
+        "changes": 156
+      },
+      {
+        "path": "test/term-content-zstd-frame-inspector.test.js",
+        "status": "added",
+        "gitBlobSha1": "ef218bc5dd5eeb5a94ce0831e9c701cacb12cf8b",
+        "changes": 272
+      },
+      {
+        "path": "test/term-key-hash.test.js",
+        "status": "modified",
+        "gitBlobSha1": "c4a48673cd18106cabc1de41210847ca75c9f0bc",
+        "changes": 32
+      },
+      {
+        "path": "test/term-record-content-reference-iterator.test.js",
+        "status": "added",
+        "gitBlobSha1": "b2ff0cf7808bdeaf9013e55922e0d5838da427b9",
+        "changes": 591
+      },
+      {
+        "path": "test/zstd-generic-decoder-context.test.js",
+        "status": "modified",
+        "gitBlobSha1": "fb44a126bb9bcee1df5930097b0f7ee17face2a9",
+        "changes": 33
+      },
+      {
+        "path": "test/zstd-term-content-initialization.test.js",
+        "status": "modified",
+        "gitBlobSha1": "cf48edf4f6d06dc8aa5b25f51dd33c3a1aa1eacd",
+        "changes": 31
+      },
+      {
+        "path": "test/zstd-trainer-worker-owner.test.js",
+        "status": "added",
+        "gitBlobSha1": "538f6a4f1eab10672b223ce9e5e30b0cd54fd337",
+        "changes": 321
+      },
+      {
+        "path": "types/ext/api.d.ts",
+        "status": "modified",
+        "gitBlobSha1": "3d727b3c35a8da3302d3a1995194f8c576778637",
+        "changes": 1
+      },
+      {
+        "path": "types/ext/dictionary-import-journal.d.ts",
+        "status": "modified",
+        "gitBlobSha1": "9d2f36ac53c6ac2f0ae2d9462a555a1ead84d692",
+        "changes": 33
+      },
+      {
+        "path": "types/ext/offscreen.d.ts",
+        "status": "modified",
+        "gitBlobSha1": "55dfa50fb94cd5c683edf25c8cc0550e0b98791e",
+        "changes": 15
+      },
+      {
+        "path": "types/ext/settings-controller.d.ts",
+        "status": "modified",
+        "gitBlobSha1": "a3e53846d65e737bb44048c72287a33ed7950dd7",
+        "changes": 2
+      }
+    ],
+    "commits": [
+      {
+        "sha": "55fe4eed806887c1ea89695f916402176aabff19",
+        "message": "feat: qualify online zstd for legacy dictionaries"
+      },
+      {
+        "sha": "fc9fdd2726a45b5aded89079c2c230eab50bb64e",
+        "message": "fix: complete online zstd qualification"
+      },
+      {
+        "sha": "1bf208b6ca205cea61736a9e2f62de2757ebb8df",
+        "message": "Merge remote-tracking branch 'origin/develop' into codex/online-zstd-resume-20261127"
+      },
+      {
+        "sha": "6553908d81e59e8edffb6afe5f8f13342a284458",
+        "message": "test: compare borrowed zstd samples as typed arrays"
+      },
+      {
+        "sha": "a7e39ddfdc4d0c6761e31f329b93e2e6cc93687a",
+        "message": "Merge remote-tracking branch 'origin/develop' into codex/online-zstd-resume-20261127"
+      },
+      {
+        "sha": "a300da36d00df8e353c5679b1528b50a1299b75f",
+        "message": "Merge pull request #982 from ManabiIO/codex/online-zstd-resume-20261127"
+      }
+    ],
+    "qualificationNote": "Current corrected component retains the frozen f28 baseline. No full-import gain transfers to a300; new source qualification is required if promotion is warranted."
+  },
+  "closedOwnedOverlap": {
+    "number": 977,
+    "state": "closed",
+    "head": "54844293b8ea82350531b8da92336b325d5ab7ec",
+    "body": "## Completed qualification: closed without promotion\n\nThe unchanged owned-overlap design does **not** provide a review-worthy complete JMdict import gain on the current baseline. Both independent opposite-order hosts finished their full schedules and failed the original timing gates. Closing this draft without merging.\n\n| JMdict host | Paired median change | Equal-work change | Faster pairs | 95% paired median interval | Identical-code control median |\n| --- | ---: | ---: | ---: | ---: | ---: |\n| AB | −0.35 ms / −0.0525% | +1.1783% | 6/12 | [−1.3355%, +1.2804%] | +1.6537% |\n| BA | +15.40 ms / +1.8676% | +1.5151% | 3/12 | [−0.3239%, +4.2180%] | +0.7763% |\n\nNegative is faster. Each host retains twelve candidate/baseline pairs, four unchanged-code control pairs and four excluded warmups. No observation was removed, retried or pooled across hosts. Both semantic and separate memory screens passed; neither timing result meets the predeclared ≥10 ms and ≥1% improvement, nine faster pairs, negative confidence intervals and control requirements.\n\nThe earlier standalone compression result justified investigation, but it did not carry through to the complete import. Existing diagnostics confirm overlapping sink callbacks in all24 candidate observations. Parser-worker wall durations increase on both hosts; those overlapping clocks suggest contention/queueing for future analysis and do not establish a removable CPU cost.\n\n### Exact source and validation\n\n- Baseline: `dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16`.\n- Product head: `54844293b8ea82350531b8da92336b325d5ab7ec`.\n- Qualification source: `c98110712296be803fcb30b9295bb11c7d0b44bc`; [run46132124178](https://github.com/ManabiIO/manabitan/actions/runs/46132124178).\n- Current verification passed: JavaScript lint, main/test types,674 unit files /15186 tests passed /47 skipped,42 Python receipt tests, and all-target **dry-run** validation.\n- Both complete JMdict artifact ZIPs were independently downloaded and verified. Every prescribed observation and source identity matches; exact package changes, semantic receipts, paired arithmetic and the seeded bootstrap pass the audit.\n- [Durable raw observations, full logs, source identities, memory receipts, reproducible audit and mechanism diagnostics](https://github.com/ManabiIO/manabitan/tree/0000b582cb442f8d75aa5076ed611075aab7c9c8/builds/perf/import-overlap-20261128-da6c4/owned-completed-jmdict).\n- [Complete experiment record](https://github.com/ManabiIO/manabitan/blob/0000b582cb442f8d75aa5076ed611075aab7c9c8/dev/perf/import-experiments-20260914.md), including the historical rationale and superseded failures.\n\nRemaining Jitendex/VNDB observations and audits are being retained for completeness. They cannot change this failed primary JMdict promotion decision. A materially different design would require a separately frozen experiment."
+  },
+  "openPullRequests": [
+    {
+      "number": 980,
+      "title": "perf(import): allocate content metadata IDs only when needed",
+      "head": "a9085d1ce49aa0e74662f7b3818ab546068a1376",
+      "draft": false
+    },
+    {
+      "number": 979,
+      "title": "perf: reduce short-gap CRC work with existing slicing tables",
+      "head": "961614e36859c529580fc034d6535ca89d119051",
+      "draft": true
+    },
+    {
+      "number": 976,
+      "title": "perf(lookup): prefetch encoded block reference spans",
+      "head": "8be3268d26887bf26a93e7a3b84519bf22754c9f",
+      "draft": false
+    },
+    {
+      "number": 975,
+      "title": "perf: cache hash tags in canonical import slots",
+      "head": "43a84f84bbd7fe1c251425ab06aaafbb361477f3",
+      "draft": true
+    },
+    {
+      "number": 974,
+      "title": "Reduce Zstd pool startup work by sharing compiled code and dictionary",
+      "head": "ab00fae7cdf7f32ad5100fd2101f3e7ce7202af1",
+      "draft": true
+    },
+    {
+      "number": 973,
+      "title": "Avoid unused SQLite OPFS proxy workers",
+      "head": "ccb61f580f626d00bf6dab2509ff801c31d01f9a",
+      "draft": true
+    },
+    {
+      "number": 966,
+      "title": "test: restore missing import qualification against current policy",
+      "head": "5c17b2d669218375ff44f405e97e6b9fe994abb8",
+      "draft": true
+    },
+    {
+      "number": 962,
+      "title": "Record import verification for JMdict, Jitendex, and VNDB",
+      "head": "f41237899319b59873fba36af7c16b7445e0ff96",
+      "draft": true
+    },
+    {
+      "number": 961,
+      "title": "perf: compact fused metadata for dictionary imports",
+      "head": "0e233538e975c7be11b2144974923e2bf6396254",
+      "draft": true
+    },
+    {
+      "number": 958,
+      "title": "Check native dictionary content capacity once per literal row",
+      "head": "6dc0b915412fc3f271b5cb2e25996a9931d854dc",
+      "draft": true
+    },
+    {
+      "number": 955,
+      "title": "Release borrowed parser buffers after compression gathers their bytes",
+      "head": "bc94ee31a5dbfc1b29766cb9dee3a6fe6b54ea54",
+      "draft": true
+    },
+    {
+      "number": 953,
+      "title": "test: preserve native hints after duplicate glossary types",
+      "head": "4e8bb81c1055e45f4fec123d042e09d04ed831f9",
+      "draft": true
+    },
+    {
+      "number": 951,
+      "title": "Avoid word scanning for empty dictionary string fields",
+      "head": "8c32e0e4d9ad61a1dafd324efa717f2680ba31db",
+      "draft": true
+    },
+    {
+      "number": 948,
+      "title": "perf: fuse validated structured glossary type literals",
+      "head": "dce83c54af038e7b4ac59c8d690026c532341f40",
+      "draft": true
+    },
+    {
+      "number": 947,
+      "title": "test: verify import allocation changes on all three pinned dictionaries",
+      "head": "0e463f74dbc4f1dc6a4f90ec4dc962d14fbfedcf",
+      "draft": false
+    },
+    {
+      "number": 945,
+      "title": "Record dictionary import optimization evidence",
+      "head": "19f19195c75c27c59976abfd26806481b8d3d3c6",
+      "draft": true
+    },
+    {
+      "number": 930,
+      "title": "test: profile and qualify current dictionary import optimizations",
+      "head": "481f32470d43109c387ed8c657e0d4960bcdd1a3",
+      "draft": true
+    },
+    {
+      "number": 929,
+      "title": "test: qualify JMdict, Jitendex and VNDB import changes",
+      "head": "72d5a45a13b224cf2a58f9936ae6c929cfa6497f",
+      "draft": true
+    },
+    {
+      "number": 914,
+      "title": "perf: preflight content publication in existing native scratch",
+      "head": "b273513dab4fa409a0213a2db470e52b4a0f559c",
+      "draft": true
+    },
+    {
+      "number": 912,
+      "title": "perf: reuse native lookup output tail for sequence scratch",
+      "head": "f5aa5ce36dd547cf790c34803b37a5bd4cc2e96c",
+      "draft": true
+    },
+    {
+      "number": 910,
+      "title": "perf: reuse exact glossary CRCs across contiguous source runs",
+      "head": "2fe47fa3db04342d04eb4f309c5d74ef45eef9e3",
+      "draft": true
+    },
+    {
+      "number": 907,
+      "title": "Transfer projected dictionary media as compact owned columns",
+      "head": "e5fbc6af88c8c69bfa7471da287ef9ceef953c90",
+      "draft": true
+    },
+    {
+      "number": 905,
+      "title": "perf: project validated image paths without full glossary decoding",
+      "head": "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9",
+      "draft": true
+    },
+    {
+      "number": 903,
+      "title": "perf: fuse media selection with canonical content validation",
+      "head": "3d7b4528c295a3e0f9cf97e8d6967896c51d2310",
+      "draft": true
+    },
+    {
+      "number": 899,
+      "title": "perf: reuse strict term-row integer projections",
+      "head": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+      "draft": true
+    },
+    {
+      "number": 895,
+      "title": "Recognize repeated Jitendex metadata keys during native parsing",
+      "head": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+      "draft": true
+    },
+    {
+      "number": 894,
+      "title": "Compact lookup keys directly into final native indexes",
+      "head": "7ee8f0cde0845af3906e77b8adad11e3aaefc371",
+      "draft": true
+    },
+    {
+      "number": 893,
+      "title": "test: strengthen common-key parser boundary coverage",
+      "head": "811950b5cbd1a81a365848bf63675c46a8ff0dde",
+      "draft": true
+    },
+    {
+      "number": 892,
+      "title": "perf: fuse child-container comma transitions in term parsing",
+      "head": "b8f6eb5785ac31b71f4b177834b988a15edea370",
+      "draft": true
+    },
+    {
+      "number": 880,
+      "title": "perf: snapshot immutable inputs in native canonical scans",
+      "head": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+      "draft": true
+    },
+    {
+      "number": 877,
+      "title": "Move owned lookup envelopes to the import I/O worker",
+      "head": "1a04064bcc33565537c47f8047dacd03b3e89b24",
+      "draft": true
+    },
+    {
+      "number": 874,
+      "title": "perf: overlap accepted private content compression with record writes",
+      "head": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "draft": true
+    },
+    {
+      "number": 864,
+      "title": "Reduce native canonical scan counter writes",
+      "head": "d147a60fc4845e898d98d8924968d6094b417007",
+      "draft": true
+    },
+    {
+      "number": 863,
+      "title": "Reduce media requirement allocation during dictionary imports",
+      "head": "ebb0777114578c5cee879877274e7d872bfea27e",
+      "draft": true
+    },
+    {
+      "number": 856,
+      "title": "perf: compact native import rollback journals",
+      "head": "8282d596809d76ca2960f926719d94877925489e",
+      "draft": true
+    },
+    {
+      "number": 855,
+      "title": "Encode repeated record fields in runs on direct output columns",
+      "head": "bb1073961bb5adaa190e32943c94d063a18aa8bd",
+      "draft": true
+    },
+    {
+      "number": 850,
+      "title": "Compact projected media rows before worker transfer",
+      "head": "3597a103b0f35d076587e08196caa9f5d12f53ef",
+      "draft": true
+    },
+    {
+      "number": 846,
+      "title": "Avoid temporary strings when indexing VNDB media paths",
+      "head": "32c13e05c1a7fda88fd531dab40648c1978565f2",
+      "draft": true
+    },
+    {
+      "number": 840,
+      "title": "perf: copy and hash long glossary records in one pass",
+      "head": "44686ef6ebaafa624e6d228494719bbed4cb8ef4",
+      "draft": true
+    },
+    {
+      "number": 831,
+      "title": "Reuse validated nested metadata during dictionary imports",
+      "head": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+      "draft": true
+    },
+    {
+      "number": 830,
+      "title": "perf: specialize current in-flight content registration",
+      "head": "049cb11e6963604435998aa060e1400cc00365cb",
+      "draft": true
+    },
+    {
+      "number": 829,
+      "title": "Bound parser content backlog with existing buffer ownership",
+      "head": "f6ae9bcdd0bfc43aa0f13ad6b500bc2179541f26",
+      "draft": true
+    },
+    {
+      "number": 828,
+      "title": "Bound parallel parser lead by owned content bytes",
+      "head": "c763a4c8e628e1cd0417102dfbddcc70b6440735",
+      "draft": true
+    },
+    {
+      "number": 823,
+      "title": "Release consumed compression source references",
+      "head": "bcdb64934e6191ef72324d3c238e6a79edc23d34",
+      "draft": true
+    },
+    {
+      "number": 820,
+      "title": "perf: reuse owned native lookup key and expression buffers",
+      "head": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
+      "draft": true
+    },
+    {
+      "number": 812,
+      "title": "perf: accelerate native DEFLATE history copies",
+      "head": "5555f3efd3e0c8baa99e93b4c14e7f1889c30383",
+      "draft": true
+    },
+    {
+      "number": 810,
+      "title": "Share owned dictionary content with compression workers",
+      "head": "5754e7837a6cea28debfd5d37a95c380d9bd4871",
+      "draft": true
+    },
+    {
+      "number": 797,
+      "title": "Reduce repeated delimiter dispatch in dictionary imports",
+      "head": "2663832da942d3ce0ccefb5609ef17b7d0ae9371",
+      "draft": true
+    },
+    {
+      "number": 764,
+      "title": "Reduce redundant work in JMdict import and block reads",
+      "head": "1e82e1a237410c5a850661c1c361c444fa624546",
+      "draft": true
+    },
+    {
+      "number": 761,
+      "title": "Reuse validated row tokens in fused dictionary imports",
+      "head": "b9c9850a25eff3bb0684b8283cbb9b3c7ef49042",
+      "draft": true
+    }
+  ],
+  "savingInspectionFailure": {
+    "attempt": 1,
+    "type": "exec argument list too long when attempting full fetched JSON snapshot",
+    "sourceOrObservationChanged": false,
+    "correction": "Persist compact exact source/path identities and PR metadata; full source remains at immutable Git commits."
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "kind": "independent-primary-fresh-correctness-reuse-audit",
+  "recordedAtUtc": "2026-11-28T11:45:33.122Z",
+  "runId": 46141233321,
+  "jobId": 140967406330,
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "jobTerminalConclusion": "success",
+  "primaryLog": {
+    "bytes": 31266,
+    "sha256": "a8ba6af883eb9b874bbeaafe83f2d06fbb0e8bccb8ff434ca9cec0de963eccce"
+  },
+  "taggedRecords": 12,
+  "originalSuccessfulCommandReceiptsExactlyEqual": true,
+  "originalCorrectness": {
+    "artifactBytes": 146783,
+    "artifactGitBlobSha1": "b9123d6e64bfd0f7faa3abb3aabdc693ed7c0577",
+    "artifactId": 15261456718,
+    "artifactSha256": "3d17262def25c405f1add4f4923694059479bbae83af4e9a93960985a4ba48a7",
+    "jobId": 140961651044,
+    "runId": 46139360578,
+    "toolingCommit": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c",
+    "toolingTree": "c83cc5aa64eccb4637c438e7d3c74544c2e73a95"
+  },
+  "currentFreshSource": {
+    "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "trees": {
+      "A": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+      "B": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f"
+    }
+  },
+  "freshUnitCounts": {
+    "files": 701,
+    "passed": 15921,
+    "skipped": 47
+  },
+  "focusedCases": {
+    "test/term-bank-row-suffix-proof-consumer.test.js": 17,
+    "test/term-bank-row-suffix-reuse.test.js": 32,
+    "test/term-bank-row-suffix-token-ends.test.js": 9
+  },
+  "optionsPassed": 32,
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "nativeCheck": {
+    "mode": "check",
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+      }
+    ],
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    }
+  },
+  "sourceBindingSha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3",
+  "freshCorrectnessProofSha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "newTestSuitesExecuted": false,
+  "newBenchmarkObservations": 0,
+  "requiredExactHeadRepositoryChecksRemainRequiredBeforeMerge": true,
+  "pass": true,
+  "scope": "Primary log reconciliation of the strict same-head correctness reuse dependency. Exact original artifact bytes and raw command logs were separately checked by the published verifier and previous original-artifact audit01df; no duplicate test suite or measurement was run."
+}

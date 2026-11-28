@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "complete": true,
+  "scope": "Immutable current-source raw-audit/recovery preparation; identity data frozen after actual job registration and before any current full observation retrieval.",
+  "recordedAt": "2026-11-28T11:45:34.514001+00:00",
+  "runId": 46141233321,
+  "workflowCommit": "e8f2ccf9738839a901703890fb0061bb5eeae743",
+  "jobs": {
+    "jmdict-AB": 140967463788,
+    "jmdict-BA": 140967463778,
+    "jitendex-AB": 140967463739,
+    "jitendex-BA": 140967463737,
+    "vndb-AB": 140967463725,
+    "vndb-BA": 140967463694
+  },
+  "files": {
+    "raw-evidence-audit-v2.py": "6d7ee1243cf99eee76c1b198389c0fecbeee2b6e9d6816cf255b43525521ef4b",
+    "recover-raw-archive-v2.py": "d23e55c961851b39dc0a000e4274500655bf3beee4f76f47ec0d6bce94a70330",
+    "independent-complete-import-expected.json": "006d19ea2498cb3b561f084dba2c41b133c0c5b23a65137b8afb7756716f49f9",
+    "publication-binding.json": "5e53f0a6b260587d33b36b6d2198f4edcccbde74a541f9e4d1e53346bce6c6da",
+    "primary-auditor-independent-review.json": "2882c238b4c745ca35a466d18955117bdcbedaaf722436e95c3427f4d309dae3",
+    "output-provenance-amendment.json": "71229509900831a58cd2cf92160188880d5882fd2e1b7e6964c25c85c94cca3c",
+    "source-preparation-receipt.json": "c752bcd271b3064fd58c95a3e5af52d21a12115a084c176e51aeca60634137cc"
+  },
+  "originalSourcesAndDraftsPreserved": true,
+  "currentFullObservationFilesRead": 0,
+  "nativeExecution": false,
+  "benchmarkExecution": false
+}

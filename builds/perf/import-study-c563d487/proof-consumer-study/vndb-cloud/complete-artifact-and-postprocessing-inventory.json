@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "scope": "Exact original acquired ZIPs and additional postprocessing layers; no new acquisition.",
+  "originalZipArtifacts": [
+    {
+      "label": "failed-build",
+      "bytes": 143191,
+      "sha256": "83fec428abd17ec35a69684ee22ba4524a498f15856d8d89bf727918056347b4",
+      "gitBlob": "7f80ccc0cc2bcf9060ccd6cf174d42fe0d9e64e5"
+    },
+    {
+      "label": "build",
+      "bytes": 315161,
+      "sha256": "8f48ef25c5c8a9283981192db8402fadcdbba7cc3a02290b278c3d229470c1ee",
+      "gitBlob": "0da0a6727cdce30b00b1995cfef4fe9aac95f84a"
+    },
+    {
+      "label": "jmdict",
+      "bytes": 193334,
+      "sha256": "81a30e876da47cb4aa7433741e62fed291468df67f7eb3c9c9ad1e6e18a4d0da",
+      "gitBlob": "2c6c961e4c83fd19f4d4fc42c26c767eee3a6c46"
+    },
+    {
+      "label": "jitendex",
+      "bytes": 214255,
+      "sha256": "7dad7f5919e459bed984fd68c2acc83c405b94f615a51eae7b4235cfb504f736",
+      "gitBlob": "3b711fd08ac44fbe9c45f155e5e4a99ee74d2551"
+    },
+    {
+      "label": "vndb",
+      "bytes": 281122,
+      "sha256": "6630e77afbb10681aee5faef58bd0b4aad47cd52b94715e93b346041ff18b3f5",
+      "gitBlob": "4ab0def4ad08b139d9a29ccc5c59e23ece913f8c"
+    }
+  ],
+  "derivedRecoveryZip": {
+    "bytes": 317346,
+    "sha256": "97fe273c32f6b885ffedb924190fca5d3cd5846243fea9f3f17a909f80080ddf",
+    "gitBlob": "4b1b31ddaba9c0a7aca24c39963a73cab1f58843"
+  },
+  "originalFrozenAuditorAfterRecovery": {
+    "complete": true,
+    "sha256": "ade67deebfbd7e7a699cc5445d03d2c2502075a79039646b051ac0dbe99a36ab",
+    "gitBlob": "665cf70416b095f5c9887742b276514e63f04f91",
+    "path": "../independent-artifact-replay-after-recovery-1/independent-component-audit.json",
+    "historicalCloudStatementsRemainUnchanged": true
+  },
+  "originalAuditCode": {
+    "core": {
+      "sha256": "26ae504a358edf263b45c9da575e02a548dfe00f50e370ff502e20ee90f88aaf",
+      "gitBlob": "1792343ce2c9722eb32bc696e7c9e348cec196c3"
+    },
+    "component": {
+      "sha256": "6e007d90376d3195d14d0949e7aa23d72bc8bfe438cdec510b4ef29d3979da66",
+      "gitBlob": "a0256e0107063caf734c20d907f215e80f3576d8"
+    },
+    "correctedExpectations": {
+      "sha256": "ae80191962e44d378237922b923d9411d42b53ab6149fc680d8907b05974fad9",
+      "gitBlob": "e479f8c9093331e06cf47fbc08f0b2c438eaa4bb"
+    }
+  },
+  "cloudFiles": [
+    {
+      "name": "recover.py",
+      "bytes": 16145,
+      "sha256": "71abc32cb48ec9259c6bb186f05aed13c98c724e4956b79a9918f81ec43f03ed",
+      "gitBlob": "c5c97fae0609b0398205d96702c62afcb52d2720"
+    },
+    {
+      "name": "recovery-workflow.yml",
+      "bytes": 1300,
+      "sha256": "246f94868b9955e1fc1a46ad31d3540a9fafc957f010a5875d38a0109acebcdd",
+      "gitBlob": "69484a8b0c260f536bbbd1179bb2130c5776111c"
+    },
+    {
+      "name": "cloud-byte-helper.js",
+      "bytes": 4296,
+      "sha256": "70aba211c279b54c24dff2f3e4e7bc6efbf4282e84c665167ef2f3821e7cbfe0",
+      "gitBlob": "00c49121ff880189acd6d5896304c01fcde01333"
+    },
+    {
+      "name": "cloud-auditor-v1.js",
+      "bytes": 15445,
+      "sha256": "2bae98638f350a9ffb8bc4691598abcca9816f3996ad39490521b1e433e6cc10",
+      "gitBlob": "d081a289bde6cd5ac345eb88853f9bc7c8952bb1"
+    },
+    {
+      "name": "cloud-auditor-v2.js",
+      "bytes": 15837,
+      "sha256": "a8ea0b6f7829a2479b58b4d4af89097500a168d0a2896b40046783856a639fc8",
+      "gitBlob": "847441d22d5212420f3df81271b8ab3722820e34"
+    },
+    {
+      "name": "cloud-original-artifact-reconciliation.json",
+      "bytes": 18707,
+      "sha256": "f4bc21fbf178c1e28202f14578d32e0a1ef07ff04d6505e73b2827f3e90d3581",
+      "gitBlob": "d5d2ac37a09e0898483d0955fd03509d9e374796"
+    },
+    {
+      "name": "native-oracle-receipt-audit.js",
+      "bytes": 7440,
+      "sha256": "16052d5e83ad668566b50590cbad70292da9adff826ba1d253b125cb6ec5ddb5",
+      "gitBlob": "1b14758da42a10906e494ee65dfb5cd368121da8"
+    },
+    {
+      "name": "native-oracle-receipt-audit.json",
+      "bytes": 2281,
+      "sha256": "6f9b943d127b6584a7f618a1483da9b9e43e6d72818dafec797d2e3a93ed63ba",
+      "gitBlob": "270223f126525f731db4e3078e2b64eda4202254"
+    },
+    {
+      "name": "cloud-postprocessor-attempt-1.json",
+      "bytes": 248,
+      "sha256": "46a07806b1c9a45221449f625329870942f3bd4f605d1b95f2b20977d0c72301",
+      "gitBlob": "e9a893f109c018294435ae7799a2a6ec33b9f63c"
+    },
+    {
+      "name": "projection-amendment.json",
+      "bytes": 2038,
+      "sha256": "c168d10bfff2b25dfca85715ed1e563c062610a31a75a54e170a99fbfffa79c8",
+      "gitBlob": "8607c6b3ca705b73a1bc6965b4f9ab160b949aa1"
+    },
+    {
+      "name": "recovery-manifest.json",
+      "bytes": 26141,
+      "sha256": "3c4a292bcb9ff3da4dac9f577de476ae073e2c333151db033a34b45b44b95a84",
+      "gitBlob": "73ca7c03aba49d06c770fe7297a556728b4b7213"
+    }
+  ],
+  "externalReviewBlobs": {
+    "recoverySource": "ab035e81a0c01af1bfffccc9dd50a33be96cc6a6",
+    "projectionCorrection": "80780765d0f98e2b5ae314703ff6fb94783dea1b"
+  },
+  "recordedLimitations": [
+    "Cloud reconciliation historical receipt states original6e00 not-run during outage; later exact execution is a distinct additional layer.",
+    "Derived recovery ZIP and original ZIP are distinct and both retained.",
+    "No native tests or benchmarks were rerun for any artifact audit."
+  ]
+}

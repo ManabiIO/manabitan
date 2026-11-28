@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "finalizedBeforeAnyCorrectedMeasurementsConsumed": true,
+  "recordedAt": "2026-11-28T10:50:04.836417+00:00",
+  "scope": "Prospective identity amendment only for a separate corrected preflight/cohort. No acquisition, raw-observation, arithmetic, gate, or native-source change.",
+  "originalExpectedSha256": "766b4371ffe2a3203a8ee40642b99c8807c2a5183d16157ee70f6b83bcb62c52",
+  "correctedExpectedSha256": "ae80191962e44d378237922b923d9411d42b53ab6149fc680d8907b05974fad9",
+  "bindingSha256": "61d7d54b12c709e2c5275d187c11bf4370d5edaebc21c9ede8ee93cf57aff880",
+  "publicationReceiptSha256": "8aa82613d4e5a0b892aede121774d472a23c885295f6598182cc824ad996383f",
+  "publication": {
+    "runId": 46136965050,
+    "runAttempt": 1,
+    "commit": "2c6761f83bd88a8d88b269ef31e5e15fa6840c22",
+    "tree": "d71df680d403dad8c801f57e70c3a7c86dae17ca",
+    "branch": "perf/numeric-suffix-proof-consumer-corrected-20261128-c563d487",
+    "workflowPath": ".github/workflows/import-suffix-proof-component-c563d487.yml"
+  },
+  "runDiscovery": {
+    "source": "Benchmark owner original GitHub run/job metadata; delivered before any corrected build result or component observation.",
+    "createdAtUtc": "2026-11-28T10:49:18Z",
+    "correctnessJobId": 140954302987,
+    "statusAtBinding": "in_progress/setup"
+  },
+  "changedTopLevelFields": [
+    "recordedAt",
+    "publication",
+    "bindingSha256",
+    "binding"
+  ],
+  "changedToolingFiles": [
+    "workflow.yml"
+  ],
+  "changedQualificationFiles": [
+    "term-bank-row-suffix-proof-consumer.test.js",
+    "term-bank-row-suffix-proof-fixtures.js"
+  ],
+  "allOtherExpectedValuesEqual": true,
+  "allElevenBaselineSourceHashesUnchanged": true,
+  "allFourteenNativeInputHashesUnchanged": true,
+  "allCriteriaFixtureSmokeDiagnosticAndArithmeticValuesUnchanged": true,
+  "auditorFilesUnchanged": {
+    "evidence_core.py": "26ae504a358edf263b45c9da575e02a548dfe00f50e370ff502e20ee90f88aaf",
+    "audit-component.py": "6e007d90376d3195d14d0949e7aa23d72bc8bfe438cdec510b4ef29d3979da66",
+    "audit-build.py": "77947b8202fbadf59e4bd1677ae7fe437a37a0159c1a65d727a440b7969a7f92"
+  },
+  "originalFailedRunId": 46135694884,
+  "originalExpectedAndAuditorFilesPreserved": true,
+  "preparerSha256": "4199a5644de748c037fd260a8fceaca5c4d68c5254506db97221c5b263c40178",
+  "interpretation": "This binds only the new run identity and reviewed optional-wide-sequence test contract. A successful original build and all fixed raw observations are still required for any later conclusion."
+}
