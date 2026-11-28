@@ -319,6 +319,12 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             record.storageEstimateAtFirstLookup = await page.evaluate(async () => navigator.storage.estimate())
             record.storageAtFirstLookup = await inspectPersistedContent(page)
         }
+        if (process.env.BENCH_CAPTURE_IMPORT_PHASES === '1') {
+            record.importDebugSnapshot = await page.evaluate(() => globalThis.__manabitanLastImportDebug ?? null)
+            if (!record.importDebugSnapshot || record.importDebugSnapshot.dictionaryTitle !== spec.title) {
+                errors.push('Importer phase snapshot was missing or belonged to a different dictionary')
+            }
+        }
         if (!record.exactHeadword || !record.allResultsHydrated || sourceCoverage.missing.length > 0) {
             errors.push('Manabitan lookup failed exact-pair or hydrated-glossary validation')
         }
@@ -350,8 +356,9 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
                     record.afterRestart = await probeLookup(restartedPage, spec.query, record.resultSha256, spec.title, glossaryOracle)
                     if (!record.afterRestart.equal) errors.push('Restart lookup differs from the first lookup')
                     record.storage = await inspectPersistedContent(restartedPage)
-                    if (dataset === 'vndb' && arm === 'candidate') {
-                        const mediaOracle = JSON.parse(await readFile(path.join(fixtureRoot, 'fixtures/vndb-media-oracle.json'), 'utf8'))
+                    if (['jitendex', 'vndb'].includes(dataset) && arm === 'candidate') {
+                        const mediaOracleName = dataset === 'jitendex' ? 'jitendex-media-oracle.json' : 'vndb-media-oracle.json'
+                        const mediaOracle = JSON.parse(await readFile(path.join(fixtureRoot, 'fixtures', mediaOracleName), 'utf8'))
                         if (mediaOracle.archiveSha256 !== spec.sha || mediaOracle.dictionary !== spec.title ||
                             !Number.isSafeInteger(mediaOracle.bytes) || !/^[0-9a-f]{64}$/.test(mediaOracle.sha256)) {
                             throw new Error('Pinned VNDB media oracle identity does not match the dataset')
