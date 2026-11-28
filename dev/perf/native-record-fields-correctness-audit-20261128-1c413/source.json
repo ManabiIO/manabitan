@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "records-only-original-correctness-audit",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "files": {
+    ".github/workflows/native-fields-correctness-audit-1c413.yml": {
+      "gitBlob": "832c9b8792ee1be0bbaa247dbb9dc9faebe6946a",
+      "bytes": 6637,
+      "sha256": "d875ac6fe08349348594ca2c935f7944bad38266ef1419f388c076ffbd1d134d"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/audit.py": {
+      "gitBlob": "2b57d39379680d7e12ce2d54da5aa730c8040827",
+      "bytes": 64980,
+      "sha256": "53ad5a144bd025300e2e3d6b19f34a638ca8ea7bbc93b7218c6e4dfd43c07e9c"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/field_activation.py": {
+      "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
+      "bytes": 25222,
+      "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/manifest.json": {
+      "gitBlob": "916e0e96e8dc30603f91a348378e215aeabec1b0",
+      "bytes": 2774,
+      "sha256": "cb28cdb91e6df581b0bd820d958898607ca6a0f220fe7dd7e8409c65b16eb8d8"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/README.md": {
+      "gitBlob": "0d76689014a4feddb2b3fa71acfcaf56cbb3d043",
+      "bytes": 6592,
+      "sha256": "81b460a198297db398c001c59624c825fd8299692cebf2c63ff10388af51fd09"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/test-audit.py": {
+      "gitBlob": "462c543c7239b67f3392262b204163128d32bf15",
+      "bytes": 36702,
+      "sha256": "b76eea73ff82e392469cb3ca772193719a2a97aab95402387ba4d974a966bc47"
+    },
+    "dev/perf/native-record-fields-correctness-audit-20261128-1c413/transport.py": {
+      "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+      "bytes": 9875,
+      "sha256": "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
+    }
+  }
+}

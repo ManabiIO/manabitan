@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "publication": {
+    "runId": 46132025311,
+    "headSha": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+    "headBranch": "test/native-record-fields-types-20261128-1c413",
+    "attempt": 1
+  },
+  "source": {
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+    "product": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+    "productTree": "1800a0e2cd59503d2ffeb605f415476dc9025f2c",
+    "candidate": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+    "candidateTree": "68b87c1b0121b82f3321260525b9d0836f858577"
+  },
+  "jobs": {
+    "validation": {
+      "id": 140939066469,
+      "name": "Rebuild, complete units, types, lint and all-target builds",
+      "conclusion": "success"
+    },
+    "corpus": {
+      "id": 140939066689,
+      "name": "Untimed original baseline and candidate importer parity",
+      "conclusion": "success"
+    }
+  },
+  "artifacts": {
+    "validation": {
+      "id": 15258022480,
+      "name": "native-record-fields-correctness-5c95580e99d0f1f57e0daef417753003c352e5b5",
+      "sizeBytes": 343135,
+      "sha256": "d0c9a526f185b06f314a82d85e17efae61999f97983613a17c48e6fd1fa4713f"
+    },
+    "corpus": {
+      "id": 15257853500,
+      "name": "native-record-fields-corpus-5c95580e99d0f1f57e0daef417753003c352e5b5",
+      "sizeBytes": 1041067,
+      "sha256": "494be69997cc8f581c9e8b706ab65f355a3880ce48230830ac8817191e5385e6"
+    }
+  },
+  "scope": {
+    "readOnly": true,
+    "performanceMeasurements": false,
+    "replacementAcquisition": false,
+    "originalSuccessfulRawSinksRetired": true,
+    "originalCorpusContainsCompleteHashReceipts": true,
+    "noBrowserPersistenceOrFullMediaQualification": true
+  },
+  "priorFailurePreservation": [
+    {
+      "runId": 46125649822,
+      "description": "Original source-mode guard rejected tracked executable; no corpus imports."
+    },
+    {
+      "runId": 46127174624,
+      "description": "Original generated-runtime mismatch and filename upload failure; internal corpus receipts unavailable."
+    },
+    {
+      "runId": 46129727075,
+      "description": "All original corpus pairs passed, but archive rejected intentional smoke symlink; validation had concrete lint/type failures. Full console evidence separately preserved; no passing original corpus artifact."
+    }
+  ],
+  "originalJobLogs": {
+    "corpus": {
+      "gitBlob": "7fb959dac5a2797779845d2e3af5b55360bf4efa",
+      "bytes": 683056,
+      "sha256": "cbfc80d54ca374d7d55bd0e2b59f3fbb98dcdf08c3632ee8de5da9fd24bfd24e"
+    },
+    "validation": {
+      "gitBlob": "dc5c7ebdd48c68e879419b2bd8fd1f483ab6dcd4",
+      "bytes": 1118769,
+      "sha256": "fb0cb75447de815247c13665f53ed81a29b30ee567d41f18c075c203a7fea313"
+    }
+  }
+}
