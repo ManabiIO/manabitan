@@ -1,0 +1,283 @@
+name: Current import integration correctness gates (1b47)
+
+on:
+  push:
+    branches: [perf/current-import-integration-gates-20261128-1b47]
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    name: Validate exact current integration (${{ matrix.variant }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: score
+            product_sha: dbaa4d72a5f6b4fcffeb92cefadb521e101df7df
+          - variant: crc
+            product_sha: 961614e36859c529580fc034d6535ca89d119051
+    env:
+      INTEGRATION_VARIANT: ${{ matrix.variant }}
+      INTEGRATION_PRODUCT_SHA: ${{ matrix.product_sha }}
+      INTEGRATION_BASELINE_SHA: dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
+      INTEGRATION_EVIDENCE: builds/perf/current-import-integration-gates-1b47/${{ matrix.variant }}
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - name: Check out the exact product commit
+        id: checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ matrix.product_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Bind exact source, tree, parents, blobs and changed file set
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$INTEGRATION_EVIDENCE"
+          python3 - <<'PY' 2>&1 | tee "$INTEGRATION_EVIDENCE/source-check.log"
+          import hashlib, json, os, pathlib, subprocess
+          baseline = 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'
+          expected = {
+              'score': {
+                  'commit': 'dbaa4d72a5f6b4fcffeb92cefadb521e101df7df',
+                  'tree': '4a632857a1250fd0a716f700f8d8997f7560cb68',
+                  'parents': ['b15bad43acdfd54d541895cac1109c0e5ba51b2f', baseline],
+                  'files': {
+                      'ext/js/dictionary/term-record-opfs-store.js': {
+                          'gitBlob': 'b17f72437f196aa1fd21b282c03f147aad7d633f',
+                          'sha256': '63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769',
+                          'bytes': 365322,
+                      },
+                  },
+              },
+              'crc': {
+                  'commit': '961614e36859c529580fc034d6535ca89d119051',
+                  'tree': 'e7e454a7f019ed2201e4c66ce5db2e8b87218148',
+                  'parents': ['5909db31ebe859fce1cc4b38324271ddf9f3dd59', baseline],
+                  'files': {
+                      'dev/data/dictionary-wasm/manifest.json': {
+                          'gitBlob': '0c9570aeab5f9a003cd815ce1c0a286c715f3cc2',
+                          'sha256': '85c25286a9d3d3ff2ba90b61700fb054e3fe2c7ab81a33725bc001d813512fd7',
+                          'bytes': 2588,
+                      },
+                      'dev/data/dictionary-wasm/term-bank-parser.wasm': {
+                          'gitBlob': 'dcbbca0b5ed4ec2f5348901e53cb25fcd085cb96',
+                          'sha256': 'fbcf0f790ced310b93d2824d9d191402bb5496d8d6166be5ea1b4770a215ce81',
+                          'bytes': 69352,
+                      },
+                      'ext/js/dictionary/wasm/term-bank-parser.c': {
+                          'gitBlob': '8580418076e7b0229b466644340dab649911882a',
+                          'sha256': '48ee9733ed67c192c10573fbd319c8bcc35d4aabda7904101fb82d0af946dd94',
+                          'bytes': 162379,
+                      },
+                      'test/term-bank-crc.test.js': {
+                          'gitBlob': 'eb968742aa8279b2bff81065dea56791caad6bf4',
+                          'sha256': 'e144707e13ec49bc74d9a45448a4b1655957b2329bee770301a4739d33678876',
+                          'bytes': 8907,
+                      },
+                  },
+              },
+          }
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          def require(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+          variant = os.environ['INTEGRATION_VARIANT']
+          selection = expected[variant]
+          output = pathlib.Path(os.environ['INTEGRATION_EVIDENCE'])
+          receipt = {'scope': 'Correctness only; no browser or performance acquisition',
+                     'variant': variant, 'baseline': baseline, 'expected': selection,
+                     'workflowCommit': os.environ['GITHUB_SHA'], 'passed': False}
+          try:
+              require(os.environ['INTEGRATION_BASELINE_SHA'] == baseline, 'Unexpected common baseline')
+              require(os.environ['INTEGRATION_PRODUCT_SHA'] == selection['commit'], 'Unexpected matrix commit')
+              receipt['actualCommit'] = git('rev-parse', 'HEAD')
+              receipt['actualTree'] = git('rev-parse', 'HEAD^{tree}')
+              receipt['actualParents'] = git('show', '-s', '--format=%P', 'HEAD').split()
+              receipt['changedFiles'] = [line.split('\t') for line in git(
+                  'diff', '--name-status', '--no-renames', baseline, 'HEAD').splitlines()]
+              receipt['initialTrackedStatus'] = git('status', '--porcelain', '--untracked-files=no')
+              require(receipt['actualCommit'] == selection['commit'], 'Product commit mismatch')
+              require(receipt['actualTree'] == selection['tree'], 'Product tree mismatch')
+              require(receipt['actualParents'] == selection['parents'], 'Product merge-parent order mismatch')
+              require(receipt['changedFiles'] == [['M', path] for path in sorted(selection['files'])],
+                      'Unexpected product file set or change kind')
+              require(receipt['initialTrackedStatus'] == '', 'Initial tracked source is dirty')
+              subprocess.run(['git', 'merge-base', '--is-ancestor', selection['commit'],
+                              os.environ['GITHUB_SHA']], check=True)
+              require(git('rev-parse', 'HEAD:.github/actions/setup/action.yml') == git(
+                  'rev-parse', baseline + ':.github/actions/setup/action.yml'), 'Setup action changed')
+              receipt['files'] = {}
+              for path, identity in selection['files'].items():
+                  data = pathlib.Path(path).read_bytes()
+                  actual = {'gitBlob': git('rev-parse', 'HEAD:' + path),
+                            'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
+                  receipt['files'][path] = actual
+                  require(actual == identity, 'Source identity mismatch: ' + path)
+                  require(hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+                          == identity['gitBlob'], 'Working-copy Git blob mismatch: ' + path)
+                  target = output / 'source' / path
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+              workflow_path = '.github/workflows/current-import-integration-gates-1b47.yml'
+              workflow = subprocess.check_output(['git', 'show', os.environ['GITHUB_SHA'] + ':' + workflow_path])
+              (output / 'registered-workflow.yml').write_bytes(workflow)
+              receipt['workflowSha256'] = hashlib.sha256(workflow).hexdigest()
+              receipt['passed'] = True
+          except Exception as error:
+              receipt['error'] = str(error)
+              raise
+          finally:
+              (output / 'source-check.json').write_text(json.dumps(receipt, indent=2) + '\n')
+              print(json.dumps(receipt, sort_keys=True))
+          PY
+
+      - name: Install and assert the pinned native toolchain version
+        id: toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update 2>&1 | tee "$INTEGRATION_EVIDENCE/apt-update.log"
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 \
+            2>&1 | tee "$INTEGRATION_EVIDENCE/apt-install.log"
+          clang-21 --version | tee "$INTEGRATION_EVIDENCE/clang-version.txt"
+          wasm-ld-21 --version | tee "$INTEGRATION_EVIDENCE/lld-version.txt"
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess
+          output = pathlib.Path(os.environ['INTEGRATION_EVIDENCE'])
+          versions = {}
+          for name in ('clang-21', 'wasm-ld-21'):
+              text = subprocess.check_output([name, '--version'], text=True)
+              if not re.search(r'\b21\.1\.8\b', text.splitlines()[0]):
+                  raise RuntimeError(name + ' is not the pinned 21.1.8 toolchain')
+              versions[name] = text
+          (output / 'native-toolchain.json').write_text(json.dumps(versions, indent=2) + '\n')
+          PY
+
+      - name: Set up exact Node and locked dependencies
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Assert Node identity and generated parser test asset
+        id: runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e 'if (process.versions.node !== "22.22.0") throw new Error("Unexpected Node version"); console.log(JSON.stringify(process.versions))' \
+            | tee "$INTEGRATION_EVIDENCE/node-versions.json"
+          test -d ext/lib
+          test ! -L ext/lib
+          cmp dev/data/dictionary-wasm/term-bank-parser.wasm ext/lib/term-bank-parser.wasm
+          sha256sum dev/data/dictionary-wasm/term-bank-parser.wasm ext/lib/term-bank-parser.wasm \
+            | tee "$INTEGRATION_EVIDENCE/parser-asset-sha256.txt"
+
+      - name: Reproduce all native bytes against the committed manifest
+        id: native
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:dictionary-wasm -- --check 2>&1 | tee "$INTEGRATION_EVIDENCE/native-check.log"
+
+      - name: Run the full unit suite with two workers
+        id: unit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:unit -- --maxWorkers=2 --reporter=default --reporter=json \
+            --outputFile.json="$INTEGRATION_EVIDENCE/unit-results.json" \
+            2>&1 | tee "$INTEGRATION_EVIDENCE/unit.log"
+
+      - name: Validate every build target
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:build 2>&1 | tee "$INTEGRATION_EVIDENCE/build.log"
+
+      - name: Lint the changed JavaScript source or test
+        id: lint
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          case "$INTEGRATION_VARIANT" in
+            score) target=ext/js/dictionary/term-record-opfs-store.js ;;
+            crc) target=test/term-bank-crc.test.js ;;
+            *) exit 1 ;;
+          esac
+          npx eslint --no-cache "$target" 2>&1 | tee "$INTEGRATION_EVIDENCE/lint.log"
+
+      - name: Validate runtime types
+        id: types_main
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          npm run test:ts:main 2>&1 | tee "$INTEGRATION_EVIDENCE/types-main.log"
+
+      - name: Validate test types
+        id: types_test
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          npm run test:ts:test 2>&1 | tee "$INTEGRATION_EVIDENCE/types-test.log"
+
+      - name: Preserve final tracked source state
+        id: final_source
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$INTEGRATION_EVIDENCE"
+          git rev-parse HEAD > "$INTEGRATION_EVIDENCE/final-source-sha.txt"
+          git status --porcelain --untracked-files=no > "$INTEGRATION_EVIDENCE/final-tracked-status.txt"
+          git diff --binary > "$INTEGRATION_EVIDENCE/final-working-diff.patch"
+          git diff --cached --binary > "$INTEGRATION_EVIDENCE/final-index-diff.patch"
+          test "$(git rev-parse HEAD)" = "$INTEGRATION_PRODUCT_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Preserve the exact gate outcomes
+        if: always()
+        shell: bash
+        env:
+          INTEGRATION_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p "$INTEGRATION_EVIDENCE"
+          python3 - <<'PY'
+          import datetime, json, os, pathlib
+          output = pathlib.Path(os.environ['INTEGRATION_EVIDENCE'])
+          result = {'time': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    'scope': 'Correctness validation only; no browser or performance acquisition',
+                    'variant': os.environ['INTEGRATION_VARIANT'],
+                    'productCommit': os.environ['INTEGRATION_PRODUCT_SHA'],
+                    'commonBaseline': os.environ['INTEGRATION_BASELINE_SHA'],
+                    'workflowCommit': os.environ['GITHUB_SHA'],
+                    'steps': json.loads(os.environ['INTEGRATION_STEP_OUTCOMES'])}
+          (output / 'validation-status.json').write_text(json.dumps(result, indent=2) + '\n')
+          print(json.dumps(result, sort_keys=True))
+          PY
+
+      - name: Retain all logs, sources and failed gate records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: current-import-integration-gates-1b47-${{ matrix.variant }}
+          path: builds/perf/current-import-integration-gates-1b47/${{ matrix.variant }}
+          if-no-files-found: error
+          retention-days: 14
