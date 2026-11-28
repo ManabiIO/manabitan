@@ -116,6 +116,12 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
+const RECORD_FIELD_TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS = Object.getOwnPropertyDescriptors(RECORD_FIELD_TYPED_ARRAY_PROTOTYPE);
+const RECORD_FIELD_TYPED_ARRAY_PROPERTIES = ['buffer', 'length', 'byteOffset', 'byteLength'];
+const RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(RECORD_FIELD_TYPED_ARRAY_PROTOTYPE, Symbol.toStringTag);
+const RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR = Object.getPrototypeOf(Uint8Array);
+const RECORD_FIELD_CONSTRUCTORS = [ArrayBuffer, Uint32Array, Float64Array, Int32Array];
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
@@ -895,14 +901,51 @@ async function settleEncodedArtifactRecordFields(encoded) {
  * established validator and retain its property-read ordering.
  * @param {unknown} value
  * @param {object} prototype
+ * @param {'Uint32Array'|'Float64Array'|'Int32Array'} kind
  * @returns {boolean}
  */
-function isPlainPrivateRecordFieldColumn(value, prototype) {
+function isPlainPrivateRecordFieldColumn(value, prototype, kind) {
+    if (
+        !ArrayBuffer.isView(value) || typeof RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR?.get !== 'function' ||
+        RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR.get.call(value) !== kind ||
+        Object.getPrototypeOf(value) !== prototype ||
+        Object.getPrototypeOf(prototype) !== RECORD_FIELD_TYPED_ARRAY_PROTOTYPE
+    ) { return false; }
+    for (const property of RECORD_FIELD_TYPED_ARRAY_PROPERTIES) {
+        const originalDescriptor = RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS[property];
+        if (
+            Object.hasOwn(value, property) || Object.hasOwn(prototype, property) ||
+            typeof originalDescriptor?.get !== 'function' ||
+            Object.getOwnPropertyDescriptor(RECORD_FIELD_TYPED_ARRAY_PROTOTYPE, property)?.get !== originalDescriptor.get
+        ) { return false; }
+    }
+    const bufferDescriptor = RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS.buffer;
     return (
-        ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
-        !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'length') &&
-        Object.getPrototypeOf(value.buffer) === ArrayBuffer.prototype
+        typeof bufferDescriptor?.get === 'function' &&
+        Object.getPrototypeOf(bufferDescriptor.get.call(value)) === ArrayBuffer.prototype
     );
+}
+
+/**
+ * The original selectors observe constructor instance checks. Preserve their
+ * order and count when a caller changes an own or inherited hasInstance hook.
+ * @returns {boolean}
+ */
+function hasOriginalRecordFieldInstanceChecks() {
+    if (
+        Object.getPrototypeOf(RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR) !== Function.prototype ||
+        Object.hasOwn(RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR, Symbol.hasInstance)
+    ) { return false; }
+    const constructors = [ArrayBuffer, Uint32Array, Float64Array, Int32Array];
+    for (let i = 0; i < constructors.length; ++i) {
+        const constructor = constructors[i];
+        if (
+            constructor !== RECORD_FIELD_CONSTRUCTORS[i] ||
+            Object.getPrototypeOf(constructor) !== (i === 0 ? Function.prototype : RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR) ||
+            Object.hasOwn(constructor, Symbol.hasInstance)
+        ) { return false; }
+    }
+    return true;
 }
 
 /**
@@ -917,7 +960,7 @@ function isPlainPrivateRecordFieldColumn(value, prototype) {
 function tryEncodeCompactRecordFieldsWithContentBounds(chunk, count) {
     if (!Number.isSafeInteger(count) || count <= 0) { return null; }
     const origin = resolvedContentReferenceOrigins.get(chunk);
-    if (typeof origin === 'undefined') { return null; }
+    if (typeof origin === 'undefined' || !hasOriginalRecordFieldInstanceChecks()) { return null; }
     const fixedBaseDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentOffsetBase');
     if (
         Object.getPrototypeOf(chunk) !== Object.prototype ||
@@ -925,10 +968,10 @@ function tryEncodeCompactRecordFieldsWithContentBounds(chunk, count) {
         Object.getOwnPropertyDescriptor(chunk, 'rowCount')?.value !== count ||
         Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value !== origin ||
         Object.getPrototypeOf(origin) !== Object.prototype ||
-        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'uniqueIndexList')?.value, Uint32Array.prototype) ||
-        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'offsets')?.value, Float64Array.prototype) ||
-        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'lengths')?.value, Uint32Array.prototype) ||
-        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value, Int32Array.prototype)
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'uniqueIndexList')?.value, Uint32Array.prototype, 'Uint32Array') ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'offsets')?.value, Float64Array.prototype, 'Float64Array') ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(origin, 'lengths')?.value, Uint32Array.prototype, 'Uint32Array') ||
+        !isPlainPrivateRecordFieldColumn(Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value, Int32Array.prototype, 'Int32Array')
     ) { return null; }
     const references = getSynchronousRecordFieldReferences(chunk, count);
     if (references === null) { return null; }

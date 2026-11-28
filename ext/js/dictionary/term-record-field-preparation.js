@@ -19,7 +19,8 @@
 /** @typedef {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} PreinternedPlan */
 /** @type {WeakMap<object, {bytes: Uint8Array, preinternedPlan: PreinternedPlan}>} */
 const preparedOrigins = new WeakMap();
-const mapGet = Map.prototype.get;
+/** @type {Map<unknown, unknown>['get']} */
+const mapGet = Reflect.get(Map.prototype, 'get');
 
 /**
  * Construct a plain entry at the native worker-result boundary. This witness
