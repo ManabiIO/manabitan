@@ -1,0 +1,13 @@
+{
+  "status": "acquisition-on-hold-before-timing",
+  "originalRun": 46128570908,
+  "originalJob": 140928524543,
+  "originalHead": "8498c92ba6a5626317486c11b2a85f84b057fce0",
+  "observedBeforeRequest": {
+    "status": "queued",
+    "steps": []
+  },
+  "reason": "Static source review found that the harness left _prepareExactLookupRoute=false while ordinary import enables it for the pinned VNDB raw-source size. This invalidates intended production-option parity.",
+  "action": "Replace only the isolated research branch workflow with a no-acquisition hold using the same concurrency group and cancel-in-progress=true. No benchmark is run.",
+  "constraints": "Do not use any timings from the defective harness. Complete setup audit and retain original run status before prospectively registering any corrected acquisition."
+}

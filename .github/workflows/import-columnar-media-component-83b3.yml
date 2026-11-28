@@ -9,77 +9,16 @@ permissions:
 
 concurrency:
   group: columnar-media-component-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  acquire:
-    name: Qualify and acquire the fixed component cohort
-    if: ${{ github.run_attempt == 1 }}
+  hold:
+    name: Hold acquisition for production-option parity review
     runs-on: ubuntu-26.04
-    timeout-minutes: 75
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          filter: blob:none
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /*
-            !/builds/
-            !/ext/fonts/
-            !/ext/data/fonts/
-            !/dev/perf/import-qualification-evidence-20261125-a7f7/
-      - name: Restore reviewed harness and retain pre-start evidence
+      - name: Record why no cohort may run
         run: |
-          git restore --source "$GITHUB_SHA" --worktree --ignore-skip-worktree-bits builds/perf/20261128-columnar-media-component
-          mkdir -p "$RUNNER_TEMP/columnar-evidence/preparation"
-          cp builds/perf/20261128-columnar-media-component/preparation/* "$RUNNER_TEMP/columnar-evidence/preparation/"
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "22.22.0"
-          cache: npm
-      - name: Install locked dependencies and pinned libraries
-        run: |
-          npm ci
-          npm run build:libs
-      - name: Check port types and focused ownership tests
-        run: |
-          npm run test:ts:main
-          npm run test:ts:test
-          npx vitest run test/dictionary-importer-media-reference.test.js test/term-bank-experiments.test.js --maxWorkers=1 --no-file-parallelism
-          node test/fixtures/parser-settlement/borrowed-content.mjs "$RUNNER_TEMP/columnar-evidence/borrowed-content.json"
-      - name: Prepare exact reference and pinned VNDB source
-        shell: bash
-        run: |
-          set -euo pipefail
-          reference="$RUNNER_TEMP/columnar-reference"
-          git worktree add --detach --no-checkout "$reference" dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
-          git -C "$reference" sparse-checkout set --no-cone '/*' '!/builds/' '!/ext/fonts/' '!/ext/data/fonts/' '!/dev/perf/import-qualification-evidence-20261125-a7f7/'
-          git -C "$reference" checkout --detach dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16
-          ln -s "$GITHUB_WORKSPACE/node_modules" "$reference/node_modules"
-          cp -a ext/lib "$reference/ext/lib"
-          python builds/perf/20261128-columnar-media-component/generate-identities.py --reference "$reference" --candidate "$GITHUB_WORKSPACE"
-          node --input-type=module <<'JS'
-          import {ensureSelectedPinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js';
-          await ensureSelectedPinnedDictionaryCache(`${process.env.RUNNER_TEMP}/columnar-cache`, ['vndb']);
-          JS
-      - name: Run the single predeclared acquisition
-        shell: bash
-        run: |
-          set -euo pipefail
-          screen="builds/perf/20261128-columnar-media-component/screen-controller.py"
-          screen_args=(--reference "$RUNNER_TEMP/columnar-reference" --candidate "$GITHUB_WORKSPACE" --archive "$RUNNER_TEMP/columnar-cache/vndb_characters_by_bee.zip" --output "$RUNNER_TEMP/columnar-evidence")
-          python "$screen" smoke "${screen_args[@]}"
-          python "$screen" freeze "${screen_args[@]}"
-          python "$screen" qualify "${screen_args[@]}"
-          python "$screen" timing "${screen_args[@]}"
-      - name: Preserve every raw observation and failure
-        if: ${{ always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: columnar-media-component-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/columnar-evidence
-          if-no-files-found: warn
-          retention-days: 30
+          echo "Acquisition is on hold before timing."
+          echo "The direct importer harness omitted production exact-lookup-route setup."
+          echo "No benchmark or replacement cohort is executed by this workflow."
