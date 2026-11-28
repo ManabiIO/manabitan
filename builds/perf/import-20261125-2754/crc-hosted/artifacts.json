@@ -1,0 +1,101 @@
+[
+  {
+    "id": 15037132938,
+    "name": "exact-crc-memory-jitendex-rep1-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15037132938",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15037132938.zip",
+    "serviceDigest": "sha256:dc727b9b2be9cac55680797896ded53ee8856e50131a24a3ec2c88fdb5001533",
+    "archiveSha256": "dc727b9b2be9cac55680797896ded53ee8856e50131a24a3ec2c88fdb5001533",
+    "archiveBytes": 34210340
+  },
+  {
+    "id": 15038726730,
+    "name": "exact-crc-memory-jitendex-rep2-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15038726730",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15038726730.zip",
+    "serviceDigest": "sha256:db106e0ef170110cfd9fc6009f2a89633dbccf00f120078f6f9b5d1d8f5036f4",
+    "archiveSha256": "db106e0ef170110cfd9fc6009f2a89633dbccf00f120078f6f9b5d1d8f5036f4",
+    "archiveBytes": 34172722
+  },
+  {
+    "id": 15037852350,
+    "name": "exact-crc-memory-jmdict-rep1-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15037852350",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15037852350.zip",
+    "serviceDigest": "sha256:8ec241627ad4fa38e8b64f8d7960e8edebee8d4d70dae0e020bf166728b9cfaa",
+    "archiveSha256": "8ec241627ad4fa38e8b64f8d7960e8edebee8d4d70dae0e020bf166728b9cfaa",
+    "archiveBytes": 34128604
+  },
+  {
+    "id": 15037468972,
+    "name": "exact-crc-memory-jmdict-rep2-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15037468972",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15037468972.zip",
+    "serviceDigest": "sha256:e358e51201858bcea6b04c067b891d87964debfb79bee79cd92db94e6b4c3b92",
+    "archiveSha256": "e358e51201858bcea6b04c067b891d87964debfb79bee79cd92db94e6b4c3b92",
+    "archiveBytes": 34117313
+  },
+  {
+    "id": 15039581472,
+    "name": "exact-crc-memory-vndb-rep1-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15039581472",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15039581472.zip",
+    "serviceDigest": "sha256:6d677ed82afe248b6820909ea7e416be3be8eee361c30ab319777617f55b9949",
+    "archiveSha256": "6d677ed82afe248b6820909ea7e416be3be8eee361c30ab319777617f55b9949",
+    "archiveBytes": 34282489
+  },
+  {
+    "id": 15039215938,
+    "name": "exact-crc-memory-vndb-rep2-2754",
+    "kind": "memory",
+    "run": "45644635208",
+    "directory": "/tmp/manabitan-2754-crc-audit/memory/15039215938",
+    "archive": "/tmp/manabitan-2754-crc-audit/memory/15039215938.zip",
+    "serviceDigest": "sha256:1c935613a38fdec4baf9cf08a82be68d38b2c65439bbaad7db48efc5fd8f60fa",
+    "archiveSha256": "1c935613a38fdec4baf9cf08a82be68d38b2c65439bbaad7db48efc5fd8f60fa",
+    "archiveBytes": 34446018
+  },
+  {
+    "id": 15038541229,
+    "name": "exact-crc-screen-jitendex-2754",
+    "kind": "timing",
+    "run": "45644628634",
+    "directory": "/tmp/manabitan-2754-crc-audit/timing/15038541229",
+    "archive": "/tmp/manabitan-2754-crc-audit/timing/15038541229.zip",
+    "serviceDigest": "sha256:9391862e6e9333a94f13cfcfb6bb974632ed1969401ec7bc7693c3465728f775",
+    "archiveSha256": "9391862e6e9333a94f13cfcfb6bb974632ed1969401ec7bc7693c3465728f775",
+    "archiveBytes": 1059425
+  },
+  {
+    "id": 15036814976,
+    "name": "exact-crc-screen-jmdict-2754",
+    "kind": "timing",
+    "run": "45644628634",
+    "directory": "/tmp/manabitan-2754-crc-audit/timing/15036814976",
+    "archive": "/tmp/manabitan-2754-crc-audit/timing/15036814976.zip",
+    "serviceDigest": "sha256:fca19417c39b9a7f8caa481dc22452d51492f669548960493d98cd4a33ef9986",
+    "archiveSha256": "fca19417c39b9a7f8caa481dc22452d51492f669548960493d98cd4a33ef9986",
+    "archiveBytes": 1042506
+  },
+  {
+    "id": 15038993452,
+    "name": "exact-crc-screen-vndb-2754",
+    "kind": "timing",
+    "run": "45644628634",
+    "directory": "/tmp/manabitan-2754-crc-audit/timing/15038993452",
+    "archive": "/tmp/manabitan-2754-crc-audit/timing/15038993452.zip",
+    "serviceDigest": "sha256:8f7478ab11070dc5ae405d0485e2a65742cabeaf1e6dfdbd33de551c23e8e5e5",
+    "archiveSha256": "8f7478ab11070dc5ae405d0485e2a65742cabeaf1e6dfdbd33de551c23e8e5e5",
+    "archiveBytes": 1080665
+  }
+]

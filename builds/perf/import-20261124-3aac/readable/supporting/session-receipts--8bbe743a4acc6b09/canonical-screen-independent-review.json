@@ -1,0 +1,734 @@
+{
+  "cells": [
+    {
+      "activeSahFileBytes": [
+        176128
+      ],
+      "allTimingsMs": {
+        "A": [
+          1495.699999999997,
+          908.1000000000058,
+          871.2999999999884,
+          874.8999999999942,
+          895.1000000000058,
+          873.6000000000058
+        ],
+        "B": [
+          884.8000000000029,
+          889.0999999999913,
+          855.3000000000175,
+          913.3999999999942,
+          871.5999999999767,
+          847.7999999999884
+        ],
+        "C": [
+          861.1000000000058,
+          903.0999999999913,
+          860.8999999999942,
+          909.3999999999942,
+          853.7000000000116,
+          881.3999999999942
+        ]
+      },
+      "artifact": "import-canonical-screen-storage-v1-jmdict-forward-45472377306-1",
+      "attemptedObservations": 23,
+      "browserVersion": "153.0.8010.12",
+      "canonicalProbeDigest": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 885.0,
+          "bestPairPercent": -40.843752089322415,
+          "candidateMedianMs": 878.1999999999898,
+          "equalWorkPercent": -11.095341882508436,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -40.843752089322415,
+            -2.092280585840156,
+            -1.8363365086618955,
+            4.400502914618842,
+            -2.62540498268673,
+            -2.95329670329868
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -21.89852439631055,
+            1.2820832029784734
+          ],
+          "pairedMedianPercent": -2.3588427842634427,
+          "pairs": 6,
+          "worstPairPercent": 4.400502914618842
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 871.25,
+          "bestPairPercent": -3.812117086454059,
+          "candidateMedianMs": 878.1999999999898,
+          "equalWorkPercent": -0.14422347047252648,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            2.752293577981302,
+            -1.550215922932141,
+            -0.6504820536620715,
+            0.4398504508467127,
+            2.096755300452724,
+            -3.812117086454059
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -2.6811665046931,
+            2.424524439217013
+          ],
+          "pairedMedianPercent": -0.10531580140767938,
+          "pairs": 6,
+          "worstPairPercent": 2.752293577981302
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 885.0,
+          "bestPairPercent": -42.42829444407251,
+          "candidateMedianMs": 871.25,
+          "equalWorkPercent": -10.966935306739757,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -42.42829444407251,
+            -0.5506001541696448,
+            -1.1936187306317403,
+            3.9433078066064997,
+            -4.625181543960888,
+            0.8928571428558074
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -23.5267379940167,
+            2.4180824747311536
+          ],
+          "pairedMedianPercent": -0.8721094424006925,
+          "pairs": 6,
+          "worstPairPercent": 3.9433078066064997
+        }
+      },
+      "correctnessPassed": true,
+      "dictionary": "jmdict",
+      "exhaustiveDiagnostics": 2,
+      "exhaustiveMediaReceipt": {
+        "bytes": 0,
+        "files": 0,
+        "mode": "all",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "totalBytes": 0,
+        "totalFiles": 0
+      },
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-11-22]",
+        "label": "JMdict",
+        "mediaBytes": 0,
+        "mediaFiles": 0,
+        "release": "2026-11-22",
+        "revision": "JMdict.2026-11-22",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "termRows": 528299,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+      },
+      "inputSha256": {
+        "analysis.json": "8891597d57833735dc3d093ce4fd6dc1f76f2ffd39d9ad55648fd55b5bbf2640",
+        "block-01-1-A/storage-receipt.json": "782e3835a07041fda5f9147ac61f7bd089ac832ea2310306fb381e03fd643dd4",
+        "block-01-1-A/summary.json": "a7678901ccb6ffdef694330507beff3e58af7f9979e5d8c54b998c393ca49c91",
+        "block-01-2-B/storage-receipt.json": "f4141d467bdade0be28b2b3a4fc6a0418d17b22a583a04bf47053fa790515105",
+        "block-01-2-B/summary.json": "9d955c1eaa958342ac6d4d94a12468eff4500365ffaccaf3d1048276c428b08f",
+        "block-01-3-C/storage-receipt.json": "7ea25192739406db8da1d7a0db0a2e10202340706e36ef2ff68f559eccb32c20",
+        "block-01-3-C/summary.json": "4f48fdcebb97cf3d2953b790246f9faa4c4295fb1a70372b30def38f117d4aa5",
+        "block-02-1-C/storage-receipt.json": "089553a98fbdf6c2cee1824315066781f4bcaf22ec4b2d621efa68dd50fb1d8c",
+        "block-02-1-C/summary.json": "087e636cf3538a8fdf13518d07661fb90400aed72c27ff6132f1f8d3a3c4bbf6",
+        "block-02-2-B/storage-receipt.json": "911576438e869567c5b4daa276cdeea3415766f2311b19f65deb412994799dab",
+        "block-02-2-B/summary.json": "0f96c6787e1509ddaf6f1c75aecca6e538ded394c7c670b949f7e302f5274cd1",
+        "block-02-3-A/storage-receipt.json": "0e5313c8a87029385d56fd851905e48b257d479173992b76459e10fbdbc1fb8c",
+        "block-02-3-A/summary.json": "d393e6d0dc44b26a891fc676a77bbe467da27c1f1205636931be829bac7ca9db",
+        "block-03-1-B/storage-receipt.json": "7d61cc71d478090b3c37fc393206b4b9c401f9edb8bf84bb37949e0a1e5c4c23",
+        "block-03-1-B/summary.json": "2cdf702c8edfdc96056ec7fd9d3e60b983e9419a97e0722d7e8b37c1d27fd309",
+        "block-03-2-A/storage-receipt.json": "5d5d2ecd7a03c1bc906ab3b66b10d46a05e646e48f6ba877ee151da0c5276ab9",
+        "block-03-2-A/summary.json": "67df8488371db68948ae2492886077a0c84af249fba34e6fe13f0e6e00a481e2",
+        "block-03-3-C/storage-receipt.json": "9a28a94f65e7bc8d1fd52fc4c25d0b0af6c0a000452d1f1e95af4a752f417a8e",
+        "block-03-3-C/summary.json": "1ec2f12d3f7f94c163e3541b92acdfbac51350233e0b2915270a815c3f822bdf",
+        "block-04-1-C/storage-receipt.json": "5bc6f045090543d7dac3a85e45a246cf5abbf7aafe35201f9170d251864dc28d",
+        "block-04-1-C/summary.json": "60e78585b2590c55c94f15c93b48911fe0ee4b57f7b115d9c80846174b815d5d",
+        "block-04-2-A/storage-receipt.json": "6205b3c77a6628d28a19ce58cd5f300ed05703a20fdff830cc565fe85f861b5f",
+        "block-04-2-A/summary.json": "546e48273fd922d81decff83d04af3d0cab5d2a371897a823c10d37322f70640",
+        "block-04-3-B/storage-receipt.json": "12e54b4a101540b2faaee595d3b3781a9008c78183c1fad6d40da42aaf9d3d48",
+        "block-04-3-B/summary.json": "c8ffb3087e0fe1c040af62aaaed0b85a56e307b0efc79ccb00ff7aef2d9532cc",
+        "block-05-1-B/storage-receipt.json": "1a4d00e8818ff7c9555e151bb31dc83806d37b14a168deabc9280fea3aaa6b6c",
+        "block-05-1-B/summary.json": "c2548d44f6faca6f3d1e6eb86252417b23d6e5e9320ccccd75fe7cd65e75271a",
+        "block-05-2-C/storage-receipt.json": "f5ec0ef444e55038b28d3c69ae7317560e0b22f1376c82dfb10a9462d5122947",
+        "block-05-2-C/summary.json": "cc80e617fbb1db3cb71ec294b64c08adad1ca3df001ee9ddb9d6a79c1fc8c5f1",
+        "block-05-3-A/storage-receipt.json": "3ac1689aa6b96e4bc942f881140201d01e4966782be49eefcfa2ea00ba8d6dfa",
+        "block-05-3-A/summary.json": "2e808c4dc3b76caaf2a4ae5a2fef951a293dca742a5d3f966f56e2ba2c1eab71",
+        "block-06-1-A/storage-receipt.json": "693314bfa215c873b837080fe02d95910b83eee844ef4888ad96a1ed0f070e95",
+        "block-06-1-A/summary.json": "b8301b67d98e25b4c8b0020d5bafce5dac621095c99390b1d565fbda121ad105",
+        "block-06-2-C/storage-receipt.json": "ad5932d228a8887459ffc5268f8952b6ed1d3240d1186dfff71cbf195c2082a5",
+        "block-06-2-C/summary.json": "45a71af92d930906737a9dce3ab205c111e72a82e17ce5ee433d539841c0d233",
+        "block-06-3-B/storage-receipt.json": "40ef18aec4037d685947343fb7753b5daa3121845abf872b35287e9691f887a6",
+        "block-06-3-B/summary.json": "44e21ac9592fddc60ddb4ac9a61c8a97ec43cb5f17a50167cd68a7cf14a15ab4",
+        "correctness.json": "d0fdba035633340152d38b5f9d9277cf8916ada0fe2f98a261870bb1427cbfbc",
+        "diagnostic-A/storage-receipt.json": "55769afadb7dbcc46bcc06fa5d62353f4acfe3649ddd851d346453a0ae752e76",
+        "diagnostic-A/summary.json": "ba5b509887d3aa07d0b1d4c179e267448de0d8c61ab1b9b3e80b8c63ff23f2c2",
+        "diagnostic-B/storage-receipt.json": "29913a68770832e43940026269743af004d577f88a887f454b56a01bbb1af660",
+        "diagnostic-B/summary.json": "267f07eaf9b2ec668bf51ccf046b86103b55a63267949ad53ef0391b6c44aeb7",
+        "fixture.json": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae",
+        "observations.json": "69c003f63ccbaf887dee1f5675f488c7e24dbc5f59e7ab4e2e7e5ff4db3f915d",
+        "package-A.json": "4671f2228c4ab5d5fd9aa5cdb15dcf53834f5841cb603f4e5f57b8748318c862",
+        "package-B.json": "d0629ba00fe91e6fb9d8d4da65738b396986d034bc2eac40b66c9bcb061704de",
+        "package-C.json": "0930cf014f8561b8a7f293bb56bfe3d1941eaf513dceb7b6baf8c8c2ba91acd2",
+        "protocol.json": "64c35dc83613777acc216657a3e422696dd254bb0616f96142fb70b943eba182",
+        "setup-fixtures.json": "49b0313572e7e50976769efdb57d6376246ca8d462715382bd303ae8d84f7a5b",
+        "state.json": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd",
+        "warmup-A/storage-receipt.json": "09f06ad6f45eece83f05bb0ca380877cdd9adb902d7cf82687161aca6dc4e4c7",
+        "warmup-A/summary.json": "c56db12974c839aeb43d20916691520a57a9a467922286a2dbd7d36bcf93b434",
+        "warmup-B/storage-receipt.json": "6409d970675cbef6e1fd015cfc78e3732f08e69d7f8eb72f56217a9057bbeea0",
+        "warmup-B/summary.json": "e7f75a1ef42fa618b9b9023b23cdaf8a224d11747830a3a061519a38ece21d85",
+        "warmup-C/storage-receipt.json": "b147d0dd40d8957ea28712b3e4de986bffb3f66f519aec5c4478ca4ee5d5848d",
+        "warmup-C/summary.json": "ec00053a65d3690e437b8da2566ad01b7404322f89f3035f6dbaba424f0a4f42"
+      },
+      "packageDifferences": [
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "packageEntryCount": {
+        "A": 550,
+        "B": 550,
+        "C": 550
+      },
+      "packageSha256": {
+        "A": "00ba72c81bc0bd635b228056c138339f0879fac346e8f50d695e926f6df3aa46",
+        "B": "10c30ba26eae49d15e77fb4aedcd756d057ea37bf54d3e302d0170289c7b59f2",
+        "C": "00ba72c81bc0bd635b228056c138339f0879fac346e8f50d695e926f6df3aa46"
+      },
+      "prespecifiedWarmups": 3,
+      "rawStorageBytes": 43520477,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+          "tree": "64345e92fff3800b5035b6aab52dff06e20bc874"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "storagePolicyVersion": "pinned-import-storage-20261124-v1",
+      "timedObservations": 18
+    },
+    {
+      "activeSahFileBytes": [
+        5459968
+      ],
+      "allTimingsMs": {
+        "A": [
+          1897.0999999999913,
+          1774.0999999999767,
+          1842.1000000000058,
+          1774.8999999999942,
+          1807.2000000000116,
+          1783.8000000000466
+        ],
+        "B": [
+          1828.699999999997,
+          1756.8999999999942,
+          1758.2000000000116,
+          1798.3999999999942,
+          1748.6000000000058,
+          1763.2999999999884
+        ],
+        "C": [
+          1834.3000000000175,
+          1788.3999999999942,
+          1776.2000000000116,
+          1801.1999999999825,
+          1730.5999999999767,
+          1833.3000000000466
+        ]
+      },
+      "artifact": "import-canonical-screen-storage-v1-jitendex-forward-45472377306-1",
+      "attemptedObservations": 23,
+      "browserVersion": "153.0.8010.12",
+      "canonicalProbeDigest": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723",
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 1795.500000000029,
+          "bestPairPercent": -4.5545844416695065,
+          "candidateMedianMs": 1760.75,
+          "equalWorkPercent": -2.069085962203421,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -3.6055031363657397,
+            -0.9695056648431732,
+            -4.5545844416695065,
+            1.3240182545495527,
+            -3.242585214697069,
+            -1.14923197668223
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -4.080043789017623,
+            0.17725629485318972
+          ],
+          "pairedMedianPercent": -2.19590859568965,
+          "pairs": 6,
+          "worstPairPercent": 1.3240182545495527
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 1794.7999999999884,
+          "bestPairPercent": -3.8182512409347336,
+          "candidateMedianMs": 1760.75,
+          "equalWorkPercent": -1.020995912300604,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -0.30529357248106903,
+            -1.7613509282039863,
+            -1.0133993919603568,
+            -0.15545192094095217,
+            1.0401016988344614,
+            -3.8182512409347336
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -2.78980108456936,
+            0.4423248889467546
+          ],
+          "pairedMedianPercent": -0.6593464822207129,
+          "pairs": 6,
+          "worstPairPercent": 1.0401016988344614
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 1795.500000000029,
+          "bestPairPercent": -4.238601150953658,
+          "candidateMedianMs": 1794.7999999999884,
+          "equalWorkPercent": -1.0589013898080424,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            -3.3103157450832366,
+            0.8060425004237537,
+            -3.5774387926819418,
+            1.4817736210484211,
+            -4.238601150953658,
+            2.77497477295654
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -3.9080199718178,
+            2.1283741970024805
+          ],
+          "pairedMedianPercent": -1.2521366223297414,
+          "pairs": 6,
+          "worstPairPercent": 2.77497477295654
+        }
+      },
+      "correctnessPassed": true,
+      "dictionary": "jitendex",
+      "exhaustiveDiagnostics": 2,
+      "exhaustiveMediaReceipt": {
+        "bytes": 4992155,
+        "files": 236,
+        "mode": "all",
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402",
+        "totalBytes": 4992155,
+        "totalFiles": 236
+      },
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "label": "Jitendex",
+        "mediaBytes": 4992155,
+        "mediaFiles": 236,
+        "release": "2026.10.03.0",
+        "revision": "2026.10.03.0",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ],
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+      },
+      "inputSha256": {
+        "analysis.json": "e9dcdba9d4f5cd0d2846077c761447776bd08533d4eb23f5a71d8c34679060ba",
+        "block-01-1-A/storage-receipt.json": "43e1ee344c4e7196f54654ce3d04eca70afcaa453108097b0155f9ec7d3ae579",
+        "block-01-1-A/summary.json": "801b491c0d6f0a3198da15aa595c20f705dd8f757c3cd59e6c447115863e7184",
+        "block-01-2-B/storage-receipt.json": "3060e2afefb006f7d1494ee927782a9432da9325a3175065fc53d2077045bcca",
+        "block-01-2-B/summary.json": "13cd5412c63c3aa1b66a4da63c9926de3826b8ef90f5b38ac37ecd343c23724f",
+        "block-01-3-C/storage-receipt.json": "82cc676577e499970c032e13e49fa5f48dc5be9471f75af87cfe0853f0c9d914",
+        "block-01-3-C/summary.json": "cfd8a59ecde90da1cd2d1b1009ac871605a0f61ac763607f0494405b72b3590e",
+        "block-02-1-C/storage-receipt.json": "71b2b27ab6b7f1165da03f63446de7e3866c6ab31e81deebca584276d1b698be",
+        "block-02-1-C/summary.json": "209d49abd73e056d5dad70dadd48393599861c2bdf636dc940d69db93a873d48",
+        "block-02-2-B/storage-receipt.json": "7019c31ce304806c4d79b0e326391411af00f9d4c1dfc6b6c211515b936d6999",
+        "block-02-2-B/summary.json": "fc8b83767a3311f7f3277cd604f303215cc72f5cd4bccee4dd35665d2e6dc57d",
+        "block-02-3-A/storage-receipt.json": "0a707e61f0feca97ca178577744ea51354742d758dfe085b1cccac564a5f5b3b",
+        "block-02-3-A/summary.json": "4f7f8b67af8d2fb24c2813fa0eccc235d47c54b464b76b916f5365b7eb1a2387",
+        "block-03-1-B/storage-receipt.json": "bd08d0d4d10dcb837bbdba206327be8b49d9ec8391ca10b16cf0f08c76392a59",
+        "block-03-1-B/summary.json": "21fab21cdc4c6488c840d8014452c390bf234dbc2ba5ccadd64933a2f65e8028",
+        "block-03-2-A/storage-receipt.json": "9920d24bac78a195f57094a06696d9e23615f87e7a4041384019b3b0969094b0",
+        "block-03-2-A/summary.json": "48c07bd5f6ec0dc5fe1cd4d4cc69e5c66948f7133b4b73128da5bdee1ace3266",
+        "block-03-3-C/storage-receipt.json": "bbea844057e59fe01ce777e743cc3bb63d8a3811cce24049095448d43374d053",
+        "block-03-3-C/summary.json": "e3495f72e686f064f814594a149af885b7d632669ba5c898134ba699a2898708",
+        "block-04-1-C/storage-receipt.json": "ea95ce4c3ea837d6e36a1bd5ea5e1922eb4855e522426e56cbf69fcf0b5faf66",
+        "block-04-1-C/summary.json": "f4a3fbae2dd8b225242705458e502177b802068e84b04fa7f6b4156ee2f69b1a",
+        "block-04-2-A/storage-receipt.json": "34ca37310bcd943ac278518c2e58ab6739cdb8cd85dc2033ccb6ba42400d5665",
+        "block-04-2-A/summary.json": "fb054048afb7f21091272061ce161a9e83078ce3e904477ff5db2060a9bad221",
+        "block-04-3-B/storage-receipt.json": "8ce3740fafde43477bd68b042288e586b9e356315935810e765f2975c38ceef9",
+        "block-04-3-B/summary.json": "9d3af0feff98354464fcb0941212620af7d10acd7b9d5254f07c3c0eb0426904",
+        "block-05-1-B/storage-receipt.json": "ecea070c358d4c70a576a02199db9998a1b39869e4818d977850d04a40598b98",
+        "block-05-1-B/summary.json": "8f5826e0a0d05e58010a61f664dfc6b6ef137471a2695708accf38dcb8938aee",
+        "block-05-2-C/storage-receipt.json": "44556064347817e09e6a3ab187a80c181c1bef1551d1d3ddf6cb92bdf0c07af4",
+        "block-05-2-C/summary.json": "7761a20a0492f3275a3a84a33d7a40b501d9e48401537a75a84312a94bb00fa1",
+        "block-05-3-A/storage-receipt.json": "aed46fc37a4f10f3cbff5be3fc1072b26c0d63b9dbba879ce6040f3111c34e88",
+        "block-05-3-A/summary.json": "cb1155bcbf5e9156d29dedf7c9fadc4dd5e80dd82dded189d35642dba5ab8d48",
+        "block-06-1-A/storage-receipt.json": "e39ffca7a30120ae1071d18f6e13b0e9cc94304991482c1bcfc5ecf59bba940e",
+        "block-06-1-A/summary.json": "d9340e97d5ef3b6597f6818e7872a5cc59d0e335c66d3926f11de9bfef898743",
+        "block-06-2-C/storage-receipt.json": "da1ba5ea139ad971f6489ff24af316d37d601577f6e7502c06229c10cfbe24ad",
+        "block-06-2-C/summary.json": "393028be7a451bef3c0fd0b99df27c3506848d8f8c8374572236ef6c54effeec",
+        "block-06-3-B/storage-receipt.json": "48b56548f3f263bef7145dc156fccd8a9c9d5f632d554e44303ab7081b131805",
+        "block-06-3-B/summary.json": "3460858c87e062dd7fc58264d73c64c1ee3a5e043383768f5040376d35c38f4b",
+        "correctness.json": "6ec1b787bbbeb1b12bfa0fb2e434de0d6d192b45e8ab4efe0a8b4299286b1f0a",
+        "diagnostic-A/storage-receipt.json": "93db01501d4a408f19f8f7116c2fbfd1c45bccc5d85e02cca3e04f23baa6d890",
+        "diagnostic-A/summary.json": "d45226aea8b3b40501d81892ac3f2353c248b08ceb3a5aaa8cbabc3dd993f5a3",
+        "diagnostic-B/storage-receipt.json": "57687578c0fd9feb342e860553132c4448b38f6bb2e534fe00690ee9efa0d7b0",
+        "diagnostic-B/summary.json": "e793ff0fd0926fecd32fc66bfb1d203ac7b1f1b90c13e5b7201ce61d32bb2d47",
+        "fixture.json": "47a3058be786968cb1dd19ba9badbce443354ca361bc99de574cc732ee02d510",
+        "observations.json": "9e336ad1173a6e04bf4bbe55532bdf38f98c0275a6caed88b0c12bc3e05ef3be",
+        "package-A.json": "5ea546b6ced9251003e7826b69d1baa7b50f4493f9337e6503929c9b948a81ba",
+        "package-B.json": "40c592386630a26fe724aacff1e4a93ce2359cf643e88e7218e9786873cdf121",
+        "package-C.json": "761fa165ada8260d7bf22e263c0d795617f9986e57da591fc38c91c776dafe63",
+        "protocol.json": "f79b14bdbdb116bec9d87098ac1741b706d156613ee83c055fa22fa50af0e7d9",
+        "setup-fixtures.json": "49b0313572e7e50976769efdb57d6376246ca8d462715382bd303ae8d84f7a5b",
+        "state.json": "ec67ab708fe0ab5b41a667f6d24d028c3ddf8a3722d49462a097589842fb55de",
+        "warmup-A/storage-receipt.json": "dccad76028b06f7efd07d1d42a208f342920f8838784da724780e77cd483ceda",
+        "warmup-A/summary.json": "6cdeaec25fd65936cede2812a5c0c85582bc2be55ae0587b6f64ceb0f0ae98f2",
+        "warmup-B/storage-receipt.json": "1409d66bb030803d74a09b1de6694acab17bb118ad08184d84a7115cca151888",
+        "warmup-B/summary.json": "f8817a7652c8ab4cfaa865cd8edffd4e570137679ec7608e5d01cd2937374e69",
+        "warmup-C/storage-receipt.json": "9a038e17a5c87d215e07fc44c61289fdad82beec1b80cc40983da22ee35561d6",
+        "warmup-C/summary.json": "e0bbaa9e02a989b97b3c070ccc92233ca247a3de0d4fa6c54d03d4efb4bfc3e8"
+      },
+      "packageDifferences": [
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "packageEntryCount": {
+        "A": 550,
+        "B": 550,
+        "C": 550
+      },
+      "packageSha256": {
+        "A": "c3d8d73ba6b18f69f1da55ee35a991478c9092a18ac8f1128345b2681580a674",
+        "B": "727afdee6f191bcc145eb00f3437c66fdfa4ef5a197804c4fa49d11b6231bab2",
+        "C": "c3d8d73ba6b18f69f1da55ee35a991478c9092a18ac8f1128345b2681580a674"
+      },
+      "prespecifiedWarmups": 3,
+      "rawStorageBytes": 67466332,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+          "tree": "64345e92fff3800b5035b6aab52dff06e20bc874"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "storagePolicyVersion": "pinned-import-storage-20261124-v1",
+      "timedObservations": 18
+    },
+    {
+      "activeSahFileBytes": [
+        528384
+      ],
+      "allTimingsMs": {
+        "A": [
+          6748.300000000047,
+          6987.400000000023,
+          6866.800000000047,
+          6939.100000000093,
+          6924.400000000023,
+          6808.5
+        ],
+        "B": [
+          6610.29999999993,
+          6888.099999999977,
+          6793.199999999953,
+          7019.400000000023,
+          6942.699999999953,
+          6781.900000000023
+        ],
+        "C": [
+          7356.099999999977,
+          6793,
+          6806.699999999953,
+          6732.699999999953,
+          7096.900000000023,
+          6827.199999999953
+        ]
+      },
+      "artifact": "import-canonical-screen-storage-v1-vndb-forward-45472377306-1",
+      "attemptedObservations": 23,
+      "browserVersion": "153.0.8010.12",
+      "canonicalProbeDigest": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 6895.600000000035,
+          "bestPairPercent": -2.0449594712759533,
+          "candidateMedianMs": 6840.649999999965,
+          "equalWorkPercent": -0.5788077384350387,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -2.0449594712759533,
+            -1.4211294616029768,
+            -1.0718238480819653,
+            1.1572105892684759,
+            0.2642828259478147,
+            -0.39068811044983276
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -1.733044466439465,
+            0.7107467076081453
+          ],
+          "pairedMedianPercent": -0.731255979265899,
+          "pairs": 6,
+          "worstPairPercent": 1.1572105892684759
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 6816.949999999953,
+          "bestPairPercent": -10.138524489879808,
+          "candidateMedianMs": 6840.649999999965,
+          "equalWorkPercent": -1.3865992511883474,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -10.138524489879808,
+            1.3999705579269328,
+            -0.19833399444665334,
+            4.2583213272546105,
+            -2.1727796643614683,
+            -0.6635223810629642
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -6.155652077120639,
+            2.8291459425907717
+          ],
+          "pairedMedianPercent": -0.4309281877548088,
+          "pairs": 6,
+          "worstPairPercent": 4.2583213272546105
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 6895.600000000035,
+          "bestPairPercent": -2.974449136057078,
+          "candidateMedianMs": 6816.949999999953,
+          "equalWorkPercent": 0.8191498382769558,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            9.006712801741568,
+            -2.7821507284544023,
+            -0.8752257237737093,
+            -2.974449136057078,
+            2.4911905724683603,
+            0.27465667915038683
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -2.8782999322557403,
+            5.748951687104964
+          ],
+          "pairedMedianPercent": -0.30028452231166125,
+          "pairs": 6,
+          "worstPairPercent": 9.006712801741568
+        }
+      },
+      "correctnessPassed": true,
+      "dictionary": "vndb",
+      "exhaustiveDiagnostics": 2,
+      "exhaustiveMediaReceipt": {
+        "bytes": 188131284,
+        "files": 146570,
+        "mode": "all",
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "fixture": {
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB",
+        "mediaBytes": 188131284,
+        "mediaFiles": 146570,
+        "mediaRows": 146570,
+        "optional": true,
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      },
+      "inputSha256": {
+        "analysis.json": "8c6ea72b8141dfa665f25a74fe926df36f59be095906718f0981ae1df5fd2651",
+        "block-01-1-A/storage-receipt.json": "15028f6d894d77512223abf0791a6f0b7d4327b1f3c2d07416a530c3f2f0d20a",
+        "block-01-1-A/summary.json": "1a896b9082f06c1b9e4b8b7b6074b570fd8f3a4e2c120204afc49947fd32cf36",
+        "block-01-2-B/storage-receipt.json": "9b9c3b4e99ed7d1ed989f5a14097aa58bd26b1f2c18ddcedc7b9832e6b3914bc",
+        "block-01-2-B/summary.json": "48fdeb45c7c07adda8d0ceb20df04010b1135f13e3229f3e380c3132c514fd66",
+        "block-01-3-C/storage-receipt.json": "4b817bd2557073777a0807f822e88a09aaf1433bad356a126b5599d484a70bcb",
+        "block-01-3-C/summary.json": "f701f483d63810c8b7c14c9c38108a3be7487d2548f1d652288be9c6bc089928",
+        "block-02-1-C/storage-receipt.json": "19183e6601ad8705733a8cce5044ae21e31020e15a2c448f3a337549c7426adb",
+        "block-02-1-C/summary.json": "6c01be14c33e506254c8b8ae59662c2716027e95d33edbeeacf1790223f9f768",
+        "block-02-2-B/storage-receipt.json": "5aaa8921146403cebf5e072389db25fbd83ebee3daf54bd120052ffaf0774304",
+        "block-02-2-B/summary.json": "1b0d6e1b2a3f4a83840af7cf82dedcb59ea8fa0e5af37452f5eb9dd7984a26ae",
+        "block-02-3-A/storage-receipt.json": "dc1bb8f7ce94b99788fc91ce6d11de319fc7fb6ef1d3698e0299baf7a92cb16d",
+        "block-02-3-A/summary.json": "732f44298ee5e9efac6d6795403b4fc0c2ea06f5ecd462badb05d7951cc94f4c",
+        "block-03-1-B/storage-receipt.json": "75fad5178988af34c25b05207d2c34bb238999024e71fd8eb017caa5169c0c35",
+        "block-03-1-B/summary.json": "493d3189e572b5e53972307b574c66e106734d864d8a709280c83737ca1098f9",
+        "block-03-2-A/storage-receipt.json": "4b3bec0f8216dc1807eb19286059686897bb8a0f9176550dae8927c1d7319d28",
+        "block-03-2-A/summary.json": "6a4f642df28c2278e3c9f642b7114ec1b243e36e8bf1bb1fa12d70c3f96ee987",
+        "block-03-3-C/storage-receipt.json": "ae273f4a79a753d08a4b4c253e2aeaba753626ecc8a26636dfea55e3a2bc7196",
+        "block-03-3-C/summary.json": "6d1331dca9b15b985f31850bdcc7d135e7a4210dfe9d08083527f60cd5615bfd",
+        "block-04-1-C/storage-receipt.json": "f6411d087a8dc81caf4925859a447f737b83ebc51b14885ebee8e058f01f2748",
+        "block-04-1-C/summary.json": "187c4773251a2302af3e4e84dc6ca411845891145a25b17c977403aca49e4774",
+        "block-04-2-A/storage-receipt.json": "575be8da423c5cab62900e69357a69728551e99daf324b48f32338a38270f97b",
+        "block-04-2-A/summary.json": "2ee496752926b32910b48cb9f4c33e32c856279c2b6b06565404e2aec81bedc2",
+        "block-04-3-B/storage-receipt.json": "9f50234e441808de16918a8fc59b6717c05cf7623a0d4ae35e1e8de59c631b5f",
+        "block-04-3-B/summary.json": "6e6a81abcc234a4429cd6f8d407b2c533c68ca23891c635e9954ec16dff47999",
+        "block-05-1-B/storage-receipt.json": "6235f947d6c77cfa2afefe116ef1d2c0dff914a52f2d5629cd3067080ffc8fa1",
+        "block-05-1-B/summary.json": "5c4cb9ad1cc8e921f310ead797011aaf49854d0b3158acabf70b86829abdd7ae",
+        "block-05-2-C/storage-receipt.json": "a1e57e1f8e276f8e642cfce7ac30766c6fc17527237afa8bfe93efab2b12d25d",
+        "block-05-2-C/summary.json": "341597891f85ed8bc8e8eb9b66b64c9e593177bb691bc0b7b72c280c8357c02c",
+        "block-05-3-A/storage-receipt.json": "e7f3b2c99d572e971695ae507ed9330b8fb1bc40bb382209c4cc1135ece96cf5",
+        "block-05-3-A/summary.json": "76f87935edb4276b045b85e6c97bd9ea01f4562798ea35bf6ef4d7294f470b3c",
+        "block-06-1-A/storage-receipt.json": "7bf45633dff7e09266e21c120a63372aa00a027874af3f5e18ed0447782c01b5",
+        "block-06-1-A/summary.json": "1692d71d83b04cb5c9cbf2cc9620b11d6763976ff15ad3ae3ebe23d00b9fc6c8",
+        "block-06-2-C/storage-receipt.json": "a5ae04d6dbf0df03bd2af5bb9c1d99f860fb4b349a76720bec07a3c29b543802",
+        "block-06-2-C/summary.json": "7afa5d0e59d9c8c69bf8498872dcb9571079ea8454af68a6edcef605c38ee67f",
+        "block-06-3-B/storage-receipt.json": "7155fcc68c1716a5d7fae9a74bb4ac07630a129116e9c2ae61bce252c6c764be",
+        "block-06-3-B/summary.json": "c7185fddd74038145c7b0a7bfbb8994c0bcb2af8eea7fc60ac049a6ba3ac3721",
+        "correctness.json": "1ac55fd3ea5bf55c324a88335de9914619a860971e634bc7e93eead2b54c4211",
+        "diagnostic-A/storage-receipt.json": "73502cadbeb42743ae271ac0ea79d5c40ecb61a725e504d86414e6ac2e20ae89",
+        "diagnostic-A/summary.json": "4aa15dbce27b3f1085d666473c59554b0a6e70b3a67321efa95f1e8fbc7282b8",
+        "diagnostic-B/storage-receipt.json": "65bb1d5caad135c734d959f3fdcf9e24bcbf72077716cc5231fe0df9a37f6739",
+        "diagnostic-B/summary.json": "3a2a7acb2b3aa2571cc96d4bddd1cee7074fbbd41e52b4db48fc5b485dc5e82e",
+        "fixture.json": "ef5038c0ce9d0532f1c41492d22f2900abbcf6e0eea5bbb9d21456470a1e5308",
+        "observations.json": "c314ebdc65bf473cea4d8e16ac1f68bac3841d5412231ef254e263f25754716d",
+        "package-A.json": "b63db138a5d11eb57836cb0e5d772885ddb651edc4bf056e16538406c109898c",
+        "package-B.json": "c394cdae5ef868450ea2a4f4e732d38de029ae5f314ccdaad967a339b86bc3d0",
+        "package-C.json": "29aa6e879b796bbe7c3b835a2caa202b714733e95f9561848df133526e5d8089",
+        "protocol.json": "796a666d9a9694d0326cd08d11b834fb0df47f7e64f80add9bcdc254fdd839de",
+        "setup-fixtures.json": "d6d399d2d6bccb13d6c115751f43e81de3d05c2fd0c52387b4b87ae3e1c670da",
+        "state.json": "54a667af41160629e8721e5b07c6055941dbb5feee6b98dba0440b7448376f91",
+        "warmup-A/storage-receipt.json": "8a1bd290ab55e16a3399d7c0d660c12c2d3446d4844c6ab906072746978e747e",
+        "warmup-A/summary.json": "e34c67d552120499f97456740cc68a2c9dfc552e9660e0035c1ca5cd620d1224",
+        "warmup-B/storage-receipt.json": "0f400030a69d37256e25635f27aa94512ffae7ab3bb18e95d4e9f6e124d2df6d",
+        "warmup-B/summary.json": "70e05ce89614f3dff51bc3591d977fc444a6a7a2990c6d027ab38f4035ed701a",
+        "warmup-C/storage-receipt.json": "94f78b0774e68568209d4e0d8d6c9caeb3bf0fabb6bee3e8e777b48b27617e98",
+        "warmup-C/summary.json": "64c7e780bbc0d807fc5eeb85e0d018c42add27b6d4b3895b4e4c9b69f897de05"
+      },
+      "packageDifferences": [
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "packageEntryCount": {
+        "A": 550,
+        "B": 550,
+        "C": 550
+      },
+      "packageSha256": {
+        "A": "d96d4c3f04ebb17cc537adea5ebd6e2d9ec29c03c2cd4b82a9edfb1bd85a9647",
+        "B": "93f27fe22f3907f9d5280d5bb0ab02269c5d1f868d2dcfced945fd3f533efe93",
+        "C": "d96d4c3f04ebb17cc537adea5ebd6e2d9ec29c03c2cd4b82a9edfb1bd85a9647"
+      },
+      "prespecifiedWarmups": 3,
+      "rawStorageBytes": 609553611,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+          "tree": "64345e92fff3800b5035b6aab52dff06e20bc874"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "storagePolicyVersion": "pinned-import-storage-20261124-v1",
+      "timedObservations": 18
+    }
+  ],
+  "decisions": {
+    "jitendex": "No demonstrated material total-import gain: B/C paired median -0.6593%, with 5/6 faster pairs but an interval crossing zero. B/A -2.1959% must be considered alongside C/A -1.2521% control drift. No qualification claim follows from this exploratory screen.",
+    "jmdict": "No demonstrated material total-import gain: B/C paired median -0.1053%, with 3/6 faster pairs and an interval crossing zero. The retained 1495.7 ms A observation inflates the B/A equal-work reduction, while the same-code C/A control shows almost the same reduction. No tail is excluded.",
+    "next": "Retain all three complete cohorts. None demonstrates a material total-import gain, so these results do not justify performance promotion or another unchanged-source screen.",
+    "scopeLimit": "Inventory counts, 12 canonical probes, 72 production lookup receipts, restart, exact normalized storage inventory, and exhaustive media were checked. These receipts do not establish byte-for-byte equality of every term or persisted database page.",
+    "vndb": "No demonstrated material total-import gain: B/A paired median -0.7313% and B/C -0.4309%, with 4/6 faster pairs against each baseline and both intervals crossing zero. The identical-product C/A median is -0.3003%; all tails are retained. All 23 original observations pass correctness, including 146,570 media files / 188,131,284 bytes in each exhaustive diagnostic. The active SAH file is 528,384 bytes in every observation, within the unchanged prospective 129-131 aligned 4,096-byte full-file allocation-unit bound."
+  },
+  "excludedPostHocObservations": 0,
+  "newAcquisitions": 0,
+  "pendingDictionary": null,
+  "retriesOrReplacements": 0,
+  "reviewerScriptSha256": "012d477ab52b42077291885959ca53e2ec5711fa2d4171e19d5d1f6e597b8d23",
+  "schemaVersion": 1,
+  "scope": "Independent read-only reconciliation of all 23 observations per completed screen: fixed schedule, source/package/fixture/harness identities, native summary receipts, storage, media, restart and paired arithmetic. No new acquisitions or source changes.",
+  "sourceIdentities": {
+    "A": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "B": {
+      "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+      "tree": "64345e92fff3800b5035b6aab52dff06e20bc874"
+    },
+    "C": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    }
+  },
+  "vndbArchiveVerification": {
+    "archiveMembers": 212,
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14960175867/zip",
+      "created_at": "2026-11-24T20:02:58Z",
+      "digest": "sha256:cbb6ec528241f0074b9618017db489b12e2bb0a30554da994b103b451ec97e9b",
+      "expired": false,
+      "expires_at": "2026-12-24T20:02:57Z",
+      "id": 14960175867,
+      "name": "import-canonical-screen-storage-v1-vndb-forward-45472377306-1",
+      "size_in_bytes": 1079476,
+      "updated_at": "2026-11-24T20:02:58Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14960175867",
+      "workflow_run": {
+        "head_branch": "perf/import-studies-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "8774a1cebe9974e5353af48453159413350d9a6a",
+        "id": 45472377306,
+        "repository_id": 1165902460
+      }
+    },
+    "atomicStagedExtraction": true,
+    "downloadedArchive": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-canonical-screen-storage-v1-vndb-forward-45472377306-1.zip",
+    "existingDestinationReplaced": false,
+    "extractedDirectory": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-canonical-screen-storage-v1-vndb-forward-45472377306-1",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45472377306,
+    "schemaVersion": 1,
+    "verifiedArchiveSha256": "cbb6ec528241f0074b9618017db489b12e2bb0a30554da994b103b451ec97e9b",
+    "verifiedBytes": 1079476
+  },
+  "workflowAttempt": 1,
+  "workflowRun": 45472377306,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45472377306"
+}

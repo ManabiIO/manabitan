@@ -1,0 +1,15 @@
+test_all_three_frozen_fixture_shapes_pass_without_mutating_inputs (test_qualification_receipts.QualificationReceiptWitness.test_all_three_frozen_fixture_shapes_pass_without_mutating_inputs) ... ok
+test_cohort_browser_version_and_expected_harness_hash_are_binding (test_qualification_receipts.QualificationReceiptWitness.test_cohort_browser_version_and_expected_harness_hash_are_binding) ... ok
+test_duplicate_probe_or_lookup_missing_pass_and_utf16_length_fail (test_qualification_receipts.QualificationReceiptWitness.test_duplicate_probe_or_lookup_missing_pass_and_utf16_length_fail) ... ok
+test_every_non_timing_semantic_field_remains_in_the_comparison (test_qualification_receipts.QualificationReceiptWitness.test_every_non_timing_semantic_field_remains_in_the_comparison) ... ok
+test_exact_total_and_each_file_size_are_compared_including_allowed_sah_pages (test_qualification_receipts.QualificationReceiptWitness.test_exact_total_and_each_file_size_are_compared_including_allowed_sah_pages) ... ok
+test_full_media_retains_common_identity_and_has_a_separate_digest (test_qualification_receipts.QualificationReceiptWitness.test_full_media_retains_common_identity_and_has_a_separate_digest) ... ok
+test_malformed_unknown_duplicate_and_out_of_bound_storage_fail_closed (test_qualification_receipts.QualificationReceiptWitness.test_malformed_unknown_duplicate_and_out_of_bound_storage_fail_closed) ... ok
+test_only_lookup_elapsed_times_and_validated_random_names_are_ignored (test_qualification_receipts.QualificationReceiptWitness.test_only_lookup_elapsed_times_and_validated_random_names_are_ignored) ... ok
+test_package_source_browser_and_raw_binding_mismatches_fail (test_qualification_receipts.QualificationReceiptWitness.test_package_source_browser_and_raw_binding_mismatches_fail) ... ok
+test_same_shaped_content_lookup_and_media_digests_cannot_silently_change (test_qualification_receipts.QualificationReceiptWitness.test_same_shaped_content_lookup_and_media_digests_cannot_silently_change) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.083s
+
+OK

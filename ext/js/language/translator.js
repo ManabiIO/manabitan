@@ -787,10 +787,14 @@ export class Translator {
      * @returns {string}
      */
     _getNextSubstring(searchResolution, currentString) {
-        const nextSubstringLength = searchResolution === 'word' ?
-            currentString.search(/[^\p{Letter}\p{Mark}][\p{Letter}\p{Mark}\p{Number}]*$/u) :
-            currentString.length - 1;
-        return currentString.substring(0, nextSubstringLength);
+        if (searchResolution === 'word') {
+            const boundary = currentString.search(/[^\p{Letter}\p{Mark}][\p{Letter}\p{Mark}\p{Number}]*$/u);
+            return currentString.substring(0, boundary);
+        }
+        // A supplementary code point occupies the last two code units.
+        const possiblePair = currentString.codePointAt(currentString.length - 2);
+        const unitsToRemove = typeof possiblePair === 'number' && possiblePair > 0xffff ? 2 : 1;
+        return currentString.substring(0, currentString.length - unitsToRemove);
     }
 
     /**

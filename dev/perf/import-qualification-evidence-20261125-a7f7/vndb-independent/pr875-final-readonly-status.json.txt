@@ -1,0 +1,1791 @@
+{
+  "checkedAt": "2026-11-25 15:40:20 UTC",
+  "purpose": "Read-only current PR875 status, runtime equivalence and existing timing job inspection. No tests, rerun or cancellation.",
+  "pr": {
+    "number": 875,
+    "url": "https://github.com/ManabiIO/manabitan/pull/875",
+    "state": "open",
+    "draft": true,
+    "head": "perf/native-media-projection-20261124-3aac",
+    "headSha": "5afd2e97ec2707b150acfde61115aee688547a78",
+    "baseSha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "updatedAt": "2026-11-25T15:32:31Z"
+  },
+  "frozenToCurrentComparison": {
+    "repository_full_name": "ManabiIO/manabitan",
+    "base": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+    "head": "5afd2e97ec2707b150acfde61115aee688547a78",
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "total_commits": 1,
+    "too_large": null,
+    "base_commit": {
+      "sha": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/7a8b25a44a3fe165107ed816377cc72bb0fac67d"
+    },
+    "merge_base_commit": {
+      "sha": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "html_url": "https://github.com/ManabiIO/manabitan/commit/7a8b25a44a3fe165107ed816377cc72bb0fac67d"
+    },
+    "files": [
+      {
+        "filename": "test/term-bank-experiments.test.js",
+        "status": "modified",
+        "additions": 7,
+        "deletions": 3,
+        "changes": 10,
+        "previous_filename": null
+      },
+      {
+        "filename": "test/term-bank-media-projection.test.js",
+        "status": "modified",
+        "additions": 3,
+        "deletions": 3,
+        "changes": 6,
+        "previous_filename": null
+      }
+    ]
+  },
+  "runtimeEquivalence": {
+    "equivalent": true,
+    "basis": "GitHub comparison is one commit ahead, changing only test/term-bank-experiments.test.js and test/term-bank-media-projection.test.js; no runtime/build/dependency/native artifact change."
+  },
+  "workflowRuns": {
+    "workflow_runs": [
+      {
+        "id": 45644262132,
+        "name": "CI",
+        "status": "queued",
+        "conclusion": null,
+        "run_number": 2788,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262132/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262132/logs",
+        "workflow_id": 238346704
+      },
+      {
+        "id": 45644262262,
+        "name": "Auto-Approve Safe PRs",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 2444,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262262/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262262/logs",
+        "workflow_id": 238346702
+      },
+      {
+        "id": 45644262721,
+        "name": "ManabiTan static web acceptance",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 1371,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262721/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262721/logs",
+        "workflow_id": 361835025
+      },
+      {
+        "id": 45644262096,
+        "name": "CodeQL",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 1223,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262096/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262096/logs",
+        "workflow_id": 238346706
+      },
+      {
+        "id": 45644262338,
+        "name": "Lint GitHub Actions workflows",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 8567,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262338/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262338/logs",
+        "workflow_id": 238346700
+      },
+      {
+        "id": 45644262951,
+        "name": "Dependency Review",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 2444,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262951/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262951/logs",
+        "workflow_id": 238346709
+      },
+      {
+        "id": 45644262217,
+        "name": "Chromium Restart Interruption",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 529,
+        "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262217/jobs",
+        "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45644262217/logs",
+        "workflow_id": 389251547
+      }
+    ]
+  },
+  "ciJobs": {
+    "jobs": [
+      {
+        "id": 139311042209,
+        "name": "JavaScript",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run JavaScript tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311042684,
+        "name": "Test Build",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned dictionary WASM toolchain",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned dictionary WASM rebuild",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Retain versioned release packages",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Validate manifest.json of the extension",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          }
+        ]
+      },
+      {
+        "id": 139311042807,
+        "name": "Unit Tests",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run Unit Tests tests",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8
+          }
+        ]
+      },
+      {
+        "id": 139311042819,
+        "name": "Anki Deduplication Matrix (Chromium)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run Chromium Anki deduplication matrix",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Enforce Chromium Anki matrix success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Upload Chromium Anki deduplication report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          }
+        ]
+      },
+      {
+        "id": 139311042852,
+        "name": "TypeScript (main)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run TypeScript (main) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311042865,
+        "name": "Unit Tests (options)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run Unit Tests (options) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311042931,
+        "name": "TypeScript (bench)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run TypeScript (bench) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311042982,
+        "name": "JSON",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run JSON tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311043001,
+        "name": "Full Extension E2E (Chromium)",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build Chromium test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Retain tested Chromium release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Restore Chromium E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run Chromium extension E2E",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8
+          },
+          {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Summarize Chromium extension E2E",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Upload Chromium extension E2E report",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Post Restore Chromium E2E dictionary cache",
+            "status": "pending",
+            "conclusion": null,
+            "number": 22
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 23
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24
+          }
+        ]
+      },
+      {
+        "id": 139311043011,
+        "name": "HTML",
+        "status": "queued",
+        "conclusion": null,
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 139311043081,
+        "name": "TypeScript (dev)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run TypeScript (dev) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311043087,
+        "name": "Full Extension E2E (Firefox)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build Firefox test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Retain tested Firefox release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install Firefox Developer Edition",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Upload Firefox extension E2E report",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Post Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23
+          }
+        ]
+      },
+      {
+        "id": 139311043126,
+        "name": "CSS",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run CSS tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 139311043195,
+        "name": "Markdown",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 3
+          },
+          {
+            "name": "Run Markdown tests",
+            "status": "pending",
+            "conclusion": null,
+            "number": 4
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "pending",
+            "conclusion": null,
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "pending",
+            "conclusion": null,
+            "number": 8
+          }
+        ]
+      },
+      {
+        "id": 139311043601,
+        "name": "TypeScript (test)",
+        "status": "queued",
+        "conclusion": null,
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 139311044563,
+        "name": "Full Extension E2E (Edge)",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 139311045764,
+        "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 139311045903,
+        "name": "Published release upgrade and reimport",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 139311137353,
+        "name": "Firefox Android Installation Smoke (blocking)",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 45644262132,
+        "logs_url": null,
+        "steps": null
+      }
+    ]
+  },
+  "timingJobs": {
+    "jobs": [
+      {
+        "id": 139303444810,
+        "name": "Current native media screen (jmdict)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45642169759,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Fetch the frozen product revisions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Validate unchanged storage policy",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run six fixed balanced blocks and exhaustive media diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Retain every attempted observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          }
+        ]
+      },
+      {
+        "id": 139303445340,
+        "name": "Current native media screen (vndb)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45642169759,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Fetch the frozen product revisions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Validate unchanged storage policy",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run six fixed balanced blocks and exhaustive media diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Retain every attempted observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          }
+        ]
+      },
+      {
+        "id": 139303445359,
+        "name": "Current native media screen (jitendex)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 45642169759,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Fetch the frozen product revisions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install matching Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Validate unchanged storage policy",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run six fixed balanced blocks and exhaustive media diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Retain every attempted observation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          }
+        ]
+      }
+    ]
+  },
+  "timingArtifacts": {
+    "artifacts": [
+      {
+        "id": 15037168171,
+        "name": "current-media-screen-vndb-2754",
+        "size_in_bytes": 1078333,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037168171",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037168171/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:38:00Z",
+        "expires_at": "2026-12-09T15:37:59Z",
+        "updated_at": "2026-11-25T15:38:00Z",
+        "digest": "sha256:66a52eb28790f1bc10d38cb81569bf6077104696fdfd685f15965339f02efdf9",
+        "workflow_run": {
+          "id": 45642169759,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "research/import-studies-20261125-2754",
+          "head_sha": "ae85fc50a77ce5d13cb9001ad376f741f915ec7a"
+        }
+      },
+      {
+        "id": 15035414026,
+        "name": "current-media-screen-jmdict-2754",
+        "size_in_bytes": 1041082,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15035414026",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15035414026/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:15:24Z",
+        "expires_at": "2026-12-09T15:15:23Z",
+        "updated_at": "2026-11-25T15:15:24Z",
+        "digest": "sha256:d1454f57d8bd510556ef87967fe5813ebbc24cdcde106cbcfb8652b19670b317",
+        "workflow_run": {
+          "id": 45642169759,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "research/import-studies-20261125-2754",
+          "head_sha": "ae85fc50a77ce5d13cb9001ad376f741f915ec7a"
+        }
+      },
+      {
+        "id": 15035319890,
+        "name": "current-media-screen-jitendex-2754",
+        "size_in_bytes": 1057032,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15035319890",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15035319890/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:16:53Z",
+        "expires_at": "2026-12-09T15:16:52Z",
+        "updated_at": "2026-11-25T15:16:53Z",
+        "digest": "sha256:0cb626e60423fa73d6b82af5df8614875e13dfc17fe0197a265574e637e308f8",
+        "workflow_run": {
+          "id": 45642169759,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "research/import-studies-20261125-2754",
+          "head_sha": "ae85fc50a77ce5d13cb9001ad376f741f915ec7a"
+        }
+      }
+    ]
+  },
+  "timingJobObservations": [
+    {
+      "loggedAt": "2026-11-25T15:15:37.9948556Z",
+      "name": "warmup-A",
+      "arm": "A",
+      "cohort": "excluded-warmup",
+      "block": null,
+      "position": null,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 7619.699999999997,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "warmup-A/summary.json",
+      "phaseCounters": "warmup-A/phase-counters.json",
+      "commandElapsedSeconds": 28.282761754999996
+    },
+    {
+      "loggedAt": "2026-11-25T15:16:08.1589523Z",
+      "name": "warmup-B",
+      "arm": "B",
+      "cohort": "excluded-warmup",
+      "block": null,
+      "position": null,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6667,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "warmup-B/summary.json",
+      "phaseCounters": "warmup-B/phase-counters.json",
+      "commandElapsedSeconds": 30.137179556000007
+    },
+    {
+      "loggedAt": "2026-11-25T15:16:34.6938545Z",
+      "name": "warmup-C",
+      "arm": "C",
+      "cohort": "excluded-warmup",
+      "block": null,
+      "position": null,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6727.600000000006,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "warmup-C/summary.json",
+      "phaseCounters": "warmup-C/phase-counters.json",
+      "commandElapsedSeconds": 26.508077661
+    },
+    {
+      "loggedAt": "2026-11-25T15:17:01.2107866Z",
+      "name": "block-01-1-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 1,
+      "position": 1,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6686.100000000006,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-01-1-A/summary.json",
+      "phaseCounters": "block-01-1-A/phase-counters.json",
+      "commandElapsedSeconds": 26.489855820000002
+    },
+    {
+      "loggedAt": "2026-11-25T15:17:27.3213829Z",
+      "name": "block-01-2-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 1,
+      "position": 2,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6332.899999999994,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-01-2-B/summary.json",
+      "phaseCounters": "block-01-2-B/phase-counters.json",
+      "commandElapsedSeconds": 26.083579544999992
+    },
+    {
+      "loggedAt": "2026-11-25T15:17:53.7429062Z",
+      "name": "block-01-3-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 1,
+      "position": 3,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6666,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-01-3-C/summary.json",
+      "phaseCounters": "block-01-3-C/phase-counters.json",
+      "commandElapsedSeconds": 26.39440429999999
+    },
+    {
+      "loggedAt": "2026-11-25T15:18:20.0014880Z",
+      "name": "block-02-1-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 2,
+      "position": 1,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6691.400000000023,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-02-1-C/summary.json",
+      "phaseCounters": "block-02-1-C/phase-counters.json",
+      "commandElapsedSeconds": 26.231805246999983
+    },
+    {
+      "loggedAt": "2026-11-25T15:18:45.9849057Z",
+      "name": "block-02-2-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 2,
+      "position": 2,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6255.900000000023,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-02-2-B/summary.json",
+      "phaseCounters": "block-02-2-B/phase-counters.json",
+      "commandElapsedSeconds": 25.95592202900002
+    },
+    {
+      "loggedAt": "2026-11-25T15:19:12.5891513Z",
+      "name": "block-02-3-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 2,
+      "position": 3,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6621.899999999965,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-02-3-A/summary.json",
+      "phaseCounters": "block-02-3-A/phase-counters.json",
+      "commandElapsedSeconds": 26.577499392999982
+    },
+    {
+      "loggedAt": "2026-11-25T15:19:38.7576091Z",
+      "name": "block-03-1-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 3,
+      "position": 1,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6435.900000000023,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-03-1-B/summary.json",
+      "phaseCounters": "block-03-1-B/phase-counters.json",
+      "commandElapsedSeconds": 26.141293271999984
+    },
+    {
+      "loggedAt": "2026-11-25T15:20:04.9697689Z",
+      "name": "block-03-2-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 3,
+      "position": 2,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6428.600000000035,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-03-2-A/summary.json",
+      "phaseCounters": "block-03-2-A/phase-counters.json",
+      "commandElapsedSeconds": 26.183193650999954
+    },
+    {
+      "loggedAt": "2026-11-25T15:20:31.5847076Z",
+      "name": "block-03-3-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 3,
+      "position": 3,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6689.400000000023,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-03-3-C/summary.json",
+      "phaseCounters": "block-03-3-C/phase-counters.json",
+      "commandElapsedSeconds": 26.58705738699996
+    },
+    {
+      "loggedAt": "2026-11-25T15:20:57.8367253Z",
+      "name": "block-04-1-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 4,
+      "position": 1,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6547.700000000012,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-04-1-C/summary.json",
+      "phaseCounters": "block-04-1-C/phase-counters.json",
+      "commandElapsedSeconds": 26.224400801
+    },
+    {
+      "loggedAt": "2026-11-25T15:21:24.4001620Z",
+      "name": "block-04-2-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 4,
+      "position": 2,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6785.700000000012,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-04-2-A/summary.json",
+      "phaseCounters": "block-04-2-A/phase-counters.json",
+      "commandElapsedSeconds": 26.535049543000014
+    },
+    {
+      "loggedAt": "2026-11-25T15:21:50.7511131Z",
+      "name": "block-04-3-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 4,
+      "position": 3,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6269.799999999988,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-04-3-B/summary.json",
+      "phaseCounters": "block-04-3-B/phase-counters.json",
+      "commandElapsedSeconds": 26.323430040999995
+    },
+    {
+      "loggedAt": "2026-11-25T15:22:17.0148988Z",
+      "name": "block-05-1-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 5,
+      "position": 1,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6314.599999999977,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-05-1-B/summary.json",
+      "phaseCounters": "block-05-1-B/phase-counters.json",
+      "commandElapsedSeconds": 26.235834428000032
+    },
+    {
+      "loggedAt": "2026-11-25T15:22:43.2840384Z",
+      "name": "block-05-2-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 5,
+      "position": 2,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6451,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-05-2-C/summary.json",
+      "phaseCounters": "block-05-2-C/phase-counters.json",
+      "commandElapsedSeconds": 26.23906271300001
+    },
+    {
+      "loggedAt": "2026-11-25T15:23:09.5811306Z",
+      "name": "block-05-3-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 5,
+      "position": 3,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6565.79999999993,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-05-3-A/summary.json",
+      "phaseCounters": "block-05-3-A/phase-counters.json",
+      "commandElapsedSeconds": 26.26901705900002
+    },
+    {
+      "loggedAt": "2026-11-25T15:23:36.0348250Z",
+      "name": "block-06-1-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 6,
+      "position": 1,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6475.5,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-06-1-A/summary.json",
+      "phaseCounters": "block-06-1-A/phase-counters.json",
+      "commandElapsedSeconds": 26.426724099000012
+    },
+    {
+      "loggedAt": "2026-11-25T15:24:02.4062348Z",
+      "name": "block-06-2-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 6,
+      "position": 2,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6405,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-06-2-C/summary.json",
+      "phaseCounters": "block-06-2-C/phase-counters.json",
+      "commandElapsedSeconds": 26.34386034399995
+    },
+    {
+      "loggedAt": "2026-11-25T15:24:28.1893560Z",
+      "name": "block-06-3-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 6,
+      "position": 3,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "sample",
+      "totalImportMs": 6164.5,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "block-06-3-B/summary.json",
+      "phaseCounters": "block-06-3-B/phase-counters.json",
+      "commandElapsedSeconds": 25.75517955700002
+    },
+    {
+      "loggedAt": "2026-11-25T15:31:12.6160114Z",
+      "name": "diagnostic-A",
+      "arm": "A",
+      "cohort": "exhaustive-diagnostic",
+      "block": null,
+      "position": null,
+      "source": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "status": "success",
+      "mediaCheck": "all",
+      "totalImportMs": 6521.800000000047,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "diagnostic-A/summary.json",
+      "phaseCounters": "diagnostic-A/phase-counters.json",
+      "commandElapsedSeconds": 404.3997676959999
+    },
+    {
+      "loggedAt": "2026-11-25T15:37:58.2214462Z",
+      "name": "diagnostic-B",
+      "arm": "B",
+      "cohort": "exhaustive-diagnostic",
+      "block": null,
+      "position": null,
+      "source": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "status": "success",
+      "mediaCheck": "all",
+      "totalImportMs": 6190.099999999977,
+      "storageBytes": 609553611,
+      "activeSahFileBytes": 528384,
+      "nonSahBytes": 608996555,
+      "summary": "diagnostic-B/summary.json",
+      "phaseCounters": "diagnostic-B/phase-counters.json",
+      "commandElapsedSeconds": 405.57724351799993
+    }
+  ],
+  "timingAvailability": {
+    "completeArtifactAvailable": true,
+    "allThreeTimingJobsSucceeded": true,
+    "observationCount": 23,
+    "allLogObservationsSucceeded": true,
+    "diagnostics": [
+      {
+        "name": "diagnostic-A",
+        "commandElapsedSeconds": 404.3997676959999,
+        "totalImportMs": 6521.800000000047,
+        "mediaCheck": "all",
+        "loggedAt": "2026-11-25T15:31:12.6160114Z"
+      },
+      {
+        "name": "diagnostic-B",
+        "commandElapsedSeconds": 405.57724351799993,
+        "totalImportMs": 6190.099999999977,
+        "mediaCheck": "all",
+        "loggedAt": "2026-11-25T15:37:58.2214462Z"
+      }
+    ],
+    "interpretation": "The final two exhaustive-media diagnostic commands accounted for about13.5minutes. This status check has not independently audited the artifact's timing statistics."
+  }
+}

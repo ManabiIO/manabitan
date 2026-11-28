@@ -1,0 +1,758 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45469432793",
+  "allChecksPass": true,
+  "newAcquisition": false,
+  "scope": "Two independent corrected VNDB screens; all 46 original observations retained. No stages or hosts pooled.",
+  "packageLimit": "Product archives are not included. Archive and decompressed-entry inventories are reconciled as retained receipts; raw product ZIP bytes could not be independently rehashed.",
+  "storageLimit": "Prospective policy permits only VNDB active SQLite allocation 129-131 x4096 bytes. All other normalized paths/sizes exact; no whole SQLite byte-equivalence claim. Earlier failed cohorts remain failed.",
+  "canonicalScope": "Complete rows and restart; 12 deterministic terms x6 passes. Exhaustive persisted media in the two separate diagnostics per cell. No exhaustive all-row canonical-content claim.",
+  "results": [
+    {
+      "artifact": "import-media-screen-storage-v1-vndb-forward-45469432793-1",
+      "lane": "media",
+      "allChecksPass": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "toolingCommit": "f44fbe93a4cb2da44cf94cc2a03236acde8755a8",
+      "runnerSha256": "0b0fe27b8ee57092e412d5194990061ece131a5b7826ef55cae7f4ac3aebe24b",
+      "unchangedHarnessFileCount": 75,
+      "packageHashesReported": {
+        "A": "5de8af7ee6aad04fe66a89e0dd8dab007ae97253d148da624edd7f6759f320d6",
+        "B": "821a249cd0f7a42dc86e3fede62c0baea901f39d753e909ff43df7b79b21207a",
+        "C": "5de8af7ee6aad04fe66a89e0dd8dab007ae97253d148da624edd7f6759f320d6"
+      },
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "packageEntryCount": 550,
+      "observations": 23,
+      "timed": 18,
+      "warmups": 3,
+      "exhaustiveDiagnostics": 2,
+      "timingsMs": {
+        "A": [
+          6925.5,
+          6553.300000000047,
+          6562.400000000023,
+          6710.699999999953,
+          6616.5,
+          6690.900000000023
+        ],
+        "B": [
+          6233.6999999999825,
+          6333.0,
+          6294.0,
+          6379.200000000012,
+          6355.0,
+          6832.5
+        ],
+        "C": [
+          6666.8000000000175,
+          6809.6999999999825,
+          6563.5,
+          6570.800000000047,
+          6657.5,
+          6609.70000000007
+        ]
+      },
+      "metrics": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "bestPairPercent": -9.989170457006969,
+          "worstPairPercent": 2.1163072232431634,
+          "pairedChangesPercent": [
+            -9.989170457006969,
+            -3.3616651152861166,
+            -4.089967085213065,
+            -4.939872144484836,
+            -3.952240610594726,
+            2.1163072232431634
+          ],
+          "pairedMedianPercent": -4.021103847903896,
+          "pairedMedianBootstrap95Percent": [
+            -7.464521300745902,
+            -0.6226789460214766
+          ],
+          "equalWorkPercent": -4.07371072385202,
+          "baselineMedianMs": 6653.700000000012,
+          "candidateMedianMs": 6344.0
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "bestPairPercent": -7.000308383628995,
+          "worstPairPercent": 3.370803516043508,
+          "pairedChangesPercent": [
+            -6.496370072599056,
+            -7.000308383628995,
+            -4.106040984230974,
+            -2.915931089061208,
+            -4.543747653022912,
+            3.370803516043508
+          ],
+          "pairedMedianPercent": -4.324894318626943,
+          "pairedMedianBootstrap95Percent": [
+            -6.748339228114025,
+            0.22743621349115006
+          ],
+          "equalWorkPercent": -3.6375946637246526,
+          "baselineMedianMs": 6633.600000000035,
+          "candidateMedianMs": 6344.0
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "bestPairPercent": -3.7354703631504282,
+          "worstPairPercent": 3.912532617153719,
+          "pairedChangesPercent": [
+            -3.7354703631504282,
+            3.912532617153719,
+            0.016762160184935482,
+            -2.084730355997255,
+            0.6196629638026252,
+            -1.213588605418603
+          ],
+          "pairedMedianPercent": -0.5984132226168337,
+          "pairedMedianBootstrap95Percent": [
+            -2.9101003595738417,
+            2.266097790478172
+          ],
+          "equalWorkPercent": -0.4525790515558903,
+          "baselineMedianMs": 6653.700000000012,
+          "candidateMedianMs": 6633.600000000035
+        }
+      },
+      "media": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "termRows": 6648310,
+      "lookupReceiptsPerObservation": 72,
+      "offsetSensitiveDigest": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "nonSahFiles": {
+        "manabitan-dictionary-media-v1/{generation}.bin": 199563210,
+        "manabitan-term-content.bin": 7533449,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+      },
+      "storageObservations": [
+        {
+          "name": "warmup-A",
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-B",
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-C",
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609561803,
+          "activeSahFileBytes": 536576,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-A",
+          "arm": "A",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-B",
+          "arm": "B",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "rawReportSha256": {
+        "warmup-A": "cba4b0c60592afc91930d0ecea5dbce68c2f3d15f35441d94993804313a08f6d",
+        "warmup-B": "dad115f992b1f6e4f1b717cb0d2c16274fccc3c4b91ebe55c594f223ed972764",
+        "warmup-C": "15b444f8dafa31f871903c9682af762f235f2f51809b529c91c5e05dc4cdb7be",
+        "block-01-1-A": "3e1e5eea9cadd86bbbe5b4dafbaf89662fda4d7f27e3b04e630fd671b27af604",
+        "block-01-2-B": "ee15a5f53505b9ff2a17504ecfe52a0fe6546919a3ff65dd4230d6e407537b8f",
+        "block-01-3-C": "c05b9219942ed6c2dfb232fc3355c1fe18452a10a7e57e865656a5b52d769222",
+        "block-02-1-C": "b997b057d13d3e2700d428a773156096d92da43b4a2070eab5b807045cacafda",
+        "block-02-2-B": "988d8b41793cbc0eca3aaf578a090411c9025254fe800816b9755065ccefb9e3",
+        "block-02-3-A": "f0fdcf912a770e564d0b51eca5bb4225d58c06380316fd31d8d7a3f52bb6aed0",
+        "block-03-1-B": "264a93b6aaac991407ed220c0f680ab87e7e224984b708478a4681bfd50bc2db",
+        "block-03-2-A": "1f169f618de1ff76e9b06158bf410d2a3983099f5889fbcfe4b7118d7aca0676",
+        "block-03-3-C": "00240f7e9f8254da77534727d30ad9a2d85bceb31f1d43b3635bd8b9ff38a6b1",
+        "block-04-1-C": "8c187cf5cbc33c38cccbc33fb8f08a91820210d0d11606ca0e39dd425cf4a708",
+        "block-04-2-A": "fcc0e08a98467384458f09fa97427124f3c94382ce3363648518f0f674b21f21",
+        "block-04-3-B": "6b49508fe2f0242c16344a9d122fb1cdf4d5e6f575fd21c928b68f329c36ab7c",
+        "block-05-1-B": "da2fff7fe48646205a62b49bc771f02022cee78ee38ec2d59c5b0b292bc3df13",
+        "block-05-2-C": "0d1c539fb422a59b80dc21f8bfac907a8d8a7e2f1016324604e6b0f96eb88749",
+        "block-05-3-A": "264e0a783479ec2f995d78d2d5bb5925d5767e85d1512bb212fe155a083876e6",
+        "block-06-1-A": "94d07bb5f0c24dd197240d2cafae3ac24e45d5bcd7d4001310fafcb1c12e161a",
+        "block-06-2-C": "9a0cf08c1c005c3dcea5f7036c76b9cb412da292bb4cf7759b9e449c5bfa0af9",
+        "block-06-3-B": "5c98b9abb874a3a121e15f5ed6e1fd3eba9d30bdf299a6696f1d69a2b22cd855",
+        "diagnostic-A": "4dfdea585ba56733423e62aa31817ed6d5bc6d4378b2704d6f67748fe2c4e2f1",
+        "diagnostic-B": "a1b4bf88aa1c24fea7a0f508175d62bd92494c45be9ec4142d7adfba7d6a53cb"
+      }
+    },
+    {
+      "artifact": "import-prefix-screen-storage-v1-vndb-forward-45469432793-1",
+      "lane": "prefix",
+      "allChecksPass": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+          "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "toolingCommit": "f44fbe93a4cb2da44cf94cc2a03236acde8755a8",
+      "runnerSha256": "0b0fe27b8ee57092e412d5194990061ece131a5b7826ef55cae7f4ac3aebe24b",
+      "unchangedHarnessFileCount": 75,
+      "packageHashesReported": {
+        "A": "f5de05edadd8aafe843a4de348a58e9dcf0056031e09d4a10ba170443b46ab79",
+        "B": "89f66ac8a7b35c4d0c45f66b2a979bda6cf24836a337c4fa7b63078e5ce18d2b",
+        "C": "f5de05edadd8aafe843a4de348a58e9dcf0056031e09d4a10ba170443b46ab79"
+      },
+      "packageDifferences": [
+        "js/dictionary/term-content-block-store.js",
+        "js/dictionary/term-content-opfs-store.js",
+        "js/dictionary/term-content-ownership.js",
+        "js/dictionary/zstd-term-content.js",
+        "lib/zstd-wasm.js",
+        "lib/zstd-wasm.js.map"
+      ],
+      "packageEntryCount": 550,
+      "observations": 23,
+      "timed": 18,
+      "warmups": 3,
+      "exhaustiveDiagnostics": 2,
+      "timingsMs": {
+        "A": [
+          6370.6999999999825,
+          6521.5,
+          6566.299999999988,
+          6482.900000000023,
+          6388.20000000007,
+          6690.300000000047
+        ],
+        "B": [
+          6393.299999999988,
+          6517.900000000023,
+          6398.900000000023,
+          6575.099999999977,
+          6355.299999999988,
+          6746.400000000023
+        ],
+        "C": [
+          6385.1999999999825,
+          6425.6999999999825,
+          6435.699999999953,
+          6400.900000000023,
+          6350.600000000035,
+          6486.0
+        ]
+      },
+      "metrics": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "bestPairPercent": -2.5493809298991144,
+          "worstPairPercent": 1.4222030264226415,
+          "pairedChangesPercent": [
+            0.35474908565786833,
+            -0.055202024073863765,
+            -2.5493809298991144,
+            1.4222030264226415,
+            -0.5150120534748615,
+            0.8385274202947102
+          ],
+          "pairedMedianPercent": 0.14977353079200229,
+          "pairedMedianBootstrap95Percent": [
+            -1.532196491686988,
+            1.1303652233586758
+          ],
+          "equalWorkPercent": -0.08457223109256118,
+          "baselineMedianMs": 6502.200000000012,
+          "candidateMedianMs": 6458.400000000023
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 1,
+          "bestPairPercent": -0.5718103702772148,
+          "worstPairPercent": 4.01480111008361,
+          "pairedChangesPercent": [
+            0.12685585416283285,
+            1.4348631277532498,
+            -0.5718103702772148,
+            2.721492290145955,
+            0.07400875507752591,
+            4.01480111008361
+          ],
+          "pairedMedianPercent": 0.7808594909580413,
+          "pairedMedianBootstrap95Percent": [
+            -0.24890080759984445,
+            3.3681467001147825
+          ],
+          "equalWorkPercent": 1.3065135991228827,
+          "baselineMedianMs": 6413.300000000003,
+          "candidateMedianMs": 6458.400000000023
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "bestPairPercent": -3.053674723107258,
+          "worstPairPercent": 0.2276045018600792,
+          "pairedChangesPercent": [
+            0.2276045018600792,
+            -1.4689871961974577,
+            -1.9889435450715753,
+            -1.2648660321769478,
+            -0.5885852039703598,
+            -3.053674723107258
+          ],
+          "pairedMedianPercent": -1.3669266141872027,
+          "pairedMedianBootstrap95Percent": [
+            -2.5213091340894165,
+            -0.18049035105514033
+          ],
+          "equalWorkPercent": -1.3731454975541513,
+          "baselineMedianMs": 6502.200000000012,
+          "candidateMedianMs": 6413.300000000003
+        }
+      },
+      "media": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "termRows": 6648310,
+      "lookupReceiptsPerObservation": 72,
+      "offsetSensitiveDigest": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "nonSahFiles": {
+        "manabitan-dictionary-media-v1/{generation}.bin": 199563210,
+        "manabitan-term-content.bin": 7533449,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+      },
+      "storageObservations": [
+        {
+          "name": "warmup-A",
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-B",
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-C",
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-A",
+          "arm": "A",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-B",
+          "arm": "B",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "rawReportSha256": {
+        "warmup-A": "329c2bffb81b9a26ff6de38fdb1e3757b3f42c4326f570d87ea5d4970631ad63",
+        "warmup-B": "f509f126319aac7c45cdac82da4e86758a33af3215183661b16b64b864b17f57",
+        "warmup-C": "720dc2617c70d91bcae354c50e1f0edf9a606f8c606dd48ddc0d516d0a602c8d",
+        "block-01-1-A": "17e263f38ff94e1164974c007c32b0e1724c04c32975770f9bbd9d2777d4a760",
+        "block-01-2-B": "b06a11cf852c50b4b1f1faab3618d92db8111299df0ef06eee41d5c670f96a45",
+        "block-01-3-C": "cacfdcf63392a47a269134e59c1c63b514ac8be56a5b6afa9ba7485c2bf17d93",
+        "block-02-1-C": "3c31938820bfd46890650232457e044b382854fe3c8ab188622136204aec5e54",
+        "block-02-2-B": "99e5258bb91bc84378da32cf72d1a0de80bf377846bb20eb06e3ca2fc79d4ab8",
+        "block-02-3-A": "5ce597c6c8c7b45064fbb715f85dd697e15e3d4d50890863364626e3a2e21c95",
+        "block-03-1-B": "1153143808630af553f885ea73d135977f6bd8d64499c5657b56516fd32e93f1",
+        "block-03-2-A": "af70520ff02352466f9b666dfffec61d32d600af768d2148a90a7522686eba69",
+        "block-03-3-C": "de882d77a3dd5d9d33ee9ac744b0a746ab07a19f2d069c884350c0d0039486ca",
+        "block-04-1-C": "b814e8ba780138bdd422f58c704332b7249589768cdabe0f394fd620e7c9bf90",
+        "block-04-2-A": "2f633e3ff3b08cfd007c98b5679af09ba5f4471e1891ad31bed2d2e93e6f4e3e",
+        "block-04-3-B": "e61c4af06b4eb3766c798edc26beaae3296c10c7f1832c53f96009a05c39511e",
+        "block-05-1-B": "490b1f9860110bef06f3ef181c4c86115c67462c5509ca5bb6f6ac8807d1ddc2",
+        "block-05-2-C": "f84efc24a38ed2c7ff49aeac3eda06d6b5d383293d452eb890e21316732088da",
+        "block-05-3-A": "10164096e411b9677490cd99493a145fd663b0442301d74b1d095a051e010dd2",
+        "block-06-1-A": "88591ef4b92efc44ffa9aeb7dce5098facc5ed732c64afa5f3a268e11e322c5c",
+        "block-06-2-C": "129f8da88dc57f0a4b9b6ff5c13b5370430ac493707124bde6d8e63a56342830",
+        "block-06-3-B": "26c79c7b6259bc4cb830c174f042768f6559d2a8168ffb5be3ad80e3fe4751a1",
+        "diagnostic-A": "79b26c4432b806f23713a36b827ed672e9686df4564a8cfc7d1ad8d01dacd801",
+        "diagnostic-B": "9a94dfd357a1d8391efef2b8560b3b076cfbdcb75c3fb8a4a12c3552de53ef5f"
+      }
+    }
+  ]
+}

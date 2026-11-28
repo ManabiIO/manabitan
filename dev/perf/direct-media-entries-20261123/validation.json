@@ -1,0 +1,97 @@
+{
+    "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+    "runtimeChangeFiles": [
+        "ext/js/dictionary/source-zip-media-pack.js",
+        "ext/js/dictionary/source-zip-media-preparation-worker.js"
+    ],
+    "focusedTests": {
+        "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--maxWorkers=2",
+            "test/source-zip-media-entry-pack.test.js",
+            "test/raw-zip-range-reader.test.js",
+            "test/zip-media-validation.test.js",
+            "test/dictionary-generation-media-store.test.js"
+        ],
+        "exitCode": 0,
+        "filesPassed": 4,
+        "testsPassed": 146,
+        "durationSeconds": 3.77
+    },
+    "allTargetDryBuild": {
+        "command": [
+            "node",
+            "dev/bin/build.js",
+            "--dryRun",
+            "--all"
+        ],
+        "exitCode": 0,
+        "targets": [
+            "chrome",
+            "chrome-dev",
+            "chrome-playwright",
+            "firefox",
+            "firefox-dev",
+            "firefox-android",
+            "edge"
+        ]
+    },
+    "libraryBuild": {
+        "command": "npm run build:libs",
+        "exitCode": 0
+    },
+    "typescript": [
+        {
+            "project": "jsconfig.json",
+            "exitCode": 0
+        },
+        {
+            "project": "dev/jsconfig.json",
+            "exitCode": 0
+        },
+        {
+            "project": "test/jsconfig.typecheck.json",
+            "exitCode": 0
+        },
+        {
+            "project": "benches/jsconfig.json",
+            "exitCode": 0
+        }
+    ],
+    "typescriptCommand": "node node_modules/typescript/bin/tsc --noEmit --project PROJECT",
+    "scopedEslint": {
+        "exitCode": 0,
+        "files": [
+            "ext/js/dictionary/source-zip-media-pack.js",
+            "ext/js/dictionary/source-zip-media-preparation-worker.js",
+            "test/source-zip-media-entry-pack.test.js",
+            "test/perf/direct-media-entries-20261123/screen.mjs",
+            "test/perf/direct-media-entries-20261123/worker.mjs",
+            "dev/perf/direct-media-entries-20261123/*.json"
+        ]
+    },
+    "exactBaseFullMediaProof": {
+        "complete": true,
+        "receipt": "exact-base-worker-oracle.json",
+        "independentVerifierReceipt": "media-verification.json",
+        "verifierSha256": "ef3dca78b6e8640a9e0745d3999d624b70840746051c6cf439b570311373da2e"
+    },
+    "fullLocalUnitSuite": {
+        "status": "not-run",
+        "reason": "A separate full suite stalled in the shared environment. Final full-suite qualification is deferred to PR CI."
+    },
+    "localBrowserQualification": {
+        "status": "blocked",
+        "reason": "The shared environment rejected browser socket creation with EPERM. Browser integration remains a PR CI gate."
+    },
+    "performanceCohort": {
+        "status": "not-acquired",
+        "claim": "Eliminates 146570 redundant Map entries and 293140 requirement/source wrapper objects for the pinned VNDB source; no measured peak-memory or end-to-end speed claim."
+    },
+    "resolvedValidationIssues": [
+        "The first focused test used a slow deep comparison of a 4.6 MiB byte array and timed out. It was replaced with complete native Buffer equality, preserving all-byte assertions and the existing timeout.",
+        "The original test used Array.toReversed, unsupported by the repository ES2022 type libraries. The fixture-owned arrays now use reverse; test and bench type checks and all focused tests pass."
+    ]
+}

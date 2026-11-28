@@ -1,0 +1,46 @@
+{
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "c3a9e25814392b97d313fb7f6fe65797ed752b3c",
+  "candidateTree": "64345e92fff3800b5035b6aab52dff06e20bc874",
+  "nodeVersion": "v22.22.0",
+  "realDependencyDirectory": true,
+  "baselinePackage": "/workspace/scratch/3aacd533c01f/round2/current-baseline/builds/manabitan-chrome.zip",
+  "candidatePackage": "/workspace/scratch/3aacd533c01f/round2/jmdict-canonical-inputs/builds/manabitan-chrome.zip",
+  "expectedDifferences": [
+    "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "lib/term-content-canonical-scan-v1.wasm"
+  ],
+  "baselineZipBytes": 17265196,
+  "candidateZipBytes": 17265431,
+  "zipDeltaBytes": 235,
+  "baselineRawEntryBytes": 42447036,
+  "candidateRawEntryBytes": 42447852,
+  "baselineZipSha256": "231a5f41a54fd11ed34662a5e6114ab624ac3106f62628b37262e44ef4029faa",
+  "candidateZipSha256": "2688c3820ae3aa54ae452952c5103985ee72dbfdfc3bf71ae867399941e435ad",
+  "changedEntries": {
+    "js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+      "baseline": {
+        "bytes": 6853,
+        "compressedBytes": 2505,
+        "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+      },
+      "candidate": {
+        "bytes": 7626,
+        "compressedBytes": 2726,
+        "sha256": "fee76ae817358be978aa75f0f5638b5902ef9f26a0c644e37ec581be504583d0"
+      }
+    },
+    "lib/term-content-canonical-scan-v1.wasm": {
+      "baseline": {
+        "bytes": 1624,
+        "compressedBytes": 955,
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      "candidate": {
+        "bytes": 1667,
+        "compressedBytes": 969,
+        "sha256": "5e16593eb74b04513eb06b08ff98111853cc6bec51e45292feed92f424d732ae"
+      }
+    }
+  }
+}

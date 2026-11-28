@@ -1,0 +1,65 @@
+{
+  "activeSahFileBytesByArm": {
+    "A": [
+      528384,
+      528384
+    ],
+    "B": [
+      528384,
+      528384
+    ]
+  },
+  "observations": [
+    {
+      "activeSahFileBytes": 528384,
+      "arm": "B",
+      "correctnessStatus": "passed",
+      "index": 1,
+      "name": "B1",
+      "nonSahBytes": 608996555,
+      "pair": 1,
+      "rawStorageBytes": 609553611
+    },
+    {
+      "activeSahFileBytes": 528384,
+      "arm": "A",
+      "correctnessStatus": "passed",
+      "index": 2,
+      "name": "A1",
+      "nonSahBytes": 608996555,
+      "pair": 1,
+      "rawStorageBytes": 609553611
+    },
+    {
+      "activeSahFileBytes": 528384,
+      "arm": "A",
+      "correctnessStatus": "passed",
+      "index": 3,
+      "name": "A2",
+      "nonSahBytes": 608996555,
+      "pair": 2,
+      "rawStorageBytes": 609553611
+    },
+    {
+      "activeSahFileBytes": 528384,
+      "arm": "B",
+      "correctnessStatus": "passed",
+      "index": 4,
+      "name": "B2",
+      "nonSahBytes": 608996555,
+      "pair": 2,
+      "rawStorageBytes": 609553611
+    }
+  ],
+  "policyVersion": "pinned-import-storage-20261124-v1",
+  "rawStorageBytesByArm": {
+    "A": [
+      609553611,
+      609553611
+    ],
+    "B": [
+      609553611,
+      609553611
+    ]
+  }
+}

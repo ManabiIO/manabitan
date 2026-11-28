@@ -1,0 +1,216 @@
+"""Recompute the frozen study from retained original scans and reports."""
+
+import gzip
+import hashlib
+import importlib
+import json
+from pathlib import Path, PurePosixPath
+import re
+import sys
+import tarfile
+import tempfile
+
+
+PARENT = Path('/workspace/scratch/ef009a302ea8')
+EVIDENCE = PARENT / 'vndb-evidence-work/builds/perf/import-vndb-20261125-ef009/memory'
+OBSERVER = PARENT / 'memory-work/dev/perf/import-memory-ef009'
+sys.path.insert(0, str(OBSERVER))
+audit_cell = importlib.import_module('audit_memory').audit_cell
+semantic_receipt = importlib.import_module('packaging_helpers').semantic_receipt
+schedule = importlib.import_module('overlay_helpers').schedule
+protocol = json.loads((OBSERVER / 'protocol.json').read_text())
+sha = lambda raw: hashlib.sha256(raw).hexdigest()
+protocol_sha = sha((OBSERVER / 'protocol.json').read_bytes())
+expected_head = '57590f5eaee359d721ba9d5d8bde28728a8d172e'
+expected_run = 45646484626
+expected_cells = {(dictionary, replication) for dictionary in protocol['dictionaries'] for replication in (1, 2)}
+summary_records = json.loads((EVIDENCE / 'retrieved-artifacts.json').read_text())
+full_records = json.loads((EVIDENCE / 'full-evidence-index.json').read_text())
+summaries = {}
+for record in summary_records:
+    artifact = record['artifact']
+    assert artifact['workflow_run']['id'] == expected_run
+    assert artifact['workflow_run']['head_sha'] == expected_head
+    packed = (EVIDENCE / record['rawPath']).read_bytes()
+    assert sha(packed) == record['compressedSha256'] and len(packed) == record['compressedBytes']
+    raw = gzip.decompress(packed)
+    assert sha(raw) == record['originalSha256'] and len(raw) == record['originalBytes']
+    summary = json.loads(raw)
+    cell = (summary['dictionary'], summary['replication'])
+    assert cell in expected_cells and cell not in summaries
+    summaries[cell] = (summary, record)
+
+results = []
+package_maps = {'A': {}, 'B': {}}
+semantic_sets = {}
+for record in full_records:
+    artifact = record['artifact']
+    match = re.fullmatch(r'import-memory-ef009-(jmdict|jitendex|vndb)-([12])', artifact['name'])
+    assert match and artifact['workflow_run']['id'] == expected_run
+    assert artifact['workflow_run']['head_sha'] == expected_head
+    cell = (match[1], int(match[2]))
+    result = {'dictionary': cell[0], 'replication': cell[1], 'artifactId': artifact['id'],
+              'rawArchive': record['archivePath'], 'errors': []}
+    try:
+        assert cell in summaries, 'Compact summary is unavailable'
+        summary, summary_record = summaries[cell]
+        result['summaryArtifactId'] = summary_record['artifact']['id']
+        packed = (EVIDENCE / record['archivePath']).read_bytes()
+        assert sha(packed) == record['archiveSha256'] and len(packed) == record['archiveBytes']
+        expected_members = {item['path']: item for item in record['members']}
+        with tempfile.TemporaryDirectory(prefix='memory-raw-reaudit-') as temporary:
+            root = Path(temporary)
+            with tarfile.open(EVIDENCE / record['archivePath'], 'r:gz') as archive:
+                members = archive.getmembers()
+                assert len(members) == len(expected_members)
+                assert len({item.name for item in members}) == len(members)
+                for item in members:
+                    name = PurePosixPath(item.name)
+                    assert item.isfile() and not name.is_absolute() and '..' not in name.parts
+                    raw = archive.extractfile(item).read()
+                    expected = expected_members[item.name]
+                    assert len(raw) == expected['bytes'] and sha(raw) == expected['sha256']
+                    destination = root / item.name
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    destination.write_bytes(raw)
+            read = lambda name: json.loads((root / name).read_text())
+            plan = read('plan.json')
+            assert plan == summary['plan']
+            assert plan['config'] == protocol and plan['protocolSha256'] == protocol_sha
+            assert sha((root / 'protocol.json').read_bytes()) == protocol_sha
+            assert plan['workflowCommit'] == expected_head and str(plan['workflowRun']) == str(expected_run)
+            assert str(plan['workflowAttempt']) == '1'
+            assert plan['schedule'] == schedule(cell[1])
+            assert plan['authoritativeTiming'] is False and summary['authoritativeTiming'] is False
+            assert plan['prepareOnly'] is False and summary['prepareOnly'] is False
+            for name in ('audit_memory.py', 'chromium_memory.py', 'packaging_helpers.py'):
+                assert sha((root / 'observer-source' / name).read_bytes()) == sha((OBSERVER / name).read_bytes())
+                assert sha((OBSERVER / name).read_bytes()) == plan['observerSha256'][name]
+            recomputed = audit_cell(root)
+            assert recomputed == read('memory-audit.json') == summary['independentAudit']
+            assert recomputed['metrics'] == summary['metrics']
+            comparison = read('memory-comparison.json')
+            assert comparison['pairs'] == summary['pairs']
+            observations = read('observations.json')
+            assert len(observations) == len(summary['observations']) == 4
+            for compact, original in zip(summary['observations'], observations):
+                assert compact == {key: original[key] for key in compact}
+            fixture = read('fixture.json')
+            assert fixture == summary['fixture']
+            delta = read('package-delta.json')
+            assert delta == summary['packageDelta'] == sorted(protocol['candidate']['packagedDelta'])
+            receipts = {arm: read(f'package-memory-{arm}-receipt.json') for arm in 'AB'}
+            assert receipts == summary['packages']
+            assert receipts['A']['sourceCommit'] == protocol['base']
+            assert receipts['A']['sourceTree'] == '99d23f16e973c7ae9feba77ca3643d1c27dfb93d'
+            assert receipts['B']['sourceCommit'] == protocol['candidate']['commit']
+            assert receipts['B']['sourceTree'] == protocol['candidate']['tree']
+            assert receipts['A']['harnessSha256'] == receipts['B']['harnessSha256']
+            overlay = read('overlay-receipts.json')
+            assert overlay == summary['overlayReceipts']
+            member_maps = {arm: read(f'package-memory-{arm}-members.json') for arm in 'AB'}
+            changed = sorted(name for name in member_maps['A'].keys() | member_maps['B'].keys()
+                             if member_maps['A'].get(name) != member_maps['B'].get(name))
+            assert changed == delta
+            excluded = {item['path']: item for item in record['excludedMembers']}
+            for arm in 'AB':
+                assert receipts[arm]['generatedLibrariesShared'] is True
+                assert receipts[arm]['nativeModulesRestoredFromOwnManifest'] is True
+                assert overlay[arm]['originalSha256'] == plan['originalHarnessSha256']
+                assert overlay[arm]['appliedSha256'] == plan['memoryOverlaySha256']
+                release = excluded[f'package-memory-{arm}.zip']
+                assert release['sha256'] == receipts[arm]['packageSha256']
+                assert release['allMemberHashesMatchReceipt'] is True
+                assert release['unchangedNativeAndFrozenParserSourceVerified'] is True
+                package_maps[arm][cell] = member_maps[arm]
+            semantics = []
+            for item in plan['schedule']:
+                name = item['name']
+                report = read(f'{name}/run-1.json')
+                benchmark = read(f'{name}/summary.json')
+                semantic = semantic_receipt(report)
+                assert semantic == read(f'{name}/semantic-receipt.json')
+                assert semantic['termRows'] == fixture['termRows']
+                assert semantic['title'] == fixture['expectedTitle'] and semantic['revision'] == fixture['revision']
+                media = semantic['media']
+                assert media['mode'] == 'all' and media['files'] == media['totalFiles'] == fixture['mediaFiles']
+                assert media['bytes'] == media['totalBytes'] == fixture['mediaBytes']
+                arm_receipt = receipts[item['arm']]
+                assert report['packageSha256'] == arm_receipt['packageSha256']
+                assert report['browserVersion'] == protocol['browserVersion']
+                assert benchmark['gitSha'] == arm_receipt['sourceCommit']
+                assert benchmark['authoritativeTiming'] is False
+                assert len(benchmark['runs']) == 1
+                header = report['benchmark']
+                for flag in ('authoritativeTiming', 'traceEnabled', 'phaseProfiling', 'phaseScreenshots', 'processSampling'):
+                    assert header[flag] is False
+                assert header['productionImportDefaults'] is True and header['pinnedDictionaries'] is True
+                assert header['importFlags'] is None and header['mediaCheck'] == 'all'
+                for source, expected in plan['memoryOverlaySha256'].items():
+                    assert benchmark['source']['sha256'][source] == expected
+                memory = read(f'{name}/memory.json')
+                assert memory['windowDurationMs'] >= benchmark['runs'][0]['totalImportMs']
+                semantics.append(semantic)
+            assert all(value == semantics[0] for value in semantics)
+            semantic_sets[cell] = semantics[0]
+            assert not comparison['validationFailures'] and not summary['validationFailures']
+            assert summary['acquisitionComplete'] is True
+            assert summary['passesProspectiveMemoryScreen'] == recomputed['passesProspectiveMemoryScreen']
+            assert summary['status'] == ('passed' if recomputed['passesProspectiveMemoryScreen'] else 'failed')
+            result.update({'rawAudit': recomputed, 'hostIdentity': plan['hostIdentity'],
+                           'sourceAndPackageIdentityVerified': True, 'semanticObservationsVerified': 4,
+                           'publicLookupObservationsVerified': 4 * 72,
+                           'mediaPayloadsPerObservation': fixture['mediaFiles'],
+                           'sourceCommits': {arm: receipts[arm]['sourceCommit'] for arm in 'AB'},
+                           'sourceTrees': {arm: receipts[arm]['sourceTree'] for arm in 'AB'},
+                           'packageMemberCounts': {arm: len(member_maps[arm]) for arm in 'AB'},
+                           'metrics': recomputed['metrics'], 'pairs': comparison['pairs'],
+                           'minimumCoveredImportScans': min(row['stableFullyReadImportSampleCount'] for row in observations),
+                           'maximumCoveredGapMs': max(row['maximumCoveredSampleGapMs'] for row in observations),
+                           'maximumBracketGapMs': max(max(row['preImportBracketGapMs'], row['postImportBracketGapMs']) for row in observations),
+                           'qualificationFailures': [
+                               {'observation': row['name'], 'failures': row['qualificationFailures'],
+                                'maximumCoveredSampleGapMs': row['maximumCoveredSampleGapMs']}
+                               for row in observations if not row['qualifiedForWholeTreePss']],
+                           'acquisitionComplete': True, 'evidenceVerified': True,
+                           'qualified': recomputed['passesProspectiveMemoryScreen']})
+    except Exception as error:
+        result['evidenceVerified'] = False
+        result['qualified'] = False
+        result['errors'].append({'type': type(error).__name__, 'message': str(error)})
+    results.append(result)
+
+actual_cells = {(row['dictionary'], row['replication']) for row in results}
+assert len(actual_cells) == len(results)
+missing = sorted(expected_cells - actual_cells)
+independence = {}
+semantic_agreement = {}
+for dictionary in protocol['dictionaries']:
+    selected = [row for row in results if row['dictionary'] == dictionary and row.get('evidenceVerified')]
+    boots = [row['hostIdentity']['bootId'] for row in selected]
+    runners = [row['hostIdentity']['runnerName'] for row in selected]
+    independence[dictionary] = {'bootIds': boots, 'runnerNames': runners,
+                               'verified': len(boots) == len(set(boots)) == 2 and all(boots)
+                               and len(runners) == len(set(runners)) == 2 and all(runners)}
+    receipts = [semantic_sets[(dictionary, replica)] for replica in (1, 2) if (dictionary, replica) in semantic_sets]
+    semantic_agreement[dictionary] = len(receipts) == 2 and receipts[0] == receipts[1]
+maps_equal = {arm: len(values) == 6 and all(value == next(iter(values.values())) for value in values.values())
+              for arm, values in package_maps.items()}
+complete = not missing and all(row.get('evidenceVerified') and row.get('acquisitionComplete') for row in results)
+qualified = complete and all(row['qualified'] for row in results) and all(value['verified'] for value in independence.values()) and all(semantic_agreement.values()) and all(maps_equal.values())
+output = {'schemaVersion': 1, 'authoritativeTiming': False,
+          'source': 'Independent local re-execution of the unchanged frozen raw-scan auditor plus retained original semantic/source/package reports; no new imports or substituted observations.',
+          'workflowRun': expected_run, 'workflowHead': expected_head, 'protocolSha256': protocol_sha,
+          'expectedCells': 6, 'receivedSummaryCount': len(summaries), 'receivedFullArtifactCount': len(results),
+          'missingCells': missing, 'complete': complete, 'qualified': qualified,
+          'cells': sorted(results, key=lambda row: (row['dictionary'], row['replication'])),
+          'independentHosts': independence, 'semanticAgreementAcrossHosts': semantic_agreement,
+          'allPackageMemberMapsEqualAcrossHostsAndDictionaries': maps_equal,
+          'observationsPreserved': sum(row.get('rawAudit', {}).get('observations', 0) for row in results),
+          'rawScansRecomputed': sum(row.get('rawAudit', {}).get('rawScanCount', 0) for row in results),
+          'limitations': protocol['criterion']['limitations']}
+(EVIDENCE / 'independent-reaudit.json').write_text(json.dumps(output, indent=4) + '\n')
+print(json.dumps({'complete': complete, 'qualified': qualified, 'cells': [
+    {'dictionary': row['dictionary'], 'replication': row['replication'], 'qualified': row['qualified'], 'errors': row['errors'], 'metrics': row.get('metrics')}
+    for row in output['cells']], 'missing': missing, 'rawScansRecomputed': output['rawScansRecomputed'],
+    'independentHosts': independence, 'packageMapsEqual': maps_equal}))

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "passed-read-only-recipe-and-count-audit",
+  "scope": "Independent source/recipe/report reconciliation only; no acquisition, parse replay, timing, memory or whole-database equality claimed",
+  "sourceTree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103",
+  "runnerSha256": "9a516feda3d781ee172fafc3b5ddfe4623cc3999f21095e6b2ebb97dde157f6e",
+  "reportSha256": "73cd4cdd23b623ee08d56e5f4f9357134814a3737a79f48f7e4724467fddd06c",
+  "checks": [
+    "All six retained source-file hashes and runner hash match frozen local source",
+    "Pinned fixture lock hash matches",
+    "Production lazy byte-balanced partition recipe matches 3workers\u00d73minimum groups and24MiB target;170groups cover every numbered bank once",
+    "Production large projected import forces experimentalNativeEscapedKeys=true; all170reported effective profiles use true with0fused fallbacks",
+    "Every aggregate total equals the sum of all170retained groups",
+    "All146725native calls report one-path admission, no native fallback;146570distinct image paths equal fixture inventory",
+    "Harness deep-compares all candidate owned chunk fields to unchanged fallback projection and rechecks the prior owned chunk after next native parse"
+  ],
+  "counts": {
+    "banks": 665,
+    "rows": 6648310,
+    "groupMediaRows": 146725,
+    "uniqueImagePaths": 146570,
+    "legacyWholeGlossaryParses": 146725,
+    "candidateWholeGlossaryParses": 0,
+    "legacyDecoderInputBytes": 84398732,
+    "candidateDecoderInputBytes": 2391178
+  },
+  "qualification": "Mechanical counts and component output parity support activation/correctness; isolated full-import and process-memory qualification remains separate. Earlier effective-flag-mismatch receipt remains separate fallback coverage."
+}

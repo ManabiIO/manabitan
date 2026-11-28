@@ -1,0 +1,58 @@
+{
+  "allOriginalHashesAndNumericValuesPreserved": true,
+  "bytes": 25021,
+  "clarifications": [
+    "Parser-prepared lookup/index payload bytes match; final sidecar offsets/checksums intentionally differ.",
+    "VNDB has zero new private reservation admissions; generic compression still runs.",
+    "ZIP deltas are local Chrome package-guard measurements, with explicit CI-size example; native WASM byte deltas unchanged.",
+    "VNDB storage units count full-file allocation, not SQLite pages.",
+    "Timing artifacts retain package hash/entry inventories, not raw product ZIP bytes."
+  ],
+  "independentQualificationReceipt": "/workspace/scratch/3aacd533c01f/round2/vndb-media-qualification-independent-audit/receipt.json",
+  "independentQualificationReceiptSha256": "18df9b9761cd4b55685f1153d11d8a7bba9440e2b0e68caca3ed83f81b124a80",
+  "lines": 224,
+  "mediaQualificationRun": 45475087387,
+  "newAcquisitions": 0,
+  "path": "/workspace/scratch/3aacd533c01f/round2/final-handoff-section.md",
+  "readyForRootAppend": true,
+  "repositoryPrettier": "3.4.2; formatted and --check passed for the explicit scratch Markdown file using --ignore-path /dev/null",
+  "schemaVersion": 1,
+  "scope": "Replicated VNDB timing benefit on frozen bbcc-based sources and CI workloads; memory hold remains; no qualification transfers to newer develop.",
+  "sha256": "8af79f9b19a7b8d08eaf3158a45515d03fef423c608eab2e5b816889e63825df",
+  "singleSection": true,
+  "sourceOrPublishingWorktreeEdits": false,
+  "tableReconciliation": [
+    {
+      "allNineDisplayedPercentagesMatch": true,
+      "analysisSha256": "18ace82c45ab3ddfe9633f27f68fcba9051b127d652c82226e54b45f4828a923",
+      "direction": "forward",
+      "displayedPercentages": [
+        "\u22125.2703%",
+        "\u22126.1074%",
+        "\u22123.7283%",
+        "\u22125.0548%",
+        "\u22126.3501%",
+        "\u22124.1903%",
+        "+0.1091%",
+        "\u22125.0998%",
+        "\u22125.2490%"
+      ]
+    },
+    {
+      "allNineDisplayedPercentagesMatch": true,
+      "analysisSha256": "1e821d9403433d440d750b5983f14843eeb7389a9ab3ad791333a4de2c0ecd47",
+      "direction": "reverse",
+      "displayedPercentages": [
+        "\u22124.6686%",
+        "\u22126.2451%",
+        "\u22123.2300%",
+        "\u22125.0954%",
+        "\u22125.8739%",
+        "\u22123.4104%",
+        "\u22120.1816%",
+        "\u22124.8897%",
+        "\u22124.7269%"
+      ]
+    }
+  ]
+}

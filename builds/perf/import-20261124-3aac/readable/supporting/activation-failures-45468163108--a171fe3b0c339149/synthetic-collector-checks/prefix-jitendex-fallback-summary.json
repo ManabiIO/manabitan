@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "synthetic",
+  "tree": "synthetic",
+  "dictionary": "jitendex",
+  "mode": "prefix",
+  "packageSha256": "94ca2fadb4d8d6e655182f68f914690230e1358c1223a4d31b9b988926d9385b",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "73297dd6290b7e888775e25c100735b580f16cb73a81b3c0121fd14702ee2fab",
+  "activationOwner": "fallback",
+  "eventCounts": {
+    "attempt": 2,
+    "begin": 1,
+    "private-prefix": 1
+  },
+  "activation": {
+    "attempts": 2,
+    "privateAdmissions": 1,
+    "privatePrefixReservations": 1,
+    "privateSuffixFallbacks": 0,
+    "existingSharedAdmissions": 0,
+    "firstPrivateAttempts": 1,
+    "privateAdmittedContentBytes": 20,
+    "privateAdmittedUniqueCount": 1,
+    "eligibleOwnedSourceBytes": 20
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": true,
+    "diagnosticOnly": true,
+    "productionOffscreenOwner": false,
+    "eventsObserved": true,
+    "attemptsObserved": true,
+    "privateAdmissionMatchesOwnedForcedInputs": true,
+    "everyPrivateAdmissionHasOnePlacement": true,
+    "firstPrivateSelectionUnchanged": true,
+    "boundedPrefixCursor": true,
+    "privatePrefixActivated": true,
+    "firstPrivateBatchObserved": true
+  },
+  "allChecksPass": false,
+  "events": [
+    {
+      "event": "attempt",
+      "compressionDictName": "jmdict",
+      "sourceKind": "private",
+      "force": false,
+      "ownsContent": true,
+      "sourceBytes": 20,
+      "uncompressedBytes": 20
+    },
+    {
+      "event": "attempt",
+      "compressionDictName": "jmdict",
+      "sourceKind": "private",
+      "force": true,
+      "ownsContent": true,
+      "sourceBytes": 20,
+      "uncompressedBytes": 20
+    },
+    {
+      "event": "begin",
+      "privateSource": true,
+      "initialSelection": false,
+      "uncompressedBytes": 20,
+      "uniqueCount": 1
+    },
+    {
+      "event": "private-prefix",
+      "primaryStartOffset": 20,
+      "primaryBytesUpperBound": 30,
+      "maximumEndOffset": 4294967294
+    }
+  ]
+}

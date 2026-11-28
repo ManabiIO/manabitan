@@ -1,0 +1,11 @@
+{
+  "attemptedObservations": 41,
+  "browserVersion": "153.0.8010.12",
+  "buildComplete": true,
+  "dictionary": "vndb",
+  "exhaustiveDiagnostics": 2,
+  "performanceClaim": "none; inspect paired evidence and control drift",
+  "stage": "qualification",
+  "status": "success",
+  "timedObservations": 36
+}

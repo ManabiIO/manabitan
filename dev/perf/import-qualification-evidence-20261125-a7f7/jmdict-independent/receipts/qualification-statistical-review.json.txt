@@ -1,0 +1,65 @@
+{
+  "runnerSha256": "42a5bbaf9ee7f08079d7f4a150fd96b11c7d237c8ad2eefc82ce29aae7640e56",
+  "checks": [
+    "36uniqueobservationspercohort",
+    "4excludedwarmups",
+    "12balancedcandidatepairs",
+    "4balancedidenticalcontrolpairs",
+    "opposite-ordercohorts",
+    "correctcandidate-controlratioorientation",
+    "pairedmedianandequalworkarithmetic",
+    "complete-pairbootstrapdeterminism",
+    "warmupexclusion",
+    "incompletepairrejection"
+  ],
+  "candidateSyntheticSummary": {
+    "count": 12,
+    "ratios": [
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9,
+      0.9
+    ],
+    "medianPairedChangePercent": -9.999999999999998,
+    "equalWorkChangePercent": -9.999999999999998,
+    "worstPairChangePercent": -9.999999999999998,
+    "descriptiveBootstrap95Percent": [
+      -9.999999999999998,
+      -9.999999999999998
+    ],
+    "fasterPairs": 12
+  },
+  "controlSyntheticSummary": {
+    "count": 4,
+    "ratios": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "medianPairedChangePercent": 0.0,
+    "equalWorkChangePercent": 0.0,
+    "worstPairChangePercent": 0.0,
+    "descriptiveBootstrap95Percent": [
+      0.0,
+      0.0
+    ],
+    "fasterPairs": 0
+  },
+  "finalReviewedRunnerSha256": "42a5bbaf9ee7f08079d7f4a150fd96b11c7d237c8ad2eefc82ce29aae7640e56",
+  "finalReviewedWorkflowSha256": "71c934989aa3e4225d3c44d2a23532e1f7d1e43cacc5aa0914595adb60b0da91",
+  "resolvedFindings": [
+    "Memory sampler receives strict/headless environment settings",
+    "Correctness-memory status explicitly excludes speedup claims",
+    "Memory audit failure retained without suppressing completed timing analysis"
+  ],
+  "remainingBlockers": []
+}

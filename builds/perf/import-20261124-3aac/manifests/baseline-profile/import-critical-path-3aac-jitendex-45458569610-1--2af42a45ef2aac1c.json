@@ -1,0 +1,188 @@
+{
+  "attempt": 1,
+  "dictionary": "jitendex",
+  "name": "import-critical-path-3aac-jitendex-45458569610-1",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951662076/zip",
+      "created_at": "2026-11-24T18:22:18Z",
+      "digest": "sha256:9ce5222e56a29678444252f4995aca7044117cffb1611d1e98d0740bd7074ffd",
+      "expired": false,
+      "expires_at": "2026-12-24T18:22:17Z",
+      "id": 14951662076,
+      "name": "import-critical-path-3aac-jitendex-45458569610-1",
+      "size_in_bytes": 1001889,
+      "updated_at": "2026-11-24T18:22:18Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951662076",
+      "workflow_run": {
+        "head_branch": "perf/import-critical-path-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "d5ddb829542111e2067343ca16479d685eca3866",
+        "id": 45458569610,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610/artifacts/14951662076",
+    "metadataReceipt": "provenance/github-artifacts-45458569610.json",
+    "metadataReceiptSha256": "e2a013bf861939eb1fc93ff23e05782465c1ce0e37d5c954d09f774a60167e6d",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45458569610,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610"
+  },
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 10238368,
+  "retainedFiles": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 83743,
+      "path": "ordinary/run-1.html",
+      "sha256": "c15da9f97beb6518b3e81671f4b93b68415d691d464c95cbb7423c7704b442e3"
+    },
+    {
+      "bytes": 151004,
+      "path": "ordinary/run-1.json",
+      "sha256": "7f6b1f40234294126f795eb5492b2e3848c2a88eb32f06049667db603783e134"
+    },
+    {
+      "bytes": 59071,
+      "path": "ordinary/summary.json",
+      "sha256": "2e39a27cfbdacea906a1ddb1abd36a14b2aa9b532a0e7107da7b56c474409fcd"
+    },
+    {
+      "bytes": 1578,
+      "path": "ordinary.log",
+      "sha256": "448fd3fbb5e25eb0726c58e1b32c998d745e945d37a6833511efb70deb563f0a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1e171a72064b439120ca00e4f66bdf6431dd80d5cd2c476ca0df0d228978c81e"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 84584,
+      "path": "trace/run-1.html",
+      "sha256": "899b5cef80a9a9650c9571dc8d6bde3aa7e95e968c40757885aad755fc845841"
+    },
+    {
+      "bytes": 151334,
+      "path": "trace/run-1.json",
+      "sha256": "7d681a126b5f4119ae94d320fa7d1117cd830187ea0145d0c216899f9f51e2b1"
+    },
+    {
+      "bytes": 9641618,
+      "path": "trace/run-1.trace.json",
+      "sha256": "487dce5abd79d62aa050f827e6e5fa122dfd68e009a692c78808d5e1d7b0cdbd"
+    },
+    {
+      "bytes": 59032,
+      "path": "trace/summary.json",
+      "sha256": "28ca7976dce4ea8ed38fb6b0be44ebdb19dd3c9d9f0000ff16eb9e4f9f456be1"
+    },
+    {
+      "bytes": 1804,
+      "path": "trace.log",
+      "sha256": "5e00d3ef349e17b92f12299edb74b42963b7c28a68654012bd416f74d4f9ef60"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "runId": 45458569610,
+  "schemaVersion": 1,
+  "sourceBytes": 10238368,
+  "sourceFileCount": 14,
+  "sourceInventory": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 83743,
+      "path": "ordinary/run-1.html",
+      "sha256": "c15da9f97beb6518b3e81671f4b93b68415d691d464c95cbb7423c7704b442e3"
+    },
+    {
+      "bytes": 151004,
+      "path": "ordinary/run-1.json",
+      "sha256": "7f6b1f40234294126f795eb5492b2e3848c2a88eb32f06049667db603783e134"
+    },
+    {
+      "bytes": 59071,
+      "path": "ordinary/summary.json",
+      "sha256": "2e39a27cfbdacea906a1ddb1abd36a14b2aa9b532a0e7107da7b56c474409fcd"
+    },
+    {
+      "bytes": 1578,
+      "path": "ordinary.log",
+      "sha256": "448fd3fbb5e25eb0726c58e1b32c998d745e945d37a6833511efb70deb563f0a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1e171a72064b439120ca00e4f66bdf6431dd80d5cd2c476ca0df0d228978c81e"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 84584,
+      "path": "trace/run-1.html",
+      "sha256": "899b5cef80a9a9650c9571dc8d6bde3aa7e95e968c40757885aad755fc845841"
+    },
+    {
+      "bytes": 151334,
+      "path": "trace/run-1.json",
+      "sha256": "7d681a126b5f4119ae94d320fa7d1117cd830187ea0145d0c216899f9f51e2b1"
+    },
+    {
+      "bytes": 9641618,
+      "path": "trace/run-1.trace.json",
+      "sha256": "487dce5abd79d62aa050f827e6e5fa122dfd68e009a692c78808d5e1d7b0cdbd"
+    },
+    {
+      "bytes": 59032,
+      "path": "trace/summary.json",
+      "sha256": "28ca7976dce4ea8ed38fb6b0be44ebdb19dd3c9d9f0000ff16eb9e4f9f456be1"
+    },
+    {
+      "bytes": 1804,
+      "path": "trace.log",
+      "sha256": "5e00d3ef349e17b92f12299edb74b42963b7c28a68654012bd416f74d4f9ef60"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "sourceInventorySha256": "2af42a45ef2aac1c52c7420c88aa595754fddc8af02e746af978eeb61189201c",
+  "sourceRoot": "artifacts/import-critical-path-3aac-jitendex-45458569610-1",
+  "stage": "baseline-profile"
+}

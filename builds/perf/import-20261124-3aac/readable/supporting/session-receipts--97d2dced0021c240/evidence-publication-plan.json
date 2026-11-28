@@ -1,0 +1,3929 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/evidence",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "52f5c109a73809b81ca7af1cfa1698795e535998",
+  "tree": "7ce1f3a8b4b54e9c6328128c6c3d332add0cbef5",
+  "files": [
+    {
+      "path": "builds/perf/import-20261124-3aac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e144eb0f68458c314d717616a76254da5f8be5ff",
+      "size": 19857
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-corrected/import-activation-3aac-cache-jmdict-45470204352-1--1d83405543371989.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d4c4b51d25a2d466688b89f2a1d0c7da0cda884",
+      "size": 45990
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-corrected/import-activation-3aac-prefix-jitendex-45470204352-1--5a0440cbdd2791ba.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c57daa53a6d10e30f86a3b6d8d0e375a1c6f944",
+      "size": 64680
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-corrected/import-activation-3aac-prefix-jmdict-45470204352-1--597d60cdebd64262.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b7b5f08a900eac69e6700351dd4d7d7496fce24",
+      "size": 49679
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fabf73c0714098d06dea54eb7ea782fa2bc24406",
+      "size": 83624
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-failures/import-activation-3aac-cache-jmdict-45468163108-1--1db6d72115ee8d2e.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9d03003f397e8c5eea4a640d4e9c4d03eccecdf",
+      "size": 41847
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-failures/import-activation-3aac-prefix-jitendex-45468163108-1--84081e51fe3c94e9.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc21b0762ead0c17e766487e2164f36762213c32",
+      "size": 10090
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-failures/import-activation-3aac-prefix-jmdict-45468163108-1--b5ea1d8a5704cd88.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbc030d1335b1f21217a45478640a7d01f5de64a",
+      "size": 43052
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/activation-failures/import-activation-3aac-prefix-vndb-45468163108-1--7790afc61375df1c.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b4c5f68699980c66630692f95ff68e3d7c40684",
+      "size": 43859
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d86fd49987c89c8632fd093500a4c78a05df44d1",
+      "size": 945233
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "912074b8481e77d087f83d06c563cd081ce6b536",
+      "size": 509068
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1281078196575949eafe2a6eae62ce0cc8a281b",
+      "size": 2360896
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b34389b275eda54ca6a0af4c5f57433272c046c7",
+      "size": 968082
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fcad5c9cc0732b035d5a55945c3d97a58993496b",
+      "size": 954032
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d8f9bc0d8de0edb0d7b8aaebc84f825e23dd695",
+      "size": 988361
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d77591dc1495edebcd298a10a821ebecc0f8da02",
+      "size": 988857
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11663fe269ff1a3315b751089010f0ae8109041a",
+      "size": 712550
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8b4893afd91afd3cf4ff6959004e4ec27de7ea5",
+      "size": 681241
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24d7e534577c91f9d0c9115ea93e6c19b7567878",
+      "size": 868289
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c53de9933b61b91097523c39e05b234b42ab6e50",
+      "size": 815976
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a26aebfbbb404901ad52a98a6e12f519b6fa2e63",
+      "size": 726660
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebeab7c42ad1c8a7abea129cf2359997c8f764c5",
+      "size": 731617
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59af808f903bf3b9d611a60198dec7f0ddff4cdc",
+      "size": 1601796
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a566f86b9d16dc09c5beb844a2b3723c838efcb",
+      "size": 1596503
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1c06a4f384a170b0676dcb501b3d68ce83cdda7",
+      "size": 1578119
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9417d194d118cfac93e3f39d6089659ee7c09747",
+      "size": 1583161
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95600424560d856796e22d5f75dd32c67e36fd10",
+      "size": 931296
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fe7fc7289f60ccd07fb2c9ce4242312ba25654a",
+      "size": 922900
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef9c4e724c0e5892cb6b81b36ee1db1b09ecc76",
+      "size": 244727
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ced29ceaecebb92c0367e35e3eb055a5ad5f2f51",
+      "size": 930717
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba6fcdec0c53801bcaddab7ba684102296b63d4b",
+      "size": 924619
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b3d9d293984ec05dabad486c69c047034254948",
+      "size": 392255
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22048e902adf28612a0be9a9818e89eb5b856880",
+      "size": 935251
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6900a99e480abd023d8beb493797f151bd7e6ae",
+      "size": 924631
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "047004d5fc6d0ee444b730e6bd52fbc3782d71b7",
+      "size": 540438
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/activation-corrected-45470204352--0c40bf29632237a2.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11e9bb64916e8bc658bbe10c52f479fbb731f9a3",
+      "size": 315091
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/activation-failures-45468163108--a171fe3b0c339149.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d3915390deebed9207b159fa810f86fce5032d0",
+      "size": 321826
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/jmdict-audit--8e184c05e46173fc.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a93d3a7aa00554424b6ad21dba47331f578eccfd",
+      "size": 73809
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/jmdict-audit--e8518da38dca2a71.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6859f737a1192f1abe416bb345d977478b102130",
+      "size": 75740
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/media-memory-attribution--6d7cd14c81a80db8.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f69c2b3b49b86915e9174a0a6a4f872da655e3db",
+      "size": 7279
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/session-receipts--0a321b97aa69ca85.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a39aa36db88f5c926c5c4203982fd487b9a01a28",
+      "size": 36011
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/session-receipts--22579f3de0abefb4.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ce90fd6ec6e23fd1f947cb7bf67d564b38607db",
+      "size": 56947
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/session-receipts--477b54620c617954.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "500c86f0187c21722ce53261e44f8576c6ee61e3",
+      "size": 73224
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/session-receipts--c52e63363afca2cf.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7364ef1d6079c6d3d38b878fef5547a1200c6f47",
+      "size": 55665
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/storage-protocol--b2d3297979c04c57.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "954882df26cd66984b0304d3c5c3efdcbd0ab882",
+      "size": 24675
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/archives/supporting/vndb-audit--c49686d7852be538.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc6c8ab68b3818d615cd28fea99437e4df32453b",
+      "size": 262640
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44a15d55ee86e3ae85fd828a8d70299c8b037809",
+      "size": 158526
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-corrected/import-activation-3aac-cache-jmdict-45470204352-1--1d83405543371989.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44cd5d6ed0e1d2de7254444ab58c4d6fda89c5b3",
+      "size": 7010
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-corrected/import-activation-3aac-prefix-jitendex-45470204352-1--5a0440cbdd2791ba.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e105ff2bc9d29b7951468de6123f85e81f384fe1",
+      "size": 7020
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-corrected/import-activation-3aac-prefix-jmdict-45470204352-1--597d60cdebd64262.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3cd0bef3fd00adaed73af4ba811810d32bdde475",
+      "size": 7012
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa704a5ecfff47cb597a2cf90edaf11c2cd25eef",
+      "size": 7014
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-failures/import-activation-3aac-cache-jmdict-45468163108-1--1db6d72115ee8d2e.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f80ca32237afe540ac103819a2e87d9c68e43a27",
+      "size": 6647
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-failures/import-activation-3aac-prefix-jitendex-45468163108-1--84081e51fe3c94e9.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc37efa3b862fa4062fcb634bbef588015a00458",
+      "size": 6027
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-failures/import-activation-3aac-prefix-jmdict-45468163108-1--b5ea1d8a5704cd88.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92f7660dd1973a76acab110435a8e8f4bdc5fb4a",
+      "size": 6649
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/activation-failures/import-activation-3aac-prefix-vndb-45468163108-1--7790afc61375df1c.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4fdc047266a0888985f0b03a8ed364cd57a3477c",
+      "size": 6645
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa660a72135c945e618b503ac78c603c58aa651b",
+      "size": 6254
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e996b88af3f8d4a1c97411fa860143b9cef2009",
+      "size": 6243
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2345298ade281e35f5954f3b1050c1bd01b14504",
+      "size": 6240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5870b988e20e1a9beac7d605f8b8cfeb78f9dd1a",
+      "size": 72910
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08fd67f05a647e5c8ea68d4ab9b91e219a747ba5",
+      "size": 72898
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdd434f4f148f9b992104137d738afc12e14eecd",
+      "size": 72877
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03230fd6b5eb0261f9d8eaf958fd3c877d900c75",
+      "size": 72881
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ee6b700476c5b167ff659a226ad3cfba7924473",
+      "size": 31992
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "066fe1822e32e96c2c764865f460369afa64bcaf",
+      "size": 32285
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a65048edb169f867e779ae36fc4b7f460944c505",
+      "size": 32269
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaf0ba6822b657ddc01d42f4dc4948d0e6a5b235",
+      "size": 31976
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf35f59e8971e0eefee07a2354a5acce5a04edd2",
+      "size": 30463
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "709a552db95f6e8a1b8cfb495e5d90fae247ca98",
+      "size": 30463
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c03bd3caa88df1620e783030c56f2a21a73a5d1a",
+      "size": 105950
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5a43798d089589bc02d27d688d7e2a807d51dbb",
+      "size": 105950
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4345a37409adcbc770b02be0158607dacecd479d",
+      "size": 105938
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66a4247577315b921ec68a2c23d2460ad7ab8cab",
+      "size": 105938
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ad12e7a8f08431a180a5697692a696895c5d1a3",
+      "size": 63384
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dfa496f7d04c19b4fcaed34e0bac3a22ca70129",
+      "size": 63372
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77d2921ea38cf854050a769a7c795fc5578c2113",
+      "size": 17374
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2d06ea473dc380f5b42afa5d12d4f0794d94bf6",
+      "size": 63386
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11a201b8ae49b2702b0efd5aaa64e1c17e80c2a8",
+      "size": 63374
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80514b33889fc9b0cdf266dc960277a824a538dd",
+      "size": 26826
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7382fa00c5a09bc675f638b464744f18ef3405c7",
+      "size": 63390
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87b0c881f3db60c8f2ea1efaf09018e85391d880",
+      "size": 63378
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0eae0f0e04e0988c0635a46d5a3fcd47c6c56124",
+      "size": 36279
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/activation-corrected-45470204352--0c40bf29632237a2.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fd0db2fd43df2184ee7b5d81b316e1a737c6fc7",
+      "size": 4451
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/activation-failures-45468163108--a171fe3b0c339149.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1aec10ecb7c31fc5de16232f484e18de7981c852",
+      "size": 11581
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/jmdict-audit--8e184c05e46173fc.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "958a93e1d05e8913c30baaeae5d87ce85cb8a1d9",
+      "size": 5401
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/jmdict-audit--e8518da38dca2a71.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7545076748e1a29ed0769ddeddef78256c66ec8",
+      "size": 5735
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/media-memory-attribution--6d7cd14c81a80db8.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "574847bb4198f471257c375a7efd29cb57d1583a",
+      "size": 1546
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/session-receipts--0a321b97aa69ca85.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db7a397682167eca17409b30298feaaecebc6a74",
+      "size": 15130
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/session-receipts--22579f3de0abefb4.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cae801a6689f5b9937ec672e247617ad61e16885",
+      "size": 16910
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/session-receipts--477b54620c617954.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f4fd8a2d1ae94c8d7ee42f7078ed8c789c4ceeb",
+      "size": 18650
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/session-receipts--c52e63363afca2cf.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "05b02aaa1563f37222bfb9bfb8054f3cc121c447",
+      "size": 16558
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/storage-protocol--b2d3297979c04c57.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f658d0d48dc9b3bfeecf5c31608c68b141c245e",
+      "size": 4427
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/manifests/supporting/vndb-audit--c49686d7852be538.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81abc22d797f800129d69a2b5ce763c29e629dac",
+      "size": 14515
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/package-evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af2250e1a07b62964080c720977dc5f591af5e4b",
+      "size": 33173
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45458569610.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6b173bc0a45aab2e3f124ce90f4d44562d47a1c",
+      "size": 3693
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45465463257.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cdc6450d341e67fd6269f89c5cd78e4a88f192c",
+      "size": 7946
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45468163108.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f388dc93d3395390acce1273c399b15ffe28d167",
+      "size": 3696
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45468314006.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77d0b9d956bcffb59cd497457cac93068030f29e",
+      "size": 3717
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45468614083.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "435c27e60b1cbf0173b19e5407e1efea5fcfae68",
+      "size": 1985
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45469432793.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60cdc907d4d2b3a37103cff820cce56578b1651b",
+      "size": 1994
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45470204352.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8b74ecaa82e10c45b2aabe9bac4f520c41e9bf0",
+      "size": 3764
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45471351138.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adf3334a594951e2311b698aa1227717c5a89311",
+      "size": 3713
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/github-artifacts-45472377306.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "382006a4cefe26c0de4fe58190a4cc69df6bba39",
+      "size": 2007
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/104c582c1edd0db853462d6e46b2a433de57a411fe1452707c31af48cc1617e8.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8b74ecaa82e10c45b2aabe9bac4f520c41e9bf0",
+      "size": 3764
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/47343aed7c3eeebc9235edbca40f8f6db3c9dec0b861c9663d215c572d8c3aa3.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cdc6450d341e67fd6269f89c5cd78e4a88f192c",
+      "size": 7946
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/a05a763ee6974ca8329eaf8f4d871c0392182d79e7f1a80fb88894c4c61d752f.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "382006a4cefe26c0de4fe58190a4cc69df6bba39",
+      "size": 2007
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/bcee54a33f11f7d01096697f64eff9e94834ea2b97f7ccb3786a2b6cca81ab71.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbb7a498fc7400e641379ce8ca291a18ad8f73f5",
+      "size": 267
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/cef704c05f1728bb52e762370bf70f54b91ac923bcaf2167e709a9ba6dfb7198.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77d0b9d956bcffb59cd497457cac93068030f29e",
+      "size": 3717
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/dad79e47fbd08379a0aecc8e2706655ab2937f1cd64bb7a34f41631054b4d8da.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60cdc907d4d2b3a37103cff820cce56578b1651b",
+      "size": 1994
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/ddbf466d6de967b468570af763259ab73c68386c487d9ef6e35cdfdf7319fdca.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "435c27e60b1cbf0173b19e5407e1efea5fcfae68",
+      "size": 1985
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/e2a013bf861939eb1fc93ff23e05782465c1ce0e37d5c954d09f774a60167e6d.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6b173bc0a45aab2e3f124ce90f4d44562d47a1c",
+      "size": 3693
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/ed090cc80d9f4281bb9a849b4a8fffdef5c3bccd831db5ce0b1a29a7a5cc5bda.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f388dc93d3395390acce1273c399b15ffe28d167",
+      "size": 3696
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/metadata/f4caaf96b50120f6386a5e6e2dd755b0e2e63100b78c2680ef65752ae0a1b378.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adf3334a594951e2311b698aa1227717c5a89311",
+      "size": 3713
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52918f047ada893440afacd2a60398c8f046f1ab",
+      "size": 27123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/a48eca10728103b8e69ddfd03c1c935baad3ab1a8e2d362eb87aef7dac58b174.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bea97750bc2d7b941c253e63d8e5228db034ba8a",
+      "size": 28187
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/a5e8debb716545b67d81f8a31e0a345cecbfaac4f7233933011535cdff06222a.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "36b01820e50339a1b2a0504697d67d8a13afd80b",
+      "size": 31213
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/b33d0adfe55bc8ec03f34e8f1db1018f61d66488244829af9d5a2fe4ec1c1563.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af2250e1a07b62964080c720977dc5f591af5e4b",
+      "size": 33173
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/d5db8075998fca4e081af09c85609bdebcc11585a54249453c70bb2c2accedd2.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2bf5dea6ddf00c16abfc910e390088127677d0a",
+      "size": 30383
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/da75dc5549f8821ad64094a1b939645e9062c9432029d17c44d26100beea3cec.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "834cdffae05296472d6451fb3e5f52516f5bd78d",
+      "size": 29778
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packagers/e307a788b291416f99c982675ff6e361a4933e9dde7c5ec3677d3940e43b8345.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1c066ec42ac5fd42c465ebbabf5a2d243ee6c59",
+      "size": 29688
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/provenance/packaging-attempt-1.log",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f5c66a791f08d4ba5030b282e76a30ad77bcff2",
+      "size": 749
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-cache-jmdict-45470204352-1--1d83405543371989/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa4889d0026df6a80c763c0a87d1a9e206b9b4a0",
+      "size": 64501
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-jitendex-45470204352-1--5a0440cbdd2791ba/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87567af86719d780e6b7c17b1237f9101665c4d5",
+      "size": 77871
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-jmdict-45470204352-1--597d60cdebd64262/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd8f76a109d0dc9314c9121e8f214df202d2c048",
+      "size": 65928
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-corrected/import-activation-3aac-prefix-vndb-45470204352-1--4c31fbf55b2b9b0e/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa1ed0dc17a9421f0d50e9305b8210687ef75592",
+      "size": 115179
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-failures/import-activation-3aac-cache-jmdict-45468163108-1--1db6d72115ee8d2e/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac1765d0e3ab4506a517dd2e0cc0cd595c219687",
+      "size": 58780
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-failures/import-activation-3aac-prefix-jmdict-45468163108-1--b5ea1d8a5704cd88/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4691b629dbafce992270a68929440581b833219",
+      "size": 58827
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/activation-failures/import-activation-3aac-prefix-vndb-45468163108-1--7790afc61375df1c/diagnostic/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e427e9b9b5f2f42e9cc8a5ab8a2ac469f32493f",
+      "size": 59754
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c/ordinary/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "85847efd07031464bf65c0105bb75df92dfcf085",
+      "size": 59071
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-jitendex-45458569610-1--2af42a45ef2aac1c/trace/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "672d5bf83d5827399cdc0023ef3c2b6585e26906",
+      "size": 59032
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601/ordinary/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9992432f259855af5d6e2da30764029afb675132",
+      "size": 58938
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-jmdict-45458569610-1--297f989080bc5601/trace/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad61689dbefb61960943178ff932e9a6987c3221",
+      "size": 58862
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313/ordinary/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "545a03dac76e6013c933e5b6dcb06734e280fa3a",
+      "size": 60056
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/baseline-profile/import-critical-path-3aac-vndb-45458569610-1--2a0495c162b17313/trace/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c27aa055467f7354a810ec91574ea5480241a7da",
+      "size": 60143
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f539b47f9734bc286b1e345a1be3d4d51d44f58",
+      "size": 3185
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00e300f55fa0c33fa45c5d5e27c8e9fee514718b",
+      "size": 12181
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9d027d5522abd1f93a16c3dc4fdb24fb6d32388",
+      "size": 13565
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d795436bb596a9393cae6179d3b69c4e17ce8099",
+      "size": 105
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce562f2505accd1604697c1ef79d6d7bdd65342e",
+      "size": 13109
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jitendex-forward-45472377306-1--0eb8f1035b82d626/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a86217109f086f8162aa6676599e2174aa84e753",
+      "size": 298
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33cae349dc0071885b0e97320e0e0de3de86769b",
+      "size": 3132
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d83bf7ebc15a4a2fa8f4bb336ed6532e324f8142",
+      "size": 12603
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbe40dffffd6d1c9cd685c1088a4624214356a6f",
+      "size": 13494
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d795436bb596a9393cae6179d3b69c4e17ce8099",
+      "size": 105
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a7c9f12e6498c4dd992dc03dcfb099feb943ccb",
+      "size": 12555
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/canonical-screen/import-canonical-screen-storage-v1-jmdict-forward-45472377306-1--14be29f05387e430/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a05930923b908b9ecde4cfd0c3440c2bf21f14b3",
+      "size": 296
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af149bc4593761e6ccbdb1937791a5e95fdb5226",
+      "size": 3064
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6f55f5aa5641fef26f216b3cfc8c0beb95563e2",
+      "size": 13213
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9165fcfd4ceb277ef2821b1f521edeb5c9d9283",
+      "size": 656
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dcd6947c055cfc1af35f6cb5d01e57f159aa96a",
+      "size": 13447
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a747fef5b524e492b5f4bafddbfb53e84a728896",
+      "size": 12720
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6562320f1f3fb00bbbad9bf0dfdd24c960fda72a",
+      "size": 3096
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-media-screen-storage-v1-vndb-forward-45469432793-1--270c3388b2996992/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23ba0b16ca544ed599c4525c184f94b1cb35c0ca",
+      "size": 294
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad4679b2f0015be3726e0f4257739ad6c40b1584",
+      "size": 3171
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6f55f5aa5641fef26f216b3cfc8c0beb95563e2",
+      "size": 13213
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9165fcfd4ceb277ef2821b1f521edeb5c9d9283",
+      "size": 656
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d43028d5a4ef62d3d1af625eb0cb6dad1b030d6",
+      "size": 13499
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "675ff07f57c43ae703bbc607de4db35e77d7db81",
+      "size": 12781
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6562320f1f3fb00bbbad9bf0dfdd24c960fda72a",
+      "size": 3096
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/corrected-vndb-screen/import-prefix-screen-storage-v1-vndb-forward-45469432793-1--b9eb189b404df3da/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23ba0b16ca544ed599c4525c184f94b1cb35c0ca",
+      "size": 294
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18f6c000547c23c691fd42eb4fa71edefab6e648",
+      "size": 13692
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c73eeee080024b5e5b7ffa76eddcada206a3c5a3",
+      "size": 59122
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14fe54970d2faa0328dabcd773f26178984ecf0a",
+      "size": 13692
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e735ecd51d353b60dfed62cba894076d904ca027",
+      "size": 59174
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d8d5d7e583cb53b375df4741a3ac5098fab49b5",
+      "size": 13690
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "676b4b32e86fb3440f01f66048cef83032579505",
+      "size": 59104
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbf37857a05f6e07aa6be2ea89e637298de84c0d",
+      "size": 13690
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00609ff18e659e199c8cc48d6c994e744e47b8d4",
+      "size": 59186
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65b04ed4a2f751ea72a98cc011a677d76c8b7692",
+      "size": 59059
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b4d9fa0c58bf869f2a28d3c63290c347218ed62",
+      "size": 456
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba6c4676a6f7e7b49e2d82e6005ed6ad06ec5b41",
+      "size": 10140
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18d265cf576bf9855d94845f730b5494d37b6459",
+      "size": 8508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f5a5b245669c759f0953a173eb2e62007455793",
+      "size": 14458
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1feb85f3b01b717a4ae7528d9dbbe59d683a57c3",
+      "size": 191
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cf7d1c3693a6b58a68b68f68cd1510ef87f43a5",
+      "size": 615
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d591ede60ca345dc8a6a8053e1c6431d8e1eef4",
+      "size": 1905
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep1-45471351138-1--b80aec158411d449/storage-allocation-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24d403c81a42d5d8a2c76c75df4d0bf63c3219ee",
+      "size": 1242
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a440fae7c3a0a69b60f4b4042d54169e92cf6129",
+      "size": 13691
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84c805b41914d41a59d86f09b654c71c80626556",
+      "size": 59067
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce5d783b3860b349981f793cff486761a670d7ef",
+      "size": 13692
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a526154441244d6969faf885497df27a7c255e78",
+      "size": 59124
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "120219d1dc23a20bc9851da75d072538e090d62c",
+      "size": 13690
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0bf015dae0a27341bd1e6a5a6b97bf04d075a640",
+      "size": 59143
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65367faab88f234446a84a38e17ba373beaeacfc",
+      "size": 13692
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3035ee0c8fde712b24d6f7c0a2209d2cde24c070",
+      "size": 59278
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99163bd092931a9db45da77dce86d1ea6dd410d8",
+      "size": 59060
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57d25f92ffad7e9844947fc2ee9065d1533aa73e",
+      "size": 402
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8c03942aa2b7d2ce7b03848562212a903ca3910",
+      "size": 10104
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82b23e39f44a03446c977a646b60ab826793e11b",
+      "size": 8559
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2586361b1f7c47e294d7c3f3623c4a70821a898a",
+      "size": 14458
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "675302f9203c02cc762e1edc717e5718608c5193",
+      "size": 192
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cf7d1c3693a6b58a68b68f68cd1510ef87f43a5",
+      "size": 615
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d591ede60ca345dc8a6a8053e1c6431d8e1eef4",
+      "size": 1905
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-jitendex-rep2-45471351138-1--12e18aaf286fbdb6/storage-allocation-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eded535bc3ac61bddd14b833afba0a925874511c",
+      "size": 1242
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "85a594e5963308675b24c575a4287c6cfb2fd915",
+      "size": 15050
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c68103794d61e3cfa3b65d70f84a517f0a2e18e",
+      "size": 59689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c90eca915ceddb07d380bdcbfacbfd1c5cf4d1d",
+      "size": 15047
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15c373991a58945dbcb599df360c9738440fca1c",
+      "size": 59662
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37472184c60b8cf13ebadbb27ee359cdd1a29aa9",
+      "size": 15046
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbc84fe57ad083bac030c0ccef0153c1f43a9d24",
+      "size": 59563
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5f166eed59b9189d295f0303b619b40cebabdd9",
+      "size": 15047
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4d4d29ffbc7c1568205fc08ceae17c5cfe65663",
+      "size": 59783
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9f782334ac7a71146b47d5bb9a584a16bc2ccd4",
+      "size": 64677
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8326cb809553258bd52e183644909ee708ac1ad1",
+      "size": 402
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e92d58363db692fa7d7f2405ed0bd3901e23a110",
+      "size": 10122
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e2257ef8c48f0148b1a6943c64a5b52d290096c",
+      "size": 8608
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29fadcaf398b36105d84e4e0966e0288f07b898d",
+      "size": 13986
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "675302f9203c02cc762e1edc717e5718608c5193",
+      "size": 192
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cf7d1c3693a6b58a68b68f68cd1510ef87f43a5",
+      "size": 615
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "666c93fc71f701507d414cb8431a601dd720f1ec",
+      "size": 2449
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep1-45471351138-1--ea0186c54bc810d3/storage-allocation-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b0db10f8c003790b57ca0f138dbed15838d44c7",
+      "size": 1246
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aec527415add1e3c18255ac60d2281b69caeaa40",
+      "size": 15047
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2907615310427ae241ac1ea43ebe3d2eaf672ea7",
+      "size": 59897
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad93bd7b459906e574cd8b382f6d2df615fb8d55",
+      "size": 15049
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f8262635f3e7c185139b180afeba5ccbcf1fe4f",
+      "size": 59947
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b03fa029b0346a190642f8bcdc4ea4a6c7dd454",
+      "size": 15048
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e3b2b8048d07c56981f1724f2fae9da44fe558e",
+      "size": 60068
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "605e38368445b3689f7fe2530bc7329af80dd610",
+      "size": 15047
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a7dde3ca970a7d8961b537d2015ee3bec2b83a3",
+      "size": 60106
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "591b75fe401fcb6f04231e6b33d9469204cebd9d",
+      "size": 64678
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaf454c4efe8135cc8c99ae45f0e2994c7c25414",
+      "size": 456
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edbf8d367d4d6ec7a09299b4ece84c2e8077712e",
+      "size": 10142
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b470dc556d628741d29eadf50debefc86674fe4",
+      "size": 8516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f11805eaa6b5cb6da6813268a83a606939673b6e",
+      "size": 13986
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1feb85f3b01b717a4ae7528d9dbbe59d683a57c3",
+      "size": 191
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cf7d1c3693a6b58a68b68f68cd1510ef87f43a5",
+      "size": 615
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "666c93fc71f701507d414cb8431a601dd720f1ec",
+      "size": 2449
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/media-memory/import-memory-3aac-media-vndb-rep2-45471351138-1--ce6cb68e16a12a25/storage-allocation-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba8170680f39ce84090061c5ca24bbfb283f785f",
+      "size": 1246
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4d4bc7445e13a8feae529b2bc923003c4b5daf5",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e44155358e8a0591895732d10cb20bff4fa352d3",
+      "size": 59270
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d938e8f54d2ea5c3e79fe9741b21bd9969126cc",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebb5a8cc603151e01895e70ef6599fa20ca4afb0",
+      "size": 59077
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03d8d08cc8207611bc6bda23196cefec5e414c59",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "886e19ded3e58f99529e568450c9053762717c51",
+      "size": 59220
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "084d5722fea9ab840981e4a97f7a31bfa7c25f1f",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6d74aa39f5d82780e3b60fdb7bc1140ba8abd1f",
+      "size": 59106
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbe93af4c1cdd44654d07b60eb117e7018fda1c4",
+      "size": 48883
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "89cd2b978dec9e868db321d2bc4eaa0b6f12b3f5",
+      "size": 455
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab3d4cf9d43a58e12dc3329fc903ba9458975fed",
+      "size": 10143
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e7ee425b980e6deca1fe7b0be56b90c9ba8669fe",
+      "size": 8514
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f771c895b69c309ab6d5480272602663e41ea4a0",
+      "size": 14057
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1feb85f3b01b717a4ae7528d9dbbe59d683a57c3",
+      "size": 191
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04e472ebe19d7c99026cc936fe8f6d28e6720ad3",
+      "size": 676
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep1-45468614083-1--5a74757f16b3ce28/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d591ede60ca345dc8a6a8053e1c6431d8e1eef4",
+      "size": 1905
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/A1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4d4bc7445e13a8feae529b2bc923003c4b5daf5",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/A1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21726004df80800299f047e1900444cc659eaa40",
+      "size": 59297
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/A2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d938e8f54d2ea5c3e79fe9741b21bd9969126cc",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/A2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d782ae581229d0d30494b3d9a24addfc865aa9f",
+      "size": 59336
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/B1/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03d8d08cc8207611bc6bda23196cefec5e414c59",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/B1/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e855af2f72fed269a73778f4f8ecc42d25ba1771",
+      "size": 59316
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/B2/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "084d5722fea9ab840981e4a97f7a31bfa7c25f1f",
+      "size": 11315
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/B2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c812800d89c0e281f5fd45364f28659ff0c8a80",
+      "size": 59133
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d021af8de8eed8ec591e1841386cd0ba64784ca9",
+      "size": 48883
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/memory-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b04bbfc0f50e4ec080f69381ff9576ca2fa122d",
+      "size": 454
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/memory-comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e2d5e0973d216684208848a41da91a1eac2de16",
+      "size": 10144
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38f447e2986ab7fa4381ada4f31a79f93af47347",
+      "size": 8519
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26ee3480150a095f502bed42fd7af702e3869f24",
+      "size": 14057
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/qualification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1feb85f3b01b717a4ae7528d9dbbe59d683a57c3",
+      "size": 191
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/receipt-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04e472ebe19d7c99026cc936fe8f6d28e6720ad3",
+      "size": 676
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-memory/import-memory-3aac-prefix-jitendex-rep2-45468614083-1--e015c3afb1b42964/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d591ede60ca345dc8a6a8053e1c6431d8e1eef4",
+      "size": 1905
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31b89b7d5950504aee2bd0db3e451a0a364a2685",
+      "size": 4054
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec71105c1b373b14fa19cf4d196a647920effa0a",
+      "size": 11439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99ce869a7eb025ee12334acc206843c70e1bcb94",
+      "size": 21431
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a1e5d6e30fbdfe3f84995519b9e829fffcf0b15",
+      "size": 12643
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-forward-45468314006-1--555157dc7518abe0/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69aad8a64983d30d52211c1255e814426552fc7b",
+      "size": 305
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b082993b0b84fd84b02c60b75ae5a90ad0bba72",
+      "size": 3994
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec71105c1b373b14fa19cf4d196a647920effa0a",
+      "size": 11439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fefcc9950f414d6a1d60e3444f606200493dc8f1",
+      "size": 21343
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66d1d0f97fad15b975dd70b8e26ee899abc6749e",
+      "size": 12642
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jitendex-reverse-45468314006-1--34909835a4582320/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69aad8a64983d30d52211c1255e814426552fc7b",
+      "size": 305
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16eb13e30875afa89955394dfa126f41d1ec31a4",
+      "size": 3978
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b945136dcc656ebc1c7eb600a52171130675af6f",
+      "size": 11876
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4437db82151cc031664c2a77580536657cbc8c19",
+      "size": 21282
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "240b023d2a188e2c671333ca20c5db2f54acc58a",
+      "size": 12089
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-forward-45468314006-1--d2937e39f08c5e3a/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c3526c3a771f985bdddd2e0de0deb2e270d34ff",
+      "size": 303
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3e4ad6a0151067864995257f529099df76f3e9e",
+      "size": 3980
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b945136dcc656ebc1c7eb600a52171130675af6f",
+      "size": 11876
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9322cc011af988638eeb4b8b5efa88fe2667174",
+      "size": 21333
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e022f66c7f30fe87d810532d4108d17d654827b3",
+      "size": 12088
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/prefix-qualification/import-prefix-qualification-jmdict-reverse-45468314006-1--3822e795b916a12b/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c3526c3a771f985bdddd2e0de0deb2e270d34ff",
+      "size": 303
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16dc1a6219d0d2b4fcf5564036a84b87786f881e",
+      "size": 3122
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec71105c1b373b14fa19cf4d196a647920effa0a",
+      "size": 11439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09f1cdf9acb5ae2c9fee638065e22ff439a0b7f0",
+      "size": 11934
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd8b22904e24882d2afcbb78e2f9c2160a22f608",
+      "size": 45
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec970350fd47317931c5dbbb0f48bc06627ab0f4",
+      "size": 12375
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jitendex-forward-45465463257-1--48fc5a9b190da046/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a86217109f086f8162aa6676599e2174aa84e753",
+      "size": 298
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a324e07eebb7eece59d285d644895be8e9dafbd",
+      "size": 3144
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b945136dcc656ebc1c7eb600a52171130675af6f",
+      "size": 11876
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b127c3d3b4a87bb47afdc9fdb7e386f58c3999c6",
+      "size": 12013
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd8b22904e24882d2afcbb78e2f9c2160a22f608",
+      "size": 45
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6ed0a1e7fb53d3505d65b4d5d4e14fd2bc5d8c9",
+      "size": 11821
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-jmdict-forward-45465463257-1--6be0ae98a23104bd/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a05930923b908b9ecde4cfd0c3440c2bf21f14b3",
+      "size": 296
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9165fcfd4ceb277ef2821b1f521edeb5c9d9283",
+      "size": 656
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ee14fcb4448bdd072123ab21ba83b4f53e837a2",
+      "size": 2005
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd8b22904e24882d2afcbb78e2f9c2160a22f608",
+      "size": 45
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e198e6d4d158d15f939f74b587d1ebf72f62dc2",
+      "size": 11915
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6562320f1f3fb00bbbad9bf0dfdd24c960fda72a",
+      "size": 3096
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-cache-screen-vndb-forward-45465463257-1--c9b2174ece8f1641/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b6acd5d73af227015479d1cd2a5e9f4379c6cb6",
+      "size": 176
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee99a261f511d26d886f411537458f88ab6a35b5",
+      "size": 3148
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec71105c1b373b14fa19cf4d196a647920effa0a",
+      "size": 11439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a52eb50c9a242fb999e476c8aba2c79c78685510",
+      "size": 11998
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9830427bd009fa3c173c986a36831097f5462f4d",
+      "size": 12508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jitendex-forward-45465463257-1--c83f6b0179b9ff08/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a86217109f086f8162aa6676599e2174aa84e753",
+      "size": 298
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9231532c4589e5d72c17b859a439e6a4ad3474a0",
+      "size": 3136
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b945136dcc656ebc1c7eb600a52171130675af6f",
+      "size": 11876
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad5293a7930ccfcf62a966a8a6cac4bd14d93f68",
+      "size": 11975
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c6dd782ad3cfaedff5b057d0e219e7be42cc192",
+      "size": 11954
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-jmdict-forward-45465463257-1--61b3ed5a3318e64b/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a05930923b908b9ecde4cfd0c3440c2bf21f14b3",
+      "size": 296
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9165fcfd4ceb277ef2821b1f521edeb5c9d9283",
+      "size": 656
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23891e1b2fb341bc9398cc32380641ce10e19e43",
+      "size": 4090
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a943b83dd309f47190e6c777150de53a2961df6",
+      "size": 172
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7554c7231383d7a92cdf254b890146426f13f1df",
+      "size": 12048
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6562320f1f3fb00bbbad9bf0dfdd24c960fda72a",
+      "size": 3096
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-media-screen-vndb-forward-45465463257-1--814a7f1bf7bed4d9/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b6acd5d73af227015479d1cd2a5e9f4379c6cb6",
+      "size": 176
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d90b10f8599ab0004a40ff0d409115fd68dff8e",
+      "size": 3153
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec71105c1b373b14fa19cf4d196a647920effa0a",
+      "size": 11439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc1bef89cdfe0e4be8e6c122ed99084d37d0b6a7",
+      "size": 1123
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f538f8be83200645bca230dc76f8479b9575336b",
+      "size": 12030
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efd77763575e4a210d1bb3cd5173ae0da2ae3327",
+      "size": 12569
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jitendex-forward-45465463257-1--fc69885acdda07db/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a86217109f086f8162aa6676599e2174aa84e753",
+      "size": 298
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1839b546301c8a83dcddcef66f5d11300eb38ba5",
+      "size": 3091
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b945136dcc656ebc1c7eb600a52171130675af6f",
+      "size": 11876
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f53082addb031b0b3f18ce0575935099373d971",
+      "size": 571
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aece650588581d6e4f0c403f328840c588d9a25e",
+      "size": 11954
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb9fb0143e7d2cfc05984af450877b75495d33a4",
+      "size": 12015
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c247102a603e35f874e80ec3876fe6b241c237c2",
+      "size": 2393
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-jmdict-forward-45465463257-1--bfe3b80d3ff4b968/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a05930923b908b9ecde4cfd0c3440c2bf21f14b3",
+      "size": 296
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9165fcfd4ceb277ef2821b1f521edeb5c9d9283",
+      "size": 656
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/observations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e8774b81690b199b3f3a7e4655fb90fed716bf8",
+      "size": 6165
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/package-differences.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2296d0c8e726ad35f0ebe2077dcdf7bd2190f01",
+      "size": 229
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/protocol.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6dd2f32f5c0b67afa624e87349f4e6bc4d635234",
+      "size": 12109
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/setup-fixtures.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6562320f1f3fb00bbbad9bf0dfdd24c960fda72a",
+      "size": 3096
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/screen/import-prefix-screen-vndb-forward-45465463257-1--28fafb6b6be71d99/cohort/state.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b6acd5d73af227015479d1cd2a5e9f4379c6cb6",
+      "size": 176
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-corrected-45470204352--0c40bf29632237a2/activation-receipt.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d21e18f868907ad2b741cf57c0a93a265b8a2b3",
+      "size": 4977
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-corrected-45470204352--0c40bf29632237a2/github-metadata.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8f5f365dfdb62b07bc56589068f100a01e01e71",
+      "size": 15566
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-corrected-45470204352--0c40bf29632237a2/independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "685a0e209801317ffccb2f0f1e7a062ae3cfd409",
+      "size": 8346
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/diagnosis.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "362c9ad55584c94f34eb35e12b3b6890e64175e0",
+      "size": 4455
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6c1779ec5867eef06d9c10c99f3a34f46e4b455",
+      "size": 1383
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-fallback.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e752c39434dfd178804a265899b9588bea000e9",
+      "size": 122527
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c510601c5d844954e40956fbb730badd5053756",
+      "size": 1382
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/cache-jmdict-offscreen.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ca6cb37cc7d34ee93afd94993ed6a8aea089650",
+      "size": 122528
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/checks.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7451e2af168935ba108d12ec1955f0e91fcba9a",
+      "size": 1178
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "072fa41a141c6e9e2ebe091b856541134c678d8f",
+      "size": 2036
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-fallback.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39323f1f46516e0ec013a5e01587f782500a6a7e",
+      "size": 122870
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b92692661d228b6cc5f922c04a795a9b9e7a8b7",
+      "size": 2035
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jitendex-offscreen.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "593abc29fadb53a501eb1d09c0fbf43651160b49",
+      "size": 122871
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2bfead51be776792e302eabfb041d65baac146b",
+      "size": 1660
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-fallback.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "989ce8d42b7c309a6f93174ab6ac844a83ddb074",
+      "size": 122592
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5cfc84a3bacf64701aa62a3b157f35d71161d547",
+      "size": 1659
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-jmdict-offscreen.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9e4c0e7fd4efaccf6392b457ee81c029322277d",
+      "size": 122593
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dfa670b1d2e436a6bab5e1062aa032bdb3b69dd4",
+      "size": 1444
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-fallback.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f6bd4e9565127af64498529becc632b6fb301a9",
+      "size": 122476
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4837ea1012bed371ec699ea67e90d97d3a1fba5",
+      "size": 1443
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/prefix-vndb-offscreen.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94ed0c1271f298359a4fc7e641141ff2a2b01743",
+      "size": 122477
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/retained-14954079813-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "469a999f2f3a64af9fc3ca13f54000a41db8d60a",
+      "size": 1290
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/retained-14955703235-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f30c3f730ce35d3fe3e43069577a589f3281c910",
+      "size": 1079
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/activation-failures-45468163108--a171fe3b0c339149/synthetic-collector-checks/retained-14956350395-summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db741ed36aab6c353987939b655e84ebe049a036",
+      "size": 1245
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--8e184c05e46173fc/canonical-input-baseline-package-entries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4b6ce3a45b25912f8e40b5623cbd544bedd0174",
+      "size": 96364
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--8e184c05e46173fc/canonical-input-candidate-package-entries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe312461a3215b38830dfdfbccd3c9491dd5d705",
+      "size": 96364
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--8e184c05e46173fc/canonical-input-package-guard.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b659fa91b5448f7bee9082f7fa36a4efc25340e1",
+      "size": 1783
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--8e184c05e46173fc/canonical-input-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bcd22b6d3495789b4d96c1fb2af2affc68836620",
+      "size": 2790
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--8e184c05e46173fc/canonical-input-work-proof.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3372d0baff32d73faa3fb16724c9e48c45f3acd8",
+      "size": 1427
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-baseline-package-entries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4b6ce3a45b25912f8e40b5623cbd544bedd0174",
+      "size": 96364
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-candidate-package-entries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe312461a3215b38830dfdfbccd3c9491dd5d705",
+      "size": 96364
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-ci-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50d1cbe7358b462c94f12ebc0d347c19864ac26a",
+      "size": 28851
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-package-guard.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b659fa91b5448f7bee9082f7fa36a4efc25340e1",
+      "size": 1783
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bcd22b6d3495789b4d96c1fb2af2affc68836620",
+      "size": 2790
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/jmdict-audit--e8518da38dca2a71/canonical-input-work-proof.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3372d0baff32d73faa3fb16724c9e48c45f3acd8",
+      "size": 1427
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/media-memory-attribution--6d7cd14c81a80db8/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93403687067f7d1ca04e1c8b013456817529635b",
+      "size": 5439
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/media-memory-attribution--6d7cd14c81a80db8/receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57c4e4dc973684db6c262261a512de008d5101f2",
+      "size": 12585
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/activation-correction-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8017fd42daa2ab4d76a5eff3a2e5d1c2c36c3d",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/activation-correction-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64457079f5e638892e30a4a472da918f8a27620c",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/activation-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efeeadedf3f3f38f6f90b9f1417efb1ea6f52194",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/activation-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a07d7f3c5a5355bc1ed0b6b05928c85861c28fc",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/cache-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67db988cafb9a495199754938d3c10ae3ac9ce5b",
+      "size": 712
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/cache-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccb3cf44ed4d0427ceb4426afacf172298f4c0ee",
+      "size": 5349
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/canonical-input-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2b327323d1cad3cdd1d6bbafbc805f5368724e5",
+      "size": 1348
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/canonical-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2c896d20b1697c8f4192c41b28b78ef512de4c7",
+      "size": 7036
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/canonical-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47cd20047997cee1f5fdaad0ee9d3283feb74518",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/canonical-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1da1f087ad4b1753989f401ae0c2f924db9b4367",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/diagnostic-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44be9fafa01cfdac3eaaebceb02efedebc77ed9f",
+      "size": 425
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/jmdict-cache-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9453506c7ae0b9bb5dfd62eb150c355c777e5a77",
+      "size": 4576
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/media-memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "229de12326f80b6725570e413c206c350c1d77d3",
+      "size": 2376
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/media-memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3a4fe8ff6aed5a28dca30e6e87dd44b96af066",
+      "size": 2554
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/media-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ac5c3c4b6b7abe89f2d3b6dff445fabfd34cd0a",
+      "size": 1682
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/media-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08bf6e5a09c0ff837b96603f81f8c69ea6807863",
+      "size": 8253
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1e43237f26146444024aeec20fa338bd3cc10cd",
+      "size": 2578
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf6ddb053b33189e39fb3ab6886ad0dba45fd323",
+      "size": 2688
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/package-guards.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a76ba50c9c4638f0ff007adae6abc54e88a4904",
+      "size": 1489
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/prefix-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fd27a2ed58186256b4344aab38658d833456602",
+      "size": 2241
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/prefix-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50bd831b785228607e1d2d8918050368e124ed18",
+      "size": 8288
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/prefix-qualification-artifact-provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bc681fb5cbe0419f18052ab74a782feceb6f60d",
+      "size": 1971
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/prefix-qualification-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca3316a028ab0be946d808683524eaec3de88ed5",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/prefix-qualification-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec70faafe1cd6fd1bd016484820beb203cfac391",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/private-prefix-handoff.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3968e572c847ee19d65cdb76e4342f0a82adca7e",
+      "size": 17449
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/six-screen-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19621c09dc4594d5c8abd88f060d1586995599c8",
+      "size": 32347
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/study-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f04381a8b5f50728294a88134913e205a2b1b769",
+      "size": 710
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/study-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "768f8c78b49feb1bdf92e2b2bc492bc35b7b7067",
+      "size": 821
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/vndb-storage-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "668eab05afe238f4dcaadaffeda9859fafe1e9cf",
+      "size": 1335
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--0a321b97aa69ca85/vndb-storage-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "897180bdb56b486c23ae44730b5986a06a30e9df",
+      "size": 1508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/activation-correction-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8017fd42daa2ab4d76a5eff3a2e5d1c2c36c3d",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/activation-correction-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64457079f5e638892e30a4a472da918f8a27620c",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/activation-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efeeadedf3f3f38f6f90b9f1417efb1ea6f52194",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/activation-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a07d7f3c5a5355bc1ed0b6b05928c85861c28fc",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/cache-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67db988cafb9a495199754938d3c10ae3ac9ce5b",
+      "size": 712
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/cache-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccb3cf44ed4d0427ceb4426afacf172298f4c0ee",
+      "size": 5349
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/canonical-input-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2b327323d1cad3cdd1d6bbafbc805f5368724e5",
+      "size": 1348
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/canonical-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2c896d20b1697c8f4192c41b28b78ef512de4c7",
+      "size": 7036
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/canonical-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47cd20047997cee1f5fdaad0ee9d3283feb74518",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/canonical-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1da1f087ad4b1753989f401ae0c2f924db9b4367",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/diagnostic-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44be9fafa01cfdac3eaaebceb02efedebc77ed9f",
+      "size": 425
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/evidence-packager-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e73d5f5e56e3a88e7b03dfea47029a44fea89bac",
+      "size": 2701
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/jmdict-cache-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9453506c7ae0b9bb5dfd62eb150c355c777e5a77",
+      "size": 4576
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/media-memory-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5410b448a10c035db6f666de82884fb07eaef9ac",
+      "size": 58218
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/media-memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "229de12326f80b6725570e413c206c350c1d77d3",
+      "size": 2376
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/media-memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3a4fe8ff6aed5a28dca30e6e87dd44b96af066",
+      "size": 2554
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/media-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ac5c3c4b6b7abe89f2d3b6dff445fabfd34cd0a",
+      "size": 1682
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/media-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08bf6e5a09c0ff837b96603f81f8c69ea6807863",
+      "size": 8253
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1e43237f26146444024aeec20fa338bd3cc10cd",
+      "size": 2578
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf6ddb053b33189e39fb3ab6886ad0dba45fd323",
+      "size": 2688
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/package-guards.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a76ba50c9c4638f0ff007adae6abc54e88a4904",
+      "size": 1489
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-memory-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "722ccd9bee5a4edf4e557bb13bccdd6d385841a8",
+      "size": 5391
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fd27a2ed58186256b4344aab38658d833456602",
+      "size": 2241
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50bd831b785228607e1d2d8918050368e124ed18",
+      "size": 8288
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-qualification-artifact-provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bc681fb5cbe0419f18052ab74a782feceb6f60d",
+      "size": 1971
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-qualification-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca3316a028ab0be946d808683524eaec3de88ed5",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-qualification-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec70faafe1cd6fd1bd016484820beb203cfac391",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/prefix-timing-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebefa18e568e4bde9945c7a410c7aadcdacbc594",
+      "size": 27525
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/private-prefix-handoff.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9c2ac69eb409fe9f05b43a26a5bf8a69f9b3f31",
+      "size": 18916
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/six-screen-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19621c09dc4594d5c8abd88f060d1586995599c8",
+      "size": 32347
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/study-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f04381a8b5f50728294a88134913e205a2b1b769",
+      "size": 710
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/study-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "768f8c78b49feb1bdf92e2b2bc492bc35b7b7067",
+      "size": 821
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/vndb-storage-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "668eab05afe238f4dcaadaffeda9859fafe1e9cf",
+      "size": 1335
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--22579f3de0abefb4/vndb-storage-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "897180bdb56b486c23ae44730b5986a06a30e9df",
+      "size": 1508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/activation-correction-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8017fd42daa2ab4d76a5eff3a2e5d1c2c36c3d",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/activation-correction-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64457079f5e638892e30a4a472da918f8a27620c",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/activation-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efeeadedf3f3f38f6f90b9f1417efb1ea6f52194",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/activation-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a07d7f3c5a5355bc1ed0b6b05928c85861c28fc",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/cache-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67db988cafb9a495199754938d3c10ae3ac9ce5b",
+      "size": 712
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/cache-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccb3cf44ed4d0427ceb4426afacf172298f4c0ee",
+      "size": 5349
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/canonical-input-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2b327323d1cad3cdd1d6bbafbc805f5368724e5",
+      "size": 1348
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/canonical-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2c896d20b1697c8f4192c41b28b78ef512de4c7",
+      "size": 7036
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/canonical-screen-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "214cad4591751af9e790fbd7a2fbbfdb5bda5aad",
+      "size": 24922
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/canonical-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47cd20047997cee1f5fdaad0ee9d3283feb74518",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/canonical-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1da1f087ad4b1753989f401ae0c2f924db9b4367",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/diagnostic-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44be9fafa01cfdac3eaaebceb02efedebc77ed9f",
+      "size": 425
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/evidence-packager-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e73d5f5e56e3a88e7b03dfea47029a44fea89bac",
+      "size": 2701
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/jmdict-cache-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9453506c7ae0b9bb5dfd62eb150c355c777e5a77",
+      "size": 4576
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-memory-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5410b448a10c035db6f666de82884fb07eaef9ac",
+      "size": 58218
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "229de12326f80b6725570e413c206c350c1d77d3",
+      "size": 2376
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3a4fe8ff6aed5a28dca30e6e87dd44b96af066",
+      "size": 2554
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ac5c3c4b6b7abe89f2d3b6dff445fabfd34cd0a",
+      "size": 1682
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08bf6e5a09c0ff837b96603f81f8c69ea6807863",
+      "size": 8253
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-qualification-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "89cc1b4fde66de764c217fcd52bcb9f9c017f777",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/media-qualification-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27ba3c3f59b8620a8333e603ae682237a8b7c13a",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1e43237f26146444024aeec20fa338bd3cc10cd",
+      "size": 2578
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf6ddb053b33189e39fb3ab6886ad0dba45fd323",
+      "size": 2688
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/package-guards.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a76ba50c9c4638f0ff007adae6abc54e88a4904",
+      "size": 1489
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-memory-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "722ccd9bee5a4edf4e557bb13bccdd6d385841a8",
+      "size": 5391
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fd27a2ed58186256b4344aab38658d833456602",
+      "size": 2241
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50bd831b785228607e1d2d8918050368e124ed18",
+      "size": 8288
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-qualification-artifact-provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bc681fb5cbe0419f18052ab74a782feceb6f60d",
+      "size": 1971
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-qualification-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca3316a028ab0be946d808683524eaec3de88ed5",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-qualification-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec70faafe1cd6fd1bd016484820beb203cfac391",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/prefix-timing-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebefa18e568e4bde9945c7a410c7aadcdacbc594",
+      "size": 27525
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/private-prefix-handoff.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9c2ac69eb409fe9f05b43a26a5bf8a69f9b3f31",
+      "size": 18916
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/private-prefix-qualification-receipt.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49402747197bc814658448ddd5b001131eb4c557",
+      "size": 10464
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/six-screen-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19621c09dc4594d5c8abd88f060d1586995599c8",
+      "size": 32347
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/study-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f04381a8b5f50728294a88134913e205a2b1b769",
+      "size": 710
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/study-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "768f8c78b49feb1bdf92e2b2bc492bc35b7b7067",
+      "size": 821
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/vndb-storage-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "668eab05afe238f4dcaadaffeda9859fafe1e9cf",
+      "size": 1335
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--477b54620c617954/vndb-storage-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "897180bdb56b486c23ae44730b5986a06a30e9df",
+      "size": 1508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/activation-correction-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8017fd42daa2ab4d76a5eff3a2e5d1c2c36c3d",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/activation-correction-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64457079f5e638892e30a4a472da918f8a27620c",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/activation-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efeeadedf3f3f38f6f90b9f1417efb1ea6f52194",
+      "size": 1125
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/activation-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a07d7f3c5a5355bc1ed0b6b05928c85861c28fc",
+      "size": 1240
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/cache-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67db988cafb9a495199754938d3c10ae3ac9ce5b",
+      "size": 712
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/cache-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccb3cf44ed4d0427ceb4426afacf172298f4c0ee",
+      "size": 5349
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/canonical-input-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2b327323d1cad3cdd1d6bbafbc805f5368724e5",
+      "size": 1348
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/canonical-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2c896d20b1697c8f4192c41b28b78ef512de4c7",
+      "size": 7036
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/canonical-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47cd20047997cee1f5fdaad0ee9d3283feb74518",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/canonical-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1da1f087ad4b1753989f401ae0c2f924db9b4367",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/diagnostic-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44be9fafa01cfdac3eaaebceb02efedebc77ed9f",
+      "size": 425
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/jmdict-cache-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9453506c7ae0b9bb5dfd62eb150c355c777e5a77",
+      "size": 4576
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/media-memory-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5410b448a10c035db6f666de82884fb07eaef9ac",
+      "size": 58218
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/media-memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "229de12326f80b6725570e413c206c350c1d77d3",
+      "size": 2376
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/media-memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3a4fe8ff6aed5a28dca30e6e87dd44b96af066",
+      "size": 2554
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/media-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ac5c3c4b6b7abe89f2d3b6dff445fabfd34cd0a",
+      "size": 1682
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/media-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08bf6e5a09c0ff837b96603f81f8c69ea6807863",
+      "size": 8253
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/memory-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1e43237f26146444024aeec20fa338bd3cc10cd",
+      "size": 2578
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/memory-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf6ddb053b33189e39fb3ab6886ad0dba45fd323",
+      "size": 2688
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/package-guards.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a76ba50c9c4638f0ff007adae6abc54e88a4904",
+      "size": 1489
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-memory-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "722ccd9bee5a4edf4e557bb13bccdd6d385841a8",
+      "size": 5391
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fd27a2ed58186256b4344aab38658d833456602",
+      "size": 2241
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50bd831b785228607e1d2d8918050368e124ed18",
+      "size": 8288
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-qualification-artifact-provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bc681fb5cbe0419f18052ab74a782feceb6f60d",
+      "size": 1971
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-qualification-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca3316a028ab0be946d808683524eaec3de88ed5",
+      "size": 516
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-qualification-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec70faafe1cd6fd1bd016484820beb203cfac391",
+      "size": 689
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/prefix-timing-qualification-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebefa18e568e4bde9945c7a410c7aadcdacbc594",
+      "size": 27525
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/private-prefix-handoff.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9c2ac69eb409fe9f05b43a26a5bf8a69f9b3f31",
+      "size": 18916
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/six-screen-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19621c09dc4594d5c8abd88f060d1586995599c8",
+      "size": 32347
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/study-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f04381a8b5f50728294a88134913e205a2b1b769",
+      "size": 710
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/study-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "768f8c78b49feb1bdf92e2b2bc492bc35b7b7067",
+      "size": 821
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/vndb-storage-screen-publication-plan.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "668eab05afe238f4dcaadaffeda9859fafe1e9cf",
+      "size": 1335
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/session-receipts--c52e63363afca2cf/vndb-storage-screen-publication.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "897180bdb56b486c23ae44730b5986a06a30e9df",
+      "size": 1508
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/storage-protocol--b2d3297979c04c57/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d102f7fcbd9feb0710d7e67b8b913a4c4898a01",
+      "size": 5118
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/storage-protocol--b2d3297979c04c57/media-memory-manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3bf192c0ef94da66e0591f9be506c1a9a759e9b1",
+      "size": 5941
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/storage-protocol--b2d3297979c04c57/retrospective-compatibility.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "446ffa1d9ddd974f260d45de5c36f9073b9161a6",
+      "size": 2020
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/storage-protocol--b2d3297979c04c57/vndb-failure-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "131fb01029e652120aa4e5c3d3cbaa9163c30dae",
+      "size": 91425
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/AGENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5aca156e72768d3980256e9997b0fa54de1e84e",
+      "size": 5083
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/exact-base-worker-oracle.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e3519091e718f40b64b283c4aaaed864e719768",
+      "size": 6651
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/import-experiments-20260914.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ce16c27d4b3267e1d75c79582ab4d3c28585746",
+      "size": 25955
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-counts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f06bd0de9bd8741508ef536e78de07e69fa7b29",
+      "size": 545524
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-projection-trace-attribution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d451e4c5cec0709eb04c2f93ba0c233fad221cc",
+      "size": 21756
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/media-verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d55838dc38473cda6fe554ee05a2b8343925272",
+      "size": 603
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-admission-diagnostic.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9f5646618d4ed95c5678c6f146c43d65170f49a",
+      "size": 83092
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-handoff.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f7fb550489953585624b93f970d8ec3755b3359f",
+      "size": 11112
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-final-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "129f5eb2e725392c6e535223a642dab095f0afdb",
+      "size": 11232
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-oracle.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f9383a548c03b66fb29be717da4ffd453d4235c",
+      "size": 544665
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/native-media-projection-source-receipt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cd8f31a554ca75e95d7819b50f03e476814877a",
+      "size": 5659
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-independent-review.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a16573eb5e910eb9706ffede35e4a13b2760b81c",
+      "size": 1780
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/production-media-projection-oracle.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc5a248bc81b2c325fd91759914fe67013ea68e1",
+      "size": 578308
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/reproducibility.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0e60077969995e871299adb158e6f62aea880c7",
+      "size": 963
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20e0a0a291b9ff264469956f6c04fdcce3585595",
+      "size": 439
+    }
+  ]
+}

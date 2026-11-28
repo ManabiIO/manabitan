@@ -482,7 +482,13 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     {
         function owner(native) {
             const f = fixture(40);
-            f.chunk.dictionary = 'synthetic';
+            // The mocked reservation follows production shared-JMdict admission.
+            /* eslint-disable @stylistic/semi */
+            f.chunk.dictionary = 'JMdict synthetic'
+            const sharedContent = new Uint8Array(new SharedArrayBuffer(f.chunk.contentBytesBuffer.byteLength))
+            sharedContent.set(f.chunk.contentBytesBuffer)
+            f.chunk.contentBytesBuffer = sharedContent
+            /* eslint-enable @stylistic/semi */
             f.chunk.dictionaryTotalRows = 80;
             f.chunk.contentBytesBuffer[8] = 55;
             f.chunk.contentMetaList[10] = f.chunk.contentMetaList[2];
@@ -1066,9 +1072,12 @@ test('production typed pending IDs: storage and record failure, old-entry preser
             db._bulkImportTransactionOpen = true;
             db._deferTermsVirtualTableSync = true;
             db._termContentZstdInitialized = true;
-            const bytes = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+            // Faults below exercise the admitted shared-content reservation.
+            const bytes = new Uint8Array(new SharedArrayBuffer(12)),
                 meta = new Uint32Array(24),
                 ids = Uint32Array.from([0, 1, 2, 0, 1, 2]);
+            // eslint-disable-next-line @stylistic/semi
+            bytes.set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             for (let r = 0; r < 6; r++) {
                 const u = r % 3;
                 meta.set([u * 4, 4, u + 11, u + 31], r * 4);
@@ -1092,7 +1101,7 @@ test('production typed pending IDs: storage and record failure, old-entry preser
                 plan.uniqueSignatures.set([word, word, word], u * 3);
             }
             const chunk = {
-                dictionary: 'outer-fault',
+                dictionary: 'JMdict outer-fault',
                 dictionaryTotalRows: 6,
                 rowCount: 6,
                 contentRowStart: 0,

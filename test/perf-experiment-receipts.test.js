@@ -2,12 +2,14 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import {describe, expect, test} from 'vitest'
+import {createHash} from 'node:crypto'
 import {extractImportResult} from '../dev/perf/benchmark-support.js'
 import {loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 
 const fixture = (await loadDictionaryFixtures()).jmdict
-const threshold = 512 * 1024 * 1024
+const threshold = 1024 * 1024 * 1024
+const probeTerms = Array.from({length: 12}, (_, index) => `term-${index}`)
 
 /**
  * @param {number} bytes
@@ -48,7 +50,16 @@ function report(bytes = threshold, projected = true, flags = null) {
             phaseScreenshots: false,
             processSampling: false,
             importFlags: flags,
-            validation: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12}},
+            validation: {title: fixture.expectedTitle,
+                revision: fixture.revision,
+                termRows: fixture.termRows,
+                contentReadable: true,
+                probeCount: 12,
+                probeTerms,
+                restart: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12, mediaFiles: 0},
+                media: {mode: 'all', totalFiles: 0, totalBytes: 0, files: 0, bytes: 0, sha256: createHash('sha256').digest('hex')},
+                storage: {bytes: 1000000},
+                lookup: {observations: Array.from({length: 6}).flatMap((_, pass) => probeTerms.map((term) => ({pass, term, elapsedMs: 1, results: 1, originalTextLength: term.length, hasExactHeadwordMatch: true, sha256: 'b'.repeat(64)})))}}},
         phases: [{name: 'JMdict: total import',
             durationMs: 200,
             startMs: 100,
@@ -93,11 +104,30 @@ const invalidContexts = [
     ['parallel skip reason', (term) => { term.parserParallelSkipReason = 'disabled' }],
     ['source size', (term) => { term.parserSourceUncompressedBytes = threshold - 1 }],
     ['string source size', (term) => { term.parserSourceUncompressedBytes = String(threshold) }],
+    ['missing source size', (term) => { delete term.parserSourceUncompressedBytes }],
+    ['unsafe source size', (term) => { term.parserSourceUncompressedBytes = Number.MAX_SAFE_INTEGER + 1 }],
 ]
 
 describe('requested versus effective parser receipt policy', () => {
-    test.each([threshold - 1, threshold, threshold + 1, 537538792])('accepts the exact production policy at %i source bytes', (bytes) => {
-        expect(extract(report(bytes)).totalImportMs).toBe(200)
+    test.each([
+        {bytes: 536870912, escaped: false},
+        {bytes: 538927310, escaped: false},
+        {bytes: 1073741823, escaped: false},
+        {bytes: 1073741824, escaped: true},
+        {bytes: 1073741825, escaped: true},
+    ])('requires the production escaped-key receipt $escaped at $bytes source bytes', ({bytes, escaped}) => {
+        // Keep these observed and boundary expectations independent of the
+        // fixture builder's policy, including the pinned Jitendex source size.
+        for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments']) {
+            const value = report(bytes)
+            const [term, banks] = details(value)
+            term.parserExperiments.experimentalNativeEscapedKeys = escaped
+            banks.fastPathParserEffectiveExperiments.experimentalNativeEscapedKeys = escaped
+            expect(extract(value).totalImportMs).toBe(200)
+            const receipt = key === 'parserExperiments' ? term[key] : banks[key]
+            receipt.experimentalNativeEscapedKeys = !escaped
+            expect(() => extract(value)).toThrow(`receipt mismatch: ${key}`)
+        }
     })
     test('rejects an unexpected escaped-key switch on the small JMdict source', () => {
         const value = report(171092992)

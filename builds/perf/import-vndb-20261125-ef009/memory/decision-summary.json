@@ -1,0 +1,444 @@
+{
+    "schemaVersion": 1,
+    "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/905",
+    "sourceCommit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+    "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+    "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "workflowRun": 45646484626,
+    "workflowHead": "57590f5eaee359d721ba9d5d8bde28728a8d172e",
+    "workflowAttempt": 1,
+    "protocolSha256": "0880cf10e13635bddd64a4d0848db13c4f46b06684e92f826a643086d213bc42",
+    "decision": "not-qualified-coverage-failure",
+    "acquisitionComplete": true,
+    "qualified": false,
+    "authoritativeTiming": false,
+    "expectedCells": 6,
+    "preservedCells": 6,
+    "preservedObservations": 24,
+    "rawScansRecomputed": 2399,
+    "evidenceConsistency": "All six raw-scan audits match the unchanged frozen auditor, original workflow receipts, compact summaries, and direct source/package/semantic checks.",
+    "memoryGates": {
+        "maximumMedianPairedIncreasePercent": 5,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "everyObservationQualified": true
+    },
+    "coverageGates": {
+        "minimumFullyCoveredImportScans": 5,
+        "maximumCoveredGapMs": 250,
+        "maximumBracketGapMs": 250,
+        "betweenScanWaitMs": 25
+    },
+    "failedQualification": {
+        "dictionary": "vndb",
+        "replication": 1,
+        "observation": "B1",
+        "failure": "covered-import-scan-gap-over-250ms",
+        "observedMaximumCoveredGapMs": 254.99874,
+        "frozenMaximumCoveredGapMs": 250,
+        "qualifiedPssAndPrivateMaxima": null,
+        "pair1Qualified": false,
+        "cellMetricAggregates": null,
+        "benchmarkExitCode": 0,
+        "semanticValidationFailures": []
+    },
+    "interpretation": "All acquisitions and semantic checks completed. Five cells satisfy the original coverage and PSS/private limits. VNDB host 1 fails the original coverage gate, so its first pair and cell aggregates stay unqualified and the full six-cell memory qualification fails. No observations were rerun, replaced, excluded, or given revised thresholds. This coverage failure does not establish either a memory regression or memory improvement for the missing qualified pair.",
+    "cells": [
+        {
+            "dictionary": "jitendex",
+            "replication": 1,
+            "evidenceVerified": true,
+            "qualified": true,
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "04403733-128b-4c73-a694-0c327ec90b8f",
+                "runnerName": "GitHub Actions 1000088097",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -2.408762720687996,
+                    "maximumPairedChangePercent": -1.8292810881446742
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -3.0558222240352926,
+                    "maximumPairedChangePercent": -2.3908447422508528
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1048390,
+                        "candidate": 1029212,
+                        "changePercent": -1.8292810881446742
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 815444,
+                        "candidate": 795948,
+                        "changePercent": -2.3908447422508528
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1057109,
+                        "candidate": 1025520,
+                        "changePercent": -2.9882443532313174
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 826704,
+                        "candidate": 795944,
+                        "changePercent": -3.720799705819733
+                    }
+                }
+            ],
+            "qualificationFailures": []
+        },
+        {
+            "dictionary": "jitendex",
+            "replication": 2,
+            "evidenceVerified": true,
+            "qualified": true,
+            "hostIdentity": {
+                "hostname": "ip-10-0-140-160",
+                "bootId": "df909984-faf1-49de-8466-03a7fa1aa3f8",
+                "runnerName": "GitHub Actions 1000088061",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -0.19622794674753474,
+                    "maximumPairedChangePercent": 0.3523035740505831
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -0.4089040337333927,
+                    "maximumPairedChangePercent": 0.6297010607521747
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1062436,
+                        "candidate": 1066179,
+                        "changePercent": 0.3523035740505831
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 829600,
+                        "candidate": 834824,
+                        "changePercent": 0.6297010607521747
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1058194,
+                        "candidate": 1050313,
+                        "changePercent": -0.7447594675456526
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 830392,
+                        "candidate": 818372,
+                        "changePercent": -1.44750912821896
+                    }
+                }
+            ],
+            "qualificationFailures": []
+        },
+        {
+            "dictionary": "jmdict",
+            "replication": 1,
+            "evidenceVerified": true,
+            "qualified": true,
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "231dafb1-57a6-43cd-bb95-f9831ebe2295",
+                "runnerName": "GitHub Actions 1000088077",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -1.4058534106683063,
+                    "maximumPairedChangePercent": -0.3674196740575786
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -2.210466462140576,
+                    "maximumPairedChangePercent": -0.937140134217529
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1034784,
+                        "candidate": 1030982,
+                        "changePercent": -0.3674196740575786
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 805856,
+                        "candidate": 798304,
+                        "changePercent": -0.937140134217529
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1022834,
+                        "candidate": 997833,
+                        "changePercent": -2.444287147279034
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 792240,
+                        "candidate": 764640,
+                        "changePercent": -3.4837927900636223
+                    }
+                }
+            ],
+            "qualificationFailures": []
+        },
+        {
+            "dictionary": "jmdict",
+            "replication": 2,
+            "evidenceVerified": true,
+            "qualified": true,
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "e2e610a8-7945-484b-9264-e57f92b772eb",
+                "runnerName": "GitHub Actions 1000088075",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": 0.25088129420160477,
+                    "maximumPairedChangePercent": 0.9046380902855145
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": 0.007458025613799046,
+                    "maximumPairedChangePercent": 0.6008861657397224
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1009575,
+                        "candidate": 1018708,
+                        "changePercent": 0.9046380902855145
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 778184,
+                        "candidate": 782860,
+                        "changePercent": 0.6008861657397224
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1022152,
+                        "candidate": 1018034,
+                        "changePercent": -0.4028755018823049
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 790484,
+                        "candidate": 785852,
+                        "changePercent": -0.5859701145121243
+                    }
+                }
+            ],
+            "qualificationFailures": []
+        },
+        {
+            "dictionary": "vndb",
+            "replication": 1,
+            "evidenceVerified": true,
+            "qualified": false,
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "913bab4b-446d-438a-8d0b-fa95542f74e1",
+                "runnerName": "GitHub Actions 1000088084",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": null,
+                    "maximumPairedChangePercent": null
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": null,
+                    "maximumPairedChangePercent": null
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": false,
+                    "maxSampledPssKiB": {
+                        "baseline": 1384928,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1152756,
+                        "candidate": null,
+                        "changePercent": null
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1464711,
+                        "candidate": 1406352,
+                        "changePercent": -3.9843354764182104
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1234352,
+                        "candidate": 1176660,
+                        "changePercent": -4.673869366274774
+                    }
+                }
+            ],
+            "qualificationFailures": [
+                {
+                    "observation": "B1",
+                    "failures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "maximumCoveredSampleGapMs": 254.99874
+                }
+            ]
+        },
+        {
+            "dictionary": "vndb",
+            "replication": 2,
+            "evidenceVerified": true,
+            "qualified": true,
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "1933ffc9-7728-426c-b17f-c23688b88792",
+                "runnerName": "GitHub Actions 1000088062",
+                "runnerEnvironment": "github-hosted"
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": 0.8428565161834767,
+                    "maximumPairedChangePercent": 0.9288332679627809
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": 0.9258843158537533,
+                    "maximumPairedChangePercent": 1.103609976957598
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1399713,
+                        "candidate": 1412714,
+                        "changePercent": 0.9288332679627809
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1170340,
+                        "candidate": 1179096,
+                        "changePercent": 0.7481586547499086
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1419380,
+                        "candidate": 1430123,
+                        "changePercent": 0.7568797644041725
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1187376,
+                        "candidate": 1200480,
+                        "changePercent": 1.103609976957598
+                    }
+                }
+            ],
+            "qualificationFailures": []
+        }
+    ],
+    "independentHosts": {
+        "jmdict": {
+            "bootIds": [
+                "e2e610a8-7945-484b-9264-e57f92b772eb",
+                "231dafb1-57a6-43cd-bb95-f9831ebe2295"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088075",
+                "GitHub Actions 1000088077"
+            ],
+            "verified": true
+        },
+        "jitendex": {
+            "bootIds": [
+                "df909984-faf1-49de-8466-03a7fa1aa3f8",
+                "04403733-128b-4c73-a694-0c327ec90b8f"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088061",
+                "GitHub Actions 1000088097"
+            ],
+            "verified": true
+        },
+        "vndb": {
+            "bootIds": [
+                "1933ffc9-7728-426c-b17f-c23688b88792",
+                "913bab4b-446d-438a-8d0b-fa95542f74e1"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088062",
+                "GitHub Actions 1000088084"
+            ],
+            "verified": true
+        }
+    },
+    "semanticAgreementAcrossHosts": {
+        "jmdict": true,
+        "jitendex": true,
+        "vndb": true
+    },
+    "allPackageMemberMapsEqualAcrossHostsAndDictionaries": {
+        "A": true,
+        "B": true
+    },
+    "archivePolicy": "Original artifact ZIP byte counts and GitHub SHA-256 digests were verified on download. All original members are retained except the two nested release ZIP files, whose hashes, all release member hashes, own native bytes, and frozen parser/projector source were independently verified before exclusion; those ZIPs remain in the linked original GitHub artifacts. Every retained member has a byte count and SHA-256 in full-evidence-index.json. Compact summary JSON is preserved byte-exact as deterministic gzip.",
+    "transportNote": "A first attempt to retrieve the already-completed Jitendex host 1 full artifact received HTTP 403 after its signed download URL expired. The same artifact was successfully retrieved with a fresh connector URL and its original size/digest verified. This was not an observation or workflow rerun.",
+    "limitations": "Non-atomic sampled import-window maxima, not exact peaks. Startup, semantic/media readback, and restart are excluded from maxima. Cumulative allocation or copying reductions do not establish peak-memory savings.",
+    "evidence": {
+        "artifactIndex": "retrieved-artifacts.json",
+        "fullArtifactIndex": "full-evidence-index.json",
+        "unchangedAuditorReexecution": "independent-reaudit.json",
+        "failureJobLog": "vndb-host-1-job.log.gz",
+        "failureJobLogHashReceipt": "vndb-host-1-job-log.json",
+        "ciStatus": "../memory-ci-status.json",
+        "independentDirectRawScanReview": "independent-review.json",
+        "independentDirectRawScanAuditor": "independent-review-auditor.py.txt"
+    },
+    "independentReview": {
+        "complete": true,
+        "evidenceDiscrepancies": 0,
+        "observationsVerified": 24,
+        "publicLookupObservationsVerified": 1728,
+        "coverageQualifiedObservations": 23,
+        "rawScansRecomputed": 2399,
+        "distinctBootIds": 6,
+        "distinctRunnerNames": 6,
+        "hostnameReuseObserved": true,
+        "sourceSha256": "b30b0defee67bcc3c5981697ae8152d1a05eaf879e94bab78ed3dcdfa8f738dd",
+        "outputSha256": "b21a3df2528f8ffdb773ae5285b01aaa2c1edc1a20b73fad9ce435034a5f2a2d"
+    },
+    "independenceLimitation": "Distinct boot IDs and runner assignments establish distinct hosted instances, not physical hardware independence; hostnames may be reused."
+}

@@ -1,0 +1,58 @@
+{
+  "id": 45644488882,
+  "name": "Import screening ef009",
+  "head_branch": "codex/import-qualification-20261125-ef009",
+  "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+  "path": ".github/workflows/import-qualification-ef009.yml",
+  "display_title": "ci: screen frozen JMdict, Jitendex and VNDB import candidates",
+  "run_number": 1,
+  "event": "pull_request",
+  "status": "completed",
+  "conclusion": "success",
+  "workflow_id": 430509542,
+  "check_suite_id": 123501271051,
+  "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45644488882",
+  "pull_requests": [
+    {
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/pulls/911",
+      "id": 5494196822,
+      "number": 911,
+      "head": {
+        "ref": "codex/import-qualification-20261125-ef009",
+        "sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "repo": {
+          "id": 1165902460,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan",
+          "name": "manabitan"
+        }
+      },
+      "base": {
+        "ref": "develop",
+        "sha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "repo": {
+          "id": 1165902460,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan",
+          "name": "manabitan"
+        }
+      }
+    }
+  ],
+  "created_at": "2026-11-25T15:22:48Z",
+  "updated_at": "2026-11-25T16:00:09Z",
+  "run_attempt": 1,
+  "run_started_at": "2026-11-25T15:22:48Z",
+  "head_commit": {
+    "id": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+    "tree_id": "3418f3b5f3daffed97b10dd19cd6a2070d51d83f",
+    "message": "ci: screen frozen import candidates with exact release packages",
+    "timestamp": "2026-11-25T15:22:22Z",
+    "author": {
+      "name": "Alex Ehlke",
+      "email": "alex.ehlke@gmail.com"
+    },
+    "committer": {
+      "name": "Alex Ehlke",
+      "email": "alex.ehlke@gmail.com"
+    }
+  }
+}

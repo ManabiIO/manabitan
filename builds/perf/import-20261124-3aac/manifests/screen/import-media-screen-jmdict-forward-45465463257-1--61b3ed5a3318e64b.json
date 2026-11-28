@@ -1,0 +1,1890 @@
+{
+  "attempt": 1,
+  "candidate": "media",
+  "dictionary": "jmdict",
+  "direction": "forward",
+  "name": "import-media-screen-jmdict-forward-45465463257-1",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955247566/zip",
+      "created_at": "2026-11-24T19:05:19Z",
+      "digest": "sha256:62c21f301cc0ea358f1074cd17a05e10cfa86d3269d7a6d5e21c1a14d7efd26c",
+      "expired": false,
+      "expires_at": "2026-12-24T19:05:18Z",
+      "id": 14955247566,
+      "name": "import-media-screen-jmdict-forward-45465463257-1",
+      "size_in_bytes": 1010055,
+      "updated_at": "2026-11-24T19:05:19Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955247566",
+      "workflow_run": {
+        "head_branch": "perf/import-studies-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "7147cf5a1d1d68a38105c407c4ad5ca92f56e056",
+        "id": 45465463257,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45465463257/artifacts/14955247566",
+    "metadataReceipt": "provenance/github-artifacts-45465463257.json",
+    "metadataReceiptSha256": "47343aed7c3eeebc9235edbca40f8f6db3c9dec0b861c9663d215c572d8c3aa3",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45465463257,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45465463257"
+  },
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": {
+    "attemptedObservations": 23,
+    "browserVersion": "153.0.8010.12",
+    "buildComplete": true,
+    "dictionary": "jmdict",
+    "exhaustiveDiagnostics": 2,
+    "performanceClaim": "none; inspect paired evidence and control drift",
+    "stage": "screen",
+    "status": "success",
+    "timedObservations": 18
+  },
+  "retainedBytes": 7427085,
+  "retainedFiles": [
+    {
+      "bytes": 3136,
+      "path": "cohort/analysis.json",
+      "sha256": "0625fed467256f2a34bad6f65a95565272c3a9df2f877b24d5913685b54c6ebe"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-01-1-A/command.log",
+      "sha256": "623fe1c6b1b6ec35563dbd249a252ecc150f3165abe534175f039514f629d4eb"
+    },
+    {
+      "bytes": 502,
+      "path": "cohort/block-01-1-A/host-after.json",
+      "sha256": "98a12e4a0b03000edd199825a7c686a283278eb8b3ecf66ec5a3ab1e2cd126fe"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-1-A/host-before.json",
+      "sha256": "4eced6d612fdfc477246d8a2e321f1fba2d1aebe6c0c56186646d13de4fb327a"
+    },
+    {
+      "bytes": 15460,
+      "path": "cohort/block-01-1-A/phase-counters.json",
+      "sha256": "7cf262825757fff6900a3c1cfdf30aa662c2b86fd44cb8c07838edd812e109c2"
+    },
+    {
+      "bytes": 83338,
+      "path": "cohort/block-01-1-A/run-1.html",
+      "sha256": "f0acbc62216b09a2f58c25d0793a30ae98fbd66f06185f63d2c615c88a293ee2"
+    },
+    {
+      "bytes": 150872,
+      "path": "cohort/block-01-1-A/run-1.json",
+      "sha256": "5a81c67300238b17d4f5f5cb72321b133b8c121c3adccf441f567e13be3bf35c"
+    },
+    {
+      "bytes": 58920,
+      "path": "cohort/block-01-1-A/summary.json",
+      "sha256": "ce6fd272bf002f584daff4ef7490527b34be3201848e940c770bb7c61fe95258"
+    },
+    {
+      "bytes": 1617,
+      "path": "cohort/block-01-2-B/command.log",
+      "sha256": "24d1913634779aa1bbd8a9e9aafa272ae2442c242f570e1856e4b5d0d49a7845"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-2-B/host-after.json",
+      "sha256": "a4c4a7fb46e4e6033c2a60f5278f70c84048243b8b8ebeb67c685000dd817fc6"
+    },
+    {
+      "bytes": 502,
+      "path": "cohort/block-01-2-B/host-before.json",
+      "sha256": "ca1deb4a9affe5e3af56904973242dbac7e8240a51ca83f6402ea0d158231d53"
+    },
+    {
+      "bytes": 15470,
+      "path": "cohort/block-01-2-B/phase-counters.json",
+      "sha256": "bc68e7212581f5180759326b932585bb2aa73c1efa59fa999685307237e2665e"
+    },
+    {
+      "bytes": 83374,
+      "path": "cohort/block-01-2-B/run-1.html",
+      "sha256": "0ac65c6639d3044705382663077bc8a06869408786fb5af893b887cca2ad3cb5"
+    },
+    {
+      "bytes": 150926,
+      "path": "cohort/block-01-2-B/run-1.json",
+      "sha256": "c3e17e050d63564efa1666f73d872206112dc924a23497dde4760c1f8b10d1a6"
+    },
+    {
+      "bytes": 58978,
+      "path": "cohort/block-01-2-B/summary.json",
+      "sha256": "39caf748500a2608fa2d85ec46efdba14f40fd7e40ea47f78d7503abf0f118c5"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-01-3-C/command.log",
+      "sha256": "e10629911e0f72abfd274d9724ca5d7465a007593e47674242bebebd57158862"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-3-C/host-after.json",
+      "sha256": "73df432b2d7339bb63660b71d961f33bfa063898aa4418e16a67ae8d687dd8d2"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-3-C/host-before.json",
+      "sha256": "4403cdcb3226cc754ee4cef128611e4b1444adb7d265e6b8eafd257334b3eead"
+    },
+    {
+      "bytes": 15458,
+      "path": "cohort/block-01-3-C/phase-counters.json",
+      "sha256": "b1198c9210deb0352480e41664e33cdb99af21d1ac770b562bb23b9733554a01"
+    },
+    {
+      "bytes": 83367,
+      "path": "cohort/block-01-3-C/run-1.html",
+      "sha256": "1e72b3276f1bcca324ecf2da9e9abebef793afcf7853979319ffc3869a888b40"
+    },
+    {
+      "bytes": 150963,
+      "path": "cohort/block-01-3-C/run-1.json",
+      "sha256": "c2baa0a6b85a929149430c9a584699d629978b215dd8f46ec9cf23da08984f3f"
+    },
+    {
+      "bytes": 58924,
+      "path": "cohort/block-01-3-C/summary.json",
+      "sha256": "ad070e3b2cb6b15cf89129926e56caec8ed37ee645a40d801e1ff381941cfe0c"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-02-1-C/command.log",
+      "sha256": "bad1dfb214b472635f38c970c937e5feb86a3ec73093c32019b4f492a7c915f3"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-1-C/host-after.json",
+      "sha256": "78af530fdb302bbc568b88e60b447ea1e98816aff6817e3b906fe659192e2b76"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-1-C/host-before.json",
+      "sha256": "95f46b468410485e5e0b84313453b2e6f33192be584d7216f497418ff6f780d9"
+    },
+    {
+      "bytes": 15491,
+      "path": "cohort/block-02-1-C/phase-counters.json",
+      "sha256": "c1e58dab43c1e6ed9365932a693e4baaf5507d44eac098d88a157bca2c30c15f"
+    },
+    {
+      "bytes": 84110,
+      "path": "cohort/block-02-1-C/run-1.html",
+      "sha256": "9aca5c3f633b90d3de6d7889064ea34cec1bbace81440ad6b4de849d4c64a628"
+    },
+    {
+      "bytes": 151267,
+      "path": "cohort/block-02-1-C/run-1.json",
+      "sha256": "f3fc6c134127680fe426d0384e72ba747451dd5e21d6669ec4c51e1e08da0929"
+    },
+    {
+      "bytes": 58875,
+      "path": "cohort/block-02-1-C/summary.json",
+      "sha256": "828b71d117c020899bb2c5d4ac588704a78a17adc053383b77de5c8be97f5ac9"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-02-2-B/command.log",
+      "sha256": "7381236a4fd161789bdc53256da17fc71444cb01983bcb7764bb35cc4f450c41"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-2-B/host-after.json",
+      "sha256": "d5f9028438630f28894593ed34ec53301b33c66672d4ca0063d8ca890f34bfd4"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-2-B/host-before.json",
+      "sha256": "e61e78f635cb4d18ea39111b5fc58b675776a7c4fdaaca110913cceb64c12225"
+    },
+    {
+      "bytes": 15392,
+      "path": "cohort/block-02-2-B/phase-counters.json",
+      "sha256": "7b9554c3228dd61b2ced7873078c61570afc540e5297fbec52f0e282bd819897"
+    },
+    {
+      "bytes": 83092,
+      "path": "cohort/block-02-2-B/run-1.html",
+      "sha256": "9df8b5b90d5bbe1a8ace459c4e58b7da94824b087fdb9581a78b1f270e6f2451"
+    },
+    {
+      "bytes": 150370,
+      "path": "cohort/block-02-2-B/run-1.json",
+      "sha256": "fd49f2be44fb675ee4dca2629d3b235cafbf3d6ac199cf17d0a82c117f3b4eb5"
+    },
+    {
+      "bytes": 58706,
+      "path": "cohort/block-02-2-B/summary.json",
+      "sha256": "4b3a4c2ec0c9f1cda966426e5963ba707266712b1f68b63359c71174799712a7"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-02-3-A/command.log",
+      "sha256": "4de333e76d6e5971366810a35d90ff45711645f6e1263020146617ed085b60bf"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-3-A/host-after.json",
+      "sha256": "d2d36a73d8280deedd9d8f0ca00285c5fd17daed8485a545eebe90d81bb19f63"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-3-A/host-before.json",
+      "sha256": "c9196e1b456fae3af009e807086567d27f62edb7826576ab937042bcbdc8ebfb"
+    },
+    {
+      "bytes": 15468,
+      "path": "cohort/block-02-3-A/phase-counters.json",
+      "sha256": "3db22e2d3cc1dcd80df9a43c77256aa2f3cbadd929b30bccad70bc4bcffc2cc2"
+    },
+    {
+      "bytes": 83332,
+      "path": "cohort/block-02-3-A/run-1.html",
+      "sha256": "69a550c47acc6141e23e06f19c06b23f71d5233bef72fd87b65c9f9da7c42279"
+    },
+    {
+      "bytes": 150751,
+      "path": "cohort/block-02-3-A/run-1.json",
+      "sha256": "45a82010c94cb72fd852ebb51ad1761c24f9975d8cc9d36c946c530619496c83"
+    },
+    {
+      "bytes": 58817,
+      "path": "cohort/block-02-3-A/summary.json",
+      "sha256": "9e1340b8c2e03bfae49cdfd5d65d18625989b7057cb32a8e2108bcb773311f8b"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-03-1-B/command.log",
+      "sha256": "4b3916a83bfac731f49f89a3cb7277a8bcd29ea3b4e8b39b64997da51ca8db8e"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-1-B/host-after.json",
+      "sha256": "09c1c9a81e41052a3a24c5d9d915ead3defaf28ba1e5294756971972788a9539"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-1-B/host-before.json",
+      "sha256": "ab9805cb064438cbe80651557d286c9cf895eae0a12e4f9e26c4300f5349b75c"
+    },
+    {
+      "bytes": 15419,
+      "path": "cohort/block-03-1-B/phase-counters.json",
+      "sha256": "7371fa2dc5cc738efda229ae6208bf368d52e59e0d3c57be8fce6f286bd3bb06"
+    },
+    {
+      "bytes": 83184,
+      "path": "cohort/block-03-1-B/run-1.html",
+      "sha256": "47435e1c792ee3cab26bc82e8ccdb97dda61aab8ed2594a546b38c26a76bac91"
+    },
+    {
+      "bytes": 150491,
+      "path": "cohort/block-03-1-B/run-1.json",
+      "sha256": "7b3572fc7c319bc42fb884eecd9d104febce83fb443fa2d831a89d5aae43f8ef"
+    },
+    {
+      "bytes": 58683,
+      "path": "cohort/block-03-1-B/summary.json",
+      "sha256": "a3414c4fbe958de7014acd245dfad4d73e3feb27254f725c3b7f8c737290a341"
+    },
+    {
+      "bytes": 1619,
+      "path": "cohort/block-03-2-A/command.log",
+      "sha256": "c29f5c5324a707c7eac3ffa3842054803fd215e8c2728a1dff4e31348e1b3d83"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-2-A/host-after.json",
+      "sha256": "2de427b2c85abe0bcdf85f24e0520dd38fc0667ec4df4813127a9b25eca1ba91"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-2-A/host-before.json",
+      "sha256": "eea6036ade1ea8b1f559a2abe55c3949e41b558ca1149f0bbd3bcfa7e96c96b3"
+    },
+    {
+      "bytes": 15426,
+      "path": "cohort/block-03-2-A/phase-counters.json",
+      "sha256": "96113cce875b928eea062731a78514244dad912b35351cfc796b273b1d564718"
+    },
+    {
+      "bytes": 83236,
+      "path": "cohort/block-03-2-A/run-1.html",
+      "sha256": "d050bd4a1544b21ee3793085c6894edbefc174e5055077f25e2dccc38fc64b27"
+    },
+    {
+      "bytes": 150630,
+      "path": "cohort/block-03-2-A/run-1.json",
+      "sha256": "5f3f3a08513f0badeb074b53bc6a4e767724676f0212c9d41f1dff38a6074edf"
+    },
+    {
+      "bytes": 58771,
+      "path": "cohort/block-03-2-A/summary.json",
+      "sha256": "bd5534bef049c2a80b761e58f614ddf4740563899265df389dbc50dec8a040a9"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-03-3-C/command.log",
+      "sha256": "31b12c418e61414b65db97448e7bd794b59af8d4859b249e496ca8860d6a62c1"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-3-C/host-after.json",
+      "sha256": "1c84a514eb1ea5467e3de8364e3a2bc95589eca8de9bbe4901ec6b26f04c6a47"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-3-C/host-before.json",
+      "sha256": "77b192855439bada0c0196f1adb1e29c91adaffffaba1c56047a3ad48f4c6d98"
+    },
+    {
+      "bytes": 15490,
+      "path": "cohort/block-03-3-C/phase-counters.json",
+      "sha256": "1a3fc02f31e1c93f1b92e58341b5f16c5af9be2cc478a3be3f34d383ff230c05"
+    },
+    {
+      "bytes": 83402,
+      "path": "cohort/block-03-3-C/run-1.html",
+      "sha256": "cea124e411cd85e75fabccec5b0730eed36c00ed39ab20b2ae6c52f4beff22e4"
+    },
+    {
+      "bytes": 150941,
+      "path": "cohort/block-03-3-C/run-1.json",
+      "sha256": "be1d020560d355c764dc8484d75c9a99c9676f1aa002f47d24b410b89d150603"
+    },
+    {
+      "bytes": 58892,
+      "path": "cohort/block-03-3-C/summary.json",
+      "sha256": "39cd6290ae884975b69b475867f135f5da897d5bfea579a723b3359121ad10b4"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-04-1-C/command.log",
+      "sha256": "da8c084505d0dd60178f16e79d42a5cd4641b9289164a16cee9b6ffaccd2523f"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-1-C/host-after.json",
+      "sha256": "82f5f85f6ffee4d1238b47728c8ad16e05861e8c56bc1339d4208e32e10b7535"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-04-1-C/host-before.json",
+      "sha256": "2ae891fe3cd272cf9f7e9e2d634067083fbd6b10e317ed998e1fe42f84ccf693"
+    },
+    {
+      "bytes": 15335,
+      "path": "cohort/block-04-1-C/phase-counters.json",
+      "sha256": "1571ec45d800c64ac4757e1bd8c88c0653d66171ae56268f89f598922e8ea7c9"
+    },
+    {
+      "bytes": 82895,
+      "path": "cohort/block-04-1-C/run-1.html",
+      "sha256": "39e6b552ba37c83e5435d23d0d9c150bd95f3216d96de0419b613b80aa34d350"
+    },
+    {
+      "bytes": 150113,
+      "path": "cohort/block-04-1-C/run-1.json",
+      "sha256": "160a41c576bae6dfa99090c4d7305d68b5789c854eae18e75e28b5933deb8fcd"
+    },
+    {
+      "bytes": 58770,
+      "path": "cohort/block-04-1-C/summary.json",
+      "sha256": "007b7aece34a596456eae0d220d5718275e7765d64eddb5456939939b2f72b43"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-04-2-A/command.log",
+      "sha256": "8621271b17b0bcd6a83e9a3525ee4f2242de2ef2fb866a4c513b1925855d6861"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-2-A/host-after.json",
+      "sha256": "f539d4fbae1066236263db8ad7885e4b07a74ab01e879a80efc5ea9ad92eadec"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-2-A/host-before.json",
+      "sha256": "ffee278936b3c806ae2f9048b78984ee793b1bd7e5c1536ec869025bb27e8a97"
+    },
+    {
+      "bytes": 15381,
+      "path": "cohort/block-04-2-A/phase-counters.json",
+      "sha256": "9520f66986435f7246423fb44615437db100f53002866689e75e851cdc7709a8"
+    },
+    {
+      "bytes": 83774,
+      "path": "cohort/block-04-2-A/run-1.html",
+      "sha256": "3a8aed898f0233e5bc35b1f0e08112e97830335e448c3a90dfd4dc5bf8886750"
+    },
+    {
+      "bytes": 150845,
+      "path": "cohort/block-04-2-A/run-1.json",
+      "sha256": "ef5ab29bea1d5bf93956184a3290957f75a6e765a4247f539f4dd887ce066f90"
+    },
+    {
+      "bytes": 58916,
+      "path": "cohort/block-04-2-A/summary.json",
+      "sha256": "795dcb09b6a4a9284baa2902e95afee4f64ff9384e155dd6dd49e2aeb1dd3c0c"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-04-3-B/command.log",
+      "sha256": "8a197e562a344a2577ec42957ca381f19477c453ad2cf616e24e8897162c8edd"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-3-B/host-after.json",
+      "sha256": "a4d8c0906db5da25e8bd9037f9d1bc299618c56d8862b39d7c3add2cfae0de51"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-3-B/host-before.json",
+      "sha256": "c31e018762e76d4d8cf866998f82674457ad6f52c347e754e5f9161b6d106a6e"
+    },
+    {
+      "bytes": 15450,
+      "path": "cohort/block-04-3-B/phase-counters.json",
+      "sha256": "b1acd9de62abff247949276b80c5ccfa6b0b9b0b5600f9e42f301b74fd2fb2c5"
+    },
+    {
+      "bytes": 83251,
+      "path": "cohort/block-04-3-B/run-1.html",
+      "sha256": "66cff322bbd3a49301b2b1f06faefcfbd780d0cef407e52812454835413033f4"
+    },
+    {
+      "bytes": 150794,
+      "path": "cohort/block-04-3-B/run-1.json",
+      "sha256": "27d8601738628521d8038bdcb8b15e9a607c0d9076c26b366a848d09c63ae67a"
+    },
+    {
+      "bytes": 58861,
+      "path": "cohort/block-04-3-B/summary.json",
+      "sha256": "f6c6284557bc11167c005319d635b42a8dffa99bd415c7ecdc0a6da7e7e231ec"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-05-1-B/command.log",
+      "sha256": "0413e102bbc4ac52407ba6f2f36fbfb67ab5e0730394128b36a5f373a0d6cf39"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-1-B/host-after.json",
+      "sha256": "5cb4fb7d7073d3ca51bc02f519e7e77280acd08bae42215ac08749870d18a2f7"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-1-B/host-before.json",
+      "sha256": "1fae8271a335aac61e8a994f235245597de59f1f195b640d0ae76f02699b3fc5"
+    },
+    {
+      "bytes": 15433,
+      "path": "cohort/block-05-1-B/phase-counters.json",
+      "sha256": "c1e3809b5245de5795510463fc94c157e8eba02ae24d1480f4bfac0b7d4b0dc7"
+    },
+    {
+      "bytes": 83254,
+      "path": "cohort/block-05-1-B/run-1.html",
+      "sha256": "222e430476d3c87ed0210c424a337e5d5509dda279e6388a68084df0ce5e1a61"
+    },
+    {
+      "bytes": 150695,
+      "path": "cohort/block-05-1-B/run-1.json",
+      "sha256": "6a0bf1f8e33ac60a205c32272aa8dd1ff41b338c293d93c2a057b5f53dfa1296"
+    },
+    {
+      "bytes": 58862,
+      "path": "cohort/block-05-1-B/summary.json",
+      "sha256": "f71be7b44572c6fb106758cfa943f589cb22851ed6b424d4661866ec9a0c306b"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-05-2-C/command.log",
+      "sha256": "2cd606f01448f66fba70259d8c9d93bf215b339219c9315f367444780e5a0a31"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-2-C/host-after.json",
+      "sha256": "d696ff6f3d29f97676305da82dfc658097be0c664f4d099e90d0fbc7d11917b6"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-2-C/host-before.json",
+      "sha256": "3756022ed34bd6b1db09f31d19bfc440137fb36f8e916832c8e47e0fb55bd33f"
+    },
+    {
+      "bytes": 15369,
+      "path": "cohort/block-05-2-C/phase-counters.json",
+      "sha256": "01f03c6a86ce6a3184fa507062191cfcd6249c0f2d6a15400f6a4c2e2021b7f7"
+    },
+    {
+      "bytes": 83038,
+      "path": "cohort/block-05-2-C/run-1.html",
+      "sha256": "eaba28752a366ae3419fe577f65956b214e2a9afa44bff5a42902e670746307d"
+    },
+    {
+      "bytes": 150367,
+      "path": "cohort/block-05-2-C/run-1.json",
+      "sha256": "3000a9fd207a1a63352abad2a134ca3e08b8ffbc5b45106d6265640c6ea34b93"
+    },
+    {
+      "bytes": 58820,
+      "path": "cohort/block-05-2-C/summary.json",
+      "sha256": "3d22a6154f4c2b57337a390b5a20324b536cc68a15853504196c81ee8c19ea3a"
+    },
+    {
+      "bytes": 1707,
+      "path": "cohort/block-05-3-A/command.log",
+      "sha256": "7ee44f062614e8a505af8b2a7486437dbb5da08942c629320deac691854901dc"
+    },
+    {
+      "bytes": 501,
+      "path": "cohort/block-05-3-A/host-after.json",
+      "sha256": "4b43de0aadf6e018be2a39bb6f27dd8cb31050899fd266b79f78d552e52a5bbf"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-3-A/host-before.json",
+      "sha256": "0b61421949bf25b78368b565ca57e4d7065b3074243e9162d3c0ed3ade3a4143"
+    },
+    {
+      "bytes": 15389,
+      "path": "cohort/block-05-3-A/phase-counters.json",
+      "sha256": "e6662477c06d063a8e943f3d49384b10fa1740e512539735a576481b792d6570"
+    },
+    {
+      "bytes": 83835,
+      "path": "cohort/block-05-3-A/run-1.html",
+      "sha256": "2ef8598439e27bc195317f2f1fc019cf38d7755a1bebc170b01e72526c7148bc"
+    },
+    {
+      "bytes": 150828,
+      "path": "cohort/block-05-3-A/run-1.json",
+      "sha256": "2fcd5ad699442f04d98e36cf78c6e1f305f50e01d5313b55a0bcb866f9fdbd1a"
+    },
+    {
+      "bytes": 58794,
+      "path": "cohort/block-05-3-A/summary.json",
+      "sha256": "170c09402018ccfffe3fcb0ff1e02cb32ff056892d64550fb033a74b70cc9859"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-06-1-A/command.log",
+      "sha256": "69a751ade41c65b1ff9d7bd04ea7d02246ff40715b7e76b1d840c144e79ebf07"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-1-A/host-after.json",
+      "sha256": "d4b510f7eb7cc78808fc8595eaac49bf8fc238b13533b933aa986b16a6768223"
+    },
+    {
+      "bytes": 501,
+      "path": "cohort/block-06-1-A/host-before.json",
+      "sha256": "b77cd87ce0d7f47a4a1c13b6364f6102f29fccfdf5d8afecf1ae74a458f81b71"
+    },
+    {
+      "bytes": 15326,
+      "path": "cohort/block-06-1-A/phase-counters.json",
+      "sha256": "cebc6076addb08bca0330d454a6989f050484813ce5fae18ed560d24bd284952"
+    },
+    {
+      "bytes": 82941,
+      "path": "cohort/block-06-1-A/run-1.html",
+      "sha256": "142f6593ee71820d02deaea73e31ec2b552549290b5422d209ed8e4d55a4ba55"
+    },
+    {
+      "bytes": 150171,
+      "path": "cohort/block-06-1-A/run-1.json",
+      "sha256": "38e1843162f01476b7e5add9ed5f1e94db716610c9abe87742cd53ebf4a5c569"
+    },
+    {
+      "bytes": 58789,
+      "path": "cohort/block-06-1-A/summary.json",
+      "sha256": "253a979ba85ae2e0bb820ca7da5cd7f54d18a4f989de1a86710fd26e2ace8bda"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-06-2-C/command.log",
+      "sha256": "88c0fc6789ed731928dd9a9bc52b7adf078f896d6ba6df361f74b7d2b0e7a09b"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-06-2-C/host-after.json",
+      "sha256": "ca2392321a437ba434ba96bd15fa42e94e3759fb8b8ef486125808f0ff9eebeb"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-2-C/host-before.json",
+      "sha256": "87ff01cf7afc0b5d0ca4945ecdb6b4d5a6b7ac39c72b6aeeb75d9daad421c9e7"
+    },
+    {
+      "bytes": 15431,
+      "path": "cohort/block-06-2-C/phase-counters.json",
+      "sha256": "b07287138d48dd4a5855b7f9569522c64dc6b5395e97ff085752f8c1c29f3ed3"
+    },
+    {
+      "bytes": 83233,
+      "path": "cohort/block-06-2-C/run-1.html",
+      "sha256": "f2c42d15d1c8cf8fdff0c1a8eb75d9dde51c4ad2a53dbb9adbd2d2654373048b"
+    },
+    {
+      "bytes": 150612,
+      "path": "cohort/block-06-2-C/run-1.json",
+      "sha256": "692d1530095c29cda73da52bb3297c16d6e3c4f683137d240277624278c2ede1"
+    },
+    {
+      "bytes": 58736,
+      "path": "cohort/block-06-2-C/summary.json",
+      "sha256": "b904493d510866b53f5d224838ff884c4f6e5aea8e96f51be45e4b907b536d8f"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-06-3-B/command.log",
+      "sha256": "ac582c658ec819290c1278765399b9d8d17bb704768a182d8ec4eab94043030b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-3-B/host-after.json",
+      "sha256": "2d7a989f06f41552ffc5f2d4f2763e7e483f8434cc55b424011d67d868f0f941"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-06-3-B/host-before.json",
+      "sha256": "63fcefc99cff44314f4b93cd871a9bac231bd142ad2cc584fce77e95462cc676"
+    },
+    {
+      "bytes": 15485,
+      "path": "cohort/block-06-3-B/phase-counters.json",
+      "sha256": "4821409794d3dc7c7faaa555422f117f1b935f7de76caf3c935d15493323ddca"
+    },
+    {
+      "bytes": 84064,
+      "path": "cohort/block-06-3-B/run-1.html",
+      "sha256": "edcfa67ec60434a4a1f65a7f634d58b85fd143859d8c435a2246641f48f75960"
+    },
+    {
+      "bytes": 151272,
+      "path": "cohort/block-06-3-B/run-1.json",
+      "sha256": "1342bbd756ecf68a026429caefe5a0996d8fda97a05a6ed7fc17eeb11b226476"
+    },
+    {
+      "bytes": 58867,
+      "path": "cohort/block-06-3-B/summary.json",
+      "sha256": "a42ab2dcee2ffe083d94c1346e33bd17f1c28f918760851df916eaf854b98ae2"
+    },
+    {
+      "bytes": 128,
+      "path": "cohort/build-A.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 128,
+      "path": "cohort/build-B.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 11876,
+      "path": "cohort/correctness.json",
+      "sha256": "73360dcde8d277b0322898ad83668c07db4b47a53c5d0e56061c1b7ea470f9e5"
+    },
+    {
+      "bytes": 1614,
+      "path": "cohort/diagnostic-A/command.log",
+      "sha256": "0808f6598e97921102daeb2bed0e9ef93d37d68a40f7c813c040d406517c5dd8"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-A/host-after.json",
+      "sha256": "db9f14a856bf50b829d3580feb245e554e16dcf962bafec7b92ef5f85c19526b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-A/host-before.json",
+      "sha256": "41d0c889aa550578cca2bda5ddd8e99ab4aaebc2716c4d858f2c01665e071ea3"
+    },
+    {
+      "bytes": 15490,
+      "path": "cohort/diagnostic-A/phase-counters.json",
+      "sha256": "51123614276c1fd996697e50761803de47772ed3a3dd2e8c581c84cf537362a5"
+    },
+    {
+      "bytes": 83363,
+      "path": "cohort/diagnostic-A/run-1.html",
+      "sha256": "fac9bf723f7df8785834dd848821e5427d625b87ef6978330000770ed3d14ef5"
+    },
+    {
+      "bytes": 150889,
+      "path": "cohort/diagnostic-A/run-1.json",
+      "sha256": "555742551c231c3a5542f6d3c324fea222fe94146e7825164be6a97c6eb1cd9b"
+    },
+    {
+      "bytes": 58895,
+      "path": "cohort/diagnostic-A/summary.json",
+      "sha256": "98c96aa60a5cdde78799b8252683a677ee59ee9f47ad494fdef96473305842f8"
+    },
+    {
+      "bytes": 1619,
+      "path": "cohort/diagnostic-B/command.log",
+      "sha256": "4c91f607e7309d05958e3b6f3a290faf23c97c6517e3c0eebe443d6b09831753"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-B/host-after.json",
+      "sha256": "9dca4f35c5bf68d29a01667245f672479c326b319e96e6d60c6175cf53521b2b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-B/host-before.json",
+      "sha256": "5f47ab5ac1a35b869a2757612b6c92e95fbac6be2f20f95d1431ffbe14380066"
+    },
+    {
+      "bytes": 15461,
+      "path": "cohort/diagnostic-B/phase-counters.json",
+      "sha256": "510e3909785fa33442b8f47e546afeff1ddfc115423a4a5da8bc518d786774be"
+    },
+    {
+      "bytes": 83344,
+      "path": "cohort/diagnostic-B/run-1.html",
+      "sha256": "f1399f15a89b1693a3ccc784ecefbff19a549f0a656f326945570a7fff2478d2"
+    },
+    {
+      "bytes": 150827,
+      "path": "cohort/diagnostic-B/run-1.json",
+      "sha256": "40e1fd0c06e91059e9f7cec77f2b31bbc0b6e2cbe3e562dd9a97a11f6c18b0b7"
+    },
+    {
+      "bytes": 58910,
+      "path": "cohort/diagnostic-B/summary.json",
+      "sha256": "0d982ec933587227e6e0320d46d6d695925bbdf7ee228c9ecfa7548f9683a14d"
+    },
+    {
+      "bytes": 571,
+      "path": "cohort/fixture.json",
+      "sha256": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae"
+    },
+    {
+      "bytes": 60,
+      "path": "cohort/libraries-A.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 60,
+      "path": "cohort/libraries-B.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 11975,
+      "path": "cohort/observations.json",
+      "sha256": "4c1912f21a3080200f55371241620393aad9fd8669a3d059738e66bc4768f980"
+    },
+    {
+      "bytes": 60293,
+      "path": "cohort/package-A.json",
+      "sha256": "0613f078bfea2779f4bc2dcdb5164c5560f7d98e1a47d4b95b6fc4b515c4d872"
+    },
+    {
+      "bytes": 60293,
+      "path": "cohort/package-B.json",
+      "sha256": "00ae39634391df6136b71850fc108fc55c1acec52426089d07682eb9c687c59a"
+    },
+    {
+      "bytes": 60327,
+      "path": "cohort/package-C.json",
+      "sha256": "3950ade78778f098f8b849a309677df3047e07a67352c69d704e51de1514b485"
+    },
+    {
+      "bytes": 172,
+      "path": "cohort/package-differences.json",
+      "sha256": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53"
+    },
+    {
+      "bytes": 538,
+      "path": "cohort/prepare-dictionaries.log",
+      "sha256": "e29632b8264001e15e80f716523133b309ffc9ff3944409dcaf8170d5872f471"
+    },
+    {
+      "bytes": 11954,
+      "path": "cohort/protocol.json",
+      "sha256": "c06feadc06b947b8e97c996dc2df2b6c4af7705e1346dd5e32b0ba490b4adf13"
+    },
+    {
+      "bytes": 2393,
+      "path": "cohort/setup-fixtures.json",
+      "sha256": "49b0313572e7e50976769efdb57d6376246ca8d462715382bd303ae8d84f7a5b"
+    },
+    {
+      "bytes": 525,
+      "path": "cohort/source-differences.txt",
+      "sha256": "61ee1e098713d4d2f3fc21b4527bc606e52df459d93ea8b5ca2371dfc04683ac"
+    },
+    {
+      "bytes": 1,
+      "path": "cohort/source-status-A.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 1,
+      "path": "cohort/source-status-B.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 296,
+      "path": "cohort/state.json",
+      "sha256": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd"
+    },
+    {
+      "bytes": 1608,
+      "path": "cohort/warmup-A/command.log",
+      "sha256": "1667adf2cef17ec8767776d5d195851fb3269d4a6632230a05e3bcb82ae274c6"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-A/host-after.json",
+      "sha256": "19a75f2492e2ac54ca1f1a4fcc0e840a0041af50203e449c3f8cd73126e0dcb7"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-A/host-before.json",
+      "sha256": "c94fbdec829f305d2fcd88503642c0550a142e9388797f69f061dc35bff6af6c"
+    },
+    {
+      "bytes": 15387,
+      "path": "cohort/warmup-A/phase-counters.json",
+      "sha256": "03f1ee226f37264fab65a0211c9086315b91462d4d3e77d9ace0aff66a9f40d2"
+    },
+    {
+      "bytes": 83108,
+      "path": "cohort/warmup-A/run-1.html",
+      "sha256": "3adc9d97ccc2791b6d7a3038d4df061e1856b6a850799f8949afc514320cb6ba"
+    },
+    {
+      "bytes": 150422,
+      "path": "cohort/warmup-A/run-1.json",
+      "sha256": "9d4a738a7d5ab402a9772ef9143737714662454cbe01ce2cf3dd22d2a89bd2d9"
+    },
+    {
+      "bytes": 58740,
+      "path": "cohort/warmup-A/summary.json",
+      "sha256": "701e68ce9f7ee48c416f8817b55b3036e0e62235456bf2d853061f5dc0ca3f24"
+    },
+    {
+      "bytes": 1606,
+      "path": "cohort/warmup-B/command.log",
+      "sha256": "ab0e99831b185d7cfe0c4fb3e86bcfaa33cf9798cb0032c7a660854ae0cf3fe1"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-B/host-after.json",
+      "sha256": "98dcec7b7f8b338fe11e0907d278bafc4b62000fae326237d1a2fb91a0a4fa0f"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-B/host-before.json",
+      "sha256": "11b8dafdd8706ce26a434525312af0a25b227d1c5f69b3e972ee3a6226fce757"
+    },
+    {
+      "bytes": 15424,
+      "path": "cohort/warmup-B/phase-counters.json",
+      "sha256": "80330d16c693a7757b7af7541445b8aa274b22dc5371661d4f1cd69db7a705a9"
+    },
+    {
+      "bytes": 83258,
+      "path": "cohort/warmup-B/run-1.html",
+      "sha256": "60b47bb28128acadc3a00d57f63d3a753ce8be580a1601a04edf77c482a8db19"
+    },
+    {
+      "bytes": 150730,
+      "path": "cohort/warmup-B/run-1.json",
+      "sha256": "79f3f92c9bc10481207fd3eba7159fcfbf48450da0741e48974a353c7486924c"
+    },
+    {
+      "bytes": 58825,
+      "path": "cohort/warmup-B/summary.json",
+      "sha256": "6762975a0f990f9c79a1891969fe16aff659c4c21d54e5b348b3aeb7cc104a06"
+    },
+    {
+      "bytes": 1603,
+      "path": "cohort/warmup-C/command.log",
+      "sha256": "18c324c3d400c30a67e0f53fb42f90e59027332bfd45adae26609384b0e1809b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-C/host-after.json",
+      "sha256": "ae334dde2fae7b101b9f09262912aec369a1f6911738d383c0bc73b4b9db61b5"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-C/host-before.json",
+      "sha256": "b7d5113d5c8a5296f8810a276994e56ea6bd21daa7aa0d61c65725e8c5e1ee25"
+    },
+    {
+      "bytes": 15448,
+      "path": "cohort/warmup-C/phase-counters.json",
+      "sha256": "ec8103d2e5e5f0e0597267af3a21984835a59e38ab3dee8b9b8b4bbe95709a14"
+    },
+    {
+      "bytes": 83324,
+      "path": "cohort/warmup-C/run-1.html",
+      "sha256": "c09012e5bb1509837ed545a692c702657a5270c661ae3775e3f347db4af74608"
+    },
+    {
+      "bytes": 150782,
+      "path": "cohort/warmup-C/run-1.json",
+      "sha256": "e6d4a435b020fd6b65766d09612070914ecc2e3d0c8567e57f65cd4ef3e48a6e"
+    },
+    {
+      "bytes": 58825,
+      "path": "cohort/warmup-C/summary.json",
+      "sha256": "24dc8eb6aee8eb2e704314b20a1c904ee8c42c6d467b7e5a0c8612fd09d22d85"
+    },
+    {
+      "bytes": 24723,
+      "path": "runner.log",
+      "sha256": "546a0e45478ae6caa73b64ad1931512eec84302472ed5bd7d6652e1d48bd6a4f"
+    },
+    {
+      "bytes": 21298,
+      "path": "runner.py",
+      "sha256": "764ac3dcfe9aba82346e925cee606ec84672c7df097f9fe417749f41258a1230"
+    },
+    {
+      "bytes": 3932,
+      "path": "workflow.yml",
+      "sha256": "78fac3447bea1ca4dec3137e5a06d2cae45141f2a242c9392a08fc1c70c37b70"
+    }
+  ],
+  "runId": 45465463257,
+  "schemaVersion": 1,
+  "sourceBytes": 7427085,
+  "sourceFileCount": 183,
+  "sourceInventory": [
+    {
+      "bytes": 3136,
+      "path": "cohort/analysis.json",
+      "sha256": "0625fed467256f2a34bad6f65a95565272c3a9df2f877b24d5913685b54c6ebe"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-01-1-A/command.log",
+      "sha256": "623fe1c6b1b6ec35563dbd249a252ecc150f3165abe534175f039514f629d4eb"
+    },
+    {
+      "bytes": 502,
+      "path": "cohort/block-01-1-A/host-after.json",
+      "sha256": "98a12e4a0b03000edd199825a7c686a283278eb8b3ecf66ec5a3ab1e2cd126fe"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-1-A/host-before.json",
+      "sha256": "4eced6d612fdfc477246d8a2e321f1fba2d1aebe6c0c56186646d13de4fb327a"
+    },
+    {
+      "bytes": 15460,
+      "path": "cohort/block-01-1-A/phase-counters.json",
+      "sha256": "7cf262825757fff6900a3c1cfdf30aa662c2b86fd44cb8c07838edd812e109c2"
+    },
+    {
+      "bytes": 83338,
+      "path": "cohort/block-01-1-A/run-1.html",
+      "sha256": "f0acbc62216b09a2f58c25d0793a30ae98fbd66f06185f63d2c615c88a293ee2"
+    },
+    {
+      "bytes": 150872,
+      "path": "cohort/block-01-1-A/run-1.json",
+      "sha256": "5a81c67300238b17d4f5f5cb72321b133b8c121c3adccf441f567e13be3bf35c"
+    },
+    {
+      "bytes": 58920,
+      "path": "cohort/block-01-1-A/summary.json",
+      "sha256": "ce6fd272bf002f584daff4ef7490527b34be3201848e940c770bb7c61fe95258"
+    },
+    {
+      "bytes": 1617,
+      "path": "cohort/block-01-2-B/command.log",
+      "sha256": "24d1913634779aa1bbd8a9e9aafa272ae2442c242f570e1856e4b5d0d49a7845"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-2-B/host-after.json",
+      "sha256": "a4c4a7fb46e4e6033c2a60f5278f70c84048243b8b8ebeb67c685000dd817fc6"
+    },
+    {
+      "bytes": 502,
+      "path": "cohort/block-01-2-B/host-before.json",
+      "sha256": "ca1deb4a9affe5e3af56904973242dbac7e8240a51ca83f6402ea0d158231d53"
+    },
+    {
+      "bytes": 15470,
+      "path": "cohort/block-01-2-B/phase-counters.json",
+      "sha256": "bc68e7212581f5180759326b932585bb2aa73c1efa59fa999685307237e2665e"
+    },
+    {
+      "bytes": 83374,
+      "path": "cohort/block-01-2-B/run-1.html",
+      "sha256": "0ac65c6639d3044705382663077bc8a06869408786fb5af893b887cca2ad3cb5"
+    },
+    {
+      "bytes": 150926,
+      "path": "cohort/block-01-2-B/run-1.json",
+      "sha256": "c3e17e050d63564efa1666f73d872206112dc924a23497dde4760c1f8b10d1a6"
+    },
+    {
+      "bytes": 58978,
+      "path": "cohort/block-01-2-B/summary.json",
+      "sha256": "39caf748500a2608fa2d85ec46efdba14f40fd7e40ea47f78d7503abf0f118c5"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-01-3-C/command.log",
+      "sha256": "e10629911e0f72abfd274d9724ca5d7465a007593e47674242bebebd57158862"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-3-C/host-after.json",
+      "sha256": "73df432b2d7339bb63660b71d961f33bfa063898aa4418e16a67ae8d687dd8d2"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-01-3-C/host-before.json",
+      "sha256": "4403cdcb3226cc754ee4cef128611e4b1444adb7d265e6b8eafd257334b3eead"
+    },
+    {
+      "bytes": 15458,
+      "path": "cohort/block-01-3-C/phase-counters.json",
+      "sha256": "b1198c9210deb0352480e41664e33cdb99af21d1ac770b562bb23b9733554a01"
+    },
+    {
+      "bytes": 83367,
+      "path": "cohort/block-01-3-C/run-1.html",
+      "sha256": "1e72b3276f1bcca324ecf2da9e9abebef793afcf7853979319ffc3869a888b40"
+    },
+    {
+      "bytes": 150963,
+      "path": "cohort/block-01-3-C/run-1.json",
+      "sha256": "c2baa0a6b85a929149430c9a584699d629978b215dd8f46ec9cf23da08984f3f"
+    },
+    {
+      "bytes": 58924,
+      "path": "cohort/block-01-3-C/summary.json",
+      "sha256": "ad070e3b2cb6b15cf89129926e56caec8ed37ee645a40d801e1ff381941cfe0c"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-02-1-C/command.log",
+      "sha256": "bad1dfb214b472635f38c970c937e5feb86a3ec73093c32019b4f492a7c915f3"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-1-C/host-after.json",
+      "sha256": "78af530fdb302bbc568b88e60b447ea1e98816aff6817e3b906fe659192e2b76"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-1-C/host-before.json",
+      "sha256": "95f46b468410485e5e0b84313453b2e6f33192be584d7216f497418ff6f780d9"
+    },
+    {
+      "bytes": 15491,
+      "path": "cohort/block-02-1-C/phase-counters.json",
+      "sha256": "c1e58dab43c1e6ed9365932a693e4baaf5507d44eac098d88a157bca2c30c15f"
+    },
+    {
+      "bytes": 84110,
+      "path": "cohort/block-02-1-C/run-1.html",
+      "sha256": "9aca5c3f633b90d3de6d7889064ea34cec1bbace81440ad6b4de849d4c64a628"
+    },
+    {
+      "bytes": 151267,
+      "path": "cohort/block-02-1-C/run-1.json",
+      "sha256": "f3fc6c134127680fe426d0384e72ba747451dd5e21d6669ec4c51e1e08da0929"
+    },
+    {
+      "bytes": 58875,
+      "path": "cohort/block-02-1-C/summary.json",
+      "sha256": "828b71d117c020899bb2c5d4ac588704a78a17adc053383b77de5c8be97f5ac9"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-02-2-B/command.log",
+      "sha256": "7381236a4fd161789bdc53256da17fc71444cb01983bcb7764bb35cc4f450c41"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-2-B/host-after.json",
+      "sha256": "d5f9028438630f28894593ed34ec53301b33c66672d4ca0063d8ca890f34bfd4"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-2-B/host-before.json",
+      "sha256": "e61e78f635cb4d18ea39111b5fc58b675776a7c4fdaaca110913cceb64c12225"
+    },
+    {
+      "bytes": 15392,
+      "path": "cohort/block-02-2-B/phase-counters.json",
+      "sha256": "7b9554c3228dd61b2ced7873078c61570afc540e5297fbec52f0e282bd819897"
+    },
+    {
+      "bytes": 83092,
+      "path": "cohort/block-02-2-B/run-1.html",
+      "sha256": "9df8b5b90d5bbe1a8ace459c4e58b7da94824b087fdb9581a78b1f270e6f2451"
+    },
+    {
+      "bytes": 150370,
+      "path": "cohort/block-02-2-B/run-1.json",
+      "sha256": "fd49f2be44fb675ee4dca2629d3b235cafbf3d6ac199cf17d0a82c117f3b4eb5"
+    },
+    {
+      "bytes": 58706,
+      "path": "cohort/block-02-2-B/summary.json",
+      "sha256": "4b3a4c2ec0c9f1cda966426e5963ba707266712b1f68b63359c71174799712a7"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-02-3-A/command.log",
+      "sha256": "4de333e76d6e5971366810a35d90ff45711645f6e1263020146617ed085b60bf"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-3-A/host-after.json",
+      "sha256": "d2d36a73d8280deedd9d8f0ca00285c5fd17daed8485a545eebe90d81bb19f63"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-02-3-A/host-before.json",
+      "sha256": "c9196e1b456fae3af009e807086567d27f62edb7826576ab937042bcbdc8ebfb"
+    },
+    {
+      "bytes": 15468,
+      "path": "cohort/block-02-3-A/phase-counters.json",
+      "sha256": "3db22e2d3cc1dcd80df9a43c77256aa2f3cbadd929b30bccad70bc4bcffc2cc2"
+    },
+    {
+      "bytes": 83332,
+      "path": "cohort/block-02-3-A/run-1.html",
+      "sha256": "69a550c47acc6141e23e06f19c06b23f71d5233bef72fd87b65c9f9da7c42279"
+    },
+    {
+      "bytes": 150751,
+      "path": "cohort/block-02-3-A/run-1.json",
+      "sha256": "45a82010c94cb72fd852ebb51ad1761c24f9975d8cc9d36c946c530619496c83"
+    },
+    {
+      "bytes": 58817,
+      "path": "cohort/block-02-3-A/summary.json",
+      "sha256": "9e1340b8c2e03bfae49cdfd5d65d18625989b7057cb32a8e2108bcb773311f8b"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-03-1-B/command.log",
+      "sha256": "4b3916a83bfac731f49f89a3cb7277a8bcd29ea3b4e8b39b64997da51ca8db8e"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-1-B/host-after.json",
+      "sha256": "09c1c9a81e41052a3a24c5d9d915ead3defaf28ba1e5294756971972788a9539"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-1-B/host-before.json",
+      "sha256": "ab9805cb064438cbe80651557d286c9cf895eae0a12e4f9e26c4300f5349b75c"
+    },
+    {
+      "bytes": 15419,
+      "path": "cohort/block-03-1-B/phase-counters.json",
+      "sha256": "7371fa2dc5cc738efda229ae6208bf368d52e59e0d3c57be8fce6f286bd3bb06"
+    },
+    {
+      "bytes": 83184,
+      "path": "cohort/block-03-1-B/run-1.html",
+      "sha256": "47435e1c792ee3cab26bc82e8ccdb97dda61aab8ed2594a546b38c26a76bac91"
+    },
+    {
+      "bytes": 150491,
+      "path": "cohort/block-03-1-B/run-1.json",
+      "sha256": "7b3572fc7c319bc42fb884eecd9d104febce83fb443fa2d831a89d5aae43f8ef"
+    },
+    {
+      "bytes": 58683,
+      "path": "cohort/block-03-1-B/summary.json",
+      "sha256": "a3414c4fbe958de7014acd245dfad4d73e3feb27254f725c3b7f8c737290a341"
+    },
+    {
+      "bytes": 1619,
+      "path": "cohort/block-03-2-A/command.log",
+      "sha256": "c29f5c5324a707c7eac3ffa3842054803fd215e8c2728a1dff4e31348e1b3d83"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-2-A/host-after.json",
+      "sha256": "2de427b2c85abe0bcdf85f24e0520dd38fc0667ec4df4813127a9b25eca1ba91"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-2-A/host-before.json",
+      "sha256": "eea6036ade1ea8b1f559a2abe55c3949e41b558ca1149f0bbd3bcfa7e96c96b3"
+    },
+    {
+      "bytes": 15426,
+      "path": "cohort/block-03-2-A/phase-counters.json",
+      "sha256": "96113cce875b928eea062731a78514244dad912b35351cfc796b273b1d564718"
+    },
+    {
+      "bytes": 83236,
+      "path": "cohort/block-03-2-A/run-1.html",
+      "sha256": "d050bd4a1544b21ee3793085c6894edbefc174e5055077f25e2dccc38fc64b27"
+    },
+    {
+      "bytes": 150630,
+      "path": "cohort/block-03-2-A/run-1.json",
+      "sha256": "5f3f3a08513f0badeb074b53bc6a4e767724676f0212c9d41f1dff38a6074edf"
+    },
+    {
+      "bytes": 58771,
+      "path": "cohort/block-03-2-A/summary.json",
+      "sha256": "bd5534bef049c2a80b761e58f614ddf4740563899265df389dbc50dec8a040a9"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-03-3-C/command.log",
+      "sha256": "31b12c418e61414b65db97448e7bd794b59af8d4859b249e496ca8860d6a62c1"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-03-3-C/host-after.json",
+      "sha256": "1c84a514eb1ea5467e3de8364e3a2bc95589eca8de9bbe4901ec6b26f04c6a47"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-03-3-C/host-before.json",
+      "sha256": "77b192855439bada0c0196f1adb1e29c91adaffffaba1c56047a3ad48f4c6d98"
+    },
+    {
+      "bytes": 15490,
+      "path": "cohort/block-03-3-C/phase-counters.json",
+      "sha256": "1a3fc02f31e1c93f1b92e58341b5f16c5af9be2cc478a3be3f34d383ff230c05"
+    },
+    {
+      "bytes": 83402,
+      "path": "cohort/block-03-3-C/run-1.html",
+      "sha256": "cea124e411cd85e75fabccec5b0730eed36c00ed39ab20b2ae6c52f4beff22e4"
+    },
+    {
+      "bytes": 150941,
+      "path": "cohort/block-03-3-C/run-1.json",
+      "sha256": "be1d020560d355c764dc8484d75c9a99c9676f1aa002f47d24b410b89d150603"
+    },
+    {
+      "bytes": 58892,
+      "path": "cohort/block-03-3-C/summary.json",
+      "sha256": "39cd6290ae884975b69b475867f135f5da897d5bfea579a723b3359121ad10b4"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-04-1-C/command.log",
+      "sha256": "da8c084505d0dd60178f16e79d42a5cd4641b9289164a16cee9b6ffaccd2523f"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-1-C/host-after.json",
+      "sha256": "82f5f85f6ffee4d1238b47728c8ad16e05861e8c56bc1339d4208e32e10b7535"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-04-1-C/host-before.json",
+      "sha256": "2ae891fe3cd272cf9f7e9e2d634067083fbd6b10e317ed998e1fe42f84ccf693"
+    },
+    {
+      "bytes": 15335,
+      "path": "cohort/block-04-1-C/phase-counters.json",
+      "sha256": "1571ec45d800c64ac4757e1bd8c88c0653d66171ae56268f89f598922e8ea7c9"
+    },
+    {
+      "bytes": 82895,
+      "path": "cohort/block-04-1-C/run-1.html",
+      "sha256": "39e6b552ba37c83e5435d23d0d9c150bd95f3216d96de0419b613b80aa34d350"
+    },
+    {
+      "bytes": 150113,
+      "path": "cohort/block-04-1-C/run-1.json",
+      "sha256": "160a41c576bae6dfa99090c4d7305d68b5789c854eae18e75e28b5933deb8fcd"
+    },
+    {
+      "bytes": 58770,
+      "path": "cohort/block-04-1-C/summary.json",
+      "sha256": "007b7aece34a596456eae0d220d5718275e7765d64eddb5456939939b2f72b43"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-04-2-A/command.log",
+      "sha256": "8621271b17b0bcd6a83e9a3525ee4f2242de2ef2fb866a4c513b1925855d6861"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-2-A/host-after.json",
+      "sha256": "f539d4fbae1066236263db8ad7885e4b07a74ab01e879a80efc5ea9ad92eadec"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-2-A/host-before.json",
+      "sha256": "ffee278936b3c806ae2f9048b78984ee793b1bd7e5c1536ec869025bb27e8a97"
+    },
+    {
+      "bytes": 15381,
+      "path": "cohort/block-04-2-A/phase-counters.json",
+      "sha256": "9520f66986435f7246423fb44615437db100f53002866689e75e851cdc7709a8"
+    },
+    {
+      "bytes": 83774,
+      "path": "cohort/block-04-2-A/run-1.html",
+      "sha256": "3a8aed898f0233e5bc35b1f0e08112e97830335e448c3a90dfd4dc5bf8886750"
+    },
+    {
+      "bytes": 150845,
+      "path": "cohort/block-04-2-A/run-1.json",
+      "sha256": "ef5ab29bea1d5bf93956184a3290957f75a6e765a4247f539f4dd887ce066f90"
+    },
+    {
+      "bytes": 58916,
+      "path": "cohort/block-04-2-A/summary.json",
+      "sha256": "795dcb09b6a4a9284baa2902e95afee4f64ff9384e155dd6dd49e2aeb1dd3c0c"
+    },
+    {
+      "bytes": 1615,
+      "path": "cohort/block-04-3-B/command.log",
+      "sha256": "8a197e562a344a2577ec42957ca381f19477c453ad2cf616e24e8897162c8edd"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-3-B/host-after.json",
+      "sha256": "a4d8c0906db5da25e8bd9037f9d1bc299618c56d8862b39d7c3add2cfae0de51"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-04-3-B/host-before.json",
+      "sha256": "c31e018762e76d4d8cf866998f82674457ad6f52c347e754e5f9161b6d106a6e"
+    },
+    {
+      "bytes": 15450,
+      "path": "cohort/block-04-3-B/phase-counters.json",
+      "sha256": "b1acd9de62abff247949276b80c5ccfa6b0b9b0b5600f9e42f301b74fd2fb2c5"
+    },
+    {
+      "bytes": 83251,
+      "path": "cohort/block-04-3-B/run-1.html",
+      "sha256": "66cff322bbd3a49301b2b1f06faefcfbd780d0cef407e52812454835413033f4"
+    },
+    {
+      "bytes": 150794,
+      "path": "cohort/block-04-3-B/run-1.json",
+      "sha256": "27d8601738628521d8038bdcb8b15e9a607c0d9076c26b366a848d09c63ae67a"
+    },
+    {
+      "bytes": 58861,
+      "path": "cohort/block-04-3-B/summary.json",
+      "sha256": "f6c6284557bc11167c005319d635b42a8dffa99bd415c7ecdc0a6da7e7e231ec"
+    },
+    {
+      "bytes": 1616,
+      "path": "cohort/block-05-1-B/command.log",
+      "sha256": "0413e102bbc4ac52407ba6f2f36fbfb67ab5e0730394128b36a5f373a0d6cf39"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-1-B/host-after.json",
+      "sha256": "5cb4fb7d7073d3ca51bc02f519e7e77280acd08bae42215ac08749870d18a2f7"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-1-B/host-before.json",
+      "sha256": "1fae8271a335aac61e8a994f235245597de59f1f195b640d0ae76f02699b3fc5"
+    },
+    {
+      "bytes": 15433,
+      "path": "cohort/block-05-1-B/phase-counters.json",
+      "sha256": "c1e3809b5245de5795510463fc94c157e8eba02ae24d1480f4bfac0b7d4b0dc7"
+    },
+    {
+      "bytes": 83254,
+      "path": "cohort/block-05-1-B/run-1.html",
+      "sha256": "222e430476d3c87ed0210c424a337e5d5509dda279e6388a68084df0ce5e1a61"
+    },
+    {
+      "bytes": 150695,
+      "path": "cohort/block-05-1-B/run-1.json",
+      "sha256": "6a0bf1f8e33ac60a205c32272aa8dd1ff41b338c293d93c2a057b5f53dfa1296"
+    },
+    {
+      "bytes": 58862,
+      "path": "cohort/block-05-1-B/summary.json",
+      "sha256": "f71be7b44572c6fb106758cfa943f589cb22851ed6b424d4661866ec9a0c306b"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-05-2-C/command.log",
+      "sha256": "2cd606f01448f66fba70259d8c9d93bf215b339219c9315f367444780e5a0a31"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-2-C/host-after.json",
+      "sha256": "d696ff6f3d29f97676305da82dfc658097be0c664f4d099e90d0fbc7d11917b6"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-2-C/host-before.json",
+      "sha256": "3756022ed34bd6b1db09f31d19bfc440137fb36f8e916832c8e47e0fb55bd33f"
+    },
+    {
+      "bytes": 15369,
+      "path": "cohort/block-05-2-C/phase-counters.json",
+      "sha256": "01f03c6a86ce6a3184fa507062191cfcd6249c0f2d6a15400f6a4c2e2021b7f7"
+    },
+    {
+      "bytes": 83038,
+      "path": "cohort/block-05-2-C/run-1.html",
+      "sha256": "eaba28752a366ae3419fe577f65956b214e2a9afa44bff5a42902e670746307d"
+    },
+    {
+      "bytes": 150367,
+      "path": "cohort/block-05-2-C/run-1.json",
+      "sha256": "3000a9fd207a1a63352abad2a134ca3e08b8ffbc5b45106d6265640c6ea34b93"
+    },
+    {
+      "bytes": 58820,
+      "path": "cohort/block-05-2-C/summary.json",
+      "sha256": "3d22a6154f4c2b57337a390b5a20324b536cc68a15853504196c81ee8c19ea3a"
+    },
+    {
+      "bytes": 1707,
+      "path": "cohort/block-05-3-A/command.log",
+      "sha256": "7ee44f062614e8a505af8b2a7486437dbb5da08942c629320deac691854901dc"
+    },
+    {
+      "bytes": 501,
+      "path": "cohort/block-05-3-A/host-after.json",
+      "sha256": "4b43de0aadf6e018be2a39bb6f27dd8cb31050899fd266b79f78d552e52a5bbf"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-05-3-A/host-before.json",
+      "sha256": "0b61421949bf25b78368b565ca57e4d7065b3074243e9162d3c0ed3ade3a4143"
+    },
+    {
+      "bytes": 15389,
+      "path": "cohort/block-05-3-A/phase-counters.json",
+      "sha256": "e6662477c06d063a8e943f3d49384b10fa1740e512539735a576481b792d6570"
+    },
+    {
+      "bytes": 83835,
+      "path": "cohort/block-05-3-A/run-1.html",
+      "sha256": "2ef8598439e27bc195317f2f1fc019cf38d7755a1bebc170b01e72526c7148bc"
+    },
+    {
+      "bytes": 150828,
+      "path": "cohort/block-05-3-A/run-1.json",
+      "sha256": "2fcd5ad699442f04d98e36cf78c6e1f305f50e01d5313b55a0bcb866f9fdbd1a"
+    },
+    {
+      "bytes": 58794,
+      "path": "cohort/block-05-3-A/summary.json",
+      "sha256": "170c09402018ccfffe3fcb0ff1e02cb32ff056892d64550fb033a74b70cc9859"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-06-1-A/command.log",
+      "sha256": "69a751ade41c65b1ff9d7bd04ea7d02246ff40715b7e76b1d840c144e79ebf07"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-1-A/host-after.json",
+      "sha256": "d4b510f7eb7cc78808fc8595eaac49bf8fc238b13533b933aa986b16a6768223"
+    },
+    {
+      "bytes": 501,
+      "path": "cohort/block-06-1-A/host-before.json",
+      "sha256": "b77cd87ce0d7f47a4a1c13b6364f6102f29fccfdf5d8afecf1ae74a458f81b71"
+    },
+    {
+      "bytes": 15326,
+      "path": "cohort/block-06-1-A/phase-counters.json",
+      "sha256": "cebc6076addb08bca0330d454a6989f050484813ce5fae18ed560d24bd284952"
+    },
+    {
+      "bytes": 82941,
+      "path": "cohort/block-06-1-A/run-1.html",
+      "sha256": "142f6593ee71820d02deaea73e31ec2b552549290b5422d209ed8e4d55a4ba55"
+    },
+    {
+      "bytes": 150171,
+      "path": "cohort/block-06-1-A/run-1.json",
+      "sha256": "38e1843162f01476b7e5add9ed5f1e94db716610c9abe87742cd53ebf4a5c569"
+    },
+    {
+      "bytes": 58789,
+      "path": "cohort/block-06-1-A/summary.json",
+      "sha256": "253a979ba85ae2e0bb820ca7da5cd7f54d18a4f989de1a86710fd26e2ace8bda"
+    },
+    {
+      "bytes": 1618,
+      "path": "cohort/block-06-2-C/command.log",
+      "sha256": "88c0fc6789ed731928dd9a9bc52b7adf078f896d6ba6df361f74b7d2b0e7a09b"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-06-2-C/host-after.json",
+      "sha256": "ca2392321a437ba434ba96bd15fa42e94e3759fb8b8ef486125808f0ff9eebeb"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-2-C/host-before.json",
+      "sha256": "87ff01cf7afc0b5d0ca4945ecdb6b4d5a6b7ac39c72b6aeeb75d9daad421c9e7"
+    },
+    {
+      "bytes": 15431,
+      "path": "cohort/block-06-2-C/phase-counters.json",
+      "sha256": "b07287138d48dd4a5855b7f9569522c64dc6b5395e97ff085752f8c1c29f3ed3"
+    },
+    {
+      "bytes": 83233,
+      "path": "cohort/block-06-2-C/run-1.html",
+      "sha256": "f2c42d15d1c8cf8fdff0c1a8eb75d9dde51c4ad2a53dbb9adbd2d2654373048b"
+    },
+    {
+      "bytes": 150612,
+      "path": "cohort/block-06-2-C/run-1.json",
+      "sha256": "692d1530095c29cda73da52bb3297c16d6e3c4f683137d240277624278c2ede1"
+    },
+    {
+      "bytes": 58736,
+      "path": "cohort/block-06-2-C/summary.json",
+      "sha256": "b904493d510866b53f5d224838ff884c4f6e5aea8e96f51be45e4b907b536d8f"
+    },
+    {
+      "bytes": 1704,
+      "path": "cohort/block-06-3-B/command.log",
+      "sha256": "ac582c658ec819290c1278765399b9d8d17bb704768a182d8ec4eab94043030b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/block-06-3-B/host-after.json",
+      "sha256": "2d7a989f06f41552ffc5f2d4f2763e7e483f8434cc55b424011d67d868f0f941"
+    },
+    {
+      "bytes": 503,
+      "path": "cohort/block-06-3-B/host-before.json",
+      "sha256": "63fcefc99cff44314f4b93cd871a9bac231bd142ad2cc584fce77e95462cc676"
+    },
+    {
+      "bytes": 15485,
+      "path": "cohort/block-06-3-B/phase-counters.json",
+      "sha256": "4821409794d3dc7c7faaa555422f117f1b935f7de76caf3c935d15493323ddca"
+    },
+    {
+      "bytes": 84064,
+      "path": "cohort/block-06-3-B/run-1.html",
+      "sha256": "edcfa67ec60434a4a1f65a7f634d58b85fd143859d8c435a2246641f48f75960"
+    },
+    {
+      "bytes": 151272,
+      "path": "cohort/block-06-3-B/run-1.json",
+      "sha256": "1342bbd756ecf68a026429caefe5a0996d8fda97a05a6ed7fc17eeb11b226476"
+    },
+    {
+      "bytes": 58867,
+      "path": "cohort/block-06-3-B/summary.json",
+      "sha256": "a42ab2dcee2ffe083d94c1346e33bd17f1c28f918760851df916eaf854b98ae2"
+    },
+    {
+      "bytes": 128,
+      "path": "cohort/build-A.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 128,
+      "path": "cohort/build-B.log",
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "bytes": 11876,
+      "path": "cohort/correctness.json",
+      "sha256": "73360dcde8d277b0322898ad83668c07db4b47a53c5d0e56061c1b7ea470f9e5"
+    },
+    {
+      "bytes": 1614,
+      "path": "cohort/diagnostic-A/command.log",
+      "sha256": "0808f6598e97921102daeb2bed0e9ef93d37d68a40f7c813c040d406517c5dd8"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-A/host-after.json",
+      "sha256": "db9f14a856bf50b829d3580feb245e554e16dcf962bafec7b92ef5f85c19526b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-A/host-before.json",
+      "sha256": "41d0c889aa550578cca2bda5ddd8e99ab4aaebc2716c4d858f2c01665e071ea3"
+    },
+    {
+      "bytes": 15490,
+      "path": "cohort/diagnostic-A/phase-counters.json",
+      "sha256": "51123614276c1fd996697e50761803de47772ed3a3dd2e8c581c84cf537362a5"
+    },
+    {
+      "bytes": 83363,
+      "path": "cohort/diagnostic-A/run-1.html",
+      "sha256": "fac9bf723f7df8785834dd848821e5427d625b87ef6978330000770ed3d14ef5"
+    },
+    {
+      "bytes": 150889,
+      "path": "cohort/diagnostic-A/run-1.json",
+      "sha256": "555742551c231c3a5542f6d3c324fea222fe94146e7825164be6a97c6eb1cd9b"
+    },
+    {
+      "bytes": 58895,
+      "path": "cohort/diagnostic-A/summary.json",
+      "sha256": "98c96aa60a5cdde78799b8252683a677ee59ee9f47ad494fdef96473305842f8"
+    },
+    {
+      "bytes": 1619,
+      "path": "cohort/diagnostic-B/command.log",
+      "sha256": "4c91f607e7309d05958e3b6f3a290faf23c97c6517e3c0eebe443d6b09831753"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-B/host-after.json",
+      "sha256": "9dca4f35c5bf68d29a01667245f672479c326b319e96e6d60c6175cf53521b2b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/diagnostic-B/host-before.json",
+      "sha256": "5f47ab5ac1a35b869a2757612b6c92e95fbac6be2f20f95d1431ffbe14380066"
+    },
+    {
+      "bytes": 15461,
+      "path": "cohort/diagnostic-B/phase-counters.json",
+      "sha256": "510e3909785fa33442b8f47e546afeff1ddfc115423a4a5da8bc518d786774be"
+    },
+    {
+      "bytes": 83344,
+      "path": "cohort/diagnostic-B/run-1.html",
+      "sha256": "f1399f15a89b1693a3ccc784ecefbff19a549f0a656f326945570a7fff2478d2"
+    },
+    {
+      "bytes": 150827,
+      "path": "cohort/diagnostic-B/run-1.json",
+      "sha256": "40e1fd0c06e91059e9f7cec77f2b31bbc0b6e2cbe3e562dd9a97a11f6c18b0b7"
+    },
+    {
+      "bytes": 58910,
+      "path": "cohort/diagnostic-B/summary.json",
+      "sha256": "0d982ec933587227e6e0320d46d6d695925bbdf7ee228c9ecfa7548f9683a14d"
+    },
+    {
+      "bytes": 571,
+      "path": "cohort/fixture.json",
+      "sha256": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae"
+    },
+    {
+      "bytes": 60,
+      "path": "cohort/libraries-A.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 60,
+      "path": "cohort/libraries-B.log",
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "bytes": 11975,
+      "path": "cohort/observations.json",
+      "sha256": "4c1912f21a3080200f55371241620393aad9fd8669a3d059738e66bc4768f980"
+    },
+    {
+      "bytes": 60293,
+      "path": "cohort/package-A.json",
+      "sha256": "0613f078bfea2779f4bc2dcdb5164c5560f7d98e1a47d4b95b6fc4b515c4d872"
+    },
+    {
+      "bytes": 60293,
+      "path": "cohort/package-B.json",
+      "sha256": "00ae39634391df6136b71850fc108fc55c1acec52426089d07682eb9c687c59a"
+    },
+    {
+      "bytes": 60327,
+      "path": "cohort/package-C.json",
+      "sha256": "3950ade78778f098f8b849a309677df3047e07a67352c69d704e51de1514b485"
+    },
+    {
+      "bytes": 172,
+      "path": "cohort/package-differences.json",
+      "sha256": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53"
+    },
+    {
+      "bytes": 538,
+      "path": "cohort/prepare-dictionaries.log",
+      "sha256": "e29632b8264001e15e80f716523133b309ffc9ff3944409dcaf8170d5872f471"
+    },
+    {
+      "bytes": 11954,
+      "path": "cohort/protocol.json",
+      "sha256": "c06feadc06b947b8e97c996dc2df2b6c4af7705e1346dd5e32b0ba490b4adf13"
+    },
+    {
+      "bytes": 2393,
+      "path": "cohort/setup-fixtures.json",
+      "sha256": "49b0313572e7e50976769efdb57d6376246ca8d462715382bd303ae8d84f7a5b"
+    },
+    {
+      "bytes": 525,
+      "path": "cohort/source-differences.txt",
+      "sha256": "61ee1e098713d4d2f3fc21b4527bc606e52df459d93ea8b5ca2371dfc04683ac"
+    },
+    {
+      "bytes": 1,
+      "path": "cohort/source-status-A.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 1,
+      "path": "cohort/source-status-B.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 296,
+      "path": "cohort/state.json",
+      "sha256": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd"
+    },
+    {
+      "bytes": 1608,
+      "path": "cohort/warmup-A/command.log",
+      "sha256": "1667adf2cef17ec8767776d5d195851fb3269d4a6632230a05e3bcb82ae274c6"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-A/host-after.json",
+      "sha256": "19a75f2492e2ac54ca1f1a4fcc0e840a0041af50203e449c3f8cd73126e0dcb7"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-A/host-before.json",
+      "sha256": "c94fbdec829f305d2fcd88503642c0550a142e9388797f69f061dc35bff6af6c"
+    },
+    {
+      "bytes": 15387,
+      "path": "cohort/warmup-A/phase-counters.json",
+      "sha256": "03f1ee226f37264fab65a0211c9086315b91462d4d3e77d9ace0aff66a9f40d2"
+    },
+    {
+      "bytes": 83108,
+      "path": "cohort/warmup-A/run-1.html",
+      "sha256": "3adc9d97ccc2791b6d7a3038d4df061e1856b6a850799f8949afc514320cb6ba"
+    },
+    {
+      "bytes": 150422,
+      "path": "cohort/warmup-A/run-1.json",
+      "sha256": "9d4a738a7d5ab402a9772ef9143737714662454cbe01ce2cf3dd22d2a89bd2d9"
+    },
+    {
+      "bytes": 58740,
+      "path": "cohort/warmup-A/summary.json",
+      "sha256": "701e68ce9f7ee48c416f8817b55b3036e0e62235456bf2d853061f5dc0ca3f24"
+    },
+    {
+      "bytes": 1606,
+      "path": "cohort/warmup-B/command.log",
+      "sha256": "ab0e99831b185d7cfe0c4fb3e86bcfaa33cf9798cb0032c7a660854ae0cf3fe1"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-B/host-after.json",
+      "sha256": "98dcec7b7f8b338fe11e0907d278bafc4b62000fae326237d1a2fb91a0a4fa0f"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-B/host-before.json",
+      "sha256": "11b8dafdd8706ce26a434525312af0a25b227d1c5f69b3e972ee3a6226fce757"
+    },
+    {
+      "bytes": 15424,
+      "path": "cohort/warmup-B/phase-counters.json",
+      "sha256": "80330d16c693a7757b7af7541445b8aa274b22dc5371661d4f1cd69db7a705a9"
+    },
+    {
+      "bytes": 83258,
+      "path": "cohort/warmup-B/run-1.html",
+      "sha256": "60b47bb28128acadc3a00d57f63d3a753ce8be580a1601a04edf77c482a8db19"
+    },
+    {
+      "bytes": 150730,
+      "path": "cohort/warmup-B/run-1.json",
+      "sha256": "79f3f92c9bc10481207fd3eba7159fcfbf48450da0741e48974a353c7486924c"
+    },
+    {
+      "bytes": 58825,
+      "path": "cohort/warmup-B/summary.json",
+      "sha256": "6762975a0f990f9c79a1891969fe16aff659c4c21d54e5b348b3aeb7cc104a06"
+    },
+    {
+      "bytes": 1603,
+      "path": "cohort/warmup-C/command.log",
+      "sha256": "18c324c3d400c30a67e0f53fb42f90e59027332bfd45adae26609384b0e1809b"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-C/host-after.json",
+      "sha256": "ae334dde2fae7b101b9f09262912aec369a1f6911738d383c0bc73b4b9db61b5"
+    },
+    {
+      "bytes": 504,
+      "path": "cohort/warmup-C/host-before.json",
+      "sha256": "b7d5113d5c8a5296f8810a276994e56ea6bd21daa7aa0d61c65725e8c5e1ee25"
+    },
+    {
+      "bytes": 15448,
+      "path": "cohort/warmup-C/phase-counters.json",
+      "sha256": "ec8103d2e5e5f0e0597267af3a21984835a59e38ab3dee8b9b8b4bbe95709a14"
+    },
+    {
+      "bytes": 83324,
+      "path": "cohort/warmup-C/run-1.html",
+      "sha256": "c09012e5bb1509837ed545a692c702657a5270c661ae3775e3f347db4af74608"
+    },
+    {
+      "bytes": 150782,
+      "path": "cohort/warmup-C/run-1.json",
+      "sha256": "e6d4a435b020fd6b65766d09612070914ecc2e3d0c8567e57f65cd4ef3e48a6e"
+    },
+    {
+      "bytes": 58825,
+      "path": "cohort/warmup-C/summary.json",
+      "sha256": "24dc8eb6aee8eb2e704314b20a1c904ee8c42c6d467b7e5a0c8612fd09d22d85"
+    },
+    {
+      "bytes": 24723,
+      "path": "runner.log",
+      "sha256": "546a0e45478ae6caa73b64ad1931512eec84302472ed5bd7d6652e1d48bd6a4f"
+    },
+    {
+      "bytes": 21298,
+      "path": "runner.py",
+      "sha256": "764ac3dcfe9aba82346e925cee606ec84672c7df097f9fe417749f41258a1230"
+    },
+    {
+      "bytes": 3932,
+      "path": "workflow.yml",
+      "sha256": "78fac3447bea1ca4dec3137e5a06d2cae45141f2a242c9392a08fc1c70c37b70"
+    }
+  ],
+  "sourceInventorySha256": "61b3ed5a3318e64b49602e81d78ab444d9e9d791fd1dbe0bde6c6e03c789cf4b",
+  "sourceRoot": "artifacts/import-media-screen-jmdict-forward-45465463257-1",
+  "stage": "screen"
+}

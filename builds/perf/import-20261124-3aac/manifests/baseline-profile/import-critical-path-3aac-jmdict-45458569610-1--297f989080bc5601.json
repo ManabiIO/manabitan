@@ -1,0 +1,188 @@
+{
+  "attempt": 1,
+  "dictionary": "jmdict",
+  "name": "import-critical-path-3aac-jmdict-45458569610-1",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14950778149/zip",
+      "created_at": "2026-11-24T18:22:03Z",
+      "digest": "sha256:208a21fe707e1fad823ece0584451b6518507e7abad96c851825fdb5916c6945",
+      "expired": false,
+      "expires_at": "2026-12-24T18:22:02Z",
+      "id": 14950778149,
+      "name": "import-critical-path-3aac-jmdict-45458569610-1",
+      "size_in_bytes": 540381,
+      "updated_at": "2026-11-24T18:22:03Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14950778149",
+      "workflow_run": {
+        "head_branch": "perf/import-critical-path-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "d5ddb829542111e2067343ca16479d685eca3866",
+        "id": 45458569610,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610/artifacts/14950778149",
+    "metadataReceipt": "provenance/github-artifacts-45458569610.json",
+    "metadataReceiptSha256": "e2a013bf861939eb1fc93ff23e05782465c1ce0e37d5c954d09f774a60167e6d",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45458569610,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45458569610"
+  },
+  "packagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 5600880,
+  "retainedFiles": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 83244,
+      "path": "ordinary/run-1.html",
+      "sha256": "be2ff9a5a3ba7212cb091a9b9e0fc5ba232fa8803ce4fce18decf9e50a63529b"
+    },
+    {
+      "bytes": 150795,
+      "path": "ordinary/run-1.json",
+      "sha256": "f09c0e75f26648e9c854544f9778092e800f7218dba9435edf838e3d95f3b39d"
+    },
+    {
+      "bytes": 58938,
+      "path": "ordinary/summary.json",
+      "sha256": "3f3d1e548b532eae510fc36c9dc2e922dae5359ffb0146bfecde3cad6d6e8578"
+    },
+    {
+      "bytes": 1568,
+      "path": "ordinary.log",
+      "sha256": "8c655d798e81532845b027bf17303f75b499c1e20c15f89a7fb4def87ee17731"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1d694ac135656cce1eaf6fbf042eddc8be1b346b6f548e3d6fc8aa0f1755b9d2"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 84219,
+      "path": "trace/run-1.html",
+      "sha256": "941679d2ff2c635bd5cc9de88ce9d08e3c1956c67f305d1a9919c75414dc2b72"
+    },
+    {
+      "bytes": 151348,
+      "path": "trace/run-1.json",
+      "sha256": "fa88463cdcfa87082a11f48c3e24de9b6e266c533cdac1ee44fb53e7d18a89b2"
+    },
+    {
+      "bytes": 5005514,
+      "path": "trace/run-1.trace.json",
+      "sha256": "6a0d930ce10f195d83fd09b5711bf59ec1344a29add857d1ce1c0aca2535fece"
+    },
+    {
+      "bytes": 58862,
+      "path": "trace/summary.json",
+      "sha256": "85f6086b62a2bf4eb2bcae6e3d8e33a65f2386761af651fb80170dcada17b815"
+    },
+    {
+      "bytes": 1792,
+      "path": "trace.log",
+      "sha256": "44e2adff780162acd2047c6642f7fbf4d404538d64ac7fa5e3727bb36cdb3f65"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "runId": 45458569610,
+  "schemaVersion": 1,
+  "sourceBytes": 5600880,
+  "sourceFileCount": 14,
+  "sourceInventory": [
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 83244,
+      "path": "ordinary/run-1.html",
+      "sha256": "be2ff9a5a3ba7212cb091a9b9e0fc5ba232fa8803ce4fce18decf9e50a63529b"
+    },
+    {
+      "bytes": 150795,
+      "path": "ordinary/run-1.json",
+      "sha256": "f09c0e75f26648e9c854544f9778092e800f7218dba9435edf838e3d95f3b39d"
+    },
+    {
+      "bytes": 58938,
+      "path": "ordinary/summary.json",
+      "sha256": "3f3d1e548b532eae510fc36c9dc2e922dae5359ffb0146bfecde3cad6d6e8578"
+    },
+    {
+      "bytes": 1568,
+      "path": "ordinary.log",
+      "sha256": "8c655d798e81532845b027bf17303f75b499c1e20c15f89a7fb4def87ee17731"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "1d694ac135656cce1eaf6fbf042eddc8be1b346b6f548e3d6fc8aa0f1755b9d2"
+    },
+    {
+      "bytes": 0,
+      "path": "source-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d2b7a1372d735c783a92b8ee20adf853a475035fbe1d24c65e4ba959388b7405"
+    },
+    {
+      "bytes": 84219,
+      "path": "trace/run-1.html",
+      "sha256": "941679d2ff2c635bd5cc9de88ce9d08e3c1956c67f305d1a9919c75414dc2b72"
+    },
+    {
+      "bytes": 151348,
+      "path": "trace/run-1.json",
+      "sha256": "fa88463cdcfa87082a11f48c3e24de9b6e266c533cdac1ee44fb53e7d18a89b2"
+    },
+    {
+      "bytes": 5005514,
+      "path": "trace/run-1.trace.json",
+      "sha256": "6a0d930ce10f195d83fd09b5711bf59ec1344a29add857d1ce1c0aca2535fece"
+    },
+    {
+      "bytes": 58862,
+      "path": "trace/summary.json",
+      "sha256": "85f6086b62a2bf4eb2bcae6e3d8e33a65f2386761af651fb80170dcada17b815"
+    },
+    {
+      "bytes": 1792,
+      "path": "trace.log",
+      "sha256": "44e2adff780162acd2047c6642f7fbf4d404538d64ac7fa5e3727bb36cdb3f65"
+    },
+    {
+      "bytes": 4456,
+      "path": "workflow.yml",
+      "sha256": "53a9520bcc001a911866f3555cb7090cf4fe744893c4c8034d1c3d89cf5e77b8"
+    }
+  ],
+  "sourceInventorySha256": "297f989080bc560111465cb51d3138b1a80cadab1b4b43cf38ff2bd4beaa93fb",
+  "sourceRoot": "artifacts/import-critical-path-3aac-jmdict-45458569610-1",
+  "stage": "baseline-profile"
+}

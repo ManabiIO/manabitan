@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
-import {hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -398,6 +398,104 @@ describe('TermRecordOpfsStore', () => {
         expect(compact.byteLength).toBe(16 + (values.length * 4) + (scores.length * 8));
         expect(compact).toEqual(expected);
     });
+
+    /* eslint-disable @stylistic/semi */
+    test.each([65534, 65535, 65536])('round-trips %i distinct scores through the persisted field reader', async (distinctScoreCount) => {
+        // Keep enough repeated rows for compact fields to win the size check,
+        // including at the reader-reserved count of 65535 scores.
+        const rowCount = distinctScoreCount + 16
+        const dictionary = `Score-table boundary ${distinctScoreCount}`
+        const expressionBytes = new TextEncoder().encode('boundary')
+        const scores = Int32Array.from({length: rowCount}, (_, i) => (i % distinctScoreCount) - 32768)
+        const offsets = Float64Array.from({length: rowCount}, (_, i) => 2 ** 40 + i * 8)
+        const lengths = new Uint32Array(rowCount).fill(7)
+        const chunk = {
+            dictionary,
+            rowCount,
+            expressionBytesList: new Array(rowCount).fill(expressionBytes),
+            readingBytesList: new Array(rowCount).fill(expressionBytes),
+            readingEqualsExpressionList: new Uint8Array(rowCount).fill(1),
+            scoreList: scores,
+            sequenceList: Int32Array.from({length: rowCount}, (_, i) => i),
+            termRecordPreinternedPlan: {
+                stringLengths: Uint16Array.of(expressionBytes.byteLength),
+                stringOffsets: Uint32Array.of(0),
+                stringsBuffer: expressionBytes,
+                expressionIndexes: new Uint32Array(rowCount),
+                readingIndexes: new Uint32Array(rowCount),
+            },
+        }
+        const fileBytesByName = new Map()
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName)
+        const writer = new TermRecordOpfsStore()
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle)
+        const fields = writer._encodeArtifactRecordFields(chunk, offsets, lengths, offsets[0])
+        const format = fields.byteLength === rowCount * 12 ? 1 : 2
+        const compact = distinctScoreCount < 65535
+        // Use the real field header/key parser. This small lookup payload only
+        // reaches field validation; the oversized container is never persisted.
+        const payload = encodePersistedTermLookupIndex([{expressionBytes, readingBytes: null, sequence: null}])
+        writer._createLookupIndexChunk(1, rowCount, offsets[0], payload, fields, format)
+        assert.equal(format, compact ? 2 : 1)
+        const expected = new Uint8Array(compact ? 16 + distinctScoreCount * 4 + rowCount * 8 : rowCount * 12)
+        if (compact) {
+            new Uint32Array(expected.buffer, 0, 4).set([0x3246524d, rowCount, distinctScoreCount, 2])
+            new Int32Array(expected.buffer, 16, distinctScoreCount).set(scores.subarray(0, distinctScoreCount))
+            let cursor = 16 + distinctScoreCount * 4
+            new Uint32Array(expected.buffer, cursor, rowCount).set(Uint32Array.from(offsets, (offset) => offset - offsets[0]))
+            cursor += rowCount * 4
+            new Uint16Array(expected.buffer, cursor, rowCount).fill(7)
+            cursor += rowCount * 2
+            new Uint16Array(expected.buffer, cursor, rowCount).set(Uint16Array.from(scores, (_, i) => i % distinctScoreCount))
+        } else {
+            const view = new DataView(expected.buffer)
+            for (let i = 0; i < rowCount; ++i) {
+                view.setUint32(i * 12, offsets[i] - offsets[0], true)
+                view.setUint32(i * 12 + 4, lengths[i], true)
+                view.setInt32(i * 12 + 8, scores[i], true)
+            }
+        }
+        assert.deepEqual(fields, expected)
+
+        // The public path splits these inputs into supported lookup chunks.
+        // Reopen that actual persisted representation and read every row.
+        const prepared = writer.prepareArtifactChunkLookupIndexes(chunk)
+        assert(prepared)
+        assert.equal(prepared.indexes.size, 3)
+        await writer.beginImportSession()
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {...chunk, preparedLookupIndexes: prepared.indexes},
+            offsets,
+            lengths,
+            'raw',
+        )
+        await writer.endImportSession()
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1]
+        assert(indexBytes instanceof Uint8Array)
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength)
+        assert.equal(indexView.getUint32(16, true), 3)
+        assert.equal(indexView.getUint32(20, true), rowCount)
+
+        const reader = new TermRecordOpfsStore()
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle)
+        await reader._loadShardFiles(false)
+        await reader.ensureDictionariesLoaded([dictionary])
+        const ids = Array.from({length: rowCount}, (_, i) => i + 1)
+        const records = await reader.getByIdsAsync(ids)
+        assert.equal(records.size, rowCount)
+        for (let i = 0; i < rowCount; ++i) {
+            const record = records.get(i + 1)
+            assert(record, `Missing record ${i + 1}`)
+            assert.equal(record.expression, 'boundary')
+            assert.equal(record.reading, 'boundary')
+            assert.equal(record.entryContentOffset, offsets[i])
+            assert.equal(record.entryContentLength, lengths[i])
+            assert.equal(record.sequence, i)
+            assert.equal(record.score, scores[i])
+        }
+    })
+    /* eslint-enable @stylistic/semi */
 
     test('round-trips non-int32 scores through ordinary record persistence', async () => {
         const dictionaryName = 'Float scores ordinary';
@@ -3871,6 +3969,69 @@ void 0,
         expect(records.map(({entryContentLength}) => entryContentLength)).toStrictEqual([7, 7, 9]);
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('splits high resolved offsets even with a prepared whole-chunk lookup index', async () => {
+        const dictionary = 'Reserved shared content offsets'
+        const expressions = ['old', 'reserved', 'repeated', 'far-reserved']
+        const bytes = expressions.map((value) => new TextEncoder().encode(value))
+        const builder = createTermRecordPreinternedPlanBuilder(expressions.length)
+        const indexes = bytes.map((value) => builder.internStringBytes(value))
+        const plan = builder.buildPlan(indexes, indexes)
+        const uniqueOffsets = new Float64Array([16, 0x100000010, Number.MAX_SAFE_INTEGER - 64])
+        const uniqueIndexes = new Uint32Array([0, 1, 0, 2])
+        const expectedOffsets = [...uniqueIndexes].map((index) => uniqueOffsets[index])
+        const files = new Map()
+        const directory = createFakeDirectoryHandle(files)
+        const writer = new TermRecordOpfsStore()
+        Reflect.set(writer, '_recordsDirectoryHandle', directory)
+        const chunk = {
+            dictionary,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: expressions.length,
+            expressionBytesList: bytes,
+            readingBytesList: bytes,
+            readingEqualsExpressionList: new Uint8Array(expressions.length).fill(1),
+            scoreList: new Int32Array([1, 2, 3, 4]),
+            sequenceList: new Int32Array(expressions.length).fill(-1),
+            termRecordPreinternedPlan: plan,
+            resolvedContentReferences: {
+                uniqueIndexList: uniqueIndexes,
+                offsets: uniqueOffsets,
+                lengths: new Uint32Array(uniqueOffsets.length).fill(8),
+            },
+        }
+        const prepared = writer.prepareArtifactChunkLookupIndexes(chunk)
+        expect(prepared?.indexes.size).toBe(1)
+        const encode = vi.spyOn(writer, '_encodeArtifactChunkRecords')
+        await writer.beginImportSession()
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {...chunk, preparedLookupIndexes: prepared?.indexes},
+            new Float64Array(0),
+            new Uint32Array(0),
+            'raw-block-v2:jmdict',
+        )
+        await writer.endImportSession()
+        expect(encode.mock.calls.map(([run]) => run.rowCount)).toStrictEqual([1, 1, 1, 1])
+
+        const reader = new TermRecordOpfsStore()
+        Reflect.set(reader, '_recordsDirectoryHandle', directory)
+        await reader._loadShardFiles(false)
+        await reader.ensureDictionariesLoaded([dictionary])
+        for (let i = 0; i < expressions.length; ++i) {
+            const ids = reader.findTermIds(dictionary, expressions[i], 'expression')
+            expect(ids).toHaveLength(1)
+            const record = (await reader.getByIdsAsync(ids)).get(ids[0])
+            expect(record).toMatchObject({
+                expression: expressions[i],
+                reading: expressions[i],
+                score: i + 1,
+                entryContentOffset: expectedOffsets[i],
+                entryContentLength: 8,
+            })
+        }
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('rejects unresolved content reference indexes', async () => {
         const textEncoder = new TextEncoder();
         const store = new TermRecordOpfsStore();
@@ -4147,6 +4308,80 @@ void 0,
             message: expect.stringContaining('Short lookup index read'),
         });
         expect(overCapReader.findTermIds(dictionaryName, '二', 'expression')).toEqual([]);
+    });
+
+    test.each(['complete', 'short', 'unavailable'])('reads a bounded lookup index with %s read-only access', async (outcome) => {
+        const store = new TermRecordOpfsStore();
+        const size = 8 * 1024 * 1024;
+        const file = /** @type {File} */ (/** @type {unknown} */ ({size}));
+        const close = vi.fn();
+        const open = vi.fn(async () => {
+            if (outcome === 'unavailable') { throw new TypeError('Read-only access is unavailable'); }
+            return {
+                getSize: () => size,
+                read: (/** @type {Uint8Array} */ bytes) => {
+                    bytes[0] = 17;
+                    return outcome === 'short' ? size - 1 : size;
+                },
+                close,
+            };
+        });
+        const handle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({createSyncAccessHandle: open}));
+        const fallbackBytes = new Uint8Array([42]);
+        const readFallback = vi.spyOn(store, '_readFileRange').mockResolvedValue(fallbackBytes);
+        const bytes = await store._readWholeLookupIndex(handle, file);
+
+        expect(open).toHaveBeenCalledExactlyOnceWith({mode: 'read-only'});
+        expect(close).toHaveBeenCalledTimes(outcome === 'unavailable' ? 0 : 1);
+        if (outcome === 'complete') {
+            expect(bytes.byteLength).toBe(size);
+            expect(bytes[0]).toBe(17);
+            expect(readFallback).not.toHaveBeenCalled();
+        } else {
+            expect(bytes).toBe(fallbackBytes);
+            expect(readFallback).toHaveBeenCalledExactlyOnceWith(file, 0, size);
+        }
+    });
+
+    test('reuses a read-only handle for bounded windows and closes it before snapshot fallback', async () => {
+        const store = new TermRecordOpfsStore();
+        const size = 33 * 1024 * 1024;
+        const file = /** @type {File} */ (/** @type {unknown} */ ({size}));
+        const scheduler = {yield: vi.fn(async () => {})};
+        const close = vi.fn();
+        const read = vi.fn((/** @type {Uint8Array} */ bytes) => {
+            bytes[0] = 17;
+            return bytes.byteLength;
+        });
+        const open = vi.fn(async () => ({getSize: () => size, read, close}));
+        const handle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({createSyncAccessHandle: open}));
+        const snapshot = new Uint8Array([42]);
+        const readSnapshot = vi.spyOn(store, '_readFileRange').mockResolvedValue(snapshot);
+
+        vi.stubGlobal('scheduler', scheduler);
+        try {
+            const reader = await store._openRangedLookupIndexReader(handle, file);
+            if (reader === null) { throw new Error('Expected the read-only reader'); }
+            const first = await reader.read(40, 44);
+            expect(first).toEqual(new Uint8Array([17, 0, 0, 0]));
+            expect(read).toHaveBeenCalledExactlyOnceWith(first, {at: 40});
+            expect(scheduler.yield).toHaveBeenCalledTimes(1);
+            expect(readSnapshot).not.toHaveBeenCalled();
+
+            expect(await reader.read(0, 17 * 1024 * 1024)).toBe(snapshot);
+            expect(close).not.toHaveBeenCalled();
+
+            read.mockReturnValueOnce(3);
+            expect(await reader.read(44, 48)).toBe(snapshot);
+            expect(await reader.read(48, 52)).toBe(snapshot);
+            reader.close();
+            expect(close).toHaveBeenCalledTimes(1);
+            expect(read).toHaveBeenCalledTimes(2);
+            expect(scheduler.yield).toHaveBeenCalledTimes(2);
+            expect(open).toHaveBeenCalledExactlyOnceWith({mode: 'read-only'});
+        } finally {
+            vi.unstubAllGlobals();
+        }
     });
 
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
@@ -6284,6 +6519,85 @@ describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => 
             assert.equal(new TermRecordOpfsStore()._decodeString(bytes, 3, encoded.length), value);
         });
     }
+});
+
+describe('TermRecordOpfsStore query-scoped exact reads', () => {
+    async function importFixture() {
+        const dictionaryName = 'Scoped';
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const store = new TermRecordOpfsStore();
+        store._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        store.setRawTermBankSourceBytes(128 * 1024 * 1024);
+        await store.beginImportSession();
+        for (const [i, expression, reading] of /** @type {const} */ ([[0, '猫', 'ねこ'], [1, '犬', 'いぬ']])) {
+            await store.appendBatch([{
+                dictionary: dictionaryName,
+                expression,
+                reading,
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: i * 8,
+                entryContentLength: 8,
+                entryContentDictName: 'raw',
+                score: i,
+                sequence: i,
+            }]);
+        }
+        await store.endImportSession();
+        return {dictionaryName, store, files};
+    }
+
+    test('keeps independent exact reads private until a full prefix load', async () => {
+        const {store, dictionaryName} = await importFixture();
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        store.publishExactLookupRoute(dictionaryName);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫', '犬']), null);
+        const [cat, dog] = await Promise.all([
+            store.prepareExactLookupView(dictionaryName, ['猫']),
+            store.prepareExactLookupView(dictionaryName, ['いぬ']),
+        ]);
+        assert.ok(cat);
+        assert.ok(dog);
+        assert.deepEqual(store.findTermIdMatchesForDictionaries([dictionaryName], '猫', cat), [{expression: [1], reading: []}]);
+        assert.deepEqual(store.findTermIdMatchesForDictionaries([dictionaryName], 'いぬ', dog), [{expression: [], reading: [2]}]);
+        assert.equal((await store.getByIdsAsync([1], cat)).get(1)?.expression, '猫');
+        assert.equal((await store.getByIdsAsync([2], dog)).get(2)?.expression, '犬');
+        assert.equal(store.hasPersistentTermLookupIndex(dictionaryName), false);
+        assert.equal(store.getById(1), undefined);
+
+        await store.ensureDictionariesLoaded([dictionaryName]);
+        assert.equal(store.hasPersistentTermLookupIndex(dictionaryName), true);
+        assert.deepEqual(store.findTermPrefixIdMatches(dictionaryName, 'い', 'reading'), [{id: 2, exact: false}]);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        assert.equal(cat.isCurrent(), true);
+        await store.deleteByDictionary(dictionaryName);
+        assert.equal(cat.isCurrent(), false);
+        assert.equal((await store.getByIdsAsync([1], cat)).size, 0);
+    });
+
+    test('rejects a changed index and declines to reuse its route', async () => {
+        const {store, dictionaryName, files} = await importFixture();
+        store.publishExactLookupRoute(dictionaryName);
+        const indexName = [...files.keys()].find((name) => name.endsWith('.mbti'));
+        assert.ok(indexName);
+        const healthyBytes = files.get(indexName);
+        assert.ok(healthyBytes);
+        const damaged = new Uint8Array(healthyBytes);
+        // First chunk's framed base payload after the two 40-byte headers.
+        damaged[128] ^= 1;
+        files.set(indexName, damaged);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        files.set(indexName, healthyBytes);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+
+        const reopened = new TermRecordOpfsStore();
+        reopened._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        await reopened._loadShardFiles(false);
+        assert.equal(await reopened.prepareExactLookupView(dictionaryName, ['猫']), null);
+        await reopened.ensureDictionariesLoaded([dictionaryName]);
+        assert.deepEqual(reopened.findTermIds(dictionaryName, '猫', 'expression'), [1]);
+    });
 });
 
 describe('TermRecordOpfsStore exact dictionary identity', () => {

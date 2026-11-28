@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "archiveSha256": "4eebab2d1c0725e036705c5f12a7e97baa72c095ea4b0ccc281a6b99276b58c9",
+      "name": "import-prefix-screen-vndb-forward-45465463257-1",
+      "regeneratedBytes": 540438,
+      "sourceManifestPackagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+      "status": "byte-identical"
+    },
+    {
+      "archiveSha256": "5edd6f7d662169124a85e0486d44852c885038047aa73226a7102a3a380e9b80",
+      "name": "import-memory-3aac-prefix-jitendex-rep1-45468614083-1",
+      "regeneratedBytes": 726660,
+      "sourceManifestPackagerSha256": "65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461",
+      "status": "byte-identical"
+    }
+  ],
+  "packagerSha256": "b33d0adfe55bc8ec03f34e8f1db1018f61d66488244829af9d5a2fe4ec1c1563",
+  "scope": "Fresh tar/gzip generation at another destination from retained manifests and original input files; no browser/tests/benchmarks.",
+  "status": "passed"
+}

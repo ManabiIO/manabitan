@@ -1,0 +1,1491 @@
+{
+  "schemaVersion": 3,
+  "dictionary": "vndb",
+  "buildTarget": "chrome",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true
+  },
+  "authoritativeTiming": true,
+  "traceEnabled": false,
+  "gitSha": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+  "source": {
+    "gitSha": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+    "dirty": true,
+    "sha256": {
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "33e5ce27a5ab9edb67dea43834043eabd7f27e6b3c006e3fe2d8a653aa92e73e"
+    }
+  },
+  "hostEnvironment": {
+    "capturedAtIso": "2026-11-24T19:16:50.154Z",
+    "loadAverage": [
+      2.57,
+      1.22,
+      0.51
+    ],
+    "freeMemoryBytes": 14952235008,
+    "nodeVersion": "v22.22.0",
+    "v8Version": "12.4.254.21-node.33",
+    "platform": "linux",
+    "arch": "x64",
+    "cpuModel": "AMD EPYC 7763 64-Core Processor",
+    "logicalCpuCount": 4,
+    "availableParallelism": 4,
+    "totalMemoryBytes": 16759431168,
+    "cgroupCpuMax": null,
+    "cgroupCpuQuotaCores": null,
+    "cgroupMemoryMaxBytes": null,
+    "cgroupMemoryCurrentBytes": null
+  },
+  "browserVersion": "153.0.8010.12",
+  "importFlags": null,
+  "mediaCheck": "sample",
+  "runs": [
+    {
+      "index": 1,
+      "reportPath": "/home/runner/work/_temp/import-activation/diagnostic/run-1.html",
+      "reportJsonPath": "/home/runner/work/_temp/import-activation/diagnostic/run-1.json",
+      "tracePath": null,
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "33e5ce27a5ab9edb67dea43834043eabd7f27e6b3c006e3fe2d8a653aa92e73e",
+      "totalImportMs": 7135.5,
+      "automationObservedImportMs": 7190.886218,
+      "workerImportMs": 7093.5,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.3000000000174623,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 8,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 246.69999999998254,
+                "heapDeltaBytes": -689937,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 6797.200000000012,
+                "heapDeltaBytes": 930594,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 64.79999999998836,
+                "heapDeltaBytes": 341099,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.3000000000174623
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 8
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 246.69999999998254
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 6797.200000000012
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 64.79999999998836
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "VNDB Characters by Bee",
+            "termParseMs": 3673,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 2752,
+            "bulkAddTagsMetaMs": 1,
+            "mediaResolveMs": 115,
+            "mediaWriteMs": 44,
+            "accountedMs": 6585,
+            "otherMs": 207,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 3,
+            "parserGroupCount": 170
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 3673,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 2752,
+          "bulkAddTagsMetaMs": 1,
+          "mediaResolveMs": 115,
+          "mediaWriteMs": 44,
+          "accountedMs": 6585,
+          "otherMs": 207
+        }
+      },
+      "importDebug": {
+        "dictionaryTitle": "vndb_characters_by_bee.zip",
+        "hasResult": true,
+        "resultTitle": "VNDB Characters by Bee",
+        "sourceTitle": "VNDB Characters by Bee",
+        "errorCount": 0,
+        "addSettingsErrorCount": 0,
+        "fallbackDatabaseContentBase64Length": null,
+        "usesFallbackStorage": false,
+        "openStorageDiagnostics": {
+          "mode": "opfs-sahpool",
+          "caller": "DictionaryDatabase._openConnection",
+          "runtimeContext": {
+            "href": "chrome-extension://ejifhlbpccmgjajjjlgehagpbklpclpb/js/background/offscreen-dictionary-worker.js",
+            "origin": "chrome-extension://ejifhlbpccmgjajjjlgehagpbklpclpb",
+            "globalConstructor": "DedicatedWorkerGlobalScope",
+            "isWindow": false,
+            "isWorkerGlobalScope": true,
+            "isServiceWorkerGlobalScope": false,
+            "isDedicatedWorkerGlobalScope": true,
+            "crossOriginIsolated": false,
+            "hasSharedArrayBuffer": true,
+            "hasAtomics": true,
+            "hasNavigatorStorage": true,
+            "hasStorageGetDirectory": true,
+            "hasFileSystemHandle": true,
+            "hasFileSystemDirectoryHandle": true,
+            "hasFileSystemFileHandle": true,
+            "hasCreateSyncAccessHandle": true,
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+          },
+          "forceFallback": false,
+          "opfsReadyTimeoutMs": 0,
+          "opfsReadyWait": null,
+          "hasOpfsDbCtor": true,
+          "hasOpfsImportDb": true,
+          "hasWasmfsDir": true,
+          "hasInstallOpfsSAHPoolVfs": true,
+          "hasOpfsVfs": true,
+          "hasOpfsSahpoolVfs": true,
+          "opfsVfsPtr": 786960,
+          "opfsSahpoolVfsPtr": 787088,
+          "opfsSahpoolInstallAttempted": false,
+          "opfsSahpoolInstallResult": null,
+          "opfsSahpoolInstallError": null,
+          "opfsSahpoolDirectory": "/manabitan/sqlite-sahpool-v1",
+          "opfsSahpoolCapacity": 8,
+          "opfsSahpoolFileCount": 1,
+          "opfsSahpoolFileNames": [
+            "/dict.sqlite3"
+          ],
+          "openFailureClass": null,
+          "attempts": [],
+          "lastError": null
+        },
+        "useImportSession": true,
+        "finalizeImportSession": true,
+        "importerPhaseTimings": [
+          {
+            "phase": "archive-and-index",
+            "elapsedMs": 210,
+            "startEpochMs": 1795547785654,
+            "endEpochMs": 1795547785864,
+            "details": {
+              "ok": true,
+              "fileCount": 147237,
+              "catalog": "dense-zip",
+              "indexVersion": 3,
+              "zipMaxWorkers": 2,
+              "zipChunkSize": null,
+              "zipUseWebWorkers": true,
+              "autoZipMaxWorkersForLargeArchive": true,
+              "archiveSizeBytes": 291705969
+            }
+          },
+          {
+            "phase": "term-file-fast-path:term_bank_1.json..term_bank_665.json",
+            "elapsedMs": 6701,
+            "startEpochMs": 1795547785914,
+            "endEpochMs": 1795547792615,
+            "details": {
+              "batchedFileCount": 665,
+              "rows": 6648310,
+              "chunkCount": 170,
+              "importerMaterializationMs": 178,
+              "importerChunkSinkMs": 4431,
+              "sourceArchiveReadMs": 6509.1999999999825,
+              "sourceBatchMaxBytes": 201326592,
+              "sourcePrefetchMaxBytes": 100663296,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 30,
+              "sourceFirstBatchEstimatedBytes": 200766806,
+              "sourceFirstBatchSizeKnown": true,
+              "parserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "parserFusedAttempts": 170,
+              "parserFusedFallbacks": 0,
+              "parserDiscardedFusedMs": 0,
+              "parserDiscardedFusedRows": 0,
+              "parserBankSpanCount": 665,
+              "parserEscapedKeyDecodeCount": 1870,
+              "parserValidatedGlossaryReuseCount": 6490145,
+              "parserGlobalExactContentReuseCount": 0,
+              "parserFastGlossaryNormalizationCount": 0,
+              "parserFastGlossaryNormalizationFallbackCount": 0,
+              "parserFusedSingleBankGroups": 0,
+              "parserNativeLookupScratchReusedBytes": 501936456,
+              "parserNativeLookupScratchReuseGroups": 170,
+              "parserNativeLookupScratchReuseMisses": 0,
+              "parserNativeSegmentedLookupSegments": 0,
+              "parserNativeSegmentedLookupFallbacks": 0,
+              "parserDirectLookupArenaSegments": 0,
+              "parserDirectLookupArenaCopiedBytesAvoided": 0,
+              "parserLookupCompactionSourceValidationPasses": 0,
+              "parserMaxWasmHeapBytes": 45219840,
+              "parserBufferSetupMs": 9112,
+              "parserAllocationMs": 1,
+              "parserCopyJsonMs": 0,
+              "parserParseBankMs": 9001,
+              "parserEncodeContentMs": 0,
+              "parserRecentContentDedupHitCount": 6490301,
+              "parserRowDecodeMs": 503,
+              "parserChunkDispatchMs": 2756,
+              "parserSourcePreparationMs": 1.3000000000174623,
+              "parserSourceDeliveryMs": 181,
+              "parserSourceTransferredBytes": 86850424,
+              "parserSourceInflateMs": 1293.0999999998312,
+              "parserSourceCrcMs": 1869.9000000001397,
+              "parserSourceCrcScannedBytes": 568284368,
+              "parserSourceCrcReusedBytes": 3699708599,
+              "parserSourceCrcReusedGlossaryCount": 6490145,
+              "parserSourceCompressedBytes": 86850424,
+              "parserSourceUncompressedBytes": 4267992967,
+              "parserResultCopyMs": 2756.1000000001513,
+              "parserCompactContentMetadataGroups": 170,
+              "parserCompactContentMetadataBytesAvoided": 103847136,
+              "parserResultDeliveryMs": 3937,
+              "parserOrderedSinkWaitMs": 8243.800000000105,
+              "parserBorrowedContentResultCount": 0,
+              "parserLookupIndexPrepareMs": 561.9000000001106,
+              "parserLookupIndexCompactMs": 0,
+              "parserLookupIndexEncodeMs": 561.9000000001106,
+              "parserParallelWorkerCount": 3,
+              "parserParallelPipelineGroupsPerWorker": 3,
+              "parserParallelGroupCount": 170,
+              "parserParallelWorkerWallMs": 6689.5,
+              "parserParallelSourceReadWallMs": 6509.1999999999825,
+              "parserParallelOwnedContentBytes": 91670244,
+              "parserParallelPeakQueuedOwnedContentBytes": 4169513,
+              "parserParallelSkipReason": null,
+              "parserMetaCapacity": 6650000,
+              "parserMetaAllocatedBytes": 452200000,
+              "parserEncodedContentBytes": 91670244,
+              "parserContentCapacity": 1276800000,
+              "parserInitialContentBytesPerRow": 48,
+              "parserChunkSize": 0,
+              "parserMinimalDecode": true,
+              "dedupNativeCallCount": 170,
+              "dedupNativeScannedRows": 157864,
+              "dedupNativeBulkPendingRows": 157150,
+              "dedupNativeExactCandidates": 714,
+              "dedupNativeCopiedInputBytes": 5840968,
+              "dedupNativeCopiedOutputBytes": 5712,
+              "dedupNativeSnapshotBytes": 0,
+              "dedupNativeFallbackCount": 0,
+              "dedupNativeFallbackEligibilityCount": 0,
+              "dedupNativeFallbackAssetCount": 0,
+              "dedupNativeFallbackUnsupportedCount": 0,
+              "mediaResolveMs": 69,
+              "mediaWriteMs": 19,
+              "serializationMs": 0,
+              "bulkAddTermsMs": 2752,
+              "contentAppendMs": 976.5000000000291,
+              "dedupScanMs": 512.799999999901,
+              "dedupCapacityMs": 18.899999999906868,
+              "dedupCanonicalScanMs": 176.50000000020373,
+              "dedupExactCompareMs": 290.6999999998952,
+              "contentStoreMs": 419.70000000021537,
+              "contentPackMs": 100.49999999991269,
+              "contentCompressMs": 239.30000000004657,
+              "contentEnvelopeMs": 0,
+              "contentReferenceMs": 22.800000000017462,
+              "contentOpfsAppendMs": 20.900000000110595,
+              "contentInitialReservationCount": 0,
+              "contentInitialReservationSavingsMissCount": 0,
+              "contentMetadataMs": 42.39999999999418,
+              "contentMetadataStageMs": 0,
+              "contentMetadataPublishMs": 42.39999999999418,
+              "contentMetadataProjectionMs": 24.499999999970896,
+              "contentMetadataIndexPublishMs": 13.89999999999418,
+              "dedupPendingHitCount": 6490446,
+              "dedupPersistedHitCount": 714,
+              "dedupUniqueCount": 157150,
+              "dedupExactFallbackCount": 714,
+              "dedupRecentSourceHitCount": 0,
+              "dedupRecentSourceCacheMs": 1.2000000000407454,
+              "dedupRecentSourceCacheBytes": 0,
+              "dedupRecentSourceAdoptedBytes": 0,
+              "termRecordBuildMs": 0.6000000000058208,
+              "termRecordEncodeMs": 631.5000000002037,
+              "termRecordWriteMs": 678.7999999997264,
+              "termsVtabInsertMs": 0,
+              "termRecordInternMs": 0,
+              "termRecordPackLengthsMs": 0,
+              "termRecordHeapCopyMs": 0,
+              "termRecordFieldEncodeMs": 449.9000000001688,
+              "termRecordValidationMs": 70.9000000001397,
+              "termLookupIndexEncodeMs": 737.2000000001281
+            }
+          },
+          {
+            "phase": "import-data-banks",
+            "elapsedMs": 6792,
+            "startEpochMs": 1795547785904,
+            "endEpochMs": 1795547792696,
+            "details": {
+              "terms": 6648310,
+              "termMeta": 0,
+              "kanji": 0,
+              "kanjiMeta": 0,
+              "tagMeta": 5,
+              "media": 146570,
+              "step4TermParseMs": 3673,
+              "step4TermArchiveReadMs": 6509.1999999999825,
+              "step4TermSerializationMs": 0,
+              "step4BulkAddTermsMs": 2752,
+              "step4BulkAddTagsMetaMs": 1,
+              "step4MediaResolveMs": 115,
+              "step4MediaWriteMs": 44,
+              "step4MediaZipBatchReadMs": 1606,
+              "step4MediaZipBatchInflateMs": 635,
+              "step4MediaZipBatchCount": 144,
+              "step4MediaZipBatchEntryCount": 146314,
+              "step4MediaZipBatchRangeBytes": 195649882,
+              "step4MediaZipBatchCompressedBytes": 188864129,
+              "step4MediaZipBatchUncompressedBytes": 188131284,
+              "step4SourcePackedMediaEntryCount": 146314,
+              "step4SourcePackedMediaBytes": 195649882,
+              "step4SourcePackedMediaAppendMs": 15,
+              "step4SourcePackedMediaParallel": true,
+              "step4SourcePackedMediaEarlyPayload": true,
+              "step4TermFileNonParseWriteMs": 833,
+              "step4ArtifactPreloadMs": 0,
+              "step4ArtifactReadBytesMs": 0,
+              "step4ArtifactMetadataRebaseMs": 0,
+              "step4ArtifactMetadataAppendMs": 0,
+              "step4SharedGlossaryAppendMs": 0,
+              "step4TermMetaReadMs": 0,
+              "step4KanjiReadMs": 0,
+              "step4KanjiMetaReadMs": 0,
+              "step4TagReadMs": 2,
+              "step4AccountedMs": 6585,
+              "step4OtherMs": 207,
+              "fastPathChunkCount": 170,
+              "fastPathChunkSinkMs": 4431,
+              "fastPathParserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserEffectiveExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserFusedAttempts": 170,
+              "fastPathParserFusedFallbacks": 0,
+              "fastPathParserDiscardedFusedMs": 0,
+              "fastPathParserDiscardedFusedRows": 0,
+              "fastPathParserBankSpanCount": 665,
+              "fastPathParserEscapedKeyDecodeCount": 1870,
+              "fastPathParserValidatedGlossaryReuseCount": 6490145,
+              "fastPathParserGlobalExactContentReuseCount": 0,
+              "fastPathParserFastGlossaryNormalizationCount": 0,
+              "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+              "fastPathParserFusedSingleBankGroups": 0,
+              "fastPathParserNativeLookupScratchReusedBytes": 501936456,
+              "fastPathParserNativeLookupScratchReuseGroups": 170,
+              "fastPathParserNativeLookupScratchReuseMisses": 0,
+              "fastPathParserNativeSegmentedLookupSegments": 0,
+              "fastPathParserNativeSegmentedLookupFallbacks": 0,
+              "fastPathParserDirectLookupArenaSegments": 0,
+              "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+              "fastPathParserLookupCompactionSourceValidationPasses": 0,
+              "fastPathParserMaxWasmHeapBytes": 45219840,
+              "fastPathParserBufferSetupMs": 9112,
+              "fastPathParserAllocationMs": 1,
+              "fastPathParserCopyJsonMs": 0,
+              "fastPathParserParseBankMs": 9001,
+              "fastPathParserEncodeContentMs": 0,
+              "fastPathParserRecentContentDedupHitCount": 6490301,
+              "fastPathParserRowDecodeMs": 503,
+              "fastPathParserStringPlanMs": 0,
+              "fastPathParserChunkDispatchMs": 2756,
+              "fastPathParserSourcePreparationMs": 1.3000000000174623,
+              "fastPathParserSourceDeliveryMs": 181,
+              "fastPathParserSourceTransferredBytes": 86850424,
+              "fastPathParserSourceInflateMs": 1293.0999999998312,
+              "fastPathParserSourceCrcMs": 1869.9000000001397,
+              "fastPathParserSourceCrcScannedBytes": 568284368,
+              "fastPathParserSourceCrcReusedBytes": 3699708599,
+              "fastPathParserSourceCrcReusedGlossaryCount": 6490145,
+              "fastPathParserSourceCompressedBytes": 86850424,
+              "fastPathParserSourceUncompressedBytes": 4267992967,
+              "fastPathParserResultCopyMs": 2756.1000000001513,
+              "fastPathParserCompactContentMetadataGroups": 170,
+              "fastPathParserCompactContentMetadataBytesAvoided": 103847136,
+              "fastPathParserResultDeliveryMs": 3937,
+              "fastPathParserOrderedSinkWaitMs": 8243.800000000105,
+              "fastPathParserBorrowedContentResultCount": 0,
+              "fastPathParserLookupIndexPrepareMs": 561.9000000001106,
+              "fastPathParserLookupIndexCompactMs": 0,
+              "fastPathParserLookupIndexEncodeMs": 561.9000000001106,
+              "fastPathParserParallelWorkerCount": 3,
+              "fastPathParserParallelPipelineGroupsPerWorker": 3,
+              "fastPathParserParallelGroupCount": 170,
+              "fastPathParserParallelWorkerWallMs": 6689.5,
+              "fastPathParserParallelSourceReadWallMs": 6509.1999999999825,
+              "fastPathParserParallelOwnedContentBytes": 91670244,
+              "fastPathParserParallelPeakQueuedOwnedContentBytes": 4169513,
+              "fastPathParserParallelSkipReason": null,
+              "sourceZipLogicalRangeReadCount": 665,
+              "sourceZipPhysicalRangeReadCount": 163,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 30,
+              "sourceFirstBatchEstimatedBytes": 200766806,
+              "sourceFirstBatchSizeKnown": true,
+              "useMediaPipeline": true,
+              "hasArchiveImageMediaFiles": true
+            }
+          },
+          {
+            "phase": "finalize-descriptor",
+            "elapsedMs": 0,
+            "startEpochMs": 1795547792697,
+            "endEpochMs": 1795547792697,
+            "details": {
+              "hasStyles": false
+            }
+          },
+          {
+            "phase": "bulk-finalization",
+            "elapsedMs": 41,
+            "startEpochMs": 1795547792699,
+            "endEpochMs": 1795547792740,
+            "details": {
+              "ok": true,
+              "commitMs": 3.6000000000058208,
+              "termContentEndImportSessionMs": 2.2999999999883585,
+              "termContentEndImportSessionFlushPendingWritesMs": 0,
+              "termContentEndImportSessionAwaitQueuedWritesMs": 0,
+              "termContentEndImportSessionCloseWritableMs": 1.1000000000058208,
+              "termContentDrainCycleCount": 2,
+              "termContentWriteCallCount": 2,
+              "termContentSingleChunkWriteCount": 0,
+              "termContentMergedWriteCount": 2,
+              "termContentTotalWriteBytes": 7533449,
+              "termContentMergedWriteBytes": 7533449,
+              "termContentMaxWriteBytes": 4198700,
+              "termContentMergedGroupChunkCount": 339,
+              "termContentMaxMergedGroupChunkCount": 181,
+              "termContentFlushDueToBytesCount": 0,
+              "termContentFlushDueToChunkCount": 0,
+              "termContentFlushFinalGroupCount": 2,
+              "termContentWriteCoalesceTargetBytes": 67108864,
+              "termContentWriteCoalesceMaxChunks": 8192,
+              "termContentWriteFlushThresholdBytes": 8388608,
+              "termRecordEndImportSessionMs": 29,
+              "termRecordEndImportSessionFlushPendingWritesMs": 6.2999999999883585,
+              "termRecordEndImportSessionAwaitQueuedWritesMs": 1.6000000000058208,
+              "termRecordEndImportSessionCloseWritableMs": 20.89999999999418,
+              "termRecordDrainCycleCount": 2,
+              "termRecordWriteCallCount": 2,
+              "termRecordSingleChunkWriteCount": 2,
+              "termRecordMergedWriteCount": 0,
+              "termRecordTotalWriteBytes": 64,
+              "termRecordMergedWriteBytes": 0,
+              "termRecordMaxWriteBytes": 38,
+              "termRecordMergedGroupChunkCount": 0,
+              "termRecordMaxMergedGroupChunkCount": 0,
+              "termRecordWriteCoalesceTargetBytes": 16777216,
+              "termRecordLookupIndexWriteCallCount": 83,
+              "termRecordLookupIndexWriteBytes": 401899752,
+              "compressionExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "termRecordLookupIndexAwaitMs": 7.2999999999883585,
+              "termRecordLookupIndexMaxQueuedBytes": 12259376,
+              "termRecordLookupIndexWorkerFileCount": 2,
+              "termsVirtualTableSyncMs": 0,
+              "createIndexesMs": 0,
+              "createIndexesCheckpointCount": 0,
+              "cacheResetMs": 0,
+              "runtimePragmasMs": 0.10000000000582077,
+              "totalMs": 39.30000000001746,
+              "published": true,
+              "housekeepingErrors": []
+            }
+          },
+          {
+            "phase": "write-summary",
+            "elapsedMs": 0,
+            "startEpochMs": 1795547792740,
+            "endEpochMs": 1795547792740,
+            "details": {
+              "ok": true,
+              "fusedWithBulkFinalization": true
+            }
+          },
+          {
+            "phase": "post-finalization-integrity-sample",
+            "elapsedMs": 0,
+            "startEpochMs": 1795547792740,
+            "endEpochMs": 1795547792740,
+            "details": {
+              "skipped": true,
+              "reason": "transaction-commit-completed",
+              "termCount": 6648310
+            }
+          }
+        ],
+        "localPhaseTimings": [
+          {
+            "phase": "read-archive",
+            "elapsedMs": 0,
+            "startEpochMs": 1795547785648,
+            "endEpochMs": 1795547785648,
+            "details": {
+              "sizeBytes": 291705969,
+              "source": "file-handle"
+            }
+          },
+          {
+            "phase": "worker-import-dictionary",
+            "elapsedMs": 7093.5,
+            "startEpochMs": 1795547785648.5,
+            "endEpochMs": 1795547792742,
+            "details": {
+              "useImportSession": true,
+              "finalizeImportSession": true
+            }
+          },
+          {
+            "phase": "page-side-finalization-queued",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "add-dictionary-settings",
+            "elapsedMs": 9.900000000023283,
+            "startEpochMs": 1795547792745.1,
+            "endEpochMs": 1795547792755,
+            "details": {
+              "settingsErrorCount": 0,
+              "skipped": false
+            }
+          },
+          {
+            "phase": "trigger-database-updated",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-options-batch-read",
+            "elapsedMs": 1.8999999999941792,
+            "startEpochMs": 1795547792760.1,
+            "endEpochMs": 1795547792762,
+            "details": {
+              "dictionaryCount": 1,
+              "batchFinalization": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-visible",
+            "elapsedMs": 0.6000000000058208,
+            "startEpochMs": 1795547792762.4,
+            "endEpochMs": 1795547792763,
+            "details": {
+              "dictionaryTitle": "VNDB Characters by Bee",
+              "requireEnabledForActiveProfile": true,
+              "batchFinalization": true
+            }
+          }
+        ]
+      },
+      "validation": {
+        "title": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+          "フォーニ",
+          "あいこ先生",
+          "鎧衣 美琴たん",
+          "右代宮金蔵社長",
+          "Kamala Copperheart",
+          "榊亜実先輩",
+          "RestaurantOwnerちゃん",
+          "Osamu博士",
+          "Lynrd Skynrdたん",
+          "霧姫・アイスマン坊",
+          "Tyler博士",
+          "クレイグ・ウァジェト部長"
+        ],
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "storage": {
+          "kind": "OPFS logical file sizes after restart and verification",
+          "bytes": 609553611,
+          "files": [
+            {
+              "path": "manabitan-dictionary-media-v1/35f20409-0144-4284-8f82-6cb374906a40.bin",
+              "bytes": 199563210
+            },
+            {
+              "path": "manabitan-term-content.bin",
+              "bytes": 7533449
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+              "bytes": 38
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+              "bytes": 399513708
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+              "bytes": 26
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+              "bytes": 2386124
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1lg1fwq1cxq",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/7e5cqjgz6df",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/d2unu5ax26r",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/huxaplf7tqe",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/r0b6k7jfv7",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/tl41a6p3d3h",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ub6ib8qa6oq",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/w06vfqtqigf",
+              "bytes": 528384
+            }
+          ]
+        },
+        "lookup": {
+          "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing",
+          "observations": [
+            {
+              "pass": 0,
+              "term": "フォーニ",
+              "elapsedMs": 2.7999999999883585,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 0,
+              "term": "あいこ先生",
+              "elapsedMs": 4.199999999982538,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 0,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 4.100000000005821,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 0,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 2.1999999999825377,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 0,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 2.8000000000174623,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 0,
+              "term": "榊亜実先輩",
+              "elapsedMs": 2,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 0,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 5.100000000005821,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 0,
+              "term": "Osamu博士",
+              "elapsedMs": 4.2999999999883585,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 0,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 2.7000000000116415,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 0,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 2,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 0,
+              "term": "Tyler博士",
+              "elapsedMs": 14.39999999999418,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 0,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 2.3000000000174623,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 1,
+              "term": "フォーニ",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 1,
+              "term": "あいこ先生",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 1,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.7000000000116415,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 1,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 1,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.400000000023283,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 1,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 1,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.6000000000058208,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 1,
+              "term": "Osamu博士",
+              "elapsedMs": 1.3000000000174623,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 1,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 1,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 1,
+              "term": "Tyler博士",
+              "elapsedMs": 2.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 1,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.400000000023283,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 2,
+              "term": "フォーニ",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 2,
+              "term": "あいこ先生",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 2,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 2,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 2,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.3000000000174623,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 2,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 2,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.6000000000058208,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 2,
+              "term": "Osamu博士",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 2,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 2,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 2,
+              "term": "Tyler博士",
+              "elapsedMs": 1.8999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 2,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 3,
+              "term": "フォーニ",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 3,
+              "term": "あいこ先生",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 3,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 3,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 3,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 3,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 3,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.6000000000058208,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 3,
+              "term": "Osamu博士",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 3,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 3,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 3,
+              "term": "Tyler博士",
+              "elapsedMs": 2.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 3,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 4,
+              "term": "フォーニ",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 4,
+              "term": "あいこ先生",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 4,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 4,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 4,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 4,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 4,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.5,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 4,
+              "term": "Osamu博士",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 4,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 4,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 4,
+              "term": "Tyler博士",
+              "elapsedMs": 1.8000000000174623,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 4,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.2000000000116415,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 5,
+              "term": "フォーニ",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 5,
+              "term": "あいこ先生",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 5,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 5,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.3000000000174623,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 5,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.3000000000174623,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 5,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 5,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.7999999999883585,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 5,
+              "term": "Osamu博士",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 5,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 5,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 5,
+              "term": "Tyler博士",
+              "elapsedMs": 2,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 5,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            }
+          ]
+        },
+        "restart": {
+          "title": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "termRows": 6648310,
+          "mediaFiles": 146570,
+          "contentReadable": true,
+          "probeCount": 12
+        }
+      }
+    }
+  ],
+  "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+  "timing": {
+    "count": 1,
+    "minMs": 7135.5,
+    "medianMs": 7135.5,
+    "p95Ms": 7135.5,
+    "maxMs": 7135.5
+  },
+  "automationObservedTiming": {
+    "count": 1,
+    "minMs": 7190.886218,
+    "medianMs": 7190.886218,
+    "p95Ms": 7190.886218,
+    "maxMs": 7190.886218
+  },
+  "workerTiming": {
+    "count": 1,
+    "minMs": 7093.5,
+    "medianMs": 7093.5,
+    "p95Ms": 7093.5,
+    "maxMs": 7093.5
+  }
+}

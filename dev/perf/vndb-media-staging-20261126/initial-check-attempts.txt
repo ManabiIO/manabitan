@@ -1,0 +1,32 @@
+Initial check attempts before the host's memory-pressure recovery
+
+The first command was not redirected; this receipt transcribes the tool's
+reported outcome rather than claiming an independently retained stdout file.
+
+Command:
+/workspace/scratch/9175611d1a4c/runtime-node22/node_modules/node/bin/node node_modules/vitest/vitest.mjs run test/zip-media-validation.test.js test/source-zip-media-entry-pack.test.js --maxWorkers 1 --no-file-parallelism
+
+Exit: 1
+Test Files: 1 failed, 1 passed (2)
+Tests: 2 failed, 75 passed (77)
+Duration: 25.85 s (transform 1.94 s, setup 177 ms, import 2.73 s,
+tests 21.83 s, environment 0 ms)
+
+Unchanged zip-media-validation.test.js failures:
+- validates stored payloads of 65535 bytes without output space:
+  Test timed out in 5000ms. Reported test duration 5583 ms.
+- reuses one scratch span across mixed stored, fixed, dynamic, and
+  multiple-block sources:
+  Test timed out in 5000ms. Reported test duration 7312 ms.
+
+No behavioral assertion failure was reported. source-zip-media-entry-pack.test.js
+passed all 18 cases. These failures are retained and are not counted as passing.
+
+The changed-file ESLint attempt also was not redirected. It remained stalled
+while the host was under memory pressure and eventually exited 137 with no lint
+diagnostic. It printed the pre-existing vendored pako CommonJS warning during
+its build/configuration path. This attempt does not qualify lint success.
+
+The first new regression suite (11 cases, before the resizable-buffer fallback
+case was added) passed, with original stdout retained separately in
+shared-staging-tests.log. The final source needs the later 12-case check.

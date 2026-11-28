@@ -4,7 +4,7 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "c4d29ef5aa55a1570eb56c19fe3a274860f564fcd08da9b8f67cbd9eb6982a48",
+    "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
     "sourceFileCount": 14,
     "targets": [
         {
@@ -44,7 +44,9 @@
                 "-Wl,--export=wasm_get_last_parse_capacity",
                 "-Wl,--export=wasm_get_last_content_capacity",
                 "-Wl,--export=inflate_and_join_term_banks",
+                "-Wl,--export=verify_term_bank_source_crcs",
                 "-Wl,--export=inflate_zip_media_batch",
+                "-Wl,--export=project_single_glossary_image_path",
                 "-Wl,--export=parse_term_bank",
                 "-Wl,--export=parse_term_bank_with_media_hints",
                 "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
@@ -57,7 +59,7 @@
                 "-Wl,--export=encode_term_content_token_binary_dedup",
                 "-Wl,--strip-all"
             ],
-            "sha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f"
+            "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
         }
     ]
 }

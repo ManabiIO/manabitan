@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only review and offline verification of the frozen evidence packager. No product edits, benchmark acquisition, observation replacement, or threshold changes.",
+  "packagerSha256": "d5db8075998fca4e081af09c85609bdebcc11585a54249453c70bb2c2accedd2",
+  "reviewedIndexSha256": "38970598bb42209da2ccd32830f750243d9387790bbfeb24934d40ee68f64018",
+  "offlineVerification": {
+    "status": "passed",
+    "archives": 38,
+    "retainedFilesVerified": 3434,
+    "retainedBytesVerified": 245937166,
+    "compressedArchiveBytes": 23006221,
+    "missingExpectedArtifacts": [
+      "import-prefix-screen-vndb-forward-45469432793-1",
+      "import-media-screen-vndb-forward-45469432793-1"
+    ],
+    "failedCohortsReclassified": false
+  },
+  "findingsResolved": [
+    "Require original GitHub provenance before omitting any product ZIP.",
+    "Reconcile omitted ZIP SHA, complete package-entry map, plan source commit/tree, identity receipts, original artifact URL and archive digest.",
+    "Expect all baseline profile and original failed activation cells explicitly.",
+    "Preserve corrected activation run45470204352 as four distinct artifacts and separate supporting receipts/logs/ZIPs.",
+    "Preserve new media-memory failure review and canonical PR880 CI receipt."
+  ],
+  "reviewedInvariants": [
+    "Every CI input file is inventoried before top-level A/B/C-product.zip omission; raw native JSON, failures, tails, memory samples, markers and logs remain retained.",
+    "Sorted deterministic archives embed exact manifests; archive/member/readable hashes are checked offline.",
+    "Content-inventory changes create a new snapshot and retain prior versions.",
+    "Metadata and packager sources are preserved by full content hash.",
+    "Missing corrected VNDB timing cells are explicitly reported and do not turn into completed qualification."
+  ],
+  "limitations": [
+    "Product ZIP container bytes are omitted after verification. Full original ZIP hashes and entry maps are retained; source rebuilds may differ in container metadata.",
+    "Two corrected VNDB timing artifacts had not arrived at this snapshot; later additions need their own manifest verification.",
+    "This audit covers the recorded frozen index, not future refresh contents."
+  ],
+  "additionalMediaCrossCellChecks": {
+    "sourceA": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "sourceB": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+    "eachArmsPackageEntryMapIdenticalAcrossFourCells": true,
+    "browserVersion": "153.0.8010.12",
+    "memoryOverlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+    "fixtureRecipesIdenticalAcrossReplications": true
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "vndb-screen-independent-audit",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "65de7e608273509a1d05b9ceac8e8605b061487c5514261220736a5cff403f1f",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 49507,
+  "retainedFiles": [
+    {
+      "bytes": 5337,
+      "path": "README.md",
+      "sha256": "7f7508e9f46962c018a801209008a7dcb13838a84ad4dfc65b203634ff168649"
+    },
+    {
+      "bytes": 757,
+      "path": "artifact-provenance.json",
+      "sha256": "a372289fcafaaf82e24bb2647f73ee7d3609df9f57f448c891d65b4682298cbf"
+    },
+    {
+      "bytes": 26595,
+      "path": "receipt.json",
+      "sha256": "c70b03f56daf84fd8de9ccd61934fab455b574b2f514095726772b3d6d16c38f"
+    },
+    {
+      "bytes": 16818,
+      "path": "reconcile.py",
+      "sha256": "2f74daf53d68f9d109686b8f28e483dd189a5d70a13c94a5674ed580830378c4"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 49507,
+  "sourceFileCount": 4,
+  "sourceInventory": [
+    {
+      "bytes": 5337,
+      "path": "README.md",
+      "sha256": "7f7508e9f46962c018a801209008a7dcb13838a84ad4dfc65b203634ff168649"
+    },
+    {
+      "bytes": 757,
+      "path": "artifact-provenance.json",
+      "sha256": "a372289fcafaaf82e24bb2647f73ee7d3609df9f57f448c891d65b4682298cbf"
+    },
+    {
+      "bytes": 26595,
+      "path": "receipt.json",
+      "sha256": "c70b03f56daf84fd8de9ccd61934fab455b574b2f514095726772b3d6d16c38f"
+    },
+    {
+      "bytes": 16818,
+      "path": "reconcile.py",
+      "sha256": "2f74daf53d68f9d109686b8f28e483dd189a5d70a13c94a5674ed580830378c4"
+    }
+  ],
+  "sourceInventorySha256": "5a888e8dcf94fe49065afc40648e39a6a491d2608efa81831f1c784a4373d105",
+  "sourceRoot": "vndb-screen-independent-audit",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

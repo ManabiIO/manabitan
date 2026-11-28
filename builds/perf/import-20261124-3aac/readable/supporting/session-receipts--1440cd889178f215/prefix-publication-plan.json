@@ -1,0 +1,79 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/content-overlap",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "1b48960d2d6abc907d271be61b108d7573e60a4e",
+  "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+  "files": [
+    {
+      "path": "dev/lib/zstd-wasm.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d565ee3ade67e3ff81e05ff95896b506f5b58ee4",
+      "size": 20865
+    },
+    {
+      "path": "ext/js/dictionary/term-content-block-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fad4ee8067fd303684e499cf94425225281db89c",
+      "size": 73137
+    },
+    {
+      "path": "ext/js/dictionary/term-content-opfs-store.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "096e9254abb919cbd3f169297e87eb9a85bd47c2",
+      "size": 104719
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5edeceee4525c7f3e5e973b57ea18b01c6d0c97e",
+      "size": 3613
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cc1cadd56e577bcd4b745a305ca293cd6bce4bb",
+      "size": 40563
+    },
+    {
+      "path": "test/term-content-ownership.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d2355eb9b03cd688b1e2cb160842a4513d75d0a",
+      "size": 3344
+    },
+    {
+      "path": "test/term-content-private-codec.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "638138089caaeaa032c4b90772c3b91f01a8b24d",
+      "size": 4519
+    },
+    {
+      "path": "test/term-content-private-reservation.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "556e7e55dd404aeec418389057b0bb6cdd28c7c1",
+      "size": 13607
+    },
+    {
+      "path": "test/term-content-reservation-limits.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe35abb250ca6d8ef07e101a177174690b6f5b44",
+      "size": 7677
+    },
+    {
+      "path": "test/term-record-opfs-store.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "081eef97b7c6778228b8bd71a4fee0da57f8e54e",
+      "size": 336192
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "jitendex": {
+    "cacheFile": "jitendex-yomitan.zip",
+    "expectedTitle": "Jitendex.org [2026-10-03]",
+    "label": "Jitendex",
+    "mediaBytes": 4992155,
+    "mediaFiles": 236,
+    "release": "2026.10.03.0",
+    "revision": "2026.10.03.0",
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822,
+    "termRows": 436555,
+    "unreferencedMediaPaths": [
+      "jitendex/HanaMinA/05167.svg",
+      "jitendex/HanaMinA/05641.svg",
+      "jitendex/HanaMinA/0576b.svg",
+      "jitendex/HanaMinA/05bda.svg",
+      "jitendex/HanaMinA/06207.svg",
+      "jitendex/HanaMinA/07055.svg",
+      "jitendex/HanaMinA/07575.svg",
+      "jitendex/HanaMinA/076a5.svg",
+      "jitendex/HanaMinA/0793d.svg",
+      "jitendex/HanaMinA/080ed.svg",
+      "jitendex/HanaMinA/09093.svg",
+      "jitendex/HanaMinA/09c81.svg",
+      "jitendex/HanaMinA/20bb7.svg"
+    ],
+    "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+  },
+  "jmdict": {
+    "cacheFile": "JMdict.zip",
+    "expectedTitle": "JMdict [2026-11-22]",
+    "label": "JMdict",
+    "mediaBytes": 0,
+    "mediaFiles": 0,
+    "release": "2026-11-22",
+    "revision": "JMdict.2026-11-22",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "termRows": 528299,
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+  },
+  "jmnedict": {
+    "cacheFile": "JMnedict.zip",
+    "expectedTitle": "JMnedict [2026-09-06]",
+    "label": "JMnedict",
+    "release": "2026-09-06",
+    "revision": "JMnedict.2026-09-06",
+    "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+    "sizeBytes": 11432315,
+    "termRows": 667942,
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip"
+  }
+}

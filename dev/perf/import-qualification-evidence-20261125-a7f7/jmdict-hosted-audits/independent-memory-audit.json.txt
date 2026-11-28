@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "workflowRun": 45646399468,
+  "toolingCommit": "b1a0c5b78295def8cc91e4fca5e831d2248c7d01",
+  "frozenToolingHelpersVerifiedAgainstGit": true,
+  "helperSha256": {
+    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+  },
+  "auditScriptSha256": "60244d67ebe206e9259d46179d301059c7fb59c392289442e8f779931380afc0",
+  "artifactMetadataSha256": "60cd2c2a0200e94133fe554a1fb6e6118c4ff846f78c83af7ac78b2acaabcdcd",
+  "scope": "Independent offline memory audit only. All raw observations retained. No browser imports, replacement observations, acquisition retries, threshold changes or pooled memory metrics.",
+  "sourceIdentities": {
+    "A": {
+      "sha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "B": {
+      "sha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+      "tree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1"
+    }
+  },
+  "importFlags": {
+    "experimentalParserWorkers3": false
+  },
+  "expectedParserWorkers": 2,
+  "fixedRules": {
+    "minimumFullyCoveredImportScans": 5,
+    "maximumCoveredGapMs": 250,
+    "maximumBracketGapMs": 250,
+    "betweenScanWaitMs": 25,
+    "maximumMedianPairedIncreasePercent": 5,
+    "maximumIndividualPairedIncreasePercent": 10,
+    "everyObservationQualified": true,
+    "bothReplicationsRequired": true
+  },
+  "rawScanCount": 571,
+  "observationCount": 8,
+  "allObservationsQualified": true,
+  "bothReplicationsPassMemoryScreen": true,
+  "fixedObservationFailures": [],
+  "qualifiedIndividualBoundExcesses": [],
+  "cells": [
+    {
+      "cohort": "AB",
+      "memoryOrder": "ABBA",
+      "artifactId": 15040500276,
+      "artifactSha256": "dc60f4f96653cbc6cc7709610027f8054834e2ec2606fcbae42664ecf4f161a9",
+      "inputSha256": {
+        "browser-identity.json": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd",
+        "memory/A1/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/A1/markers.jsonl": "0929ae5f512488d27081cf1db5ab8d0ba889ae7f1381bdc240eba11bf268815c",
+        "memory/A1/memory.json": "2f76bea7ac583cb61512e1a3f61b96b4ed8d25de3116f0d5712ad1ff81d2e3ba",
+        "memory/A1/run-1.json": "152baa92bc8f4b9360974ff1abe20fd0879e4266187cc393d4c303ff28b7b603",
+        "memory/A1/summary.json": "efc19773bb520c5c70d3011ef0f22e3a6b15ba966b91a3dafc85cf38fd31877e",
+        "memory/A2/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/A2/markers.jsonl": "2b58278ed2ffb379a6d9f162c21cb20c10de8792f7f0543548949bc3d3de12c7",
+        "memory/A2/memory.json": "4e0670054ebcb72dc5b0689b0b2a06bae6c4d12a4a206a1d036140c9a4558b4b",
+        "memory/A2/run-1.json": "a8ec55ae0edbfb5a1dec16695eaa2116a2ed573ab305a75fe80b4a25f77ea9e6",
+        "memory/A2/summary.json": "ac5194bb726679746d989270b442f4ba8f70299fc71f8abf17683d7aca1bcf00",
+        "memory/B1/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/B1/markers.jsonl": "f73be375dc9d1b0aa22ef5fdb9154ae7518870848168569dad58af7bc5a0086f",
+        "memory/B1/memory.json": "650640bb6c0f87d070ac9a7bd54a431bb14ae8bafadcbea112dcbca1c83cce82",
+        "memory/B1/run-1.json": "514518842d862e11a20dc644b3c2a9d7bcfae933eeb6d6bdb933f461289f0de6",
+        "memory/B1/summary.json": "4dc8c375e38c18a302c787663fdd29b2dae74a2a2d950e0c34435bc54d0ea063",
+        "memory/B2/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/B2/markers.jsonl": "bb8fafdbe7eb2a9ff420efba92a1c917bf04d2d94911697e63cef8fbe785d02d",
+        "memory/B2/memory.json": "fdd9e0de0ed1aeb590128ff712ab0a46247afc6b8c51badd32038d47e3aee103",
+        "memory/B2/run-1.json": "3f15270e5603163c7c93c68d06d7c095412a100b94c817f571a961a101efa696",
+        "memory/B2/summary.json": "1115df0b5c7a301a9447eadc6cbbe0ae9409a3f62fb1cfad040f549e0fcdbab8",
+        "memory/harness-instrumented.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "memory/harness-original.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "memory/memory-audit.json": "4899355174c332e197d0a55ac3a1d7fd90c470f68b42b7d6b7604f59f845ed67",
+        "memory/memory-comparison.json": "27d9b754184f0912333535398be5bd8da504c0db77f7e96864cfb91c6732fadf",
+        "memory/observations.json": "64d6179a90194b4984bade49fc3be2a59409de6705cd0100987a33375225ab3c",
+        "memory/plan.json": "71e903067ed4b62e6eb3a9fcadc0744a7b49ea4d0c176ba468f7a9d2a603ca2a",
+        "memory/semantic-failures.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "registered-plan.json": "49e0d9b01c528a75177c9f38963cc39e6eb6d33d115b88209591908088dbb57f",
+        "source-identities.json": "f1f79436dccbac13fd13179d758c9b76dc1f6d69e494ac8fa7c19421253f7a2e"
+      },
+      "schedule": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2
+        }
+      ],
+      "overlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 266,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.6688050647253325,
+            "maximumPairedChangePercent": -1.086764801742346
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -3.395915391064741,
+            "maximumPairedChangePercent": -1.5863782462090636
+          }
+        }
+      },
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 814300,
+            "candidate": 771912,
+            "changePercent": -5.2054525359204185
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1047227,
+            "candidate": 1002711,
+            "changePercent": -4.250845327708319
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 811408,
+            "candidate": 798536,
+            "changePercent": -1.5863782462090636
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1043188,
+            "candidate": 1031851,
+            "changePercent": -1.086764801742346
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "observations": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1,
+          "allObservedSampleCount": 67,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 126.976668,
+          "preImportBracketGapMs": 62.809414,
+          "postImportBracketGapMs": 41.018552,
+          "fullyContainedImportSampleCount": 8,
+          "stableFullyReadImportSampleCount": 8,
+          "maxSampledPssKiB": 1047227,
+          "maxSampledPrivateKiB": 814300,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 21,
+            "no-multiple-process-coverage": 22,
+            "no-readable-browser-process": 21,
+            "no-readable-renderer-process": 26,
+            "process-tree-changed-during-scan": 8,
+            "unreadable-discovered-process-smaps": 3
+          },
+          "sourceSha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "packageSha256": "415bb3d1b030be5c36827b15b335c64d3abccd2c467698ecf1bd9594e5bfc5b9",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1,
+          "allObservedSampleCount": 66,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 123.522719,
+          "preImportBracketGapMs": 14.347392,
+          "postImportBracketGapMs": 13.639794,
+          "fullyContainedImportSampleCount": 9,
+          "stableFullyReadImportSampleCount": 9,
+          "maxSampledPssKiB": 1002711,
+          "maxSampledPrivateKiB": 771912,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 22,
+            "no-multiple-process-coverage": 23,
+            "no-readable-browser-process": 22,
+            "no-readable-renderer-process": 25,
+            "process-tree-changed-during-scan": 7,
+            "unreadable-discovered-process-smaps": 3
+          },
+          "sourceSha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "packageSha256": "ae42c02803972c566b1f097148963d48cbd491cc273f18097144113a81505fe3",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2,
+          "allObservedSampleCount": 66,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 134.70334,
+          "preImportBracketGapMs": 26.08667,
+          "postImportBracketGapMs": 10.241235,
+          "fullyContainedImportSampleCount": 8,
+          "stableFullyReadImportSampleCount": 8,
+          "maxSampledPssKiB": 1031851,
+          "maxSampledPrivateKiB": 798536,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 22,
+            "no-multiple-process-coverage": 22,
+            "no-readable-browser-process": 22,
+            "no-readable-renderer-process": 24,
+            "process-tree-changed-during-scan": 7,
+            "unreadable-discovered-process-smaps": 1
+          },
+          "sourceSha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "packageSha256": "ae42c02803972c566b1f097148963d48cbd491cc273f18097144113a81505fe3",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2,
+          "allObservedSampleCount": 67,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 124.93024,
+          "preImportBracketGapMs": 86.33047,
+          "postImportBracketGapMs": 42.662595,
+          "fullyContainedImportSampleCount": 8,
+          "stableFullyReadImportSampleCount": 8,
+          "maxSampledPssKiB": 1043188,
+          "maxSampledPrivateKiB": 811408,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 21,
+            "no-multiple-process-coverage": 22,
+            "no-readable-browser-process": 21,
+            "no-readable-renderer-process": 24,
+            "process-tree-changed-during-scan": 6,
+            "unreadable-discovered-process-smaps": 4
+          },
+          "sourceSha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "packageSha256": "415bb3d1b030be5c36827b15b335c64d3abccd2c467698ecf1bd9594e5bfc5b9",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        }
+      ],
+      "recordedSemanticFailures": [],
+      "sourceIdentities": {
+        "A": {
+          "sha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "415bb3d1b030be5c36827b15b335c64d3abccd2c467698ecf1bd9594e5bfc5b9"
+        },
+        "B": {
+          "sha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "tree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1",
+          "packageSha256": "ae42c02803972c566b1f097148963d48cbd491cc273f18097144113a81505fe3"
+        }
+      }
+    },
+    {
+      "cohort": "BA",
+      "memoryOrder": "BAAB",
+      "artifactId": 15039683170,
+      "artifactSha256": "ebb2ef69aa49a824f030b4e627adceb6cdc1af8f1c318bb4ad9dce44b56a8b0f",
+      "inputSha256": {
+        "browser-identity.json": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd",
+        "memory/A1/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/A1/markers.jsonl": "8a48a1003347188850791db41c76db14a1a74529d1d6bce9afbdc85b68b99dfb",
+        "memory/A1/memory.json": "b413e05e9795d9b145dd14d1f0d94023509fc66744fca3d6bd8a7c66f9d5d127",
+        "memory/A1/run-1.json": "6d36c0bac6e15304eec50a124627b9bd68cece5ff86997dd942b263fb0a1d966",
+        "memory/A1/summary.json": "afec4f3e2551125b58b7117018cc6667a9c7008fb001c789e2641df922a6df06",
+        "memory/A2/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/A2/markers.jsonl": "af46a52626134baec6b2b572c129b430ff0d977501ec94e0a421cbc0ca807540",
+        "memory/A2/memory.json": "f845f1007c1db12963b2c73084735a500a7963efc14fa0a0f40d2a54f06314f5",
+        "memory/A2/run-1.json": "d5b5bb6c686151d0eb4ab40d74b9005664ea3e629842684ba576af61584ce73a",
+        "memory/A2/summary.json": "906a89f8c6b03f043d9ce492e8568570239525ca2bb22e529b43c54ee3cac877",
+        "memory/B1/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/B1/markers.jsonl": "d01111689e51137723590ac2a148ee07aa8968d3f4ccf29b2998018a00cb5187",
+        "memory/B1/memory.json": "448d64bf9b0b5a99aa5404257ecc0e3f863679da139efaa46dd70ab4c6ce6ce8",
+        "memory/B1/run-1.json": "148149b11b70818c1f014ea4a3f224e754b8d19dee344308ae1f7666bddd7541",
+        "memory/B1/summary.json": "a3841d53ca7015a8321025c5d04da7523eaf126fabdf4b6c1ef1ea17794c5077",
+        "memory/B2/canonical-receipt.json": "03bab49456f9e69e4fc2a6f576bab2fb4826f10d5beaca39a86d2093681ea258",
+        "memory/B2/markers.jsonl": "799f55d6983627ad7a609df7ef024a1c38ff5564a5bc26cf26215159b398fb2f",
+        "memory/B2/memory.json": "39b28468cb443cba3dfba4de7975ff584c2213034e8f894b21cf79f304f46518",
+        "memory/B2/run-1.json": "8865db24a53ca115bb3b5a47234d3314d5c201b2cd1157954f13e21241b68bb9",
+        "memory/B2/summary.json": "28f6cad6754b1b6ad60c9f2364a87d8a944372d2d9f778e4421d8b3290b836e0",
+        "memory/harness-instrumented.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "memory/harness-original.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "memory/memory-audit.json": "a9e9218b99c8dd212bba3be4ff24ada6309d88a9c8c72f3d0597edeb21e06127",
+        "memory/memory-comparison.json": "e44f9eb14704816337358f3aab48da46430558e389791580c244ca7fc4181acd",
+        "memory/observations.json": "eabca1d57c2d1b817a4c0a6878ceb5b2cd818b04d05a15b9d4f1fab78c0555ff",
+        "memory/plan.json": "a09a0286f964162c276bcdf97633dd35a57af480730b4ea4f2061ac3db4c6673",
+        "memory/semantic-failures.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "registered-plan.json": "a030d9c710f87c826d21f182e77af6f324f43312602f59a6133a6d6f83b7e4d0",
+        "source-identities.json": "412d5e17bdee37ea616516ac09b16b1658c863fb76877a0560f174565fd113be"
+      },
+      "schedule": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2
+        }
+      ],
+      "overlaySha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 305,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.3753311340944763,
+            "maximumPairedChangePercent": 3.627300825942581
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 1.8596296160294457,
+            "maximumPairedChangePercent": 4.913596097059947
+          }
+        }
+      },
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 812836,
+            "candidate": 803128,
+            "changePercent": -1.1943368650010555
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1045813,
+            "candidate": 1036645,
+            "changePercent": -0.8766385577536284
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 778900,
+            "candidate": 817172,
+            "changePercent": 4.913596097059947
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1010724,
+            "candidate": 1047386,
+            "changePercent": 3.627300825942581
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "observations": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1,
+          "allObservedSampleCount": 78,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 149.980584,
+          "preImportBracketGapMs": 9.632998,
+          "postImportBracketGapMs": 83.446991,
+          "fullyContainedImportSampleCount": 10,
+          "stableFullyReadImportSampleCount": 10,
+          "maxSampledPssKiB": 1036645,
+          "maxSampledPrivateKiB": 803128,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 22,
+            "no-multiple-process-coverage": 22,
+            "no-readable-browser-process": 22,
+            "no-readable-renderer-process": 24,
+            "process-tree-changed-during-scan": 8,
+            "unreadable-discovered-process-smaps": 1
+          },
+          "sourceSha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "packageSha256": "f79557bdb088470616301145fa2072fb65be452692604f0c6a52e67ab19f52be",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1,
+          "allObservedSampleCount": 79,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 150.789818,
+          "preImportBracketGapMs": 38.704968,
+          "postImportBracketGapMs": 5.017241,
+          "fullyContainedImportSampleCount": 11,
+          "stableFullyReadImportSampleCount": 11,
+          "maxSampledPssKiB": 1045813,
+          "maxSampledPrivateKiB": 812836,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 22,
+            "no-multiple-process-coverage": 23,
+            "no-readable-browser-process": 22,
+            "no-readable-renderer-process": 25,
+            "process-tree-changed-during-scan": 6,
+            "unreadable-discovered-process-smaps": 1
+          },
+          "sourceSha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "packageSha256": "fc82a5589a4186f75f0996ecc8cfa1f44d6d3d04c7b0faecbe5987ea9dd835ab",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2,
+          "allObservedSampleCount": 75,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 157.220357,
+          "preImportBracketGapMs": 90.943285,
+          "postImportBracketGapMs": 95.831039,
+          "fullyContainedImportSampleCount": 9,
+          "stableFullyReadImportSampleCount": 9,
+          "maxSampledPssKiB": 1010724,
+          "maxSampledPrivateKiB": 778900,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 23,
+            "no-multiple-process-coverage": 23,
+            "no-readable-browser-process": 23,
+            "no-readable-renderer-process": 25,
+            "process-tree-changed-during-scan": 9,
+            "unreadable-discovered-process-smaps": 3
+          },
+          "sourceSha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "packageSha256": "fc82a5589a4186f75f0996ecc8cfa1f44d6d3d04c7b0faecbe5987ea9dd835ab",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2,
+          "allObservedSampleCount": 73,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 142.016604,
+          "preImportBracketGapMs": 62.899112,
+          "postImportBracketGapMs": 32.361624,
+          "fullyContainedImportSampleCount": 9,
+          "stableFullyReadImportSampleCount": 9,
+          "maxSampledPssKiB": 1047386,
+          "maxSampledPrivateKiB": 817172,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "benchmarkExitCode": 0,
+          "rawScanQualificationFailureCounts": {
+            "no-browser-seed": 23,
+            "no-multiple-process-coverage": 23,
+            "no-readable-browser-process": 23,
+            "no-readable-renderer-process": 25,
+            "process-tree-changed-during-scan": 9,
+            "unreadable-discovered-process-smaps": 1
+          },
+          "sourceSha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "packageSha256": "f79557bdb088470616301145fa2072fb65be452692604f0c6a52e67ab19f52be",
+          "verifiedParserWorkerCounts": [
+            2
+          ]
+        }
+      ],
+      "recordedSemanticFailures": [],
+      "sourceIdentities": {
+        "A": {
+          "sha": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "fc82a5589a4186f75f0996ecc8cfa1f44d6d3d04c7b0faecbe5987ea9dd835ab"
+        },
+        "B": {
+          "sha": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+          "tree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1",
+          "packageSha256": "f79557bdb088470616301145fa2072fb65be452692604f0c6a52e67ab19f52be"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Sampled PSS/private maxima are not exact peaks.",
+    "Startup, readback and restart scans remain in raw evidence but do not contribute to import-window maxima.",
+    "The external memory observer makes underlying native harness timing labels non-authoritative.",
+    "Canonical semantic receipts and non-instrumented timing statistics are audited separately by other reviewers.",
+    "These results apply to the explicitly selected two-parser-worker workload and pinned source/fixture environment."
+  ]
+}

@@ -1,0 +1,150 @@
+{
+    "schemaVersion": 1,
+    "scope": "All retained evidence files except this inventory itself; original artifact/member/summary digests are additionally preserved in their acquisition indexes.",
+    "files": {
+        "component-results.json": {
+            "bytes": 56394,
+            "sha256": "db4b394feb234a40fac75c29b2ca6d24bf61e88c5c3c201ebef676673ac380ec"
+        },
+        "component-run.log": {
+            "bytes": 6282,
+            "sha256": "06adc4f92891fa540e72454af865dbb1766d8adfeb754155b153cdd8dc1ed237"
+        },
+        "evidence-audit.json": {
+            "bytes": 1445,
+            "sha256": "1d82ede1ddaf040a550379030d45de1a5c9afdf794981f4ffe373f13ac0cd527"
+        },
+        "evidence-index.json": {
+            "bytes": 15660,
+            "sha256": "65d98b8825fd3bfe9665cb6817117906d9094699ba695489454a66391308a1d5"
+        },
+        "executed-component-runner.mjs.txt": {
+            "bytes": 11729,
+            "sha256": "bedf73fa17d7715bb9b2f96a52b297b49d20d60aec4533e2658cdd6233402b45"
+        },
+        "local-unit-interrupted.log": {
+            "bytes": 7362,
+            "sha256": "aac5f165c8fa62a01b215dec649785d453fc3f24636b9ad295b3504410cc48d8"
+        },
+        "memory/decision-summary.json": {
+            "bytes": 18153,
+            "sha256": "32bb5f053f69c1fd2f9a5bdf2c26983c2460e8a0d5442a263893eb979646151c"
+        },
+        "memory/full/jitendex-1.tar.gz": {
+            "bytes": 620125,
+            "sha256": "8f5c98fc1648831db9007edfce8df564eba5ef0e5c76914a9ebbc315d79bd8c0"
+        },
+        "memory/full/jitendex-2.tar.gz": {
+            "bytes": 687250,
+            "sha256": "7bf7f4670b1695cc55c3d5abc81a723d5d762398c03450cbe8c707e013718ba9"
+        },
+        "memory/full/jmdict-1.tar.gz": {
+            "bytes": 601293,
+            "sha256": "fbe66937418c4344857ebbe30a7a4db0d20f220c6be86316790fd2a77f0812f0"
+        },
+        "memory/full/jmdict-2.tar.gz": {
+            "bytes": 656264,
+            "sha256": "fb209a54869dc815db0c1ee408c1b3062fb8009aefd60d66866c4ac03dcc2474"
+        },
+        "memory/full/vndb-1.tar.gz": {
+            "bytes": 779774,
+            "sha256": "4dc212c65a781ccc391b2de0b0502988049322f8c541a5f05a20fa8d3a4dcb31"
+        },
+        "memory/full/vndb-2.tar.gz": {
+            "bytes": 737921,
+            "sha256": "516552e529f95ea1e8681d200225b41751d9fbc3756ccf6f0c72af9acaf37fb3"
+        },
+        "memory/full-evidence-index.json": {
+            "bytes": 84232,
+            "sha256": "b2d612aae9553acd241051d2c6441bfd7a17ffad8fd5902d392fdba5e5c522da"
+        },
+        "memory/independent-reaudit.json": {
+            "bytes": 24764,
+            "sha256": "bc5cfc56cd391d48f6371b9e2d3a44cdf00a1800d9345f0c1b7b6c99969c8716"
+        },
+        "memory/independent-review-auditor.py.txt": {
+            "bytes": 33135,
+            "sha256": "b30b0defee67bcc3c5981697ae8152d1a05eaf879e94bab78ed3dcdfa8f738dd"
+        },
+        "memory/independent-review.json": {
+            "bytes": 31262,
+            "sha256": "b21a3df2528f8ffdb773ae5285b01aaa2c1edc1a20b73fad9ce435034a5f2a2d"
+        },
+        "memory/raw/single-image-projection-jitendex-1.json.gz": {
+            "bytes": 4314,
+            "sha256": "3b9ac95ff813e453a2b77002f3295d774652ba89386b2e2448c8429066cf8f2f"
+        },
+        "memory/raw/single-image-projection-jitendex-2.json.gz": {
+            "bytes": 4328,
+            "sha256": "d10e941d483127ad134f2deacd84d0c230c065495c3cd3c4d2c62f2cc7f3973f"
+        },
+        "memory/raw/single-image-projection-jmdict-1.json.gz": {
+            "bytes": 4202,
+            "sha256": "9d8797fd2ba93301e37575014a31326ada9292530e8ccccdd085b16111302b3a"
+        },
+        "memory/raw/single-image-projection-jmdict-2.json.gz": {
+            "bytes": 4203,
+            "sha256": "affd0fd3958a1cda571fb8bcd85158cdcabe9614e355507db5b3992df5de20a2"
+        },
+        "memory/raw/single-image-projection-vndb-1.json.gz": {
+            "bytes": 4277,
+            "sha256": "c3992d87724c4b63904d75f11216e66905f90795ecac7d8c04d4131a066814cf"
+        },
+        "memory/raw/single-image-projection-vndb-2.json.gz": {
+            "bytes": 4260,
+            "sha256": "e1f3852904c5fa00a262dc3831c855d0c637404fc94fb0891c27d7f83f49d8ea"
+        },
+        "memory/reaudit-memory-evidence.py.txt": {
+            "bytes": 14710,
+            "sha256": "87a1ef256c5004e3a9c2dfd76677b37d9615660dd8493ea9655c72ee93da1bed"
+        },
+        "memory/retrieve-memory-full.py.txt": {
+            "bytes": 4335,
+            "sha256": "12eefab5282f494d065b6d263dbf9f80951b69e73ff96c74664899ac476f7ab4"
+        },
+        "memory/retrieve-memory-summary.py.txt": {
+            "bytes": 1891,
+            "sha256": "780e538eb542cf9a1df63aaff7c4659a3b9b4fe93db8af48c503054778a5aeb0"
+        },
+        "memory/retrieved-artifacts.json": {
+            "bytes": 7203,
+            "sha256": "82dd062405c1cabd4ac0b034a73297febddf5e3e9ebc96bec5b7bac7b692e627"
+        },
+        "memory/vndb-host-1-job-log.json": {
+            "bytes": 472,
+            "sha256": "6dbd21673c305cec66e906b4072237771b285a95f9764a8dbc14e3bd91bbd6c4"
+        },
+        "memory/vndb-host-1-job.log.gz": {
+            "bytes": 45329,
+            "sha256": "787b62c5fdb5dec8983e7fbc26ec8e6536fd2d493e5c8969a9ec8ff745953249"
+        },
+        "memory-ci-status.json": {
+            "bytes": 29845,
+            "sha256": "fc3aff71baff3f58e7a0bf33bf592e622f123fe760133279685ef05f8645bb5b"
+        },
+        "scaffold-maintenance/local-full-json-gate.log": {
+            "bytes": 2429,
+            "sha256": "547ad7076ff9af7f3d66519304eacb8a16d35642e827267556db035540c38e24"
+        },
+        "scaffold-maintenance/local-registry-focused.log": {
+            "bytes": 591,
+            "sha256": "a0a22ca927acddc0a4818ffc4f88956f9475ca8fd9702828c5bcb0c3ea3d8b6e"
+        },
+        "scaffold-maintenance/original-remote-json-job.log": {
+            "bytes": 48840,
+            "sha256": "0d1624a039764a88f1b8a46d12497926685e9a43668496381139bed4b965df7e"
+        },
+        "scaffold-maintenance/registry-fix-validation.json": {
+            "bytes": 2032,
+            "sha256": "19b424e6be8ba2f1edcc1fb1db43b39c37610ae4d270bcf0e4d5316652e067b7"
+        },
+        "scaffold-maintenance/registry-only.patch": {
+            "bytes": 907,
+            "sha256": "b73c84c584133ea55f90ec5eee7981850367566e92403ff38be3d43b40073fbc"
+        },
+        "source-ci.json": {
+            "bytes": 34383,
+            "sha256": "ea786122cfbc0ef44302025890a1a337efe6f9b7470dca6bbd9a4491d10f2096"
+        }
+    }
+}

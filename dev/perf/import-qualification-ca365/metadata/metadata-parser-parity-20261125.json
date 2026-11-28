@@ -1,0 +1,145 @@
+{
+    "schemaVersion": 1,
+    "kind": "complete-corpus-parser-output-parity",
+    "repository": "ManabiIO/manabitan",
+    "pullRequest": 831,
+    "recordedAtUtc": "2026-11-25T15:31:19Z",
+    "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "publishedCandidateCommit": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+    "testedLocalCandidateCommit": "2bd40d8063ba4b1e6db3e6a53e68bd7786888594",
+    "candidateTree": "49ea808e09b3d9ce26c27614c1b49ff9f0466c70",
+    "publishedTreeEqualsTestedTree": true,
+    "sourceAndWasmDigestsVerifiedAgainstCommits": true,
+    "nodeVersion": "v24.22.3",
+    "nativeCompilerVersion": "21.1.8",
+    "nativeLinkerVersion": "21.1.8",
+    "passesPerArmPerCorpus": 1,
+    "outputOracle": {
+        "fields": [
+            "canonical content slab and content metadata",
+            "content hashes and unique indexes",
+            "preinterned expression and reading plans",
+            "reading equality, score and sequence columns",
+            "prepared lookup index bytes and plans when emitted",
+            "parser media candidate rows and projected fields"
+        ],
+        "grouping": "Fixed diagnostic term-bank groups; not a production importer planner override.",
+        "sourceMode": "Verified source ZIP term-bank JSON parsed in process; no extension, compression worker, database persistence or browser import.",
+        "mediaRowsMeaning": "Conservative parser media candidates, including false positives; not the number of actual image files.",
+        "vndbPreparedIndexes": "The VNDB oracle includes optional prepared-index presence. Baseline legitimately omits these indexes on fallback groups."
+    },
+    "nativeMemoryObservation": {
+        "metric": "Maximum parser-reported WASM memory byte length per arm and corpus",
+        "result": "Equal for baseline and candidate in all three corpus runs",
+        "additionalCallLocalCacheBytes": 1040,
+        "scope": "Native parser allocation observation only; not browser RSS/PSS, JavaScript memory, retained pipeline memory or whole-import peak memory."
+    },
+    "totalRowsPerArm": 7613164,
+    "rawEvidenceSha256": "9d810e72d5c85ae96b7818fa7e4a0ac95cfd0bf38cc8ec92eb26f20ec382abc2",
+    "purpose": "One-pass complete parser output parity; no timing or browser import claim",
+    "sourceIdentity": {
+        "baseline": {
+            "wasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+            "sources": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d"
+            }
+        },
+        "candidate": {
+            "wasmSha256": "d3ea9d7c95b433ea33412e0b62d544447fe68030818d8770d71dfbfaf2d50e47",
+            "sources": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "989bcee59e674324d8fe28223fbac39f03dd730fe0824147901c9c45c955464d",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "4e827331e2eafdc28dd480276d3fb6c9d5d995305bc6f5a32ce2cb3a05fab357"
+            }
+        }
+    },
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "dictionaries": {
+        "jmdict": {
+            "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "groupSize": 7,
+            "baseline": {
+                "rows": 528299,
+                "groups": 8,
+                "mediaRows": 17,
+                "nestedMetadataReuseCount": 0,
+                "nestedMetadataReuseBytes": 0,
+                "maxWasmHeapBytes": 61603840,
+                "fusedParseFallbacks": 0,
+                "digest": "af0b39540249f37b3b982109b6d555c2cc492091bc59c9ecfd78221ecd3db235"
+            },
+            "candidate": {
+                "rows": 528299,
+                "groups": 8,
+                "mediaRows": 17,
+                "nestedMetadataReuseCount": 851490,
+                "nestedMetadataReuseBytes": 19960198,
+                "maxWasmHeapBytes": 61603840,
+                "fusedParseFallbacks": 0,
+                "digest": "af0b39540249f37b3b982109b6d555c2cc492091bc59c9ecfd78221ecd3db235"
+            }
+        },
+        "jitendex": {
+            "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "groupSize": 10,
+            "baseline": {
+                "rows": 436555,
+                "groups": 22,
+                "mediaRows": 339,
+                "nestedMetadataReuseCount": 0,
+                "nestedMetadataReuseBytes": 0,
+                "maxWasmHeapBytes": 89063424,
+                "fusedParseFallbacks": 0,
+                "digest": "323b521512b894d7af3f37f304563a07f87edfc3497652b0d736ba6935db2836"
+            },
+            "candidate": {
+                "rows": 436555,
+                "groups": 22,
+                "mediaRows": 339,
+                "nestedMetadataReuseCount": 1447741,
+                "nestedMetadataReuseBytes": 42243721,
+                "maxWasmHeapBytes": 89063424,
+                "fusedParseFallbacks": 0,
+                "digest": "323b521512b894d7af3f37f304563a07f87edfc3497652b0d736ba6935db2836"
+            }
+        },
+        "vndb": {
+            "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "groupSize": 10,
+            "baseline": {
+                "rows": 6648310,
+                "groups": 67,
+                "mediaRows": 146633,
+                "nestedMetadataReuseCount": 0,
+                "nestedMetadataReuseBytes": 0,
+                "maxWasmHeapBytes": 109969408,
+                "fusedParseFallbacks": 21,
+                "digest": "d819b5869b8c076e70548291bbbd3efb63384a78ed806b6268e93ad3f9eaf6b4"
+            },
+            "candidate": {
+                "rows": 6648310,
+                "groups": 67,
+                "mediaRows": 146633,
+                "nestedMetadataReuseCount": 303562,
+                "nestedMetadataReuseBytes": 24223053,
+                "maxWasmHeapBytes": 109969408,
+                "fusedParseFallbacks": 21,
+                "digest": "d819b5869b8c076e70548291bbbd3efb63384a78ed806b6268e93ad3f9eaf6b4"
+            }
+        }
+    },
+    "complete": true,
+    "runnerSha256s": {
+        "metadata-witness-parity.mjs": "0501f91403213565bb23f40560ce2e6b05518f5a8598396c450a72bda8fbcfd0",
+        "metadata-witness-parity-vndb.mjs": "6729bb9a4362864222ee5938b065497947347820ab8b8c69e1660b5ea08f9a13"
+    },
+    "limitations": [
+        "One pass per arm validates complete parser output equality. No import timing was measured and no speed improvement is claimed.",
+        "The experiment does not validate browser storage bytes, persisted-content decoding, media blob writes, restart behavior, or actual whole-import completion. Separate exact-SHA browser qualification is required.",
+        "Equal maximum WASM memory lengths do not establish browser or pipeline memory neutrality. The candidate adds a fixed 1,040-byte call-local stack cache.",
+        "The initial all-corpus process completed JMdict and Jitendex, then was killed with exit 137 while opening VNDB before any VNDB row result. Those completed results were retained; the incomplete VNDB attempt is not a passing observation.",
+        "VNDB was rerun separately using file-backed ZIP reads, an entry generator, ten-bank groups, and a 640 MiB JavaScript heap cap.",
+        "The first file-backed VNDB attempt stopped after the baseline parser legitimately omitted prepared lookup indexes on a fallback group. The harness assertion was corrected to permit and hash optional index presence; the subsequent complete pass produced the reported VNDB result.",
+        "The two oracle programs have distinct recorded SHA-256 values because VNDB used the corrected file-backed reader and optional-index handling. Digest equality is asserted within each corpus, not between different corpora or oracle programs."
+    ]
+}

@@ -46,6 +46,29 @@ export function shouldOwnTermContentBytes(contentBytesLength, uniqueCount, sourc
 }
 
 /**
+ * Large projected groups keep private lookahead when repeated definitions make
+ * their content slab small. Borrow only byte-heavy complete groups: the compact
+ * content limit applies to every term row, including duplicate rows, so repeated
+ * definitions do not trigger a lease for only a few bytes per record. The caller must
+ * already have shared WASM storage and retain its existing persistence lease.
+ * @param {number|undefined} contentBytesLength
+ * @param {unknown} uniqueCount
+ * @param {unknown} sourceRowCount
+ * @param {number} rowCount
+ * @returns {boolean}
+ */
+export function shouldBorrowProjectedTermContent(contentBytesLength, uniqueCount, sourceRowCount, rowCount) {
+    return (
+        typeof contentBytesLength === 'number' && Number.isSafeInteger(contentBytesLength) &&
+        contentBytesLength > 0 &&
+        Number.isSafeInteger(rowCount) && rowCount > 0 &&
+        typeof uniqueCount === 'number' && Number.isSafeInteger(uniqueCount) && uniqueCount > 0 &&
+        uniqueCount <= rowCount && sourceRowCount === rowCount &&
+        contentBytesLength / rowCount > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
+    )
+}
+
+/**
  * Called only for an explicit owned result from the parser worker. Its fresh
  * compact buffer is immutable after publication; ordinary caller arrays and
  * borrowed WASM memory never receive this ownership witness.
@@ -64,8 +87,8 @@ export function registerOwnedTermContent(source) {
 }
 
 /**
- * Consumes a private one-time witness. The cache must first establish that its
- * retained range is the entire backing buffer, preserving cache byte coverage.
+ * Consumes a private one-time witness for a complete immutable backing buffer.
+ * A cache may retain a subrange view only while charging the full allocation.
  * @param {Uint8Array} source
  * @returns {boolean}
  */

@@ -1,0 +1,236 @@
+#!/usr/bin/env node
+/* Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+/* eslint @stylistic/semi: ["error", "never"] */
+
+import assert from 'node:assert/strict'
+import {execFileSync} from 'node:child_process'
+import {createHash} from 'node:crypto'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {mkdir, readFile, writeFile} from 'node:fs/promises'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
+import {parseArgs} from 'node:util'
+import {inflateRawSync} from 'node:zlib'
+import {BlobReader, ZipReader} from '@zip.js/zip.js'
+import {DictionaryImporter} from '../../../ext/js/dictionary/dictionary-importer.js'
+import {readDenseZipDirectory} from '../../../ext/js/dictionary/dense-zip-directory.js'
+import {RawZipPayloadReader} from '../../../ext/js/dictionary/term-bank-source-pipeline.js'
+import {copyWasmBackedColumnChunk, parseTermBankWithWasmColumnChunks, setTermBankWasmModule} from '../../../ext/js/dictionary/term-bank-wasm-parser.js'
+import {DictionaryImporterMediaLoader} from '../../mocks/dictionary-importer-media-loader.js'
+
+const root = fileURLToPath(new URL('../../../', import.meta.url))
+const {values, positionals} = parseArgs({allowPositionals: true, options: {
+    'cache-dir': {type: 'string', default: path.join(root, 'builds/e2e-dictionary-cache')},
+    out: {type: 'string', default: path.join(root, 'builds/perf/projected-media-references-20261125.json')},
+}})
+const dictionaryId = positionals[0] ?? 'vndb'
+assert.equal(positionals.length <= 1, true)
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const lockBytes = await readFile(path.join(root, 'test/perf/dictionaries.lock.json'))
+const fixture = JSON.parse(lockBytes).dictionaries[dictionaryId]
+assert(fixture, `Unknown locked dictionary ${dictionaryId}`)
+const archivePath = path.join(values['cache-dir'], fixture.cacheFile)
+const archiveHash = createHash('sha256')
+let archiveBytes = 0
+for await (const bytes of createReadStream(archivePath)) {
+    archiveHash.update(bytes)
+    archiveBytes += bytes.length
+}
+assert.equal(archiveBytes, fixture.sizeBytes)
+assert.equal(archiveHash.digest('hex'), fixture.sha256)
+const files = [
+    'ext/js/dictionary/dictionary-importer.js',
+    'ext/js/dictionary/term-bank-wasm-parser.js',
+    'ext/lib/term-bank-parser.wasm',
+    'test/perf/projected-media-references-20261125/verify.mjs',
+]
+const identities = async () => Object.fromEntries(await Promise.all(files.map(async (file) => [file, hash(await readFile(path.join(root, file)))])))
+const sourceIdentity = await identities()
+const report = {
+    schema: 1,
+    complete: false,
+    boundary: 'Every locked source JSON row and every native projected media chunk, processed in numeric bank order. Compares complete first-reference path/headword/reading tuples with an independent raw-JSON walk and the previous diagnostic construction, and verifies unchanged term-column bytes. Counts are cumulative allocated diagnostic buffer bytes and projected rows; they are not browser peak memory or complete import timing. Native parsing uses source-bank groups of at most 12,000 rows; browser worker scheduling, persistence, media I/O and UI are outside this proof.',
+    node: process.version,
+    head: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
+    sourceIdentity,
+    fixture: {...fixture, lockSha256: hash(lockBytes)},
+    banks: 0,
+    rows: 0,
+    chunks: 0,
+    mediaRows: 0,
+    projectedRows: 0,
+    selectedRows: 0,
+    oldPathReferences: 0,
+    selectedPathReferences: 0,
+    oldDiagnosticBytes: 0,
+    selectedDiagnosticBytes: 0,
+    oldDiagnosticSpanBytes: 0,
+    selectedDiagnosticSpanBytes: 0,
+    chunkLocalSetMaxEntries: 0,
+    firstReferenceSha256: null,
+    termColumnSha256: null,
+}
+const save = async () => {
+    await mkdir(path.dirname(values.out), {recursive: true})
+    await writeFile(values.out, JSON.stringify(report, null, 2) + '\n')
+}
+const decoder = new TextDecoder('utf-8', {ignoreBOM: true})
+const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(root, 'ext/lib/term-bank-parser.wasm'))))
+const knownSourcePaths = new Set()
+const knownOriginalPaths = new Set()
+const knownSelectedPaths = new Set()
+const sourceDigest = createHash('sha256')
+const originalDigest = createHash('sha256')
+const selectedDigest = createHash('sha256')
+const termDigest = createHash('sha256')
+
+// Independent source walker: only image glossary objects and img elements in
+// structured content carry image semantics. Plain text and link paths do not.
+const structuredPaths = (value, result) => {
+    if (Array.isArray(value)) {
+        for (const child of value) { structuredPaths(child, result) }
+    } else if (value !== null && typeof value === 'object') {
+        if (value.tag === 'img') {
+            if (typeof value.path === 'string') { result.push(value.path) }
+        } else {
+            structuredPaths(value.content, result)
+        }
+    }
+}
+const glossaryPaths = (glossary) => {
+    const result = []
+    for (const value of glossary) {
+        if (value === null || typeof value !== 'object' || Array.isArray(value)) { continue }
+        if (value.type === 'image' && typeof value.path === 'string') { result.push(value.path) }
+        if (value.type === 'structured-content') { structuredPaths(value.content, result) }
+    }
+    return result
+}
+const key = (diagnostics, row, field) => {
+    const decoded = diagnostics.decodedKeys?.get(row * 2 + field)
+    if (typeof decoded === 'string') { return decoded }
+    const span = row * 4 + field * 2
+    return decoder.decode(diagnostics.bytes.subarray(diagnostics.spans[span], diagnostics.spans[span] + diagnostics.spans[span + 1]))
+}
+const columnHash = (chunk) => {
+    const digest = createHash('sha256')
+    for (const value of [...Object.values(chunk), ...Object.values(chunk.termRecordPreinternedPlan)]) {
+        if (ArrayBuffer.isView(value)) { digest.update(new Uint8Array(value.buffer, value.byteOffset, value.byteLength)) }
+    }
+    return digest.digest('hex')
+}
+const collect = (rows, diagnostics, known, digest) => {
+    const result = []
+    let diagnosticIndex = 0
+    for (const {imagePaths} of rows) {
+        assert(imagePaths, 'This proof requires all media rows to use projected image references')
+        for (const imagePath of imagePaths) {
+            if (known.has(imagePath)) { continue }
+            const tuple = [imagePath, key(diagnostics, diagnosticIndex, 0), key(diagnostics, diagnosticIndex, 1)]
+            known.add(imagePath)
+            result.push(tuple)
+            digest.update(JSON.stringify(tuple) + '\n')
+        }
+        ++diagnosticIndex
+    }
+    return result
+}
+
+let zipReader
+try {
+    const archive = await openAsBlob(archivePath)
+    let entries = await readDenseZipDirectory(archive)
+    if (entries === null) {
+        zipReader = new ZipReader(new BlobReader(archive))
+        entries = await zipReader.getEntries()
+    }
+    const termFiles = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.match(/\d+/)[0]) - Number(b.filename.match(/\d+/)[0]))
+    const reader = new RawZipPayloadReader(archive)
+    const signal = new AbortController().signal
+    for (const file of termFiles) {
+        const compressed = await reader.read(file, signal)
+        assert(compressed, file.filename)
+        const json = file.compressionMethod === 0 ? compressed : inflateRawSync(compressed)
+        assert.equal(json.byteLength, file.uncompressedSize)
+        const sourceRows = JSON.parse(decoder.decode(json))
+        const expected = []
+        for (const row of sourceRows) {
+            for (const imagePath of glossaryPaths(row[5])) {
+                if (knownSourcePaths.has(imagePath)) { continue }
+                knownSourcePaths.add(imagePath)
+                const tuple = [imagePath, row[0], row[1] || row[0]]
+                expected.push(tuple)
+                sourceDigest.update(JSON.stringify(tuple) + '\n')
+            }
+        }
+        const original = []
+        const selected = []
+        let nativeRows = 0
+        await parseTermBankWithWasmColumnChunks(new Uint8Array(json), 3, (borrowed) => {
+            const chunk = copyWasmBackedColumnChunk(borrowed, false, true)
+            const before = columnHash(chunk)
+            const admittedCount = knownSelectedPaths.size
+            const newRows = importer._selectNewMediaReferenceRows(chunk.mediaRows, knownSelectedPaths)
+            assert.equal(knownSelectedPaths.size, admittedCount)
+            const oldDiagnostics = importer._createMediaReferenceDiagnostics(chunk)
+            const newDiagnostics = importer._createMediaReferenceDiagnostics({...chunk, mediaRows: newRows})
+            original.push(...collect(chunk.mediaRows, oldDiagnostics, knownOriginalPaths, originalDigest))
+            selected.push(...collect(newRows, newDiagnostics, knownSelectedPaths, selectedDigest))
+            assert.equal(columnHash(chunk), before)
+            termDigest.update(before)
+            nativeRows += chunk.rowCount
+            ++report.chunks
+            report.mediaRows += chunk.mediaRows.length
+            report.projectedRows += chunk.mediaRows.filter(({imagePaths}) => typeof imagePaths !== 'undefined').length
+            report.selectedRows += newRows.length
+            report.oldPathReferences += chunk.mediaRows.reduce((sum, {imagePaths}) => sum + (imagePaths?.length ?? 0), 0)
+            const newPathCount = newRows.reduce((sum, {imagePaths}) => sum + (imagePaths?.length ?? 0), 0)
+            report.selectedPathReferences += newPathCount
+            report.chunkLocalSetMaxEntries = Math.max(report.chunkLocalSetMaxEntries, newPathCount)
+            report.oldDiagnosticBytes += oldDiagnostics?.bytes.byteLength ?? 0
+            report.selectedDiagnosticBytes += newDiagnostics?.bytes.byteLength ?? 0
+            report.oldDiagnosticSpanBytes += oldDiagnostics?.spans.byteLength ?? 0
+            report.selectedDiagnosticSpanBytes += newDiagnostics?.spans.byteLength ?? 0
+        }, 12000, {
+            ...Reflect.get(importer, '_termBankExperiments'),
+            singleChunk: false,
+            emitTermByteLists: false,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            prepareLookupIndexes: true,
+            mediaHintFastScan: true,
+            validateGlossaryTypes: true,
+            skipTagRuleDecode: true,
+            lazyGlossaryDecode: true,
+        })
+        assert.equal(nativeRows, sourceRows.length, file.filename)
+        assert.deepEqual(original, expected, `Original diagnostics: ${file.filename}`)
+        assert.deepEqual(selected, expected, `Selected diagnostics: ${file.filename}`)
+        report.rows += nativeRows
+        ++report.banks
+        if (report.banks % 50 === 0) {
+            await save()
+            console.log(JSON.stringify({banks: report.banks, rows: report.rows, selectedPaths: knownSelectedPaths.size}))
+        }
+    }
+    assert.equal(report.rows, fixture.termRows)
+    assert.equal(knownSelectedPaths.size, fixture.mediaFiles)
+    assert.equal(knownOriginalPaths.size, knownSourcePaths.size)
+    report.firstReferenceSha256 = sourceDigest.digest('hex')
+    assert.equal(originalDigest.digest('hex'), report.firstReferenceSha256)
+    assert.equal(selectedDigest.digest('hex'), report.firstReferenceSha256)
+    report.termColumnSha256 = termDigest.digest('hex')
+    assert.deepEqual(await identities(), sourceIdentity)
+    report.complete = true
+    await save()
+    console.log(JSON.stringify(report, null, 2))
+} catch (error) {
+    report.error = {message: String(error), stack: error.stack}
+    await save()
+    throw error
+} finally {
+    await zipReader?.close()
+}

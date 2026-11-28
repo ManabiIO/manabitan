@@ -59,4 +59,42 @@ describe('getImageMediaTypeFromFileName', () => {
         expect(getImageMediaTypeFromFileName('.png')).toBe('image/png');
         expect(getImageMediaTypeFromFileName('assets/.JPEG')).toBe('image/jpeg');
     });
+
+    test('recognizes every WebP case combination', () => {
+        for (let mask = 0; mask < 16; ++mask) {
+            const extension = [...'webp'].map((letter, index) => (((mask >>> index) & 1) === 0 ? letter : letter.toUpperCase())).join('');
+            expect(getImageMediaTypeFromFileName(`assets/image.${extension}`)).toBe('image/webp');
+        }
+    });
+
+    test.each([
+        '.webp',
+        'assets/.webp',
+        'assets/image.png.webp',
+        'assets/image.webp/image.webp',
+        'assets/image.webp\\image.webp',
+        '\uFEFF\uD800/\u65E5\u672C\u8A9E.webp',
+        'assets/\nimage.webp',
+        `${'long-directory/'.repeat(100)}image.webp`,
+    ])('recognizes the final WebP suffix in %s', (path) => {
+        expect(getImageMediaTypeFromFileName(path)).toBe('image/webp');
+    });
+
+    test.each([
+        'webp',
+        'imagewebp',
+        'image.webp.',
+        'image.webp2',
+        'image.webp\n',
+        'image.webp\r\n',
+        'image.webp\u0000',
+        'image.webp?query',
+        'image.webp#fragment',
+        'image.webp/file',
+        'image.webp\\file',
+        'image\uFF0Ewebp',
+        'image.we\uFF42p',
+    ])('rejects a nonterminal or noncanonical WebP suffix in %s', (path) => {
+        expect(getImageMediaTypeFromFileName(path)).toBeNull();
+    });
 });

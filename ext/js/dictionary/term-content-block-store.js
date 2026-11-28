@@ -36,7 +36,7 @@ import {
 } from './term-content-block-envelope.js';
 import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
@@ -720,6 +720,21 @@ export class TermContentBlockStore {
             sourceLengths,
             compressionDictName,
             force,
+            () => {
+                const plan = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+                return {
+                    ...plan,
+                    createBlock: (blockIndex) => packContentSpanBlock(
+                        sourceBytes,
+                        sourceOffsets,
+                        sourceLengths,
+                        plan.blockStartIndexes[blockIndex],
+                        plan.blockStartIndexes[blockIndex + 1],
+                        plan.packedChunkLengths[blockIndex],
+                        blockIndex,
+                    ),
+                };
+            },
         );
     }
 
@@ -1015,24 +1030,38 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
+     * @param {(() => {blockStartIndexes: Uint32Array, packedChunkLengths: Uint32Array, createBlock: (index: number) => Uint8Array})|null} [prepareBlocks]
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force) {
+    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force, prepareBlocks = null) {
         const compressionExperiments = this._compressionExperiments;
         let uncompressedBytes = 0;
         for (const length of sourceLengths) { uncompressedBytes += length; }
         if (uncompressedBytes === 0 || (!force && uncompressedBytes < this._minInputBytes)) { return null; }
 
         let phaseStart = safePerformance.now();
-        let packed = pack();
+        let packed = prepareBlocks === null ? pack() : prepareBlocks();
         let packMs = safePerformance.now() - phaseStart;
-        let packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
+        let packedChunkLengths = 'packedChunks' in packed ?
+            Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength) :
+            packed.packedChunkLengths;
         /** @type {Uint8Array[]} */
         let compressedChunks;
         let envelopeMs = 0;
+        let compressionPackMs = 0;
         phaseStart = safePerformance.now();
         try {
-            const result = await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName, compressionExperiments);
+            const createBlock = 'createBlock' in packed ? packed.createBlock : null;
+            const result = 'packedChunks' in packed ?
+                await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName, compressionExperiments) :
+                await compressWrappedTermContentZstdBlocks(packedChunkLengths, (blockIndex) => {
+                    const packStart = safePerformance.now();
+                    const content = /** @type {(index: number) => Uint8Array} */ (createBlock)(blockIndex);
+                    const elapsed = safePerformance.now() - packStart;
+                    packMs += elapsed;
+                    compressionPackMs += elapsed;
+                    return content;
+                }, compressionDictName, compressionExperiments);
             compressedChunks = result.chunks;
             envelopeMs = result.envelopeMs;
             if (!result.wrapped) {
@@ -1040,7 +1069,7 @@ export class TermContentBlockStore {
                 compressedChunks = compressedChunks.map(wrapCompressedTermContentBlock);
                 envelopeMs += safePerformance.now() - envelopeStart;
             }
-            validateCompressedChunks(compressedChunks, packed.packedChunks.length);
+            validateCompressedChunks(compressedChunks, packedChunkLengths.length);
         } catch (_) {
             // Worker dispatch may detach packed slabs. Repack from stable source
             // bytes before using the synchronous fallback.
@@ -1048,6 +1077,7 @@ export class TermContentBlockStore {
             packed = pack();
             packMs += safePerformance.now() - retryPackStart;
             phaseStart = safePerformance.now();
+            compressionPackMs = 0;
             packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
             compressedChunks = packed.packedChunks.map((content) => {
                 const compressed = compressTermContentZstd(content, compressionDictName);
@@ -1058,7 +1088,7 @@ export class TermContentBlockStore {
             });
             validateCompressedChunks(compressedChunks, packed.packedChunks.length);
         }
-        const compressMs = Math.max(0, safePerformance.now() - phaseStart - envelopeMs);
+        const compressMs = Math.max(0, safePerformance.now() - phaseStart - envelopeMs - compressionPackMs);
         return await this._appendCompressedBlocks(
             packed,
             packedChunkLengths,
@@ -1305,51 +1335,62 @@ function createTermContentReferenceSlabs(
     let blockIndex = -1;
     let nextBlockStart = 0;
     let sourceOffset = 0;
-    const blockPrefix = new DataView(new ArrayBuffer(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES));
-    let blockOffsetLow = 0;
-    let blockOffsetHigh = 0;
-    let blockStoredLength = 0;
+    const blockPrefix = new Uint8Array(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+    const blockPrefixView = new DataView(blockPrefix.buffer);
     let blockUncompressedLength = 0;
     for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
         const startIndex = slabIndex * entriesPerSlab;
         const entryCount = Math.min(entriesPerSlab, sourceLengths.length - startIndex);
         const slab = new Uint8Array(entryCount * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
         const view = new DataView(slab.buffer, slab.byteOffset, slab.byteLength);
-        for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
+        for (let localIndex = 0; localIndex < entryCount;) {
             const contentIndex = startIndex + localIndex;
             if (contentIndex === nextBlockStart) {
                 ++blockIndex;
                 nextBlockStart = packed.blockStartIndexes[blockIndex + 1];
+                if (
+                    packed.blockStartIndexes[blockIndex] !== contentIndex ||
+                    !Number.isInteger(nextBlockStart) || nextBlockStart <= contentIndex || nextBlockStart > sourceLengths.length
+                ) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
                 sourceOffset = 0;
                 blockUncompressedLength = packedChunkLengths[blockIndex];
-                // The checked scalar encoder validates the invariant block
-                // fields once. Cache its fixed words for each entry in the block.
+                // Validate the invariant fields once per compressed block.
                 writeRawTermContentCompactBlockReference(
-                    blockPrefix,
+                    blockPrefixView,
                     0,
                     blockOffsets[blockIndex],
                     blockLengths[blockIndex],
                     blockUncompressedLength,
                     0,
                 );
-                blockOffsetLow = blockPrefix.getUint32(0, true);
-                blockOffsetHigh = blockPrefix.getUint32(4, true);
-                blockStoredLength = blockPrefix.getUint32(8, true);
             }
-            const length = sourceLengths[contentIndex];
-            const entryOffset = sourceOffset;
-            sourceOffset += length;
-            // Empty rows at the end keep their reference slot with an in-block
-            // placeholder offset. Exact deduplication handles them by length.
-            if (sourceOffset > blockUncompressedLength || (contentIndex + 1 === nextBlockStart && sourceOffset !== blockUncompressedLength)) {
-                throw new RangeError('Invalid compact term-content block reference');
+            const runEnd = Math.min(entryCount, nextBlockStart - startIndex);
+            const runStartByte = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            const runEndByte = runEnd * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            slab.set(blockPrefix, runStartByte);
+            // Repeat complete templates in-place, retaining explicit little-
+            // endian bytes without rewriting four invariant words per entry.
+            for (let filledEnd = runStartByte + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES; filledEnd < runEndByte;) {
+                const copyLength = Math.min(filledEnd - runStartByte, runEndByte - filledEnd);
+                slab.copyWithin(filledEnd, runStartByte, runStartByte + copyLength);
+                filledEnd += copyLength;
             }
-            const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
-            view.setUint32(offset, blockOffsetLow, true);
-            view.setUint32(offset + 4, blockOffsetHigh, true);
-            view.setUint32(offset + 8, blockStoredLength, true);
-            view.setUint32(offset + 12, blockUncompressedLength, true);
-            view.setUint32(offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4, entryOffset === blockUncompressedLength ? 0 : entryOffset, true);
+            for (; localIndex < runEnd; ++localIndex) {
+                const index = startIndex + localIndex;
+                const entryOffset = sourceOffset;
+                sourceOffset += sourceLengths[index];
+                // Empty trailing rows keep an in-block placeholder offset.
+                if (sourceOffset > blockUncompressedLength || (index + 1 === nextBlockStart && sourceOffset !== blockUncompressedLength)) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
+                view.setUint32(
+                    localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4,
+                    entryOffset === blockUncompressedLength ? 0 : entryOffset,
+                    true,
+                );
+            }
         }
         referenceSlabs[slabIndex] = slab;
     }
@@ -1463,31 +1504,52 @@ function packPlannedContentSpansIntoSlabs(
     }
     const packedChunks = new Array(packedChunkLengths.length);
     for (let blockIndex = 0; blockIndex < packedChunks.length; ++blockIndex) {
-        const output = new Uint8Array(packedChunkLengths[blockIndex]);
-        const startIndex = blockStartIndexes[blockIndex];
-        const endIndex = blockStartIndexes[blockIndex + 1];
-        let outputOffset = 0;
-        let runStart = sourceOffsets[startIndex];
-        let runEnd = runStart;
-        let runOutputOffset = 0;
-        for (let i = startIndex; i < endIndex; ++i) {
-            const sourceOffset = sourceOffsets[i];
-            const length = sourceLengths[i];
-            if (sourceOffset !== runEnd) {
-                if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-                runStart = sourceOffset;
-                runOutputOffset = outputOffset;
-            }
-            runEnd = sourceOffset + length;
-            outputOffset += length;
-        }
-        if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-        if (outputOffset !== output.byteLength) {
-            throw new RangeError(`Packed term content fallback block ${blockIndex} has an invalid length`);
-        }
-        packedChunks[blockIndex] = output;
+        packedChunks[blockIndex] = packContentSpanBlock(
+            sourceBytes,
+            sourceOffsets,
+            sourceLengths,
+            blockStartIndexes[blockIndex],
+            blockStartIndexes[blockIndex + 1],
+            packedChunkLengths[blockIndex],
+            blockIndex,
+        );
     }
     return packedChunks;
+}
+
+/**
+ * @param {Uint8Array} sourceBytes
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} startIndex
+ * @param {number} endIndex
+ * @param {number} packedLength
+ * @param {number} blockIndex
+ * @returns {Uint8Array}
+ * @throws {RangeError} If the preserved block length is inconsistent.
+ */
+function packContentSpanBlock(sourceBytes, sourceOffsets, sourceLengths, startIndex, endIndex, packedLength, blockIndex) {
+    const output = new Uint8Array(packedLength);
+    let outputOffset = 0;
+    let runStart = sourceOffsets[startIndex];
+    let runEnd = runStart;
+    let runOutputOffset = 0;
+    for (let i = startIndex; i < endIndex; ++i) {
+        const sourceOffset = sourceOffsets[i];
+        const length = sourceLengths[i];
+        if (sourceOffset !== runEnd) {
+            if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
+            runStart = sourceOffset;
+            runOutputOffset = outputOffset;
+        }
+        runEnd = sourceOffset + length;
+        outputOffset += length;
+    }
+    if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
+    if (outputOffset !== output.byteLength) {
+        throw new RangeError(`Packed term content fallback block ${blockIndex} has an invalid length`);
+    }
+    return output;
 }
 
 /**

@@ -66,7 +66,7 @@ import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictio
 import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {
     createGlossarySearchQuery,
@@ -76,6 +76,7 @@ import {
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -145,10 +146,11 @@ const INTERNAL_PENDING_CONTENT_SPANS = new WeakSet();
  * @property {Uint8Array} resolvedFlags
  * @property {Float64Array} resolvedOffsets
  * @property {Uint32Array} resolvedLengths
+ * @property {boolean} [resolutionDeferred] Empty resolution columns await first storage admission.
  * @property {string[]|null} resolvedDictNames
  * @property {string} [resolvedUniformDictName]
- * @property {Uint32Array} pendingEpochs
- * @property {Uint32Array} pendingIndexes
+ * @property {Uint32Array|null} pendingEpochs Null together with pendingIndexes until generic deduplication needs scratch.
+ * @property {Uint32Array|null} pendingIndexes
  * @property {Uint32Array} [uniqueRowIndexes]
  * @property {Uint32Array} [uniqueSignatures]
  * @property {number} nextEpoch
@@ -171,6 +173,7 @@ const INTERNAL_PENDING_CONTENT_SPANS = new WeakSet();
  * @property {number} [contentBytesBaseOffset]
  * @property {() => void} [releaseBorrowedContent]
  * @property {Uint32Array} [contentMetaList]
+ * @property {boolean} [contentMetaByUniqueIndex]
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
  * @property {boolean} [useResolvedContentReferences]
@@ -701,6 +704,9 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatches = new Map();
         /** @type {number} */
         this._recentTermContentSourceBatchBytes = 0;
+        /** @type {number} */
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentBoundaryBatchId = 0
         /** @type {number} */
         this._recentTermContentSourceCacheMaxBytes = this._computeRecentTermContentSourceCacheMaxBytes();
         /** @type {number} */
@@ -1475,8 +1481,14 @@ export class DictionaryDatabase {
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
-                for (const dropIndexSql of this._createDropIndexesSql()) {
-                    db.exec(dropIndexSql);
+                // Schema initialization already removes disabled secondary
+                // indexes before this connection can accept an import. Only
+                // the enabled policy recreates indexes between imports.
+                if (this._enableSqliteSecondaryIndexes) {
+                    for (const dropIndexSql of this._createDropIndexesSql()) {
+                        // eslint-disable-next-line @stylistic/semi
+                        db.exec(dropIndexSql)
+                    }
                 }
                 this._clearTermEntryContentMetaCaches();
                 this._termContentBlockImportSession?.close();
@@ -1586,6 +1598,7 @@ export class DictionaryDatabase {
             let termRecordLookupIndexWriteBytes = 0;
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
+            let termRecordLookupIndexWorkerFileCount = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1656,6 +1669,7 @@ export class DictionaryDatabase {
                             termRecordLookupIndexWriteBytes = metrics.lookupIndexWriteBytes ?? 0;
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
+                            termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1719,8 +1733,10 @@ export class DictionaryDatabase {
                     this._importJournalRecoveryPending = true;
                     commitMs = safePerformance.now() - tCommitStart;
                     if (publication !== null) {
-                        this._termRecordGenerationByStorage.set(this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title), sessionId);
+                        const storageName = this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title);
+                        this._termRecordGenerationByStorage.set(storageName, sessionId);
                         this._setGenerationMediaDescriptor(publication.summary.title, publication.summary.generationMedia);
+                        this._termRecordStore.publishExactLookupRoute?.(storageName);
                     }
                     try {
                         await this._importJournal.clear();
@@ -1782,6 +1798,7 @@ export class DictionaryDatabase {
                         `termRecordLookupIndexWriteBytes=${termRecordLookupIndexWriteBytes} ` +
                         `termRecordLookupIndexAwait=${termRecordLookupIndexAwaitMs.toFixed(1)}ms ` +
                         `termRecordLookupIndexMaxQueuedBytes=${termRecordLookupIndexMaxQueuedBytes} ` +
+                        `termRecordLookupIndexWorkerFiles=${termRecordLookupIndexWorkerFileCount} ` +
                         `termsVtabSync=${termsVirtualTableSyncMs.toFixed(1)}ms ` +
                         `createIndexes=${createIndexesMs.toFixed(1)}ms ` +
                         `cacheReset=${cacheResetMs.toFixed(1)}ms ` +
@@ -1829,6 +1846,7 @@ export class DictionaryDatabase {
                     compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
+                    termRecordLookupIndexWorkerFileCount,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
@@ -1918,7 +1936,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
+     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
         this._termContentBlockStore.setCompressionExperiments(options);
@@ -1946,6 +1964,7 @@ export class DictionaryDatabase {
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
         this._termContentStore.setQueueImportWritesEnabled(options.queueTermContentWrites === true);
         this._termRecordStore.setExpectedImportBytes(options.expectedTermRecordImportBytes ?? null);
+        this._termRecordStore.setRawTermBankSourceBytes(options.rawTermBankSourceBytes ?? null);
     }
 
     /**
@@ -3283,7 +3302,23 @@ null;
                 dictionaryNames: requestedDictionaryNames,
             }));
         }
-        await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
+        const routeOwner = matchType === 'exact' ? this._termRecordStore.getExactLookupRouteOwner?.() ?? null : null;
+        const routedName = routeOwner === null ?
+void 0 :
+            requestedDictionaryNames.find((name) => this._getTermRecordStorageName(name) === routeOwner);
+        /** @type {import('./term-record-opfs-store.js').ExactLookupView|null} */
+        let view = null;
+        if (typeof routedName === 'undefined') {
+            await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
+        } else {
+            if (requestedDictionaryNames.length > 1) {
+                // Publish the other owners first so the scoped read checks
+                // every active dictionary for overlapping record IDs.
+                await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames.filter((name) => name !== routedName));
+            }
+            view = await this._termRecordStore.prepareExactLookupView(this._getTermRecordStorageName(routedName), termList);
+            if (view === null) { await this._ensureDirectTermIndexesLoaded([routedName]); }
+        }
         this._assertTermLookupGeneration(generation);
         if (typeof observedAvailability !== 'undefined') {
             observedAvailability.push(...this.getDictionaryAvailability(requestedDictionaryNames));
@@ -3329,7 +3364,7 @@ null;
             for (let i = 0; i < termList.length; ++i) {
                 const term = termList[i];
                 const termPresenceKey = this._createTermExactPresenceCacheKey(dictionaryCacheKey, term);
-                const cachedPresence = this._termExactPresenceCache.get(termPresenceKey);
+                const cachedPresence = view === null ? this._termExactPresenceCache.get(termPresenceKey) : void 0;
                 if (cachedPresence === false) {
                     continue;
                 }
@@ -3356,24 +3391,30 @@ null;
                 const cacheableReadingIds = [];
                 const termPresenceKey = this._createTermExactPresenceCacheKey(dictionaryCacheKey, term);
                 const termMatchKey = this._createTermExactMatchCacheKey(dictionaryNames, term);
-                const cachedMatches = shouldReportDiagnostics ? void 0 : this._termExactMatchCache.get(termMatchKey);
+                const cachedMatches = shouldReportDiagnostics || view !== null ? void 0 : this._termExactMatchCache.get(termMatchKey);
                 if (typeof cachedMatches !== 'undefined') {
                     found = cachedMatches.expression.length > 0 || cachedMatches.reading.length > 0;
                     appendExactMatches(cachedMatches.expression, 'term', itemIndexes, visitedExpressionIds, cacheableExpressionIds);
                     appendExactMatches(cachedMatches.reading, 'reading', itemIndexes, visitedReadingIds, cacheableReadingIds);
                 } else {
                     const directFindForDictionaries = Reflect.get(this._termRecordStore, 'findTermIdMatchesForDictionaries');
-                    const dictionaryMatches = typeof directFindForDictionaries === 'function' ?
-                        /** @type {(dictionaryNames: string[], query: string) => Array<{expression: number[], reading: number[]}>} */ (
-                            directFindForDictionaries
-                        ).call(
-                            this._termRecordStore,
+                    const dictionaryMatches = view !== null ?
+                        this._termRecordStore.findTermIdMatchesForDictionaries(
                             dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
                             term,
+                            view,
                         ) :
+                        (typeof directFindForDictionaries === 'function' ?
+                        /** @type {(dictionaryNames: string[], query: string) => Array<{expression: number[], reading: number[]}>} */ (
+                                directFindForDictionaries
+                            ).call(
+                                this._termRecordStore,
+                                dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
+                                term,
+                            ) :
                         dictionaryNames.map(
                             (dictionaryName) => this._findDirectTermIdMatches(dictionaryName, term),
-                        );
+                        ));
                     for (let dictionaryIndex = 0; dictionaryIndex < dictionaryNames.length; ++dictionaryIndex) {
                         const dictionaryName = dictionaryNames[dictionaryIndex];
                         const expressionIds = dictionaryMatches[dictionaryIndex].expression;
@@ -3397,7 +3438,7 @@ null;
                         appendExactMatches(readingIds, 'reading', itemIndexes, visitedReadingIds, cacheableReadingIds);
                     }
                     if (
-                        found &&
+                        view === null && found &&
                         cacheableExpressionIds.length + cacheableReadingIds.length <= TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM
                     ) {
                         this._termExactMatchCache.set(termMatchKey, {
@@ -3406,11 +3447,11 @@ null;
                         });
                     }
                 }
-                this._setTermExactPresenceCached(termPresenceKey, found);
+                if (view === null) { this._setTermExactPresenceCached(termPresenceKey, found); }
             }
 
             if (idMatches.size === 0) {
-                this._assertTermLookupAvailability(generation, dictionaryNames);
+                this._assertTermLookupAvailability(generation, dictionaryNames, view);
                 if (shouldReportDiagnostics) {
                     reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                         stage: 'findTermsBulk-exact',
@@ -3427,8 +3468,8 @@ null;
                 return [];
             }
 
-            const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-            this._assertTermLookupAvailability(generation, dictionaryNames);
+            const rowsById = await this._fetchTermRowsByIds(idMatches.keys(), view);
+            this._assertTermLookupAvailability(generation, dictionaryNames, view);
             if (shouldReportDiagnostics) {
                 reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                     stage: 'findTermsBulk-exact',
@@ -5108,7 +5149,7 @@ null;
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -5127,7 +5168,7 @@ null;
             const hasContentSlab = (
                 chunk.contentBytesBuffer instanceof Uint8Array &&
                 chunk.contentMetaList instanceof Uint32Array &&
-                chunk.contentMetaList.length >= chunk.rowCount * 4
+                (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
             );
             if (hasHashArrays || hasContentSlab) {
                 await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
@@ -6380,6 +6421,8 @@ null;
         this._inFlightTermContentSourceBatches.clear();
         this._recentTermContentSourceBatches.clear();
         this._recentTermContentSourceBatchBytes = 0;
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentBoundaryBatchId = 0
         this._nextRecentTermContentSourceBatchId = 1;
     }
 
@@ -6818,10 +6861,11 @@ null;
         return {buffer, offset, length};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Retains bounded owned bytes so the next parser groups can verify exact
-     * duplicates without reading recently written OPFS blocks. Complete compact
-     * parser slabs can be adopted without changing cache coverage or cost.
+     * duplicates without reading recently written OPFS blocks. Immutable parser
+     * slabs can back a retained view when their full allocation fits the budget.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
@@ -6836,6 +6880,14 @@ null;
         ) {
             return 0;
         }
+        // The previous boundary has already been available to this group's
+        // resolver. Retire it before considering the newly published boundary.
+        const previousBoundary = this._recentTermContentSourceBatches.get(this._recentTermContentBoundaryBatchId)
+        if (typeof previousBoundary !== 'undefined') {
+            this._recentTermContentSourceBatches.delete(this._recentTermContentBoundaryBatchId)
+            this._recentTermContentSourceBatchBytes -= previousBoundary.buffer.byteLength
+        }
+        this._recentTermContentBoundaryBatchId = 0
         const averageSampleCount = Math.min(
             staged.indexes.length,
             TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
@@ -6851,17 +6903,31 @@ null;
             ++sampledPublishedCount;
             sampledContentBytes += spans.lengths[sourceIndex];
         }
-        if (
+        let retainBoundaryOnly = (
             sampledPublishedCount >= Math.min(16, averageSampleCount) &&
             sampledContentBytes > sampledPublishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
-        ) {
-            return 0;
+        )
+        let sourceStart = 0
+        let sourceEnd = staged.indexes.length
+        if (retainBoundaryOnly) {
+            // Aliases of the final definition can continue into the next
+            // parser group even when retaining this whole slab is wasteful.
+            // Keep only its last published indexed span, under the same budget.
+            sourceStart = sourceEnd - 1
+            while (sourceStart >= 0) {
+                const index = staged.indexes[sourceStart]
+                if (index >= 0 && this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED) { break }
+                --sourceStart
+            }
+            if (sourceStart < 0) { return 0 }
+            sourceEnd = sourceStart + 1
         }
         let minimumOffset = Infinity;
         let maximumEnd = 0;
         let publishedCount = 0;
         let publishedContentBytes = 0;
-        for (let i = 0; i < staged.indexes.length; ++i) {
+        let lastPublishedSource = -1
+        for (let i = sourceStart; i < sourceEnd; ++i) {
             const index = staged.indexes[i];
             if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
             const offset = spans.offsets[i];
@@ -6871,17 +6937,29 @@ null;
             maximumEnd = Math.max(maximumEnd, offset + length);
             ++publishedCount;
             publishedContentBytes += length;
+            lastPublishedSource = i
+        }
+        if (!retainBoundaryOnly && publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
+            retainBoundaryOnly = true
+            sourceStart = lastPublishedSource
+            sourceEnd = sourceStart + 1
+            minimumOffset = spans.offsets[sourceStart]
+            maximumEnd = minimumOffset + spans.lengths[sourceStart]
+            publishedCount = 1
         }
         if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
-        if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
-            return 0;
-        }
         const source = spans.buffer;
         const sharedSource = !(source.buffer instanceof ArrayBuffer);
         const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
-        const byteLength = maximumEnd - minimumOffset + padding;
+        const copyByteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
-        if (byteLength > cacheMaxBytes) { return 0; }
+        if (copyByteLength > cacheMaxBytes || (retainBoundaryOnly && copyByteLength > TERM_CONTENT_BLOCK_TARGET_BYTES)) { return 0; }
+        const adoptTransferredSource = (
+            !retainBoundaryOnly && source.buffer.byteLength <= cacheMaxBytes && takeOwnedTermContent(source)
+        );
+        // A retained view avoids copying an immutable slab to trim its edges.
+        // Charge the complete backing allocation, including those unused edges.
+        const byteLength = adoptTransferredSource ? source.buffer.byteLength : copyByteLength;
         while (
             this._recentTermContentSourceBatchBytes + byteLength > cacheMaxBytes &&
             this._recentTermContentSourceBatches.size > 0
@@ -6894,25 +6972,26 @@ null;
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
             this._recentTermContentSourceBatchBytes = 0;
+            this._recentTermContentBoundaryBatchId = 0
             this._termEntryContentMetaRecentSourceBatchIdTable.fill(0);
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const adoptTransferredSource = (
-            minimumOffset === 0 && maximumEnd === source.byteLength &&
-            takeOwnedTermContent(source)
-        );
         // Match the source alignment so the shared bytes need only one copy.
+        const copySource = retainBoundaryOnly || sharedSource
         const owned = adoptTransferredSource ?
-            source :
-            (sharedSource ?
+            (minimumOffset === 0 && maximumEnd === source.byteLength ?
+                source :
+                source.subarray(minimumOffset, maximumEnd)) :
+            (copySource ?
                 new Uint8Array(byteLength).subarray(padding) :
                 source.slice(minimumOffset, maximumEnd));
-        if (sharedSource && !adoptTransferredSource) {
+        if (copySource && !adoptTransferredSource) {
             owned.set(source.subarray(minimumOffset, maximumEnd));
         }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
+        if (retainBoundaryOnly) { this._recentTermContentBoundaryBatchId = batchId }
         if (adoptTransferredSource && importMetrics !== null) {
             importMetrics.dedupRecentSourceAdoptedBytes = (importMetrics.dedupRecentSourceAdoptedBytes ?? 0) + owned.byteLength;
         }
@@ -6937,7 +7016,7 @@ null;
             this._termEntryContentMetaRecentSourceBatchIdTable.fill(batchId, firstIndex, endIndex);
             this._termEntryContentMetaRecentSourceOffsetTable.set(spans.offsets.subarray(0, staged.indexes.length), firstIndex);
         } else {
-            for (let i = 0; i < staged.indexes.length; ++i) {
+            for (let i = sourceStart; i < sourceEnd; ++i) {
                 const index = staged.indexes[i];
                 if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
                 this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
@@ -6946,6 +7025,7 @@ null;
         }
         return owned.byteLength;
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Builds diagnostic strings only on a read failure, not for every imported
@@ -7271,26 +7351,33 @@ null;
         let capacity = Math.max(16, oldCapacity);
         while (capacity < requiredCount) { capacity *= 2; }
         const arena = new TermContentMetadataArena(capacity, slotCapacity);
+        /* eslint-disable @stylistic/semi */
+        // The high-water mark includes empty IDs retained for reuse after
+        // rollback. Never truncate to the published/pending entry count.
+        const denseCount = this._termEntryContentMetaDenseCount
+        const rehash = forceRehash || oldSlotTable.length !== slotCapacity
         if (this._termContentMetadataArena !== null) {
-            arena.copyFrom(this._termContentMetadataArena);
+            arena.copyFrom(this._termContentMetadataArena, denseCount, !rehash)
         }
+        /* eslint-enable @stylistic/semi */
         const growDense = capacity !== oldCapacity;
         const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
         const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
+        /* eslint-disable @stylistic/semi */
         if (growDense) {
-            idTable.set(this._termEntryContentMetaIdTable);
-            offsetTable.set(this._termEntryContentMetaOffsetTable);
-            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+            idTable.set(this._termEntryContentMetaIdTable.subarray(0, denseCount))
+            offsetTable.set(this._termEntryContentMetaOffsetTable.subarray(0, denseCount))
+            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable.subarray(0, denseCount))
+            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable.subarray(0, denseCount))
+            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable.subarray(0, denseCount))
         }
-        if (forceRehash || oldSlotTable.length !== slotCapacity) {
-            arena.slots.fill(0);
+        /* eslint-enable @stylistic/semi */
+        if (rehash) {
+            // A fresh WASM memory is already zeroed; no old slots were copied.
             const mask = slotCapacity - 1;
-            const denseCount = this._termEntryContentMetaDenseCount;
             const useDense = denseCount <= oldSlotTable.length;
             const scanLength = useDense ? denseCount : oldSlotTable.length;
             for (let i = 0; i < scanLength; ++i) {
@@ -7682,6 +7769,10 @@ this._readTermContentSignature(
             this._termEntryContentMetaFreeIndexes.push(index);
         }
         for (const batchId of recentSourceBatchIds) {
+            if (this._recentTermContentBoundaryBatchId === batchId) {
+                // eslint-disable-next-line @stylistic/semi
+                this._recentTermContentBoundaryBatchId = 0
+            }
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
@@ -8377,7 +8468,7 @@ this._readTermContentSignature(
         const hasContentSlab = chunk.contentBytesBuffer instanceof Uint8Array && chunk.contentMetaList instanceof Uint32Array;
         if (
             hasContentSlab ?
-                chunk.contentMetaList.length < count * 4 :
+                (chunk.contentMetaByUniqueIndex !== true && chunk.contentMetaList.length < count * 4) :
                 (chunk.contentHash1List.length < count || chunk.contentHash2List.length < count)
         ) {
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
@@ -8712,13 +8803,14 @@ this._readTermContentSignature(
         const contentBytesBuffer = chunk.contentBytesBuffer instanceof Uint8Array ? chunk.contentBytesBuffer : null;
         const contentMetaList = contentBytesBuffer !== null && chunk.contentMetaList instanceof Uint32Array ? chunk.contentMetaList : null;
         const useContentSlab = contentMetaList !== null;
+        const useUniqueContentMetadata = chunk.contentMetaByUniqueIndex === true;
         const contentBytesBaseOffset = useContentSlab ? chunk.contentBytesBaseOffset : 0;
         if (
             useContentSlab &&
             (
                 !Number.isSafeInteger(contentBytesBaseOffset) ||
                 contentBytesBaseOffset < 0 ||
-                contentMetaList.length < count * 4
+                (!useUniqueContentMetadata && contentMetaList.length < count * 4)
             )
         ) {
             throw new RangeError('Artifact term content slab metadata is invalid');
@@ -8743,12 +8835,21 @@ this._readTermContentSignature(
                 typeof candidateDedupPlan.resolvedUniformDictName === 'undefined' ||
                 typeof candidateDedupPlan.resolvedUniformDictName === 'string'
             ) &&
-            candidateDedupPlan.pendingEpochs instanceof Uint32Array &&
-            candidateDedupPlan.pendingIndexes instanceof Uint32Array
+            (
+                (candidateDedupPlan.pendingEpochs instanceof Uint32Array && candidateDedupPlan.pendingIndexes instanceof Uint32Array) ||
+                (candidateDedupPlan.pendingEpochs === null && candidateDedupPlan.pendingIndexes === null)
+            )
         ) ?
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
+        if (contentDedupPlan !== null) { initializeTermContentPlanResolution(contentDedupPlan); }
         const useResolvedContentReferences = chunk.useResolvedContentReferences === true && contentDedupPlan !== null;
+        if (
+            useUniqueContentMetadata &&
+            (!useContentSlab || contentDedupPlan === null || contentMetaList.length !== contentDedupPlan.resolvedFlags.length * 4)
+        ) {
+            throw new RangeError('Artifact term content unique metadata is invalid');
+        }
         const uniqueSignatures = (
             contentDedupPlan?.uniqueSignatures instanceof Uint32Array &&
             contentDedupPlan.uniqueSignatures.length >= contentDedupPlan.resolvedFlags.length * 3
@@ -8762,7 +8863,7 @@ null;
         if (contentDedupPlan !== null) {
             pendingPlanEpoch = contentDedupPlan.nextEpoch >>> 0;
             if (pendingPlanEpoch === 0) {
-                contentDedupPlan.pendingEpochs.fill(0);
+                contentDedupPlan.pendingEpochs?.fill(0);
                 pendingPlanEpoch = 1;
             }
             contentDedupPlan.nextEpoch = (pendingPlanEpoch + 1) >>> 0;
@@ -8853,7 +8954,7 @@ null :
                     }
                     const pendingIndex = uniqueIndex - firstPendingUniqueIndex;
                     if (uniqueIndex === nextPendingUniqueIndex) {
-                        const contentMetaOffset = i * 4;
+                        const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndex : i) * 4;
                         const contentOffset = useContentSlab ?
                             contentBytesBaseOffset + contentMetaList[contentMetaOffset] :
                             0;
@@ -9186,7 +9287,7 @@ null :
                             ++alreadyResolvedUniqueCount;
                             continue;
                         }
-                        const contentMetaOffset = rowIndex * 4;
+                        const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndex : rowIndex) * 4;
                         const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
                         const contentLength = contentMetaList[contentMetaOffset + 1];
                         const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
@@ -9292,6 +9393,16 @@ null :
                     },
             };
         }
+        if (contentDedupPlan !== null && contentDedupPlan.pendingEpochs === null && contentDedupPlan.pendingIndexes === null) {
+            // Build both columns before publishing either. A failed allocation
+            // must leave the deferred pair intact for rollback or a later scan.
+            const epochs = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            const indexes = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            contentDedupPlan.pendingEpochs = epochs;
+            contentDedupPlan.pendingIndexes = indexes;
+        }
+        const pendingEpochs = contentDedupPlan?.pendingEpochs ?? null;
+        const pendingIndexes = contentDedupPlan?.pendingIndexes ?? null;
         let tableSize = 1;
         while (tableSize < count * 2) { tableSize *= 2; }
         const tableMask = tableSize - 1;
@@ -9337,10 +9448,10 @@ null :
          * @returns {number}
          */
         const findPendingContentIndex = (hash1, hash2, contentBytes, contentOffset, contentLength) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                return contentDedupPlan.pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
-                    contentDedupPlan.pendingIndexes[uniqueIndex] :
+                return pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
+                    pendingIndexes[uniqueIndex] :
                     -1;
             }
             let slot = getPendingHashSlot(hash1, hash2);
@@ -9372,11 +9483,11 @@ null :
          * @throws {Error} If the selected hash-table slot is unavailable.
          */
         const insertPendingContentIndex = (hash1, hash2) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const pendingIndex = pendingContentCount;
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingIndex;
+                pendingEpochs[uniqueIndex] = pendingPlanEpoch;
+                pendingIndexes[uniqueIndex] = pendingIndex;
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 return pendingIndex;
             }
@@ -9394,7 +9505,7 @@ null :
         try {
             for (let i = 0; i < count; ++i) {
                 currentRowIndex = i;
-                const contentMetaOffset = i * 4;
+                const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndexList[i] : i) * 4;
                 const hash1 = (useContentSlab ? contentMetaList[contentMetaOffset + 2] : chunk.contentHash1List[i]) >>> 0;
                 const hash2 = (useContentSlab ? contentMetaList[contentMetaOffset + 3] : chunk.contentHash2List[i]) >>> 0;
                 const contentOffset = useContentSlab ? contentBytesBaseOffset + contentMetaList[contentMetaOffset] : 0;
@@ -9551,6 +9662,16 @@ null :
             return null;
         }
         const compressionDictName = resolveTermContentZstdDictName(dictionary);
+        // Reservation requires shared JMdict content. Ordinary persistence
+        // validates ineligible spans; do not scan them for a rejected attempt.
+        if (
+            compressionDictName !== 'jmdict' ||
+            typeof SharedArrayBuffer !== 'function' ||
+            !(pendingContentSpans.buffer.buffer instanceof SharedArrayBuffer)
+        ) {
+            // eslint-disable-next-line @stylistic/semi
+            return null
+        }
         const operation = this._termContentBlockImportSession.tryBeginAppendSpans(
             dictionary,
             pendingContentSpans.buffer,
@@ -9739,6 +9860,125 @@ null :
     }
     /* eslint-enable @stylistic/semi */
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Publishes a fully checked consecutive reservation without per-row table
+     * writes. The witness is local to this synchronous call. An unsupported or
+     * invalid row leaves every table untouched so the scalar path preserves its
+     * original partial-publication and error behavior.
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {number[]|Uint32Array} hash1s
+     * @param {number[]|Uint32Array} hash2s
+     * @param {number[]|Float64Array} offsets
+     * @param {number[]|Uint32Array} lengths
+     * @param {number} dictNameId
+     * @param {boolean} metadataValidated
+     * @returns {boolean} Whether the complete range was published.
+     */
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+        if (
+            staged === null ||
+            !(staged.indexes instanceof Int32Array) ||
+            !(hash1s instanceof Uint32Array) ||
+            !(hash2s instanceof Uint32Array) ||
+            !(offsets instanceof Float64Array) ||
+            !(lengths instanceof Uint32Array) ||
+            !(staged.indexes.buffer instanceof ArrayBuffer) ||
+            !(hash1s.buffer instanceof ArrayBuffer) ||
+            !(hash2s.buffer instanceof ArrayBuffer) ||
+            !(offsets.buffer instanceof ArrayBuffer) ||
+            !(lengths.buffer instanceof ArrayBuffer)
+        ) {
+            return false
+        }
+        const count = offsets.length
+        const firstIndex = staged.indexes[0]
+        const endIndex = firstIndex + count
+        if (
+            count === 0 ||
+            staged.indexes.length !== count ||
+            hash1s.length < count || hash2s.length < count || lengths.length < count ||
+            firstIndex < 0 ||
+            endIndex > this._termEntryContentMetaStateTable.length ||
+            endIndex > this._termEntryContentMetaHash1Table.length ||
+            endIndex > this._termEntryContentMetaHash2Table.length ||
+            endIndex > this._termEntryContentMetaLengthTable.length ||
+            endIndex > this._termEntryContentMetaIdTable.length ||
+            endIndex > this._termEntryContentMetaOffsetTable.length ||
+            endIndex > this._termEntryContentMetaDictNameIdTable.length
+        ) {
+            return false
+        }
+        const indexes = staged.indexes
+        const stateTable = this._termEntryContentMetaStateTable
+        const hash1Table = this._termEntryContentMetaHash1Table
+        const hash2Table = this._termEntryContentMetaHash2Table
+        const lengthTable = this._termEntryContentMetaLengthTable
+        // Caller-owned columns may be views into metadata storage. Scalar
+        // publication interleaves its reads and writes; bulk operations require
+        // every input to remain unchanged until all writes finish. Native arena
+        // tables share one buffer but occupy disjoint byte ranges.
+        const reads = [
+            {values: indexes, start: 0},
+            {values: hash1s, start: 0},
+            {values: hash2s, start: 0},
+            {values: offsets, start: 0},
+            {values: lengths, start: 0},
+            {values: hash1Table, start: firstIndex},
+            {values: hash2Table, start: firstIndex},
+            {values: lengthTable, start: firstIndex},
+        ]
+        const writes = [
+            this._termEntryContentMetaIdTable,
+            this._termEntryContentMetaOffsetTable,
+            this._termEntryContentMetaDictNameIdTable,
+            stateTable,
+        ]
+        for (let i = 0; i < writes.length; ++i) {
+            const target = writes[i]
+            const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
+            const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
+            for (const {values, start} of reads) {
+                if (values.buffer !== target.buffer) { continue }
+                const inputStart = values.byteOffset + start * values.BYTES_PER_ELEMENT
+                const inputEnd = inputStart + count * values.BYTES_PER_ELEMENT
+                if (inputStart < targetEnd && targetStart < inputEnd) { return false }
+            }
+            for (let j = i + 1; j < writes.length; ++j) {
+                const other = writes[j]
+                if (other.buffer !== target.buffer) { continue }
+                const otherStart = other.byteOffset + firstIndex * other.BYTES_PER_ELEMENT
+                const otherEnd = other.byteOffset + endIndex * other.BYTES_PER_ELEMENT
+                if (otherStart < targetEnd && targetStart < otherEnd) { return false }
+            }
+        }
+        for (let i = 0; i < count; ++i) {
+            const index = firstIndex + i
+            const offset = offsets[i]
+            const length = lengths[i]
+            if (
+                indexes[i] !== index ||
+                stateTable[index] !== TERM_CONTENT_META_SLOT_PENDING ||
+                hash1Table[index] !== hash1s[i] || hash2Table[index] !== hash2s[i] ||
+                lengthTable[index] !== length ||
+                (!metadataValidated && (
+                    !Number.isSafeInteger(offset) || offset < 0 || length >= TERM_CONTENT_META_U32_NULL
+                ))
+            ) {
+                return false
+            }
+        }
+        this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
+        this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
+        this._termEntryContentMetaDictNameIdTable.fill(dictNameId, firstIndex, endIndex)
+        stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
+        this._termEntryContentMetaHashPairPendingCount -= count
+        this._termEntryContentMetaHashPairCount += count
+        return true
+    }
+
+    /* eslint-enable @stylistic/semi */
+
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
      * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
@@ -9828,7 +10068,18 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; i < pendingOffsets.length; ++i) {
+        /* eslint-disable @stylistic/semi */
+        const publishedContiguous = typeof uniformPendingDictName === 'string' && this._tryPublishContiguousArtifactTermContentMetadata(
+            stagedContentMetadata,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingOffsets,
+            pendingLengths,
+            uniformPendingDictNameId,
+            metadataValidated,
+        )
+        /* eslint-enable @stylistic/semi */
+        for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
@@ -9939,23 +10190,20 @@ null :
         contentDedupPlan,
         useResolvedContentReferences,
     ) {
-        /** @type {Partial<ArtifactTermRecordChunk>} */
-        const additions = {};
-        if (preparedLookupIndexes !== null) {
-            additions.preparedLookupIndexes = preparedLookupIndexes;
-        }
         if (
             useResolvedContentReferences &&
             contentDedupPlan !== null &&
             chunk.contentUniqueIndexList instanceof Uint32Array
         ) {
-            additions.resolvedContentReferences = {
-                uniqueIndexList: chunk.contentUniqueIndexList,
-                offsets: contentDedupPlan.resolvedOffsets,
-                lengths: contentDedupPlan.resolvedLengths,
-            };
+            return createArtifactTermRecordChunkWithResolvedContent(
+                chunk,
+                chunk.contentUniqueIndexList,
+                contentDedupPlan.resolvedOffsets,
+                contentDedupPlan.resolvedLengths,
+                preparedLookupIndexes,
+            );
         }
-        return Object.keys(additions).length === 0 ? chunk : {...chunk, ...additions};
+        return preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};
     }
 
     /**
@@ -11193,10 +11441,14 @@ null :
      * a selected owner becomes unavailable while rows are being hydrated.
      * @param {number} generation
      * @param {string[]} dictionaryNames
+     * @param {import('./term-record-opfs-store.js').ExactLookupView|null} [view=null]
      * @throws {TermContentLookupReadError}
      */
-    _assertTermLookupAvailability(generation, dictionaryNames) {
+    _assertTermLookupAvailability(generation, dictionaryNames, view = null) {
         this._assertTermLookupGeneration(generation, dictionaryNames);
+        if (view !== null && !view.isCurrent()) {
+            throw new TermContentLookupReadError('temporarilyUnavailable', 'Dictionary lookup data changed while the lookup was running');
+        }
         const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
         if (typeof isDictionaryAvailable !== 'function') { return; }
         for (const name of dictionaryNames) {
@@ -11239,9 +11491,10 @@ null :
 
     /**
      * @param {Iterable<number>} ids
+     * @param {import('./term-record-opfs-store.js').ExactLookupView|null} [view=null]
      * @returns {Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>}
      */
-    async _fetchTermRowsByIds(ids) {
+    async _fetchTermRowsByIds(ids, view = null) {
         const generation = this._directTermIndexGeneration;
         try {
             await this._termContentStore.ensureLoadedForRead();
@@ -11257,7 +11510,7 @@ null :
         /** @type {number[]} */
         const uncachedIds = [];
         for (const id of ids) {
-            const cached = this._getCachedTermRow(id);
+            const cached = view === null ? this._getCachedTermRow(id) : void 0;
             if (typeof cached !== 'undefined') {
                 rowsById.set(id, cached);
             } else {
@@ -11268,9 +11521,14 @@ null :
             return rowsById;
         }
         const getByIdsAsync = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'getByIdsAsync'));
-        const recordsById = typeof getByIdsAsync === 'function' ?
-            await /** @type {(ids: Iterable<number>) => Promise<Map<number, import('./term-record-opfs-store.js').TermRecord>>} */ (getByIdsAsync).call(this._termRecordStore, uncachedIds) :
-            this._termRecordStore.getByIds(uncachedIds);
+        let recordsById;
+        if (view !== null) {
+            recordsById = await this._termRecordStore.getByIdsAsync(uncachedIds, view);
+        } else if (typeof getByIdsAsync === 'function') {
+            recordsById = await /** @type {(ids: Iterable<number>) => Promise<Map<number, import('./term-record-opfs-store.js').TermRecord>>} */ (getByIdsAsync).call(this._termRecordStore, uncachedIds);
+        } else {
+            recordsById = this._termRecordStore.getByIds(uncachedIds);
+        }
         this._assertTermLookupGeneration(generation);
         const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
         if (typeof warmSlices === 'function') {
@@ -11319,7 +11577,7 @@ null :
                         if (failed) { return; }
                         this._assertTermLookupGeneration(generation, row.dictionary);
                         rowsById.set(id, row);
-                        this._setCachedTermRow(id, row);
+                        if (view === null) { this._setCachedTermRow(id, row); }
                     }
                 }
             } catch (error) {

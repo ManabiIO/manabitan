@@ -1,0 +1,60 @@
+{
+  "syntheticOnly": true,
+  "checks": [
+    {
+      "case": "prefix-jmdict-offscreen",
+      "expectedExit": 0,
+      "actualExit": 0
+    },
+    {
+      "case": "prefix-jmdict-fallback",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "prefix-jitendex-offscreen",
+      "expectedExit": 0,
+      "actualExit": 0
+    },
+    {
+      "case": "prefix-jitendex-fallback",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "prefix-vndb-offscreen",
+      "expectedExit": 0,
+      "actualExit": 0
+    },
+    {
+      "case": "prefix-vndb-fallback",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "cache-jmdict-offscreen",
+      "expectedExit": 0,
+      "actualExit": 0
+    },
+    {
+      "case": "cache-jmdict-fallback",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "retained-14954079813-still-fails",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "retained-14955703235-still-fails",
+      "expectedExit": 1,
+      "actualExit": 1
+    },
+    {
+      "case": "retained-14956350395-still-fails",
+      "expectedExit": 1,
+      "actualExit": 1
+    }
+  ]
+}

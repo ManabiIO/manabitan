@@ -1,0 +1,179 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {readFile, stat, writeFile} from 'node:fs/promises'
+import {loadavg, cpus} from 'node:os'
+import path from 'node:path'
+import {pathToFileURL} from 'node:url'
+
+const [baselineRoot, candidateRoot, fixturePath, outputPath, mode = 'all'] = process.argv.slice(2)
+assert(baselineRoot && candidateRoot && fixturePath && outputPath)
+assert(mode === 'all' || mode === 'work')
+const modulePath = 'ext/js/dictionary/term-bank-wasm-parser.js'
+const wasmPath = 'ext/lib/term-bank-parser.wasm'
+const hash = (value) => createHash('sha256').update(value).digest('hex')
+const baselineCode = await readFile(path.join(baselineRoot, modulePath))
+const candidateCode = await readFile(path.join(candidateRoot, modulePath))
+const native = await readFile(path.join(baselineRoot, wasmPath))
+assert.equal(hash(native), hash(await readFile(path.join(candidateRoot, wasmPath))))
+const lock = JSON.parse(await readFile(path.join(baselineRoot, 'test/perf/dictionaries.lock.json'), 'utf8')).dictionaries.vndb
+assert.equal((await stat(fixturePath)).size, lock.sizeBytes)
+const fixtureHash = createHash('sha256')
+for await (const bytes of createReadStream(fixturePath)) fixtureHash.update(bytes)
+assert.equal(fixtureHash.digest('hex'), lock.sha256)
+
+const modules = {
+    A: await import(pathToFileURL(path.join(baselineRoot, modulePath)) + '?arm=A'),
+    B: await import(pathToFileURL(path.join(candidateRoot, modulePath)) + '?arm=B'),
+    C: await import(pathToFileURL(path.join(baselineRoot, modulePath)) + '?arm=C'),
+}
+const compiled = await WebAssembly.compile(native)
+for (const module of Object.values(modules)) module.setTermBankWasmModule(compiled)
+const {readDenseZipDirectory} = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/dense-zip-directory.js')))
+const {RawZipPayloadReader, RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/term-bank-source-pipeline.js')))
+const {getImageMediaTypeFromFileName} = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/media/media-util.js')))
+
+async function prepare() {
+    const archive = await openAsBlob(fixturePath)
+    const entries = await readDenseZipDirectory(archive)
+    assert(entries)
+    const files = entries.filter(({filename}) => getImageMediaTypeFromFileName(filename) !== null)
+    assert.equal(files.length, lock.mediaFiles)
+    const reader = new RawZipPayloadReader(archive)
+    const batches = []
+    let rangeReadCount = 0
+    let rangeReadBytes = 0
+    for (let start = 0; start < files.length;) {
+        let end = start
+        let compressed = 0
+        let decoded = 0
+        while (end < files.length && end - start < RAW_ZIP_BATCH_MAX_FILES) {
+            const file = files[end]
+            if (compressed + file.compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES || decoded + file.uncompressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES) break
+            compressed += file.compressedSize
+            decoded += file.uncompressedSize
+            ++end
+        }
+        assert(end > start)
+        const result = await reader.readBatch(files.slice(start, end), undefined, () => false, true)
+        assert(result)
+        rangeReadCount += result.rangeReadCount
+        rangeReadBytes += result.rangeReadBytes
+        batches.push(result.sources)
+        start = end
+    }
+    return {batches, rangeReadCount, rangeReadBytes}
+}
+
+const {batches, rangeReadCount, rangeReadBytes} = await prepare()
+const mediaFiles = batches.reduce((sum, sources) => sum + sources.length, 0)
+const mediaBytes = batches.reduce((sum, sources) => sum + sources.reduce((s, source) => s + source.uncompressedSize, 0), 0)
+assert.equal(mediaFiles, lock.mediaFiles)
+assert.equal(mediaBytes, lock.mediaBytes)
+
+function sourceDigest() {
+    const digest = createHash('sha256')
+    for (const sources of batches) {
+        for (const source of sources) {
+            digest.update(JSON.stringify([source.filename, source.compressionMethod, source.compressedSize, source.uncompressedSize, source.signature]) + '\n')
+            digest.update(source.bytes)
+        }
+    }
+    return digest.digest('hex')
+}
+
+const beforeDigest = sourceDigest()
+const sourceBuffers = new Set(batches.flatMap((sources) => sources.map(({bytes}) => bytes.buffer)))
+const work = {}
+for (const arm of ['A', 'B', 'C']) {
+    const counts = {copies: 0, copiedBytes: 0, maxCopiedSpanBytes: 0, maxDestinationBufferBytes: 0}
+    const original = Uint8Array.prototype.set
+    Uint8Array.prototype.set = function (source, offset) {
+        if (ArrayBuffer.isView(source) && sourceBuffers.has(source.buffer)) {
+            ++counts.copies
+            counts.copiedBytes += source.byteLength
+            counts.maxCopiedSpanBytes = Math.max(counts.maxCopiedSpanBytes, source.byteLength)
+            counts.maxDestinationBufferBytes = Math.max(counts.maxDestinationBufferBytes, this.buffer.byteLength)
+        }
+        return Reflect.apply(original, this, [source, offset])
+    }
+    try {
+        for (const sources of batches) await modules[arm].validateCompressedZipMediaBatchWasm(sources)
+    } finally { Uint8Array.prototype.set = original }
+    work[arm] = counts
+    await writeFile(outputPath + '.work-checkpoint', JSON.stringify({work, fixtureSha256: lock.sha256, sourcesSha256: beforeDigest}) + '\n')
+}
+
+const observations = []
+async function run(arm, phase, round, order) {
+    globalThis.gc?.()
+    const loadBefore = loadavg()
+    const usageBefore = process.cpuUsage()
+    const start = performance.now()
+    for (const sources of batches) await modules[arm].validateCompressedZipMediaBatchWasm(sources)
+    const wallMs = performance.now() - start
+    const cpu = process.cpuUsage(usageBefore)
+    observations.push({arm, phase, round, order, wallMs, processCpuMs: (cpu.user + cpu.system) / 1000, loadBefore, loadAfter: loadavg()})
+    process.stderr.write(JSON.stringify(observations.at(-1)) + '\n')
+}
+if (mode === 'all') {
+    for (const [round, order] of ['ABC', 'CBA'].entries()) for (const arm of order) await run(arm, 'warmup', round, order)
+    for (const [round, order] of ['ABC', 'BCA', 'CAB', 'CBA', 'ACB', 'BAC'].entries()) for (const arm of order) await run(arm, 'measured', round, order)
+}
+assert.equal(sourceDigest(), beforeDigest)
+const batchCount = batches.length
+batches.length = 0
+sourceBuffers.clear()
+globalThis.gc?.()
+
+async function packedOutput(root) {
+    const {preparePackedSourceZipMediaEntries} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/source-zip-media-pack.js')))
+    const {createGenerationMediaIndex} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/dictionary-generation-media-store.js')))
+    const parser = await import(pathToFileURL(path.join(root, modulePath)))
+    parser.setTermBankWasmModule(compiled)
+    const archive = await openAsBlob(fixturePath)
+    const entries = await readDenseZipDirectory(archive)
+    assert(entries)
+    const files = entries.filter(({filename}) => getImageMediaTypeFromFileName(filename) !== null)
+    const packed = await preparePackedSourceZipMediaEntries(archive, files, new RawZipPayloadReader(archive), () => {})
+    assert(packed)
+    assert.equal(packed.records.length, lock.mediaFiles)
+    assert.equal(packed.uncompressedBytes, lock.mediaBytes)
+    const index = createGenerationMediaIndex(packed.records, packed.blob.size)
+    assert(index)
+    const recordsHash = createHash('sha256')
+    for (const record of packed.records) {
+        recordsHash.update(JSON.stringify([
+            record.path, record.mediaType, record.offset, record.compressedSize,
+            record.packedOffset, record.packedLength, record.uncompressedLength,
+            record.compressionMethod, record.signature,
+        ]) + '\n')
+    }
+    const blobHash = createHash('sha256')
+    for await (const bytes of packed.blob.stream()) blobHash.update(bytes)
+    return {
+        records: packed.records.length,
+        recordsSha256: recordsHash.digest('hex'),
+        indexSha256: hash(index.index),
+        descriptor: index.descriptor,
+        packedSpanBytes: packed.blob.size,
+        packedSpanSha256: blobHash.digest('hex'),
+        rangeReadCount: packed.rangeReadCount,
+        rangeReadBytes: packed.rangeReadBytes,
+        compressedBytes: packed.compressedBytes,
+        uncompressedBytes: packed.uncompressedBytes,
+    }
+}
+const parity = {A: await packedOutput(baselineRoot)}
+globalThis.gc?.()
+parity.B = await packedOutput(candidateRoot)
+assert.deepEqual(parity.B, parity.A)
+const report = {
+    scope: 'Full pinned VNDB media validation component: JS metadata admission, WASM input staging, CRC and decoded-length checks. Excludes archive reads, parsing, workers, OPFS, database and visible readiness.',
+    runtime: {node: process.version, v8: process.versions.v8, cpus: cpus().length, model: cpus()[0].model},
+    provenance: {baselineCodeSha256: hash(baselineCode), candidateCodeSha256: hash(candidateCode), wasmSha256: hash(native), fixtureSha256: lock.sha256, scriptSha256: hash(await readFile(new URL(import.meta.url)))},
+    fixture: {mediaFiles, mediaBytes, batches: batchCount, rangeReadCount, rangeReadBytes, sourcesSha256: beforeDigest},
+    work, observations, parity,
+}
+await writeFile(outputPath, JSON.stringify(report, null, 2) + '\n')
+process.stdout.write(JSON.stringify({outputPath, fixture: report.fixture, work}, null, 2) + '\n')

@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "kind": "frozen-tooling-handoff",
+  "createdUtc": "2026-11-24T19:30:26.582607+00:00",
+  "worktree": "/workspace/scratch/3aacd533c01f/round2/media-memory-study",
+  "branch": "perf/import-media-memory-20261124-3aac",
+  "commit": "d3a4d79ab974dd6d1733b53f3aa96e4432007af3",
+  "tree": "66f22c36779eaaaf270e68e1195555862ce0f03c",
+  "parent": "20a9be91160d2ef6d438ece46c68efedaefba041",
+  "clean": true,
+  "published": false,
+  "acquiredObservations": 0,
+  "productSourceChanged": false,
+  "oldCohortsReclassified": false,
+  "workflow": ".github/workflows/import-memory-20261124-3aac.yml",
+  "changedFiles": [
+    ".github/workflows/import-memory-20261124-3aac.yml",
+    "dev/perf/import-memory-20261124-3aac/README.md",
+    "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md",
+    "dev/perf/import-memory-20261124-3aac/protocol.py",
+    "dev/perf/import-memory-20261124-3aac/run_memory.py",
+    "dev/perf/import-memory-20261124-3aac/storage_receipts.py",
+    "dev/perf/import-memory-20261124-3aac/test_protocol.py",
+    "dev/perf/import-memory-20261124-3aac/test_receipts.py",
+    "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py",
+    "dev/perf/import-memory-20261124-3aac/verify_receipts.py"
+  ],
+  "changedFileSha256": {
+    ".github/workflows/import-memory-20261124-3aac.yml": "a3a56b63111b7bba560ffc644a84fcdf6f5f77777459c8e6ec381828a684c069",
+    "dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+    "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+    "dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+    "dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+    "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+    "dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+    "dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+    "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+    "dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28"
+  },
+  "sourceIdentities": {
+    "A": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "B": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    }
+  },
+  "matrix": {
+    "dictionary": [
+      "vndb",
+      "jitendex"
+    ],
+    "replication": [
+      1,
+      2
+    ]
+  },
+  "fixedSequences": {
+    "1": [
+      "A1",
+      "B1",
+      "B2",
+      "A2"
+    ],
+    "2": [
+      "B1",
+      "A1",
+      "A2",
+      "B2"
+    ]
+  },
+  "expectedPackageDifferences": [
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "observerUnchangedFromParentSha256": {
+    "dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+  },
+  "reviewedStorageHelperSha256": {
+    "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+    "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69"
+  },
+  "qualification": {
+    "everyObservationRequired": true,
+    "bothReplicationsRequired": true,
+    "metrics": [
+      "whole-tree-PSS",
+      "whole-tree-private"
+    ],
+    "maximumMedianPairedIncreasePercent": 5,
+    "maximumIndividualPairedIncreasePercent": 10,
+    "minimumFullyCoveredImportScans": 5,
+    "maximumCoveredGapMs": 250,
+    "maximumBracketGapMs": 250,
+    "betweenScanWaitMs": 25,
+    "retryCount": 0,
+    "timingsAuthoritative": false
+  },
+  "storagePolicy": {
+    "version": "pinned-import-storage-20261124-v1",
+    "rawFilesAndTotalsRetained": true,
+    "allocationSummaryRecomputedOffline": true,
+    "nonSahPathsAndSizes": "exact across all observations with fixed fixture inventory",
+    "sahFileCount": 8,
+    "sahEmptyCount": 7,
+    "sahEmptyBytes": 4096,
+    "jitendexActiveAllocation": "exact across observations",
+    "vndbActiveAllocationUnitsInclusive": [
+      129,
+      131
+    ],
+    "vndbAllocationUnitBytes": 4096,
+    "sqliteBytesProvedEqual": false
+  },
+  "validation": {
+    "command": "python -m unittest discover -s dev/perf/import-memory-20261124-3aac -p 'test_*.py' -v",
+    "passedTests": 42,
+    "log": "/workspace/scratch/3aacd533c01f/round2/storage-protocol/media-memory-tests.log",
+    "logSha256": "160b0ee93b9387cce1a3639d80acbfd74814bb44e7327409a253240844da0728",
+    "prettier": "passed for workflow and both Markdown files",
+    "gitDiffCheck": "passed",
+    "integrationPeerReview": {
+      "agent": "/root/jmdict_import",
+      "mode": "read-only",
+      "result": "no blocker found",
+      "scope": [
+        "comparison key preserves browser/lookup/media semantics",
+        "raw allocation summary recomputed offline",
+        "helper validates exact inventory and prospective SAH bounds",
+        "fixed media source tree and four package differences",
+        "two dictionaries and two independent replications",
+        "unchanged dependency-source guards"
+      ],
+      "testsOrAcquisitionsPerformed": false
+    }
+  }
+}

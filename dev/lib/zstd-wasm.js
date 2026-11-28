@@ -442,7 +442,7 @@ export function decompress(content, options = {}) {
 /**
  * @param {number} context
  * @param {Uint8Array} content
- * @param {Uint8Array} dictionary
+ * @param {Uint8Array|null} dictionary A null dictionary reuses the context for ordinary frames.
  * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
  * @returns {Uint8Array}
  */
@@ -500,7 +500,7 @@ function decompressUsingContext(context, content, dictionary, defaultHeapSize, m
                 throw new Error('Failed to allocate Zstd dictionary buffer');
             }
             if (dictionary !== null) { module.HEAPU8.set(dictionary, dictionaryPointer); }
-            const size = dictionary === null ?
+            const size = dictionary === null && context === 0 ?
                 module._ZSTD_decompress(destination, outputSize, source, content.byteLength) :
                 module._ZSTD_decompress_usingDict(
                     context,
@@ -509,7 +509,7 @@ function decompressUsingContext(context, content, dictionary, defaultHeapSize, m
                     source,
                     content.byteLength,
                     dictionaryPointer,
-                    dictionary.byteLength,
+                    dictionary === null ? 0 : dictionary.byteLength,
                 );
             checkResult(size);
             return module.HEAPU8.slice(destination, destination + size);

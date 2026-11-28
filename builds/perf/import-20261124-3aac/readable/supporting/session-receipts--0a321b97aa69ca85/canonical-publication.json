@@ -1,0 +1,85 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/jmdict-canonical-inputs",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "c3a9e25814392b97d313fb7f6fe65797ed752b3c",
+  "tree": "64345e92fff3800b5035b6aab52dff06e20bc874",
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bde122e7b1983ca13b2e3a0196fa05f8e355c173",
+      "size": 2521
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e662b3db9ec358f1c0f02f3a3e06a66ceab9fd26",
+      "size": 1667
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c1f1104ce0f744c9f9f55a0c7fa5986e48272c3",
+      "size": 7626
+    },
+    {
+      "path": "test/data/dictionary-wasm/term-content-canonical-v1-baseline.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+      "size": 1624
+    },
+    {
+      "path": "test/term-content-canonical-inputs.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ebeabe4a40b6faf0a8378167ed8625339fb7e93",
+      "size": 8965
+    }
+  ],
+  "remoteCommit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+  "branch": "perf/canonical-input-snapshots-20261124-3aac",
+  "body": "## Problem\n\nThe native canonical scan repeatedly reloads immutable configuration and row metadata around its rollback barrier. These inputs are already isolated from every validated authoritative write, so the reloads add work to each row and collision probe.\n\n## Change\n\nSnapshot the validated configuration at the start of each synchronous native call and retain each row's length and hash words in local values. Keep the existing volatile progress writes, three-word rollback journal, memory barrier, trap points, validation order, and ABI. A continuation takes fresh snapshots after returning to JavaScript.\n\nThe module accepts non-shared memory and imports no callbacks. Authoritative pointers must remain above the fixed input region, so writes cannot invalidate the snapshots. This does not incorporate the counter-publication or journal changes proposed in other PRs.\n\nRebuild the checked canonical WASM and its source-bound manifest with pinned LLVM 21.1.8. No parser WASM, import budgets, worker counts, cache limits, compression policy, or persisted format changes.\n\n## Validation\n\n- Five focused suites: 130 tests pass, including 79 new baseline-comparison cases covering complete native state, invalid inputs and prefix aliases, intentional traps, and resumed calls.\n- Preserve the exact 1,624-byte baseline module as a SHA-256-checked test fixture.\n- Test TypeScript and changed-file ESLint pass.\n- Pinned native build and reproduction check pass.\n- Chrome package differs only in the canonical C source and canonical WASM. Archive size increases by 235 bytes; the WASM itself increases by 43 bytes.\n- Independent source review found no aliasing, reentrancy, or trap-order blocker.\n\n## Performance status\n\nDraft pending complete-import qualification. Static assembly inspection removes 11 repeated immutable configuration load sites from the row/probe loops; this is work-removal evidence, not a measured import speedup. One fixed screen will compare this exact source against `bbccabd520972cc351a65d9f545bd5369b6e9747` for JMdict, Jitendex, and VNDB, with identical-product controls and separate correctness checks.\n",
+  "pr": {
+    "url": "https://github.com/ManabiIO/manabitan/pull/880",
+    "number": 880,
+    "state": "open",
+    "merged": false,
+    "mergeable": false,
+    "draft": true,
+    "body": "## Problem\n\nThe native canonical scan repeatedly reloads immutable configuration and row metadata around its rollback barrier. These inputs are already isolated from every validated authoritative write, so the reloads add work to each row and collision probe.\n\n## Change\n\nSnapshot the validated configuration at the start of each synchronous native call and retain each row's length and hash words in local values. Keep the existing volatile progress writes, three-word rollback journal, memory barrier, trap points, validation order, and ABI. A continuation takes fresh snapshots after returning to JavaScript.\n\nThe module accepts non-shared memory and imports no callbacks. Authoritative pointers must remain above the fixed input region, so writes cannot invalidate the snapshots. This does not incorporate the counter-publication or journal changes proposed in other PRs.\n\nRebuild the checked canonical WASM and its source-bound manifest with pinned LLVM 21.1.8. No parser WASM, import budgets, worker counts, cache limits, compression policy, or persisted format changes.\n\n## Validation\n\n- Five focused suites: 130 tests pass, including 79 new baseline-comparison cases covering complete native state, invalid inputs and prefix aliases, intentional traps, and resumed calls.\n- Preserve the exact 1,624-byte baseline module as a SHA-256-checked test fixture.\n- Test TypeScript and changed-file ESLint pass.\n- Pinned native build and reproduction check pass.\n- Chrome package differs only in the canonical C source and canonical WASM. Archive size increases by 235 bytes; the WASM itself increases by 43 bytes.\n- Independent source review found no aliasing, reentrancy, or trap-order blocker.\n\n## Performance status\n\nDraft pending complete-import qualification. Static assembly inspection removes 11 repeated immutable configuration load sites from the row/probe loops; this is work-removal evidence, not a measured import speedup. One fixed screen will compare this exact source against `bbccabd520972cc351a65d9f545bd5369b6e9747` for JMdict, Jitendex, and VNDB, with identical-product controls and separate correctness checks.\n",
+    "title": "perf: snapshot immutable inputs in native canonical scans",
+    "base": "develop",
+    "base_sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "head": "perf/canonical-input-snapshots-20261124-3aac",
+    "head_sha": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+    "head_repo_id": 1165902460,
+    "head_repo_full_name": "ManabiIO/manabitan",
+    "merge_commit_sha": null,
+    "user": {
+      "login": "aehlke",
+      "name": "aehlke",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "id": 71601
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-24T19:35:42Z",
+    "updated_at": "2026-11-24T19:35:42Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 1,
+    "changed_files": 5,
+    "additions": 226,
+    "deletions": 20,
+    "display_url": "https://github.com/ManabiIO/manabitan/pull/880",
+    "display_title": "perf: snapshot immutable inputs in native canonical scans"
+  }
+}
