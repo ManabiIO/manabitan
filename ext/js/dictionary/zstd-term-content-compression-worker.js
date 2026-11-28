@@ -27,9 +27,35 @@ void initialization.then(
     (error) => { self.postMessage({type: 'initialization-error', error: `${error}`}); },
 );
 
+/** @type {MessagePort|null} */
+let importIndexPort = null;
+
 self.addEventListener('message', (event) => {
+    const data = /** @type {{type?: unknown, port?: unknown}|null} */ (event.data);
+    if (data?.type === 'bind-import-index') {
+        void bindImportIndex(data.port);
+        return;
+    }
     void compressContent(event);
 });
+
+/** @param {unknown} value */
+async function bindImportIndex(value) {
+    if (!(value instanceof MessagePort)) { return; }
+    const port = value;
+    try {
+        if (importIndexPort !== null) { throw new Error('Compression worker already owns an import index session'); }
+        importIndexPort = port;
+        const {attachImportIndexWorkerPort} = await import('./term-record-import-index-worker-handler.js');
+        attachImportIndexWorkerPort(port, () => {
+            if (importIndexPort === port) { importIndexPort = null; }
+        });
+    } catch (error) {
+        if (importIndexPort === port) { importIndexPort = null; }
+        port.postMessage({type: 'initialization-error', error: `${error}`});
+        port.close();
+    }
+}
 
 /** @param {MessageEvent} event */
 async function compressContent(event) {

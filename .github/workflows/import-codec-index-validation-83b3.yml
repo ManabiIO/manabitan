@@ -1,0 +1,60 @@
+name: Codec index research validation
+
+on:
+  push:
+    branches: [research/import-codec-index-owner-20261128-83b3]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codec-index-validation-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMPORT_RESEARCH_BASE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  MANABITAN_CLANG: clang-21
+  MANABITAN_WASM_LD: wasm-ld-21
+
+jobs:
+  correctness:
+    name: Source, types, unit tests, and build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        id: setup
+        with:
+          node-version: "22.22.0"
+      - name: Install existing pinned native toolchain
+        id: toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Verify recorded dictionary WASM bytes
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.toolchain.outcome == 'success' }}
+        run: npm run build:dictionary-wasm -- --check
+      - name: Lint changed JavaScript
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only -z --diff-filter=ACMR "$IMPORT_RESEARCH_BASE" "$GITHUB_SHA" -- '*.js' '*.mjs' |
+            xargs -0 -r npx eslint --
+      - name: Check source types
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: npm run test:ts:main
+      - name: Check test types
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: npm run test:ts:test
+      - name: Run full unit suite
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.toolchain.outcome == 'success' }}
+        run: npm run test:unit
+      - name: Validate every build target
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: npm run test:build

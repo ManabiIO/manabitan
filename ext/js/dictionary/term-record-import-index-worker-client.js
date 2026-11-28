@@ -103,16 +103,16 @@ export async function createImportIndexWorkerClient() {
         await client.ready;
         return client;
     } catch (_) {
-        client?.dispose();
+        await client?.dispose();
         return null;
     }
 }
 
 /** One import session owns this worker and every fresh sidecar opened in it. */
 export class ImportIndexWorkerClient {
-    /** @param {Worker} worker */
+    /** @param {Worker|import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport} worker */
     constructor(worker) {
-        /** @type {Worker} */
+        /** @type {Worker|import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport} */
         this._worker = worker;
         /** @type {number} */
         this._nextRequestId = 1;
@@ -120,6 +120,8 @@ export class ImportIndexWorkerClient {
         this._nextWriterId = 1;
         /** @type {Error|null} */
         this._failure = null;
+        /** @type {Promise<void>|null} */
+        this._disposePromise = null;
         /** @type {Map<number, Error>} */
         this._errors = new Map();
         /** @type {Map<number, {resolve: (value: unknown) => void, reject: (error: Error) => void, timeout: ReturnType<typeof setTimeout>}>} */
@@ -138,9 +140,9 @@ export class ImportIndexWorkerClient {
         this._readyTimeout = setTimeout(() => {
             this._fail(new Error('Import index worker startup timed out'));
         }, READY_TIMEOUT_MS);
-        worker.addEventListener('message', (event) => { this._onMessage(event); });
+        worker.addEventListener('message', (event) => { this._onMessage(/** @type {MessageEvent<unknown>} */ (event)); });
         worker.addEventListener('error', (event) => {
-            this._fail(new Error(event.message || 'Import index worker failed'));
+            this._fail(new Error(/** @type {ErrorEvent} */ (event).message || 'Import index worker failed'));
         });
         worker.addEventListener('messageerror', () => {
             this._fail(new Error('Import index worker returned an invalid message'));
@@ -193,9 +195,34 @@ export class ImportIndexWorkerClient {
      * Called only after store finalization/rollback has joined all writers.
      * Transport failure still reaches checkpoint restoration; termination is
      * never used as proof that a mutated file was successfully published.
+     * @returns {Promise<void>}
      */
     dispose() {
-        this._fail(new Error('Import index worker closed'));
+        this._disposePromise ??= this._dispose();
+        return this._disposePromise;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     * @throws {Error} If a borrowed session cannot acknowledge clean retirement.
+     */
+    async _dispose() {
+        if (this._failure !== null) { return; }
+        const worker = this._worker;
+        if ('release' in worker) {
+            try {
+                const status = await this.request(0, 'dispose-session');
+                if (status !== 'disposed') { throw new Error('Shared import index worker returned invalid disposal status'); }
+                this._fail(new Error('Import index worker closed'), false);
+                worker.release();
+            } catch (error) {
+                const failure = toError(error);
+                this._fail(failure);
+                throw failure;
+            }
+        } else {
+            this._fail(new Error('Import index worker closed'));
+        }
     }
 
     /** @param {MessageEvent<unknown>} event */
@@ -231,13 +258,16 @@ export class ImportIndexWorkerClient {
         }
     }
 
-    /** @param {Error} error */
-    _fail(error) {
+    /**
+     * @param {Error} error
+     * @param {boolean} [terminate=true]
+     */
+    _fail(error, terminate = true) {
         if (this._failure !== null) { return; }
         this._failure = error;
         clearTimeout(this._readyTimeout);
         this._rejectReady(error);
-        this._worker.terminate();
+        if (terminate) { this._worker.terminate(); }
         for (const {reject, timeout} of this._pending.values()) {
             clearTimeout(timeout);
             reject(error);

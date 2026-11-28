@@ -83,6 +83,8 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-record-opfs-store.js',
     'ext/js/dictionary/term-record-import-index-writer.js',
     'ext/js/dictionary/term-record-import-index-worker.js',
+    'ext/js/dictionary/term-record-import-index-worker-handler.js',
+    'ext/js/dictionary/compression-index-worker-transport.js',
     'ext/js/dictionary/term-record-import-index-worker-client.js',
     'ext/js/dictionary/term-lookup-index.js',
     'ext/js/dictionary/term-lookup-index-preparation.js',

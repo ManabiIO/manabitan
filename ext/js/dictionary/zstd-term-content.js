@@ -104,6 +104,8 @@ export class TermContentCompressionPool {
         this._nextId = 1;
         /** @type {boolean} */
         this._failed = false;
+        /** @type {import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport|null} */
+        this._importIndexTransport = null;
         for (const worker of workers) {
             worker.addEventListener('message', (event) => { this._onMessage(event); });
             worker.addEventListener('error', (event) => {
@@ -117,6 +119,46 @@ export class TermContentCompressionPool {
 
     /** @returns {boolean} */
     get failed() { return this._failed; }
+
+    /**
+     * Bind one index session to the last already-ready codec lane. No worker is
+     * created or removed from compression scheduling. A second session retains
+     * its ordinary local writer until the first has acknowledged retirement.
+     * @param {typeof import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport} Transport
+     * @returns {import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport|null}
+     */
+    createImportIndexTransport(Transport) {
+        if (this._failed || this._workers.length < 2 || this._importIndexTransport !== null || typeof MessageChannel !== 'function') { return null; }
+        let channel;
+        try { channel = new MessageChannel(); } catch { return null; }
+        /** @type {import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport} */
+        let transport;
+        try {
+            transport = new Transport(
+                channel.port1,
+                (error) => { this._fail(error); },
+                () => {
+                    if (this._importIndexTransport === transport) { this._importIndexTransport = null; }
+                },
+            );
+        } catch {
+            channel.port1.close();
+            channel.port2.close();
+            return null;
+        }
+        this._importIndexTransport = transport;
+        try {
+            this._workers[this._workers.length - 1].postMessage(
+                {type: 'bind-import-index', port: channel.port2},
+                [channel.port2],
+            );
+            return transport;
+        } catch (error) {
+            channel.port2.close();
+            this._fail(error instanceof Error ? error : new Error(String(error)));
+            return null;
+        }
+    }
 
     /**
      * @param {Uint8Array[]} contents
@@ -442,6 +484,7 @@ export class TermContentCompressionPool {
     _fail(error) {
         if (this._failed) { return; }
         this._failed = true;
+        this._importIndexTransport?.fail(error);
         for (const worker of this._workers) { worker.terminate(); }
         this._workers = [];
         for (const {reject, rejectSourceConsumed, sourceConsumedSettled, timeoutId} of this._pending.values()) {
@@ -769,6 +812,33 @@ function discardCompressionPool(pool) {
     if (pool === null) { return; }
     pool.close();
     if (compressionPool === pool) { compressionPool = null; }
+}
+
+/**
+ * Reuse a ready codec pool for index persistence without starting an extra
+ * worker or waiting for codec startup. Callers may fall back before open.
+ * @returns {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>|null}
+ */
+export function createReadyCompressionIndexWorkerClient() {
+    const pool = compressionPool;
+    if (pool === null || pool.failed) { return null; }
+    // The codec module also runs in every compression worker. Load the index
+    // client only in the parent which actually admits a borrowed session.
+    return Promise.all([
+        import('./compression-index-worker-transport.js'),
+        import('./term-record-import-index-worker-client.js'),
+    ]).then(async ([{CompressionIndexWorkerTransport}, {ImportIndexWorkerClient}]) => {
+        const transport = pool.createImportIndexTransport(CompressionIndexWorkerTransport);
+        if (transport === null) { return null; }
+        const client = new ImportIndexWorkerClient(transport);
+        try {
+            await client.ready;
+            return client;
+        } catch {
+            await client.dispose();
+            return null;
+        }
+    }, () => null);
 }
 
 /** @returns {Promise<TermContentCompressionPool|null>} */

@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {createReadyCompressionIndexWorkerClient} from './zstd-term-content.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -1476,7 +1477,16 @@ export class TermRecordOpfsStore {
                 // Checkpoint restoration validates the committed sidecar bytes below.
             }
         }
-        await this._retireImportIndexWorker();
+        try {
+            await this._retireImportIndexWorker();
+        } catch (error) {
+            // Failed borrowed-session retirement revokes its codec worker and
+            // any ambiguous handle. Restore through fresh handles and verify
+            // the checkpoint, as for the abandoned writes above.
+            reportDiagnostics('term-record-store-rollback-worker-retirement-error', {
+                error: toError(error).message,
+            });
+        }
         this._invalidateAllPersistentLookupState();
     }
 
@@ -6430,16 +6440,18 @@ view.chunks :
         const fileHandle = state.lookupIndexFileHandle;
         if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
         if (this._importSessionActive && state.initialFileLength === 0) {
-            // Keep the worker and periodic flushes for imports with enough
-            // source work to cover their setup and scheduling costs. Tiny
-            // sidecars first written at finalization still use the local path
-            // unless a worker already belongs to this eligible session.
+            // Large sources retain their dedicated I/O worker. Other validated
+            // raw imports may reuse an already-ready codec lane, avoiding another
+            // worker startup. Preserve the actual queued-byte boundary and keep
+            // tiny sidecars or unavailable codec pools on the local writer.
             if (
                 this._rawTermBankSourceBytes !== null &&
-                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES &&
+                this._rawTermBankSourceBytes > 0 &&
                 (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
             ) {
-                this._importIndexWorkerPromise ??= createImportIndexWorkerClient();
+                this._importIndexWorkerPromise ??= this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES ?
+                    createImportIndexWorkerClient() :
+                    createReadyCompressionIndexWorkerClient();
                 const worker = await this._importIndexWorkerPromise;
                 if (worker !== null) {
                     const writer = await worker.open(fileHandle);
@@ -6470,7 +6482,7 @@ view.chunks :
     async _retireImportIndexWorker() {
         const promise = this._importIndexWorkerPromise;
         this._importIndexWorkerPromise = null;
-        if (promise !== null) { (await promise)?.dispose(); }
+        if (promise !== null) { await (await promise)?.dispose(); }
     }
 
     /**
@@ -6538,7 +6550,11 @@ view.chunks :
                 );
             }
         }
-        await this._retireImportIndexWorker();
+        try {
+            await this._retireImportIndexWorker();
+        } catch (error) {
+            errors.push(toError(error));
+        }
         if (errors.length === 1) {
             throw errors[0];
         }
