@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "study": "native-components-20261128-1c413",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "nodeVersion": "v24.22.3",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "dictionary": "jmdict",
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "termBankCount": 53,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "canonicalScannerSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "runtimeSourceDigest": "73c774fb00b81979769ffbd0b244a78a10b07afb4fd159c44404344d1d5144a2",
+  "runtimeSourceFileCount": 323,
+  "arms": {
+    "A": "baseline",
+    "B": "native-terminal-tags",
+    "C": "baseline",
+    "D": "native-subtrees",
+    "E": "native-inline",
+    "F": "native-strict-inline",
+    "G": "native-hints",
+    "H": "native-table-tags"
+  },
+  "variants": {
+    "baseline": {
+      "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+      "wasmBytes": 67659
+    },
+    "native-terminal-tags": {
+      "cSha256": "b719eddcb2fe983ec4b895ba416afc90ecacb80adec2db4111e17237e99d58d5",
+      "wasmSha256": "197d37860910e09897b80ea9267e0cf1ca03fa5efa9ebae9fd6b4ebc8dd44ed5",
+      "manifestSha256": "50a97cbef1aac2715373ed9f9eb9fcc0eb1458364cb2cb586f93b14826457180",
+      "patchSha256": "d441210e21993fd58e31a6867e59e9c8e7e6f3e56f5212f3cbb760b04448479d",
+      "wasmBytes": 67751,
+      "directory": "variants/native-terminal-tags"
+    },
+    "native-subtrees": {
+      "cSha256": "608420abdb76bc364ec57888891f4772e1af97558812d3bae63f559409544421",
+      "wasmSha256": "ffc8f22f3e5551cf0fa5b18fcbcd9172d5e7151d2725a05469f2ad3869929c34",
+      "manifestSha256": "2f3c9caf020a26a77253719d3e0af768475a586d8923ed92034525f39d848f7e",
+      "patchSha256": "b85453dbb0dc9f55dc90f699c497640c512d3f929e0c408deff8b58318ec818a",
+      "wasmBytes": 69628,
+      "directory": "variants/native-subtrees"
+    },
+    "native-inline": {
+      "cSha256": "67023f5448c2200efbb051ccad431489d826b1c1d39bf21ecaacde4cc1300297",
+      "wasmSha256": "d0da8449db4c5b5c9a47dbc7bdcb37482e971dbc03b94993e42746c53e12a791",
+      "manifestSha256": "e7aa0fbeadb217016ab408e0bf9c3282bf921a071a3e8baa08cd0d13f4650ae8",
+      "patchSha256": "db5f3b00fb07b194b0e3e0bed63b0870e6d1a45067cb96fdd09499dbfaed80ca",
+      "wasmBytes": 69275,
+      "directory": "variants/native-inline"
+    },
+    "native-strict-inline": {
+      "cSha256": "f80fbe7bba8e51ed6a5e595172cea8a4f5ef77530ec9536348bdc9aaf6519ece",
+      "wasmSha256": "7fa0b772aaa177dc463a3f71f9df5af5974c90518796b4cc3c40c582b7c8fee3",
+      "manifestSha256": "9fa9afa7bf5654ffdd0357777287b5c64957a9f86aec34d64bf4f41156c9c4cd",
+      "patchSha256": "07e3d9186dd2afc91e5398940e25b03a762bf6a942848d799def5364489ea542",
+      "wasmBytes": 75929,
+      "directory": "variants/native-strict-inline"
+    },
+    "native-hints": {
+      "cSha256": "ac67d7ea4f07345fadf54f355db554a8a67ee66be5b5591ba7acd492bc9f4e90",
+      "wasmSha256": "8f00fef255e15db2ee306112d46e9cbaeda199126f004b4995b246761333386b",
+      "manifestSha256": "f8a0838f710f299b9cffe41c82b3ba9f8429c5fada7d00130b0de17b249ad7b7",
+      "patchSha256": "3308024809afcd63f7d8c46ae5414a510954e949ac0454d87783b27bc85b0cc0",
+      "wasmBytes": 67714,
+      "directory": "variants/native-hints"
+    },
+    "native-table-tags": {
+      "cSha256": "bac37cfee5307a13fd11f6d0e6f9a5b98343a68a474491cac02d7e52648121a6",
+      "wasmSha256": "424db50a9e5e6eb0a111bc35931792fada825ac5902ab91072e494dd284ebd95",
+      "manifestSha256": "572094db2221a700a4d9ef9dc62ab2fbbb70eb563ea57773f4ace21377232f21",
+      "patchSha256": "15e462146e273dab91a139f5d0bd3b79030973c81dc62da6d8d15df78a2c865d",
+      "wasmBytes": 67969,
+      "directory": "variants/native-table-tags"
+    }
+  },
+  "schedule": [
+    "ABHCGDFE",
+    "BCADHEGF",
+    "CDBEAFHG",
+    "DECFBGAH",
+    "EFDGCHBA",
+    "FGEHDACB",
+    "GHFAEBDC",
+    "HAGBFCED",
+    "DECFBGAH",
+    "CDBEAFHG",
+    "BCADHEGF",
+    "ABHCGDFE",
+    "HAGBFCED",
+    "GHFAEBDC",
+    "FGEHDACB",
+    "EFDGCHBA"
+  ],
+  "warmupOrder": [
+    "ABCDEFGH",
+    "HGFEDCBA"
+  ],
+  "warmupsPerInstance": 2,
+  "observationsPerArm": 16,
+  "passesPerObservation": 1,
+  "rowChunkSize": 2048,
+  "options": {
+    "singleChunk": true,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "mediaHintFastScan": false,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true
+  },
+  "timedExports": [
+    "parse_term_bank",
+    "parse_term_bank_with_media_hints",
+    "parse_and_encode_term_bank_token_binary_dedup",
+    "build_term_string_plan",
+    "compact_term_lookup_keys",
+    "encode_term_lookup_index",
+    "encode_term_content",
+    "encode_term_content_no_hash",
+    "encode_term_content_token_binary",
+    "encode_term_content_token_binary_dedup"
+  ],
+  "primaryExport": "parse_and_encode_term_bank_token_binary_dedup",
+  "primaryMetric": "current-thread CPU milliseconds in primary native export",
+  "secondaryMetrics": [
+    "same-export wall milliseconds",
+    "all selected native exports CPU and wall milliseconds",
+    "JavaScript parser plus lookup API wall milliseconds (diagnostic only)"
+  ],
+  "affinity": "Pin Node to the second CPU in sorted initial allowed affinity; use the sole CPU if only one is available. Record original and selected affinity.",
+  "scope": "Resident serial native component screen only. Decompressed term banks use unchanged lazy 24 MiB balancing for an explicit three-worker/four-groups policy; those groups execute serially in each arm. No ZIP, worker scheduling, compression, storage, browser UI, GC or digest work is inside native-call timers.",
+  "selectionPolicy": "All eight arms and all sixteen blocks are fixed before acquisition. Retain all observations; no adaptive reruns, warmup changes, outlier deletion or control-based resampling. A component signal can only nominate an independent complete-browser import confirmation; this screen cannot qualify a PR.",
+  "grouping": {
+    "policy": "unchanged lazy byte balancing with explicit worker count",
+    "parserWorkers": 3,
+    "plainGroupsPerWorker": 4,
+    "mediaGroupsPerWorker": 3,
+    "targetBytes": 25165824,
+    "expectedGroupCount": 12,
+    "executionConcurrency": 1,
+    "reference": "test/perf/segmented-lookup-ownership-20261125/replay.mjs",
+    "referenceSha256": "6027c6de77b581254333b3790d7acf1dcfe140f51bd6b3e25ddaa0bd884342d6"
+  },
+  "archiveMediaPolicy": "Derive hasArchiveImages from every locked ZIP filename with the production getImageMediaTypeFromFileName helper; require false for the locked JMdict fixture. Set mediaHintFastScan to this observed flag."
+}

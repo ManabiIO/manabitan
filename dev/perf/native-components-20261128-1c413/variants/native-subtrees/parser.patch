@@ -1,0 +1,104 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index ccfba94ced..51dd77021f 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -907,7 +907,13 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
+     }
+ }
+ 
+-static int parse_composite_span_impl(
++static int parse_nested_composite_span(
++    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
++    uint32_t* media_hint, uint32_t* normalization_hint,
++    uint32_t* text_normalization_hint, uint32_t nesting_limit
++);
++
++static __attribute__((always_inline)) inline int parse_composite_span_core(
+     const uint8_t* src,
+     uint32_t len,
+     uint32_t start,
+@@ -915,13 +921,14 @@ static int parse_composite_span_impl(
+     uint32_t* media_hint,
+     uint32_t* normalization_hint,
+     uint32_t* text_normalization_hint,
+-    int validate_glossary_types
++    int validate_glossary_types,
++    uint32_t nesting_limit
+ ) {
+     enum {
+         ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
+         OBJECT_FIRST, OBJECT_COLON, OBJECT_VALUE, OBJECT_AFTER_VALUE, OBJECT_KEY
+     };
+-    if (start >= len || (src[start] != '[' && src[start] != '{')) { return 0; }
++    if (nesting_limit == 0u || start >= len || (src[start] != '[' && src[start] != '{')) { return 0; }
+ 
+     // The active frame stays in a local. Only suspended parents need stack
+     // storage; the state also encodes the matching container type.
+@@ -1004,9 +1011,16 @@ static int parse_composite_span_impl(
+                     // dispatching its opener through the general token loop.
+                     if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
+                         i < len && (src[i] == '[' || src[i] == '{')) {
+-                        if (depth >= MAX_JSON_NESTING) { return 0; }
++                        if (depth >= nesting_limit) { return 0; }
+                         if (validate_top_level_objects && depth == 2u) {
+                             glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
++                            uint32_t child_end;
++                            if (!parse_nested_composite_span(src, len, i, &child_end,
++                                    media_hint, normalization_hint, text_normalization_hint,
++                                    nesting_limit - depth)) { return 0; }
++                            state = OBJECT_AFTER_VALUE;
++                            i = child_end;
++                            continue;
+                         }
+                         parents[depth - 1u] = OBJECT_AFTER_VALUE;
+                         ++depth;
+@@ -1087,7 +1101,16 @@ static int parse_composite_span_impl(
+             }
+         }
+         if (c == '[' || c == '{') {
+-            if (depth >= MAX_JSON_NESTING) { return 0; }
++            if (depth >= nesting_limit) { return 0; }
++            if (validate_top_level_objects && depth == 2u) {
++                uint32_t child_end;
++                if (!parse_nested_composite_span(src, len, i, &child_end,
++                        media_hint, normalization_hint, text_normalization_hint,
++                        nesting_limit - depth)) { return 0; }
++                state = next_state;
++                i = child_end;
++                continue;
++            }
+             if (validate_top_level_objects && depth == 1u && c == '{') {
+                 glossary_object_type = 0u;
+                 glossary_valid_fields = 0u;
+@@ -1107,6 +1130,31 @@ static int parse_composite_span_impl(
+     return 0;
+ }
+ 
++/* Required glossary fields belong to the outer glossary objects. Nested JSON
++ * uses the same grammar and hint collection with that bookkeeping eliminated.
++ * The remaining depth budget preserves the original global nesting bound. */
++static __attribute__((noinline)) int parse_nested_composite_span(
++    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
++    uint32_t* media_hint, uint32_t* normalization_hint,
++    uint32_t* text_normalization_hint, uint32_t nesting_limit
++) {
++    return parse_composite_span_core(src, len, start, out_end, media_hint,
++        normalization_hint, text_normalization_hint, 0, nesting_limit);
++}
++
++static int parse_composite_span_impl(
++    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
++    uint32_t* media_hint, uint32_t* normalization_hint,
++    uint32_t* text_normalization_hint, int validate_glossary_types
++) {
++    if (!validate_glossary_types) {
++        return parse_nested_composite_span(src, len, start, out_end, media_hint,
++            normalization_hint, text_normalization_hint, MAX_JSON_NESTING);
++    }
++    return parse_composite_span_core(src, len, start, out_end, media_hint,
++        normalization_hint, text_normalization_hint, 1, MAX_JSON_NESTING);
++}
++
+ static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+     return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0, 0);
+ }

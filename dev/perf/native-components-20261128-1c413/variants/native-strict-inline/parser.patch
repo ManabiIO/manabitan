@@ -1,0 +1,71 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index ccfba94ced..ef94789e83 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1478,7 +1478,7 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*
+  * Keep its grammar explicit instead of dispatching each field twice through
+  * the permissive row parser and set_field. Every metadata word is assigned
+  * before success; failed rows are never published. */
+-static int parse_format3_row(
++static __attribute__((always_inline)) inline int parse_format3_row(
+     const uint8_t* src,
+     uint32_t len,
+     uint32_t row_start,
+@@ -1571,7 +1571,7 @@ static int parse_format3_row(
+     return 1;
+ }
+ 
+-static int parse_row_single_pass(
++static __attribute__((noinline)) int parse_generic_row(
+     const uint8_t* src,
+     uint32_t len,
+     uint32_t row_start,
+@@ -1585,12 +1585,6 @@ static int parse_row_single_pass(
+     int validate_glossary_types,
+     uint32_t* key_escape_mask
+ ) {
+-    if (validate_glossary_types) {
+-        return parse_format3_row(
+-            src, len, row_start, out_meta, media_hints, out_next,
+-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+-        );
+-    }
+     if (row_start >= len || src[row_start] != '[') { return 0; }
+     clear_term_row_meta(out_meta);
+     // Missing generic keys remain conservative; only validated literal keys
+@@ -1653,6 +1647,35 @@ static int parse_row_single_pass(
+     return 0;
+ }
+ 
++/* Keep the permissive fallback out of the strict fused row loop. Inlining
++ * the production row validator lets each caller specialize its stable flags
++ * without cloning the generic field dispatcher into the hot path. */
++static __attribute__((always_inline)) inline int parse_row_single_pass(
++    const uint8_t* src,
++    uint32_t len,
++    uint32_t row_start,
++    TermRowMeta* out_meta,
++    int media_hints,
++    uint32_t* out_next,
++    const TermRowMeta* prior_rows,
++    uint32_t prior_count,
++    uint32_t* glossary_witness,
++    uint32_t glossary_lookback,
++    int validate_glossary_types,
++    uint32_t* key_escape_mask
++) {
++    if (validate_glossary_types) {
++        return parse_format3_row(
++            src, len, row_start, out_meta, media_hints, out_next,
++            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
++        );
++    }
++    return parse_generic_row(
++        src, len, row_start, out_meta, media_hints, out_next,
++        prior_rows, prior_count, glossary_witness, glossary_lookback, 0, key_escape_mask
++    );
++}
++
+ static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length) {
+     return length == 4u &&
+         src[start] == 'n' &&

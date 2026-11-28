@@ -1,0 +1,526 @@
+{
+  "scope": "Local correctness before hosted component acquisition; no timing claim. Digests compare all canonical content rows, numeric/key columns, exact lookup bytes, dedup IDs and media candidates. Image decoding, persistence and query readback are outside this parity scope.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "corpusResults": {
+    "native-subtrees": {
+      "complete": true,
+      "totalRows": 7613164,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "archiveBytes": 15645766,
+          "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "title": "JMdict [2026-11-22]",
+          "revision": "JMdict.2026-11-22",
+          "rows": 528299,
+          "banks": 53,
+          "groupDigest": "0d406c57d2ec3f7b513ec411d81768b1264b5fdd6a7a9a90c7ee58a75b93b1d0",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 18284544
+        },
+        {
+          "dictionary": "jitendex",
+          "archiveBytes": 38831822,
+          "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "title": "Jitendex.org [2026-10-03]",
+          "revision": "2026.10.03.0",
+          "rows": 436555,
+          "banks": 219,
+          "groupDigest": "201ea3a5f9f8aedf97290dd5ddddd94a52a735011232cba46356566468cb8954",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 22347776
+        },
+        {
+          "dictionary": "vndb",
+          "archiveBytes": 291705969,
+          "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "title": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "rows": 6648310,
+          "banks": 665,
+          "groupDigest": "2acbbe4b44ce66631a5e4b57bc94ae3021bcebd19dccb425ae3362e61fbdcabf",
+          "fusedParseFallbacks": 28,
+          "maxWasmHeapBytes": 22347776
+        }
+      ],
+      "summarySha256": "13973bb1ac672637e9ab9bc77a1c8857923394d0c5b671246742df1e52454855",
+      "source": {
+        "cSha256": "608420abdb76bc364ec57888891f4772e1af97558812d3bae63f559409544421",
+        "wasmSha256": "ffc8f22f3e5551cf0fa5b18fcbcd9172d5e7151d2725a05469f2ad3869929c34",
+        "manifestSha256": "2f3c9caf020a26a77253719d3e0af768475a586d8923ed92034525f39d848f7e",
+        "patchSha256": "b85453dbb0dc9f55dc90f699c497640c512d3f929e0c408deff8b58318ec818a",
+        "wasmBytes": 69628,
+        "directory": "variants/native-subtrees"
+      }
+    },
+    "native-hints": {
+      "complete": true,
+      "totalRows": 7613164,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "archiveBytes": 15645766,
+          "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "title": "JMdict [2026-11-22]",
+          "revision": "JMdict.2026-11-22",
+          "rows": 528299,
+          "banks": 53,
+          "groupDigest": "0d406c57d2ec3f7b513ec411d81768b1264b5fdd6a7a9a90c7ee58a75b93b1d0",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 18284544
+        },
+        {
+          "dictionary": "jitendex",
+          "archiveBytes": 38831822,
+          "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "title": "Jitendex.org [2026-10-03]",
+          "revision": "2026.10.03.0",
+          "rows": 436555,
+          "banks": 219,
+          "groupDigest": "201ea3a5f9f8aedf97290dd5ddddd94a52a735011232cba46356566468cb8954",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 22347776
+        },
+        {
+          "dictionary": "vndb",
+          "archiveBytes": 291705969,
+          "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "title": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "rows": 6648310,
+          "banks": 665,
+          "groupDigest": "2acbbe4b44ce66631a5e4b57bc94ae3021bcebd19dccb425ae3362e61fbdcabf",
+          "fusedParseFallbacks": 28,
+          "maxWasmHeapBytes": 22347776
+        }
+      ],
+      "summarySha256": "c167f5e8c6734a891bfa2f14f9261b7bdff567ec19aabd240eab07ba53acd405",
+      "source": {
+        "cSha256": "ac67d7ea4f07345fadf54f355db554a8a67ee66be5b5591ba7acd492bc9f4e90",
+        "wasmSha256": "8f00fef255e15db2ee306112d46e9cbaeda199126f004b4995b246761333386b",
+        "manifestSha256": "f8a0838f710f299b9cffe41c82b3ba9f8429c5fada7d00130b0de17b249ad7b7",
+        "patchSha256": "3308024809afcd63f7d8c46ae5414a510954e949ac0454d87783b27bc85b0cc0",
+        "wasmBytes": 67714,
+        "directory": "variants/native-hints"
+      }
+    },
+    "native-table-tags": {
+      "complete": true,
+      "totalRows": 7613164,
+      "dictionaries": [
+        {
+          "dictionary": "jmdict",
+          "archiveBytes": 15645766,
+          "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "title": "JMdict [2026-11-22]",
+          "revision": "JMdict.2026-11-22",
+          "rows": 528299,
+          "banks": 53,
+          "groupDigest": "0d406c57d2ec3f7b513ec411d81768b1264b5fdd6a7a9a90c7ee58a75b93b1d0",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 18284544
+        },
+        {
+          "dictionary": "jitendex",
+          "archiveBytes": 38831822,
+          "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "title": "Jitendex.org [2026-10-03]",
+          "revision": "2026.10.03.0",
+          "rows": 436555,
+          "banks": 219,
+          "groupDigest": "201ea3a5f9f8aedf97290dd5ddddd94a52a735011232cba46356566468cb8954",
+          "fusedParseFallbacks": 0,
+          "maxWasmHeapBytes": 22347776
+        },
+        {
+          "dictionary": "vndb",
+          "archiveBytes": 291705969,
+          "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "title": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "rows": 6648310,
+          "banks": 665,
+          "groupDigest": "2acbbe4b44ce66631a5e4b57bc94ae3021bcebd19dccb425ae3362e61fbdcabf",
+          "fusedParseFallbacks": 28,
+          "maxWasmHeapBytes": 22347776
+        }
+      ],
+      "summarySha256": "c167f5e8c6734a891bfa2f14f9261b7bdff567ec19aabd240eab07ba53acd405",
+      "source": {
+        "cSha256": "bac37cfee5307a13fd11f6d0e6f9a5b98343a68a474491cac02d7e52648121a6",
+        "wasmSha256": "424db50a9e5e6eb0a111bc35931792fada825ac5902ab91072e494dd284ebd95",
+        "manifestSha256": "572094db2221a700a4d9ef9dc62ab2fbbb70eb563ea57773f4ace21377232f21",
+        "patchSha256": "15e462146e273dab91a139f5d0bd3b79030973c81dc62da6d8d15df78a2c865d",
+        "wasmBytes": 67969,
+        "directory": "variants/native-table-tags"
+      }
+    }
+  },
+  "focusedTests": {
+    "native-hints": {
+      "files": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": {
+          "size": 158830,
+          "sha256": "ac67d7ea4f07345fadf54f355db554a8a67ee66be5b5591ba7acd492bc9f4e90"
+        },
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+          "size": 67714,
+          "sha256": "8f00fef255e15db2ee306112d46e9cbaeda199126f004b4995b246761333386b"
+        },
+        "dev/data/dictionary-wasm/manifest.json": {
+          "size": 2588,
+          "sha256": "f8a0838f710f299b9cffe41c82b3ba9f8429c5fada7d00130b0de17b249ad7b7"
+        },
+        "test/term-bank-composite-state.test.js": {
+          "size": 8572,
+          "sha256": "1eb025508006bbfa0c4b4d7739890ab69be6be1abb08485dbb83df272afff197"
+        }
+      },
+      "focusedTests": {
+        "files": 5,
+        "passed": 1068,
+        "log": "focused-tests-1.log"
+      },
+      "receiptSha256": "f50c4a2ea9e449d12c5cd69d7d78b3476d65bad819148b299d60892af0e56855"
+    },
+    "native-table-tags": {
+      "files": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": {
+          "size": 159440,
+          "sha256": "bac37cfee5307a13fd11f6d0e6f9a5b98343a68a474491cac02d7e52648121a6"
+        },
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+          "size": 67969,
+          "sha256": "424db50a9e5e6eb0a111bc35931792fada825ac5902ab91072e494dd284ebd95"
+        },
+        "dev/data/dictionary-wasm/manifest.json": {
+          "size": 2588,
+          "sha256": "572094db2221a700a4d9ef9dc62ab2fbbb70eb563ea57773f4ace21377232f21"
+        },
+        "test/term-bank-format3-row.test.js": {
+          "size": 9258,
+          "sha256": "ee1ef224e6caf603f664a0384e0ed69c806681a1fc8966458790ee4cdd4783da"
+        }
+      },
+      "focusedTests": {
+        "files": 5,
+        "passed": 1128,
+        "log": "focused-tests-1.log"
+      },
+      "receiptSha256": "bb30933b1ea039b82aab480f1ca9b0c28e10402a4ae17ffc3a3530591c024d14"
+    }
+  },
+  "untimedPortability": {
+    "complete": true,
+    "mode": "untimed full-output portability verification",
+    "arms": 8,
+    "expected": {
+      "rows": 528299,
+      "indexBytes": 19508472,
+      "contentBytes": 145957292,
+      "mediaRows": 0,
+      "nativeSegments": 0,
+      "fusedParseAttempts": 12,
+      "fusedParseFallbacks": 0,
+      "digest": "51292350ceb9c320e06a40cb60ccbe353827efead2dc3ad0b69cc163cee0a8c8"
+    },
+    "hasArchiveImages": false,
+    "groups": [
+      [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 3224558,
+          "sha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 2724994,
+          "sha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2716299,
+          "sha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2672529,
+          "sha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1"
+        },
+        {
+          "name": "term_bank_5.json",
+          "bytes": 3204994,
+          "sha256": "ad3e78760766f7e6b0be7ef1b2eee2d7beecf17240f3def174cc005967d0d4cc"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_6.json",
+          "bytes": 3327080,
+          "sha256": "b952c58c4b1a2767a8844069976ba8cb932b0cb53888cf93d9998d0b9f994822"
+        },
+        {
+          "name": "term_bank_7.json",
+          "bytes": 3283936,
+          "sha256": "9b91d450b8744d8e88f063a3803b9a284fd128e700b97561cff29834573f9440"
+        },
+        {
+          "name": "term_bank_8.json",
+          "bytes": 3271454,
+          "sha256": "396564a2e0320f74d3099afdf88d4349fe648ecfe6af22463fca672b1ab0fd28"
+        },
+        {
+          "name": "term_bank_9.json",
+          "bytes": 3358246,
+          "sha256": "5cc34afb52511d9dd465bea3dadd0d19be8a04f68ae1ef3ed427f6d9975ba4bb"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_10.json",
+          "bytes": 3347561,
+          "sha256": "8f7c925190b05a4f53b73dee0acf2cb1f7d59a5c6ec1942e003ee8a0721f2a6f"
+        },
+        {
+          "name": "term_bank_11.json",
+          "bytes": 3314411,
+          "sha256": "0a61845cb9c988cadd11eef5d19e24bdb9c7af6104c0fee1af33517e5d6e96ae"
+        },
+        {
+          "name": "term_bank_12.json",
+          "bytes": 3353842,
+          "sha256": "e6b055f94937bc5db09d367ffc45dc5e45fd2ba637699e93e4b4bee72d058f34"
+        },
+        {
+          "name": "term_bank_13.json",
+          "bytes": 3241923,
+          "sha256": "117c80bccd5d005fe2e5801ab261a416fb30ccb6f2850e149720e3f19a409f04"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_14.json",
+          "bytes": 3311150,
+          "sha256": "6a71b15c248d4456782c8d90b312ee7f406bd2111ee6b8adad1c49d8c2341278"
+        },
+        {
+          "name": "term_bank_15.json",
+          "bytes": 4312211,
+          "sha256": "5150a28f810a5ac92fade631bcc5c05df9e4306610934575c7a092ee635277cf"
+        },
+        {
+          "name": "term_bank_16.json",
+          "bytes": 3257972,
+          "sha256": "04c256e40ce76f0651c49d92d985e15fbc97a4a466932e3cec66c292f4b85951"
+        },
+        {
+          "name": "term_bank_17.json",
+          "bytes": 3206874,
+          "sha256": "ab26d54184dd15c0eb21393be82abbe384e88c1599c5c87cd39560dcae97fbbd"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_18.json",
+          "bytes": 3408913,
+          "sha256": "1163e5686590707e1390d3edf4e4ed35f96a81f588726d6d161e0a8f687386bc"
+        },
+        {
+          "name": "term_bank_19.json",
+          "bytes": 2944326,
+          "sha256": "6589a04a9e47a232d6e674551dc5b23eb10ddd98bf630eb0210cf42054abf117"
+        },
+        {
+          "name": "term_bank_20.json",
+          "bytes": 2991158,
+          "sha256": "4b94052e3b3706587e39ee13b7c507614d02b3c3ecb2880b4ccf4e9386e0ab83"
+        },
+        {
+          "name": "term_bank_21.json",
+          "bytes": 2912871,
+          "sha256": "f4060d60cdcbd95252dfe225bb55f6b370e1145b29a82d10ea99cf69dfda253b"
+        },
+        {
+          "name": "term_bank_22.json",
+          "bytes": 2881347,
+          "sha256": "89783ca3716f121816d8b79a52fc73dee5fea19b8d043d8c233328f2e15e503b"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_23.json",
+          "bytes": 3130796,
+          "sha256": "6bb2ab2953013e724277618a59e2a032848c8151368c02c3595f43614bbd9680"
+        },
+        {
+          "name": "term_bank_24.json",
+          "bytes": 2924205,
+          "sha256": "d499e5ddfffde1fdeca2fae842715006c4fa7b19b680b4a1cef94e69de45e4c2"
+        },
+        {
+          "name": "term_bank_25.json",
+          "bytes": 3148618,
+          "sha256": "637343928a8ff879c830eaa31e208dc31ac6e0aed84c0ac27f2b7a610c6040e1"
+        },
+        {
+          "name": "term_bank_26.json",
+          "bytes": 3377060,
+          "sha256": "6b31f06728fec4b7ef892100afd7d048597a87ca3ebcd2ea404a3c203124a30c"
+        },
+        {
+          "name": "term_bank_27.json",
+          "bytes": 3374974,
+          "sha256": "45d9111bd312f2a3dd5c748edaa8322ca962d731621ecb0b26202ca684305b36"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_28.json",
+          "bytes": 3326587,
+          "sha256": "5621d982d7b9d9ba3f2f2440c21a597852fe5e0fc23b43a02e8211a54bd75782"
+        },
+        {
+          "name": "term_bank_29.json",
+          "bytes": 3411990,
+          "sha256": "a5efa8d50811c1954a770bc14aae9704a80961ca6b94935719fe2f03eecfa1dd"
+        },
+        {
+          "name": "term_bank_30.json",
+          "bytes": 3706971,
+          "sha256": "640c00d882979e4b620daddaf2db12a1ed99f4afd902d4ba9e851eb935499388"
+        },
+        {
+          "name": "term_bank_31.json",
+          "bytes": 3257358,
+          "sha256": "ea612b8561a53e662de2c02eb2c0050d83b4ffd480fd4df6c384e0789f381ef4"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_32.json",
+          "bytes": 2530607,
+          "sha256": "b7f56d4e646f695d2619b35a07843e947e967ba275fd6a57e6d5ec4a8cd1a4e8"
+        },
+        {
+          "name": "term_bank_33.json",
+          "bytes": 3140246,
+          "sha256": "5521f93cfeb63d3c78cb7e3af8374cd2a3b25739ddcf86b6e08707bff43280f1"
+        },
+        {
+          "name": "term_bank_34.json",
+          "bytes": 3038748,
+          "sha256": "315dabdbb053102a221a5e4bf6f5b937894ad1a7730fab8853d190b9e3930581"
+        },
+        {
+          "name": "term_bank_35.json",
+          "bytes": 2430169,
+          "sha256": "10d038a7290d0ed2949c8491955279817cad65a64c98ae0533c9a722020e136e"
+        },
+        {
+          "name": "term_bank_36.json",
+          "bytes": 3168136,
+          "sha256": "1c579f595f99ad7053c569dc82e14670e9b05248585a8c50479820a8babef3aa"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_37.json",
+          "bytes": 3943952,
+          "sha256": "3c4e05ac19a48d88de1319013062f719de9b646955841af618fe89c5efe923ea"
+        },
+        {
+          "name": "term_bank_38.json",
+          "bytes": 3323025,
+          "sha256": "e7d8940830e123156b998e6b792b62c58eeccbc1cd7bd153fed1ed9929ca54d9"
+        },
+        {
+          "name": "term_bank_39.json",
+          "bytes": 3401356,
+          "sha256": "a2a7a0056729a29be6e48acf20dff9556b39dcccd2c5a61c69ba22bf94fbf53d"
+        },
+        {
+          "name": "term_bank_40.json",
+          "bytes": 3450837,
+          "sha256": "ae55b1d39795173aec65ce79f7566d4662239f486be653d1f9d275ce0f33ebe1"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_41.json",
+          "bytes": 3426893,
+          "sha256": "f722810790b62cbc72e57129367622abb6382e78aee84c82a7ad7f088e787563"
+        },
+        {
+          "name": "term_bank_42.json",
+          "bytes": 3505865,
+          "sha256": "6aea96d384524f8fd8eb04618677865cb7ea836681a3dae0b4ff45e5d8b51e99"
+        },
+        {
+          "name": "term_bank_43.json",
+          "bytes": 3414653,
+          "sha256": "b40fd67648580d280b0394f28175df9c76fdf2a9eaba4a4984b45ed1a0f6646b"
+        },
+        {
+          "name": "term_bank_44.json",
+          "bytes": 3427785,
+          "sha256": "6cdd63a41b07ec9fdad8f2a612018a4a462c0234eb0ee04c877eadba0b239c14"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_45.json",
+          "bytes": 3478013,
+          "sha256": "de032d7410203ea5d95164232ceac863a429f0bb4560b5cd7c38d95414c8f6d0"
+        },
+        {
+          "name": "term_bank_46.json",
+          "bytes": 3653990,
+          "sha256": "64b0212e0104f43d08d22ab13a8289a4e174a9e2403595cef6e4e0f50f2725e8"
+        },
+        {
+          "name": "term_bank_47.json",
+          "bytes": 3481019,
+          "sha256": "5448759be94ad56b62ccc14ba4f9d5ae4a06ff6dece65f2d3d9dfdde395490ba"
+        },
+        {
+          "name": "term_bank_48.json",
+          "bytes": 3323625,
+          "sha256": "385d33b9fd754d59643fe101f159d5d7cc29cfc5e0e607e1c8ed5c63da76fbe7"
+        }
+      ],
+      [
+        {
+          "name": "term_bank_49.json",
+          "bytes": 3291469,
+          "sha256": "d1b597da0285da08e98083b7f4b5f81aaa28e70c4565fe1ee7fcfcaccb3fe7bc"
+        },
+        {
+          "name": "term_bank_50.json",
+          "bytes": 3231984,
+          "sha256": "3967400c60866210250a3b6496ea8c62469aa7832e63969fd7f1233501aa6b8a"
+        },
+        {
+          "name": "term_bank_51.json",
+          "bytes": 3194840,
+          "sha256": "1e3499825ad8a3857f7d2722a026b3bf27939e9057619c49aaefe1f4cf6cc908"
+        },
+        {
+          "name": "term_bank_52.json",
+          "bytes": 3474021,
+          "sha256": "01df61fd06b7fdc3f8e972358c90c593f5547327bf433765ec1efeaa7537a853"
+        },
+        {
+          "name": "term_bank_53.json",
+          "bytes": 2359082,
+          "sha256": "34a29b0645204a2882b9813673071d99849505711bd9744d0965e710a129feb9"
+        }
+      ]
+    ],
+    "summarySha256": "0b0aed635eba70f29b9907d3482b190bbc0ac08feb6d3901b353b46b6b864ad8",
+    "runnerSha256": "1d6bbd254dbad891611cf55805451bf4cafdd6b5fd2bb851048e157a8b98425f",
+    "commonSha256": "d12c1f44e488b2fa7b9ef1a333acdb2e4b27ea5b79dc4ea623323742201fc17d",
+    "prepareSha256": "82a8b5873e5c4fae1f93e62346ce2a1d75c76b68c47b9eba56b5524cc691e876",
+    "planSha256": "c139b55ca1da6176eb6873502c3e767dbb90752208c7e2e477443c09f21878f1",
+    "note": "All eight arms completed one full, untimed JMdict pass after exact pinned rebuilds. No CPU or wall observations were captured. Documentation and this validation receipt were appended afterward; runtime code and frozen plan are unchanged."
+  }
+}

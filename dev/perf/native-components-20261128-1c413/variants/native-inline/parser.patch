@@ -1,0 +1,13 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index ccfba94ced..4e5a1a2a64 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1571,7 +1571,7 @@ static int parse_format3_row(
+     return 1;
+ }
+ 
+-static int parse_row_single_pass(
++static __attribute__((always_inline)) inline int parse_row_single_pass(
+     const uint8_t* src,
+     uint32_t len,
+     uint32_t row_start,

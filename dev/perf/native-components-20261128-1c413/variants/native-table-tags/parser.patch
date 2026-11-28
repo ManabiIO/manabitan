@@ -1,0 +1,63 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index ccfba94ced..34ca6de82d 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -881,7 +881,13 @@ static __attribute__((always_inline)) inline uint32_t advance_glossary_delimiter
+     return next;
+ }
+ 
+-/* Short literal tags can consume their colon and following comma together. */
++/* Short literal tags can consume their colon and value together. A closing
++ * object stays in the main loop so its required fields and parent transition
++ * retain the same validation as other object endings. */
++static inline int is_structured_tag_delimiter(uint8_t c) {
++    return c == ',' || c == '}';
++}
++
+ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t len, uint32_t start) {
+     if (start >= len || src[start] != ':') { return 0u; }
+     uint32_t value = start + 1u;
+@@ -891,16 +897,23 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
+     __builtin_memcpy(&prefix, src + value, sizeof(prefix));
+     switch (prefix) {
+         case UINT32_C(0x76696422): /* "div */
+-            return len - value >= 6u && src[value + 4u] == '"' && src[value + 5u] == ',' ? value + 6u : 0u;
++            return len - value >= 6u && src[value + 4u] == '"' && is_structured_tag_delimiter(src[value + 5u]) ? value + 6u : 0u;
+         case UINT32_C(0x61707322): /* "spa */
+-            return len - value >= 7u && src[value + 4u] == 'n' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
++            return len - value >= 7u && src[value + 4u] == 'n' && src[value + 5u] == '"' && is_structured_tag_delimiter(src[value + 6u]) ? value + 7u : 0u;
+         case UINT32_C(0x62757222): /* "rub */
+-            return len - value >= 7u && src[value + 4u] == 'y' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
++            return len - value >= 7u && src[value + 4u] == 'y' && src[value + 5u] == '"' && is_structured_tag_delimiter(src[value + 6u]) ? value + 7u : 0u;
++        case UINT32_C(0x62617422): /* "tab */
++            return len - value >= 8u && src[value + 4u] == 'l' && src[value + 5u] == 'e' && src[value + 6u] == '"' && is_structured_tag_delimiter(src[value + 7u]) ? value + 8u : 0u;
+         case UINT32_C(0x22747222): /* "rt" */
+         case UINT32_C(0x226c7522): /* "ul" */
+         case UINT32_C(0x22696c22): /* "li" */
+-            return len - value >= 5u && src[value + 4u] == ',' ? value + 5u : 0u;
++        case UINT32_C(0x22687422): /* "th" */
++        case UINT32_C(0x22647422): /* "td" */
++        case UINT32_C(0x22727422): /* "tr" */
++        case UINT32_C(0x226c6f22): /* "ol" */
++            return len - value >= 5u && is_structured_tag_delimiter(src[value + 4u]) ? value + 5u : 0u;
+         case UINT32_C(0x2c226122): /* "a", */
++        case UINT32_C(0x7d226122): /* "a"} */
+             return value + 4u;
+         default:
+             return 0u;
+@@ -969,8 +982,13 @@ static int parse_composite_span_impl(
+                     if (tag_end != 0u) {
+                         if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
+                         if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
+-                        state = OBJECT_KEY;
+-                        i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
++                        if (src[tag_end - 1u] == '}') {
++                            state = OBJECT_AFTER_VALUE;
++                            i = tag_end - 1u;
++                        } else {
++                            state = OBJECT_KEY;
++                            i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
++                        }
+                         continue;
+                     }
+                 }
