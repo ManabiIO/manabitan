@@ -198,7 +198,6 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
     const profile = await mkdtemp(path.join(scratch, `cap-default-${dataset}-${pair}-${arm}-`))
     let context
     let record
-    let compressionWorkerAttestation = null
     const hostBefore = hostSnapshot()
     try {
         context = await chromium.launchPersistentContext(profile, getChromiumLaunchOptions({
@@ -340,22 +339,24 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             }
         }
         if (process.env.BENCH_EXPECTED_ZSTD_WORKERS) {
-            compressionWorkerAttestation = await worker.evaluate(() => ({
-                createdCount: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersCreated'),
-                readyCount: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersReady'),
-            }))
+            const actualCreatedCount = findNumericProperties(
+                record.importDebugSnapshot ?? {}, new Set(['qualificationZstdWorkersCreated']),
+            )[0] ?? null
+            const actualReadyCount = findNumericProperties(
+                record.importDebugSnapshot ?? {}, new Set(['qualificationZstdWorkersReady']),
+            )[0] ?? null
             record.compressionWorkerAttestation = {
                 expected: Number(process.env.BENCH_EXPECTED_ZSTD_WORKERS),
-                actualCreatedCount: compressionWorkerAttestation.createdCount ?? null,
-                actualReadyCount: compressionWorkerAttestation.readyCount ?? null,
+                actualCreatedCount,
+                actualReadyCount,
             }
             const foundParserWorkerCounts = [...new Set(findNumericProperties(
                 record.importDebugSnapshot ?? {},
                 new Set(['parserParallelWorkerCount', 'fastPathParserParallelWorkerCount']),
             ))]
             record.parserWorkerCounts = foundParserWorkerCounts
-            if (record.compressionWorkerAttestation.actualCreatedCount !== record.compressionWorkerAttestation.expected ||
-                record.compressionWorkerAttestation.actualReadyCount !== record.compressionWorkerAttestation.expected) {
+            if (actualCreatedCount !== record.compressionWorkerAttestation.expected ||
+                actualReadyCount !== record.compressionWorkerAttestation.expected) {
                 errors.push(`Observed ${record.compressionWorkerAttestation.actualCreatedCount} created and ${record.compressionWorkerAttestation.actualReadyCount} ready Zstd compression workers; expected ${record.compressionWorkerAttestation.expected}`)
             }
             if (record.hardwareConcurrency === null || foundParserWorkerCounts.length === 0) {

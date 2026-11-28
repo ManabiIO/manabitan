@@ -112,6 +112,22 @@ try {
         workerInitializationAnchor,
         `${workerInitializationAnchor.slice(0, workerInitializationAnchor.indexOf('\n            await Promise.all(readyPromises);'))}\n            globalThis.__manabitanQualificationZstdWorkersCreated = workers.length;\n            await Promise.all(readyPromises);\n            globalThis.__manabitanQualificationZstdWorkersReady = workers.length;`,
     )
+    const importerRelativePath = 'ext/js/dictionary/dictionary-importer.js'
+    const importerPath = path.resolve(product, importerRelativePath)
+    const importerStat = await lstat(importerPath)
+    if (importerStat.isSymbolicLink() || await realpath(importerPath) !== importerPath) {
+        throw new Error('Dictionary importer source is not a regular file in the detached source worktree')
+    }
+    const importerSource = await readFile(importerPath)
+    const importerSourceText = importerSource.toString('utf8')
+    const importerDebugAnchor = '            if (bulkFinalizationDetails !== null) {\n                Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);\n            }\n            recordPhaseTiming(\'bulk-finalization\', tBulkFinalizationStart, bulkFinalizationPhaseDetails);'
+    if ((importerSourceText.split(importerDebugAnchor).length - 1) !== 1) {
+        throw new Error('Frozen importer finalization diagnostics anchor is absent or ambiguous')
+    }
+    const instrumentedImporterSourceText = importerSourceText.replace(
+        importerDebugAnchor,
+        `            if (bulkFinalizationDetails !== null) {\n                Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);\n            }\n            Object.assign(bulkFinalizationPhaseDetails, {\n                qualificationZstdWorkersCreated: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersCreated') ?? null,\n                qualificationZstdWorkersReady: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersReady') ?? null,\n            });\n            recordPhaseTiming('bulk-finalization', tBulkFinalizationStart, bulkFinalizationPhaseDetails);`,
+    )
     const candidateSourceText = instrumentedControlSourceText.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;')
     if ((instrumentedControlSourceText.match(/const COMPRESSION_WORKER_COUNT = 4;/gu) ?? []).length !== 1 ||
         candidateSourceText.replace('const COMPRESSION_WORKER_COUNT = 2;', 'const COMPRESSION_WORKER_COUNT = 4;') !== instrumentedControlSourceText) {
@@ -119,6 +135,7 @@ try {
     }
     try {
         await writeFile(overlayPath, instrumentedControlSourceText)
+        await writeFile(importerPath, instrumentedImporterSourceText)
         await run(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-dev'], {cwd: product})
         const controlPackagePath = path.join(product, 'builds/manabitan-chrome-dev.zip')
         workerCountScreen.controlPackageSha256 = await sha256File(controlPackagePath)
@@ -126,16 +143,18 @@ try {
         await mkdir(controlExtensionDir, {recursive: true})
         await run('unzip', ['-q', controlPackagePath, '-d', controlExtensionDir])
         workerCountScreen.sharedDiagnosticInstrumentation = {
-            sourceSha256: createHash('sha256').update(controlSource).digest('hex'),
-            instrumentedSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'),
-            patchSha256: createHash('sha256').update(workerInitializationAnchor).digest('hex'),
-            purpose: 'Record constructed and ready Zstd worker counts in the extension service worker global scope in both packages',
+            changes: [
+                {path: overlayRelativePath, sourceSha256: createHash('sha256').update(controlSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'), anchorSha256: createHash('sha256').update(workerInitializationAnchor).digest('hex')},
+                {path: importerRelativePath, sourceSha256: createHash('sha256').update(importerSource).digest('hex'), instrumentedSourceSha256: createHash('sha256').update(instrumentedImporterSourceText).digest('hex'), anchorSha256: createHash('sha256').update(importerDebugAnchor).digest('hex')},
+            ],
+            purpose: 'Record constructed and ready Zstd worker counts in the offscreen dictionary worker global scope in both packages',
         }
         await writeFile(overlayPath, candidateSourceText)
         const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
-        if (changedFiles.trim() !== overlayRelativePath) throw new Error(`Unexpected worker-count overlay paths: ${changedFiles.trim()}`)
+        const expectedChangedPaths = [importerRelativePath, overlayRelativePath].sort().join('\n')
+        if (changedFiles.trim() !== expectedChangedPaths) throw new Error(`Unexpected worker-count overlay paths: ${changedFiles.trim()}`)
         workerCountScreen.overlayOnly = {
-            changedPaths: changedFiles.trim().split('\n'),
+            changedPaths: [overlayRelativePath],
             controlSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'),
             candidateSourceSha256: await sha256File(overlayPath),
             patchSha256: createHash('sha256').update('COMPRESSION_WORKER_COUNT: 4 -> 2').digest('hex'),
@@ -208,6 +227,7 @@ try {
         }
     } finally {
         await writeFile(overlayPath, controlSource)
+        await writeFile(importerPath, importerSource)
         const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
         if (changedFiles.trim() !== '') throw new Error(`Temporary worker-count overlay was not restored: ${changedFiles.trim()}`)
     }
