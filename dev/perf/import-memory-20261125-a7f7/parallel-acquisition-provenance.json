@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "scope": "Prospective acquisition-only observer change; no product or timing-cohort change",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineSamplerSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+  "candidateSamplerSha256": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+  "testSha256": "e68c8d56460491a1fd2b5af91b8bad535565dc9b0ea0697e0a11f9873d4feb29",
+  "maximumConcurrentReaders": 4,
+  "readerLimit": "min(4, discovered process count); no pool for an empty tree",
+  "wholeModuleAstIdenticalOutsideImportAndAcquisitionBlock": true,
+  "unchangedFiles": {
+    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+    "test_import_window.py": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518",
+    "test_protocol.py": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba",
+    "test_qualification_receipts.py": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d"
+  },
+  "originalModuleSnapshotComparisons": [
+    {
+      "case": "stable",
+      "identical": true,
+      "qualified": true,
+      "failures": [],
+      "normalizedSha256": "05ee9cdc226c5d8ab3c103c758b8d2287b590526e84c586ee4283b4d9ccf3b67"
+    },
+    {
+      "case": "denied",
+      "identical": true,
+      "qualified": false,
+      "failures": ["unreadable-discovered-process-smaps"],
+      "normalizedSha256": "2fde17eccaf3b45f8279e0d19e51325bf2a06d919af705b50bc94738d9bedbdc"
+    },
+    {
+      "case": "missing-metric",
+      "identical": true,
+      "qualified": false,
+      "failures": ["unreadable-discovered-process-smaps"],
+      "normalizedSha256": "f8133b6bd3f475809a105c67627610c232b4966371ac79daba594ff5603c474c"
+    },
+    {
+      "case": "reused-pid",
+      "identical": true,
+      "qualified": false,
+      "failures": ["process-tree-changed-during-scan"],
+      "normalizedSha256": "68c116f7f46e04576578a9334becb41d04c3232390eaa916ebb22471832e25bb"
+    },
+    {
+      "case": "metadata-changed",
+      "identical": true,
+      "qualified": false,
+      "failures": ["process-tree-changed-during-scan"],
+      "normalizedSha256": "b144b9c9d77ba1056430cb2a0bb0a97176f4c1d9581941469f327da36a950006"
+    },
+    {
+      "case": "reparented",
+      "identical": true,
+      "qualified": false,
+      "failures": ["process-tree-changed-during-scan"],
+      "normalizedSha256": "47821ffb78458628b3146f58c4f4952e375323ab0ba9ac1777abe83b8b25e2ad"
+    },
+    {
+      "case": "exited",
+      "identical": true,
+      "qualified": false,
+      "failures": [
+        "process-tree-changed-during-scan",
+        "unreadable-discovered-process-smaps"
+      ],
+      "normalizedSha256": "077096e18cfd91e922934ab1b00c0b09d81bc947b18b9e2c3794115d8591cebf"
+    },
+    {
+      "case": "new-descendant",
+      "identical": true,
+      "qualified": false,
+      "failures": ["process-tree-changed-during-scan"],
+      "normalizedSha256": "0a70214ad147e52dbb5221a172fd8cddc1c1cb818e7e243381ed116a25e1d06f"
+    },
+    {
+      "case": "persistent-inventory-error",
+      "identical": true,
+      "qualified": false,
+      "failures": ["incomplete-process-identity-inventory"],
+      "normalizedSha256": "9109b58fde9bf7215749996508c673ca9167914bdd8538e917b062507153d8e3"
+    },
+    {
+      "case": "confirmed-zombie",
+      "identical": true,
+      "qualified": true,
+      "failures": [],
+      "normalizedSha256": "fc1e9d8152804380c7c33791e7b8f3d9b63611804378d84d5d95f9763be65be6"
+    },
+    {
+      "case": "zombie-live-sibling",
+      "identical": true,
+      "qualified": false,
+      "failures": ["unreadable-discovered-process-smaps"],
+      "normalizedSha256": "aed548f3a1d31695dc561fa32929224012639fdf581ef52c7d7008fb3b809f1c"
+    },
+    {
+      "case": "empty-tree",
+      "identical": true,
+      "qualified": false,
+      "failures": [
+        "no-browser-seed",
+        "no-multiple-process-coverage",
+        "no-readable-browser-process",
+        "no-readable-renderer-process"
+      ],
+      "normalizedSha256": "8d319a5cab655cb6eab5a0d9a541c76fbba12cf8839d9c2416d388d60388f4cb"
+    },
+    {
+      "case": "browser-only",
+      "identical": true,
+      "qualified": false,
+      "failures": [
+        "no-multiple-process-coverage",
+        "no-readable-renderer-process"
+      ],
+      "normalizedSha256": "b81901f2e92812164acde64033251d054cf0f608664d48116bef11d3c6103225"
+    }
+  ],
+  "validation": {
+    "unitTestsPassed": 37,
+    "command": "python3 -m unittest -v test_parallel_acquisition test_chromium_memory test_import_window test_protocol test_qualification_receipts",
+    "includesRealLinuxProcessWitnesses": true
+  },
+  "performanceClaim": null,
+  "limitations": [
+    "Static outcomes cannot prove equal live memory values from non-atomic reads.",
+    "No claim that parallel acquisition will meet the unchanged 250 ms coverage requirement on a particular host.",
+    "Observer concurrency changes acquisition overhead; use prospectively and identically for both arms of a separate memory cohort."
+  ]
+}

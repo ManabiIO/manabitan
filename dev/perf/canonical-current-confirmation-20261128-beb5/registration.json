@@ -1,0 +1,157 @@
+{
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+    "candidateLocalConstructionCommit": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+    "runtimePublication": {
+        "localConstructionCommit": "45e51b53b860ac5491a6af8e6fedb5bed95dd3c0",
+        "remoteCommit": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+        "identicalTree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+        "relationship": "All seven product files and the existing regression test are identical; API publication changes commit metadata only."
+    },
+    "originalCohort": {
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "570ccc3968046269cb00d2053e49d3c32367031a",
+        "source": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+        "runId": 46112170828,
+        "initialOrder": "AB",
+        "scope": "Historical original corpus and its VNDB memory-coverage failure remain unchanged. This current-base BA cohort is independent, never pooled or used as a replacement."
+    },
+    "frozenMechanism": {
+        "correctedSourceCommit": "ee903e032650430839468fef391b8d820196e61d",
+        "canonicalWasmSha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896",
+        "currentParserWasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+        "combinedChecksumMinimumBytes": 3072,
+        "policy": "No guard, threshold, algorithm, ownership, lifecycle or executable canonical-code tuning; no CRC no-unroll candidate included."
+    },
+    "pairs": 12,
+    "expectedWorkers": 3,
+    "initialOrder": "BA",
+    "flags": {},
+    "expectedPackageEntries": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-layout.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/term-record-opfs-store.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+    ],
+    "expectedAddedPackageEntries": [],
+    "expectedSourceFiles": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "ext/js/dictionary/dictionary-database.js",
+        "ext/js/dictionary/term-content-canonical-layout.js",
+        "ext/js/dictionary/term-content-canonical-scan.js",
+        "ext/js/dictionary/term-record-opfs-store.js",
+        "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "test/term-lookup-native-checksum.test.js"
+    ],
+    "runtimeSources": {
+        "A": {
+            "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+            "files": {
+                "dev/data/dictionary-wasm/manifest.json": {
+                    "gitBlob": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+                    "sha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+                },
+                "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": {
+                    "gitBlob": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+                    "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+                },
+                "ext/js/dictionary/dictionary-database.js": {
+                    "gitBlob": "6414e12c51b63de2753f55725aefa32ebbbd0811",
+                    "sha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+                },
+                "ext/js/dictionary/term-content-canonical-layout.js": {
+                    "gitBlob": "a66886f06155861d12f7150393205f9f21222aff",
+                    "sha256": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c"
+                },
+                "ext/js/dictionary/term-content-canonical-scan.js": {
+                    "gitBlob": "e41743615a82936db8ad0315ea6ac0aa271ec52e",
+                    "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+                },
+                "ext/js/dictionary/term-record-opfs-store.js": {
+                    "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+                    "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+                },
+                "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+                    "gitBlob": "2035b8e2859bb4dc6a770812361040ff5b8c370f",
+                    "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+                },
+                "test/term-lookup-native-checksum.test.js": null
+            }
+        },
+        "B": {
+            "commit": "dcbbab6d1bfcebede50969f6d4b23e4f09561aa3",
+            "tree": "fc90894e914a29de988753bbe4b062bb2f617f93",
+            "files": {
+                "dev/data/dictionary-wasm/manifest.json": {
+                    "gitBlob": "2a011412738cc30c64795846791f6793c3aa5667",
+                    "sha256": "5a0ce28ef82c86994535db8fe6a35934ee793a7dc5035e24369b812eaefe1dc9"
+                },
+                "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": {
+                    "gitBlob": "44ec5ff2b33c23b8bf31460c9933e9e66f63f273",
+                    "sha256": "631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896"
+                },
+                "ext/js/dictionary/dictionary-database.js": {
+                    "gitBlob": "722f0a0056aec03fa2eec9f8cedc4843afcfc3ea",
+                    "sha256": "bdc673f0a750da75c4dd4d2b12931a43da5a50d37c3a7c59891e7d8389e376cb"
+                },
+                "ext/js/dictionary/term-content-canonical-layout.js": {
+                    "gitBlob": "f3e1299fa99117950dd72fad5e5d1fd8784e3fdb",
+                    "sha256": "b378a8fd3afbf0efac35f10928ab7d310ed6d708e51eb7e7bf888b85b68a9d80"
+                },
+                "ext/js/dictionary/term-content-canonical-scan.js": {
+                    "gitBlob": "02456bab6712d4722780167505531600686e2733",
+                    "sha256": "874f1b9465f7206eaa86e2895df33c55bf1fce5c36e02753873e5dd99ab79a28"
+                },
+                "ext/js/dictionary/term-record-opfs-store.js": {
+                    "gitBlob": "205311563fc991a76388d600b817e6b883a91ceb",
+                    "sha256": "de7425c8a325787a99354d960e4b0b189ffba092bd400f2c08b2c573a3540c59"
+                },
+                "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": {
+                    "gitBlob": "49789ee1ce89102e4ca9ef143cc5131b8b37dd32",
+                    "sha256": "d485531b3796491c7cc22657decff9f9a19e5096ed29e2823911a990699d0f97"
+                },
+                "test/term-lookup-native-checksum.test.js": {
+                    "gitBlob": "de4174b63a1a5e0b64d502a5b1bd4bba33aca8de",
+                    "sha256": "c52acfda2080a5e9a9e9bf27d02c0bc4d89dc5c5f9115706b220d83f5cbd5f53"
+                }
+            }
+        }
+    },
+    "protocolSourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "qualificationSourceHashes": {
+        "dev/perf/import-qualification-20261128-beb5.py": "326e8ca36aa0162ba4c22957b8331016284fef9f28a48cc395f3d664f1d7ffd4",
+        "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+        "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+        "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+        "dev/perf/canonical-current-confirmation-20261128-beb5/run.py": "f3f96d269fd1e31dfcf02e49087edb399811d8acd9a63ea17a1b1c7a848dd511",
+        "dev/perf/canonical-current-confirmation-20261128-beb5/audit-browser.py": "68c9e1f27e527a7cb90f4093f515c54c1abc54f06f2df312586bf1ddeb5a3343",
+        ".github/workflows/canonical-current-confirmation-beb5.yml": "63229c26ebe2e0f29956dabdea9e40be925b5bf1d5b0a3459b27647d7b810a88"
+    },
+    "memoryAcquisition": {
+        "policy": "Concurrent per-PID smaps_rollup reads, cap4, all joined inside the original complete before/after process-inventory bracket; deterministic PID order.",
+        "scope": "Diagnostic non-atomic import-window samples only. All earlier serial acquisitions and failures remain unchanged and unpooled.",
+        "eligibility": "Original stable tree/identity and readability rules, pre/post brackets, at least5 fully contained scans and maximum250ms coverage gap remain unchanged.",
+        "cadence": "Original25ms wait during import and100ms after import.",
+        "limitations": "No acquisition-speed claim or equivalence of sampled process peaks across different acquisition policies. Not a hard total-process memory cap.",
+        "localSourceReviewCommit": "dbdc348ad704e71b2fa95a2e4ff780fa21d9a00a"
+    },
+    "failurePolicy": "Keep every complete/failed observation; no trimming, control subtraction, replacement or host pooling. Stop a dictionary cell on an ordinary semantic failure.",
+    "primaryMetric": "totalImportMs: browser file-input change through completedAtMonotonicMs; automation completion polling is excluded.",
+    "diagnosticMetrics": [
+        "termRecordFieldEncodeMs",
+        "termRecordValidationMs",
+        "termRecordEncodeMs",
+        "termRecordWriteMs",
+        "termRecordEndImportSessionMs",
+        "termRecordEndImportSessionCloseWritableMs",
+        "step4.termParseMs",
+        "step4.bulkAddTermsMs"
+    ],
+    "phaseScope": "termRecordWriteMs contains checksum work inside append/write work; it is not an isolated checksum timer. Other phase counters can overlap. Do not add them or substitute them for browser totalImportMs.",
+    "promotion": "No automatic promotion. Keep all failures, controls and negative results. This source-composed confirmation is separate from every earlier corpus and from the CRC candidate."
+}
