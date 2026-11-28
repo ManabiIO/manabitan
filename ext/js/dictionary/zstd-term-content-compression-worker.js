@@ -28,12 +28,73 @@ void initialization.then(
 );
 
 self.addEventListener('message', (event) => {
-    void compressContent(event);
+    const rawData = /** @type {unknown} */ (event.data);
+    const data = /** @type {{messages?: unknown}|null} */ (rawData);
+    const operation = Array.isArray(data?.messages) ? compressBatch(data.messages) : compressContent(event.data);
+    // A failed error reply must fail the worker as well, so the pool can
+    // terminate every reader and settle its source leases immediately.
+    void operation.catch((error) => {
+        setTimeout(() => { throw error; }, 0);
+    });
 });
 
-/** @param {MessageEvent} event */
-async function compressContent(event) {
-    const rawData = /** @type {unknown} */ (event.data);
+/**
+ * @param {Record<string, unknown>} response
+ * @param {Transferable[]} [transfer]
+ */
+function postResponse(response, transfer = []) {
+    self.postMessage(response, transfer);
+}
+
+/**
+ * @param {Array<Record<string, unknown>>} responses
+ * @param {Transferable[]} [transfer]
+ */
+function postResponses(responses, transfer = []) {
+    if (responses.length === 0) { return; }
+    try {
+        postResponse({responses}, transfer);
+    } catch (error) {
+        // Structured cloning is atomic. If the grouped reply fails, settle
+        // each buffered job with the transport failure instead of a timeout.
+        for (const {id} of responses) { postResponse({id, error: `${error}`}); }
+    }
+}
+
+/** @param {unknown[]} messages */
+async function compressBatch(messages) {
+    /** @type {Array<Record<string, unknown>>} */
+    const consumed = [];
+    /** @type {Array<Record<string, unknown>>} */
+    const responses = [];
+    /** @type {Transferable[]} */
+    const transfers = [];
+    const flushConsumed = () => { postResponses(consumed.splice(0)); };
+    for (let index = 0; index < messages.length; ++index) {
+        await compressContent(messages[index], (response, transfer = []) => {
+            if (response.type === 'source-consumed') {
+                consumed.push(response);
+                // All blocks have now copied their source into private WASM
+                // memory. Release the lease before the last compression.
+                if (index === messages.length - 1) { flushConsumed(); }
+            } else if (typeof response.error === 'string') {
+                flushConsumed();
+                postResponse(response);
+            } else {
+                responses.push(response);
+                transfers.push(...transfer);
+            }
+        });
+    }
+    flushConsumed();
+    postResponses(responses, transfers);
+}
+
+/**
+ * @param {unknown} rawData
+ * @param {(response: Record<string, unknown>, transfer?: Transferable[]) => void} [respond]
+ */
+async function compressContent(rawData, respond = postResponse) {
     const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
@@ -65,7 +126,7 @@ async function compressContent(event) {
                 dictName,
                 options,
             );
-            self.postMessage({type: 'source-consumed', id});
+            respond({type: 'source-consumed', id});
             result = finishWrappedTermContentZstdSpans(prepared);
         } else {
             if (!(data.content instanceof Uint8Array)) {
@@ -83,8 +144,8 @@ async function compressContent(event) {
         ) ?
             bytes.buffer :
             Uint8Array.from(bytes).buffer;
-        self.postMessage({id, compressed, envelopeMs}, [compressed]);
+        respond({id, compressed, envelopeMs}, [compressed]);
     } catch (error) {
-        self.postMessage({id, error: `${error}`});
+        respond({id, error: `${error}`});
     }
 }

@@ -242,6 +242,8 @@ export class TermContentCompressionPool {
         const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
         offsets.set(sourceOffsets);
         lengths.set(sourceLengths);
+        /** @type {Array<Array<Record<string, unknown> & {id: number}>>} */
+        const workerMessages = Array.from(this._workers, () => []);
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
             const workerIndex = blockIndex % this._workers.length;
             const start = blockStartIndexes[blockIndex];
@@ -257,8 +259,25 @@ export class TermContentCompressionPool {
                     wrap: true,
                     compressionExperiments,
                 },
+                workerMessages[workerIndex],
             );
         });
+        for (let workerIndex = 0; workerIndex < workerMessages.length; ++workerIndex) {
+            const messages = workerMessages[workerIndex];
+            if (messages.length === 0) { continue; }
+            try {
+                this._workers[workerIndex].postMessage(messages.length === 1 ? messages[0] : {messages}, []);
+            } catch (error) {
+                for (const {id} of messages) {
+                    const pending = this._pending.get(id);
+                    if (typeof pending === 'undefined') { continue; }
+                    this._pending.delete(id);
+                    clearTimeout(pending.timeoutId);
+                    pending.rejectSourceConsumed?.(error);
+                    pending.reject(error);
+                }
+            }
+        }
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
@@ -350,10 +369,11 @@ export class TermContentCompressionPool {
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
+     * @param {Array<Record<string, unknown> & {id: number}>} [batch]
      * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
      */
-    _dispatchWithSourceConsumed(workerIndex, message) {
-        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true);
+    _dispatchWithSourceConsumed(workerIndex, message, batch) {
+        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true, batch);
         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
     }
 
@@ -362,9 +382,10 @@ export class TermContentCompressionPool {
      * @param {Record<string, unknown>} message
      * @param {Transferable[]} transfer
      * @param {boolean} trackSourceConsumed
+     * @param {Array<Record<string, unknown> & {id: number}>} [batch]
      * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
      */
-    _startDispatch(workerIndex, message, transfer, trackSourceConsumed) {
+    _startDispatch(workerIndex, message, transfer, trackSourceConsumed, batch) {
         const id = this._nextId++;
         /** @type {((value?: void|PromiseLike<void>) => void)|null} */
         let resolveSourceConsumed = null;
@@ -383,7 +404,11 @@ export class TermContentCompressionPool {
             }, COMPRESSION_JOB_TIMEOUT_MS);
             this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
             try {
-                this._workers[workerIndex].postMessage({id, ...message}, transfer);
+                if (typeof batch === 'undefined') {
+                    this._workers[workerIndex].postMessage({id, ...message}, transfer);
+                } else {
+                    batch.push({id, ...message});
+                }
             } catch (error) {
                 clearTimeout(timeoutId);
                 this._pending.delete(id);
@@ -403,6 +428,16 @@ export class TermContentCompressionPool {
     /** @param {MessageEvent} event */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
+        const data = /** @type {{responses?: unknown}|null} */ (rawData);
+        if (Array.isArray(data?.responses)) {
+            for (const response of data.responses) { this._onResponse(response); }
+        } else {
+            this._onResponse(event.data);
+        }
+    }
+
+    /** @param {unknown} rawData */
+    _onResponse(rawData) {
         const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);

@@ -12,6 +12,8 @@ class ControlledWorker {
         this.listeners = new Map();
         /** @type {Record<string, unknown>[]} */
         this.calls = [];
+        /** @type {Record<string, unknown>[]} */
+        this.packets = [];
         this.throwOnDispatch = false;
         this.terminateCount = 0;
     }
@@ -28,7 +30,8 @@ class ControlledWorker {
 
     /** @param {Record<string, unknown>} message */
     postMessage(message) {
-        this.calls.push(message);
+        this.packets.push(message);
+        this.calls.push(...(Array.isArray(message.messages) ? /** @type {Array<Record<string, unknown>>} */ (message.messages) : [message]));
         if (this.throwOnDispatch) { throw new Error('injected dispatch failure'); }
     }
 
@@ -39,6 +42,14 @@ class ControlledWorker {
     reply(call, response) {
         for (const listener of this.listeners.get('message') ?? []) {
             listener(/** @type {MessageEvent<unknown>} */ ({data: {id: this.calls[call].id, ...response}}));
+        }
+    }
+
+    /** @param {Array<{call: number, response: Record<string, unknown>}>} replies */
+    replyBatch(replies) {
+        const responses = replies.map(({call, response}) => ({id: this.calls[call].id, ...response}));
+        for (const listener of this.listeners.get('message') ?? []) {
+            listener(/** @type {MessageEvent<unknown>} */ ({data: {responses}}));
         }
     }
 
@@ -179,5 +190,77 @@ describe('shared compression job draining', () => {
         await expect(operation.completion).rejects.toThrow('first job failed');
         expect(workers.map(({terminateCount}) => terminateCount)).toEqual([1, 1]);
         expect(Reflect.get(pool, '_pending').size).toBe(0);
+    });
+    test('dispatch failure rejects every job in one packet and drains peer readers', async () => {
+        const workers = [new ControlledWorker(), new ControlledWorker()];
+        workers[0].throwOnDispatch = true;
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)));
+        const operation = pool.beginCompressWrappedSpans(
+            new Uint8Array(new SharedArrayBuffer(7)),
+            Uint32Array.of(0, 1, 2, 3, 4, 5, 6),
+            new Uint32Array(7).fill(1),
+            Uint32Array.of(0, 1, 2, 3, 4, 5, 6, 7),
+            new Uint32Array(7).fill(1),
+            'jmdict',
+        );
+        let settled = false;
+        void operation.completion.finally(() => { settled = true; }).catch(() => {});
+        try {
+            expect(workers.map(({packets}) => packets.length)).toEqual([1, 1]);
+            expect(workers.map(({calls}) => calls.length)).toEqual([4, 3]);
+            await flush();
+            expect(settled).toBe(false);
+            workers[1].replyBatch([2, 0, 1].map((call) => ({call, response: {type: 'source-consumed'}})));
+            await expect(operation.sourceConsumed).rejects.toThrow('injected dispatch failure');
+            expect(settled).toBe(false);
+            workers[1].replyBatch([1, 2, 0].map((call) => ({call, response: {compressed: Uint8Array.of(call).buffer}})));
+            await expect(operation.completion).rejects.toThrow('injected dispatch failure');
+            expect(Reflect.get(pool, '_pending').size).toBe(0);
+        } finally { pool.close(); }
+    });
+
+    test('isolates concurrent batches and restores uneven round-robin output order', async () => {
+        const workers = Array.from({length: 3}, () => new ControlledWorker());
+        const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)));
+        const begin = () => pool.beginCompressWrappedSpans(
+            new Uint8Array(new SharedArrayBuffer(7)),
+            Uint32Array.of(0, 1, 2, 3, 4, 5, 6),
+            new Uint32Array(7).fill(1),
+            Uint32Array.of(0, 1, 2, 3, 4, 5, 6, 7),
+            new Uint32Array(7).fill(1),
+            'jmdict',
+        );
+        const first = begin();
+        const second = begin();
+        let firstSettled = false;
+        void first.completion.then(() => { firstSettled = true; });
+        try {
+            expect(workers.map(({packets}) => packets.length)).toEqual([2, 2, 2]);
+            for (let workerIndex = workers.length - 1; workerIndex >= 0; --workerIndex) {
+                const worker = workers[workerIndex];
+                const count = worker.calls.length / 2;
+                worker.replyBatch(Array.from({length: count}, (_, index) => ({
+                    call: count + index,
+                    response: {compressed: Uint8Array.of(100 + index * 3 + workerIndex).buffer, envelopeMs: 2},
+                })).reverse());
+            }
+            await expect(second.sourceConsumed).resolves.toBeUndefined();
+            const result = await second.completion;
+            expect(result.chunks.map((bytes) => bytes[0])).toEqual([100, 101, 102, 103, 104, 105, 106]);
+            expect(result.envelopeMs).toBe(6);
+            expect(firstSettled).toBe(false);
+            for (let workerIndex = 0; workerIndex < workers.length; ++workerIndex) {
+                const worker = workers[workerIndex];
+                worker.replyBatch(Array.from({length: worker.calls.length / 2}, (_, call) => ({
+                    call,
+                    response: {compressed: Uint8Array.of(call * 3 + workerIndex).buffer, envelopeMs: 1},
+                })));
+            }
+            await expect(first.sourceConsumed).resolves.toBeUndefined();
+            const firstResult = await first.completion;
+            expect(firstResult.chunks.map((bytes) => bytes[0])).toEqual([0, 1, 2, 3, 4, 5, 6]);
+            expect(firstResult.envelopeMs).toBe(3);
+            expect(Reflect.get(pool, '_pending').size).toBe(0);
+        } finally { pool.close(); }
     });
 });
