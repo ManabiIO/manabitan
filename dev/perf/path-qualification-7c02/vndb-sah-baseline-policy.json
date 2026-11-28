@@ -1,0 +1,127 @@
+{
+  "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "runId": 46102820124,
+  "artifactId": 15246796550,
+  "archiveSha256": "138788a804ca4d6083b66d9d5eaedd28d3b49ab47a398378d959851ce418a99b",
+  "observations": [
+    {
+      "name": "ordinary-before",
+      "files": [
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 151552,
+          "units": 37.0
+        }
+      ],
+      "storageBytes": 609176779
+    },
+    {
+      "name": "trace",
+      "files": [
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 151552,
+          "units": 37.0
+        }
+      ],
+      "storageBytes": 609176779
+    },
+    {
+      "name": "ordinary-after",
+      "files": [
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 4096,
+          "units": 1.0
+        },
+        {
+          "bytes": 151552,
+          "units": 37.0
+        }
+      ],
+      "storageBytes": 609176779
+    }
+  ],
+  "prospectiveRangeUnits": [
+    36,
+    38
+  ],
+  "derivation": "Current baseline active file37pages; preserve historical plus/minus one4096byte allocation unit tolerance; fixed before candidate observations. Storage validation only, no product threshold changes."
+}
