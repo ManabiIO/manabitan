@@ -26,9 +26,38 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.sha }}
+          ref: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
           fetch-depth: 0
           persist-credentials: false
+      - name: Bind the workflow-only correction to the frozen runtime and harness
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import re
+          import subprocess
+
+          runtime = "9da7dedd17535b4a0f8edb97e56756049bbad7a7"
+          workflow = os.environ["GITHUB_SHA"]
+          assert re.fullmatch(r"[0-9a-f]{40}", workflow), workflow
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True).strip()
+          assert git("rev-parse", "HEAD") == runtime
+          assert git("rev-parse", runtime + "^{tree}") == "ee65e5a994b4017a443893dc7b0b268900538e94"
+          subprocess.run(["git", "merge-base", "--is-ancestor", runtime, workflow], check=True)
+          changed = git("diff", "--name-status", runtime, workflow).splitlines()
+          assert changed == ["M\t.github/workflows/import-parser-worker-bundle-b9cacc.yml"], changed
+          output = pathlib.Path("builds/perf/parser-worker-bundle-validation")
+          output.mkdir(parents=True, exist_ok=True)
+          proof = {"workflowHead": workflow, "workflowTree": git("rev-parse", workflow + "^{tree}"),
+                   "runtimeCandidate": runtime, "runtimeTree": git("rev-parse", runtime + "^{tree}"),
+                   "harnessCommit": runtime, "changedFiles": changed,
+                   "originalFailedValidationRun": 46104747758}
+          (output / "workflow-runtime-identity.json").write_text(json.dumps(proof, indent=2) + "\n")
+          print(json.dumps(proof, indent=2))
+          PY
       - uses: ./.github/actions/setup
       - name: Test strict package deltas and observation protocol
         run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
@@ -94,7 +123,16 @@ jobs:
           set -euo pipefail
           TASK_BASELINE_DIR="$PWD/.tmp-parser-worker-bundle-baseline"
           git worktree add --detach "$TASK_BASELINE_DIR" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-          ln -s "$PWD/node_modules" "$TASK_BASELINE_DIR/node_modules"
+          # Separate directory paths keep esbuild module labels and source maps
+          # identical; hardlinks share only the immutable dependency file bytes.
+          python - "$TASK_BASELINE_DIR" <<'PY'
+          import os
+          import pathlib
+          import shutil
+          import sys
+          shutil.copytree(pathlib.Path("node_modules"), pathlib.Path(sys.argv[1]) / "node_modules",
+                          copy_function=os.link, symlinks=True)
+          PY
           cp ext/legal-npm.html "$TASK_BASELINE_DIR/ext/legal-npm.html"
           node dev/bin/build.js --all --version 0.0.0.0 > builds/perf/parser-worker-bundle-validation/candidate-build.log 2>&1
           (
@@ -157,7 +195,7 @@ jobs:
           python - <<'PY'
           import pathlib
           root = pathlib.Path("builds/perf/parser-worker-bundle-validation")
-          for name in ("bundle.json", "all-target-package-deltas.json", "candidate-build.log", "baseline-build.log"):
+          for name in ("workflow-runtime-identity.json", "bundle.json", "all-target-package-deltas.json", "candidate-build.log", "baseline-build.log"):
               path = root / name
               if path.is_file():
                   print(f"{name}:")
@@ -184,7 +222,8 @@ jobs:
         order: [AB, BA]
     env:
       PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-      PERF_CANDIDATE: ${{ github.sha }}
+      PERF_CANDIDATE: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
+      PERF_WORKFLOW_HEAD: ${{ github.sha }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_ORDER: ${{ matrix.order }}
       MANABITAN_E2E_STRICT_RUNTIME: '1'
@@ -192,7 +231,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.sha }}
+          ref: 9da7dedd17535b4a0f8edb97e56756049bbad7a7
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
@@ -240,7 +279,7 @@ jobs:
           import pathlib
 
           root = pathlib.Path(os.environ["EVIDENCE_DIR"])
-          print(json.dumps({"baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"], "dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"], "outcome": os.environ["QUALIFICATION_OUTCOME"], "evidence": str(root)}, indent=2))
+          print(json.dumps({"baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"], "workflowHead": os.environ["PERF_WORKFLOW_HEAD"], "harnessCommit": os.environ["PERF_CANDIDATE"], "dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"], "outcome": os.environ["QUALIFICATION_OUTCOME"], "evidence": str(root)}, indent=2))
           for name in ("registered-plan.json", "source-identities.json", "analysis.json", "observations.json", "memory/memory-comparison.json", "memory/memory-audit.json", "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
               path = root / name
               if not path.is_file():
