@@ -1,0 +1,26 @@
+[
+  {
+    "name": "lint-final-3",
+    "command": [
+      "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+      "node_modules/eslint/bin/eslint.js",
+      "test/perf/signature1-corpus-verification",
+      "--format",
+      "json",
+      "--output-file",
+      "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/lint-final-3.json"
+    ],
+    "returncode": 1,
+    "secondsDiagnostic": 5.260289669036865
+  },
+  {
+    "name": "bounded-contracts-final-2",
+    "command": [
+      "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+      "--test",
+      "test/perf/signature1-corpus-verification/node-opfs-bounded.test.mjs"
+    ],
+    "returncode": 0,
+    "secondsDiagnostic": 0.21687817573547363
+  }
+]

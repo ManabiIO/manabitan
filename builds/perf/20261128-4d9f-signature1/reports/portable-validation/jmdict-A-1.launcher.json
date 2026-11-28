@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "timingEligible": false,
+  "command": [
+    "/home/agent/manabitan-node22-4d9ffe79ec6f/node",
+    "--max-old-space-size=512",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/test/perf/signature1-corpus-verification/run.mjs",
+    "--source-root",
+    "/home/agent/manabitan-current-4d9ffe79ec6f",
+    "--source-id",
+    "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "--corpus",
+    "jmdict",
+    "--arm",
+    "A",
+    "--cache-dir",
+    "/workspace/scratch/4d9ffe79ec6f/manabitan/builds/e2e-dictionary-cache",
+    "--output",
+    "/home/agent/manabitan-signature1-4d9ffe79ec6f/builds/perf/20261128-4d9f-signature1/reports/portable-validation/jmdict-A-1",
+    "--node-sha256",
+    "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+  ],
+  "deadlineSeconds": 1200,
+  "startedEpoch": 1795859865.9864783,
+  "launcherSha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef",
+  "status": "complete",
+  "pid": 5,
+  "returncode": 0,
+  "terminatingSignal": null,
+  "finishedEpoch": 1795859869.020568
+}

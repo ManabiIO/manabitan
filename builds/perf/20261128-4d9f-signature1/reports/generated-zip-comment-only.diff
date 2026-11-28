@@ -1,0 +1,74 @@
+--- frozen9e10/ext/lib/zip.js
++++ current-A-and-B/ext/lib/zip.js
+@@ -3 +3 @@
+-// node_modules/@zip.js/zip.js/lib/core/constants.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/constants.js
+@@ -43 +43 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/stream-adapter.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/stream-adapter.js
+@@ -65 +65 @@
+-// node_modules/@zip.js/zip.js/lib/core/configuration.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/configuration.js
+@@ -146 +146 @@
+-// node_modules/@zip.js/zip.js/lib/z-worker-inline.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/z-worker-inline.js
+@@ -152 +152 @@
+-// node_modules/@zip.js/zip.js/lib/core/util/default-mime-type.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/util/default-mime-type.js
+@@ -157 +157 @@
+-// node_modules/@zip.js/zip.js/lib/core/util/stream-codec-shim.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/util/stream-codec-shim.js
+@@ -211 +211 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/codecs/crc32.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/codecs/crc32.js
+@@ -240 +240 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/crc32-stream.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/crc32-stream.js
+@@ -261 +261 @@
+-// node_modules/@zip.js/zip.js/lib/core/util/encode-text.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/util/encode-text.js
+@@ -275 +275 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/codecs/sjcl.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/codecs/sjcl.js
+@@ -847 +847 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/common-crypto.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/common-crypto.js
+@@ -860 +860 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/aes-crypto-stream.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/aes-crypto-stream.js
+@@ -1118 +1118 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/zip-crypto-stream.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/zip-crypto-stream.js
+@@ -1227 +1227 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/zip-entry-stream.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/zip-entry-stream.js
+@@ -1332 +1332 @@
+-// node_modules/@zip.js/zip.js/lib/core/streams/codec-stream.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/streams/codec-stream.js
+@@ -1421 +1421 @@
+-// node_modules/@zip.js/zip.js/lib/core/codec-worker.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/codec-worker.js
+@@ -1701 +1701 @@
+-// node_modules/@zip.js/zip.js/lib/core/codec-pool.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/codec-pool.js
+@@ -1772 +1772 @@
+-// node_modules/@zip.js/zip.js/lib/core/io.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/io.js
+@@ -2381 +2381 @@
+-// node_modules/@zip.js/zip.js/lib/core/util/cp437-decode.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/util/cp437-decode.js
+@@ -2396 +2396 @@
+-// node_modules/@zip.js/zip.js/lib/core/util/decode-text.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/util/decode-text.js
+@@ -2405 +2405 @@
+-// node_modules/@zip.js/zip.js/lib/core/zip-entry.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/zip-entry.js
+@@ -2471 +2471 @@
+-// node_modules/@zip.js/zip.js/lib/core/zip-reader.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/zip-reader.js
+@@ -3082 +3082 @@
+-// node_modules/@zip.js/zip.js/lib/core/zip-writer.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/core/zip-writer.js
+@@ -4171 +4171 @@
+-// node_modules/@zip.js/zip.js/lib/zip.js
++// ../manabitan-runtime-deps-4d9ffe79ec6f/node_modules/@zip.js/zip.js/lib/zip.js

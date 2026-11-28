@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "parentRuntime": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateRuntime": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "publicEquivalentRuntime": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+  "helperCommit": "fb9d9612f34bdb002d846364ef089f25ed188b29",
+  "freshRuns": 6,
+  "failedAcquisitions": 0,
+  "fullUpstreamRecordIdAllocationParityEveryGroup": true,
+  "corpora": [
+    {
+      "corpus": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "recordIdRepresentation": "implicit-positive-zero-or-full-float64",
+      "finalOutputOracle": {
+        "bytes": 4712,
+        "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+      },
+      "finalSignatureArenaBytesAvoided": 2097152,
+      "finalDictionaryNameBytesAvoided": 2097152,
+      "finalOwnedBytesAvoided": 4194304,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": true,
+      "parentAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 362032,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400,
+        "dictionaryNameIds": {
+          "physicalIsNull": false,
+          "backingBytes": 2097152,
+          "representation": null
+        },
+        "ownedArenaAndOptionalColumnsBytes": 28311552,
+        "upstreamRecordIds": {
+          "capacity": 524288,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      },
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 362032,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248,
+        "dictionaryNameIds": {
+          "physicalIsNull": true,
+          "backingBytes": 0,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 362032
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 24117248,
+        "upstreamRecordIds": {
+          "capacity": 524288,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      }
+    },
+    {
+      "corpus": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "recordIdRepresentation": "implicit-positive-zero-or-full-float64",
+      "finalOutputOracle": {
+        "bytes": 4724,
+        "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+      },
+      "finalSignatureArenaBytesAvoided": 2097152,
+      "finalDictionaryNameBytesAvoided": 2097152,
+      "finalOwnedBytesAvoided": 4194304,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": true,
+      "parentAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 363243,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 26214400,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 26214400,
+        "dictionaryNameIds": {
+          "physicalIsNull": false,
+          "backingBytes": 2097152,
+          "representation": null
+        },
+        "ownedArenaAndOptionalColumnsBytes": 28311552,
+        "upstreamRecordIds": {
+          "capacity": 524288,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      },
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 363243,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248,
+        "dictionaryNameIds": {
+          "physicalIsNull": true,
+          "backingBytes": 0,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 363243
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 24117248,
+        "upstreamRecordIds": {
+          "capacity": 524288,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      }
+    },
+    {
+      "corpus": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "recordIdRepresentation": "implicit-positive-zero-or-full-float64",
+      "finalOutputOracle": {
+        "bytes": 5342,
+        "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+      },
+      "finalSignatureArenaBytesAvoided": 1048576,
+      "finalDictionaryNameBytesAvoided": 0,
+      "finalOwnedBytesAvoided": 1048576,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": false,
+      "parentAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 157150,
+        "capacity": 262144,
+        "hashSlots": 524288,
+        "nativeArenaBytes": 17301504,
+        "physicalSignature1IsNull": false,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 17301504,
+        "dictionaryNameIds": {
+          "physicalIsNull": false,
+          "backingBytes": 1048576,
+          "representation": null
+        },
+        "ownedArenaAndOptionalColumnsBytes": 18350080,
+        "upstreamRecordIds": {
+          "capacity": 262144,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      },
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 157150,
+        "capacity": 262144,
+        "hashSlots": 524288,
+        "nativeArenaBytes": 16252928,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 16252928,
+        "dictionaryNameIds": {
+          "physicalIsNull": false,
+          "backingBytes": 1048576,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 822
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 17301504,
+        "upstreamRecordIds": {
+          "capacity": 262144,
+          "physicalLength": 0,
+          "byteOffset": 0,
+          "viewBytes": 0,
+          "backingBytes": 0,
+          "backingKind": "ArrayBuffer",
+          "implicitAllPositiveZero": true
+        }
+      }
+    }
+  ],
+  "scope": "Exact retained native/S1/name-column backings; upstream ID saving excluded; no browser/whole-import timing or process-memory claim."
+}

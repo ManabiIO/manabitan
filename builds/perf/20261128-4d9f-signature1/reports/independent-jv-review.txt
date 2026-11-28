@@ -1,0 +1,3 @@
+Independent source/evidence review by benchmark_setup, 2026-11-28:
+
+Source/evidence review of completed JV parity found no new scope blocker. Archive catalog, bounded OPFS, and field-analysis helpers are byte-identical to the corrected census; file-oracle changes only add raw hashes before the same linked-generation normalization. The exact two ZIP hashes plus 24-comment-prefix normalization are narrow and retain the failed zero-group preflight. Final comparisons support 2 MiB/1 MiB owned arena allocation avoidance with complete term-sink/parser/logical parity; they do not establish browser memory, elapsed import gain, separate media persistence, restart, or lookup. Wording in protocol/comparison exclusions reflects that.

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Exact current-dcfc parent/candidate JMdict term-sink correctness and allocation verification",
+  "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateIdentity": "Explicit clean commit passed to prepare-config before acquisition; regenerated checked canonical WASM and manifest required",
+  "runtime": "Node v22.22.0, SHA256 1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+  "runtimeHeapMiB": 512,
+  "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "observations": "One full A and one full B correctness acquisition, sequentially under the shared CPU slot; failures retained individually",
+  "boundary": "Actual source worker and public dictionary sink, 12 original production groups, four actual codec workers, Node OPFS adapter and final drain",
+  "oracles": [
+    "All 528299 rows, source slabs, source descriptors, compressed frame bytes, registered spans and 103 codec replies match the original complete workload",
+    "Every persisted file byte matches the frozen final-output oracle after validating linked generations and normalizing only their random16-byte identifiers",
+    "Every logical canonical metadata column, slot, collision entry and high-water/free state matches the frozen oracle",
+    "Current parent is reacquired on dcfc; original oracle source exceptions are explicitly confined to its merged parser WASM and candidate canonical files",
+    "Candidate normalization derives the logical signature1 and presence columns independently from marker2 and literal0x3652424d; no product getter is used",
+    "Candidate must retain null physical signature1 storage at capacity524288/dense362032/hashSlots1048576",
+    "Report physical native arena and external signature1 allocation independently; compare final ownership bytes A/B"
+  ],
+  "timingEligible": false,
+  "excludedClaims": [
+    "Browser complete-import speed",
+    "Browser peak or settled process memory",
+    "SQLite, UI, restart or lookup qualification",
+    "Jitendex or VNDB corpus coverage"
+  ]
+}

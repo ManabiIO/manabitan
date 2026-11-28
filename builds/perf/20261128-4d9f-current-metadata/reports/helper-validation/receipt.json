@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "parentRuntime": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateRuntime": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "preparationCommit": "0ed66639d6e39ee06c96bc460855152a13d5828c",
+  "contracts": {
+    "attempt1": {
+      "exit": 0,
+      "passed": 26
+    },
+    "attempt2": {
+      "exit": 0,
+      "passed": 26
+    }
+  },
+  "eslint": {
+    "attempt1": {
+      "exit": 1,
+      "reason": "three helper-only style errors: Set membership, conditional arrow parentheses and typed-view snapshot spelling"
+    },
+    "attempt2": {
+      "exit": 0
+    }
+  },
+  "prettier": {
+    "attempt1": {
+      "exit": 0
+    }
+  },
+  "files": {
+    "contracts-attempt-1.log": {
+      "bytes": 6955,
+      "sha256": "3582eade7d90f2182e46bee5304a00b1153aec5888db95088dfd57a705f013b8"
+    },
+    "contracts-attempt-2.log": {
+      "bytes": 6953,
+      "sha256": "177bb9b07157e91030054938b21d4db9ca8cd5a59eaad4a2d007681b317188df"
+    },
+    "eslint-attempt-1.log": {
+      "bytes": 1735,
+      "sha256": "72c80d4fee2babbd5233568168ef45b38b3e97ba692dfaa75c2dabb76e747913"
+    },
+    "eslint-attempt-2.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "prettier-attempt-1.log": {
+      "bytes": 240,
+      "sha256": "97b81cae9f382872debd1a5c1b562432c3f8b5fb4fe569b0055bc19e0f401889"
+    }
+  }
+}

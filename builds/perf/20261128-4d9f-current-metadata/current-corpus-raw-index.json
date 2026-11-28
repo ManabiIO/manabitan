@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 1,
+  "parentRuntime": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateRuntime": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "helperCommit": "fb9d9612f34bdb002d846364ef089f25ed188b29",
+  "archive": {
+    "path": "current-corpus-raw.tar.gz",
+    "bytes": 1092839,
+    "sha256": "16cf0777466bf11b15582887e8430e304c22d9ec589e3299b4851ed584c0415b"
+  },
+  "members": [
+    {
+      "path": "corpus/jitendex-A-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "8db2fb0aa1b43d7c8d207dc1e52317caf660199df737dab4e500bceaa3fc3cf2"
+    },
+    {
+      "path": "corpus/jitendex-A-1/final-output-oracle.json",
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    {
+      "path": "corpus/jitendex-A-1/metadata-allocation.json",
+      "bytes": 17245,
+      "sha256": "80b6b056c28ed1566d74dcc3cfa20f624a59e91b020b2e4d4cb9ef8ad7b12b85"
+    },
+    {
+      "path": "corpus/jitendex-A-1/preflight.json",
+      "bytes": 17455,
+      "sha256": "45afb8ac494c6579f4ba0e6869dfee06174b325716d0b03443bc20e8c07abef8"
+    },
+    {
+      "path": "corpus/jitendex-A-1/progress.json",
+      "bytes": 188097,
+      "sha256": "71f5f8777c01e5559c5150a4776168e374e9b47f40ca5eb4f77a22ee0e8700cc"
+    },
+    {
+      "path": "corpus/jitendex-A-1/raw-final-files.json",
+      "bytes": 1006,
+      "sha256": "da21f0085259963877bb00d770b0f90e40559de343c46f482a9b73d52b19e31d"
+    },
+    {
+      "path": "corpus/jitendex-A-1/result.json",
+      "bytes": 216310,
+      "sha256": "3088be92e70972c7026bd46d394647e8c87909517df01199442a0082bb2157c9"
+    },
+    {
+      "path": "corpus/jitendex-A-1/setup.json",
+      "bytes": 16158,
+      "sha256": "806f98f00c7366f0491952196347fa4565b4544ded2686127bb4cbd0937bc4f4"
+    },
+    {
+      "path": "corpus/jitendex-A-1.launcher.json",
+      "bytes": 1157,
+      "sha256": "16b041af89287afadff07f4aab9cdffd79132a02723570b3fbc280fceb60e77a"
+    },
+    {
+      "path": "corpus/jitendex-A-1.stderr.log",
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    {
+      "path": "corpus/jitendex-A-1.stdout.log",
+      "bytes": 799,
+      "sha256": "a6f4ac0b19c83c2f044dd63d950623c1c5a3c0827bf75b4b958480baf9d2ba1c"
+    },
+    {
+      "path": "corpus/jitendex-B-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "8db2fb0aa1b43d7c8d207dc1e52317caf660199df737dab4e500bceaa3fc3cf2"
+    },
+    {
+      "path": "corpus/jitendex-B-1/final-output-oracle.json",
+      "bytes": 4724,
+      "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+    },
+    {
+      "path": "corpus/jitendex-B-1/metadata-allocation.json",
+      "bytes": 19967,
+      "sha256": "cfa1eb48f9d429c3a1b5ae4c1e7b3369565b76cf9217d8776c25cf186c2fabb0"
+    },
+    {
+      "path": "corpus/jitendex-B-1/preflight.json",
+      "bytes": 17460,
+      "sha256": "cd4d0a7d87abf655f79d75dfc3a827dcb3752cc97db21eaac2fad996bce565f4"
+    },
+    {
+      "path": "corpus/jitendex-B-1/progress.json",
+      "bytes": 190842,
+      "sha256": "833d80b58bd6bccc753bcda1f6f852c84b5cdddf0f2e34d2c10d65d82aef10a4"
+    },
+    {
+      "path": "corpus/jitendex-B-1/raw-final-files.json",
+      "bytes": 1006,
+      "sha256": "2334928403a56b6a5a3d9e3f09f4f3c6307a1b03dda3349b1b416eb94f97d5a7"
+    },
+    {
+      "path": "corpus/jitendex-B-1/result.json",
+      "bytes": 219169,
+      "sha256": "c4f9c7831ebbd00d8588629fdcad0487e9616db02fa06ebaac05b57b25f56ed4"
+    },
+    {
+      "path": "corpus/jitendex-B-1/setup.json",
+      "bytes": 16163,
+      "sha256": "8ff0d9337dc5497ae533e2b583a76fbbb5d74ea52013f4d7214bd377c763e5f9"
+    },
+    {
+      "path": "corpus/jitendex-B-1.launcher.json",
+      "bytes": 1161,
+      "sha256": "061554d9e9b11b0daa0e3096e17c3abf339edb615f2469bf8908938355237f4f"
+    },
+    {
+      "path": "corpus/jitendex-B-1.stderr.log",
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    {
+      "path": "corpus/jitendex-B-1.stdout.log",
+      "bytes": 799,
+      "sha256": "a6f4ac0b19c83c2f044dd63d950623c1c5a3c0827bf75b4b958480baf9d2ba1c"
+    },
+    {
+      "path": "corpus/jitendex-comparison-1.json",
+      "bytes": 46890,
+      "sha256": "b5de72a2992822b39b014e2ef424a210fa144448304a5afcc7ba069644ac965a"
+    },
+    {
+      "path": "corpus/jmdict-A-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "852ca90b33d4c5f8c7a7dc6d7b56ef2c9cfece846ad7ac21d0b54220450b12de"
+    },
+    {
+      "path": "corpus/jmdict-A-1/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    {
+      "path": "corpus/jmdict-A-1/jmdict-oracle-receipt.json",
+      "bytes": 11150,
+      "sha256": "d718fb056cf156c466faf1b2a44c2a595fad0264a54b5d1c3aa3b1791fb239b0"
+    },
+    {
+      "path": "corpus/jmdict-A-1/metadata-allocation.json",
+      "bytes": 9823,
+      "sha256": "259ad23e3d2abc2711b4a3959b5491954d45a824a2c79e1464786a6cf1569677"
+    },
+    {
+      "path": "corpus/jmdict-A-1/preflight.json",
+      "bytes": 16902,
+      "sha256": "1ae10b80d10504486664adabb24613fd8198607850e70460f62c9c716f2282fc"
+    },
+    {
+      "path": "corpus/jmdict-A-1/progress.json",
+      "bytes": 90169,
+      "sha256": "3e28707d6532a3b6b6115410ab41b18bff296e0c2a5c4325d73a1c334d6d75b8"
+    },
+    {
+      "path": "corpus/jmdict-A-1/raw-final-files.json",
+      "bytes": 988,
+      "sha256": "ebd85cdd867cb49470663c6a8d69b6f6ab13f202661b5c601fa6d46c205b3be4"
+    },
+    {
+      "path": "corpus/jmdict-A-1/result.json",
+      "bytes": 115932,
+      "sha256": "862c8520df13068ad6c6b52de5086d2133fd260629b33fab5483b316066cde14"
+    },
+    {
+      "path": "corpus/jmdict-A-1/setup.json",
+      "bytes": 15603,
+      "sha256": "22dbf477938402e0d1e567c4f2ea21d69898d9c448cd7caed4d4fbb763f91fa9"
+    },
+    {
+      "path": "corpus/jmdict-A-1.launcher.json",
+      "bytes": 1153,
+      "sha256": "f170d042e889aff9337c5125bed279d5c773af3691c9d6b2f1a261f4bfd8c00a"
+    },
+    {
+      "path": "corpus/jmdict-A-1.stderr.log",
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    {
+      "path": "corpus/jmdict-A-1.stdout.log",
+      "bytes": 718,
+      "sha256": "97d5c96e71a0417dbc595ab5f5eda97057d44c6902103b60362b3ee9754edb3b"
+    },
+    {
+      "path": "corpus/jmdict-B-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "852ca90b33d4c5f8c7a7dc6d7b56ef2c9cfece846ad7ac21d0b54220450b12de"
+    },
+    {
+      "path": "corpus/jmdict-B-1/final-output-oracle.json",
+      "bytes": 4712,
+      "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+    },
+    {
+      "path": "corpus/jmdict-B-1/jmdict-oracle-receipt.json",
+      "bytes": 11150,
+      "sha256": "d718fb056cf156c466faf1b2a44c2a595fad0264a54b5d1c3aa3b1791fb239b0"
+    },
+    {
+      "path": "corpus/jmdict-B-1/metadata-allocation.json",
+      "bytes": 11359,
+      "sha256": "1357cd96c9cd0c060a6911202e238528d6653250de1754cf9411b6027e588f6c"
+    },
+    {
+      "path": "corpus/jmdict-B-1/preflight.json",
+      "bytes": 16906,
+      "sha256": "f5b06e2dce1bcc128a3b76b5e019a6edf5efafc5102f20973915e04b1d7d34be"
+    },
+    {
+      "path": "corpus/jmdict-B-1/progress.json",
+      "bytes": 91663,
+      "sha256": "bd0e4ebe8a685650a95d67c6417f2d24009616973d24759a6c29fee51f0cc36d"
+    },
+    {
+      "path": "corpus/jmdict-B-1/raw-final-files.json",
+      "bytes": 988,
+      "sha256": "583f48c81c16a746dad433fcf2952183ecf482f9cf208006e0f1bd7127af8a7e"
+    },
+    {
+      "path": "corpus/jmdict-B-1/result.json",
+      "bytes": 117537,
+      "sha256": "bca2873a025b2654eedddd606a0368c99b6507f719929c60f5f39fc4ae925cbd"
+    },
+    {
+      "path": "corpus/jmdict-B-1/setup.json",
+      "bytes": 15607,
+      "sha256": "ba4727f9bc059cbd8965ce14e111694fb22827bca7eb91211aeb95bf82ba905a"
+    },
+    {
+      "path": "corpus/jmdict-B-1.launcher.json",
+      "bytes": 1157,
+      "sha256": "e74f84756717ee38f7591eed0137ee67f118fd29b7ab010ecd5d1c3d02210635"
+    },
+    {
+      "path": "corpus/jmdict-B-1.stderr.log",
+      "bytes": 870,
+      "sha256": "19869b7242bb05b3c7616dda5a7c0d7292508337ca5a44229ea3e8fb091696f3"
+    },
+    {
+      "path": "corpus/jmdict-B-1.stdout.log",
+      "bytes": 718,
+      "sha256": "97d5c96e71a0417dbc595ab5f5eda97057d44c6902103b60362b3ee9754edb3b"
+    },
+    {
+      "path": "corpus/jmdict-comparison-1.json",
+      "bytes": 27814,
+      "sha256": "4147eb9724b76a32f4ffadda3c7f761b46f3398401232e7464628507b193e8b5"
+    },
+    {
+      "path": "corpus/vndb-A-1/catalog-oracle-receipt.json",
+      "bytes": 171,
+      "sha256": "d2c064f947252b1f55d8c87e9538863cfeeee23bcb7760cb164bf2e60763108b"
+    },
+    {
+      "path": "corpus/vndb-A-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "8b0f28d8ee69c12683e2cdcc3a6ee5dc982cc5d35af248a1ed080d6cbfb4c064"
+    },
+    {
+      "path": "corpus/vndb-A-1/final-output-oracle.json",
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    },
+    {
+      "path": "corpus/vndb-A-1/media-oracle-receipt.json",
+      "bytes": 1139,
+      "sha256": "1b3cd5049f398637fa6acefab377bd940c4ddc8c5a12717ce06562897924832e"
+    },
+    {
+      "path": "corpus/vndb-A-1/media-oracle-result.json",
+      "bytes": 1514,
+      "sha256": "8cd51d549a8b7f736088d6796ff968690f81c3cd8573bb077d93498273b15705"
+    },
+    {
+      "path": "corpus/vndb-A-1/metadata-allocation.json",
+      "bytes": 127009,
+      "sha256": "0e7e49f5805fd654ca992ad8c97001f6b083f37b83395c199bcdecdb04baad73"
+    },
+    {
+      "path": "corpus/vndb-A-1/preflight.json",
+      "bytes": 16988,
+      "sha256": "74872c00173838bceaa35f15efcae7686e94a227492f774797f9cf87be699d9b"
+    },
+    {
+      "path": "corpus/vndb-A-1/progress.json",
+      "bytes": 1277150,
+      "sha256": "e7c814fbe113241585eece42bd745f3d2a5bee0866b0adb9a27fb898d55f2f33"
+    },
+    {
+      "path": "corpus/vndb-A-1/raw-final-files.json",
+      "bytes": 1713,
+      "sha256": "639a2ae53ed0a0efc04226e51dcc6acc556ff66345fd0bfbb4365fa91d813cac"
+    },
+    {
+      "path": "corpus/vndb-A-1/result.json",
+      "bytes": 1338020,
+      "sha256": "4bd9c91fac4fa1551dbe65119a6899f35075cb461fabd7bb354f1fa2a5001629"
+    },
+    {
+      "path": "corpus/vndb-A-1/setup.json",
+      "bytes": 15682,
+      "sha256": "315b7dcf39764d2d18fe03381e4fe2522345320cbee5ff5191d3299b35db5021"
+    },
+    {
+      "path": "corpus/vndb-A-1.launcher.json",
+      "bytes": 1149,
+      "sha256": "f09da97a3d3ae8c32dc6d2bff15df858a2622dba61b1beceefbb079263fef99f"
+    },
+    {
+      "path": "corpus/vndb-A-1.stderr.log",
+      "bytes": 1044,
+      "sha256": "474e5c207865046b0b346c0d95ff344d8452407553feb84753cc142980ab2b34"
+    },
+    {
+      "path": "corpus/vndb-A-1.stdout.log",
+      "bytes": 2406,
+      "sha256": "7747c7e9f991172b70137b62eeeb133b69e3ddc93845dab373abe0e3d3a3fcdc"
+    },
+    {
+      "path": "corpus/vndb-B-1/catalog-oracle-receipt.json",
+      "bytes": 171,
+      "sha256": "d2c064f947252b1f55d8c87e9538863cfeeee23bcb7760cb164bf2e60763108b"
+    },
+    {
+      "path": "corpus/vndb-B-1/complete-file-oracle.json",
+      "bytes": 571,
+      "sha256": "8b0f28d8ee69c12683e2cdcc3a6ee5dc982cc5d35af248a1ed080d6cbfb4c064"
+    },
+    {
+      "path": "corpus/vndb-B-1/final-output-oracle.json",
+      "bytes": 5342,
+      "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+    },
+    {
+      "path": "corpus/vndb-B-1/media-oracle-receipt.json",
+      "bytes": 1139,
+      "sha256": "1b3cd5049f398637fa6acefab377bd940c4ddc8c5a12717ce06562897924832e"
+    },
+    {
+      "path": "corpus/vndb-B-1/media-oracle-result.json",
+      "bytes": 1514,
+      "sha256": "8cd51d549a8b7f736088d6796ff968690f81c3cd8573bb077d93498273b15705"
+    },
+    {
+      "path": "corpus/vndb-B-1/metadata-allocation.json",
+      "bytes": 148029,
+      "sha256": "3856b9c9b98db56e06241575d0368958a95d31b8acf7a4a54c5fc3beb3a113df"
+    },
+    {
+      "path": "corpus/vndb-B-1/preflight.json",
+      "bytes": 16993,
+      "sha256": "c2d6a3a3653d883cb833896d5425755fdcd53977a45bb2c0710866f47edd20cd"
+    },
+    {
+      "path": "corpus/vndb-B-1/progress.json",
+      "bytes": 1299073,
+      "sha256": "1f995546f01f5e0d8fdd3a4f262575fdcf2722d459095a334f693d81cd00f68f"
+    },
+    {
+      "path": "corpus/vndb-B-1/raw-final-files.json",
+      "bytes": 1713,
+      "sha256": "0e51749f4aca85e3bbb3c10c87f49823cfcb5046ab3fac140528b02c1d2d20a2"
+    },
+    {
+      "path": "corpus/vndb-B-1/result.json",
+      "bytes": 1360065,
+      "sha256": "d3f1bd33d11739b9350bc60ab588413f1d506d3e441357d1e574a255c8b23537"
+    },
+    {
+      "path": "corpus/vndb-B-1/setup.json",
+      "bytes": 15687,
+      "sha256": "63f67af70650b5792f4a3b4e38126a87a0c5673fbf59e7f8c58b48b43b35a237"
+    },
+    {
+      "path": "corpus/vndb-B-1.launcher.json",
+      "bytes": 1153,
+      "sha256": "0038371f4376370577f0726e02a46f613ea9ddf2119fdcae5f0f6f2015c5d8cc"
+    },
+    {
+      "path": "corpus/vndb-B-1.stderr.log",
+      "bytes": 1044,
+      "sha256": "474e5c207865046b0b346c0d95ff344d8452407553feb84753cc142980ab2b34"
+    },
+    {
+      "path": "corpus/vndb-B-1.stdout.log",
+      "bytes": 2406,
+      "sha256": "7747c7e9f991172b70137b62eeeb133b69e3ddc93845dab373abe0e3d3a3fcdc"
+    },
+    {
+      "path": "corpus/vndb-comparison-1.json",
+      "bytes": 320095,
+      "sha256": "c4260a7bfe1fd58dd47a10b7b9741319acf8acbd7657a25468b9e12e092a973f"
+    },
+    {
+      "path": "helper/README.md",
+      "bytes": 10909,
+      "sha256": "7d44e44b6cda9e4c59b4331b6bd1d77a06d365278bdabb8c8835615b28243cc3"
+    },
+    {
+      "path": "helper/archive-catalog.mjs",
+      "bytes": 1994,
+      "sha256": "134c0671c272d5370e99babcb9f1209886c8657aae30100130a21963cd272302"
+    },
+    {
+      "path": "helper/common.mjs",
+      "bytes": 9692,
+      "sha256": "8266a7d8aa2d4bc3c067353c3c3cd7baf04df40f71107b244e54daca4f274c79"
+    },
+    {
+      "path": "helper/compare-results.mjs",
+      "bytes": 7585,
+      "sha256": "c490ca644d76aef431ae9a2564c0180c7d34b15320f999e1c634583874205693"
+    },
+    {
+      "path": "helper/field-analysis.mjs",
+      "bytes": 6689,
+      "sha256": "014c040916763fbda81e89d1a4f661bda7c94a2b6a3f6b76a781bc49be9fdc67"
+    },
+    {
+      "path": "helper/file-oracle.mjs",
+      "bytes": 3213,
+      "sha256": "547ec78aed013d5db935179de7a7e2d9f290c87180364dd9a8c6f58ab5e5053e"
+    },
+    {
+      "path": "helper/launch.py",
+      "bytes": 3245,
+      "sha256": "4d7f2f78b9858f6628633eb987879ba0247a2590b9c0f9c674ba063e4270f3ef"
+    },
+    {
+      "path": "helper/logical-record-ids.contract.mjs",
+      "bytes": 3046,
+      "sha256": "2e79d4909f4eab78459703ce0f1e762763f8510988da53171a3d2ee3b106965d"
+    },
+    {
+      "path": "helper/logical-record-ids.mjs",
+      "bytes": 1515,
+      "sha256": "a7900f780f101d32a0d1526983cb9aca9050790de8e0b3b847228acaa9a2baac"
+    },
+    {
+      "path": "helper/metadata-oracle.contract.mjs",
+      "bytes": 7311,
+      "sha256": "709d78a6470fec962b68e2c0d0653afac3f6195ed808c211279ca82c1450ebfa"
+    },
+    {
+      "path": "helper/metadata-oracle.mjs",
+      "bytes": 9935,
+      "sha256": "369b507d2f2eea7f4ff36804e13786f8fbb01581836696fdc389629a816cf152"
+    },
+    {
+      "path": "helper/node-opfs-bounded.contract.mjs",
+      "bytes": 5023,
+      "sha256": "3f3b7cf4c7bdf42db1c19cd0c9303040f7a93b23e22e7003c8141dd8ce73ebc2"
+    },
+    {
+      "path": "helper/node-opfs-bounded.mjs",
+      "bytes": 9955,
+      "sha256": "b80ed6e0733a8d27bb88c93a662b247ca38ae7d5274957742de6102ac8b2f3e8"
+    },
+    {
+      "path": "helper/run.mjs",
+      "bytes": 42080,
+      "sha256": "4f8522eeb0baa660d1bee7132a409fbf0576748ca0340c34de0f0441690f2105"
+    },
+    {
+      "path": "helper/vndb-media-oracle.py",
+      "bytes": 2740,
+      "sha256": "306ab429073a59ce8117e75f59e95947afd2c57b8b53acc8ed92b8f94678b7f9"
+    },
+    {
+      "path": "profile/protocol.json",
+      "bytes": 5349,
+      "sha256": "129cb3d163d7da594c8dc4f5dd2ebca0f36e8e888519015fd01f71125d004263"
+    },
+    {
+      "path": "profile/verification-manifest.json",
+      "bytes": 19619,
+      "sha256": "70354d122d0297554f9ea9cd70e47744c0b0062ecee747006e87b94fe70130e6"
+    }
+  ]
+}

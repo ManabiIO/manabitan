@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "branch": "perf/implicit-import-metadata-current-20261128-4d9f",
+  "remoteCommit": "68b29e5a959470e76ff67a93ec8b300cc53f1254",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "tree": "167af1110023e4febad62921e13244b2c8bcb93c",
+  "localEquivalent": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "exactChangedPaths": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/term-content-canonical-scan.js",
+    "ext/js/dictionary/term-content-metadata-arena.js",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "test/dictionary-content-dict-name-prefix.test.js",
+    "test/dictionary-content-implicit-columns.test.js",
+    "test/dictionary-content-publication-range.test.js",
+    "test/dictionary-database-content-dedup.test.js",
+    "test/term-content-canonical-scan.test.js",
+    "test/term-content-metadata-arena.test.js",
+    "test/term-content-metadata-growth.test.js",
+    "test/term-content-signature1.test.js"
+  ],
+  "status": "Focused tests passed; package/current-corpus/broad/hosted gates pending; no PR yet"
+}

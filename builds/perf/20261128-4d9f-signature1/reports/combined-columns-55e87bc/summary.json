@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "success": true,
+  "timingEligible": false,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateRuntime": "55e87bc64c9b043a91f1d075f0324d3176c18c9a",
+  "helperCommit": "434855c698d82ac336d37be63397d29d4936e6ec",
+  "freshRuns": 6,
+  "failedAcquisitions": 0,
+  "corpora": [
+    {
+      "corpus": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "finalOutputOracle": {
+        "bytes": 4712,
+        "sha256": "5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e"
+      },
+      "finalSignatureArenaBytesAvoided": 2097152,
+      "finalDictionaryNameBytesAvoided": 2097152,
+      "finalOwnedBytesAvoided": 4194304,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": true,
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 362032,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248,
+        "dictionaryNameIds": {
+          "physicalIsNull": true,
+          "backingBytes": 0,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 362032
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 24117248
+      }
+    },
+    {
+      "corpus": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "finalOutputOracle": {
+        "bytes": 4724,
+        "sha256": "16ea2af33a07c79d163d5c16cc73276940a9d5ab46776c0b2d300d70514ae6ff"
+      },
+      "finalSignatureArenaBytesAvoided": 2097152,
+      "finalDictionaryNameBytesAvoided": 2097152,
+      "finalOwnedBytesAvoided": 4194304,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": true,
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 363243,
+        "capacity": 524288,
+        "hashSlots": 1048576,
+        "nativeArenaBytes": 24117248,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 24117248,
+        "dictionaryNameIds": {
+          "physicalIsNull": true,
+          "backingBytes": 0,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 363243
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 24117248
+      }
+    },
+    {
+      "corpus": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "finalOutputOracle": {
+        "bytes": 5342,
+        "sha256": "01aa55b3440a4bb5f6831a5e3c94eb20c2f7a672029824b00b31e3738043ea62"
+      },
+      "finalSignatureArenaBytesAvoided": 1048576,
+      "finalDictionaryNameBytesAvoided": 0,
+      "finalOwnedBytesAvoided": 1048576,
+      "candidateNullPhysicalSignature1EveryGroup": true,
+      "candidateNullPhysicalDictionaryNameIdsEveryGroup": false,
+      "candidateAllocation": {
+        "arenaWasAllocated": true,
+        "denseCount": 157150,
+        "capacity": 262144,
+        "hashSlots": 524288,
+        "nativeArenaBytes": 16252928,
+        "physicalSignature1IsNull": true,
+        "externalSignature1Bytes": 0,
+        "ownedArenaAndSignature1Bytes": 16252928,
+        "dictionaryNameIds": {
+          "physicalIsNull": false,
+          "backingBytes": 1048576,
+          "representation": {
+            "_termEntryContentMetaDictNameIdPrefixValue": 1,
+            "_termEntryContentMetaDictNameIdPrefixEnd": 822
+          }
+        },
+        "ownedArenaAndOptionalColumnsBytes": 17301504
+      }
+    }
+  ],
+  "scope": "Exact retained array/native-memory backing; no process peak, browser or latency claim. Full unit/types gates deferred to separate current-base integration by root after upstream f28 merge."
+}

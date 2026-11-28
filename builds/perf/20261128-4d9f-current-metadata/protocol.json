@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 5,
+  "purpose": "Separate f28 current-base full term-sink parity and implicit S1/name-column allocation qualification",
+  "timingEligible": false,
+  "parentCommit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "candidateCommit": "81e203e084c009e79057a36d0e2106ef669ab168",
+  "candidateTree": "167af1110023e4febad62921e13244b2c8bcb93c",
+  "sourceSelection": "CLI exact source ID plus immutable f28/81e203e runtime tree and asset profiles; later helper/test-only commits accepted only when recorded runtime source trees and every source/asset hash remain equal.",
+  "runtime": "Node v22.22.0 required; actual executable SHA256 recorded and equal A/B required. Optional --node-sha256 enforces recorded Linux x64 binary.",
+  "runtimeHeapMiB": 512,
+  "observations": "One complete fresh-process A and one complete fresh-process B per corpus, sequential under the shared CPU slot; failed attempts remain separate",
+  "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS",
+  "oracles": [
+    "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
+    "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
+    "Every encoded record row independently decoded and checked against its input score/reference; every record field and final envelope hash retained",
+    "All persisted file bytes hashed twice: raw receipt plus comparison form normalizing only independently linked random 16-byte record/index generation identifiers",
+    "Every logical metadata column, slot, ordered collision entry, dictionary interner, high-water and free-ID state hashed",
+    "Candidate S1/presence independently decoded from marker 2 and literal 0x3652424d; virtual dictionary-name column independently reconstructed from its prefix with a zero capacity tail; no product getter or materializer is invoked",
+    "In both current arms, independently expand an empty Float64 record-ID view to positive zero over the full state-column capacity; physical columns retain exact bytes, including signed zero; never call a product getter. Record existing upstream ID backing separately and do not credit it to this candidate.",
+    "Per-group and final native arena, external S1 and dictionary-name backing measured separately; both prefix scalar properties explicitly validated and recorded; physical null status observed without assuming identical behavior across corpora",
+    "Independent VNDB full-corpus group/media path oracle and ZIP media filename oracle retained: 170 groups, 146725 references, 146570 distinct paths, 155 repeated group representatives",
+    "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
+    "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest"
+  ],
+  "resourcePolicy": {
+    "minimumTemporaryBytes": 536870912,
+    "minimumReportBytes": 16777216,
+    "maximumSampledRssBytes": 3221225472,
+    "maximumChildWallSeconds": 1200,
+    "firstExecYieldMilliseconds": 30000
+  },
+  "excludedClaims": [
+    "Whole-browser import speed or parser concurrency timing",
+    "Browser peak/settled memory qualification",
+    "Media file persistence, settings UI, SQLite transaction, restart or lookup validation",
+    "New format byte savings from the copied field-size diagnostic"
+  ],
+  "portableDerivative": {
+    "source": "Original combined helper frozen at434855c; independent current-ID decoder from be24f89, plus a separate current manifest/protocol and explicit mode selection. Original dcfc/55 evidence and acquisition helper remain immutable in their commits/archive.",
+    "runtimeCodeChangedByHelper": false,
+    "candidateRuntimeCommit": "81e203e084c009e79057a36d0e2106ef669ab168",
+    "helperValidation": "Executed helper contracts and fresh A/B results will be retained in separate reports; this fixed protocol does not assert their outcome."
+  },
+  "logicalRecordIdRepresentation": "implicit-positive-zero-or-full-float64",
+  "priorProfile": {
+    "path": "builds/perf/20261128-4d9f-signature1/protocol.json",
+    "sha256": "acaf3101943018bf8722ed7af2c6e03fff02be9afcb4876227a8cb872245ddb2",
+    "qualificationNotTransferred": true
+  },
+  "upstreamIntegration": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "runtimePaths": [
+      "ext/js/dictionary/dictionary-database.js",
+      "ext/js/dictionary/raw-term-content.js",
+      "ext/js/dictionary/term-content-block-store.js",
+      "ext/js/dictionary/term-record-opfs-store.js"
+    ],
+    "priorPreflightHistory": "Original S1/combined profile retains every generated-comment and helper-style failure; those observations are not current-base acquisitions."
+  }
+}
