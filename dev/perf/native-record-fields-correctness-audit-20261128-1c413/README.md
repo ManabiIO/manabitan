@@ -14,11 +14,11 @@ Every archived tracked source must match its immutable Git blob. Required source
 
 For JMdict, Jitendex and VNDB, the reader recomputes complete synchronous field-buffer identity equality and the complete finalized term-content/record/lookup file map. Only the two documented 16-byte generation-ID ranges are normalized. Complete row counts and live lookup receipts must agree. Original process exits/log hashes, adapter smokes, cleanup, parser source-bank groups, original CRC/fallback counts and successful sink-retirement receipts are checked.
 
-Recorded parser requests are joined to their terminal row counts. Ordered contiguous source-bank groups are then mapped to all downstream field-call row ranges. This explicitly distinguishes VNDB's parser-group count from field-call count; a field call cannot cross its actual source group. Scanned plus reused CRC bytes must account for all original source-bank bytes.
+Recorded parser requests are joined to their terminal row counts. Ordered contiguous source-bank groups are then mapped to all downstream field-call row ranges. This explicitly distinguishes VNDB's parser-group count from field-call count; a field call cannot cross its actual source group. Scanned plus reused CRC bytes must account for every metadata-admitted deferred group. Complete input totals cover all banks; bytes checked by immediate CRC verification are reported separately because that path has no scanned/reused counters.
 
 The optional helper must become ready through the actual production lifecycle. The reader never starts it. Before/after counters reconcile every encoder entry, native attempt, owned input/output copy, decline, natural pre-readiness JavaScript call, table allocation and bounded private page growth. Exact native layout and compact score-table sizes are recomputed from original counters and buffer sizes. Unknown or failed/disabled native paths cannot pass.
 
-The separate original validation outcomes must match the job API and include every required gate and all ten workflow-produced logs. No unit/type/build command is rerun by the reader. The reader's own 31 synthetic regression cases cover archive, provenance, counter/layout, source-group, partial-failure and prerequisite boundaries.
+The separate original validation outcomes must match the job API and include every required gate and all ten workflow-produced logs. No unit/type/build command is rerun by the reader. The reader's own 34 synthetic regression cases cover archive, provenance, counter/layout, source-group, partial-failure and prerequisite boundaries.
 
 ## Limits of the evidence
 
@@ -70,3 +70,32 @@ nonnull absent assets, null required parser assets, and null or altered candidat
 fields assets. The original two-artifact manifest, transport, source identities,
 archive checks, corpus comparisons, native counters and original import results
 are unchanged. No import is rerun or replaced.
+
+## Preserved CRC-counter reader failure and source-bound scope repair
+
+Reader source5c68e5d88564941358e104d5dc7221962c58b809, run46133974806,
+job140945067000 passed all 31 tests and the optional-baseline-source check. It
+then stopped on an extra reader equation that incorrectly required deferred CRC
+counters to cover all input. The original product verifies non-admitted banks
+immediately during inflation but records no scanned/reused counters for that
+path. Native deferred stats partition only their own complete source groups.
+
+The full original reader log is Git blob
+c053156959dd418c7fe4ef7552b561f7743c843d, 294504 UTF-8 bytes, SHA256
+af143d25f4d6ef6e7d5de12da073fd7388e6634a0973c63632442b2ef23c028f.
+Its retained audit artifact15258921486 is5829608 bytes, SHA256
+ca6e1fcf6cdd4ee661e7b70cec2ca72b25519898c859a7a0677e6ffb55d5e4b7.
+The source-bound failure/correction receipt is Git blob 099baf1a1323828fd959e6059d103df27e7f4360.
+
+This revision binds the exact importer, parser, worker, experiment defaults,
+CRC wrapper, native source and original driver. The version3/validation route
+premise is established from those immutable sources; compact worker requests do
+not independently record version/options. Recorded effective reuse/skip flags
+must match. Actual group bank count and compressed/uncompressed sizes determine
+deferred admission: multiple banks, at least4MiB uncompressed, and compressed
+bytes no greater than floor(uncompressed/32). The pinned verifier is available.
+Only those groups contribute to scanned/reused counters. Complete input totals,
+original A/B counters, fallback equality, native layouts, full field/final-file
+receipts and every archive/source gate are preserved. Three new pure cases cover
+admission edges, immediate zero counters, invalid totals/defaults/witnesses and
+source drift. No product behavior or original import is changed.

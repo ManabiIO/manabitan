@@ -46,13 +46,13 @@ jobs:
           source_path = prefix + '/source.json'
           source = json.loads(Path(source_path).read_text())
           baseline = 'dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16'
-          prior_reader = '56408685baab2d9469cdb7dc68e394cb7616523a'
+          prior_reader = '5c68e5d88564941358e104d5dc7221962c58b809'
           head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
           if head != os.environ['GITHUB_SHA'] or os.environ['GITHUB_RUN_ATTEMPT'] != '1':
               raise RuntimeError('Unexpected reader source or attempt')
           ancestry = subprocess.check_output(['git', 'rev-list', '--parents', '-n', '1', head], text=True).split()
           if ancestry != [head, prior_reader]:
-              raise RuntimeError('Reader repair must have the exact first reader as sole parent')
+              raise RuntimeError('Reader repair must have the exact prior reader as sole parent')
           changed = set(subprocess.check_output(['git', 'diff', '--name-only', '--no-renames', baseline, head], text=True).splitlines())
           if changed != set(source['files']) | {source_path}:
               raise RuntimeError('Unexpected read-only source boundary')

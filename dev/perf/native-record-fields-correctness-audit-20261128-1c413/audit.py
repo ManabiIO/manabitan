@@ -85,6 +85,17 @@ VALIDATION_LOGS = {
     "unit.log", "unit-options.log", "types-main.log", "types-dev.log",
     "types-test.log", "dry-build.log",
 }
+CRC_POLICY_SOURCES = {
+    "ext/js/dictionary/dictionary-importer.js": "e5863de2d3a0e827c514db48c6a24f62f03d6a2b",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "4f3f7e73c78bca23672f46588cb897633fc7a4ac",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "82808931b73e099a604c598460cdeaed43d67bd5",
+    "ext/js/dictionary/term-bank-source-crc.js": "47ad13920a149c643c06862c1c62b2b1ed9f2036",
+    "ext/js/dictionary/term-bank-experiments.js": "38ffe9035ffad5a4cb00de5406ce2dda5b823b4c",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+    CORPUS + "/run.mjs": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+}
+CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024
+CRC_REUSE_MIN_COMPRESSION_RATIO = 32
 TRANSPORT_SHA256 = "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
 ACTIVATION_SHA256 = "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
 
@@ -624,6 +635,82 @@ def parser_counts(phases):
     return {key: details[0][key] for key in PARSER_KEYS}
 
 
+def crc_policy_sources(api):
+    """Bind the route/defaults/metric semantics used below; never execute source."""
+    result = {}
+    candidate_tree = api.tree(CANDIDATE)
+    baseline_tree = api.tree(BASELINE)
+    for path, expected_blob in CRC_POLICY_SOURCES.items():
+        entry = candidate_tree.get(path)
+        require(entry is not None and entry["sha"] == expected_blob and entry["mode"] == "100644",
+                "Source CRC policy binding changed: " + path)
+        if path.startswith("ext/"):
+            same(baseline_tree.get(path), entry, "A/B CRC route or policy source differs: " + path)
+        data = api.source(CANDIDATE, path)
+        same(git_blob(data), expected_blob, "Source CRC policy bytes changed: " + path)
+        result[path] = {"gitBlob": expected_blob, "bytes": len(data), "sha256": digest(data)}
+    return {
+        "sources": result,
+        "versionAndValidation": "The pinned importer admits the recorded compressed-worker route only for version3 and sets validateGlossaryTypes=true; request receipts do not independently record those options",
+        "defaults": "The pinned driver supplies only its bound ordinary flags; snapshot defaults enable validated glossary reuse and disable skip-fused parsing",
+        "nativeVerifier": "The unchanged source-bound native parser exports verify_term_bank_source_crcs; complete original native rebuild and parser asset identities are separately required",
+        "metricScope": "Only deferred verification writes scanned/reused counters; immediate inflation validates original CRCs but worker metrics report0",
+    }
+
+
+def crc_coverage(phases, plan, counts):
+    """Check deferred-only metric conservation against actual original source groups."""
+    details = [item["details"] for item in phases if item["phase"] == "import-data-banks"]
+    require(len(details) == 1, "Missing actual CRC experiment receipt")
+    effective = details[0].get("fastPathParserEffectiveExperiments")
+    require(type(effective) is dict and effective.get("experimentalValidatedGlossaryReuse") is True and
+            effective.get("experimentalSkipFusedParse") is False,
+            "Actual CRC experiment defaults differ from the source-bound route")
+    groups = plan["groups"]
+    deferred_bytes = immediate_bytes = compressed_bytes = deferred_rows = 0
+    observed_groups = []
+    for ordinal, group in enumerate(groups):
+        banks = group["banks"]
+        require(type(banks) is list and banks, "Missing original CRC group metadata")
+        compressed = sum(integer(bank["compressedSize"], "CRC compressed size") for bank in banks)
+        uncompressed = sum(integer(bank["uncompressedSize"], "CRC uncompressed size") for bank in banks)
+        rows = integer(group["rowCount"], "CRC source group rows", 1)
+        deferred = (len(banks) > 1 and uncompressed >= CRC_REUSE_MIN_SOURCE_BYTES and
+                    compressed <= uncompressed // CRC_REUSE_MIN_COMPRESSION_RATIO)
+        compressed_bytes += compressed
+        if deferred:
+            deferred_bytes += uncompressed
+            deferred_rows += rows
+        else:
+            immediate_bytes += uncompressed
+        observed_groups.append({
+            "ordinal": ordinal, "bankCount": len(banks), "rowCount": rows,
+            "compressedBytes": compressed, "uncompressedBytes": uncompressed,
+            "deferredCounterCoverage": deferred,
+        })
+    source_bytes = deferred_bytes + immediate_bytes
+    same(counts["fastPathParserSourceCompressedBytes"], compressed_bytes,
+         "Complete compressed source total differs from original group metadata")
+    same(counts["fastPathParserSourceUncompressedBytes"], source_bytes,
+         "Complete uncompressed source total differs from original group metadata")
+    scanned = integer(counts["fastPathParserSourceCrcScannedBytes"], "deferred CRC scanned bytes")
+    reused = integer(counts["fastPathParserSourceCrcReusedBytes"], "deferred CRC reused bytes")
+    witnesses = integer(counts["fastPathParserSourceCrcReusedGlossaryCount"], "deferred CRC witness count")
+    require(scanned + reused == deferred_bytes,
+            "Deferred source CRC coverage differs: recorded=" + str(scanned + reused) +
+            ", metadata-admitted=" + str(deferred_bytes) + ", immediate=" + str(immediate_bytes))
+    require(witnesses <= deferred_rows and ((witnesses == 0) == (reused == 0)),
+            "Deferred CRC witness count is outside its source-bound rows")
+    return {
+        "passed": True, "groups": observed_groups, "compressedBytes": compressed_bytes,
+        "uncompressedBytes": source_bytes, "deferredCounterBytes": deferred_bytes,
+        "immediateCrcBytesWithoutCounters": immediate_bytes,
+        "recordedScannedBytes": scanned, "recordedReusedBytes": reused,
+        "recordedReusedGlossaries": witnesses, "effectiveExperiments": effective,
+        "scope": "Metadata-derived coverage of deferred counters only; immediate CRC validation is source-bound and has no scanned/reused metric",
+    }
+
+
 def verify_retirement(root):
     inventory = read_json(Path(root) / "files.json")
     retired = read_json(Path(root) / "retired-disk.json")
@@ -639,7 +726,7 @@ def verify_retirement(root):
 
 def compare_corpus(root, dictionary, fixture, api, kit_hashes, prepared, activation):
     root = Path(root)
-    reports, calls, groups, counts, retirements, call_plans = {}, {}, {}, {}, {}, {}
+    reports, calls, groups, counts, retirements, call_plans, crc_scopes = {}, {}, {}, {}, {}, {}, {}
     for arm, commit, tree in (("A", BASELINE, BASELINE_TREE), ("B", CANDIDATE, CANDIDATE_TREE)):
         directory = root / arm
         report = read_json(directory / "report.json")
@@ -682,7 +769,8 @@ def compare_corpus(root, dictionary, fixture, api, kit_hashes, prepared, activat
         workers = read_json(directory / "workers.json")
         groups[arm] = parser_groups(workers)
         call_plans[arm] = group_field_plan(workers, calls[arm], GROUPS[dictionary], fixture["termRows"])
-        counts[arm] = parser_counts(read_json(directory / "product-work-counts.json"))
+        counts[arm] = parser_counts(phases)
+        crc_scopes[arm] = crc_coverage(phases, call_plans[arm], counts[arm])
         retirements[arm] = verify_retirement(directory)
         reports[arm] = report
     changed = runtime_delta(reports["A"]["source"]["runtimeFiles"], reports["B"]["source"]["runtimeFiles"])
@@ -709,15 +797,7 @@ def compare_corpus(root, dictionary, fixture, api, kit_hashes, prepared, activat
     require(len(groups["A"]) == GROUPS[dictionary], "Wrong complete group count")
     same(counts["A"], counts["B"], "Parser/CRC/fallback work differs")
     require(counts["A"]["fastPathParserFusedFallbacks"] == 0, "Unexpected fused parser fallback")
-    metadata = [bank for group in call_plans["A"]["groups"] for bank in group["banks"]]
-    compressed_bytes = sum(integer(bank["compressedSize"], "source compressed bytes") for bank in metadata)
-    source_bytes = sum(integer(bank["uncompressedSize"], "source uncompressed bytes") for bank in metadata)
-    require(counts["A"]["fastPathParserSourceCompressedBytes"] == compressed_bytes and
-            counts["A"]["fastPathParserSourceUncompressedBytes"] == source_bytes,
-            "Recorded parser input totals differ from complete compressed bank metadata")
-    require(counts["A"]["fastPathParserSourceCrcScannedBytes"] +
-            counts["A"]["fastPathParserSourceCrcReusedBytes"] == source_bytes,
-            "Source CRC scanned/reused bytes do not cover the complete original input")
+    same(crc_scopes["A"], crc_scopes["B"], "Source CRC coverage or effective experiments differ")
 
     original = read_json(root / "comparison.json")
     require(original["passed"] is True and original["performanceMeasurements"] is False, "Original pair did not pass")
@@ -739,6 +819,7 @@ def compare_corpus(root, dictionary, fixture, api, kit_hashes, prepared, activat
         "completeFieldIdentitySha256": object_digest(fields),
         "completeFieldOutputBytes": sum(item["bytes"] for item in fields), "completeTermFiles": term_files,
         "parserWorkCounts": counts["A"], "sourceGroupsSha256": original["sourceGroupsSha256"],
+        "crcCoverage": crc_scopes["B"],
         "activation": actual_activation, "retirement": retirements,
         "sourceGroupFieldPlan": call_plans["B"], "sourceGroupFieldPlanSha256": object_digest(call_plans["B"]),
         "comparisonFile": identity(root / "comparison.json"),
@@ -875,6 +956,7 @@ def audit_corpus(root, job, api, source, activation):
                 value["timingAcquired"] is False and value["node"] == "v22.22.0", "Original adapter smoke did not pass")
         same(value["cases"], list(smoke_cases), "Original complete actual-I/O smoke inventory differs")
         smoke[arm] = {"identity": identity(path), "cases": value["cases"]}
+    crc_policy = crc_policy_sources(api)
     fixtures = parse_json(api.source(BASELINE, "test/perf/dictionaries.lock.json"))["dictionaries"]
     comparisons = []
     for dictionary in GROUPS:
@@ -888,6 +970,7 @@ def audit_corpus(root, job, api, source, activation):
         same(item, read_json(acquisition / item["dictionary"] / "comparison.json"), "Final original pair receipt differs")
     return {
         "passed": True, "comparisons": comparisons, "smoke": smoke, "sourceProofs": proofs,
+        "crcPolicySources": crc_policy,
         "reportFile": identity(report_path), "planFile": identity(acquisition / "plan.json"),
         "completeRuntimeInventories": {arm: identity(acquisition / ("prepared-source-" + arm + ".json")) for arm in ("A", "B")},
         "limitations": [

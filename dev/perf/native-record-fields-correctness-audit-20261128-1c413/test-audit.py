@@ -501,6 +501,101 @@ class CorrectnessBoundaryCases(unittest.TestCase):
             with self.subTest(recorded=changed), self.assertRaisesRegex(AUDIT.AuditError, "critical source"):
                 AUDIT.bind_runtime(bad_b, candidate, "b" * 40, StaticApi(), {})
 
+    def test_crc_metrics_cover_only_metadata_admitted_deferred_groups(self):
+        minimum = 4 * 1024 * 1024
+        def group(total, compressed, banks=2):
+            parts = ([{"uncompressedSize": total, "compressedSize": compressed}] if banks == 1 else
+                     [{"uncompressedSize": total // 2, "compressedSize": compressed // 2},
+                      {"uncompressedSize": total - total // 2, "compressedSize": compressed - compressed // 2}])
+            return {"banks": parts, "rowCount": 10}
+        groups = [
+            group(minimum - 1, (minimum - 1) // 32),
+            group(minimum, minimum // 32),
+            group(minimum + 31, (minimum + 31) // 32),
+            group(minimum, minimum // 32 + 1),
+            group(2 * minimum, 1, banks=1),
+        ]
+        deferred = 2 * minimum + 31
+        phases = [{"phase": "import-data-banks", "details": {
+            "fastPathParserEffectiveExperiments": {
+                "experimentalValidatedGlossaryReuse": True, "experimentalSkipFusedParse": False,
+            },
+        }}]
+        counts = {
+            "fastPathParserSourceCompressedBytes": sum(bank["compressedSize"] for g in groups for bank in g["banks"]),
+            "fastPathParserSourceUncompressedBytes": sum(bank["uncompressedSize"] for g in groups for bank in g["banks"]),
+            "fastPathParserSourceCrcScannedBytes": deferred - 128,
+            "fastPathParserSourceCrcReusedBytes": 128,
+            "fastPathParserSourceCrcReusedGlossaryCount": 2,
+        }
+        result = AUDIT.crc_coverage(phases, {"groups": groups}, counts)
+        self.assertEqual([g["deferredCounterCoverage"] for g in result["groups"]],
+                         [False, True, True, False, False])
+        self.assertEqual(result["deferredCounterBytes"], deferred)
+        self.assertEqual(result["immediateCrcBytesWithoutCounters"], 4 * minimum - 1)
+        self.assertEqual(result["recordedScannedBytes"] + result["recordedReusedBytes"], deferred)
+        for changes in (
+            {"fastPathParserSourceCrcScannedBytes": counts["fastPathParserSourceCrcScannedBytes"] + 1},
+            {"fastPathParserSourceCrcScannedBytes": counts["fastPathParserSourceUncompressedBytes"] - 128},
+            {"fastPathParserSourceCompressedBytes": counts["fastPathParserSourceCompressedBytes"] + 1},
+            {"fastPathParserSourceUncompressedBytes": counts["fastPathParserSourceUncompressedBytes"] + 1},
+            {"fastPathParserSourceCrcReusedGlossaryCount": 21},
+            {"fastPathParserSourceCrcReusedGlossaryCount": 0},
+        ):
+            with self.subTest(changes=changes), self.assertRaises(AUDIT.AuditError):
+                AUDIT.crc_coverage(phases, {"groups": groups}, {**counts, **changes})
+
+    def test_immediate_crc_zero_metrics_do_not_imply_unvalidated_input(self):
+        groups = [{"banks": [{"compressedSize": 5, "uncompressedSize": 100},
+                             {"compressedSize": 5, "uncompressedSize": 100}], "rowCount": 3}]
+        details = {"fastPathParserEffectiveExperiments": {
+            "experimentalValidatedGlossaryReuse": True, "experimentalSkipFusedParse": False}}
+        phases = [{"phase": "import-data-banks", "details": details}]
+        counts = {
+            "fastPathParserSourceCompressedBytes": 10, "fastPathParserSourceUncompressedBytes": 200,
+            "fastPathParserSourceCrcScannedBytes": 0, "fastPathParserSourceCrcReusedBytes": 0,
+            "fastPathParserSourceCrcReusedGlossaryCount": 0,
+        }
+        result = AUDIT.crc_coverage(phases, {"groups": groups}, counts)
+        self.assertEqual(result["deferredCounterBytes"], 0)
+        self.assertEqual(result["immediateCrcBytesWithoutCounters"], 200)
+        for effective in (None, {}, {"experimentalValidatedGlossaryReuse": False, "experimentalSkipFusedParse": False},
+                          {"experimentalValidatedGlossaryReuse": True, "experimentalSkipFusedParse": True}):
+            changed = [{"phase": "import-data-banks", "details": {"fastPathParserEffectiveExperiments": effective}}]
+            with self.subTest(effective=effective), self.assertRaisesRegex(AUDIT.AuditError, "defaults"):
+                AUDIT.crc_coverage(changed, {"groups": groups}, counts)
+        with self.assertRaisesRegex(AUDIT.AuditError, "Deferred source CRC coverage"):
+            AUDIT.crc_coverage(phases, {"groups": groups}, {**counts, "fastPathParserSourceCrcScannedBytes": 200})
+
+    def test_crc_route_premises_are_bound_to_exact_original_source_bytes(self):
+        source = {"ext/parser.js": b"pinned parser", AUDIT.CORPUS + "/run.mjs": b"pinned driver"}
+        expected = {path: AUDIT.git_blob(data) for path, data in source.items()}
+        entries = {path: {"path": path, "mode": "100644", "type": "blob", "sha": expected[path]}
+                   for path in source}
+        class StaticApi:
+            def tree(self, commit):
+                return entries if commit == AUDIT.CANDIDATE else {"ext/parser.js": entries["ext/parser.js"]}
+            def source(self, commit, path):
+                return source[path]
+        with patch.object(AUDIT, "CRC_POLICY_SOURCES", expected):
+            result = AUDIT.crc_policy_sources(StaticApi())
+            self.assertEqual(set(result["sources"]), set(source))
+            bad_entries = deepcopy(entries)
+            bad_entries["ext/parser.js"]["sha"] = "0" * 40
+            with patch.object(StaticApi, "tree", return_value=bad_entries):
+                with self.assertRaisesRegex(AUDIT.AuditError, "policy binding"):
+                    AUDIT.crc_policy_sources(StaticApi())
+            with patch.object(StaticApi, "source", return_value=b"changed"):
+                with self.assertRaisesRegex(AUDIT.AuditError, "policy bytes"):
+                    AUDIT.crc_policy_sources(StaticApi())
+            base_wrong = deepcopy(entries["ext/parser.js"])
+            base_wrong["mode"] = "100755"
+            def tree_with_base_drift(self, commit):
+                return entries if commit == AUDIT.CANDIDATE else {"ext/parser.js": base_wrong}
+            with patch.object(StaticApi, "tree", tree_with_base_drift):
+                with self.assertRaisesRegex(AUDIT.AuditError, "A/B CRC"):
+                    AUDIT.crc_policy_sources(StaticApi())
+
     def test_retirement_failure_and_digest_mismatch_remain_failure(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

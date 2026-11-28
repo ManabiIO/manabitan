@@ -4,14 +4,14 @@
   "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
   "files": {
     ".github/workflows/native-fields-correctness-audit-1c413.yml": {
-      "gitBlob": "67bd3ede97ec0cd81c94bd7424546d786c974ec0",
+      "gitBlob": "a91303b76f0243f566d69aad764e7e52f655d54c",
       "bytes": 6746,
-      "sha256": "7ea9edc290d89acc3f99b2288f0c4f3cc7af5a8dc5252acb1ebc0a7705bae5cb"
+      "sha256": "a534c40b7dd8c6dd355986a39ea513a44c806ba3e205ebb867aac4ff0c962a8a"
     },
     "dev/perf/native-record-fields-correctness-audit-20261128-1c413/audit.py": {
-      "gitBlob": "1c0db521bf12e67cb16e15a019c890b5a2f48683",
-      "bytes": 64935,
-      "sha256": "43411fb21679de6b86b05df5e88c82542dd7db3f52d30680c341da98ddc7df46"
+      "gitBlob": "0fcd55ded6773dfb93f0f86c447b8d08a1cd84f6",
+      "bytes": 70153,
+      "sha256": "de3e29f3af7dd081a52a152ba8024728b2a3aab36ef836466d7eac166f3d9e8d"
     },
     "dev/perf/native-record-fields-correctness-audit-20261128-1c413/field_activation.py": {
       "gitBlob": "9e03c189823092fa7a8217f65ab9283893f85d2e",
@@ -24,14 +24,14 @@
       "sha256": "cb28cdb91e6df581b0bd820d958898607ca6a0f220fe7dd7e8409c65b16eb8d8"
     },
     "dev/perf/native-record-fields-correctness-audit-20261128-1c413/README.md": {
-      "gitBlob": "930948aa7cb86c32ff7d51b9dcb921e6d45794f9",
-      "bytes": 8254,
-      "sha256": "e46ef096d8af4cee779e56e044ea2427ba7174285cdc6225fe3dc5dbb5806464"
+      "gitBlob": "039a4b9d62567dd8ddf5f0629cf190404025ab88",
+      "bytes": 10295,
+      "sha256": "3c823de1cf9f0fb7dbf580777822f0504eab24311571f05ef905c30bf012e198"
     },
     "dev/perf/native-record-fields-correctness-audit-20261128-1c413/test-audit.py": {
-      "gitBlob": "848913907d0533ffbf405eeaf472a38a53208c2a",
-      "bytes": 40128,
-      "sha256": "162d4d42710eeaf091a1bf40c28051c31f1e1199923e0ac2e00bcb2fc2f6c924"
+      "gitBlob": "bd8c689b6d2a5eea49ed6e7390fdd24afff13eff",
+      "bytes": 46380,
+      "sha256": "b8dfa43cc137ce1b7a9eec196e3d5d6f5dd3fb903af8905c3613a8b70f7d8d57"
     },
     "dev/perf/native-record-fields-correctness-audit-20261128-1c413/transport.py": {
       "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
@@ -40,13 +40,25 @@
     }
   },
   "readerRevision": {
-    "parent": "56408685baab2d9469cdb7dc68e394cb7616523a",
-    "originalReaderRunId": 46133246828,
-    "originalReaderJobId": 140942854198,
+    "parent": "5c68e5d88564941358e104d5dc7221962c58b809",
+    "priorReaderRunId": 46133974806,
+    "priorReaderJobId": 140945067000,
     "failureReceipt": {
-      "gitBlob": "7e58e2fe3a4e51a2d4c957e92b39ed45d851d10a",
-      "bytes": 1850,
-      "sha256": "38fa366e8cab8be26d1997d2990974a82669fdc93980a007eb452310dd8b8f10"
+      "gitBlob": "099baf1a1323828fd959e6059d103df27e7f4360",
+      "bytes": 1856,
+      "sha256": "729203d7a9a6ee0c3637d969af44342e9f62938fe2e1e1f0078e5f9e5fd59ab4"
+    },
+    "earlierReaderFailure": {
+      "parent": "56408685baab2d9469cdb7dc68e394cb7616523a",
+      "originalReaderRunId": 46133246828,
+      "originalReaderJobId": 140942854198,
+      "failureReceipt": {
+        "gitBlob": "7e58e2fe3a4e51a2d4c957e92b39ed45d851d10a",
+        "bytes": 1850,
+        "sha256": "38fa366e8cab8be26d1997d2990974a82669fdc93980a007eb452310dd8b8f10"
+      },
+      "originalArtifactManifestUnchanged": true,
+      "originalImportsReexecuted": false
     },
     "originalArtifactManifestUnchanged": true,
     "originalImportsReexecuted": false
