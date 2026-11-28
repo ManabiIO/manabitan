@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+  "candidateWasmSha256": "b362d9b0106c28e9cb495d66c650463c771e165cb8ebadc4a66adda973466fd9",
+  "candidateSourceSha256": "313ba461b0233d27042e489199204c72c4ecd83566a9484044cec55419598a66",
+  "serverSha256": "c13f63b7069dd81cc78ea6fe0d58663473c5c5009e9dc12588be89908db3134b",
+  "dictionary": "vndb",
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "fixtureBytes": 291705969,
+  "rows": 6648310,
+  "expectedDigest": "fa7435ef7e6f3583e3f06e971c889d02122f899a92ec438d313edbd5a889b3cf",
+  "nodeVersion": "v22.22.0",
+  "workerCountPolicy": 3,
+  "warmupsPerChild": 2,
+  "timedPassesPerChild": 1,
+  "verificationPassesPerChild": 1,
+  "orders": ["ABC", "BCA", "CAB", "CBA", "ACB", "BAC"],
+  "reverseDefinition": "Reverse the entire 18-observation schedule: reverse the six blocks and reverse each block's arm order.",
+  "primaryMetrics": ["workerMs", "threadCpuMs", "cpuMs"],
+  "allowedProductChanges": [
+    "dev/data/dictionary-wasm/manifest.json",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm",
+    "ext/js/dictionary/wasm/term-bank-parser.c",
+    "test/term-bank-crc.test.js"
+  ],
+  "conditioning": "One fresh child at a time. Each child has two excluded complete warmups, one timed complete pass, and one subsequent exhaustive verification. Child exits before the next arm starts. No GC or tiering flags, restarts, replacement observations or result-based stopping.",
+  "boundary": "Sequential actual production parser-worker transactions on resident compressed term banks, including native inflate/CRC, parse/content/lookup, ownership copies and media-path projection. Excludes process/module initialization, archive reads, IPC, parallel scheduling, compression/storage, media payload import, UI and lookup readiness. This is a component diagnostic, not a complete-import qualification.",
+  "interpretation": "Report each independent host separately, including every B/A, B/C and identical C/A control result. All raw observations and failures are retained. Internal per-phase Ms values are wall-clock timers and may overlap; do not sum phases or treat them as CPU time. Broad movement in unchanged phases is evidence of host drift, not additional CRC work removal."
+}

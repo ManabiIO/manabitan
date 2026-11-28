@@ -1,0 +1,134 @@
+name: Frozen CRC gap component diagnostic eef4
+
+on:
+  push:
+    branches: [experiment/crc-gap-component-20261128-eef4]
+    # Source/evidence commits alone must not reacquire a frozen cohort.
+    paths: [.github/workflows/crc-gap-component-eef4.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crc-gap-component-eef4-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  # Replace once with the reviewed source-only C/test/artifact commit.
+  PERF_CANDIDATE: 83912e61edb0bf4c8148ef3db309ed944f9babaf
+  NODE_OPTIONS: ''
+
+jobs:
+  component:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: VNDB native component (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        order: [forward, reverse]
+    env:
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      - name: Check out the reviewed diagnostic bundle
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out the exact production JavaScript baseline
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          path: baseline
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check out the frozen candidate native source and module
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_CANDIDATE }}
+          path: candidate
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Bind the two product revisions and diagnostic source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/crc-gap-component/context
+          [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C baseline rev-parse HEAD)" = "$PERF_BASELINE"
+          test "$(git -C candidate rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git -C candidate fetch --no-tags origin "$PERF_BASELINE"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/crc-gap-component/context/harness-source.txt
+          git -C candidate diff --stat "$PERF_BASELINE" "$PERF_CANDIDATE" > builds/crc-gap-component/context/product-diff-stat.txt
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - name: Install exact baseline dependencies and generated libraries
+        working-directory: baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          npm ci 2>&1 | tee ../builds/crc-gap-component/context/npm-ci.log
+          npm run build:libs 2>&1 | tee ../builds/crc-gap-component/context/build-libs.log
+      - name: Restore the locked VNDB archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: baseline/builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('baseline/test/perf/dictionaries.lock.json') }}
+      - name: Validate or acquire the exact locked fixture
+        working-directory: baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js vndb 2>&1 | tee ../builds/crc-gap-component/context/fixture.log
+      - name: Freeze every input and the complete observation schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          node baseline/dev/perf/host-environment.js > builds/crc-gap-component/context/host-before.json
+          python3 dev/perf/crc-gap-component-20261128-eef4/prepare.py \
+            --baseline-root baseline \
+            --candidate-root candidate \
+            --candidate-ref "$PERF_CANDIDATE" \
+            --cache-dir baseline/builds/e2e-dictionary-cache \
+            --node "$(command -v node)" \
+            --order "$PERF_ORDER" \
+            --out builds/crc-gap-component \
+            2>&1 | tee builds/crc-gap-component/context/admission.log
+          python3 builds/crc-gap-component/runners/run.py \
+            --plan builds/crc-gap-component/plan.json --check-only \
+            2>&1 | tee builds/crc-gap-component/context/check-plan.log
+      - name: Run the fixed six balanced blocks with one live child at a time
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 builds/crc-gap-component/runners/run.py \
+            --plan builds/crc-gap-component/plan.json \
+            2>&1 | tee builds/crc-gap-component/context/acquisition.log
+          git -C baseline diff --exit-code > builds/crc-gap-component/context/baseline-final.diff
+          git -C candidate diff --exit-code > builds/crc-gap-component/context/candidate-final.diff
+      - name: Preserve final host context and every failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p builds/crc-gap-component/context
+          if command -v node >/dev/null && test -f baseline/dev/perf/host-environment.js; then
+            node baseline/dev/perf/host-environment.js > builds/crc-gap-component/context/host-after.json 2> builds/crc-gap-component/context/host-after.stderr
+          fi
+          df -h > builds/crc-gap-component/context/disk-after.txt
+      - name: Retain all source identities, warmups, measurements and verification passes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-gap-component-eef4-${{ matrix.order }}
+          path: builds/crc-gap-component
+          if-no-files-found: error
+          retention-days: 30
