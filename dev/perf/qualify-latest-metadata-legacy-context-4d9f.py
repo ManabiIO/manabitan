@@ -39,7 +39,7 @@ def save(name, value):
         output.write("\n")
 
 try:
-    assert args.corpus in ("jmdict", "jitendex", "vndb")
+    assert args.corpus in ("jitendex", "vndb"), "JMdict retains its audited original acquisition"
     receipt["toolingCommit"] = git(tooling, "rev-parse", "HEAD")
     assert receipt["toolingCommit"] == args.expected_tooling_commit
     receipt["toolingTree"] = git(tooling, "rev-parse", "HEAD^{tree}")

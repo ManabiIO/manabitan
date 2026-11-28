@@ -1,4 +1,4 @@
-name: Qualify latest metadata legacy reads 4d9f
+name: Qualify latest metadata complete schema 4d9f
 
 on:
   push:
@@ -19,7 +19,7 @@ defaults:
 
 jobs:
   corpus:
-    name: Latest legacy context ${{ matrix.corpus }}
+    name: Latest schema context ${{ matrix.corpus }}
     runs-on: ubuntu-26.04
     timeout-minutes: 65
     strategy:
@@ -92,7 +92,18 @@ jobs:
         run: |
           npm ci 2>&1 | tee "$META_REPORTS/npm-ci-B.log"
           npm run build:libs 2>&1 | tee "$META_REPORTS/build-libs-B.log"
-      - name: Verify actual cold-read boundary on both exact source arms
+      - name: Build normal tooling bundles and lint new helper sources
+        working-directory: tooling
+        run: |
+          npm ci 2>&1 | tee "$META_REPORTS/npm-ci-tooling.log"
+          npm run build:libs 2>&1 | tee "$META_REPORTS/build-libs-tooling.log"
+          npx eslint --max-warnings 0 \
+            test/perf/signature1-corpus-verification/legacy-import-read-context.mjs \
+            test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs \
+            test/perf/signature1-corpus-verification/run-with-legacy-context.mjs \
+            test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs \
+            2>&1 | tee "$META_REPORTS/helper-lint.log"
+      - name: Verify actual public-sink and cold-read boundary on both exact source arms
         run: |
           MANABITAN_LEGACY_READ_SOURCE_ROOT="$META_A" \
           MANABITAN_LEGACY_READ_SOURCE_COMMIT=a300da36d00df8e353c5679b1528b50a1299b75f \

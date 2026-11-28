@@ -310,7 +310,7 @@ try {
         vndbMediaOracleReceipt.independentFileOracle = {path: fileOraclePath, sha256: sha256(fileOracleBytes)};
         await save('media-oracle-receipt.json', vndbMediaOracleReceipt);
     }
-    assert.equal(verification.manifest.legacyImportReadContext?.mode, 'real-sqlite-epoch-zero-v1');
+    assert.equal(verification.manifest.legacyImportReadContext?.mode, 'real-sqlite-epoch-zero-schema-v2');
     legacySqlite = await loadLegacyReadContextSqlite(sourceRoot);
     assert.deepEqual(legacySqlite.assetIdentity, verification.manifest.legacyImportReadContext.assets);
     // Initialize Node SQLite before installing the simulated browser globals.
@@ -539,8 +539,8 @@ chunk.fixedContentLength :
     database._termContentZstdInitialized = true;
     await database._termContentStore.prepare();
     await database._termRecordStore.prepare();
-    legacyReadContext = attachLegacyImportReadContext(database, legacySqlite.sqlite3);
-    legacyImportReadContext = {mode: 'real-sqlite-epoch-zero-v1',
+    legacyReadContext = await attachLegacyImportReadContext(database, legacySqlite.sqlite3);
+    legacyImportReadContext = {mode: 'real-sqlite-epoch-zero-schema-v2',
         assets: legacySqlite.assetIdentity,
         initialState: legacyReadContext.assertState(),
         groupStates: [],
@@ -752,7 +752,7 @@ chunk.fixedContentLength :
         boundary: 'Actual current parent/candidate parser, public DB sink, real codecs and record-store fields with exact source grouping and ordered sink, bounded filesystem-backed Node OPFS adapter. Every persisted file and logical metadata column hashed. No import-speed or browser-memory claim.',
         mediaBoundary: 'Default skipImageMetadata/direct-artifact route passes columnPayload unchanged. Media requirements/files, UI, SQLite transaction, browser scheduling, restart and lookup are outside this census.',
         indexStorageBoundary: 'Real import-index worker runs when eligible; Node adapter handles lack createSyncAccessHandle and production code falls back to its asynchronous writer.',
-        legacyReadBoundary: 'Real owned in-memory SQLite with unchanged production additive schema and one-time epoch-0 root seed; no online state, lifecycle teardown or snapshot lease. Actual OPFS bounds/checksums, decompression and byte-exact comparisons remain production paths. Full SQLite import publication is outside scope.',
+        legacyReadBoundary: 'Real owned in-memory SQLite with unchanged production runtime pragmas and full schema initializer, including one-time epoch-0 root seed, glossary/health tables and the actual virtual table; no online state, lifecycle teardown or snapshot lease. Actual OPFS bounds/checksums, decompression and byte-exact comparisons remain production paths. Full SQLite import publication is outside scope.',
         legacyImportReadContext,
         policy,
         rows,

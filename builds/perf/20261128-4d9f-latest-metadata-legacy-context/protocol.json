@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 7,
-  "purpose": "Distinct Jitendex/VNDB full term-sink qualification after fixing the actual a300 legacy-root harness boundary",
+  "schemaVersion": 8,
+  "purpose": "Distinct Jitendex/VNDB full term-sink qualification after completing the actual a300 public-sink SQLite schema boundary",
   "timingEligible": false,
   "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
   "candidateCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
@@ -8,9 +8,9 @@
   "sourceSelection": "Fresh exact public a300/86cd checkouts; independent whole-tree preflight and unchanged verifier runtime tree/every-source-and-asset guards. Earlier f28/81e observations are never relabeled as this qualification.",
   "runtime": "Pinned Node v22.22.0 Linux x64 executable SHA256 required in both arms; ordinary locked npm ci and build:libs in each source checkout.",
   "runtimeHeapMiB": 512,
-  "observations": "Two independent Ubuntu26.04 jobs, one per locked Jitendex/VNDB corpus. After source/asset guards, 26 unchanged contracts and 14 actual-I/O legacy-context contracts on each runtime arm pass, attempt one fresh A and one fresh B and run the strict derived comparator. No JMdict import is reexecuted. Preserve every failure and never retry unchanged acquisitions.",
+  "observations": "Two independent Ubuntu26.04 jobs, one per locked Jitendex/VNDB corpus. After source/asset guards, scoped new-helper ESLint, 26 unchanged contracts and 15 actual-I/O/public-sink contracts on each runtime arm pass, attempt one fresh A and one fresh B and run the strict derived comparator. No JMdict import is reexecuted. Preserve every failure and never retry unchanged acquisitions.",
   "upstream": "Corrected bounded OPFS census v5 SHA256 76d64d6e0d1dc78eabc7ab48c5849c2546d1475b7300fccc18d04f315bb5e018; copied helpers and changes are retained locally",
-  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS; real owned in-memory SQLite initialized only for production additive online-root tables and a one-time epoch-zero legacy seed; full SQLite import publication remains outside scope",
+  "boundary": "Production compressed parser worker handler via in-process transport adapter with structured-clone/lease behavior; exact source grouping from 4-core/8GiB policy; sequential ordered public DB sink; four real codec workers; real import-index worker and existing no-SAH asynchronous fallback; bounded filesystem-backed OPFS; real owned in-memory SQLite using unchanged runtime pragmas and awaited complete production _initializeSchema() once, including real glossary tables, health schema, virtual table and one-time epoch-zero legacy seed; version reset migrations are not invoked; full SQLite import publication remains outside scope",
   "oracles": [
     "Pinned archives and lock SHA256; native source CRC/size validation; exact production dense ZIP catalog and source grouping",
     "Complete per-group parser content/metadata/key-plan/lookup byte hashes before sink mutation",
@@ -24,7 +24,8 @@
     "Exact A/B final oracle, parser outputs, source/sink counts and logical metadata equality required",
     "All three corpora must match retained complete file-and-logical-metadata output oracles; JMdict retains original5a2d8167f046e313949af8005ed493b651d10a4de95bfc5a2de24699ec61a58e and every captured record-field/lookup/envelope digest",
     "Cold persisted comparisons use unchanged production resolvers and physical OPFS/decompression/byte-equality paths. Require committed root legacy-root-v0, epoch0, highwater0, legacy manifest and no snapshots/online/recovery/lifecycle/record-health activity after every group and final drain. Do not reseed during staged import.",
-    "Settle both production store sessions with workers and SQLite alive; then join every codec/index worker and close only the owned SQLite attachment. The derived comparator requires complete successful drain/join/close receipts."
+    "Settle both production store sessions with workers and SQLite alive; then join every codec/index worker and close only the owned SQLite attachment. The derived comparator requires complete successful drain/join/close receipts.",
+    "A real nonempty public-sink contract must pass before corpus acquisition: actual raw-v2 encoding and unchanged block compression, ordinary target-only glossary invalidation with unrelated rows retained, cold persisted exact comparison and duplicate reuse without content growth. SQLite exports are recorded diagnostically; root/epoch/high-water and user_version remain explicit invariants."
   ],
   "resourcePolicy": {
     "minimumTemporaryBytes": 536870912,
@@ -40,10 +41,10 @@
     "New format byte savings from the copied field-size diagnostic"
   ],
   "portableDerivative": {
-    "source": "All15 original public fb9/a221 helper files remain byte-identical. New separately named runner/launcher/comparator and a small real SQLite attachment module extend only the missing a300 root context. All original oracles, exact comparisons, source grouping, cache/worker budgets and 42 runtime pins remain unchanged.",
+    "source": "All15 original public fb9/a221 helper files remain byte-identical. Five separately named files extend only the missing a300 SQLite public-sink/read context. The v2 adapter uses actual full production schema setup; the v1 additive-only attempt is retained. All original oracles, exact comparisons, source grouping, cache/worker budgets and 42 runtime pins remain unchanged.",
     "runtimeCodeChangedByHelper": false,
     "candidateRuntimeCommit": "86cd5c18d325488b0ecb04c552d1dc83567de9d2",
-    "helperValidation": "Fourteen real SQLite/OPFS contracts on each exact source arm plus the26 unchanged controls are mandatory before acquisition; this prospective freeze asserts no outcome.",
+    "helperValidation": "Scoped ESLint after a normal tooling library build, 15 real SQLite/OPFS/public-sink contracts on each exact source arm and the26 unchanged controls are mandatory before acquisition; this prospective freeze asserts no outcome.",
     "newFiles": [
       "legacy-import-read-context.mjs",
       "legacy-import-read-context.contract.mjs",
@@ -85,5 +86,14 @@
   "plannedCorpora": [
     "jitendex",
     "vndb"
-  ]
+  ],
+  "retainedIncompleteSchemaAttempt": {
+    "runId": 46142163868,
+    "toolingCommit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+    "mode": "real-sqlite-epoch-zero-v1",
+    "rawEvidence": "attempt-1",
+    "contracts": "26 unchanged plus14 actual cold-read controls passed on both source arms on both hosts.",
+    "corpus": "All four Jitendex/VNDB arms failed group0 with SQLite3Error: no such table: termGlossaryTokens in ordinary public glossary invalidation. No completed corpus oracle.",
+    "correction": "Await actual production _initializeSchema() once after normal runtime pragmas; add the missed real nonempty public-sink integration control; do not bypass invalidation or manually add tables."
+  }
 }

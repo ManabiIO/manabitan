@@ -18,10 +18,10 @@ const recordIdRepresentation = manifest.logicalRecordIdRepresentation ?? 'physic
 assert.equal(a.recordIdRepresentation ?? 'physical-float64', recordIdRepresentation);
 assert.equal(b.recordIdRepresentation ?? 'physical-float64', recordIdRepresentation);
 assert.equal(a.corpus, b.corpus);
-assert.equal(manifest.legacyImportReadContext?.mode, 'real-sqlite-epoch-zero-v1');
+assert.equal(manifest.legacyImportReadContext?.mode, 'real-sqlite-epoch-zero-schema-v2');
 const expectedLegacyState = {epoch: 0, logicalHighWater: 0, rootId: 'legacy-root-v0', manifest: {version: 1, legacy: true, regions: []}};
 for (const result of [a, b]) {
-    assert.equal(result.legacyImportReadContext.mode, 'real-sqlite-epoch-zero-v1');
+    assert.equal(result.legacyImportReadContext.mode, 'real-sqlite-epoch-zero-schema-v2');
     assert.deepEqual(result.legacyImportReadContext.assets, manifest.legacyImportReadContext.assets);
     assert.deepEqual(result.legacyImportReadContext.initialState, expectedLegacyState);
     assert.deepEqual(result.legacyImportReadContext.finalState, expectedLegacyState);

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "Prospective distinct cold-read-context source freeze; no new corpus result asserted",
-  "purpose": "Preserve frozen runtime/oracles and original helper; add real in-memory SQLite root context for actual cold persisted reads",
+  "status": "Prospective complete-schema public-sink context freeze; no new corpus result asserted",
+  "purpose": "Preserve frozen runtime/oracles and original helper; use real full production SQLite schema after the retained additive-only failure",
   "priorProfile": {
     "commit": "92467bf27b8ed0661085d65eaad8f134dc2f04cc",
     "path": "builds/perf/20261128-4d9f-latest-metadata/verification-manifest.json",
@@ -19,8 +19,8 @@
       "equivalentLocalCommit": "5b178ff002216d74cc8a09336c375832fc4dd994"
     }
   },
-  "latestManifestSha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6",
-  "latestProtocolSha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1",
+  "latestManifestSha256": "30da50be222a4efa21de65076780c07a1b83ddfe3e60ae5dcad1e29eed597512",
+  "latestProtocolSha256": "56935854760f82e5e0ca60f74f8d5be4b7768dbc5c2fcac340dfe5e041183a9b",
   "changedCanonicalParentFiles": [
     {
       "path": "ext/js/dictionary/dictionary-database.js",
@@ -195,17 +195,17 @@
       "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "94793e9df77939bfbacb8a1b6f5edd544145b412",
-      "sha256": "2a3628ffb7cd598d606087b452ed216ff87da74e090c6f1463c218ec88a16cbb",
-      "bytes": 4982
+      "sha": "15f7845ae38ee47459b53ed5066321b53f382e36",
+      "bytes": 5825,
+      "sha256": "247bd800ea9397ef9e6b4dd78c9a19fffe570ddea20ce884d337b4ec70b99233"
     },
     {
       "path": "test/perf/signature1-corpus-verification/run-with-legacy-context.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "1a500ee7ff4c3e13c141954bf4e34d3d93dab485",
-      "sha256": "14a750ea5c3633b9d13cb14383ee7f4fad0230cef576a0c14507e2a9338b9130",
-      "bytes": 45670
+      "sha": "a6237ebe8891336f64c273131fe052343294c0e7",
+      "bytes": 45778,
+      "sha256": "c5618da98d5e4e6bbef3969fb335bc7b6e09f39cdc4255e2bfdbcc744929d811"
     },
     {
       "path": "test/perf/signature1-corpus-verification/launch-with-legacy-context.py",
@@ -219,17 +219,17 @@
       "path": "test/perf/signature1-corpus-verification/compare-results-with-legacy-context.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "27b9c40a642e4e8a6f61cbac53f4f568f3078f0b",
-      "sha256": "56ce726ef8705279e3ef58e8f464db4bf405ccde820d9e8055b51ec900f8733e",
-      "bytes": 9134
+      "sha": "ae6f63edbda2b5bbe2ee463cc204ad0fb5b892d3",
+      "bytes": 9148,
+      "sha256": "62d5d876c771d268e7d1d486a7d543df0405ce1eaa47c38e7d6e143d71cf6811"
     },
     {
       "path": "test/perf/signature1-corpus-verification/legacy-import-read-context.contract.mjs",
       "mode": "100644",
       "type": "blob",
-      "sha": "451629acdeeb7ae22b4a20cb4b93a4afebb11f61",
-      "bytes": 14576,
-      "sha256": "23345936d021b84e50f043bf09fa8d60dc9216f299cad88477c0421fc3f00aad"
+      "sha": "d775a3683135ec9edef6a1f8a532316bfc010beb",
+      "bytes": 22923,
+      "sha256": "1f296ebf6de255328c9b83a8c897cbb26d85173570f467bef21bc490f2816745"
     }
   ],
   "canonicalSourceCount": 42,
@@ -248,8 +248,8 @@
     "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
     "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
   },
-  "sourceReview": "Shared module and14 actual-I/O contracts independently reviewed; derived runner closes block session and settles stores before worker joins and owned SQLite close. All production readers/resolvers/comparisons and original output oracles remain unchanged.",
-  "retainedHistory": "Original dcfc/f28 six-run successes remain immutable; latest JMdict original acquisition is retained and strictly revalidated. Latest first Jitendex/VNDB boundary failures and original workflow pipefail issue remain in attempt-1. This distinct helper is not a relabeling or unchanged rerun.",
+  "sourceReview": "Complete-schema module and15 real-I/O/public-sink contracts independently reviewed. Derived runner retains awaited attachment and drain/join/owned-close ordering; only the declared schema mode changes in the comparator. No production reader/resolver/invalidation/comparison override and no original oracle change.",
+  "retainedHistory": "Original dcfc/f28 six-run successes remain immutable; latest JMdict original acquisition is retained and strictly revalidated. Latest first Jitendex/VNDB boundary failures and original workflow pipefail issue remain in attempt-1. This distinct helper is not a relabeling or unchanged rerun. The additive-only6eff attempt/run46142163868 passed all14 cold-read contracts but failed all four actual arms at public group0 glossary invalidation; exact raw artifacts are retained at attempt-1. This freeze uses the actual full production initializer and a new nonempty public-sink control.",
   "originalHelperCount": 15,
   "newHelperCount": 5,
   "sqliteAssetProvenance": {
@@ -264,5 +264,11 @@
         "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
       }
     }
+  },
+  "previousLegacyProfile": {
+    "commit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+    "manifestSha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6",
+    "protocolSha256": "d31a8a1b5a4096200280928fdbde92121a538cfa078fd6587c1af8ce6cde37a1",
+    "runId": 46142163868
   }
 }

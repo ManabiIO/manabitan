@@ -1,4 +1,4 @@
-// Scoped real-SQLite legacy-root context for the untimed a300 term-sink verifier.
+// Scoped real-SQLite production-schema context for the untimed a300 term-sink verifier.
 // Product resolvers, leases, exact comparisons, caches and OPFS reads are unchanged.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -49,10 +49,13 @@ function assertNoOnlineOrLifecycleActivity(database) {
     }
 }
 
-export function attachLegacyImportReadContext(database, sqlite3) {
+export async function attachLegacyImportReadContext(database, sqlite3) {
     assert.equal(database._db, null, 'Refuse to replace an existing database');
     assert.equal(database._sqlite3, null, 'Refuse to replace an existing SQLite owner');
     assertNoOnlineOrLifecycleActivity(database);
+    assert.equal(database._termsVtabModuleRegistered, false, 'Require a fresh virtual-table owner');
+    assert(database._termsVtabCursorState instanceof Map);
+    assert.equal(database._termsVtabCursorState.size, 0, 'Require no existing virtual-table cursors');
     assert.equal(database._termContentStore.getLogicalLength(), 0, 'Seed only the initially empty prepared legacy store');
     const connection = new sqlite3.oo1.DB(':memory:', 'c');
     let closed = false;
@@ -67,6 +70,8 @@ export function attachLegacyImportReadContext(database, sqlite3) {
     const assertState = () => {
         assertOwnership();
         assertNoOnlineOrLifecycleActivity(database);
+        assert.equal(database._termsVtabModuleRegistered, true, 'Require the actual production virtual-table registration');
+        assert.equal(database._termsVtabCursorState.size, 0, 'Scoped import must not retain virtual-table cursors');
         const state = database.getOnlineContentStorageState();
         assert.deepEqual(state, EXPECTED_STATE, 'Require the unchanged committed epoch-0 legacy root');
         assertNoOnlineOrLifecycleActivity(database);
@@ -77,14 +82,19 @@ export function attachLegacyImportReadContext(database, sqlite3) {
         if (closed) { return; }
         assert.equal(database._db, connection, 'Refuse to detach a foreign database');
         assert.equal(database._sqlite3, sqlite3, 'Refuse to detach a foreign SQLite owner');
+        database._clearTermsVtabCursorState();
+        database._termsVtabModuleRegistered = false;
         connection.close();
         database._db = null;
         database._sqlite3 = null;
         closed = true;
     };
     try {
-        database._initializeOnlineContentSchema();
-        database._seedTermContentStorageState();
+        database._applyRuntimePragmas();
+        // This real initializer creates base/glossary/health tables, seeds the
+        // legacy root once and registers the actual virtual table internally.
+        // Version-reset migrations are outside this unpublished term-sink scope.
+        await database._initializeSchema();
         assertState();
         return {assertState, close};
     } catch (error) {

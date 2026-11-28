@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "purpose": "Separate a300 Jitendex/VNDB qualification with actual SQLite epoch-zero metadata for cold persisted comparisons; original source and output oracles unchanged",
+  "purpose": "Separate a300 Jitendex/VNDB qualification using the complete production SQLite schema for the public term sink and cold persisted comparisons; original source and output oracles unchanged",
   "recordedNodeVersion": "v22.22.0",
   "recordedLinuxX64NodeSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
   "sourceProfiles": {
@@ -246,7 +246,7 @@
     "qualificationNotTransferred": true
   },
   "legacyImportReadContext": {
-    "mode": "real-sqlite-epoch-zero-v1",
+    "mode": "real-sqlite-epoch-zero-schema-v2",
     "assets": {
       "ext/lib/sqlite/index.mjs": {
         "bytes": 373254,
@@ -257,12 +257,20 @@
         "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2"
       }
     },
-    "scope": "Owned in-memory SQLite; unchanged production additive metadata schema and one-time legacy root seed after both actual stores prepare. Original production frame resolver, null epoch-zero lease, bounds, checksums, codec and full-byte dedupe comparisons remain active."
+    "scope": "Owned in-memory SQLite; unchanged production runtime pragmas and awaited full _initializeSchema() once after both actual stores prepare. It creates the real glossary/health tables and virtual table, including one-time legacy-root seed; no version reset migrations or full import publication. Ordinary glossary invalidation, frame resolver, null epoch-zero lease, bounds, checksums, codec and full-byte dedupe comparisons remain active."
   },
   "priorLatestManifest": {
     "path": "builds/perf/20261128-4d9f-latest-metadata/verification-manifest.json",
     "sha256": "7fbb44eba25fea790606b211bf0dc7143d716f1a8e75b85c58091b79225b4d3f",
     "runId": 46140311762,
+    "qualificationNotRelabeled": true
+  },
+  "priorLegacyReadContextManifest": {
+    "commit": "6eff7eeba7e94d80373448b890ccdd147ec78bb9",
+    "path": "builds/perf/20261128-4d9f-latest-metadata-legacy-context/verification-manifest.json",
+    "sha256": "cd5e8e4a15e8a7e5fc145594b38fb667f12f883fd041147387a180cd97136dc6",
+    "runId": 46142163868,
+    "status": "All 14 cold-read controls passed on both arms; all four corpus arms failed group0 because public glossary invalidation requires the complete production schema.",
     "qualificationNotRelabeled": true
   }
 }

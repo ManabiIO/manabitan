@@ -25,6 +25,7 @@ let sqlite3;
 let DictionaryDatabase;
 let decodeReference;
 let referenceBytes;
+let encodeRawContent;
 
 before(async () => {
     assert.equal(process.version, 'v22.22.0');
@@ -49,6 +50,7 @@ before(async () => {
     const raw = await sourceModule('ext/js/dictionary/raw-term-content.js');
     decodeReference = raw.decodeRawTermContentCompactBlockReference;
     referenceBytes = raw.RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+    encodeRawContent = raw.encodeRawTermContentBinary;
     await (await sourceModule('ext/js/dictionary/zstd-term-content.js')).initializeTermContentZstd();
 });
 
@@ -79,7 +81,7 @@ async function withFixture(callback, {attach = true, values = [sourceValues()]} 
     try {
         await database._termContentStore.prepare();
         await database._termRecordStore.prepare();
-        if (attach) { boundary = attachLegacyImportReadContext(database, sqlite3); }
+        if (attach) { boundary = await attachLegacyImportReadContext(database, sqlite3); }
         await database._termContentStore.beginImportSession();
         const stored = await database._termContentBlockStore.tryAppend(values, null, true);
         assert(stored);
@@ -292,3 +294,141 @@ test('foreign connection replacement is rejected without closing either connecti
         assert.equal(database._db, null);
     });
 });
+
+test('the actual nonempty public sink keeps real schema invalidation and cold exact reuse active', {timeout: 30000}, async (context) => {
+    const environment = await createBoundedNodeOpfs();
+    Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {
+        hardwareConcurrency: 4, deviceMemory: 8, storage: {getDirectory: async () => environment.root},
+    }});
+    const database = new DictionaryDatabase();
+    let boundary = null;
+    try {
+        await database._termContentStore.prepare();
+        await database._termRecordStore.prepare();
+        boundary = await attachLegacyImportReadContext(database, sqlite3);
+        const initialRoot = boundary.assertState();
+        assert.equal(database._db.selectValue('PRAGMA user_version'), 0);
+        assert.match(database._db.selectValue("SELECT sql FROM sqlite_master WHERE name = 'terms'"), /CREATE VIRTUAL TABLE.*manabitan_terms/s);
+        const tables = ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex'];
+        for (const table of tables) {
+            assert.equal(database._db.selectValue(`SELECT count(*) FROM ${table}`), 0);
+        }
+        const sqliteIdentity = () => {
+            const bytes = sqlite3.capi.sqlite3_js_db_export(database._db.pointer);
+            return {bytes: bytes.byteLength, sha256: sha256(bytes), userVersion: database._db.selectValue('PRAGMA user_version')};
+        };
+        const initialSqlite = sqliteIdentity();
+        database.setImportOptimizationFlags({termContentStorageMode: 'raw-bytes', queueTermContentWrites: true});
+        database._bulkImportTransactionOpen = true;
+        database._deferTermsVirtualTableSync = true;
+        database._termContentZstdInitialized = true;
+        await database._termContentStore.beginImportSession();
+        await database._termRecordStore.beginImportSession();
+        database._termContentBlockImportSession = database._termContentBlockStore.beginImportSession();
+
+        const encoder = new TextEncoder();
+        // One valid content value crosses the unchanged 512 KiB block minimum.
+        // This is a tiny synthetic integration fixture, not a corpus policy.
+        const bytes = encodeRawContent('', '', '', encoder.encode(JSON.stringify(['public sink '.repeat(50000)])), encoder);
+        assert(bytes.byteLength > 512 * 1024 && bytes.byteLength < 1024 * 1024);
+        const dictionary = 'Public sink integration';
+        const unrelated = 'Unrelated dictionary';
+        const chunk = (ordinal) => ({
+            dictionary,
+            dictionaryTotalRows: 2,
+            rowCount: 1,
+            expressionBytesList: [encoder.encode(`public-term-${ordinal}`)],
+            readingBytesList: [new Uint8Array(0)],
+            readingEqualsExpressionList: Uint8Array.of(1),
+            scoreList: Int32Array.of(ordinal),
+            sequenceList: Int32Array.of(ordinal),
+            contentBytesList: [bytes],
+            contentHash1List: Uint32Array.of(10),
+            contentHash2List: Uint32Array.of(20),
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v2',
+            termRecordPreinternedPlan: null,
+        });
+        await database.bulkAddArtifactTermsChunk(chunk(1));
+        await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
+        assert.equal(database._termRecordStore.size, 1);
+        assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 1);
+        assert.deepEqual(boundary.assertState(), initialRoot);
+        const afterEmptyInvalidation = sqliteIdentity();
+        assert.equal(afterEmptyInvalidation.userVersion, 0);
+        for (const table of tables) {
+            assert.equal(database._db.selectValue(`SELECT count(*) FROM ${table}`), 0);
+        }
+        const primary = database._getTermEntryContentMetaByHashPair(10, 20);
+        assert(primary);
+        assert.equal(primary.dictName, 'raw-block-v2');
+        const storedLength = database._termContentStore.getLogicalLength();
+        assert(storedLength > 0 && storedLength < bytes.byteLength);
+        assert.equal(database._recentTermContentSourceBatches.size, 0);
+        assert.equal(database._inFlightTermContentSourceBatches.size, 0);
+        database._termContentStore._invalidateReadState();
+        database._termContentBlockStore.clearCache();
+        const [cold] = await database._findMatchingPersistedTermEntryContentMetaBatch([
+            {hash1: 10, hash2: 20, contentBytes: bytes, primary},
+        ]);
+        assert.equal(cold.existingMeta, primary);
+        assert.equal(cold.exactFallback, true);
+        assert(database._termContentBlockStore._cache.size > 0, 'Cold equality decoded the actual persisted compressed frame');
+
+        for (const title of [dictionary, unrelated]) {
+            database._db.exec({sql: 'INSERT INTO termGlossaryTokens(dictionary, token, termId) VALUES (?, ?, ?)', bind: [title, 'seed', 1]});
+            database._db.exec({sql: 'INSERT INTO termGlossarySearchTerms(dictionary, termId, score) VALUES (?, ?, ?)', bind: [title, 1, 9]});
+            database._db.exec({sql: 'INSERT INTO dictionaryGlossarySearchIndex(dictionary, version, termCount, completedAt) VALUES (?, ?, ?, ?)', bind: [title, 1, 1, 1]});
+        }
+        const beforeRealInvalidation = sqliteIdentity();
+        database._termContentStore._invalidateReadState();
+        database._termContentBlockStore.clearCache();
+        await database._termContentStore.beginImportSession();
+        await database._termRecordStore.beginImportSession();
+        await database.bulkAddArtifactTermsChunk(chunk(2));
+        await Promise.all([database._termContentStore.endImportSession(), database._termRecordStore.endImportSession()]);
+        assert.equal(database._termRecordStore.size, 2);
+        assert.equal(database._lastBulkAddTermsMetrics.dedupUniqueCount, 0);
+        assert.equal(database._lastBulkAddTermsMetrics.dedupPersistedHitCount, 1);
+        assert.equal(database._lastBulkAddTermsMetrics.dedupRecentSourceHitCount, 0);
+        assert(database._lastBulkAddTermsMetrics.dedupExactFallbackCount > 0);
+        assert(database._termContentBlockStore._cache.size > 0, 'Public duplicate ingestion retains actual cold frame decoding');
+        assert.equal(database._termContentStore.getLogicalLength(), storedLength);
+        const reused = database._getTermEntryContentMetaByHashPair(10, 20);
+        assert.equal(reused.offset, primary.offset);
+        assert.equal(reused.length, primary.length);
+        assert.equal(reused.dictName, primary.dictName);
+        for (const table of tables) {
+            assert.equal(database._db.selectValue(`SELECT count(*) FROM ${table} WHERE dictionary = ?`, [dictionary]), 0);
+            assert.equal(database._db.selectValue(`SELECT count(*) FROM ${table} WHERE dictionary = ?`, [unrelated]), 1);
+        }
+        assert.deepEqual(boundary.assertState(), initialRoot);
+        const afterRealInvalidation = sqliteIdentity();
+        assert.equal(afterRealInvalidation.userVersion, 0);
+        context.diagnostic(JSON.stringify({
+            name: 'actual-public-sink-sqlite-boundary',
+            sourceCommit,
+            initialSqlite,
+            afterEmptyInvalidation,
+            emptyGlossaryInvalidationPreservesEverySqliteByte: initialSqlite.bytes === afterEmptyInvalidation.bytes && initialSqlite.sha256 === afterEmptyInvalidation.sha256,
+            beforeRealInvalidation,
+            afterRealInvalidation,
+            root: initialRoot,
+            actualTermRows: database._termRecordStore.size,
+            coldPersistedExactComparison: true,
+            publicDuplicateExactReuse: true,
+            actualScopedGlossaryInvalidation: true,
+        }));
+    } finally {
+        database._termContentBlockImportSession?.close();
+        const drains = await Promise.allSettled([
+            Promise.resolve().then(() => database._termContentStore.endImportSession()),
+            Promise.resolve().then(() => database._termRecordStore.endImportSession()),
+        ]);
+        boundary?.close();
+        await environment.dispose();
+        const failure = drains.find((result) => result.status === 'rejected');
+        if (failure) { throw failure.reason; }
+    }
+});
+
