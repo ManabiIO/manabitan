@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "branch": "perf/reference-fields-current-20261128-4d9f",
+  "remoteCommit": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+  "localEquivalent": "404190c0153512fad148231aa9448ddd56ca5504",
+  "tree": "4344f3c709195b083980e219f8a35d1d4b191d85",
+  "parent": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "extTree": "3c1286119d8d2fb93eeaeac755cfbac8a1be5553",
+  "verification": "All25 Git blobs uploaded with exact local Git object hashes; create_tree result exactly equals the complete local tree; remote commit points to that tree."
+}

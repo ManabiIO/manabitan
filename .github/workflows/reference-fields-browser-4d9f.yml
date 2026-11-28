@@ -1,0 +1,65 @@
+name: Current reference-field browser verification 4d9f
+
+on:
+  push:
+    branches: [experiment/reference-fields-browser-20261128-4d9f]
+    paths: [.github/workflows/reference-fields-browser-4d9f.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event.before == '0000000000000000000000000000000000000000' && github.run_attempt == 1
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [off-on, on-off]
+    env:
+      PERF_CANDIDATE: a72385b08a1004bec627172b0ca07f49b50c2f19
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify supplemental observer and narrow storage comparison
+        run: |
+          node --test test/perf/record-reference-table-verification/storage-activation.contract.mjs
+          python -m unittest discover -s test/perf/record-reference-table-verification -p test_activation_overlay.py
+          python -m unittest discover -s dev/perf/reference-format-browser-4d9f -p 'test_*.py'
+          python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify exact stored formats through import and restart
+        run: |
+          python dev/perf/reference-format-browser-4d9f/run-reference-format-browser.py \
+            --repo-root . \
+            --source "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --order "$PERF_ORDER" \
+            --overlay test/perf/record-reference-table-verification/activation_overlay.py \
+            --contract builds/perf/20261128-4d9f-reference-browser/storage-contract.json \
+            --evidence "builds/perf/reference-browser-$PERF_DICTIONARY-$PERF_ORDER-4d9f"
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reference-browser-${{ matrix.dictionary }}-${{ matrix.order }}-4d9f
+          path: builds/perf/reference-browser-${{ matrix.dictionary }}-${{ matrix.order }}-4d9f
+          if-no-files-found: error
+          retention-days: 14
