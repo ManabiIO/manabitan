@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "kind": "Bounded source-only final record and lookup metadata opportunity audit",
+  "createdAt": "2026-11-28T06:57:05.582811+00:00",
+  "status": "HOLD_NO_NEW_PROTOTYPE",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "sourceFiles": [
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "gitBlob": "be14a6a920584c942a4304079ebb3fc5c624a0ae",
+      "bytes": 365309,
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+      "sourceUrl": "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/ext/js/dictionary/term-record-opfs-store.js"
+    },
+    {
+      "path": "ext/js/dictionary/term-key-hash.js",
+      "gitBlob": "7662c1fcd9d167aa68953c7272e3f21e25eb95cd",
+      "bytes": 5175,
+      "sha256": "c2d4ed2a04f4c5dcd8a5f5865d49f7cbdade87fd95ab4fff92f3a9bb0181d208",
+      "sourceUrl": "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/ext/js/dictionary/term-key-hash.js"
+    },
+    {
+      "path": "ext/js/dictionary/term-lookup-index.js",
+      "gitBlob": "e0d30279b67300cb47d519a1b8d809eb4ba784f6",
+      "bytes": 67962,
+      "sha256": "be487a21eece064a745e97def94bb086b9aec1a0efd047246e27e3f9c9bf04be",
+      "sourceUrl": "https://github.com/ManabiIO/manabitan/blob/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2/ext/js/dictionary/term-lookup-index.js"
+    }
+  ],
+  "lookupHashCopy": {
+    "boundary": "TermRecordOpfsStore._createLookupIndexChunk, lines6244-6280 in frozen source",
+    "observed": "After current record-field validation and payload framing, allocate one private output, calculate independent XXH32 hashes over base, derived and recordFields, then copy payload and recordFields with two Uint8Array.set calls. No await or publication separates hashes and copies.",
+    "distinctMechanism": "Hashing each loaded word and writing that same word into this already-private output can fuse the current-byte traversal with final envelope copying. It does not rely on a checksum captured earlier by a parser worker or carried across awaits.",
+    "correctnessLimits": [
+      "Keep independent seeds, lengths, little-endian word order, tails, framing bytes and checksum offsets exact.",
+      "Any ordinary-private-input specialization must retain current behavior and validation order for shared, accessor-backed or otherwise unusual inputs.",
+      "The output remains fresh and unpublished until complete; a producer-witness cache is neither needed nor proposed."
+    ],
+    "performanceLimits": [
+      "XXH32 arithmetic and compulsory output stores remain. Only the separate native copy/read traversal is potentially removed.",
+      "Uint8Array.set is currently a native bulk copy. Added JavaScript word stores, bounds checks and register pressure may outweigh its saved traversal.",
+      "The existing frozen JS arithmetic component records only hash timings, with inputs loaded before timing; it contains no copy-only or envelope timing.",
+      "The sampled _createLookupIndexChunk remainder includes validation, framing and allocation. It is not a measurement of copy time or a reliable copy-savings ceiling."
+    ],
+    "decision": "Mechanically distinct and plausible, but no identified copy bottleneck or high-value ceiling supports another prototype at present. Do not change or rerun the frozen JS arithmetic study."
+  },
+  "otherFinalMetadataFindings": [
+    {
+      "operation": "Compact record field materialization",
+      "finding": "Frozen baseline already uses private resolved references to write final offset/length columns directly. Avoiding the generic length accessor is the completed negative field-length experiment; not proposed again."
+    },
+    {
+      "operation": "Compact score keys",
+      "finding": "The first pass creates a score dictionary and row keys, then final score count fixes the output layout. Removing score-key scratch would require another lookup pass or different allocation/layout strategy, not eliminate an obviously redundant pass."
+    },
+    {
+      "operation": "Authoritative record validation",
+      "finding": "Compact header dimensions are checked twice at the final boundary, but this is constant header work per chunk. The score-key range scan is a correctness check also used on read/repair inputs; no same-stack private-origin shortcut with a material ceiling was established."
+    },
+    {
+      "operation": "Prepared lookup framing",
+      "finding": "splitPersistedTermLookupIndex validates fixed-size framing and creates two views; it does not rescan or copy the complete index. Native prepared indexes bypass JavaScript construction in the ordinary import path."
+    }
+  ],
+  "historyScope": [
+    {
+      "url": "https://github.com/ManabiIO/manabitan/pull/858",
+      "finding": "Closed UTF-8 continuation validation/copy experiment; complete browser qualification showed no reliable gain. Different native key boundary."
+    },
+    {
+      "url": "https://github.com/ManabiIO/manabitan/commit/7ac62861701ad726331f46b39eace466437c77ac",
+      "finding": "Native MBR6 glossary copy plus paired content hashes; different output boundary."
+    },
+    {
+      "url": "https://github.com/ManabiIO/manabitan/pull/840",
+      "finding": "Native long-glossary copy/hash fusion; browser studies did not establish an import speedup. Different output boundary."
+    },
+    {
+      "url": "https://github.com/ManabiIO/manabitan/pull/351",
+      "finding": "Large-content DataView reads, not copy fusion; rejected dual-seed/mixed-loop variants do not prove this new boundary fast or slow."
+    },
+    {
+      "branch": "perf/lookup-native-hash-20261128",
+      "head": "69486d005b28998c74e31d9fa672bc333d053201",
+      "finding": "Adds private WASM scratch copy plus current-byte hash; retains final envelope copy."
+    },
+    {
+      "branch": "perf/native-rehash-lab-20261128-4a779",
+      "head": "cea622d9b99d269787a0cbbd4d5d74aadc79e356",
+      "finding": "Canonical metadata rehash, not final lookup envelope fusion."
+    },
+    {
+      "branch": "perf/jmdict-cache-envelope-20261128",
+      "head": "b17bbe06596d3dab8c39a353ed29265a8aa5f115",
+      "finding": "Dictionary content publication ranges; only dictionary-database runtime changes, not final record store."
+    },
+    {
+      "url": "https://github.com/ManabiIO/manabitan/pull/975",
+      "finding": "Active canonical-slot tags; outside this final encoder scope."
+    },
+    {
+      "url": "https://github.com/ManabiIO/manabitan/pull/977",
+      "finding": "Active bounded owned content preparation overlap; outside this final encoder scope."
+    }
+  ],
+  "searchLimit": "Narrow live PR searches for lookup/hash/copy and fused/checksum plus hash/copy/envelope branch inventories found no exact final-envelope JavaScript hash-plus-copy implementation. This is not a claim of exhaustive historical absence.",
+  "traceEvidence": {
+    "auditPath": "trace/jmdict-critical-path-audit.json",
+    "auditSha256": "d5d13e618bbfca2968ae14bd233d76766bcdf4ad68a7550381605b493be05be4",
+    "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "limits": "One perturbed trace; point samples locate hash work but negative profile deltas prevent exact sampled CPU accounting. Ordinary aggregate phase counters overlap and cannot be summed as savings."
+  },
+  "newMeasurements": 0,
+  "productMutations": 0,
+  "preservedFrozenStudies": true
+}

@@ -182,6 +182,10 @@
     "producer-checksum-storage-pr-readback.json": {
       "bytes": 105174,
       "sha256": "1f7fab539cf2f134673feaf52c23efc3659627d5437287e7123f15e8c7d2c556"
+    },
+    "final-record-lookup-hash-copy-hold.json": {
+      "bytes": 7432,
+      "sha256": "74c1dc10512f21b1f6fd7b3cb55e2f5589a9c660d6cc0bb7155a4d0d8b36b065"
     }
   }
 }
