@@ -1,8 +1,8 @@
-name: Publication cache envelope quality 4a779
+name: Publication cache envelope formatting quality 4a779
 
 on:
   push:
-    branches: [perf/jmdict-cache-envelope-quality-20261128]
+    branches: [perf/jmdict-cache-envelope-format-quality-20261128]
     paths:
       - 'ext/js/dictionary/dictionary-database.js'
       - 'test/dictionary-content-publication-range.test.js'

@@ -352,49 +352,73 @@ describe('publication source envelope', () => {
 
     // Exactly the cache's 64 sampled entries remain small, but the complete
     // group exceeds its average-byte limit. This exercises the later policy.
-    const unsampledLargeLengths = Array(128).fill(2048)
+    const unsampledLargeLengths = new Array(128).fill(2048)
     for (let i = 0; i < 64; ++i) {
         unsampledLargeLengths[Math.floor(i * 127 / 63)] = 1
     }
 
     /** @type {Array<{name: string, lengths: number[], envelope: boolean, expectedBytes?: number, change?: (harness: Harness, spans: NonNullable<PublicationState['pendingContentSpans']>) => void}>} */
     const cases = [
-        {name: 'owned private source', lengths: [4, 4, 4], envelope: true, expectedBytes: 12,
+        {name: 'owned private source',
+            lengths: [4, 4, 4],
+            envelope: true,
+            expectedBytes: 12,
             change: (_harness, spans) => { registerOwnedTermContent(spans.buffer) }},
-        {name: 'owned shared source with private offsets', lengths: [4, 4, 4], envelope: true, expectedBytes: 12,
+        {name: 'owned shared source with private offsets',
+            lengths: [4, 4, 4],
+            envelope: true,
+            expectedBytes: 12,
             change: (_harness, spans) => {
                 const shared = new Uint8Array(new SharedArrayBuffer(spans.buffer.byteLength))
                 shared.set(spans.buffer)
                 spans.buffer = shared
                 registerOwnedTermContent(shared)
             }},
-        {name: 'reordered and overlapping source spans', lengths: [4, 0, 4], envelope: true, expectedBytes: 8,
+        {name: 'reordered and overlapping source spans',
+            lengths: [4, 0, 4],
+            envelope: true,
+            expectedBytes: 8,
             change: (_harness, spans) => { spans.offsets.set([4, 8, 0]) }},
-        {name: 'source envelope with trimmed edges and gaps', lengths: [4, 4, 4], envelope: true, expectedBytes: 14,
+        {name: 'source envelope with trimmed edges and gaps',
+            lengths: [4, 4, 4],
+            envelope: true,
+            expectedBytes: 14,
             change: (_harness, spans) => {
                 spans.buffer = Uint8Array.from({length: 18}, (_, i) => i + 1)
                 spans.offsets.set([2, 8, 12])
                 registerOwnedTermContent(spans.buffer)
             }},
-        {name: 'sample-selected boundary ignores an invalid earlier span', lengths: Array(128).fill(600), envelope: true, expectedBytes: 600,
+        {name: 'sample-selected boundary ignores an invalid earlier span',
+            lengths: new Array(128).fill(600),
+            envelope: true,
+            expectedBytes: 600,
             change: (_harness, spans) => {
                 spans.buffer = spans.buffer.subarray(0, 600)
                 spans.offsets.fill(0)
                 spans.offsets[0] = spans.buffer.byteLength + 1
             }},
-        {name: 'complete average selects a boundary only after bounds validation', lengths: unsampledLargeLengths, envelope: true, expectedBytes: 1,
+        {name: 'complete average selects a boundary only after bounds validation',
+            lengths: unsampledLargeLengths,
+            envelope: true,
+            expectedBytes: 1,
             change: (_harness, spans) => {
                 spans.buffer = spans.buffer.subarray(0, 2048)
                 spans.offsets.fill(0)
             }},
-        {name: 'invalid unsampled span precedes complete-average boundary fallback', lengths: unsampledLargeLengths, envelope: true, expectedBytes: 0,
+        {name: 'invalid unsampled span precedes complete-average boundary fallback',
+            lengths: unsampledLargeLengths,
+            envelope: true,
+            expectedBytes: 0,
             change: (_harness, spans) => {
                 spans.buffer = spans.buffer.subarray(0, 2048)
                 spans.offsets.fill(0)
                 spans.offsets[1] = spans.buffer.byteLength + 1
             }},
-        {name: 'large source slab keeps the boundary-only cache scan', lengths: Array(128).fill(600), envelope: false, expectedBytes: 600},
-        {name: 'invalid final span still retires the previous boundary', lengths: [4, 4, 4], envelope: true, expectedBytes: 0,
+        {name: 'large source slab keeps the boundary-only cache scan', lengths: new Array(128).fill(600), envelope: false, expectedBytes: 600},
+        {name: 'invalid final span still retires the previous boundary',
+            lengths: [4, 4, 4],
+            envelope: true,
+            expectedBytes: 0,
             change: ({database}, spans) => {
                 spans.offsets[2] = spans.buffer.byteLength + 1
                 Reflect.get(database, '_recentTermContentSourceBatches').set(1, new Uint8Array(8))
@@ -402,31 +426,49 @@ describe('publication source envelope', () => {
                 Reflect.set(database, '_recentTermContentSourceBatchBytes', 8)
                 Reflect.set(database, '_nextRecentTermContentSourceBatchId', 2)
             }},
-        {name: 'source offsets changed by metadata publication', lengths: [4, 4, 4], envelope: false, expectedBytes: 4,
+        {name: 'source offsets changed by metadata publication',
+            lengths: [4, 4, 4],
+            envelope: false,
+            expectedBytes: 4,
             change: ({database}, spans) => {
                 const ids = /** @type {Float64Array} */ (Reflect.get(database, '_termEntryContentMetaIdTable'))
                 const offsets = new Uint32Array(ids.buffer, ids.byteOffset, 3)
                 offsets.set(spans.offsets)
                 spans.offsets = offsets
             }},
-        {name: 'source offsets in a disjoint metadata range', lengths: [4, 4, 4], envelope: true, expectedBytes: 12,
+        {name: 'source offsets in a disjoint metadata range',
+            lengths: [4, 4, 4],
+            envelope: true,
+            expectedBytes: 12,
             change: ({database}, spans) => {
                 const ids = /** @type {Float64Array} */ (Reflect.get(database, '_termEntryContentMetaIdTable'))
                 const offsets = new Uint32Array(ids.buffer, ids.byteOffset + 40, 3)
                 offsets.set(spans.offsets)
                 spans.offsets = offsets
             }},
-        {name: 'shared source offsets retain the ordinary scan', lengths: [4, 4, 4], envelope: false, expectedBytes: 12,
+        {name: 'shared source offsets retain the ordinary scan',
+            lengths: [4, 4, 4],
+            envelope: false,
+            expectedBytes: 12,
             change: (_harness, spans) => {
                 const shared = new Uint32Array(new SharedArrayBuffer(12))
                 shared.set(spans.offsets)
                 spans.offsets = shared
             }},
-        {name: 'distinct source lengths retain the ordinary scan', lengths: [4, 4, 4], envelope: false, expectedBytes: 12,
-            change: (_harness, spans) => { spans.lengths = spans.lengths.slice() }},
-        {name: 'short source offsets retain the ordinary rejection', lengths: [4, 4, 4], envelope: false, expectedBytes: 0,
+        {name: 'distinct source lengths retain the ordinary scan',
+            lengths: [4, 4, 4],
+            envelope: false,
+            expectedBytes: 12,
+            change: (_harness, spans) => { spans.lengths = new Uint32Array(spans.lengths) }},
+        {name: 'short source offsets retain the ordinary rejection',
+            lengths: [4, 4, 4],
+            envelope: false,
+            expectedBytes: 0,
             change: (_harness, spans) => { spans.offsets = spans.offsets.subarray(0, 2) }},
-        {name: 'malformed source buffer does not prevent publication', lengths: [4, 4, 4], envelope: false, expectedBytes: 0,
+        {name: 'malformed source buffer does not prevent publication',
+            lengths: [4, 4, 4],
+            envelope: false,
+            expectedBytes: 0,
             change: (_harness, spans) => { spans.buffer = /** @type {Uint8Array} */ (/** @type {unknown} */ (null)) }},
     ]
 

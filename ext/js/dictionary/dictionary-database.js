@@ -9957,13 +9957,15 @@ null :
         if (cache !== null) {
             // Consume the proof before this synchronous publication returns.
             // It is never stored on the plan or carried across an await.
-            const cacheEnvelope = validateCacheEnvelope ? {
-                valid: cacheEnvelopeValid,
-                count,
-                minimumOffset: cacheMinimumOffset,
-                maximumEnd: cacheMaximumEnd,
-                contentBytes: cacheContentBytes,
-            } : null
+            const cacheEnvelope = validateCacheEnvelope ?
+                {
+                    valid: cacheEnvelopeValid,
+                    count,
+                    minimumOffset: cacheMinimumOffset,
+                    maximumEnd: cacheMaximumEnd,
+                    contentBytes: cacheContentBytes,
+                } :
+                null
             const cacheStart = cache.importMetrics === null ? 0 : safePerformance.now()
             cache.bytes = this._cacheRecentPublishedTermContentSources(staged, spans, cache.importMetrics, cacheEnvelope)
             cache.elapsedMs = cache.importMetrics === null ? 0 : safePerformance.now() - cacheStart
@@ -10144,7 +10146,8 @@ null :
             );
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
-        const recentSourceCacheBytes = publishedContiguous ? publicationCache.bytes :
+        const recentSourceCacheBytes = publishedContiguous ?
+            publicationCache.bytes :
             this._cacheRecentPublishedTermContentSources(
                 stagedContentMetadata,
                 pendingContentSpans,
@@ -10152,7 +10155,8 @@ null :
             );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += publishedContiguous ?
-                publicationCache.elapsedMs : safePerformance.now() - recentSourceCacheStart;
+                publicationCache.elapsedMs :
+                safePerformance.now() - recentSourceCacheStart;
             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
             importMetrics.contentMetadataIndexPublishMs += safePerformance.now() - indexPublishStart;
         }
