@@ -1474,20 +1474,6 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*
     return 1;
 }
 
-/* A complete raw token from the preceding successful fused row already has
- * valid string grammar and an interned key. Keep the existing 32-byte body
- * bound, and never compare beyond this bank's logical input boundary. */
-static inline int reuse_validated_term_key(
-    const uint8_t* src, uint32_t len, uint32_t start,
-    uint32_t prior_start, uint32_t prior_length, uint32_t* out_end
-) {
-    if (prior_length < 2u || prior_length > 34u || start >= len || prior_length > len - start ||
-        src[start + prior_length - 1u] != '"' ||
-        !content_bytes_equal_between(src, start, src, prior_start, prior_length)) { return 0; }
-    *out_end = start + prior_length;
-    return 1;
-}
-
 /* Strict source validation has exactly eight fields with known token types.
  * Keep its grammar explicit instead of dispatching each field twice through
  * the permissive row parser and set_field. Every metadata word is assigned
@@ -1503,34 +1489,24 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask,
-    uint32_t* key_reuse_mask
+    uint32_t* key_escape_mask
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
     uint32_t end = 0u;
     uint32_t expression_escaped = 0u;
     uint32_t reading_escaped = 0u;
-    uint32_t reused_keys = 0u;
-    const TermRowMeta* previous = key_reuse_mask != 0 && prior_count > 0u ? &prior_rows[prior_count - 1u] : 0;
 
-    if (previous != 0 && reuse_validated_term_key(
-            src, len, i, previous->expression_start, previous->expression_length, &end)) {
-        reused_keys |= 1u;
-    } else if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
+    if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
     meta->expression_start = i;
     meta->expression_length = end - i;
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
-    if (previous != 0 && reuse_validated_term_key(
-            src, len, i, previous->reading_start, previous->reading_length, &end)) {
-        reused_keys |= 2u;
-    } else if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+    if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
     meta->reading_start = i;
     meta->reading_length = end - i;
     if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
-    if (key_reuse_mask != 0) { *key_reuse_mask = reused_keys; }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
@@ -1607,13 +1583,12 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask,
-    uint32_t* key_reuse_mask
+    uint32_t* key_escape_mask
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask, key_reuse_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -2254,7 +2229,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -2292,7 +2267,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -3403,9 +3378,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         }
         uint32_t key_escape_mask;
-        uint32_t key_reuse_mask = 0u;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask, &key_reuse_mask)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
             return -1;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
@@ -3454,15 +3428,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
-            // Strict parsing already compared the complete bounded token.
-            // Reading equality above still controls empty/equal readings.
-            if ((key_reuse_mask & (1u << field)) != 0u) {
-                string_indexes[field] = field == 0u ?
-                    expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
-                continue;
-            }
             // Cap the extra equality scan at 32 raw token-body bytes.
-            if (!validate_glossary_types && row_count > 0u && token_length >= 2u && token_length <= 34u) {
+            if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
                 const TermRowMeta* previous_row = &rows[row_count - 1u];
                 const uint32_t previous_start = field == 0u ?
                     previous_row->expression_start : previous_row->reading_start;

@@ -35,11 +35,9 @@ afterAll(() => { vi.unstubAllGlobals() })
  * @param {Uint8Array[]} sources
  * @param {boolean} fused
  * @param {boolean} [nativeEscapedKeys]
- * @param {boolean} [strict]
- * @param {boolean} [bankSpans]
  * @returns {Promise<{result: KeySnapshot, profile: ReturnType<typeof consumeLastTermBankWasmParseProfile>}>}
  */
-async function capture(sources, fused, nativeEscapedKeys = false, strict = false, bankSpans = false) {
+async function snapshot(sources, fused, nativeEscapedKeys = false) {
     /** @type {KeySnapshot|null} */
     let result = null
     await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
@@ -73,25 +71,13 @@ async function capture(sources, fused, nativeEscapedKeys = false, strict = false
         useNativeStringPlan: fused,
         experimentalSkipFusedParse: !fused,
         experimentalNativeEscapedKeys: nativeEscapedKeys,
-        validateGlossaryTypes: strict,
-        experimentalTermBankSpans: bankSpans,
     })
     const profile = consumeLastTermBankWasmParseProfile()
     if (result === null) { throw new Error('Expected parser output') }
     return {result, profile}
 }
 
-describe.each([false, true])('fused parser consecutive key reuse, strict=%s', (strict) => {
-    /**
-     * @param {Uint8Array[]} sources
-     * @param {boolean} fused
-     * @param {boolean} [nativeEscapedKeys]
-     * @param {boolean} [bankSpans]
-     */
-    const snapshot = (sources, fused, nativeEscapedKeys = false, bankSpans = false) => (
-        capture(sources, fused, nativeEscapedKeys, strict, bankSpans)
-    )
-
+describe('fused parser consecutive key reuse', () => {
     maybeTest('preserves independent term fields across repeated keys and empty bank boundaries', async () => {
         const keys = [
             ['日本語', 'にほんご'],
@@ -183,68 +169,6 @@ describe.each([false, true])('fused parser consecutive key reuse, strict=%s', (s
         expect(fresh.result).toStrictEqual((await snapshot(freshSources, false)).result)
         expect(fresh.result.expressions).toStrictEqual(['fresh', 'fresh'])
         expect(fresh.result.readings).toStrictEqual(['other', 'other'])
-    })
-
-
-    maybeTest('does not carry a key witness through shorter, longer or different raw tokens', async () => {
-        const keys = [
-            ['prefix', 'reading'],
-            ['prefix', 'reading'],
-            ['prefix-long', 'reading-long'],
-            ['pre', 'read'],
-            ['prefix-long', 'reading-long'],
-            ['x'.repeat(32), 'r'.repeat(32)],
-            ['x'.repeat(32) + 'tail', 'r'.repeat(32) + 'tail'],
-            ['x'.repeat(32), 'r'.repeat(32)],
-            ['last', ''],
-        ]
-        const rows = keys.map(([expression, reading], i) => [expression, reading, '', '', i, ['meaning'], i, ''])
-        const sources = [encoder.encode(JSON.stringify(rows)), encoder.encode('[]')]
-        const actual = await snapshot(sources, true, true)
-        expect(actual.profile?.fusedParseFallbacks ?? 0).toBe(0)
-        expect(actual.result).toStrictEqual((await snapshot(sources, false)).result)
-        expect(actual.result.expressions).toStrictEqual(keys.map(([expression]) => expression))
-        expect(actual.result.readings).toStrictEqual(keys.map(([expression, reading]) => reading || expression))
-    })
-
-    maybeTest.each([
-        '["same"x,"reading","","",0,["invalid"],1,""]',
-        '["same","reading"x,"","",0,["invalid"],1,""]',
-        '["same\\q","reading","","",0,["invalid"],1,""]',
-        '["same","reading\\u00xx","","",0,["invalid"],1,""]',
-        '["same\n","reading","","",0,["invalid"],1,""]',
-    ])('rejects invalid syntax after a prior valid key: %j', async (invalid) => {
-        const valid = '["same","reading","","",0,["valid"],1,""]'
-        const sources = [encoder.encode('[' + valid + ',' + invalid + ']'), encoder.encode('[]')]
-        await expect(snapshot(sources, true, true)).rejects.toThrow()
-        await expect(snapshot(sources, false)).rejects.toThrow()
-    })
-
-    maybeTest.each(['[["]', '[["same","]'])('keeps truncated key comparisons inside explicit bank spans: %j', async (truncated) => {
-        const sources = [
-            encoder.encode('[["same","reading","","",0,["valid"],1,""]]'),
-            encoder.encode(truncated),
-            encoder.encode('[["same","reading","","",1,["neighbor"],2,""]]'),
-        ]
-        await expect(snapshot(sources, true, true, true)).rejects.toThrow()
-        await expect(snapshot(sources, false, true, true)).rejects.toThrow()
-    })
-
-    maybeTest('starts a fresh witness after a malformed parse with matching key text', async () => {
-        const invalid = [
-            encoder.encode('[["same","reading","","",0,["valid"],1,""]]'),
-            encoder.encode('[["same","reading"x,"","",1,["invalid"],2,""]]'),
-        ]
-        await expect(snapshot(invalid, true, true)).rejects.toThrow()
-        const fresh = [
-            encoder.encode('[["reading","same","","",3,["new first"],4,""]]'),
-            encoder.encode('[["same","reading","","",4,["new second"],5,""],["same","reading","","",5,["repeated"],6,""]]'),
-        ]
-        const actual = await snapshot(fresh, true, true)
-        expect(actual.profile?.fusedParseFallbacks ?? 0).toBe(0)
-        expect(actual.result).toStrictEqual((await snapshot(fresh, false)).result)
-        expect(actual.result.expressions).toStrictEqual(['reading', 'same', 'same'])
-        expect(actual.result.readings).toStrictEqual(['same', 'reading', 'reading'])
     })
 
     /** @type {Array<[number, 'ascii'|'utf8'|'escaped', boolean]>} */
