@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-corrected-component-records-only-audit",
+  "scope": "Independent verification of retained original component evidence; no new import, benchmark, native execution or timing acquisition.",
+  "audit": {
+    "runId": 46126612006,
+    "jobId": 140922487765,
+    "runAttempt": 1,
+    "head": "b99e1a9daf7fe0885291ec25245959f731619373",
+    "tree": "4269ae3233baff65a0fefb13dc9364f8676792f5",
+    "conclusion": "success",
+    "completedAt": "2026-11-28T08:47:30Z",
+    "workflow": ".github/workflows/corrected-fields-artifact-audit-1c413.yml",
+    "pureTestsPassed": 14,
+    "runner": "macos-15 / arm64",
+    "python": "3.12.10"
+  },
+  "artifact": {
+    "id": 15255898869,
+    "name": "corrected-fields-readonly-audit-b99e1a9daf7fe0885291ec25245959f731619373",
+    "sizeBytes": 16594754,
+    "sha256": "0b9620507329ff7b4163a40035ccbdbf9dedec69d50b4c33e71961c4cd7eb164",
+    "createdAt": "2026-11-28T08:47:21Z",
+    "expiresAt": "2026-12-12T08:47:19Z",
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46126612006/artifacts/15255898869"
+  },
+  "sourceReviews": [
+    "59f253367e5789cedcd0d1ba27c2ce7a6c7d7ffa",
+    "9498a71ea93f05c01b3e066e1d449fe777f6c5f4"
+  ],
+  "durableEvidence": {
+    "completeDecodedJobLog": {
+      "blob": "ebfcb04178b8028d79e76c8bdb0db08fadd04194",
+      "bytes": 62076,
+      "sha256": "0f850f93cdfa1ad3172d95cfffcd0763b73cadcf6c06ed5516f979576c21f5bf",
+      "runId": 46126612006,
+      "jobId": 140922487765,
+      "attempt": 1,
+      "head": "b99e1a9daf7fe0885291ec25245959f731619373"
+    },
+    "exactFinalJson": {
+      "blob": "c41c034efa9021adc77c328ffc50066912e6e195",
+      "bytes": 6029,
+      "sha256": "3f2e8cd442b61ad400a329d7fe51115cffa437c378984f7bdbec8d0b9596e766"
+    },
+    "originalApiRunJobsArtifacts": {
+      "blob": "271f46bc8ca03796f0fff7308d32c69cb6625eaf"
+    },
+    "originalCorrectedComponent": {
+      "runId": 46123144616,
+      "jobId": 140911790961,
+      "logBlob": "91ef208b563ad2484f1f33b7be8d035d4bca8cca",
+      "logBytes": 303886,
+      "logSha256": "73b935d837f36e165e2f04d45647dd07a443387795be6d5961453b64a5d193b8",
+      "metadataBlob": "0e3f8188e550755c4f842a9ef09d3ec258f21b12",
+      "logAuditorBlob": "88a69b15b5b5485983bf1ee1916d1f03339cff78",
+      "intervalResultBlob": "98694a8e1a80f922577510cf74396acc60cc5388",
+      "provenance": "Reported by independent native_host_review; no duplicate download performed. Full archive/capture audit remains separate."
+    }
+  },
+  "originalCorrectedStudy": {
+    "runId": 46123144616,
+    "jobId": 140911790961,
+    "head": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+    "artifactId": 15254998779,
+    "archiveMembers": 217,
+    "requiredObservations": 42,
+    "measuredObservations": 36,
+    "excludedWarmupObservations": 6,
+    "completeSourceCaptureAndObservationVerification": true
+  },
+  "originalFailure": {
+    "runId": 46115204690,
+    "jobId": 140887357214,
+    "head": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "artifactId": 15254144071,
+    "files": 82,
+    "classification": "known-linker-driver-preflight-failure",
+    "originalWarmupObservations": 0,
+    "originalMeasuredObservations": 0,
+    "permanentlyNonqualifying": true
+  },
+  "contrasts": {
+    "cpuMs": {
+      "BoverA": {
+        "candidate": "B",
+        "control": "A",
+        "equalWorkPercent": -24.67141408164989,
+        "fasterPairs": 12,
+        "medianPercent": -25.380375097163345,
+        "medianSaving": 7.8255,
+        "metric": "cpuMs"
+      },
+      "BoverC": {
+        "candidate": "B",
+        "control": "C",
+        "equalWorkPercent": -24.969678792518735,
+        "fasterPairs": 12,
+        "medianPercent": -26.56422753665435,
+        "medianSaving": 8.3165,
+        "metric": "cpuMs"
+      },
+      "CoverA": {
+        "candidate": "C",
+        "control": "A",
+        "equalWorkPercent": 0.3975255684219414,
+        "fasterPairs": 6,
+        "medianPercent": -0.06733724617924985,
+        "medianSaving": 0.02200000000000024,
+        "metric": "cpuMs"
+      }
+    },
+    "wallMs": {
+      "BoverA": {
+        "candidate": "B",
+        "control": "A",
+        "equalWorkPercent": -24.678028970545373,
+        "fasterPairs": 12,
+        "medianPercent": -25.411087795629108,
+        "medianSaving": 7.827762,
+        "metric": "wallMs"
+      },
+      "BoverC": {
+        "candidate": "B",
+        "control": "C",
+        "equalWorkPercent": -24.978803931021854,
+        "fasterPairs": 12,
+        "medianPercent": -26.56543990910194,
+        "medianSaving": 8.311872,
+        "metric": "wallMs"
+      },
+      "CoverA": {
+        "candidate": "C",
+        "control": "A",
+        "equalWorkPercent": 0.4009199749360537,
+        "fasterPairs": 6,
+        "medianPercent": -0.038460562112024865,
+        "medianSaving": 0.013009999999997746,
+        "metric": "wallMs"
+      }
+    }
+  },
+  "result": {
+    "archiveIntegrityPassed": true,
+    "sourceAndCaptureIntegrityPassed": true,
+    "screenComplete": true,
+    "auditPassed": true,
+    "nominationGatePassed": true,
+    "qualifiedForComponentNomination": true,
+    "firstFailure": null
+  },
+  "remainingGates": [
+    "The separately reconstructed production source must pass all current-base correctness, native rebuild, unit/type/lint/build and untimed corpus gates.",
+    "Source-bound natural eligibility/activation expectations must be sealed from untimed evidence before any prospective browser acquisition.",
+    "Independent whole-browser qualification is required. The component result does not prove a complete-import gain or authorize a product PR."
+  ]
+}

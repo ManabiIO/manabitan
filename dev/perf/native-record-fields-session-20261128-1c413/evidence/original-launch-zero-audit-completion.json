@@ -1,0 +1,1563 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed records-only audit of all six original source-preflight failure archives; no product execution, import, replacement acquisition or performance qualification",
+  "repository": "ManabiIO/manabitan",
+  "audit": {
+    "run": {
+      "id": 46137216352,
+      "name": "Audit six original native fields zero-acquisition launch failures 20261128",
+      "node_id": "WFR_kwLORX5CfM8AAAAKvf4NYA",
+      "head_branch": "audit/native-fields-browser-failed-launch-20261128-1c413",
+      "head_sha": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+      "path": ".github/workflows/native-fields-browser-failed-launch-audit-1c413.yml",
+      "display_title": "perf: audit six original zero-acquisition browser launch failures",
+      "run_number": 1,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow_id": 433625104,
+      "check_suite_id": 124811446034,
+      "check_suite_node_id": "CS_kwDORX5CfM8AAAAdD1eHEg",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46137216352",
+      "pull_requests": [],
+      "created_at": "2026-11-28T10:52:32Z",
+      "updated_at": "2026-11-28T10:53:26Z",
+      "actor": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "run_attempt": 1,
+      "referenced_workflows": [],
+      "run_started_at": "2026-11-28T10:52:32Z",
+      "triggering_actor": {
+        "login": "aehlke",
+        "id": 71601,
+        "node_id": "MDQ6VXNlcjcxNjAx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/aehlke",
+        "html_url": "https://github.com/aehlke",
+        "followers_url": "https://api.github.com/users/aehlke/followers",
+        "following_url": "https://api.github.com/users/aehlke/following{/other_user}",
+        "gists_url": "https://api.github.com/users/aehlke/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/aehlke/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/aehlke/subscriptions",
+        "organizations_url": "https://api.github.com/users/aehlke/orgs",
+        "repos_url": "https://api.github.com/users/aehlke/repos",
+        "events_url": "https://api.github.com/users/aehlke/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/aehlke/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352/logs",
+      "check_suite_url": "https://api.github.com/repos/ManabiIO/manabitan/check-suites/124811446034",
+      "artifacts_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352/artifacts",
+      "cancel_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352/cancel",
+      "rerun_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352/rerun",
+      "previous_attempt_url": null,
+      "workflow_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/workflows/433625104",
+      "head_commit": {
+        "id": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+        "tree_id": "2b68623b3d6460c79f0259345ec2bf7f2d6f19f7",
+        "message": "perf: audit six original zero-acquisition browser launch failures\n\nRead only the exact retained original run46136060186 artifacts and logs. Verify source identities, complete thirteen-member archives, failed launch receipts, skipped setup/import steps and zero original observations. Keep the original six cells failed and nonqualifying. No imports, timings or replacement acquisition.",
+        "timestamp": "2026-11-28T10:50:55Z",
+        "author": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com"
+        },
+        "committer": {
+          "name": "Alex Ehlke",
+          "email": "alex.ehlke@gmail.com"
+        }
+      },
+      "repository": {
+        "id": 1165902460,
+        "node_id": "R_kgDORX5CfA",
+        "name": "manabitan",
+        "full_name": "ManabiIO/manabitan",
+        "private": false,
+        "owner": {
+          "login": "ManabiIO",
+          "id": 22897786,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjIyODk3Nzg2",
+          "avatar_url": "https://avatars.githubusercontent.com/u/22897786?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/ManabiIO",
+          "html_url": "https://github.com/ManabiIO",
+          "followers_url": "https://api.github.com/users/ManabiIO/followers",
+          "following_url": "https://api.github.com/users/ManabiIO/following{/other_user}",
+          "gists_url": "https://api.github.com/users/ManabiIO/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/ManabiIO/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/ManabiIO/subscriptions",
+          "organizations_url": "https://api.github.com/users/ManabiIO/orgs",
+          "repos_url": "https://api.github.com/users/ManabiIO/repos",
+          "events_url": "https://api.github.com/users/ManabiIO/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/ManabiIO/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "html_url": "https://github.com/ManabiIO/manabitan",
+        "description": "Pop-up dictionary browser extension for language learning. Successor to Yomichan.",
+        "fork": true,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan",
+        "forks_url": "https://api.github.com/repos/ManabiIO/manabitan/forks",
+        "keys_url": "https://api.github.com/repos/ManabiIO/manabitan/keys{/key_id}",
+        "collaborators_url": "https://api.github.com/repos/ManabiIO/manabitan/collaborators{/collaborator}",
+        "teams_url": "https://api.github.com/repos/ManabiIO/manabitan/teams",
+        "hooks_url": "https://api.github.com/repos/ManabiIO/manabitan/hooks",
+        "issue_events_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/events{/number}",
+        "events_url": "https://api.github.com/repos/ManabiIO/manabitan/events",
+        "assignees_url": "https://api.github.com/repos/ManabiIO/manabitan/assignees{/user}",
+        "branches_url": "https://api.github.com/repos/ManabiIO/manabitan/branches{/branch}",
+        "tags_url": "https://api.github.com/repos/ManabiIO/manabitan/tags",
+        "blobs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/ManabiIO/manabitan/git/tags{/sha}",
+        "git_refs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/refs{/sha}",
+        "trees_url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees{/sha}",
+        "statuses_url": "https://api.github.com/repos/ManabiIO/manabitan/statuses/{sha}",
+        "languages_url": "https://api.github.com/repos/ManabiIO/manabitan/languages",
+        "stargazers_url": "https://api.github.com/repos/ManabiIO/manabitan/stargazers",
+        "contributors_url": "https://api.github.com/repos/ManabiIO/manabitan/contributors",
+        "subscribers_url": "https://api.github.com/repos/ManabiIO/manabitan/subscribers",
+        "subscription_url": "https://api.github.com/repos/ManabiIO/manabitan/subscription",
+        "commits_url": "https://api.github.com/repos/ManabiIO/manabitan/commits{/sha}",
+        "git_commits_url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits{/sha}",
+        "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/comments{/number}",
+        "issue_comment_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/comments{/number}",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/{+path}",
+        "compare_url": "https://api.github.com/repos/ManabiIO/manabitan/compare/{base}...{head}",
+        "merges_url": "https://api.github.com/repos/ManabiIO/manabitan/merges",
+        "archive_url": "https://api.github.com/repos/ManabiIO/manabitan/{archive_format}{/ref}",
+        "downloads_url": "https://api.github.com/repos/ManabiIO/manabitan/downloads",
+        "issues_url": "https://api.github.com/repos/ManabiIO/manabitan/issues{/number}",
+        "pulls_url": "https://api.github.com/repos/ManabiIO/manabitan/pulls{/number}",
+        "milestones_url": "https://api.github.com/repos/ManabiIO/manabitan/milestones{/number}",
+        "notifications_url": "https://api.github.com/repos/ManabiIO/manabitan/notifications{?since,all,participating}",
+        "labels_url": "https://api.github.com/repos/ManabiIO/manabitan/labels{/name}",
+        "releases_url": "https://api.github.com/repos/ManabiIO/manabitan/releases{/id}",
+        "deployments_url": "https://api.github.com/repos/ManabiIO/manabitan/deployments"
+      },
+      "head_repository": {
+        "id": 1165902460,
+        "node_id": "R_kgDORX5CfA",
+        "name": "manabitan",
+        "full_name": "ManabiIO/manabitan",
+        "private": false,
+        "owner": {
+          "login": "ManabiIO",
+          "id": 22897786,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjIyODk3Nzg2",
+          "avatar_url": "https://avatars.githubusercontent.com/u/22897786?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/ManabiIO",
+          "html_url": "https://github.com/ManabiIO",
+          "followers_url": "https://api.github.com/users/ManabiIO/followers",
+          "following_url": "https://api.github.com/users/ManabiIO/following{/other_user}",
+          "gists_url": "https://api.github.com/users/ManabiIO/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/ManabiIO/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/ManabiIO/subscriptions",
+          "organizations_url": "https://api.github.com/users/ManabiIO/orgs",
+          "repos_url": "https://api.github.com/users/ManabiIO/repos",
+          "events_url": "https://api.github.com/users/ManabiIO/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/ManabiIO/received_events",
+          "type": "Organization",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "html_url": "https://github.com/ManabiIO/manabitan",
+        "description": "Pop-up dictionary browser extension for language learning. Successor to Yomichan.",
+        "fork": true,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan",
+        "forks_url": "https://api.github.com/repos/ManabiIO/manabitan/forks",
+        "keys_url": "https://api.github.com/repos/ManabiIO/manabitan/keys{/key_id}",
+        "collaborators_url": "https://api.github.com/repos/ManabiIO/manabitan/collaborators{/collaborator}",
+        "teams_url": "https://api.github.com/repos/ManabiIO/manabitan/teams",
+        "hooks_url": "https://api.github.com/repos/ManabiIO/manabitan/hooks",
+        "issue_events_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/events{/number}",
+        "events_url": "https://api.github.com/repos/ManabiIO/manabitan/events",
+        "assignees_url": "https://api.github.com/repos/ManabiIO/manabitan/assignees{/user}",
+        "branches_url": "https://api.github.com/repos/ManabiIO/manabitan/branches{/branch}",
+        "tags_url": "https://api.github.com/repos/ManabiIO/manabitan/tags",
+        "blobs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/blobs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/ManabiIO/manabitan/git/tags{/sha}",
+        "git_refs_url": "https://api.github.com/repos/ManabiIO/manabitan/git/refs{/sha}",
+        "trees_url": "https://api.github.com/repos/ManabiIO/manabitan/git/trees{/sha}",
+        "statuses_url": "https://api.github.com/repos/ManabiIO/manabitan/statuses/{sha}",
+        "languages_url": "https://api.github.com/repos/ManabiIO/manabitan/languages",
+        "stargazers_url": "https://api.github.com/repos/ManabiIO/manabitan/stargazers",
+        "contributors_url": "https://api.github.com/repos/ManabiIO/manabitan/contributors",
+        "subscribers_url": "https://api.github.com/repos/ManabiIO/manabitan/subscribers",
+        "subscription_url": "https://api.github.com/repos/ManabiIO/manabitan/subscription",
+        "commits_url": "https://api.github.com/repos/ManabiIO/manabitan/commits{/sha}",
+        "git_commits_url": "https://api.github.com/repos/ManabiIO/manabitan/git/commits{/sha}",
+        "comments_url": "https://api.github.com/repos/ManabiIO/manabitan/comments{/number}",
+        "issue_comment_url": "https://api.github.com/repos/ManabiIO/manabitan/issues/comments{/number}",
+        "contents_url": "https://api.github.com/repos/ManabiIO/manabitan/contents/{+path}",
+        "compare_url": "https://api.github.com/repos/ManabiIO/manabitan/compare/{base}...{head}",
+        "merges_url": "https://api.github.com/repos/ManabiIO/manabitan/merges",
+        "archive_url": "https://api.github.com/repos/ManabiIO/manabitan/{archive_format}{/ref}",
+        "downloads_url": "https://api.github.com/repos/ManabiIO/manabitan/downloads",
+        "issues_url": "https://api.github.com/repos/ManabiIO/manabitan/issues{/number}",
+        "pulls_url": "https://api.github.com/repos/ManabiIO/manabitan/pulls{/number}",
+        "milestones_url": "https://api.github.com/repos/ManabiIO/manabitan/milestones{/number}",
+        "notifications_url": "https://api.github.com/repos/ManabiIO/manabitan/notifications{?since,all,participating}",
+        "labels_url": "https://api.github.com/repos/ManabiIO/manabitan/labels{/name}",
+        "releases_url": "https://api.github.com/repos/ManabiIO/manabitan/releases{/id}",
+        "deployments_url": "https://api.github.com/repos/ManabiIO/manabitan/deployments"
+      }
+    },
+    "job": {
+      "id": 140955079610,
+      "run_id": 46137216352,
+      "workflow_name": "Audit six original native fields zero-acquisition launch failures 20261128",
+      "head_branch": "audit/native-fields-browser-failed-launch-20261128-1c413",
+      "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46137216352",
+      "run_attempt": 1,
+      "node_id": "CR_kwDORX5CfM8AAAAg0ZPTug",
+      "head_sha": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/140955079610",
+      "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/46137216352/job/140955079610",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-28T10:52:33Z",
+      "started_at": "2026-11-28T10:52:35Z",
+      "completed_at": "2026-11-28T10:53:25Z",
+      "name": "Verify all six original failed launch archives",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-28T10:52:35Z",
+          "completed_at": "2026-11-28T10:52:36Z"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-28T10:52:36Z",
+          "completed_at": "2026-11-28T10:53:07Z"
+        },
+        {
+          "name": "Bind and preserve the exact records-only source before setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-28T10:53:07Z",
+          "completed_at": "2026-11-28T10:53:07Z"
+        },
+        {
+          "name": "Set up the supported records-only Python",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-28T10:53:07Z",
+          "completed_at": "2026-11-28T10:53:07Z"
+        },
+        {
+          "name": "Verify the pure failure and archive reader",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-28T10:53:07Z",
+          "completed_at": "2026-11-28T10:53:08Z"
+        },
+        {
+          "name": "Read only the six exact failed original artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-28T10:53:08Z",
+          "completed_at": "2026-11-28T10:53:20Z"
+        },
+        {
+          "name": "Preserve every original archive, log and reader outcome",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-28T10:53:20Z",
+          "completed_at": "2026-11-28T10:53:21Z"
+        },
+        {
+          "name": "Post Set up the supported records-only Python",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-28T10:53:21Z",
+          "completed_at": "2026-11-28T10:53:21Z"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-28T10:53:21Z",
+          "completed_at": "2026-11-28T10:53:22Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-28T10:53:22Z",
+          "completed_at": "2026-11-28T10:53:22Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/140955079610",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000093254,
+      "runner_name": "GitHub Actions 1000093254",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    "artifact": {
+      "id": 15260456656,
+      "node_id": "MDg6QXJ0aWZhY3QxNTI2MDQ1NjY1Ng==",
+      "name": "native-fields-browser-failed-launch-audit-ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+      "size_in_bytes": 1728452,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260456656",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15260456656/zip",
+      "expired": false,
+      "digest": "sha256:6257e9e3c076b5bb56a6b61e651ffcb31cd7081acfb2368edd4fc051a43104ff",
+      "created_at": "2026-11-28T10:53:22Z",
+      "updated_at": "2026-11-28T10:53:22Z",
+      "expires_at": "2026-12-12T10:53:20Z",
+      "workflow_run": {
+        "id": 46137216352,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "audit/native-fields-browser-failed-launch-20261128-1c413",
+        "head_sha": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e"
+      }
+    },
+    "sourceCommit": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+    "sourceTree": "2b68623b3d6460c79f0259345ec2bf7f2d6f19f7",
+    "fullJobLog": {
+      "gitBlob": "9c40065dcddc1f80c91722a38983d5f60b6727e2",
+      "bytes": 359063,
+      "sha256": "97b54208692bd6cdbd93262ea06eab3b8fb930b048fc2b24f6dbedfd2f940a9e",
+      "source": "Complete decoded original GitHub Actions job 140955079610 log"
+    },
+    "exactStdoutResult": {
+      "gitBlob": "222e137181478cf9adbd96ff95276c8cb5ca3c52",
+      "bytes": 65537,
+      "sha256": "0993e18f86fc4a4e3bee32099a0cea524929d26c25ba44a59b9b2e264f43601c",
+      "source": "Exact final JSON line from original audit job stdout, with one terminating newline"
+    },
+    "pureTests": {
+      "cases": 12,
+      "passed": true,
+      "evidence": "Original complete job log: Ran 12 tests ... OK"
+    },
+    "sources": {
+      ".github/workflows/native-fields-browser-failed-launch-audit-1c413.yml": {
+        "bytes": 6207,
+        "gitBlob": "7f53b1510aa25b0f30efee54816b2043d343fae1",
+        "sha256": "a9cf8be2fb51e84e1ff47e62229c849aaf3f00b06148f4512a3d5916ae03f3b3"
+      },
+      "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/README.md": {
+        "bytes": 4600,
+        "gitBlob": "abb43b272fd493e368c016022dc2f801dc594e46",
+        "sha256": "96574731e4a7aea02f226e1ae5a3ebbc58e1d313d8da6ee660831d08d692c808"
+      },
+      "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/audit.py": {
+        "bytes": 17329,
+        "gitBlob": "00dcd51992ee4962b5a8ebdd7b2ca4039ee4250b",
+        "sha256": "f6b155a170ccdfc4f9b33e234f6c14be1676a3720691e7ba46c14b294c38d706"
+      },
+      "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/manifest.json": {
+        "bytes": 6411,
+        "gitBlob": "dbc9817df8aa648b49b50b22c9bcbfc933310103",
+        "sha256": "d6650a9bae01c0c32fabd6a0d39d96a008bde3367d0d9c6327afc2f0af7e4231"
+      },
+      "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/test-audit.py": {
+        "bytes": 13823,
+        "gitBlob": "65c40bf0b1002d1110c7524c23055a3e9e3c4dfe",
+        "sha256": "c7a10eb824db96eefd566c1e4a9c74faf2d9775f0f9811efb377402846162944"
+      },
+      "dev/perf/native-record-fields-browser-failed-launch-audit-20261128-1c413/transport.py": {
+        "bytes": 9875,
+        "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+        "sha256": "1c3c6f1c180eb8512146e7999561d8fd8cfdf10efb693a54b21d805a3a2a0aa6"
+      }
+    }
+  },
+  "independentlyChecked": {
+    "completeOriginalCells": 6,
+    "originalRegularArchiveMembers": 78,
+    "originalReportCount": 0,
+    "originalTimingObservationCount": 0,
+    "allOriginalArchivesRetained": true,
+    "allOriginalSourceGuardsFailed": true,
+    "allOriginalAcquisitionStepsSkipped": true,
+    "fullOriginalLogEqualityVerifiedByReader": true,
+    "sourceAndApiAndArchiveDigestChecksPassed": true,
+    "noPerformanceQualification": true
+  },
+  "originalPublication": {
+    "event": "push",
+    "headBranch": "perf/native-record-fields-browser-20261128-1c413",
+    "headSha": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+    "headTree": "72f34489f0a5449dcc54f6ec1122a26519f1b7e8",
+    "runAttempt": 1,
+    "runId": 46136060186,
+    "workflowPath": ".github/workflows/import-native-record-fields-1c413.yml"
+  },
+  "originalStudyPassed": false,
+  "qualificationPassed": false,
+  "verifiedZeroAcquisition": true,
+  "cells": [
+    {
+      "kind": "jitendex-AB",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15260155296,
+        "jobId": 140951508501,
+        "jobName": "Complete import (jitendex, AB)",
+        "kind": "jitendex-AB",
+        "name": "native-record-fields-browser-jitendex-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292554,
+          "gitBlob": "6a3f544e15755045b7224222c4c2d3e52e5a058d",
+          "sha256": "8178ca124e922a0f1d6fbf383b33d2ec55be898618950865642105be8151dc34"
+        },
+        "sha256": "484c8c389794b6bbfac768ef96e16e1b5ca68c3e5369986ef74e3e9b19602092",
+        "sizeBytes": 51742
+      },
+      "members": [
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 989,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "d48b1e76522bef19478e95b0821e80de1506475c160d1560c100b6da67127ca1"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "jitendex",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "AB",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    },
+    {
+      "kind": "jitendex-BA",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15260230004,
+        "jobId": 140951508493,
+        "jobName": "Complete import (jitendex, BA)",
+        "kind": "jitendex-BA",
+        "name": "native-record-fields-browser-jitendex-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292556,
+          "gitBlob": "475e997f727989742621229e341bf1c510257f91",
+          "sha256": "8e436a5500ebc3a29af256a92648ebc831089094f99e4ef10c405e9a3a9a3bba"
+        },
+        "sha256": "4373503f8ae23908cfad24909016e775bff8325917c6c6709b8f0a72ac1c0cc2",
+        "sizeBytes": 51742
+      },
+      "members": [
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 989,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "f1a40dfda89499a520ee75058e24226052a452784f84d4db5be76d0f75f67449"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "jitendex",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "BA",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    },
+    {
+      "kind": "jmdict-AB",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15259713287,
+        "jobId": 140951508519,
+        "jobName": "Complete import (jmdict, AB)",
+        "kind": "jmdict-AB",
+        "name": "native-record-fields-browser-jmdict-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292534,
+          "gitBlob": "b405b2fb0e14a1514807181d129f1e10a8b0a2ea",
+          "sha256": "ef65040bc51cf56e8efa3ba5c14c9707572ccfb90f46690a6dac910c18eb1f30"
+        },
+        "sha256": "15b5d3164f01cb98cef5efeef097d551afac0d828317dfa3ab3c4e4b78e9b821",
+        "sizeBytes": 51739
+      },
+      "members": [
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 987,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "32eb4f693a8956ddf92c8e50788699c6e10ec9e1c42fbe1cd52b2607b4b45e16"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "jmdict",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "AB",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    },
+    {
+      "kind": "jmdict-BA",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15259179765,
+        "jobId": 140951508568,
+        "jobName": "Complete import (jmdict, BA)",
+        "kind": "jmdict-BA",
+        "name": "native-record-fields-browser-jmdict-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292534,
+          "gitBlob": "6f8450f0529c36a13db62ab9f5bee4a046e59c39",
+          "sha256": "6b7acfd3ef2214b5e61dcc73dd9f106c5b688c60f33ef33c9ba7ed8df9afe564"
+        },
+        "sha256": "80bbd2183699ec8ef7f050f6263528a6debef8fa6a4656eb6f06acf22f5c7907",
+        "sizeBytes": 51739
+      },
+      "members": [
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 987,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "4f1d6142263d0a447e4a2be982ebefe5d6a1e5e46eb6102014405b5c3c47f4a4"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "jmdict",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "BA",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    },
+    {
+      "kind": "vndb-AB",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15260185274,
+        "jobId": 140951508552,
+        "jobName": "Complete import (vndb, AB)",
+        "kind": "vndb-AB",
+        "name": "native-record-fields-browser-vndb-AB-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292516,
+          "gitBlob": "5281665e5832578d3bf24aa21a6d7dc06768fd62",
+          "sha256": "f476090c1d6292edb5807b53d6e65bc1ef2f626f67e3446780fb78d8caf88382"
+        },
+        "sha256": "aebb424159cb28948686a226378e5addd581566d420324d4b7ac803d9733fc5b",
+        "sizeBytes": 51739
+      },
+      "members": [
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 985,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "38bda9d95b8ebfac55279852759413568f7dd1b4e730542eaad65c6057270894"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "vndb",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "AB",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    },
+    {
+      "kind": "vndb-BA",
+      "artifact": {
+        "expectedConclusion": "failure",
+        "id": 15260140331,
+        "jobId": 140951508293,
+        "jobName": "Complete import (vndb, BA)",
+        "kind": "vndb-BA",
+        "name": "native-record-fields-browser-vndb-BA-7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+        "originalJobLog": {
+          "bytes": 292514,
+          "gitBlob": "f0f30da80593bcd97b9048789cf708cc806ed0a7",
+          "sha256": "abaabd8be72d9b73302ef8a2675e4f91e873c6edf9cfd2657e622d47ad422704"
+        },
+        "sha256": "59160a78aae561ce7921a3ecdaaa7b36300011ea9d2f191043f2db8c7262d757",
+        "sizeBytes": 51739
+      },
+      "members": [
+        {
+          "bytes": 529,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.log",
+          "sha256": "afe71a39f72a3710d6ee07b9ec5224e941df2374756ebc5a2c9b6601dbe4677e"
+        },
+        {
+          "bytes": 581,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/activation.json",
+          "sha256": "b11c7098b7feca081125ba56483e8502f7f16dae08256fb5a85cc802875e997b"
+        },
+        {
+          "bytes": 241,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.json",
+          "sha256": "dcd66bce975b87931c07bd3b235aed8d62c0465be57dcf793c119870e9160a80"
+        },
+        {
+          "bytes": 1676,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/source-before-setup.log",
+          "sha256": "9eecc90b676a5fe92b0b81b6ca66760040397bdaaca5af26aa79846132bdeac9"
+        },
+        {
+          "bytes": 985,
+          "directory": false,
+          "path": "builds/perf/native-record-fields-browser-metadata/step-outcomes.json",
+          "sha256": "0e7ff463e1f5612567c9f71614b1e55d06989e86cdd3f2dc24e52fa3194d08fd"
+        },
+        {
+          "bytes": 8815,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md",
+          "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+        },
+        {
+          "bytes": 17495,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/README.md",
+          "sha256": "d35f81c0a318b0856786b7ddd5befee438dbd5cf90020f8337b21cd92dfb2ee5"
+        },
+        {
+          "bytes": 25222,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py",
+          "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+        },
+        {
+          "bytes": 5950,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+          "sha256": "ebce5802c2275919a1bdcebd4ac7a3d6655b9baa1d27953407f988940f9f9273"
+        },
+        {
+          "bytes": 56480,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+          "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+        },
+        {
+          "bytes": 19793,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py",
+          "sha256": "e4db24ce69bf977a796729627f15df42362b6a7303dd447f7a5afd1d81504448"
+        },
+        {
+          "bytes": 23311,
+          "directory": false,
+          "path": "dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py",
+          "sha256": "dbfa2d5950dc574095b4433c10b5a647c161a86a882730eb1059f24be72898c0"
+        },
+        {
+          "bytes": 7545,
+          "directory": false,
+          "path": ".github/workflows/import-native-record-fields-1c413.yml",
+          "sha256": "5be71883aa50edfd916e818a68e2baa727ef8e2fdbaf96ad4bc8b4e81daa0e80"
+        }
+      ],
+      "receipts": {
+        "activation": {
+          "checkerFile": {
+            "bytes": 25222,
+            "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+          },
+          "failure": {
+            "error": "[Errno 2] No such file or directory: 'builds/perf/native-record-fields-browser-cell/registered-plan.json'",
+            "type": "FileNotFoundError"
+          },
+          "observations": [],
+          "passed": false,
+          "schemaVersion": 1,
+          "scope": "No acquisition; disabled/unsealed or incomplete original evidence fails closed",
+          "studyFile": {
+            "bytes": 56480,
+            "sha256": "fa55a9f32db0561ddf02f1a958874b00ed09f27b3a313c56c27d2b2e602aa8c9"
+          }
+        },
+        "outcome": {
+          "cellComplete": false,
+          "dictionary": "vndb",
+          "failed": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "initialOrder": "BA",
+          "numericQualificationDecided": false,
+          "required": [
+            "source",
+            "setup",
+            "generated",
+            "protocol",
+            "browser",
+            "qualify",
+            "activation"
+          ],
+          "runAttempt": "1",
+          "steps": {
+            "activation": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            },
+            "browser": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "generated": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "protocol": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "qualify": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "setup": {
+              "conclusion": "skipped",
+              "outcome": "skipped"
+            },
+            "source": {
+              "conclusion": "failure",
+              "outcome": "failure"
+            }
+          }
+        },
+        "source": {
+          "error": "RuntimeError('Pinned fixture metadata changed')",
+          "passed": false,
+          "phase": "launch",
+          "productExecuted": false,
+          "schemaVersion": 1,
+          "studyHead": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+          "timingAcquired": false
+        }
+      },
+      "auditPassed": true,
+      "originalCellPassed": false,
+      "qualificationPassed": false,
+      "originalReportCount": 0,
+      "originalTimingObservationCount": 0
+    }
+  ],
+  "limitations": [
+    "The original import study remains failed and nonqualifying.",
+    "The source-only repaired preflight and any new corrected browser cohort have separate immutable source/run identities.",
+    "Audit artifact itself remains on GitHub; original six ZIP byte digests and closed member sets were verified by the completed pinned reader."
+  ]
+}

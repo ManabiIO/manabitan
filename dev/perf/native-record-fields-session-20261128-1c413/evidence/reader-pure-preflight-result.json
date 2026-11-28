@@ -1,0 +1,116 @@
+{
+  "after": {
+    "bytes": 2914,
+    "gitBlob": "57bb6a7d3ff75af43e39af03b047a6fb8b782d0a",
+    "sha256": "08368ad48d18e95546d79ea694a24f2c688191459dc51d998ae32e56c03f77a2"
+  },
+  "assembly": {
+    "commit": "2443419f919ff0ca6d578d681484cf43cb07a866",
+    "tree": "2531c5db6ac73bb7e341c96a094826d51587acdd"
+  },
+  "before": {
+    "bytes": 2914,
+    "gitBlob": "57bb6a7d3ff75af43e39af03b047a6fb8b782d0a",
+    "sha256": "08368ad48d18e95546d79ea694a24f2c688191459dc51d998ae32e56c03f77a2"
+  },
+  "browserExecuted": false,
+  "controls": {
+    "provenance.json": {
+      "bytes": 6302,
+      "gitBlob": "1cc8ef976dcea39aeb2a2606defe4b11264527f6",
+      "sha256": "204d978be7c825088aa3744ccb182809dee0f17396656cd73bf08c800c37d27a"
+    },
+    "run_one.py": {
+      "bytes": 1565,
+      "gitBlob": "a14cf9a2205639cbb05c7b076344f79fb8caf3dd",
+      "sha256": "920b176ff11575ea6f7a411b7b1e23ed3fa2a69ef30f3b52d2153b53b75f0066"
+    },
+    "run_tests.py": {
+      "bytes": 5038,
+      "gitBlob": "c1eb1db07ae43da30df3bce4b5753eb7b328c689",
+      "sha256": "9d0fdbe93e6df863bd405374f92866a843406d630c1ca52c3c48ee2dd2e62fc5"
+    }
+  },
+  "environment": {
+    "executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "implementation": "CPython",
+    "optimize": 0,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "scope": "Local pure tests, distinct from hosted audit Python3.12.10; no import timing.",
+    "startedUtc": "2026-11-28T11:03:18.146463+00:00"
+  },
+  "kind": "completed-local-pure-reader-preflight",
+  "originalArtifactApiAcquisition": false,
+  "overrides": {
+    "caller": "43e94880e9307deff1aac5f22a6e79c0826f356d",
+    "review": "a8cc87e701781cfb2db63fbff7f79518317affcf",
+    "tests": "31d8208a2bfbb26c24d2d06e5283b6e5e2b1b099"
+  },
+  "passed": true,
+  "productExecuted": false,
+  "runs": [
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/run_one.py",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/source/dev/perf/native-record-fields-browser-audit-20261128-1c413/test_audit_fields_browser.py",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/evidence/reader/execution.json"
+      ],
+      "execution": {
+        "blockedExternalEvents": [],
+        "dontWriteBytecode": true,
+        "executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "exitCode": 0,
+        "interpreter": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "networkGuardEnabled": true,
+        "optimize": 0,
+        "scope": "Existing pure synthetic unittest script only; no product or original artifact acquisition.",
+        "test": "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/source/dev/perf/native-record-fields-browser-audit-20261128-1c413/test_audit_fields_browser.py",
+        "tmpdir": "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/tmp"
+      },
+      "exitCode": 0,
+      "expectedTests": 19,
+      "name": "reader",
+      "observedTestCounts": [
+        19
+      ],
+      "passed": true
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/run_one.py",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/source/dev/perf/native-record-fields-browser-audit-20261128-1c413/test_qualification_policy.py",
+        "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/evidence/numeric/execution.json"
+      ],
+      "execution": {
+        "blockedExternalEvents": [],
+        "dontWriteBytecode": true,
+        "executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "exitCode": 0,
+        "interpreter": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "networkGuardEnabled": true,
+        "optimize": 0,
+        "scope": "Existing pure synthetic unittest script only; no product or original artifact acquisition.",
+        "test": "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/source/dev/perf/native-record-fields-browser-audit-20261128-1c413/test_qualification_policy.py",
+        "tmpdir": "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/tmp"
+      },
+      "exitCode": 0,
+      "expectedTests": 14,
+      "name": "numeric",
+      "observedTestCounts": [
+        14
+      ],
+      "passed": true
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "Run existing19reader and14numeric synthetic cases only. The unchanged qualifier is read through the existing AST FunctionDef isolation; the Chromium harness is read only as text. No artifact/API acquisition or product/native/browser execution. The baseline assembly source-binding is preserved unchanged, with the two independently reviewed literal-rebound source blobs explicitly declared here.",
+  "sourceFileCount": 12,
+  "sourceRoot": "/workspace/scratch/1c4137568bc6/reader-pure-preflight-20261128-jk6xrvi4/source",
+  "sourceUnchanged": true,
+  "timingObservations": 0
+}

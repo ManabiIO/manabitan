@@ -1,0 +1,162 @@
+{
+  "attempt": "1",
+  "browserExecuted": false,
+  "failed": [],
+  "files": {
+    "bind.log": {
+      "bytes": 3206,
+      "sha256": "2506ab3cd7ffbf774e02f88a8409f0c3dcd4097e1b607eddf5bcff2414316148"
+    },
+    "binding.json": {
+      "bytes": 3744,
+      "sha256": "2d50b984d2d3dab68896ad480785df3d9e2244faf90e4f470f9e397e9101470b"
+    },
+    "build-libs.log": {
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    "context.json": {
+      "bytes": 606,
+      "sha256": "9f1e3cd10cc44562566cfadd59a85a8084467e18afc6305b4eaae0d15f0d25ea"
+    },
+    "license-report.log": {
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    "npm-ci.log": {
+      "bytes": 421,
+      "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c"
+    },
+    "preflight-source/.github/workflows/native-record-fields-browser-preflight-1c413.yml": {
+      "bytes": 11908,
+      "sha256": "44b1fa87ff9ccbe8dfe71bb6f7ead8c2e5c39098b7310095da30e4ed143e5e55"
+    },
+    "preflight-source/dev/perf/native-record-fields-browser-preflight-20261128-1c413/README.md": {
+      "bytes": 5603,
+      "sha256": "32f8bc62679cc7d5ede42f7e424774ab8db33a071e60812fbc15ccd6eab1f98e"
+    },
+    "preflight-source/dev/perf/native-record-fields-browser-preflight-20261128-1c413/source.json": {
+      "bytes": 5242,
+      "sha256": "a39f0683ba925d2c25575cc1f74d9848a0f3020eacef99ee91440d87b38badac"
+    },
+    "pure-tests.log": {
+      "bytes": 128,
+      "sha256": "9735011f1541e234a63a81f840789eb0febf66eae0191d49ce4d90d6cd84baec"
+    },
+    "source-after-setup.json": {
+      "bytes": 99833,
+      "sha256": "bb6a86834ec795baea3b852bbdc4c4ec78a060a1657cc5380fa2fccea0fb5d77"
+    },
+    "source-after-setup.log": {
+      "bytes": 84065,
+      "sha256": "fd62afa87b3f4205fa212ac93be8542dfe99cb050fb5b77fbdc96c8d72d26bfe"
+    },
+    "source-before-setup.json": {
+      "bytes": 99361,
+      "sha256": "86b0043ca7a6b362a29c394d3deb6785c9fc91549a7f35dd2b13d8b71229455a"
+    },
+    "source-before-setup.log": {
+      "bytes": 83663,
+      "sha256": "d4378e5f1c7782da5913293e6d8b78798fa6e8cdc1cea28039227253db131bb4"
+    },
+    "study-source/.github/actions/setup/action.yml": {
+      "bytes": 930,
+      "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6"
+    },
+    "study-source/.github/workflows/import-native-record-fields-1c413.yml": {
+      "bytes": 7896,
+      "sha256": "b582a6789c070d9465f679a0de7a9d92a1a653ecc282c4ecc8cdd51bb808fbaa"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/ACTIVATION.md": {
+      "bytes": 8815,
+      "sha256": "ae1dbc9e01cb1ca3e2238d80293eb7e52eb3f0d6a6bce276f572616ad81c6933"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/README.md": {
+      "bytes": 19995,
+      "sha256": "f25d5133a91cd95e7e0f6ee6ebde1e2c961c21df89a6f04fc0cc8562cf6931d0"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/audit-activation.py": {
+      "bytes": 25222,
+      "sha256": "15c994658125015edaa4aae931ce82f122526bd4c0cc4e65286cd3975642010a"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/source.json": {
+      "bytes": 6043,
+      "sha256": "536da70d3ae5b0485607deccb2c11043836cd7aa9db4869b468a737c49daef72"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/study.json": {
+      "bytes": 74485,
+      "sha256": "5ec7546f4ce0c760410385b65b1aa195a881ac4627e5f7062f3d47a0d55a2097"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/test-activation.py": {
+      "bytes": 23398,
+      "sha256": "8d0129f66268c659f2a6acd41df6ff46569a3fab01dab86d02a4c0d5b20a6733"
+    },
+    "study-source/dev/perf/native-record-fields-browser-20261128-1c413/verify-source.py": {
+      "bytes": 23970,
+      "sha256": "46b3a6b9d7b6ac5aa4b1b640a619130f681001558fc26049bb22e5cfcb30c02f"
+    }
+  },
+  "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+  "imports": 0,
+  "kind": "source-only-preflight",
+  "passed": true,
+  "productExecuted": false,
+  "required": [
+    "initialize",
+    "checkout",
+    "bind",
+    "launch",
+    "protocol",
+    "node",
+    "dependencies",
+    "libraries",
+    "license",
+    "generated"
+  ],
+  "runId": "46137023673",
+  "steps": {
+    "bind": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "checkout": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "dependencies": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "generated": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "initialize": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "launch": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "libraries": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "license": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "node": {
+      "conclusion": "success",
+      "outcome": "success"
+    },
+    "protocol": {
+      "conclusion": "success",
+      "outcome": "success"
+    }
+  },
+  "target": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+  "targetTree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+  "timingObservations": 0
+}

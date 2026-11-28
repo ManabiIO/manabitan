@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-f28-original-correctness-completion-and-console-source-review",
+  "observedAtUtc": "2026-11-28T10:16:33Z",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46133913032,
+  "attempt": 1,
+  "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+  "headBranch": "test/native-record-fields-current-20261128-1c413",
+  "product": {
+    "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d",
+    "upstream": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2"
+  },
+  "sourceDigest": "95fe6764ac16451b9257b9224a2b1bdbc286536ddeb3ad69b6323601baec9a71",
+  "runConclusion": "success",
+  "completedAtUtc": "2026-11-28T10:14:53Z",
+  "jobs": [
+    {
+      "id": 140944880913,
+      "name": "Untimed original baseline and candidate importer parity",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Bind the original attempt and exact reconstructed source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Prepare the candidate with pinned Node",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Bind the candidate generated assets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Check out the exact unmodified baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Build baseline assets from its independent locked dependency installation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify the pure correctness comparator",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Verify portable evidence retention before any corpus import",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Verify the exact prepared runtime delta before any corpus work",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Fetch and verify all pinned corpus archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run the original untimed importer parity sequence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Preserve raw bytes and inert smoke-link metadata in a verified archive",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Preserve the complete verified corpus archive and member receipt",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Post Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        },
+        {
+          "name": "Post Check out the exact unmodified baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28
+        },
+        {
+          "name": "Post Prepare the candidate with pinned Node",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        }
+      ]
+    },
+    {
+      "id": 140944881152,
+      "name": "Rebuild, complete units, types, lint and all-target builds",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Bind the original attempt and exact reconstructed source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Prepare the pinned Node runtime and dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Bind generated assets and the setup-produced license document",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install the pinned native toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Reproduce every checked-in native target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Changed-source lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Complete ordinary unit suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Complete options unit suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete main-source types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Complete development-source types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete test-source types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "All-target dry builds",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Retain every outcome and require all independent correctness gates",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve exact source, every log and every failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Prepare the pinned Node runtime and dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 15259500068,
+      "name": "native-record-fields-corpus-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "bytes": 1043287,
+      "sha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c",
+      "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "expired": false
+    },
+    {
+      "id": 15259375276,
+      "name": "native-record-fields-correctness-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "bytes": 344007,
+      "sha256": "88dc4436039992f3819f186357e1736701a0a0a15a60e37b2bbf9dde0ed01433",
+      "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+      "expired": false
+    }
+  ],
+  "validationLog": {
+    "blob": "a8b61df444377a501906638f5d3a5b226a2aa44c",
+    "bytes": 1100318,
+    "sha256": "af2cdc7c71bb36ec833a3611cfa3e91d8cef4f84c454b7a400471558e8601183",
+    "format": "Exact complete UTF-8 decoded original job log; no ANSI or timestamp normalization applied to retained bytes."
+  },
+  "validationSummary": {
+    "unitFilesPassed": 673,
+    "unitTestsPassed": 15301,
+    "unitTestsSkipped": 47,
+    "optionFilesPassed": 1,
+    "optionTestsPassed": 32,
+    "allIndependentGatesPassed": true
+  },
+  "independentlyCheckedConsoleSources": {
+    "completeProofs": 2,
+    "identicalExpectedSourceEntries": 30,
+    "changedPaths": 30,
+    "protectedBaselineEntries": 21,
+    "protectedModesIncludeExecutablePrepareDictionaries": true,
+    "generatedAssetsBefore": 0,
+    "generatedAssetsAfter": {
+      "ext/lib/term-bank-parser.wasm": {
+        "bytes": 69068,
+        "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "ext/lib/term-content-canonical-scan-v1.wasm": {
+        "bytes": 1624,
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      "ext/lib/term-record-fields.wasm": {
+        "bytes": 1753,
+        "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+      }
+    }
+  },
+  "originalEarlierFailuresPreserved": true,
+  "priorCompletedSource": {
+    "runId": 46132025311,
+    "headSha": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+    "resultTransferred": false
+  },
+  "scope": {
+    "validationOriginalLogAndAPIChecked": true,
+    "fullArtifactPayloadAuditCompleted": false,
+    "corpusPayloadAuditOwnedBy": "pipeline_audit",
+    "browserAcquisition": false,
+    "browserNomination": false,
+    "noRerun": true
+  }
+}

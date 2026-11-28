@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-original-native-fields-source-preflight",
+  "passed": true,
+  "run": {
+    "id": 46137023673,
+    "attempt": 1,
+    "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+    "branch": "test/native-record-fields-browser-preflight-env-20261128-1c413",
+    "status": "completed",
+    "conclusion": "success",
+    "jobId": 140954485323
+  },
+  "target": {
+    "commit": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+    "sourceDigest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+    "sourceManifest": {
+      "bytes": 6043,
+      "gitBlob": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+      "mode": "100644",
+      "sha256": "536da70d3ae5b0485607deccb2c11043836cd7aa9db4869b468a737c49daef72"
+    }
+  },
+  "retained": {
+    "jobLog": {
+      "gitBlob": "d82a26cdaca6966c06fb751367cc52748459a54f",
+      "bytes": 487785,
+      "sha256": "054962e03db47b620540e4c980530b918d67a255eba24735706b13717769d2f8"
+    },
+    "workflowLintLog": {
+      "gitBlob": "b0bd828f056d840c34a2c4091839ae2e518eb848",
+      "bytes": 16815,
+      "sha256": "42e8722e7634478140cbfe831f34e9607103610e6438851ea7df2d7becae1b40"
+    },
+    "outcomes": {
+      "gitBlob": "980f66038f4e8cbba8ba766cf96cab0dcdc68a18",
+      "bytes": 5326,
+      "sha256": "2764969bd6cf417332ce4c13557819d55f85912ac3c2dfa6cc7eff2e19073405"
+    },
+    "api": {
+      "gitBlob": "870c7b40f0fdfbc49a09bab6ded56dd6665d7665",
+      "bytes": 19386,
+      "sha256": "1d5110e7ab24762dc5cffe82e38f524ebe25ab96db11d61eaf350e8650c189a2"
+    }
+  },
+  "artifact": {
+    "id": 15259224388,
+    "name": "native-fields-browser-launch-preflight-0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+    "bytes": 165797,
+    "sha256": "b85778bfbd78f5da614bb93a99c35ab5b7df8a13a0100020d5956b29fc1f945b",
+    "originalRunId": 46137023673,
+    "headSha": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+    "remoteOriginalRetained": true,
+    "archiveBytesIndependentlyDownloaded": false
+  },
+  "executed": {
+    "launchGuard": true,
+    "activationAndFixtureTests": {
+      "count": 29,
+      "passed": true
+    },
+    "node": "22.22.0",
+    "lockedDependencyInstall": true,
+    "unchangedLibraryBuild": true,
+    "unchangedLicenseReport": true,
+    "generatedGuard": true
+  },
+  "independentLogChecks": {
+    "exactTargetProductControlSourceBindings": true,
+    "protectedFilesUnchanged": 235,
+    "boundSourceFiles": 21,
+    "allFiveOriginalPrerequisiteMetadataChecks": true,
+    "numericScheduleAndActivationSourceUnchanged": true,
+    "emittedContextBindingAndBothGuardReceiptHashesRecomputed": true,
+    "generatedNativeAssets": {
+      "ext/lib/term-bank-parser.wasm": {
+        "bytes": 69068,
+        "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+      },
+      "ext/lib/term-content-canonical-scan-v1.wasm": {
+        "bytes": 1624,
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      "ext/lib/term-record-fields.wasm": {
+        "bytes": 1753,
+        "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+      }
+    },
+    "setupGeneratedDocuments": {},
+    "allTenRequiredStepOutcomesSuccess": true,
+    "retainedFileIdentities": 23
+  },
+  "originalFailuresPreserved": {
+    "firstBrowserRun": 46136060186,
+    "firstSourcePreflight": {
+      "runId": 46136784829,
+      "headSha": "0ab9f1390876af6458c97bf1cbb385dcae94ca1e",
+      "jobs": [],
+      "failureReceipt": "404b841700a130ab5f478d9e5eb2d681d7734fc2"
+    }
+  },
+  "imports": 0,
+  "timingObservations": 0,
+  "browserExecuted": false,
+  "nativeKernelExecuted": false,
+  "scope": "Actual hosted execution of the real source launch/generated guards and pure29-case suite against the exact corrected study, with the same locked setup commands. Complete decoded logs and four emitted receipt hashes were independently checked in V8. The original artifact remains bound by API digest and remote retention; its ZIP bytes were not downloaded by this child. This source/setup pass supplies no product performance or browser result.",
+  "nextGate": "Any original browser acquisition must use this exact target commit and unchanged prospective protocol. All source/semantic/media/memory/activation/numeric gates remain required."
+}

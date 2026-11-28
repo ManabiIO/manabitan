@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "kind": "static-native-record-field-table-work-ceiling",
+  "source": {
+    "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+    "helper": {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "gitBlob": "5c786f27976064b33d798dcaf23a7d3ae78b5eb0",
+      "sha256": "aaa6eb51469dc89d9e7736b2c20a3119a050a78544446cc2bcef7e3fd96bf2ec"
+    },
+    "kernel": {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af"
+    },
+    "wasm": {
+      "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+    },
+    "auditedCorpus": {
+      "runId": 46133913032,
+      "auditRunId": 46135194884,
+      "resultBlob": "07161060078f96743419784e04ae5e33d407ddca",
+      "resultSha256": "f433eb75a0e0e6e0117045580a1f4f8ec7f67a17c78fb461e8b10e747e1bc128"
+    }
+  },
+  "currentMechanism": {
+    "scoreCapacity": "min(rowCount,65535)",
+    "slotCount": "smallest power of two >=2*scoreCapacity",
+    "clear": "C __builtin_memset(slots,0,slotCount*4) once per admitted native call",
+    "maximumSlots": 131072,
+    "maximumPrivateMemoryBytes": 67108864,
+    "probeBudget": "rowCount*4+reservedSlotCount occupied probes across the call",
+    "outputBytes": "16+4*compactScoreCount+8*rowCount",
+    "dictionaryReservation": "scoreCapacity*4 bytes reserved; only actual distinct scores are written, and this dictionary is not fully cleared",
+    "exactCurrentCalls": 226,
+    "exactCurrentRows": 7613164,
+    "allCurrentCallsNative": true
+  },
+  "recomputation": {
+    "derivesScoreCountFromEveryCompleteOutputLength": true,
+    "checksAgainstAuditedCompactScoreCount": true,
+    "verifiesEverySourceLayoutAndTotalCopyClearCounter": true,
+    "sourceExecution": false,
+    "timingAcquisition": false,
+    "model": "Deterministic byte/layout arithmetic over retained audited receipts only"
+  },
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "calls": 12,
+      "rows": 528299,
+      "totalCompactScores": 3344,
+      "minCompactScores": 167,
+      "maxCompactScores": 475,
+      "baseline": {
+        "totalSlots": 1572864,
+        "tableClearBytes": 6291456,
+        "inputCopiedBytes": 8618752,
+        "outputCopiedBytes": 4239960,
+        "maximumScratchBytes": 824288,
+        "maximumLinearMemoryBytes": 2424832
+      },
+      "illustrativeScenarios": [
+        {
+          "maximumSlots": 1024,
+          "maximumDistinctScores": 512,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 49152,
+          "tableClearBytesRemoved": 6242304,
+          "tableClearReductionPercent": 99.21875,
+          "maximumScratchBytes": 106144,
+          "maximumLinearMemoryBytes": 1703936,
+          "persistentMemoryBytesRemoved": 720896,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        },
+        {
+          "maximumSlots": 2048,
+          "maximumDistinctScores": 1024,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 98304,
+          "tableClearBytesRemoved": 6193152,
+          "tableClearReductionPercent": 98.4375,
+          "maximumScratchBytes": 112288,
+          "maximumLinearMemoryBytes": 1703936,
+          "persistentMemoryBytesRemoved": 720896,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        }
+      ],
+      "jmdictCalls": [
+        {
+          "ordinal": 0,
+          "rows": 50000,
+          "scoreCount": 340,
+          "slotCount": 131072,
+          "scoreCapacity": 50000,
+          "uniqueReferences": 34951,
+          "tableBytes": 524288,
+          "outputBytes": 401376,
+          "layoutEnd": 2374772
+        },
+        {
+          "ordinal": 1,
+          "rows": 40000,
+          "scoreCount": 387,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 32856,
+          "tableBytes": 524288,
+          "outputBytes": 321564,
+          "layoutEnd": 2089632
+        },
+        {
+          "ordinal": 2,
+          "rows": 40000,
+          "scoreCount": 430,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 32421,
+          "tableBytes": 524288,
+          "outputBytes": 321736,
+          "layoutEnd": 2084412
+        },
+        {
+          "ordinal": 3,
+          "rows": 40000,
+          "scoreCount": 475,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 28895,
+          "tableBytes": 524288,
+          "outputBytes": 321916,
+          "layoutEnd": 2042100
+        },
+        {
+          "ordinal": 4,
+          "rows": 50000,
+          "scoreCount": 243,
+          "slotCount": 131072,
+          "scoreCapacity": 50000,
+          "uniqueReferences": 34677,
+          "tableBytes": 524288,
+          "outputBytes": 400988,
+          "layoutEnd": 2371484
+        },
+        {
+          "ordinal": 5,
+          "rows": 50000,
+          "scoreCount": 270,
+          "slotCount": 131072,
+          "scoreCapacity": 50000,
+          "uniqueReferences": 34006,
+          "tableBytes": 524288,
+          "outputBytes": 401096,
+          "layoutEnd": 2363432
+        },
+        {
+          "ordinal": 6,
+          "rows": 40000,
+          "scoreCount": 248,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 24271,
+          "tableBytes": 524288,
+          "outputBytes": 321008,
+          "layoutEnd": 1986612
+        },
+        {
+          "ordinal": 7,
+          "rows": 50000,
+          "scoreCount": 167,
+          "slotCount": 131072,
+          "scoreCapacity": 50000,
+          "uniqueReferences": 31906,
+          "tableBytes": 524288,
+          "outputBytes": 400684,
+          "layoutEnd": 2338232
+        },
+        {
+          "ordinal": 8,
+          "rows": 40000,
+          "scoreCount": 198,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 25774,
+          "tableBytes": 524288,
+          "outputBytes": 320808,
+          "layoutEnd": 2004648
+        },
+        {
+          "ordinal": 9,
+          "rows": 40000,
+          "scoreCount": 199,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 25109,
+          "tableBytes": 524288,
+          "outputBytes": 320812,
+          "layoutEnd": 1996668
+        },
+        {
+          "ordinal": 10,
+          "rows": 40000,
+          "scoreCount": 192,
+          "slotCount": 131072,
+          "scoreCapacity": 40000,
+          "uniqueReferences": 26102,
+          "tableBytes": 524288,
+          "outputBytes": 320784,
+          "layoutEnd": 2008584
+        },
+        {
+          "ordinal": 11,
+          "rows": 48299,
+          "scoreCount": 195,
+          "slotCount": 131072,
+          "scoreCapacity": 48299,
+          "uniqueReferences": 35062,
+          "tableBytes": 524288,
+          "outputBytes": 387188,
+          "layoutEnd": 2331880
+        }
+      ]
+    },
+    {
+      "dictionary": "jitendex",
+      "calls": 22,
+      "rows": 436555,
+      "totalCompactScores": 1251,
+      "minCompactScores": 36,
+      "maxCompactScores": 94,
+      "baseline": {
+        "totalSlots": 1245184,
+        "tableClearBytes": 4980736,
+        "inputCopiedBytes": 7851764,
+        "outputCopiedBytes": 3497796,
+        "maximumScratchBytes": 406144,
+        "maximumLinearMemoryBytes": 1310720
+      },
+      "illustrativeScenarios": [
+        {
+          "maximumSlots": 1024,
+          "maximumDistinctScores": 512,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 90112,
+          "tableClearBytesRemoved": 4890624,
+          "tableClearReductionPercent": 98.19078947368422,
+          "maximumScratchBytes": 54144,
+          "maximumLinearMemoryBytes": 917504,
+          "persistentMemoryBytesRemoved": 393216,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        },
+        {
+          "maximumSlots": 2048,
+          "maximumDistinctScores": 1024,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 180224,
+          "tableClearBytesRemoved": 4800512,
+          "tableClearReductionPercent": 96.38157894736842,
+          "maximumScratchBytes": 60288,
+          "maximumLinearMemoryBytes": 983040,
+          "persistentMemoryBytesRemoved": 327680,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        }
+      ]
+    },
+    {
+      "dictionary": "vndb",
+      "calls": 192,
+      "rows": 6648310,
+      "totalCompactScores": 556,
+      "minCompactScores": 1,
+      "maxCompactScores": 3,
+      "baseline": {
+        "totalSlots": 21139808,
+        "tableClearBytes": 84559232,
+        "inputCopiedBytes": 55332860,
+        "outputCopiedBytes": 53191776,
+        "maximumScratchBytes": 764288,
+        "maximumLinearMemoryBytes": 1769472
+      },
+      "illustrativeScenarios": [
+        {
+          "maximumSlots": 1024,
+          "maximumDistinctScores": 512,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 746880,
+          "tableClearBytesRemoved": 83812352,
+          "tableClearReductionPercent": 99.1167374840869,
+          "maximumScratchBytes": 86144,
+          "maximumLinearMemoryBytes": 1048576,
+          "persistentMemoryBytesRemoved": 720896,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        },
+        {
+          "maximumSlots": 2048,
+          "maximumDistinctScores": 1024,
+          "sourceCardinalityWouldFitEveryCall": true,
+          "cardinalityExceptions": 0,
+          "totalTableClearBytes": 1492352,
+          "tableClearBytesRemoved": 83066880,
+          "tableClearReductionPercent": 98.2351400731738,
+          "maximumScratchBytes": 92288,
+          "maximumLinearMemoryBytes": 1048576,
+          "persistentMemoryBytesRemoved": 720896,
+          "limits": "Allocation arithmetic only; probe exhaustion or other guards still could decline. This assumes dictionary reservation is capped with the table and no growth/retry."
+        }
+      ]
+    }
+  ],
+  "illustrativeInitial2048": {
+    "slots": 2048,
+    "clearBytesPerOrdinaryCall": 8192,
+    "jmdictMaximumOccupancy": 0.23193359375,
+    "capacitiesAreNotPerformanceOptimizedOrFrozen": true,
+    "currentCardinalityFits": true,
+    "probeExhaustionStillUnmeasured": true,
+    "smallestTableComparison": "1024 slots also fit every current cardinality but save only another49152 clear bytes over the complete JMdict corpus; its highest observed occupancy is475/1024. That arithmetic does not establish the faster capacity.",
+    "unchangedWork": [
+      "four input copies",
+      "native row validation",
+      "score mixing for every row",
+      "first-occurrence dictionary/key construction",
+      "second offset/length output pass",
+      "owned final output copy",
+      "compile/instantiate/readiness"
+    ]
+  },
+  "possibleSeparateMechanisms": {
+    "fixedNarrowRoute": {
+      "description": "Derive scoreCapacity from min(rowCount,65535,slotCount/2), reserve a bounded small table/dictionary, and return unsupported compact before adding an entry beyond capacity; original JS fallback remains synchronous and runs once.",
+      "changesRequired": "Both helper layout and C admission/region capacity rules must change; changing only JS allocation fails the existing C minimum table bound.",
+      "upside": "Explicit table clears fall to the listed scenario totals; compact reservation also reduces peak native pages in this exact workload.",
+      "risks": [
+        "High-cardinality custom inputs could redo substantial native work in JavaScript and lose current native coverage.",
+        "A half-full table increases occupied probes; current distinct-count evidence does not establish collision distribution or probe budget.",
+        "The fixed capacity must remain a generic memory budget, not an accepted score-value/corpus whitelist.",
+        "Any expected capacity/probe decline must remain a nullable fallback, never be misclassified as a malformed native return that disables the session."
+      ]
+    },
+    "activePrefixWithBoundedGrowth": {
+      "preferredForFurtherFeasibility": true,
+      "description": "Keep the existing validated full table/dictionary reservation and private-memory layout. C initially clears and probes only min(reservedSlots,2048) slots. Before an unseen score would exceed half the active capacity, double within the reserved region, clear the enlarged prefix, and rehash the existing first-occurrence dictionary while preserving every dictionary index and existing key.",
+      "abi": "Could retain the existing argument list and full reserved-region checks; requires a new kernel/source/binary, not any change to the current frozen source.",
+      "currentClearByteCeiling": "Every current actual cardinality fits the illustrative initial table, so the no-growth clear totals equal the2048-slot scenario. Collisions may still trigger the bounded-probe fallback.",
+      "memoryLimitation": "Retains current full private arena allocation/pages; unlike the compact-reservation scenario, it does not earn the projected peak-memory reduction.",
+      "diagnostics": "Existing tableBytesRequested counts reserved bytes. It must not be relabeled as actual cleared bytes; future logical instrumentation would need to count active clears, rehashes, probes and attempts separately.",
+      "maximumClearWhenGrowing2048To131072": 1040384,
+      "maximumExistingEntriesRehashedAtHalfLoad": 64512,
+      "worstCase": "Geometric clears total less than twice the final reserved table bytes; additional rehash/lookup work needs a single explicit bounded budget and safe fallback. A high-cardinality call can do more work than the current implementation.",
+      "safetyRequirements": [
+        "Clear every newly active prefix before use, including stale bytes from prior call layouts.",
+        "Never move/reorder the first-occurrence dictionary or already emitted key indexes.",
+        "Enforce checked active<=reserved power-of-two capacity and keep all existing uint64 region disjointness/bounds.",
+        "Keep a whole-call bounded collision/rehash budget; expected exhaustion returns zero without publishing partial private bytes.",
+        "Retain all current offset/null/length/compact-cutoff/invalid-return/ownership/guard semantics."
+      ]
+    }
+  },
+  "disposition": {
+    "evidenceSupports": "A separate generic active-prefix/growth feasibility candidate has a concrete write-volume ceiling, strongest on VNDB; it is not another score-only JS preparation or parser variant.",
+    "nextGate": "Only after root disposition of the unchanged browser cohort: an untimed source-bound clear/probe/rehash count plus complete output parity would establish whether this work reduction survives the existing collision/fallback constraints, before considering any timed screen.",
+    "noClaim": "No elapsed/CPU saving, browser benefit, optimal initial capacity or future activation success is inferred from byte counts.",
+    "frozenProductChanged": false,
+    "newProductSourceCreated": false,
+    "localOrHostedProductExecution": false,
+    "newTiming": false
+  }
+}

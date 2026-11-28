@@ -1,0 +1,50 @@
+{
+  "kind": "root-corrected-browser-first-acquisition-publication-decision",
+  "passed": true,
+  "producer": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+  "tree": "944a8720e02bfad40f68b6c7f85f7c6ae237a37f",
+  "branch": "perf/native-record-fields-browser-fixtures-20261128-1c413",
+  "sourceManifest": "c2906e74667b0a5aabf4f6c75eb6c06dbe98d897",
+  "sourceDigest": "156413d54fae4de07d28aa06eb0f5e390c0a206f68c2b21e7a60387f958356ac",
+  "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+  "control": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+  "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "sourceReview": "f95b541db8085b772226aae2f02314a7489e2f22",
+  "sourcePreflight": {
+    "run": 46137023673,
+    "job": 140954485323,
+    "head": "0fde3e1ca108386c00a1e6c879fdc870c199ee7a",
+    "attempt": 1,
+    "passed": true,
+    "target": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+    "rootReview": "8f52b626c7202d1e29ff885f0f3237ab4a36ab30",
+    "completion": "04b6779799b477521d8644c315688a662efe7936"
+  },
+  "originalFailureAudit": {
+    "run": 46137216352,
+    "job": 140955079610,
+    "head": "ca63a5078ea5f77bbd55d35b7c44190f48d3c27e",
+    "attempt": 1,
+    "passed": true,
+    "all6OriginalsVerified": true,
+    "all78ArchiveMembersVerified": true,
+    "originalReportCount": 0,
+    "originalTimingCount": 0,
+    "originalStudyPassed": false,
+    "originalRun": 46136060186,
+    "artifact": {
+      "id": 15260456656,
+      "bytes": 1728452,
+      "sha256": "6257e9e3c076b5bb56a6b61e651ffcb31cd7081acfb2368edd4fc051a43104ff"
+    },
+    "fullAuditLogSha256": "97b54208692bd6cdbd93262ea06eab3b8fb930b048fc2b24f6dbedfd2f940a9e"
+  },
+  "noTimingResampling": true,
+  "noObservationReplacement": true,
+  "productControlPoliciesScheduleNumericGatesUnchanged": true,
+  "exact6CellsEach74Reports": true,
+  "exact24CandidatePairsAnd8Controls": true,
+  "qualificationStillUndecided": true,
+  "prAuthorizedOnlyAfterFrozenWholeBrowserGatesPass": true,
+  "scope": "Root independently read complete audit job log and original metadata; reconciled all6 empty/failed artifacts and exact completed source-only preflight. The immutable failed launcher remains failed; this source correction introduces no performance observations or product change before the new original acquisition."
+}

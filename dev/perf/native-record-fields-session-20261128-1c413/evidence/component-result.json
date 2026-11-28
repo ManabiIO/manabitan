@@ -1,0 +1,156 @@
+{
+  "allCorrectedStudyJobsSucceeded": true,
+  "archiveIntegrityPassed": true,
+  "artifact": {
+    "id": 15254998779,
+    "members": 217,
+    "sha256": "e4b76382586a00d8824e85804e3a978942fd452f61c2006aedc1342c5d84d654",
+    "sizeBytes": 4076464
+  },
+  "auditPassed": true,
+  "auditorVersion": "corrected-launcher-hosted-v1",
+  "benchmarkCodeExecuted": false,
+  "componentOnly": true,
+  "contrasts": {
+    "cpuMs": {
+      "BoverA": {
+        "candidate": "B",
+        "control": "A",
+        "equalWorkPercent": -24.67141408164989,
+        "fasterPairs": 12,
+        "medianPercent": -25.380375097163345,
+        "medianSaving": 7.8255,
+        "metric": "cpuMs"
+      },
+      "BoverC": {
+        "candidate": "B",
+        "control": "C",
+        "equalWorkPercent": -24.969678792518735,
+        "fasterPairs": 12,
+        "medianPercent": -26.56422753665435,
+        "medianSaving": 8.3165,
+        "metric": "cpuMs"
+      },
+      "CoverA": {
+        "candidate": "C",
+        "control": "A",
+        "equalWorkPercent": 0.3975255684219414,
+        "fasterPairs": 6,
+        "medianPercent": -0.06733724617924985,
+        "medianSaving": 0.02200000000000024,
+        "metric": "cpuMs"
+      }
+    },
+    "wallMs": {
+      "BoverA": {
+        "candidate": "B",
+        "control": "A",
+        "equalWorkPercent": -24.678028970545373,
+        "fasterPairs": 12,
+        "medianPercent": -25.411087795629108,
+        "medianSaving": 7.827762,
+        "metric": "wallMs"
+      },
+      "BoverC": {
+        "candidate": "B",
+        "control": "C",
+        "equalWorkPercent": -24.978803931021854,
+        "fasterPairs": 12,
+        "medianPercent": -26.56543990910194,
+        "medianSaving": 8.311872,
+        "metric": "wallMs"
+      },
+      "CoverA": {
+        "candidate": "C",
+        "control": "A",
+        "equalWorkPercent": 0.4009199749360537,
+        "fasterPairs": 6,
+        "medianPercent": -0.038460562112024865,
+        "medianSaving": 0.013009999999997746,
+        "metric": "wallMs"
+      }
+    }
+  },
+  "correctedStudyHead": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+  "correctedStudyRunId": 46123144616,
+  "firstFailure": null,
+  "independentWholeBrowserQualificationRequired": true,
+  "limitations": [
+    "This separately bound reader derives from reviewed efae89e883492a0217c62e6a86bf867d11537158; the original failed-study reader remains unchanged.",
+    "Original run46115204690 is preserved as a zero-observation compiler preflight failure; it supplies no warmup, timing, control or performance result to the corrected study.",
+    "The original runner deduplicated matching owning output bytes only after full comparison. This audit reconstructs all retained common output bytes and binds every raw observation receipt.",
+    "Original Linux Node clocks, affinity, flags and resource snapshots are data. No audit-host timing or runtime result enters the comparison.",
+    "A component nomination never establishes complete-browser import benefit."
+  ],
+  "newTimingOrImportAcquired": false,
+  "nominationGatePassed": true,
+  "originalArchiveRetained": "original-15254998779.zip",
+  "originalEvidenceRoot": "original-evidence/native-record-fields-1c413",
+  "previousFailedStudy": {
+    "archiveIntegrityPassed": true,
+    "artifact": {
+      "id": 15254144071,
+      "name": "native-record-fields-1c413-b5743f37aa49eef96319e594ed42acd7a5e857f3",
+      "sha256": "c46d327aefbe24c26e6ef3c3b3375a0f786205efb00d56568d242a68d5cf1e7e",
+      "sizeBytes": 3926247
+    },
+    "artifactFiles": 82,
+    "auditPassed": true,
+    "buildLogSha256": "7d05d9df3e07b60a71bc0d806b75b7c48de85d7cf004cb6bbe0fb779f774d06f",
+    "classification": "known-linker-driver-preflight-failure",
+    "failureStage": "compiler-driver argument validation",
+    "historicalFrozenStage1RecordsAreNotNewObservations": true,
+    "kind": "original-zero-observation-launcher-failure-audit",
+    "nativeModuleReproducedInOriginal": false,
+    "newObservationFiles": 0,
+    "newTimingOrImportAcquired": false,
+    "nominationGatePassed": false,
+    "originalArchiveRetained": "original-15254144071.zip",
+    "originalBuildExitCode": 1,
+    "originalFocusedTestsExecuted": false,
+    "originalHead": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "originalJobId": 140887357214,
+    "originalJobSucceeded": false,
+    "originalMeasuredObservations": 0,
+    "originalRunId": 46115204690,
+    "originalSteps": {
+      "Preserve complete source, captures, every observation and failure": {
+        "completed_at": "2026-11-28T07:42:52Z",
+        "conclusion": "success",
+        "name": "Preserve complete source, captures, every observation and failure",
+        "number": 7,
+        "started_at": "2026-11-28T07:42:51Z",
+        "status": "completed"
+      },
+      "Run the frozen fresh-process complete-call schedule": {
+        "completed_at": "2026-11-28T07:42:51Z",
+        "conclusion": "skipped",
+        "name": "Run the frozen fresh-process complete-call schedule",
+        "number": 6,
+        "started_at": "2026-11-28T07:42:51Z",
+        "status": "completed"
+      },
+      "Verify exact sources, native reproduction and focused behavior": {
+        "completed_at": "2026-11-28T07:42:51Z",
+        "conclusion": "failure",
+        "name": "Verify exact sources, native reproduction and focused behavior",
+        "number": 5,
+        "started_at": "2026-11-28T07:42:47Z",
+        "status": "completed"
+      }
+    },
+    "originalTree": "361ad7c050882e3ab7653ec2bc907265e4b0eefc",
+    "originalWarmupObservations": 0,
+    "outerLogSha256": "86994536d8841723cef13aee194990367070e552252b74287baf13cf3e7effc8",
+    "performanceResultAvailable": false,
+    "preparationSha256": "4b78d93fe6b65254e6e50c05f688c54baf71eae6d07230018e955fb40f9c92df",
+    "productCodeExecuted": false,
+    "qualifiedForComponentNomination": false,
+    "schemaVersion": 1,
+    "sourceAndCaptureIntegrityPassed": true
+  },
+  "qualifiedForComponentNomination": true,
+  "schemaVersion": 1,
+  "screenComplete": true,
+  "sourceAndCaptureIntegrityPassed": true
+}
