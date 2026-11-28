@@ -465,6 +465,29 @@ static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t len
         crc = crc32_step16(data + offset, crc);
         offset += 16u;
     }
+    // Short source gaps often end between slice blocks. Bound each smaller
+    // block before loading it, then leave at most three serial byte steps.
+    if (length - offset >= 8u) {
+        const uint32_t first = crc ^ crc32_read_u32_le(data + offset);
+        const uint32_t second = crc32_read_u32_le(data + offset + 4u);
+        crc = crc32_table[7][first & 0xffu] ^
+            crc32_table[6][(first >> 8u) & 0xffu] ^
+            crc32_table[5][(first >> 16u) & 0xffu] ^
+            crc32_table[4][first >> 24u] ^
+            crc32_table[3][second & 0xffu] ^
+            crc32_table[2][(second >> 8u) & 0xffu] ^
+            crc32_table[1][(second >> 16u) & 0xffu] ^
+            crc32_table[0][second >> 24u];
+        offset += 8u;
+    }
+    if (length - offset >= 4u) {
+        const uint32_t word = crc ^ crc32_read_u32_le(data + offset);
+        crc = crc32_table[3][word & 0xffu] ^
+            crc32_table[2][(word >> 8u) & 0xffu] ^
+            crc32_table[1][(word >> 16u) & 0xffu] ^
+            crc32_table[0][word >> 24u];
+        offset += 4u;
+    }
     while (offset < length) {
         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
     }
@@ -472,6 +495,13 @@ static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t len
 }
 
 #if defined(TERM_BANK_CRC_TEST)
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_gap_test(uint32_t initial, uint32_t input_ptr, uint32_t length) {
+    const uint8_t* data = (const uint8_t*)(uintptr_t)input_ptr;
+    (void)crc32_bytes(data, 0u);
+    return crc32_update_gap(initial, data, length);
+}
+
 __attribute__((visibility("default")))
 uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
     Crc32Shift shift;

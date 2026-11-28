@@ -25,7 +25,7 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest'
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 import {findCompiler} from './util/wasm-compiler.js'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number, term_bank_crc32_gap_test: (initial: number, input: number, length: number) => number}} Exports */
 /** @type {Exports} */
 let wasm
 /** @type {string | undefined} */
@@ -52,6 +52,7 @@ beforeAll(async () => {
         '-Wl,--export=inflate_and_join_term_banks',
         '-Wl,--export=term_bank_crc32_test',
         '-Wl,--export=term_bank_crc32_combine_test',
+        '-Wl,--export=term_bank_crc32_gap_test',
         '-DTERM_BANK_CRC_TEST',
         '-Wl,--strip-all',
         '-o',
@@ -118,6 +119,39 @@ function candidateCrc(bytes, alignment = 0) {
 }
 
 describe('term bank CRC32', () => {
+    test('extends short source gaps across every slice tail and alignment', () => {
+        const initialStates = [0, 0xffffffff, 0x12345678]
+        for (let length = 0; length <= 80; ++length) {
+            const bytes = randomBytes(length, 0x8f5d9137 ^ length)
+            const expected = initialStates.map((initial) => crc32(bytes, initial) >>> 0)
+            for (let alignment = 0; alignment < 16; ++alignment) {
+                wasm.wasm_reset_heap()
+                const pointer = writeBytes(bytes, alignment)
+                for (let state = 0; state < initialStates.length; ++state) {
+                    expect(wasm.term_bank_crc32_gap_test(initialStates[state], pointer, length) >>> 0).toBe(expected[state])
+                }
+            }
+        }
+        const bytes = randomBytes(95, 0x7b149a6d)
+        wasm.wasm_reset_heap()
+        const pointer = writeBytes(bytes)
+        for (let split = 0; split <= bytes.length; ++split) {
+            const first = wasm.term_bank_crc32_gap_test(0, pointer, split) >>> 0
+            expect(wasm.term_bank_crc32_gap_test(first, pointer + split, bytes.length - split) >>> 0).toBe(crc32(bytes))
+        }
+    })
+
+    test('bounds short source gap loads at the physical memory end', () => {
+        wasm.wasm_reset_heap()
+        expect(wasm.wasm_alloc(4096)).toBeGreaterThan(0)
+        for (let length = 0; length <= 47; ++length) {
+            const bytes = randomBytes(length, 0x613be247 ^ length)
+            const pointer = wasm.memory.buffer.byteLength - length
+            new Uint8Array(wasm.memory.buffer, pointer, length).set(bytes)
+            expect(wasm.term_bank_crc32_gap_test(0x9e3779b9, pointer, length) >>> 0).toBe(crc32(bytes, 0x9e3779b9))
+        }
+    })
+
     test('combines exact source spans with the independent zlib CRC', () => {
         const first = randomBytes(8192, 0x51a73b92)
         for (const length of [0, 1, 2, 3, 4, 7, 8, 15, 16, 17, 31, 32, 63, 64, 255, 256, 257, 511, 512, 1023, 1024, 65535, 65536, 1048577]) {
