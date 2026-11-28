@@ -6848,8 +6848,11 @@ void 0 :
         let publishedCount = 0;
         let publishedContentBytes = 0;
         let lastPublishedSource = -1
+        const firstScannedIndex = staged.indexes[0]
+        let scannedContiguousIndexes = true
         for (let i = sourceStart; i < sourceEnd; ++i) {
             const index = staged.indexes[i];
+            scannedContiguousIndexes &&= index === firstScannedIndex + i
             if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
             const offset = spans.offsets[i];
             const length = spans.lengths[i];
@@ -6890,7 +6893,8 @@ void 0 :
             this._recentTermContentSourceBatches.delete(first.value[0]);
             this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength;
         }
-        if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
+        const resetBatchIds = this._nextRecentTermContentSourceBatchId > 0xffffffff
+        if (resetBatchIds) {
             this._recentTermContentSourceBatches.clear();
             this._recentTermContentSourceBatchBytes = 0;
             this._recentTermContentBoundaryBatchId = 0
@@ -6924,7 +6928,12 @@ void 0 :
             endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
             endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
         );
-        if (contiguousPublished) {
+        if (contiguousPublished && staged.indexes.buffer instanceof ArrayBuffer && !resetBatchIds) {
+            // Reuse the same synchronous traversal for private indexes. A
+            // rollover can clear an aliased index view; shared indexes may
+            // change independently, so those cases retain the final check.
+            contiguousPublished = scannedContiguousIndexes && firstIndex === firstScannedIndex
+        } else if (contiguousPublished) {
             for (let i = 1; i < staged.indexes.length; ++i) {
                 if (staged.indexes[i] !== firstIndex + i) {
                     contiguousPublished = false;
