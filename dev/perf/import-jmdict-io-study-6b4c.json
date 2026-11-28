@@ -1,0 +1,62 @@
+{
+    "schemaVersion": 2,
+    "stage": "frozen-jmdict-io-screen",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "baselineTree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "purpose": "One browser JMdict screen for each independent compression-acknowledgment and record-finalization candidate. Local Node wall/CPU variance was inconclusive, and synchronous Node filesystem writes do not model browser asynchronous finalization.",
+    "productionDefaults": true,
+    "pairs": 6,
+    "orders": [
+        "AB",
+        "BA"
+    ],
+    "maxParallel": 2,
+    "fixtureIntegrity": "Locked SHA-256 required before every observation",
+    "timingBoundary": "Browser monotonic file-input change through completed import UI; separate memory observations are not timing evidence",
+    "controls": "Existing two warmups per arm, six alternating complete candidate pairs and two interleaved identical-code A/C pairs in each independent initial-order cell",
+    "failurePolicy": "One fixed browser screen per candidate; retain every scheduled observation and failure, without replacement, tail trimming or repetitions to chase noise",
+    "decisionPolicy": "No PR without useful replicated complete-import improvement beyond identical-code controls, unchanged semantics/storage and every validation and prospective memory gate passing. Keep AB and BA hosts separate and assess benefit against implementation complexity.",
+    "memoryPolicy": "Unchanged qualification gate: all observations covered; paired median PSS/private increases at most 5%, individual pairs at most 10%",
+    "semanticPolicy": "Unchanged exhaustive media, JMdict no-media, canonical content, reopened storage, source/package identity and normal parser-worker gates",
+    "evidencePolicy": "Upload registered plans, exact source-tree receipts, qualification observations/packages/logs and validation logs/fixture reports only; exclude qualification-sources worktrees and dependencies",
+    "candidates": [
+        {
+            "label": "compression-source-ack",
+            "sha": "109f8bf01cd1823f7c05694afa2d51bbfec4f460",
+            "tree": "d9f29279ff9f7c2260f8444bd0e4c6b87e1f65f4",
+            "localCommit": "6f3096d6e33680dae0ddeae38d05dde0b354bb38",
+            "dictionaries": [
+                "jmdict"
+            ],
+            "expectedPackageEntries": [
+                "js/dictionary/zstd-term-content-compression-worker.js",
+                "js/dictionary/zstd-term-content.js"
+            ],
+            "expectedSourcePaths": [
+                "ext/js/dictionary/zstd-term-content-compression-worker.js",
+                "ext/js/dictionary/zstd-term-content.js",
+                "test/zstd-compression-worker-context.test.js",
+                "test/zstd-compression-worker-source-ack.test.js",
+                "test/zstd-term-content-pool-drain.test.js"
+            ]
+        },
+        {
+            "label": "record-finalization-io",
+            "sha": "2e1621f4c4d3892723109ce3ea7e848e81affd10",
+            "tree": "7007798b9cf26e8e8779a401d38bc178500cfb30",
+            "localCommit": "10d2ac02bf8053b095c95a97b5baa9058ebafba8",
+            "dictionaries": [
+                "jmdict"
+            ],
+            "expectedPackageEntries": [
+                "js/dictionary/term-record-opfs-store.js"
+            ],
+            "expectedSourcePaths": [
+                "ext/js/dictionary/term-record-opfs-store.js",
+                "test/dictionary-import-reopen-recovery.test.js",
+                "test/term-record-import-finalization.test.js",
+                "test/term-record-opfs-store.test.js"
+            ]
+        }
+    ]
+}

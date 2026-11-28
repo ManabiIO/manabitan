@@ -1,0 +1,215 @@
+name: JMdict acknowledgment and finalization study 20261128 6b4c
+
+on:
+  push:
+    branches: ['perf/import-study-20261127-6b4c']
+    paths:
+      - '.github/workflows/import-jmdict-io-study-6b4c.yml'
+      - 'dev/perf/import-jmdict-io-study-6b4c.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-jmdict-io-study-6b4c-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      candidates: ${{ steps.plan.outputs.candidates }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - id: plan
+        name: Read registered exact-source comparison plan
+        shell: python
+        run: |
+          import json, os, re
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-jmdict-io-study-6b4c.json').read_text())
+          assert re.fullmatch(r'[a-f0-9]{40}', plan['baseline'])
+          assert plan['pairs'] == 6
+          assert plan['orders'] == ['AB', 'BA']
+          assert plan['productionDefaults'] is True
+          assert plan['stage'] == 'frozen-jmdict-io-screen'
+          assert plan['maxParallel'] == 2
+          assert len(plan['candidates']) == 2
+          expected_entries = {
+              'compression-source-ack': ['js/dictionary/zstd-term-content-compression-worker.js', 'js/dictionary/zstd-term-content.js'],
+              'record-finalization-io': ['js/dictionary/term-record-opfs-store.js'],
+          }
+          assert {item['label'] for item in plan['candidates']} == set(expected_entries)
+          assert re.fullmatch(r'[a-f0-9]{40}', plan['baselineTree'])
+          matrix = []
+          candidates = []
+          for candidate in plan['candidates']:
+              assert re.fullmatch(r'[a-z0-9-]+', candidate['label'])
+              assert re.fullmatch(r'[a-f0-9]{40}', candidate['sha'])
+              assert re.fullmatch(r'[a-f0-9]{40}', candidate['tree'])
+              assert candidate['dictionaries'] == ['jmdict']
+              assert candidate['expectedPackageEntries'] == expected_entries[candidate['label']]
+              assert candidate['expectedSourcePaths'] == sorted(set(candidate['expectedSourcePaths']))
+              candidates.append({'label': candidate['label'], 'sha': candidate['sha'], 'tree': candidate['tree']})
+              for dictionary in candidate['dictionaries']:
+                  assert dictionary in ('jmdict', 'jitendex', 'vndb')
+                  for order in plan['orders']:
+                      assert order in ('AB', 'BA')
+                      matrix.append({'candidate': candidate['label'], 'sha': candidate['sha'], 'dictionary': dictionary, 'order': order})
+          assert matrix and candidates
+          matrix.sort(key=lambda cell: ({'jmdict': 0, 'jitendex': 1, 'vndb': 2}[cell['dictionary']], cell['candidate'], cell['order']))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('matrix=' + json.dumps({'include': matrix}, separators=(',', ':')) + '\n')
+              output.write('candidates=' + json.dumps({'include': candidates}, separators=(',', ':')) + '\n')
+
+  qualify:
+    needs: select
+    name: ${{ matrix.candidate }} / ${{ matrix.dictionary }} / ${{ matrix.order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    env:
+      PERF_LABEL: ${{ matrix.candidate }}
+      PERF_CANDIDATE: ${{ matrix.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run exact-source pairs, identical controls, exhaustive media, and separate memory observations
+        shell: python
+        run: |
+          import json, os, subprocess
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-jmdict-io-study-6b4c.json').read_text())
+          candidate = next(item for item in plan['candidates'] if item['label'] == os.environ['PERF_LABEL'])
+          assert candidate['sha'] == os.environ['PERF_CANDIDATE']
+          evidence = Path('builds/perf/import-jmdict-io-study-6b4c')
+          evidence.mkdir(parents=True, exist_ok=True)
+          (evidence / 'registered-study.json').write_text(json.dumps(plan, indent=2) + '\n')
+          subprocess.run(['git', 'fetch', 'origin', plan['baseline'], candidate['sha']], check=True)
+          source_trees = {
+              'baseline': subprocess.check_output(['git', 'rev-parse', plan['baseline'] + '^{tree}'], text=True).strip(),
+              'candidate': subprocess.check_output(['git', 'rev-parse', candidate['sha'] + '^{tree}'], text=True).strip(),
+              'studyCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'studyTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+          }
+          (evidence / 'registered-source-trees.json').write_text(json.dumps(source_trees, indent=2) + '\n')
+          assert source_trees['baseline'] == plan['baselineTree']
+          assert source_trees['candidate'] == candidate['tree']
+          changed_sources = subprocess.check_output(['git', 'diff', '--name-only', plan['baseline'], candidate['sha']], text=True).splitlines()
+          assert changed_sources == candidate['expectedSourcePaths'], changed_sources
+          command = [
+              'python', 'dev/perf/import-qualification-20261125-a7f7.py',
+              '--baseline', plan['baseline'], '--candidate', candidate['sha'],
+              '--dictionary', os.environ['PERF_DICTIONARY'],
+              '--initial-order', os.environ['PERF_ORDER'], '--pairs', str(plan['pairs']),
+              '--expected-workers', '3', '--evidence', str(evidence / 'qualification'),
+          ]
+          for entry in candidate['expectedPackageEntries']:
+              command.extend(['--expected-package-entry', entry])
+          subprocess.run(command, check=True)
+      - name: Retain all observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-jmdict-io-study-6b4c-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_attempt }}
+          path: |
+            builds/perf/import-jmdict-io-study-6b4c/registered-study.json
+            builds/perf/import-jmdict-io-study-6b4c/registered-source-trees.json
+            builds/perf/import-jmdict-io-study-6b4c/qualification
+          if-no-files-found: error
+          retention-days: 14
+
+  validate:
+    needs: [select, qualify]
+    if: ${{ always() && needs.select.result == 'success' }}
+    name: Validate ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.select.outputs.candidates) }}
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      VALIDATION_EVIDENCE: builds/perf/import-jmdict-io-study-6b4c-validation
+      EXPECTED_SOURCE_SHA: ${{ matrix.sha }}
+      EXPECTED_SOURCE_TREE: ${{ matrix.tree }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ matrix.sha }}
+          persist-credentials: false
+      - name: Record exact validation source
+        shell: python
+        run: |
+          import json, os, subprocess
+          from pathlib import Path
+          evidence = Path(os.environ['VALIDATION_EVIDENCE'])
+          evidence.mkdir(parents=True, exist_ok=True)
+          identity = {
+              'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+          }
+          (evidence / 'validation-source.json').write_text(json.dumps(identity, indent=2) + '\n')
+          assert identity['commit'] == os.environ['EXPECTED_SOURCE_SHA']
+          assert identity['tree'] == os.environ['EXPECTED_SOURCE_TREE']
+      - uses: ./.github/actions/setup
+      - name: Typecheck every project
+        shell: bash
+        run: npm run test:ts 2>&1 | tee "$VALIDATION_EVIDENCE/types.log"
+      - name: Lint JavaScript
+        shell: bash
+        run: npm run test:js 2>&1 | tee "$VALIDATION_EVIDENCE/lint.log"
+      - name: Run unit tests
+        shell: bash
+        run: npm run test:unit -- --maxWorkers=2 --no-file-parallelism 2>&1 | tee "$VALIDATION_EVIDENCE/unit.log"
+      - name: Run options upgrade tests
+        shell: bash
+        run: npm run test:unit:options -- --maxWorkers=1 --no-file-parallelism 2>&1 | tee "$VALIDATION_EVIDENCE/options.log"
+      - name: Check every build target
+        shell: bash
+        run: npm run test:build 2>&1 | tee "$VALIDATION_EVIDENCE/build.log"
+      - name: Retain parser fixture diagnostics
+        if: always()
+        shell: python
+        run: |
+          import json, os, shutil, tempfile
+          from pathlib import Path
+          evidence = Path(os.environ['VALIDATION_EVIDENCE'])
+          evidence.mkdir(parents=True, exist_ok=True)
+          retained = []
+          for prefix in ('borrowed-content-', 'parser-settlement-'):
+              for report in sorted(Path(tempfile.gettempdir()).glob(prefix + '*/report.json')):
+                  if not report.is_file() or report.is_symlink():
+                      continue
+                  target = evidence / 'fixture-reports' / report.parent.name / 'report.json'
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(report, target)
+                  retained.append(str(target.relative_to(evidence)))
+          (evidence / 'fixture-reports-index.json').write_text(json.dumps(retained, indent=2) + '\n')
+      - name: Retain validation logs and fixture reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-jmdict-io-study-6b4c-validation-${{ matrix.label }}-${{ github.run_attempt }}
+          path: builds/perf/import-jmdict-io-study-6b4c-validation
+          if-no-files-found: error
+          retention-days: 14
