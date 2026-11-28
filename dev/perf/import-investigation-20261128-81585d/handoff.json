@@ -49,7 +49,7 @@
       "requiredSourceGates": 15,
       "failedSourceGates": [
         "unit",
-        "test-typescript"
+        "types-test"
       ],
       "failedQualification": [
         "JMdict host0 target",
@@ -83,7 +83,7 @@
     "currentlyAccessible": true,
     "freezeTimeUtc": "2026-11-28 04:58:28 UTC",
     "adversarialTestsPassed": 32,
-    "lastExitCode": 2,
+    "lastExitCode": 1,
     "lastDisposition": {
       "lazySignatures": {
         "passedArtifacts": 4,

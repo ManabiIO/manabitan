@@ -34,5 +34,5 @@ The original aggregate checker can be run against a separate clean checkout of b
 python /tmp/import-investigation-81585d-20261128T0739/qualification/promotion-checker/check.py --baseline-root /path/to/exact-baseline --evidence-root /tmp/import-investigation-81585d-20261128T0739/qualification/stage2
 ```
 
-Exit 2 and a negative promotion disposition are expected for this snapshot: lazy signatures fails its JMdict target and has source/observer failures; early-release timing cells are absent at this cutoff. Do not alter the frozen checker to admit a later source or replace a failed observation. Some original reproduction scripts intentionally record the original absolute workspace paths; inspect those before running unrelated diagnostics.
+Exit 1 and a negative promotion disposition are expected for this snapshot: lazy signatures fails its JMdict target and has source/observer failures; early-release timing cells are absent at this cutoff. Do not alter the frozen checker to admit a later source or replace a failed observation. Some original reproduction scripts intentionally record the original absolute workspace paths; inspect those before running unrelated diagnostics.
 
