@@ -71,3 +71,15 @@ snapshot.
 The session archive, external member manifest and checksum are stored here as
 `import-session-held-evidence-20261128-1b47.*`. Its archive SHA-256 is
 `eed792a9c77ffcdc65fcffa2106157b365dc8a56369a06bcd640d1b6ba060f8b`.
+
+## Completed browser results through 06:46:37 UTC
+
+The [browser-results addendum](browser-results-addendum-README.md) preserves the
+later checkpoint JMdict/Jitendex and pipeline VNDB cohorts, including all raw
+reports and 1,052 memory scans. The checkpoint candidate did not establish a
+whole-import gain and is closed without a PR. Pipeline VNDB is a flat control
+that does not activate the proposed overlap.
+
+The immutable addendum archive, member manifest and checksum are stored here as
+`browser-results-addendum-20261128-1b47.*`. Archive SHA-256:
+`76b1ae9451052684192902916b5cdeb1e812ff806b064d0773e6d2bdf242ec98`.
