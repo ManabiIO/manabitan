@@ -15,16 +15,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  profile:
-    name: Baseline profile (${{ matrix.dictionary }})
+  select:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      candidates: ${{ steps.plan.outputs.candidates }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - id: plan
+        name: Read registered exact-source comparison plan
+        shell: python
+        run: |
+          import json, os, re
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-study-6b4c.json').read_text())
+          assert re.fullmatch(r'[a-f0-9]{40}', plan['baseline'])
+          assert 1 <= plan['pairs'] <= 24
+          matrix = []
+          candidates = []
+          for candidate in plan['candidates']:
+              assert re.fullmatch(r'[a-z0-9-]+', candidate['label'])
+              assert re.fullmatch(r'[a-f0-9]{40}', candidate['sha'])
+              assert candidate['expectedPackageEntries']
+              candidates.append({'label': candidate['label'], 'sha': candidate['sha']})
+              for dictionary in candidate['dictionaries']:
+                  assert dictionary in ('jmdict', 'jitendex', 'vndb')
+                  for order in plan['orders']:
+                      assert order in ('AB', 'BA')
+                      matrix.append({'candidate': candidate['label'], 'sha': candidate['sha'], 'dictionary': dictionary, 'order': order})
+          assert matrix and candidates
+          matrix.sort(key=lambda cell: ({'jmdict': 0, 'jitendex': 1, 'vndb': 2}[cell['dictionary']], cell['candidate'], cell['order']))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('matrix=' + json.dumps({'include': matrix}, separators=(',', ':')) + '\n')
+              output.write('candidates=' + json.dumps({'include': candidates}, separators=(',', ':')) + '\n')
+
+  qualify:
+    needs: select
+    name: ${{ matrix.candidate }} / ${{ matrix.dictionary }} / ${{ matrix.order }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
     strategy:
       fail-fast: false
-      matrix:
-        dictionary: [jmdict, jitendex, vndb]
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
     env:
+      PERF_LABEL: ${{ matrix.candidate }}
+      PERF_CANDIDATE: ${{ matrix.sha }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -38,36 +78,62 @@ jobs:
         with:
           path: builds/e2e-dictionary-cache
           key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
-      - name: Prepare unchanged baseline product
-        shell: bash
+      - name: Run exact-source pairs, identical controls, exhaustive media, and separate memory observations
+        shell: python
         run: |
-          set -euo pipefail
-          baseline_sha=$(node -p "JSON.parse(require('node:fs').readFileSync('dev/perf/import-study-6b4c.json')).baseline")
-          [[ "$baseline_sha" =~ ^[a-f0-9]{40}$ ]]
-          git diff --exit-code "$baseline_sha" HEAD -- ext dev/data dev/bin package.json package-lock.json
-          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
-          npm run build -- --target chrome
-          evidence="builds/perf/import-study-6b4c/$PERF_DICTIONARY"
-          mkdir -p "$evidence"
-          cp dev/perf/import-study-6b4c.json "$evidence/study.json"
-          git rev-parse HEAD > "$evidence/tooling-sha.txt"
-          git status --porcelain > "$evidence/source-status.txt"
-          sha256sum builds/manabitan-chrome.zip test/perf/dictionaries.lock.json > "$evidence/identities.sha256"
-      - name: Record five independent ordinary imports
-        run: >-
-          node dev/perf/import-benchmark.js "$PERF_DICTIONARY"
-          --runs 5 --no-build --build-target chrome --media-check sample
-          --output "builds/perf/import-study-6b4c/$PERF_DICTIONARY/ordinary"
-      - name: Capture separate diagnostic trace
-        run: >-
-          node dev/perf/import-benchmark.js "$PERF_DICTIONARY"
-          --runs 1 --trace --no-build --build-target chrome --media-check sample
-          --output "builds/perf/import-study-6b4c/$PERF_DICTIONARY/profile"
+          import json, os, subprocess
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-study-6b4c.json').read_text())
+          candidate = next(item for item in plan['candidates'] if item['label'] == os.environ['PERF_LABEL'])
+          assert candidate['sha'] == os.environ['PERF_CANDIDATE']
+          evidence = Path('builds/perf/import-study-6b4c')
+          evidence.mkdir(parents=True, exist_ok=True)
+          (evidence / 'registered-study.json').write_text(json.dumps(plan, indent=2) + '\n')
+          subprocess.run(['git', 'fetch', 'origin', plan['baseline'], candidate['sha']], check=True)
+          command = [
+              'python', 'dev/perf/import-qualification-20261125-a7f7.py',
+              '--baseline', plan['baseline'], '--candidate', candidate['sha'],
+              '--dictionary', os.environ['PERF_DICTIONARY'],
+              '--initial-order', os.environ['PERF_ORDER'], '--pairs', str(plan['pairs']),
+              '--expected-workers', '3', '--evidence', str(evidence / 'qualification'),
+          ]
+          for entry in candidate['expectedPackageEntries']:
+              command.extend(['--expected-package-entry', entry])
+          if os.environ['PERF_DICTIONARY'] == 'vndb':
+              command.extend(['--vndb-sah-allocation-units', '37', '37'])
+          subprocess.run(command, check=True)
       - name: Retain all observations and failures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-study-6b4c-${{ matrix.dictionary }}-${{ github.run_attempt }}
-          path: builds/perf/import-study-6b4c/${{ matrix.dictionary }}
+          name: import-study-6b4c-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.order }}-${{ github.run_attempt }}
+          path: builds/perf/import-study-6b4c
           if-no-files-found: error
           retention-days: 14
+
+  validate:
+    needs: select
+    name: Validate ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.select.outputs.candidates) }}
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ matrix.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Typecheck every project
+        run: npm run test:ts
+      - name: Lint JavaScript
+        run: npm run test:js
+      - name: Run unit tests
+        run: npm run test:unit -- --maxWorkers=2 --no-file-parallelism
+      - name: Run options upgrade tests
+        run: npm run test:unit:options -- --maxWorkers=1 --no-file-parallelism
+      - name: Check every build target
+        run: npm run test:build

@@ -1,10 +1,49 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
+    "stage": "initial-screen",
     "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
-    "purpose": "Locate remaining import critical-path work after the November 26 integrations",
+    "purpose": "Measure two independent changes against the current integrated production baseline",
     "productionDefaults": true,
-    "ordinaryRuns": 5,
-    "traceRuns": 1,
-    "mediaCheck": "sample",
-    "performanceClaim": null
+    "pairs": 6,
+    "orders": [
+        "AB",
+        "BA"
+    ],
+    "fixtureIntegrity": "Locked SHA-256 required before every observation",
+    "timingBoundary": "Browser monotonic file-input change through completed import UI; separate traces and memory observations are not timing evidence",
+    "failurePolicy": "Retain every scheduled observation and failure; do not replace observations or trim tails",
+    "decisionPolicy": "No PR from component-only gains. Require replicated useful complete-import improvement beyond identical-code controls, preserved semantics/storage, and passing existing prospective memory screen. Assess improvement against implementation complexity.",
+    "memoryPolicy": "Unchanged qualification gate: all observations covered; paired median PSS/private increases at most 5%, individual pairs at most 10%",
+    "candidates": [
+        {
+            "label": "dedup-lookahead",
+            "sha": "4e7429dc2ac81e1dbda60c2898ad9bdc2aa1219a",
+            "tree": "3e9f717cb22c952255de2c45953fb038230c2a7a",
+            "dictionaries": [
+                "jmdict",
+                "jitendex",
+                "vndb"
+            ],
+            "expectedPackageEntries": [
+                "js/dictionary/dictionary-database.js",
+                "js/dictionary/dictionary-importer.js",
+                "js/dictionary/term-bank-experiments.js",
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-import-metrics.js"
+            ]
+        },
+        {
+            "label": "typed-record-lengths",
+            "sha": "e646079dce9bdf7d04d06c7440ba92b7787d421c",
+            "tree": "d2f64320ee75b93d14ff7eee7632e16c9e883fac",
+            "dictionaries": [
+                "jmdict",
+                "jitendex",
+                "vndb"
+            ],
+            "expectedPackageEntries": [
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        }
+    ]
 }
