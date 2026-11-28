@@ -187,9 +187,22 @@ test.each([
     expect(await reopened.findTermsBulk(['Keeper'], new Set(['Keeper']), 'exact')).toMatchObject([{dictionary: 'Keeper', definitions: ['Keeper definition']}])
 })
 
-test.each([false, true])('an interrupted import rollback can recover through real prepare; new worker=%s', async (newWorker) => {
+test.each([
+    {newWorker: false, retainedReceipt: false},
+    {newWorker: true, retainedReceipt: false},
+    {newWorker: false, retainedReceipt: true},
+    {newWorker: true, retainedReceipt: true},
+])('an interrupted import rollback can recover through real prepare; new worker=$newWorker, retained receipt=$retainedReceipt', async ({newWorker, retainedReceipt}) => {
     const {database, opfs, bytes} = await fixture()
+    let priorSessionId = null
+    if (retainedReceipt) {
+        priorSessionId = await database.startBulkImport()
+        await database.finishBulkImport(null, null, priorSessionId)
+        expect(await database._importJournal.read()).toBeNull()
+        expect(database._requireDb().selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual([priorSessionId])
+    }
     const sessionId = await database.startBulkImport()
+    expect(sessionId).not.toBe(priorSessionId)
     await appendTerm(database, 'Interrupted')
     await database._termRecordStore.endImportSession()
     // Model committed append segments from the interrupted import without
@@ -222,6 +235,7 @@ test.each([false, true])('an interrupted import rollback can recover through rea
     expect(recovered._termRecordStore.getDictionaryRecordCount('Interrupted')).toBe(0)
     await expect(recordDirectory.getFileHandle(interruptedShard)).rejects.toHaveProperty('name', 'NotFoundError')
     expect(await recovered._importJournal.read()).toBeNull()
+    expect(recovered._requireDb().selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual(retainedReceipt ? [priorSessionId] : [])
     // A later import also acquires and releases ownership normally.
     const nextSession = await recovered.startBulkImport()
     await expect(recovered.abortBulkImport(nextSession)).resolves.toBeUndefined()

@@ -41,6 +41,7 @@ function createDatabase(filename = ':memory:') {
     `);
     const database = new DictionaryDatabase();
     Reflect.set(database, '_db', connection);
+    Reflect.set(database, '_sqlite3', sqlite3);
     Reflect.set(database, '_createIndexesSql', () => []);
     Reflect.set(database, '_applyRuntimePragmas', () => {});
     Reflect.set(database, '_applyImportPragmas', () => {});
@@ -183,6 +184,102 @@ describe('importer reports durable publication to the settings UI', () => {
         expect(retry.errors.map(({message}) => message)).toContain(`Dictionary ${summary.title} is already imported, skipped it.`);
         expect(finish).toHaveBeenCalledOnce();
         expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1);
+    });
+});
+
+describe('publication receipts share the import transaction', () => {
+    test('retains only the latest receipt without another SQLite write after journal removal', async () => {
+        const {database, connection} = createDatabase();
+        const exec = vi.spyOn(connection, 'exec');
+        let currentSessionId = '';
+        vi.mocked(Reflect.get(database, '_importJournal').clear).mockImplementation(async () => {
+            expect(sqlite3.capi.sqlite3_get_autocommit(connection.pointer)).toBe(1);
+            expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual([currentSessionId]);
+            exec.mockClear();
+        });
+        for (const primaryKey of [42, 43, 44]) {
+            insertSummary(connection, primaryKey, {importSuccess: false});
+            const previousSessionId = currentSessionId;
+            currentSessionId = await database.startBulkImport();
+            expect(currentSessionId).not.toBe(previousSessionId);
+            const result = await database.finishBulkImport(null, {
+                summary: {...summary, title: `Dictionary ${primaryKey}`}, primaryKey,
+            }, currentSessionId);
+            expect(result).toMatchObject({published: true, housekeepingErrors: []});
+            expect(exec).not.toHaveBeenCalled();
+            expect(Reflect.get(database, '_importJournalRecoveryPending')).toBe(false);
+            expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual([currentSessionId]);
+        }
+        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(3);
+    });
+
+    test('a recoverable pruning failure keeps publication available and a later import cleans all old receipts', async () => {
+        const {database, connection} = createDatabase();
+        connection.exec(`
+            INSERT INTO dictionaryImportPublications VALUES ('older-session', 0), ('prior-session', 1);
+            CREATE TRIGGER blockReceiptPruning BEFORE DELETE ON dictionaryImportPublications
+                BEGIN SELECT RAISE(ABORT, 'receipt pruning blocked'); END;
+        `);
+        insertSummary(connection, 42, {importSuccess: false});
+        const owner = await database.startBulkImport();
+        await expect(database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner))
+            .resolves.toMatchObject({published: true, housekeepingErrors: []});
+        expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual(expect.arrayContaining([
+            'older-session', 'prior-session', owner,
+        ]));
+        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaryImportPublications')).toBe(3);
+        expect(Reflect.get(database, '_importJournalRecoveryPending')).toBe(false);
+
+        connection.exec('DROP TRIGGER blockReceiptPruning');
+        const nextOwner = await database.startBulkImport();
+        await expect(database.finishBulkImport(null, null, nextOwner)).resolves.toHaveProperty('published', true);
+        expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual([nextOwner]);
+    });
+
+    test('a pruning error that rolls back SQLite cannot publish a standalone receipt', async () => {
+        const {database, connection} = createDatabase();
+        connection.exec(`
+            INSERT INTO dictionaryImportPublications VALUES ('prior-session', 1);
+            CREATE TRIGGER rollBackReceiptPruning BEFORE DELETE ON dictionaryImportPublications
+                BEGIN SELECT RAISE(ROLLBACK, 'receipt pruning rolled back import'); END;
+        `);
+        insertSummary(connection, 42, {importSuccess: false});
+        const owner = await database.startBulkImport();
+        insertSummary(connection, 43, {importSuccess: true});
+        await expect(database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner))
+            .rejects.toThrow('receipt pruning rolled back import');
+        expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual(['prior-session']);
+        expect(connection.selectValues('SELECT id FROM dictionaries')).toEqual([42]);
+        expect(connection.selectValue("SELECT json_type(summaryJson, '$.importSuccess') FROM dictionaries WHERE id = 42")).toBe('false');
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_importJournal').clear).toHaveBeenCalledOnce();
+    });
+
+    test('a failed COMMIT restores the prior receipt with the prior dictionary state', async () => {
+        const {database, connection} = createDatabase();
+        connection.exec(`
+            PRAGMA foreign_keys = ON;
+            CREATE TABLE publicationConstraint (
+                dictionaryId INTEGER REFERENCES dictionaries(id) DEFERRABLE INITIALLY DEFERRED
+            );
+            INSERT INTO dictionaryImportPublications VALUES ('prior-session', 1);
+        `);
+        insertSummary(connection, 42, {importSuccess: false});
+        insertSummary(connection, 44, {importSuccess: true});
+        const owner = await database.startBulkImport();
+        insertSummary(connection, 43, {importSuccess: true});
+        connection.exec('INSERT INTO publicationConstraint VALUES (999)');
+        await expect(database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner))
+            .rejects.toThrow('FOREIGN KEY constraint failed');
+        expect(connection.selectValues('SELECT sessionId FROM dictionaryImportPublications')).toEqual(['prior-session']);
+        expect(connection.selectValues('SELECT id FROM dictionaries ORDER BY id')).toEqual([42, 44]);
+        expect(connection.selectValue("SELECT json_type(summaryJson, '$.importSuccess') FROM dictionaries WHERE id = 42")).toBe('false');
+        expect(connection.selectValue("SELECT json_type(summaryJson, '$.importSuccess') FROM dictionaries WHERE id = 44")).toBe('true');
+        expect(connection.selectValue('SELECT COUNT(*) FROM publicationConstraint')).toBe(0);
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_importJournal').clear).toHaveBeenCalledOnce();
     });
 });
 

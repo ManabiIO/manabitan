@@ -1640,6 +1640,7 @@ export class DictionaryDatabase {
                         // The storage gate and the summary become durable together.
                         db.exec(`PRAGMA user_version = ${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}`);
                     }
+                    this._pruneImportPublicationMarkersBestEffort(sessionId);
                     db.exec({
                         sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
                         bind: [sessionId, Date.now()],
@@ -1662,7 +1663,8 @@ export class DictionaryDatabase {
                     try {
                         await this._importJournal.clear();
                         this._importJournalRecoveryPending = false;
-                        this._deleteImportPublicationMarkerBestEffort(sessionId);
+                        // Keep this receipt until the next publication can prune
+                        // it in its existing transaction, avoiding another commit.
                     } catch (error) {
                         this._importJournalRecoveryPending = true;
                         cleanupErrors.push(toError(error));
@@ -10357,6 +10359,27 @@ null :
         this._deferTermsVirtualTableSync = false;
         this._termsVirtualTableDirty = false;
         return errors;
+    }
+
+    /**
+     * Only the current journal can require a publication receipt. Prune older
+     * receipts inside the import transaction so cleanup adds no durable commit.
+     * A failed publication rolls this pruning back with its summary and receipt.
+     * @param {string} sessionId
+     */
+    _pruneImportPublicationMarkersBestEffort(sessionId) {
+        const db = this._requireDb();
+        try {
+            db.exec('DELETE FROM dictionaryImportPublications');
+        } catch (error) {
+            // Some SQLite failures roll back the entire transaction. Do not
+            // let the following receipt INSERT autocommit without its summary.
+            if (this._requireSqlite3().capi.sqlite3_get_autocommit(db.pointer) !== 0) { throw error; }
+            reportDiagnostics('dictionary-import-publication-cleanup-failed', {
+                sessionId,
+                error: toError(error).message,
+            });
+        }
     }
 
     /**
