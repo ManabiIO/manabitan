@@ -25,7 +25,7 @@ const run = promisify(execFile);
 const probe = fileURLToPath(new URL('fixtures/term-write-rejection-probe.js', import.meta.url));
 
 describe('queued OPFS write rejection ownership', () => {
-    test.each(['content', 'record'])('owns %s failures before finalization without suppressing them', async (kind) => {
+    test.each(['content', 'record', 'record-create', 'record-seek'])('owns %s failures before finalization without suppressing them', async (kind) => {
         const {stdout} = await run(process.execPath, [probe, kind], {timeout: 10000});
         expect(JSON.parse(stdout)).toEqual({unhandled: 0, propagated: true});
     });

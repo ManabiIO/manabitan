@@ -38,15 +38,36 @@ if (process.argv[2] === 'content') {
     store._queueWriteChunks([Uint8Array.of(1)]);
     wait = async () => { await store._awaitQueuedWrites(); };
     readFailure = () => Reflect.get(store, '_queuedWriteError');
-} else if (process.argv[2] === 'record') {
-    const store = new TermRecordOpfsStore();
-    const state = store._createShardState('probe.bin', /** @type {FileSystemFileHandle} */ ({}), 0);
-    store._writeChunksForShard = failWrite;
-    store._queueWriteChunksForShard(state, [Uint8Array.of(1)]);
-    wait = async () => { await store._awaitQueuedWritesForShard(state); };
-    readFailure = () => state.queuedWriteError;
+} else if (['record', 'record-create', 'record-seek'].includes(process.argv[2])) {
+    /* eslint-disable @stylistic/semi */
+    const kind = process.argv[2]
+    const store = new TermRecordOpfsStore()
+    const writable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({
+        seek: async () => {
+            if (kind === 'record-seek') { await failWrite() }
+        },
+        write: async () => {
+            if (kind === 'record') { await failWrite() }
+            throw new Error('Unexpected write after injected startup failure')
+        },
+    }))
+    const fileHandle = /** @type {FileSystemFileHandle} */ ({
+        createWritable: async () => {
+            if (kind === 'record-create') { await failWrite() }
+            return writable
+        },
+    })
+    const state = store._createShardState('probe.bin', fileHandle, 0)
+    // Isolate actual queued-write failure from the separately tested startup
+    // stages. Both old and deferred-startup implementations accept this state.
+    if (kind === 'record') { state.writable = writable }
+    store._queueWriteChunksForShard(state, [Uint8Array.of(1)])
+    wait = async () => { await store._awaitQueuedWritesForShard(state) }
+    readFailure = () => state.queuedWriteError
+    /* eslint-enable @stylistic/semi */
 } else {
-    throw new Error('Expected content or record');
+    // eslint-disable-next-line @stylistic/semi
+    throw new Error('Expected content, record, record-create or record-seek')
 }
 // Give the runtime an event-loop turn to report otherwise unowned rejection.
 await delay(0);
