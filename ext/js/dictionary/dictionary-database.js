@@ -1473,7 +1473,7 @@ export class DictionaryDatabase {
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
+     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termRecordFields: import('./term-record-opfs-store.js').ImportRecordFieldMetrics|null, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
@@ -1520,6 +1520,9 @@ export class DictionaryDatabase {
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
             let termRecordLookupIndexWorkerFileCount = 0;
+            /** @type {import('./term-record-opfs-store.js').ImportRecordFieldMetrics|null} */
+            /* eslint-disable-next-line @stylistic/semi */
+            let termRecordFields = null
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1591,6 +1594,8 @@ export class DictionaryDatabase {
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
                             termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
+                            /* eslint-disable-next-line @stylistic/semi */
+                            termRecordFields = metrics.recordFields ?? null
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1768,6 +1773,7 @@ export class DictionaryDatabase {
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termRecordLookupIndexWorkerFileCount,
+                    termRecordFields,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
