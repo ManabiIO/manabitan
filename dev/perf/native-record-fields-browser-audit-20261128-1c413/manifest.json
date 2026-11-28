@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "enabled": true,
+  "upstream": {
+    "commit": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+    "tree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63"
+  },
+  "cleanSources": {
+    "candidate": {
+      "commit": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+      "tree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d"
+    },
+    "control": {
+      "commit": "c34c272357fb8af463d32ab781bcbc640ba1bd3d",
+      "tree": "4c916a995f996afe56cecf0714c20d5b7e5ef346"
+    }
+  },
+  "qualificationPolicy": {
+    "primaryTarget": "jmdict",
+    "originalHostsPerDictionary": 2,
+    "measuredPairsPerHost": 24,
+    "controlPairsPerHost": 8,
+    "originalReportsPerCell": 74,
+    "originalReportsByArm": {
+      "A": 37,
+      "B": 29,
+      "C": 8
+    },
+    "targetMedianChangePercentAtMost": -2,
+    "targetFasterPairsAtLeast": 18,
+    "targetAbsoluteControlMedianAtMost": 1,
+    "targetAbsoluteControlEqualWorkAtMost": 1,
+    "nonTargetAbsoluteControlMedianAtMost": 3,
+    "nonTargetAbsoluteControlEqualWorkAtMost": 3,
+    "repeatedNonTargetRegressionPercent": 3,
+    "repeatedNonTargetDefinition": "Paired-median slowdown greater than 3 percent for the same dictionary on both original hosts",
+    "requireAllSixSourceSemanticMediaMemoryActivationCells": true,
+    "requireSeparateFullCorrectness": true,
+    "requireCompletedComponentNominationAndArtifactAudit": true,
+    "noRetriesReplacementsExclusionsOrPooling": true,
+    "scope": "Complete browser import qualification of the original frozen fields study; component measurements do not substitute for whole-import evidence."
+  },
+  "publication": {
+    "runId": 46138650386,
+    "headSha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+    "headTree": "249737a04041bce753e7d2e67fd04aec2c9e4ee8",
+    "headBranch": "perf/native-record-fields-browser-acquire-20261128-1c413",
+    "runAttempt": 1,
+    "event": "push",
+    "workflowPath": ".github/workflows/import-native-record-fields-1c413.yml"
+  },
+  "expectedRunConclusion": "failure",
+  "study": {
+    "path": "dev/perf/native-record-fields-browser-20261128-1c413/study.json",
+    "gitBlob": "15065d5e0cdb8fe612092c19fac4b14ba233965b",
+    "sha256": "387d354058d7837b0d00a6c09e79f79ecb6ee698ba1a714703aa9b461829f7b7",
+    "bytes": 80108
+  },
+  "sourceManifest": {
+    "path": "dev/perf/native-record-fields-browser-20261128-1c413/source.json",
+    "gitBlob": "fdaeb9a13397bfb0f86ae93e88adfbb2d0406460",
+    "sha256": "2d25e93de587dfc58aa0a3ad8829ede39a3cc98583ab76a4836a11b9a3a91d53",
+    "bytes": 6105
+  },
+  "correctnessPrerequisite": {
+    "reader": {
+      "gitBlob": "7890ebe21b4bf7d6b694771d7417e2c27c0b2fd6",
+      "sha256": "92a45e0feaca13425d6b9cf8124f63931aadc1f2f761a92e6fabe94e0ffab2ba",
+      "bytes": 70155
+    },
+    "manifest": {
+      "schemaVersion": 1,
+      "enabled": true,
+      "publication": {
+        "runId": 46133913032,
+        "headSha": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+        "headBranch": "test/native-record-fields-current-20261128-1c413",
+        "attempt": 1
+      },
+      "source": {
+        "baseline": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+        "baselineTree": "b428d0c9fa18e4956f3e2b182cae934de78e8f63",
+        "product": "8982dd89fac525100bdcaca7507bfff7feb2c842",
+        "productTree": "76f8a0cbe2b3820b5e33d16b5f3a4f836ef0860d",
+        "candidate": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+        "candidateTree": "71bb7a59810ebdfcd2ee896d8d269ed83e92ebaf"
+      },
+      "jobs": {
+        "validation": {
+          "id": 140944881152,
+          "name": "Rebuild, complete units, types, lint and all-target builds",
+          "conclusion": "success"
+        },
+        "corpus": {
+          "id": 140944880913,
+          "name": "Untimed original baseline and candidate importer parity",
+          "conclusion": "success"
+        }
+      },
+      "artifacts": {
+        "validation": {
+          "id": 15259375276,
+          "name": "native-record-fields-correctness-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+          "sizeBytes": 344007,
+          "sha256": "88dc4436039992f3819f186357e1736701a0a0a15a60e37b2bbf9dde0ed01433"
+        },
+        "corpus": {
+          "id": 15259500068,
+          "name": "native-record-fields-corpus-5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+          "sizeBytes": 1043287,
+          "sha256": "3397f72aee6aa3113f38dc7f8a822e8a2d03b4c3cea908ada6daa2ef67ec157c"
+        }
+      },
+      "scope": {
+        "readOnly": true,
+        "performanceMeasurements": false,
+        "replacementAcquisition": false,
+        "originalSuccessfulRawSinksRetired": true,
+        "originalCorpusContainsCompleteHashReceipts": true,
+        "noBrowserPersistenceOrFullMediaQualification": true
+      },
+      "priorFailurePreservation": [
+        {
+          "runId": 46125649822,
+          "description": "Original source-mode guard rejected tracked executable; no corpus imports."
+        },
+        {
+          "runId": 46127174624,
+          "description": "Original generated-runtime mismatch and filename upload failure; internal corpus receipts unavailable."
+        },
+        {
+          "runId": 46129727075,
+          "description": "All original corpus pairs passed, but archive rejected intentional smoke symlink; validation had concrete lint/type failures. Full console evidence separately preserved; no passing original corpus artifact."
+        }
+      ],
+      "originalJobLogs": {
+        "corpus": {
+          "gitBlob": "64edb1d821edd20dfad5010491d3caffa1b5b816",
+          "bytes": 684561,
+          "sha256": "7aafc2e48de8fd4818a7010c47ca9735b6bcc575f80ca576413c8e0ef642bf1b"
+        },
+        "validation": {
+          "gitBlob": "a8b61df444377a501906638f5d3a5b226a2aa44c",
+          "bytes": 1100318,
+          "sha256": "af2cdc7c71bb36ec833a3611cfa3e91d8cef4f84c454b7a400471558e8601183"
+        }
+      },
+      "historicalCorrectness": {
+        "runId": 46132025311,
+        "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "product": "436b226490b79439da4cb87e99f8462c9ef0cbb8",
+        "candidate": "5c95580e99d0f1f57e0daef417753003c352e5b5",
+        "artifacts": {
+          "validation": 15258022480,
+          "corpus": 15257853500
+        },
+        "resultTransferToCurrentSource": false,
+        "reason": "PR #981 changed current production source before browser timing; this reader independently audits the new exact original correctness run"
+      },
+      "readerLineage": {
+        "historicalCrcRepair": "2e03deeba0de1be5bb48110ae789226ee1e8dbc4",
+        "sameFunctionsAndTests": true,
+        "readerOnlyChanges": "Nine frozen source/run/job identity constants; original current-source artifacts and their precise metadata",
+        "priorReaderFailures": [
+          46133246828,
+          46133974806
+        ],
+        "productExecution": false
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "kind": "jmdict-AB",
+      "id": 15261037077,
+      "name": "native-record-fields-browser-jmdict-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37170747,
+      "sha256": "1b974be844016a17255170d681246929355673dec228cce74c4ceecd5dca3274",
+      "jobId": 140959486760,
+      "jobName": "Complete import (jmdict, AB)",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jmdict-BA",
+      "id": 15261001868,
+      "name": "native-record-fields-browser-jmdict-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37176542,
+      "sha256": "473d43afc021dd25e3947ecb57aeefa6241e663c3e02c206ac56c632ff57a4b4",
+      "jobId": 140959486803,
+      "jobName": "Complete import (jmdict, BA)",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jitendex-AB",
+      "id": 15261002204,
+      "name": "native-record-fields-browser-jitendex-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37108249,
+      "sha256": "0e4ae8d4fe200d1c81458dfffd018e2893f4ef4030ccee6cd7c2b20529453b98",
+      "jobId": 140959486757,
+      "jobName": "Complete import (jitendex, AB)",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jitendex-BA",
+      "id": 15261327053,
+      "name": "native-record-fields-browser-jitendex-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37151092,
+      "sha256": "a121bec01944948209d0e8a5d9867605034f63ee430191b92c3ff1daedeb9fc8",
+      "jobId": 140959486747,
+      "jobName": "Complete import (jitendex, BA)",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "vndb-AB",
+      "id": 15261819804,
+      "name": "native-record-fields-browser-vndb-AB-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37296733,
+      "sha256": "f10f9597247f6a01e58fa03e27d94b060415c82298f4382b514d709665d5b314",
+      "jobId": 140959486645,
+      "jobName": "Complete import (vndb, AB)",
+      "expectedConclusion": "failure"
+    },
+    {
+      "kind": "vndb-BA",
+      "id": 15261787471,
+      "name": "native-record-fields-browser-vndb-BA-8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sizeBytes": 37372991,
+      "sha256": "6094113d633bd8cf1c93a0b10a0271a2b3afc849b77b2f05612867a5124eddb7",
+      "jobId": 140959486755,
+      "jobName": "Complete import (vndb, BA)",
+      "expectedConclusion": "success"
+    }
+  ],
+  "scope": "Records-only audit of all six complete original attempt-one artifacts. Original VNDB AB acquisition/media/memory failure is retained and remains disqualifying; all recorded timing, semantics, activation and memory evidence is inspected without replacement or source/gate changes.",
+  "provenance": {
+    "originalFailedLaunch": {
+      "runId": 46136060186,
+      "headSha": "7d003d51dd3bd6ce24f9159680e658fe8f32dd07",
+      "zeroAcquisitionAudit": "c8a4fcf4bfd8c1929a79aa1be1835a176cf21352",
+      "originalStudyPassed": false
+    },
+    "fixtureRepairedNoRegistration": {
+      "headSha": "915d6f42aea484dffdc7ee72a8d19e417b90cb95",
+      "snapshot": "232ae9f84f705cd5bdb0cb7883127289591a0b8b",
+      "triggerCauseEstablished": false
+    },
+    "separateTriggerOnlySource": {
+      "headSha": "8680bdf7046154e65635bd82d549c6fbc07f8b5f",
+      "sourceOnlyPreflightRun": 46138436711,
+      "sourceOnlyPreflightJob": 140958839281,
+      "publicationDecision": "fd1d14311997cda5513a1541492bc3541f01983d"
+    }
+  }
+}

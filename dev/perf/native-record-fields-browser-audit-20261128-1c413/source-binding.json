@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "original-native-record-fields-browser-records-audit",
+  "files": {
+    ".github/workflows/native-record-fields-browser-audit-1c413.yml": {
+      "gitBlob": "61f724d5d6424bfb17b6e570e552f13ee7f3db73",
+      "bytes": 3988
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/audit_fields_browser.py": {
+      "gitBlob": "003ad2118b61b488545c595044eba7cfeaa050d5",
+      "bytes": 80377
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/audit_transport.py": {
+      "gitBlob": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+      "bytes": 9875
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/manifest.json": {
+      "gitBlob": "56a31fb082f00f56d280b5d9756aead43458f2e6",
+      "bytes": 10259
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/qualification_policy.py": {
+      "gitBlob": "0432f7170f7ceb76b055960bc333ad9f8f88861e",
+      "bytes": 7572
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/README.md": {
+      "gitBlob": "24e011dd3b249e138d04988cf2452cb142d50b8f",
+      "bytes": 13353
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/test_audit_fields_browser.py": {
+      "gitBlob": "abb4a1a50abdc2728ef6f840544917c4d1535a22",
+      "bytes": 27112
+    },
+    "dev/perf/native-record-fields-browser-audit-20261128-1c413/test_qualification_policy.py": {
+      "gitBlob": "e792a8b60cb690cc7c6b601203805cf2a00f6fa5",
+      "bytes": 10282
+    }
+  },
+  "sourceBindingExcludedFromOwnDigest": true
+}
