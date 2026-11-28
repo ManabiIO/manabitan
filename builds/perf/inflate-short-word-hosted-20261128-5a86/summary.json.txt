@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "study": "inflate-short-word-20261128-5a86",
+  "finalDisposition": "STOP / NO PR",
+  "reason": "Complete fixed decoder component regressed against both identical-code baseline arms; five of seven predeclared continuation checks failed.",
+  "run": {
+    "id": 46112380632,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46112380632",
+    "validationJobId": 140878598879,
+    "componentJobId": 140903680352,
+    "skippedBrowserJobId": 140915280648
+  },
+  "source": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "49bf79f35084e7c42d1088d5d30c522172d8ec3b",
+    "candidateTree": "af9a3630ab5acc04ec82023fc40d30b249983182",
+    "originalProductCommit": "1c93b0a18f5dd53a13dfdd3d054687c85e097247",
+    "originalProductTree": "7bf2f889a94d955bf8845b9f8d9e2d4afb464617",
+    "parserModules": {
+      "A": {
+        "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "bytes": 67659
+      },
+      "B": {
+        "sha256": "e522cb7f60cef3c8d305853afc57e8eb6c5d2121bf39ae773bff407901cc04b6",
+        "bytes": 67667
+      }
+    },
+    "packageEntriesDeclaredForConditionalBrowserGate": [
+      "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+      "js/dictionary/wasm/vendor/libdeflate/README.md",
+      "lib/term-bank-parser.wasm"
+    ]
+  },
+  "statuses": {
+    "sourceValidation": "SUCCESS",
+    "componentAcquisition": "COMPLETE",
+    "componentFailure": null,
+    "performanceEligibility": false,
+    "conditionalBrowserExpansion": "SKIPPED",
+    "actualBrowserImports": 0,
+    "originalLocalAcquisition": "FAILED/HOLD, zero children and zero sweeps, cause unknown"
+  },
+  "counts": {
+    "archiveMembers": 88,
+    "children": 36,
+    "freshPids": 36,
+    "completeSweeps": 180,
+    "groupCalls": 2160,
+    "verifiedBankOutputs": 9540,
+    "banksPerSweep": 53,
+    "groupsPerSweep": 12,
+    "decodedBytesPerSweep": 171617523,
+    "compressedBytesPerSweep": 15632849
+  },
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "policy": {
+    "actualProductionWorkers": 3,
+    "groupsPerWorker": 4,
+    "targetBytes": 25165824,
+    "componentExecutionConcurrency": 1,
+    "sourceBankCount": 53,
+    "sourceBytes": 171617523,
+    "compressedBytes": 15632849,
+    "options": {},
+    "requestGlossaryCrcTransaction": true,
+    "expectedDeferredCrc": false
+  },
+  "schedule": {
+    "orders": [
+      "ABC",
+      "ACB",
+      "BAC",
+      "BCA",
+      "CAB",
+      "CBA",
+      "ABC",
+      "ACB",
+      "BAC",
+      "BCA",
+      "CAB",
+      "CBA"
+    ],
+    "freshProcesses": 36,
+    "coldSweeps": 36,
+    "postcoldSweeps": 144,
+    "totalSweeps": 180,
+    "postcoldSummary": "Mean of all four prescribed postcold sweeps per child; all individual sweeps and tails retained. No steady-state claim."
+  },
+  "predeclaredContinuation": {
+    "minimumPairedWallImprovementPercent": 2,
+    "minimumFasterBlocks": 9,
+    "maximumSameCodeMedianDriftPercent": 2,
+    "maximumColdMedianRegressionPercent": 5,
+    "candidateEqualWorkWallAgainstBoth": "negative",
+    "candidateMedianCpuAgainstBoth": "negative",
+    "allCorrectnessAndSourceGates": "required",
+    "onFailure": "hold; no unchanged local rerun",
+    "onPass": "eligible only for hosted full import/source/memory qualification, including full leak-enabled sanitizer; no PR or whole-import gain claim"
+  },
+  "continuationChecks": {
+    "candidateMedianWallAgainstBoth": false,
+    "candidateEqualWorkWallAgainstBoth": false,
+    "candidateMedianCpuAgainstBoth": false,
+    "candidateFasterBlocksAgainstBoth": false,
+    "sameCodeMedianWallDrift": true,
+    "sameCodeMedianCpuDrift": true,
+    "coldWallAgainstBoth": false
+  },
+  "reportedClockSummaryPercent": {
+    "callElapsedMs": {
+      "pairedMedianBAPercent": 6.490460742604509,
+      "pairedMedianCAPercent": -0.11026098873491708,
+      "pairedMedianBCPercent": 6.444664832238733,
+      "candidateFasterBlocks": 0,
+      "candidateFasterThanControlBlocks": 0,
+      "controlFasterBlocks": 8,
+      "equalWorkBAPercent": 6.169026508189002,
+      "equalWorkBCPercent": 6.407202757789543,
+      "equalWorkCAPercent": -0.22383470613610568,
+      "coldPairedMedianBAPercent": 6.582940450401886,
+      "coldPairedMedianBCPercent": 6.82217703444945,
+      "coldPairedMedianCAPercent": 1.1207105674962414
+    },
+    "sourceInflateMs": {
+      "pairedMedianBAPercent": 6.639199729063783,
+      "pairedMedianCAPercent": -0.08907838787818312,
+      "pairedMedianBCPercent": 6.647239662973803,
+      "candidateFasterBlocks": 0,
+      "candidateFasterThanControlBlocks": 0,
+      "controlFasterBlocks": 8,
+      "equalWorkBAPercent": 6.361149550866285,
+      "equalWorkBCPercent": 6.586715023028278,
+      "equalWorkCAPercent": -0.2116262539034519,
+      "coldPairedMedianBAPercent": 6.779717248001393,
+      "coldPairedMedianBCPercent": 7.147811751855038,
+      "coldPairedMedianCAPercent": 0.8945056389984218
+    },
+    "cpuTotalMs": {
+      "pairedMedianBAPercent": 6.462613079165392,
+      "pairedMedianCAPercent": -0.12570650273954764,
+      "pairedMedianBCPercent": 6.423139149094803,
+      "candidateFasterBlocks": 0,
+      "candidateFasterThanControlBlocks": 0,
+      "controlFasterBlocks": 7,
+      "equalWorkBAPercent": 6.1589631358072605,
+      "equalWorkBCPercent": 6.3979182914331245,
+      "equalWorkCAPercent": -0.22458630719760508,
+      "coldPairedMedianBAPercent": 5.381682993120096,
+      "coldPairedMedianBCPercent": 5.900689763089817,
+      "coldPairedMedianCAPercent": 0.4903382358924069
+    }
+  },
+  "everySweepSummaryPercent": {
+    "callElapsedMs": [
+      {
+        "sweep": 0,
+        "pairedMedians": {
+          "BA": 6.582940450401886,
+          "BC": 6.82217703444945,
+          "CA": 1.1207105674962414
+        },
+        "equalWork": {
+          "BA": 6.908038841052067,
+          "BC": 5.9498416256623,
+          "CA": 0.9043875863214756
+        }
+      },
+      {
+        "sweep": 1,
+        "pairedMedians": {
+          "BA": 6.4804238287061615,
+          "BC": 6.615223197332442,
+          "CA": -0.09594524665008652
+        },
+        "equalWork": {
+          "BA": 6.288711011559767,
+          "BC": 6.558583000664364,
+          "CA": -0.25326161582207574
+        }
+      },
+      {
+        "sweep": 2,
+        "pairedMedians": {
+          "BA": 6.475032579397122,
+          "BC": 6.537330695004872,
+          "CA": 0.03134776054571908
+        },
+        "equalWork": {
+          "BA": 6.238575310458794,
+          "BC": 6.3823217417230405,
+          "CA": -0.13512247985454362
+        }
+      },
+      {
+        "sweep": 3,
+        "pairedMedians": {
+          "BA": 6.501048586596525,
+          "BC": 6.398380377726298,
+          "CA": -0.13087774351190906
+        },
+        "equalWork": {
+          "BA": 6.1533123443662685,
+          "BC": 6.023493173821515,
+          "CA": 0.12244377793886319
+        }
+      },
+      {
+        "sweep": 4,
+        "pairedMedians": {
+          "BA": 6.573197645073381,
+          "BC": 6.453387140304889,
+          "CA": -0.06378306068575701
+        },
+        "equalWork": {
+          "BA": 5.99626789715022,
+          "BC": 6.665690042718797,
+          "CA": -0.6275890075810531
+        }
+      }
+    ],
+    "sourceInflateMs": [
+      {
+        "sweep": 0,
+        "pairedMedians": {
+          "BA": 6.779717248001393,
+          "BC": 7.147811751855038,
+          "CA": 0.8945056389984218
+        },
+        "equalWork": {
+          "BA": 7.061279115398755,
+          "BC": 6.398663542004912,
+          "CA": 0.6227668199349612
+        }
+      },
+      {
+        "sweep": 1,
+        "pairedMedians": {
+          "BA": 6.6217344452277,
+          "BC": 6.828508699992408,
+          "CA": -0.12954544276437274
+        },
+        "equalWork": {
+          "BA": 6.466541512687218,
+          "BC": 6.738787866888796,
+          "CA": -0.2550585027638608
+        }
+      },
+      {
+        "sweep": 2,
+        "pairedMedians": {
+          "BA": 6.614385036838111,
+          "BC": 6.703826219188325,
+          "CA": -0.064103272026933
+        },
+        "equalWork": {
+          "BA": 6.409069268559153,
+          "BC": 6.563014423692004,
+          "CA": -0.14446396431766484
+        }
+      },
+      {
+        "sweep": 3,
+        "pairedMedians": {
+          "BA": 6.660107254795678,
+          "BC": 6.603208826100837,
+          "CA": -0.08389952165657744
+        },
+        "equalWork": {
+          "BA": 6.340181421729163,
+          "BC": 6.200398641655402,
+          "CA": 0.13162170939247098
+        }
+      },
+      {
+        "sweep": 4,
+        "pairedMedians": {
+          "BA": 6.7574516926416255,
+          "BC": 6.594213491071899,
+          "CA": -0.09438129337849266
+        },
+        "equalWork": {
+          "BA": 6.229346952483672,
+          "BC": 6.845947618375137,
+          "CA": -0.5770931697791637
+        }
+      }
+    ],
+    "cpuTotalMs": [
+      {
+        "sweep": 0,
+        "pairedMedians": {
+          "BA": 5.381682993120096,
+          "BC": 5.900689763089817,
+          "CA": 0.4903382358924069
+        },
+        "equalWork": {
+          "BA": 6.279150922510635,
+          "BC": 4.957683508495947,
+          "CA": 1.2590478084510082
+        }
+      },
+      {
+        "sweep": 1,
+        "pairedMedians": {
+          "BA": 6.473134001256497,
+          "BC": 6.615572536613524,
+          "CA": -0.1051783013068519
+        },
+        "equalWork": {
+          "BA": 6.268428518310998,
+          "BC": 6.5441356367713865,
+          "CA": -0.258772683088182
+        }
+      },
+      {
+        "sweep": 2,
+        "pairedMedians": {
+          "BA": 6.5123802458836755,
+          "BC": 6.521215272530978,
+          "CA": 0.03625816694774464
+        },
+        "equalWork": {
+          "BA": 6.242225207742447,
+          "BC": 6.387309275573094,
+          "CA": -0.1363734723799026
+        }
+      },
+      {
+        "sweep": 3,
+        "pairedMedians": {
+          "BA": 6.504799343842215,
+          "BC": 6.390931019962531,
+          "CA": -0.13398976414381036
+        },
+        "equalWork": {
+          "BA": 6.151829735251169,
+          "BC": 6.027397101991827,
+          "CA": 0.11735894368853916
+        }
+      },
+      {
+        "sweep": 4,
+        "pairedMedians": {
+          "BA": 6.570703286201951,
+          "BC": 6.447318894023901,
+          "CA": -0.06478270599116209
+        },
+        "equalWork": {
+          "BA": 5.974171968799968,
+          "BC": 6.6340299351611565,
+          "CA": -0.6188061791928989
+        }
+      }
+    ]
+  },
+  "allClockAndTailScope": "The exact numerical review retains callElapsedMs, sourceInflateMs, cpuTotalMs, cpuUserMs and cpuSystemMs, all cold/postcold per-block and per-sweep values. Zero system-CPU denominators remain null, never dropped.",
+  "sourceValidation": {
+    "status": "PASS",
+    "scopedLint": "test/term-bank-inflater.test.js",
+    "typeProjects": 4,
+    "unitTestsPassed": 15143,
+    "unitTestsSkipped": 47,
+    "unitTestFiles": 669,
+    "pinnedNativeArtifactsReproduced": 2,
+    "clangAndLldVersion": "21.1.8",
+    "nativeSanitizerCases": 231528,
+    "sanitizers": [
+      "address",
+      "undefined",
+      "leak"
+    ],
+    "nativeSanitizerCompiler": "GCC 15.2.0-16ubuntu1",
+    "nativeWordBytes": 8,
+    "buildScope": "npm run test:build -> node dev/bin/build.js --dryRun --all, seven targets; no validation-stage product ZIP build claimed",
+    "syntheticOracleChecks": 15,
+    "receiptObserverTests": 32
+  },
+  "runtime": {
+    "nodeVersion": "v22.22.0",
+    "nodeExecutableSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+  },
+  "keyOriginals": {
+    "componentArtifactZip": {
+      "artifactId": 15255017646,
+      "bytes": 375497,
+      "sha256": "baf07612795ba49af3294f4f92698ec7c1ad49c358ac738e20da6ee681cd89f7"
+    },
+    "componentJobLog": {
+      "bytes": 294528,
+      "sha256": "b8b8f3692cbcbce0115e52fa755dc9204a0467791349607050cddb98370db865"
+    },
+    "componentReport": {
+      "bytes": 1481911,
+      "sha256": "e99329f0eb72e0820f906415f4723639fc1f57513d0be463df734ce5058c2d1a"
+    },
+    "oracle": {
+      "bytes": 24318,
+      "sha256": "13ff5b6484b39637b61195578f1a505f1abdbb78ec5511d9978169f30a6062c3"
+    },
+    "invocation": {
+      "bytes": 11932,
+      "sha256": "428f3a789ca9ad708efb5e6b8c11e996f9d24a278df19efc434e2325bbfd554c"
+    },
+    "validationArtifactZip": {
+      "artifactId": 15253507283,
+      "bytes": 160484,
+      "sha256": "69eab665c19c68701eae005f6fb67958f46bdf1f4183b80615652aa5e0a3816c"
+    }
+  },
+  "independentReviews": {
+    "sourceValidation": {
+      "sha256": "e5fa0aec1040a1b4e7d2ceb2e4198499e451bdbc50c54a2c7a63e0f4d82f95c9",
+      "bytes": 17121,
+      "member": "independent-review/review.json in word-source-validation.tar.xz"
+    },
+    "componentProtocolOracleAndReceipts": {
+      "bytes": 48471,
+      "sha256": "2d34dd87d37c8ad58f40758065baac9658e19050e98ec5a9d3449149567f9193",
+      "member": "protocol-review/review.json in word-component-evidence.tar.xz"
+    },
+    "componentAllClockStatisticsAndSevenGuards": {
+      "bytes": 55370,
+      "sha256": "67013f1ce48858638c974422e7954883fb5ff6a1ba80a78c050c88fa30c35498",
+      "member": "statistics-review/review.json in word-component-evidence.tar.xz"
+    }
+  },
+  "preservedEvidence": {
+    "sourceValidationArchive": {
+      "path": "word-source-validation.tar.xz",
+      "bytes": 277880,
+      "sha256": "adb1850f3b2452ec5fabe1c607986cccca152a297cf48d97b71b46741ceb6212"
+    },
+    "sourceValidationManifest": {
+      "path": "word-source-validation-manifest.json.txt",
+      "bytes": 4810,
+      "sha256": "d0d9f6cc8df507069c4251684fda856dbe41fd7c3fa00be9921f86729ec2ac4b"
+    },
+    "componentArchive": {
+      "path": "word-component-evidence.tar.xz",
+      "bytes": 696908,
+      "sha256": "3f4b7bb93922a5812a8c7c2944a179cc9946c9f7782e5aea05580e80cba5d04f"
+    },
+    "componentManifest": {
+      "path": "word-component-manifest.json.txt",
+      "bytes": 39265,
+      "sha256": "bf12033885382080615ce7c4faf397fe0ba8d59135ff6f431bc75e90799160e1"
+    }
+  },
+  "limitations": [
+    "This is a Node decoder component result, not a browser full-import or whole-process browser-memory result. Browser expansion was skipped exactly as registered.",
+    "All 53 complete decoded banks are checked by full digest/CRC/span and input-consumption receipts; the decoded corpus bytes themselves are not in the artifact. This is not a parser row-output replay.",
+    "The fixture declares 528299 term rows; the decoder component does not independently parse/count term rows.",
+    "The native sourceInflateMs clock includes immediate CRC; the callElapsedMs clock also includes the production helper allocation/copy boundary. Concurrent whole-import phase ceilings are not inferred.",
+    "The extra branch reduced modeled source-level speculative stores, but the experiment did not isolate the machine-code reason for regression. No instruction-count or causal slowdown claim follows.",
+    "The old local signal-9 acquisition remains FAILED/HOLD with zero observations, unknown cause and unknown initial-versus-pre-slot verification substage. It was not retried, repaired or replaced.",
+    "The first reset left the native census and most local validation/preflight logs unavailable. Frozen local-evidence.tar.gz explicitly distinguishes exact recoveries from missing originals; no missing native counts were reconstructed.",
+    "The hosted oracle is a new independent pre-timing Python-zlib oracle, bound before the first child, not the missing native census oracle.",
+    "The second reset erased local source-validation downloads/review support. Exact original artifact/log/report identities were recovered, with the separately preserved recovery ledgers distinguishing proven bytes from transcript-reserialized metadata and one historical command receipt without a prior whole-file digest.",
+    "Reviewer-only preparation assumptions and corrections are retained. They did not replace any observation or change source, criteria or acquisition.",
+    "This final follow-up changes evidence and the single handoff only. The observed source stays frozen at 49bf79f35084e7c42d1088d5d30c522172d8ec3b; no new study, PR or default change is authorized by these results."
+  ]
+}

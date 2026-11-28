@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "Completed short-word source-validation preservation; no component or browser timing outcome",
+  "runId": 46112380632,
+  "validationJobId": 140878598879,
+  "acquisitionCommit": "49bf79f35084e7c42d1088d5d30c522172d8ec3b",
+  "acquisitionTree": "af9a3630ab5acc04ec82023fc40d30b249983182",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "newAcquisitionByPreservation": false,
+  "archive": {
+    "path": "word-source-validation.tar.xz",
+    "bytes": 277880,
+    "sha256": "adb1850f3b2452ec5fabe1c607986cccca152a297cf48d97b71b46741ceb6212",
+    "gitBlobSha": "fe7499a25d10cae1f7a5e09e14aaa854ae9d0dad",
+    "members": 11,
+    "uncompressedBytes": 1312363,
+    "format": "USTAR regular files in lexical order; mode0644, uid/gid/mtime zero, empty owner names; xz compression"
+  },
+  "members": {
+    "independent-review/recovered-review-manifest.json": {
+      "bytes": 2330,
+      "sha256": "b4470eb3b6cec45e7f43448fb91da1c7719caf2d22a3364a19549b8016287848"
+    },
+    "independent-review/recovered-review.tar.xz": {
+      "bytes": 11816,
+      "sha256": "f70ea23b33c4981f409af798913729e04ede91ac4425238b26184def9bbf18a6"
+    },
+    "independent-review/recovery.json": {
+      "bytes": 5681,
+      "sha256": "35c021f68c8d511b67dad9f95796e10ae0ac0066fe716933bc4ef400e3d08c40"
+    },
+    "independent-review/review.json": {
+      "bytes": 17121,
+      "sha256": "e5fa0aec1040a1b4e7d2ceb2e4198499e451bdbc50c54a2c7a63e0f4d82f95c9"
+    },
+    "validation/artifact-metadata.json": {
+      "bytes": 772,
+      "sha256": "592434e3a00af852302247e6081a5f62fdc7e3f776e92e4f6eedad1fbc30e67f"
+    },
+    "validation/artifact.zip": {
+      "bytes": 160484,
+      "sha256": "69eab665c19c68701eae005f6fb67958f46bdf1f4183b80615652aa5e0a3816c"
+    },
+    "validation/audit-validation.py": {
+      "bytes": 7419,
+      "sha256": "ad0b46deb15ff7ff84b2a258cfe04ffd57bf655fcc8397ca0498162dd6057726"
+    },
+    "validation/job-status.json": {
+      "bytes": 2446,
+      "sha256": "2fb4a5074aa70b95a2b2d555cf4597c5ad25bbbc1c19e0ce448d24a753d0aba7"
+    },
+    "validation/job.log": {
+      "bytes": 1096663,
+      "sha256": "f9e151252b3d7ffe4182e996d046717dc05fc09014171421be2989b933c8520c"
+    },
+    "validation/recovery-after-second-reset.json": {
+      "bytes": 1270,
+      "sha256": "c3927fbef206bc8359ac1177058d88836ab8d9af847e173e36c5b532f096ff7e"
+    },
+    "validation/validation-audit.json": {
+      "bytes": 6361,
+      "sha256": "29392bd4b87a301997fde724da57153664e68778212f1fa6a557e9d145f469cd"
+    }
+  },
+  "coverage": [
+    "The complete original 21-member validation artifact ZIP is retained, including all recorded source/native/unit/type/lint/build/oracle/sanitizer outputs and the sanitizer executable as unexecuted evidence.",
+    "The complete original GitHub job log and completed-job snapshot are retained.",
+    "The exact original receipt audit and independent source-validation review are retained with their explicit reset-recovery provenance."
+  ],
+  "scope": [
+    "The hosted validation passed separately from the original failed zero-child local cohort. No local failure is retroactively reclassified.",
+    "Build validation is npm run test:build, which invokes node dev/bin/build.js --dryRun --all for seven targets; no validation-stage product ZIP build is claimed.",
+    "The preflight oracle checks use synthetic input only; the future fixed component creates a new independent locked-corpus oracle outside timing.",
+    "No component timing, continuation decision, whole-import gain, or PR recommendation follows from source validation alone."
+  ],
+  "recoveryLimits": [
+    "The original local native census and most local validation/preflight logs lost in the first reset remain unavailable, as disclosed by the frozen study archive; this pack does not reconstruct them.",
+    "After the second reset, the validation artifact was re-downloaded by original ID and exact digest; held full log/audit text was restored with known-hash equality. Metadata/status JSON was reserialized from held original tool snapshots, explicitly recorded.",
+    "The independent historical review was reconstructed from exact retained inputs and accepted only after matching its original full byte count and SHA. Its ledger distinguishes hash-proven support from final command JSON whose original whole-file digest was not independently retained."
+  ],
+  "excludedReproducibleScratch": [
+    {
+      "path": "validation/extract/",
+      "reason": "All 21 byte-identical members are already retained in validation/artifact.zip and individually hashed by validation-audit.json; extracted copies are redundant."
+    }
+  ],
+  "verification": "Every outer archive member was freshly decoded and byte-compared to the retained source file; no validation or timing command was run."
+}

@@ -1,5 +1,38 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: short-word decoder screen completed — STOP, no PR
+
+The separately registered hosted study completed at frozen source `49bf79f35084e7c42d1088d5d30c522172d8ec3b`, tree `af9a3630ab5acc04ec82023fc40d30b249983182`, in [run 46112380632](https://github.com/ManabiIO/manabitan/actions/runs/46112380632). Exact source validation and the complete component acquisition succeeded. **Performance eligibility failed, so the conditional browser matrix was skipped. The final decision is STOP / no PR.** This evidence follow-up does not change the product, registered observer, workflow or criteria.
+
+All 36 fresh processes completed the fixed twelve ABC triplets, retaining one cold whole-corpus decode and all four prescribed postcold sweeps each: 180 sweeps, 2,160 production-group calls and 9,540 complete-bank verifications. Every sweep covers the same 53 locked JMdict banks, 171,617,523 decoded bytes and 15,632,849 compressed payload bytes. The original decoder output digest/CRC/span and consumption checks passed, and native heap shapes match. This component checks complete decoded bank bytes; it does not independently parse the fixture's 528,299 rows.
+
+For the mean of all four postcold sweeps, positive percentages mean slower:
+
+| Clock | Paired median B/A | Paired median B/C | Equal-work B/A | Equal-work B/C | Faster triplets vs A / C |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Production helper elapsed time | +6.4905% | +6.4447% | +6.1690% | +6.4072% | 0/12 / 0/12 |
+| Native inflate counter, including immediate CRC | +6.6392% | +6.6472% | +6.3611% | +6.5867% | 0/12 / 0/12 |
+| Process total CPU | +6.4626% | +6.4231% | +6.1590% | +6.3979% | 0/12 / 0/12 |
+
+The identical-code C/A paired medians were −0.1103% for elapsed time and −0.1257% for total CPU, passing both 2% drift guards. Cold elapsed medians regressed +6.5829% against A and +6.8222% against C, exceeding the declared 5% guard. All five candidate-performance checks failed; both same-code checks passed. All individual cold/postcold sweeps, outliers and user/system/total CPU values remain visible, including undefined system-CPU ratios where denominators are zero. No subset is relabelled as steady state. The source-level reduction in speculative copies did not produce a gain; this study does not isolate the generated-code cause of the slowdown.
+
+The source-validation job passed changed-test ESLint, all four TypeScript projects, 15,143 unit tests with 47 skips across 669 files, exact Clang/LLD 21.1.8 reproduction of both native artifacts, generated JSON checks, fifteen synthetic oracle checks and 32 receipt-observer tests. The leak-enabled native address/undefined sanitizer run passed all 231,528 cases. Build validation was the repository's `test:build` command, `node dev/bin/build.js --dryRun --all`, covering seven targets; it was not a validation-stage extension ZIP build. The source gate closes the previously outstanding local lint/leak qualifications for this exact hosted source without reclassifying any older failed local invocation.
+
+Two independent read-only component reviews verified the source/oracle/protocol/receipt bindings and reproduced every original comparison, all clock summaries and the seven literal continuation checks. No decoder or timing acquisition ran during either review. The original component ZIP contains all 88 members, including all 36 child JSON/log pairs, the newly generated independent Python-zlib oracle and the exact original/adapted observer inputs.
+
+Durable evidence is under `builds/perf/inflate-short-word-hosted-20261128-5a86/`:
+
+- `summary.json.txt` records the outcome, all seven checks, original clock summaries, each sweep's summary, source identities and scope.
+- `word-component-evidence.tar.xz` retains the complete original component ZIP and all 88 byte-identical extracted members, full job log, final job-state snapshot, both component reviews and their preparation histories, both final pre-acquisition reviews, and frozen source bytes. Its adjacent manifest binds all 131 archive members.
+- `word-source-validation.tar.xz` and its adjacent manifest retain the complete original validation artifact, full log, exact independent review and explicit second-reset recovery ledger. This earlier preservation pack is unchanged.
+
+The original component artifact is `15255017646`, SHA-256 `baf07612795ba49af3294f4f92698ec7c1ad49c358ac738e20da6ee681cd89f7`; its final report is `e99329f0eb72e0820f906415f4723639fc1f57513d0be463df734ce5058c2d1a`. The protocol review is `2d34dd87d37c8ad58f40758065baac9658e19050e98ec5a9d3449149567f9193`; the independent statistical review is `67013f1ce48858638c974422e7954883fb5ff6a1ba80a78c050c88fa30c35498`.
+
+The earlier local signal-9 attempt remains FAILED/HOLD with zero children and zero sweeps, unknown cause and unknown initial-versus-pre-slot verification substage. The first reset's missing native census and local validation/preflight logs remain explicitly unavailable. The successful hosted study is a separate acquisition with a new pre-timing zlib oracle. The later recovery of source-validation evidence is accepted only at the documented exact hashes; its ledger distinguishes hash-proven files from transcript-reserialized metadata and a historical command receipt without a prior whole-file digest. Neither reset was used to recreate measurements or replace a failed observation.
+
+There is no whole-import or browser-memory result for this candidate: the six planned browser cells did not run because eligibility was false. No retry, threshold adjustment, follow-up timing cohort or PR is warranted by this result.
+
+
 ## November 28, 2026: short DEFLATE word-copy hypothesis and separate hosted study
 
 The candidate is a five-line shortcut in the existing portable libdeflate fast match loop. In the branch that already proves `offset >= WORDBYTES`, the first word load/store is unchanged. If `length <= WORDBYTES`, that word covers the whole logical match, so execution returns to the existing fast-loop condition without issuing the other four speculative word stores. The logical output cursor, prefetched Huffman entry, bit buffer, input/output guard, longer matches and smaller distances retain their original behavior. The cutoff is the native word width, not a dictionary or cache threshold. The vendor README records this second local header adaptation.
@@ -46,7 +79,8 @@ Study inputs and the incomplete local-evidence archive are under `test/perf/infl
 
 ```sh
 python test/perf/inflate-short-word-20261128-5a86/verify-local-evidence.py
-python dev/perf/inflate-short-word-screen-5a86.py check --candidate "$(git rev-parse HEAD)"
+# Run this source gate only in a clean checkout of the measured commit below.
+python dev/perf/inflate-short-word-screen-5a86.py check --candidate 49bf79f35084e7c42d1088d5d30c522172d8ec3b
 ```
 
 The acquisition workflow is branch-only and changes no main, release or default flags. Any later evidence-only follow-up must leave its measured source and observation plan frozen.
