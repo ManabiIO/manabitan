@@ -1,0 +1,272 @@
+name: Export four frozen VNDB artifacts on macOS 6b4c
+
+on:
+  push:
+    branches: ['perf/import-evidence-macos-vndb-20261128-6b4c']
+    paths:
+      - '.github/workflows/import-study-evidence-export-macos-vndb-6b4c.yml'
+      - 'dev/perf/import-study-evidence-macos-vndb-6b4c.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: import-study-evidence-export-macos-vndb-6b4c-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  export:
+    name: Export four already finalized VNDB artifacts sequentially
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.gitignore
+            /.github/workflows/import-study-evidence-export-macos-vndb-6b4c.yml
+            /dev/perf/export-import-study-evidence-6b4c.py
+            /dev/perf/import-study-evidence-request-6b4c.json
+            /dev/perf/import-study-evidence-macos-vndb-6b4c.json
+
+      - id: export
+        name: Bind exact originals and export once per fixed artifact
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          import pathlib
+          import platform
+          import subprocess
+          import sys
+          import time
+
+          root = pathlib.Path('builds/perf/import-study-evidence-export-macos-vndb-6b4c')
+          context = root / 'context'
+          context.mkdir(parents=True, exist_ok=False)
+          plan_path = pathlib.Path('dev/perf/import-study-evidence-macos-vndb-6b4c.json')
+          exporter_path = pathlib.Path('dev/perf/export-import-study-evidence-6b4c.py')
+          request_path = pathlib.Path('dev/perf/import-study-evidence-request-6b4c.json')
+          results = []
+          failed = False
+
+          def write_json(path, value):
+              path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def git(*arguments):
+              return subprocess.check_output(['git', *arguments], text=True).strip()
+
+          try:
+              plan = json.loads(plan_path.read_text(encoding='utf-8'))
+              write_json(context / 'frozen-four-artifacts.json', plan)
+              write_json(context / 'exporter-host.json', {
+                  'runId': os.environ['GITHUB_RUN_ID'],
+                  'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+                  'workflowHead': os.environ['GITHUB_SHA'],
+                  'platform': platform.platform(),
+                  'machine': platform.machine(),
+                  'python': sys.version,
+                  'planSha256': digest(plan_path),
+                  'exporterSha256': digest(exporter_path),
+                  'requestSha256': digest(request_path),
+                  'retimingPerformed': False,
+                  'poolAvailability': 'Unknown before job assignment; no queue-fix claim',
+              })
+              if sys.version_info < (3, 9) or platform.system() != 'Darwin':
+                  raise RuntimeError('Expected macOS with Python 3.9 or newer')
+              if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA']:
+                  raise RuntimeError('Checkout differs from this workflow head')
+              if git('rev-parse', 'HEAD^') != plan['publicationBaseCommit']:
+                  raise RuntimeError('Unexpected publication parent')
+              if git('rev-parse', 'HEAD~1^{tree}') != plan['publicationBaseTree']:
+                  raise RuntimeError('Unexpected publication base tree')
+              expected_changes = sorted([
+                  '.github/workflows/import-study-evidence-export-macos-vndb-6b4c.yml',
+                  'dev/perf/import-study-evidence-macos-vndb-6b4c.json',
+              ])
+              if sorted(git('diff', '--name-only', 'HEAD^', 'HEAD').splitlines()) != expected_changes:
+                  raise RuntimeError('Publication contains changes beyond the reviewed fallback')
+              held_paths = [
+                  '.github/workflows/import-jmdict-descriptor-study-6b4c.yml',
+                  'dev/perf/import-jmdict-descriptor-study-6b4c.json',
+              ]
+              if git('ls-tree', '-r', '--name-only', 'HEAD', '--', *held_paths):
+                  raise RuntimeError('Held descriptor study entered the publication tree')
+              if digest(exporter_path) != plan['exporterSha256'] or digest(request_path) != plan['requestSha256']:
+                  raise RuntimeError('Frozen exporter or request bytes changed')
+
+              spec = importlib.util.spec_from_file_location('frozen_evidence_exporter', exporter_path)
+              if spec is None or spec.loader is None:
+                  raise RuntimeError('Cannot load frozen exporter')
+              exporter = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(exporter)
+              config = exporter.request_config(request_path)
+              for key in ['repository', 'sourceRunId', 'sourceRunAttempt', 'sourceHeadSha']:
+                  if config[key] != plan[key]:
+                      raise RuntimeError('Original run identity differs from the frozen request')
+              source_run = exporter.api_json(config, f"actions/runs/{config['sourceRunId']}")
+              write_json(context / 'original-source-run.json', source_run)
+              exporter.validate_run(config, source_run)
+              if source_run.get('status') != plan['sourceRunStatus'] or source_run.get('conclusion') != plan['sourceRunConclusion']:
+                  raise RuntimeError('Finalized original run status differs from the frozen metadata')
+
+              artifacts = plan['artifacts']
+              expected_ids = [15252930107, 15252890345, 15250213694, 15251274674]
+              if [item['id'] for item in artifacts] != expected_ids:
+                  raise RuntimeError('The four fixed original IDs or their export order changed')
+              expected_names = {
+                  f'import-study-6b4c-{candidate}-vndb-{order}-1'
+                  for candidate in ['typed-record-lengths', 'dedup-lookahead']
+                  for order in ['AB', 'BA']
+              }
+              if {item['name'] for item in artifacts} != expected_names:
+                  raise RuntimeError('Artifact set is not exactly the four original VNDB cells')
+              for artifact in artifacts:
+                  exporter.validate_artifact(config, artifact)
+
+              for artifact in artifacts:
+                  artifact_id = artifact['id']
+                  output = root / 'artifacts' / str(artifact_id)
+                  environment = {
+                      **os.environ,
+                      'EXPORT_ARTIFACT_ID': str(artifact_id),
+                      'EXPORT_ARTIFACT_NAME': artifact['name'],
+                      'EXPORT_ARTIFACT_SIZE': str(artifact['size_in_bytes']),
+                      'EXPORT_ARTIFACT_DIGEST': artifact['digest'],
+                  }
+                  command = [
+                      sys.executable, str(exporter_path), 'export',
+                      '--request', str(request_path), '--output', str(output),
+                  ]
+                  record = {
+                      'artifactId': artifact_id, 'artifactName': artifact['name'],
+                      'command': command, 'timeoutSeconds': 300,
+                      'retried': False, 'retimingPerformed': False,
+                  }
+                  started = time.monotonic()
+                  with (context / f'export-{artifact_id}.log').open('wb') as log:
+                      try:
+                          result = subprocess.run(
+                              command, env=environment, stdout=log, stderr=subprocess.STDOUT,
+                              timeout=300, check=False,
+                          )
+                          record['exitCode'] = result.returncode
+                          record['status'] = 'complete' if result.returncode == 0 else 'failed'
+                          if result.returncode == 0:
+                              retained = json.loads((output / 'retained-file-sha256.json').read_text(encoding='utf-8'))
+                              expected_names = {item['name'] for item in retained}
+                              evidence = output / 'evidence'
+                              actual_names = {
+                                  item.relative_to(evidence).as_posix()
+                                  for item in evidence.rglob('*') if item.is_file()
+                              }
+                              if len(expected_names) != len(retained) or actual_names != expected_names:
+                                  record['status'] = 'failed'
+                                  record['error'] = 'Actual evidence filenames differ from retained manifest'
+                      except subprocess.TimeoutExpired:
+                          record['exitCode'] = None
+                          record['status'] = 'timed-out'
+                      except Exception as error:
+                          record.setdefault('exitCode', None)
+                          record['status'] = 'failed'
+                          record['errorType'] = type(error).__name__
+                          record['error'] = 'Local retained-file validation failed; preserve all export files'
+                  record['elapsedSeconds'] = time.monotonic() - started
+                  results.append(record)
+                  write_json(context / 'results.json', results)
+                  if output.is_dir() and any(item.is_file() for item in output.rglob('*')):
+                      with pathlib.Path(os.environ['GITHUB_OUTPUT']).open('a', encoding='utf-8') as stream:
+                          stream.write(f'artifact_{artifact_id}=true\n')
+                  if record['status'] != 'complete':
+                      failed = True
+                  print(json.dumps(record), flush=True)
+
+              if digest(exporter_path) != plan['exporterSha256'] or digest(request_path) != plan['requestSha256']:
+                  raise RuntimeError('Frozen exporter or request bytes changed during export')
+          except Exception as error:
+              failed = True
+              write_json(context / 'preflight-or-driver-failure.json', {
+                  'errorType': type(error).__name__,
+                  'error': str(error),
+                  'retimingPerformed': False,
+                  'retried': False,
+              })
+              raise
+          finally:
+              write_json(context / 'results.json', results)
+              write_json(context / 'disposition.json', {
+                  'status': 'failed' if failed else 'complete',
+                  'completedOriginalIds': [item['artifactId'] for item in results if item['status'] == 'complete'],
+                  'failedOriginalIds': [item['artifactId'] for item in results if item['status'] != 'complete'],
+                  'attemptedArtifactCount': len(results),
+                  'retimingPerformed': False,
+                  'importsExecuted': 0,
+                  'pollingPerformed': False,
+                  'observationReplacementPerformed': False,
+              })
+          sys.exit(1 if failed else 0)
+          PY
+
+      - name: Preserve fixed request, source identity, export logs and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-macos-context-6b4c-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-study-evidence-export-macos-vndb-6b4c/context
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve original typed-record VNDB AB evidence
+        if: ${{ always() && steps.export.outputs.artifact_15252930107 == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-macos-6b4c-15252930107
+          path: builds/perf/import-study-evidence-export-macos-vndb-6b4c/artifacts/15252930107
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve original typed-record VNDB BA evidence
+        if: ${{ always() && steps.export.outputs.artifact_15252890345 == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-macos-6b4c-15252890345
+          path: builds/perf/import-study-evidence-export-macos-vndb-6b4c/artifacts/15252890345
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve original lookahead VNDB AB evidence
+        if: ${{ always() && steps.export.outputs.artifact_15250213694 == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-macos-6b4c-15250213694
+          path: builds/perf/import-study-evidence-export-macos-vndb-6b4c/artifacts/15250213694
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve original lookahead VNDB BA evidence
+        if: ${{ always() && steps.export.outputs.artifact_15251274674 == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-macos-6b4c-15251274674
+          path: builds/perf/import-study-evidence-export-macos-vndb-6b4c/artifacts/15251274674
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "purpose": "One bounded macOS read-only recovery of the four already finalized original VNDB artifacts; no new imports, polling, waiting, reruns, or observation replacement",
+  "repository": "ManabiIO/manabitan",
+  "sourceRunId": 46101887140,
+  "sourceRunAttempt": 1,
+  "sourceHeadSha": "a94a751b8068c00a44ce120c16fca6762afd3a03",
+  "sourceWorkflowPath": ".github/workflows/import-study-6b4c.yml",
+  "publicationBaseCommit": "b95376b98671d5f228cb4ac6650ce043a13d98aa",
+  "publicationBaseTree": "31253c4d2ee2b6e5afa45ef81e90f19b9205fb7e",
+  "exporterSha256": "3afcd6ae2add3685b6e5b74be1f23f99cb886393d60ae8526f4e3d1c35457b71",
+  "requestSha256": "4f0741f79eeba92a5ff8ad1f94de2f35d0922cbd12d4b243bb608f4f8881f24b",
+  "runnerLabel": "macos-15",
+  "maximumParallelExports": 1,
+  "maximumArtifactCount": 4,
+  "artifactTimeoutSeconds": 300,
+  "jobTimeoutMinutes": 45,
+  "artifacts": [
+    {
+      "id": 15252930107,
+      "name": "import-study-6b4c-typed-record-lengths-vndb-AB-1",
+      "size_in_bytes": 1106799412,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252930107",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252930107/zip",
+      "expired": false,
+      "created_at": "2026-11-28T06:40:58Z",
+      "expires_at": "2026-12-12T06:40:07Z",
+      "updated_at": "2026-11-28T06:40:58Z",
+      "digest": "sha256:e56936b5d38a6d5b163b31c434b14953078e2d2042bd6f673ff214fef38b8746",
+      "workflow_run": {
+        "id": 46101887140,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-study-20261127-6b4c",
+        "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+      }
+    },
+    {
+      "id": 15252890345,
+      "name": "import-study-6b4c-typed-record-lengths-vndb-BA-1",
+      "size_in_bytes": 1106882748,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252890345",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15252890345/zip",
+      "expired": false,
+      "created_at": "2026-11-28T06:41:33Z",
+      "expires_at": "2026-12-12T06:40:28Z",
+      "updated_at": "2026-11-28T06:41:33Z",
+      "digest": "sha256:d38e73cafcb367b229c15f0ba6e8c865467526d96ae93cb68955bdc889f318b4",
+      "workflow_run": {
+        "id": 46101887140,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-study-20261127-6b4c",
+        "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+      }
+    },
+    {
+      "id": 15250213694,
+      "name": "import-study-6b4c-dedup-lookahead-vndb-AB-1",
+      "size_in_bytes": 1106954278,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250213694",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15250213694/zip",
+      "expired": false,
+      "created_at": "2026-11-28T05:59:02Z",
+      "expires_at": "2026-12-12T05:57:52Z",
+      "updated_at": "2026-11-28T05:59:02Z",
+      "digest": "sha256:a9143d15440e01ee49f557fb253d7cfad40a09201427ef5d8bc790a22d8a3e5d",
+      "workflow_run": {
+        "id": 46101887140,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-study-20261127-6b4c",
+        "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+      }
+    },
+    {
+      "id": 15251274674,
+      "name": "import-study-6b4c-dedup-lookahead-vndb-BA-1",
+      "size_in_bytes": 1106796060,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251274674",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15251274674/zip",
+      "expired": false,
+      "created_at": "2026-11-28T06:26:30Z",
+      "expires_at": "2026-12-12T06:25:15Z",
+      "updated_at": "2026-11-28T06:26:30Z",
+      "digest": "sha256:b07958d5b5a292b2242c0476c3ffb955f7e5fbda2263b4b19ab5fab90f572210",
+      "workflow_run": {
+        "id": 46101887140,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-study-20261127-6b4c",
+        "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+      }
+    }
+  ],
+  "preservationPolicy": "Unchanged exporter verifies original ZIP published byte length and SHA-256, records every original ZIP entry, and retains every qualification file plus registered plan/tree files; only qualification-sources worktrees are omitted. Each original has its own artifact root; hidden files are included.",
+  "failurePolicy": "Attempt each fixed independent original at most once in the listed order. Retain every partial export and failed transfer log. No retries, substitute artifacts, or waiting for unfinished source cells. Any failure fails the job.",
+  "acceptancePolicy": "Receiver must explicitly allow this new outer workflow run/head/branch/attempt, require the unchanged exporter SHA, and verify exact selected/retained/actually uploaded filename sets, lengths and hashes. Original memory/semantic failures remain unchanged.",
+  "availabilityQualification": "No alternate pool capacity is asserted. A macOS job may also queue; no queue-fix claim or runner provisioning.",
+  "localPreparationBaseCommit": "cebb86de714c1cc1dc96144346382ae8bb159507",
+  "localPreparationBaseTree": "31253c4d2ee2b6e5afa45ef81e90f19b9205fb7e",
+  "publicationParentPolicy": "Local preparation base cebb86de714c1cc1dc96144346382ae8bb159507 and required remote publication parent b95376b98671d5f228cb4ac6650ce043a13d98aa have the same tree 31253c4d2ee2b6e5afa45ef81e90f19b9205fb7e. The published wrapper must have the exact remote parent, enforced before export.",
+  "metadataProvenance": {
+    "frozenSelectionFile": "mac-export-vndb-metadata.json",
+    "frozenSelectionSha256": "f114f2562885dc6fc41f8f8a06adac3351f6a3166b66513c2471dba6d1bdebcb",
+    "independentInventoryFile": "original-artifacts-20261128-0645.json",
+    "independentInventorySha256": "6972fe327189322f82b3dd1bcaf02636b9b7217da30d478f52ca2fb30ec5c0f6",
+    "finalRunIdentityFile": "original-final-run-identity-20261128.json",
+    "finalRunIdentitySha256": "0067fdc30abed8e838413b11b9b16316bce3193c5fb885814c02b831bdc6037a",
+    "selectionPolicy": "Exactly four finalized VNDB original artifacts selected by fixed candidate/dictionary/order names; full API objects unchanged, typed AB then BA then lookahead AB then BA; no pending cells or mid-batch additions."
+  },
+  "sourceRunStatus": "completed",
+  "sourceRunConclusion": "failure"
+}
