@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-11-28T07:48:41.390864+00:00",
+  "files": 1268,
+  "uncompressedBytesIncludingNestedCompactCheckpoint": 79492581,
+  "sourceCommits": 32,
+  "freeBeforeBytes": 102125568,
+  "archiveOutputCapBytes": 33554432,
+  "minimumFreeBytes": 25165824,
+  "uncompressedStagingCopy": false,
+  "publicationPatternScreen": {
+    "status": "zero-listed-pattern-matches",
+    "testedPatterns": {
+      "github-token": "\\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})\\b",
+      "private-key": "-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
+      "aws-access-key": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+      "unmasked-bearer": "(?i)authorization[\"\\s]*[:=][\"\\s]*(?:bearer|basic) +[A-Za-z0-9_+/.-]{24,}",
+      "signed-url": "(?i)[?&](?:X-Amz-Signature|access_token|sig)=[A-Za-z0-9%_+/.-]{24,}"
+    },
+    "matchCount": 0,
+    "findings": [],
+    "scope": "Only these token/key/signed-URL patterns in selected current payload bytes. The unchanged nested checkpoint retains its prior receipt. This is not an exhaustive secret audit."
+  },
+  "actualSourceReconstructionPassed": true
+}

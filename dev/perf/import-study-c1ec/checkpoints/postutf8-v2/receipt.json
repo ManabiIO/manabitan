@@ -1,0 +1,31 @@
+{
+  "completedAt": "2026-11-28T07:48:44.095712+00:00",
+  "status": "verified-local-checkpoint-not-remotely-published",
+  "archivePath": "profile-evidence/archive-snapshot-c1ec-postutf8-v2/payload.tar.gz",
+  "archiveBytes": 13833588,
+  "archiveSha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+  "manifestSha256": "47b2510e060fce8810f518acc470e39519b4cd715dad19310bd9737c92d75e59",
+  "memberCount": 1269,
+  "nestedPriorMembers": 1076,
+  "sourceCommitCount": 32,
+  "allSourceTreesReconstructed": true,
+  "allRawCommitObjectsVerified": true,
+  "realIndexUnchanged": true,
+  "allCurrentAndNestedMemberHashesVerified": true,
+  "priorCheckpointBytesUnchanged": true,
+  "publicationPatternScreen": {
+    "status": "zero-listed-pattern-matches",
+    "testedPatterns": {
+      "github-token": "\\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})\\b",
+      "private-key": "-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
+      "aws-access-key": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+      "unmasked-bearer": "(?i)authorization[\"\\s]*[:=][\"\\s]*(?:bearer|basic) +[A-Za-z0-9_+/.-]{24,}",
+      "signed-url": "(?i)[?&](?:X-Amz-Signature|access_token|sig)=[A-Za-z0-9%_+/.-]{24,}"
+    },
+    "matchCount": 0,
+    "findings": [],
+    "scope": "Only these token/key/signed-URL patterns in selected current payload bytes. The unchanged nested checkpoint retains its prior receipt. This is not an exhaustive secret audit."
+  },
+  "freeAfterBytes": 87597056,
+  "laterOutcomesRequireNewNamedCheckpoint": true
+}

@@ -1,0 +1,273 @@
+{
+  "status": "passed",
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "repository": "https://github.com/ManabiIO/manabitan",
+    "retrieval": "Fetch exact published9e baseline and tree/blob objects. No dependency or dictionary fixture bytes are embedded."
+  },
+  "commitCount": 32,
+  "allParentsIncludedInDependencyOrder": true,
+  "realIndexUnchanged": true,
+  "realIndexSha256": "addcd882a285ca8e6825b57faebcff436931f35233b966c3a1dc4cf8334d53fe",
+  "worktreesModified": false,
+  "refsCreatedOrMoved": false,
+  "observations": [
+    {
+      "commit": "d6d6f9720bb803dc99d353803392971d07cf5cc6",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "0db6f39688e774910d524e42acfe6da1f9aa6b81",
+      "reconstructedTree": "0db6f39688e774910d524e42acfe6da1f9aa6b81",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "fe0845ef3585472a3ee780ff4fb35e3bfd41a4e7",
+      "parent": "d6d6f9720bb803dc99d353803392971d07cf5cc6",
+      "expectedTree": "03583c889fe29e4e0f04290e09067a80dd299350",
+      "reconstructedTree": "03583c889fe29e4e0f04290e09067a80dd299350",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "c36d461bdb9cc6a7a0b7256b3982eb4dec2f6962",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "da27393b5b69b004a12087c39eba2dfee854d8bd",
+      "reconstructedTree": "da27393b5b69b004a12087c39eba2dfee854d8bd",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "e05534e10c07a0f936fd576e31039e018a65174f",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "4ecebc3a54f8ae865ae3f98943695fa9cbb8341d",
+      "reconstructedTree": "4ecebc3a54f8ae865ae3f98943695fa9cbb8341d",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "3f7ab525c170ceceac9b22c71934275fe6a526fd",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "4fc9ab3c1b110551eb940aeeae588547bd156f48",
+      "reconstructedTree": "4fc9ab3c1b110551eb940aeeae588547bd156f48",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "648512487236af4fb405a87182bb33e7fb5f0f8e",
+      "parent": "3f7ab525c170ceceac9b22c71934275fe6a526fd",
+      "expectedTree": "e221dd999eebae3dc24660c1f80eaceebf1b4860",
+      "reconstructedTree": "e221dd999eebae3dc24660c1f80eaceebf1b4860",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "3546a152c11616a7b233e5b1c92bac704b4ab9c4",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "b7c21d0745a368396cf3d704eb5d5c289dc05d13",
+      "reconstructedTree": "b7c21d0745a368396cf3d704eb5d5c289dc05d13",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "e5add3e5415888f1cc1ba0affbdce3c13577782a",
+      "parent": "3546a152c11616a7b233e5b1c92bac704b4ab9c4",
+      "expectedTree": "819eb305d4e0249fbbc0078a53e7de87937871b1",
+      "reconstructedTree": "819eb305d4e0249fbbc0078a53e7de87937871b1",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "703722ba99fd7fd2e0cbfe4a107f3e30bc53685f",
+      "parent": "e5add3e5415888f1cc1ba0affbdce3c13577782a",
+      "expectedTree": "b65fe68a27fdea20fa4ad9ba9e3a4df0933b7010",
+      "reconstructedTree": "b65fe68a27fdea20fa4ad9ba9e3a4df0933b7010",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "5c106f6cebb4dd4953a82a8785162eb5c28906c8",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "e1743d7a129824cbeadfe9c56f1b177529dbd9f9",
+      "reconstructedTree": "e1743d7a129824cbeadfe9c56f1b177529dbd9f9",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "b6e8e1fc6b32590bf2fe056da239c997a4da803c",
+      "parent": "5c106f6cebb4dd4953a82a8785162eb5c28906c8",
+      "expectedTree": "28f6a2b38072a5ef9bd43eba7ab84fdcf8f5c330",
+      "reconstructedTree": "28f6a2b38072a5ef9bd43eba7ab84fdcf8f5c330",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "c69084049a3762dce55d2602c6fa7033b26ef9d5",
+      "parent": "b6e8e1fc6b32590bf2fe056da239c997a4da803c",
+      "expectedTree": "813271185ff4ae759cc156ffecc21fc9617dca2b",
+      "reconstructedTree": "813271185ff4ae759cc156ffecc21fc9617dca2b",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "63bff904bb2f5d51a3216e216543593551858b28",
+      "parent": "c69084049a3762dce55d2602c6fa7033b26ef9d5",
+      "expectedTree": "21da8604d2bdfc26517953e368d9bc42f43f2cde",
+      "reconstructedTree": "21da8604d2bdfc26517953e368d9bc42f43f2cde",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "fe916b8633662bb67f54ace93b11be32536cfb93",
+      "parent": "63bff904bb2f5d51a3216e216543593551858b28",
+      "expectedTree": "9001da7c7cab7fdd9db38957e56d96dfd55834a1",
+      "reconstructedTree": "9001da7c7cab7fdd9db38957e56d96dfd55834a1",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "9e8b7b4b1774d2c259843d5a38607a202f8c4d63",
+      "parent": "fe916b8633662bb67f54ace93b11be32536cfb93",
+      "expectedTree": "0494c5535c2f6aebd0888a61b4d6d42066363f25",
+      "reconstructedTree": "0494c5535c2f6aebd0888a61b4d6d42066363f25",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "69db2dcf11c23bb12030b1b292a9f151548acd41",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "1c0404ad34b85ce4cd6061aa3436fc5511ba6f6a",
+      "reconstructedTree": "1c0404ad34b85ce4cd6061aa3436fc5511ba6f6a",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "2f10e0b538fb315ff7b132bc4888ce2acb525be3",
+      "parent": "69db2dcf11c23bb12030b1b292a9f151548acd41",
+      "expectedTree": "29abcc0c951dc71fa220979dcdb62fe8a38ab4ae",
+      "reconstructedTree": "29abcc0c951dc71fa220979dcdb62fe8a38ab4ae",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "cf1a1f8e3dd5750e4cb243ca9f7efddb583229b9",
+      "parent": "2f10e0b538fb315ff7b132bc4888ce2acb525be3",
+      "expectedTree": "983d296b388e524f028cc93b2f530c52fd9ecd34",
+      "reconstructedTree": "983d296b388e524f028cc93b2f530c52fd9ecd34",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "89ff905d3f5a54b04a696217024c94c1c97230ed",
+      "parent": "cf1a1f8e3dd5750e4cb243ca9f7efddb583229b9",
+      "expectedTree": "ce834ab9353cf0effb6b58bc7aa5ef8c14d05e40",
+      "reconstructedTree": "ce834ab9353cf0effb6b58bc7aa5ef8c14d05e40",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "abfaadece0a5c1c00188fedc8f4c9763a1c3711c",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "14890e8363487b81542cc844778c45bf2c57132b",
+      "reconstructedTree": "14890e8363487b81542cc844778c45bf2c57132b",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "ae04e5c454cf4f64adb96a22b6074c063085c8be",
+      "parent": "abfaadece0a5c1c00188fedc8f4c9763a1c3711c",
+      "expectedTree": "460ec39a1a4c03e5e56ce7808bc8557a8e75f1c4",
+      "reconstructedTree": "460ec39a1a4c03e5e56ce7808bc8557a8e75f1c4",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "d2578c0c1be841a1aab8afbc1d5318e72737085b",
+      "parent": "ae04e5c454cf4f64adb96a22b6074c063085c8be",
+      "expectedTree": "168dfc98016803062376b37bd64c7319dc0023c0",
+      "reconstructedTree": "168dfc98016803062376b37bd64c7319dc0023c0",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "79e92dce70126d64334eb07ce81d8c61df1d3ecb",
+      "parent": "d2578c0c1be841a1aab8afbc1d5318e72737085b",
+      "expectedTree": "7fbb396a00b054b044b169084b20ed09cd2dd551",
+      "reconstructedTree": "7fbb396a00b054b044b169084b20ed09cd2dd551",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "4d216238a70e3cc1fd52181ef15dc87bddcdb1fa",
+      "parent": "ae04e5c454cf4f64adb96a22b6074c063085c8be",
+      "expectedTree": "0cc20a3aab773bfc273a9bd063469860f1a28e94",
+      "reconstructedTree": "0cc20a3aab773bfc273a9bd063469860f1a28e94",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "89a218ec1aa529adfbab1ff2b87843812a2932e5",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "a4309ed21d7241736169f2948fa0ef219b879038",
+      "reconstructedTree": "a4309ed21d7241736169f2948fa0ef219b879038",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "d52370a32a1a71216835301d49dd2b4aa05908c6",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "d325dd720fde6b7719ca2e748c5136255615cebc",
+      "reconstructedTree": "d325dd720fde6b7719ca2e748c5136255615cebc",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "18aa5b0f1f7407cff3d40bac81271bbfd429abd4",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "14890e8363487b81542cc844778c45bf2c57132b",
+      "reconstructedTree": "14890e8363487b81542cc844778c45bf2c57132b",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "parent": "18aa5b0f1f7407cff3d40bac81271bbfd429abd4",
+      "expectedTree": "460ec39a1a4c03e5e56ce7808bc8557a8e75f1c4",
+      "reconstructedTree": "460ec39a1a4c03e5e56ce7808bc8557a8e75f1c4",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "cbe648af3e929bde4eb70962b0eabbd18c8bb6b5",
+      "parent": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "expectedTree": "00575b15d0b5e467c10307fe0315bb45109979cc",
+      "reconstructedTree": "00575b15d0b5e467c10307fe0315bb45109979cc",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "593c1d69a350594a557832a92ece7f9d4412f676",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "c23585fa7e3479b4b0cc3e9d53d827ebf26681fd",
+      "reconstructedTree": "c23585fa7e3479b4b0cc3e9d53d827ebf26681fd",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "6d8fd14fa1f14e3ee9497450effb2919454d9699",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "0679962b0fa41e241c0dde67741eddda11a20a34",
+      "reconstructedTree": "0679962b0fa41e241c0dde67741eddda11a20a34",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    },
+    {
+      "commit": "74aa8bab3de19470fc681f8f9ada55e3df389787",
+      "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "expectedTree": "0807f9a38826048f1fd60ca7bb0a034512501f8f",
+      "reconstructedTree": "0807f9a38826048f1fd60ca7bb0a034512501f8f",
+      "rawCommitObjectVerified": true,
+      "binaryPatchAppliedToSeparateTemporaryIndex": true
+    }
+  ]
+}

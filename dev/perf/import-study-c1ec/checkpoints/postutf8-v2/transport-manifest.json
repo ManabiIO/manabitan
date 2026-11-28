@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "reason": "The original base64 request exceeded the connector16MiB request-body limit; the unchanged archive is transported in two binary parts.",
+  "archive": {
+    "name": "payload.tar.gz",
+    "bytes": 13833588,
+    "sha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+    "logicalGitBlob": "2f8e2f2bced73f0daeea28103a32bf03f3d468e2",
+    "standaloneRemoteBlobClaimed": false
+  },
+  "sourcePublicationManifestSha256": "2576fb3b29d1ce556b7f4a7c1ff8b91f5beed8d03b2066653a00267cd1a23371",
+  "parts": [
+    {
+      "name": "payload.tar.gz.part-01",
+      "offset": 0,
+      "bytes": 6946710,
+      "sha256": "fc0a5d879a908517b8c56c2e3c78731673250f01cba430ebe2e20511d7ad9421",
+      "gitBlob": "d11fb20bc5028aa36cbf05978dc5fe223c680723",
+      "base64ChunkStart": 0,
+      "base64ChunkCount": 106
+    },
+    {
+      "name": "payload.tar.gz.part-02",
+      "offset": 6946710,
+      "bytes": 6886878,
+      "sha256": "b6fc30479fc42f236f8daa5fc865023e0cb5f901afd1c7acbc8c70ef2db2f1c4",
+      "gitBlob": "e33c8f349a361b485454ecd56361f069d1fca891",
+      "base64ChunkStart": 106,
+      "base64ChunkCount": 106
+    }
+  ],
+  "assembly": "Run python3 assemble_archive.py from this directory, then the unchanged verify_archive.py command."
+}

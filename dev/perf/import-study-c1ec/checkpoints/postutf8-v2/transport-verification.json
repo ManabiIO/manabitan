@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checkedAt": "2026-11-28T07:55:02.726613+00:00",
+  "archiveSha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+  "archiveBytes": 13833588,
+  "partCount": 2,
+  "assemblyStdout": "Verified 13833588 bytes: cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5\n",
+  "sourceArchiveUnchanged": true,
+  "transportFailure": "Original18.4MBbase64MCPrequest rejected as exceeding16MiBbodylimit; no policyapprovalrejection."
+}

@@ -1,0 +1,91 @@
+{
+  "status": "ready-for-parent-research-branch-publication; no remote write performed here",
+  "snapshot": "archive-snapshot-c1ec-postutf8-v2",
+  "files": [
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/payload.tar.gz",
+      "name": "payload.tar.gz",
+      "bytes": 13833588,
+      "sha256": "cedf25a9fd678588195f2e28b158a5df9339deb37d6ea0a2bc22e2ce0e8c19c5",
+      "gitBlob": "2f8e2f2bced73f0daeea28103a32bf03f3d468e2",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/payload.tar.gz"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/manifest.json",
+      "name": "manifest.json",
+      "bytes": 612453,
+      "sha256": "47b2510e060fce8810f518acc470e39519b4cd715dad19310bd9737c92d75e59",
+      "gitBlob": "077f6c444e41b202c7ab7c889be32a731d401d34",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/manifest.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/README.md",
+      "name": "README.md",
+      "bytes": 4637,
+      "sha256": "231786f9c6e87c801a88eef6adf000e046f0c09605f4be38f87799c235490746",
+      "gitBlob": "bb6615ac5bfe687bf1ba597c7a98697c8543cfec",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/README.md"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/results.json",
+      "name": "results.json",
+      "bytes": 25966,
+      "sha256": "19a02f0e5d98ddbb7c61e7e24cf216cb7ea974d7b1c1132e74c42dac0aa750c8",
+      "gitBlob": "186eebe2678c6793eb68e6a5d16ab8dbf2f25ab1",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/results.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/verification.json",
+      "name": "verification.json",
+      "bytes": 13656,
+      "sha256": "54e9863ab53506287b0fae97150169189086c078f783f318f77adb37e7272fb6",
+      "gitBlob": "77d1cc7207fcbd4a136c2d3077312db02361136a",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/verification.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/source-reconstruction.json",
+      "name": "source-reconstruction.json",
+      "bytes": 12334,
+      "sha256": "d865a422bd79a81739e286987da60a1151bb6545769fe9ddfabeaa085bacc8dc",
+      "gitBlob": "d6cd9fa763cbb656b75fdc09e1ce343ef3630fde",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/source-reconstruction.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/receipt.json",
+      "name": "receipt.json",
+      "bytes": 1537,
+      "sha256": "42c305fed5b931681b031c42cbc993f137e445c9f4bedb679f6ecb235c6431f0",
+      "gitBlob": "e6e5e9c2acc54cf9ede900dca2d5f0a172cd6c22",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/receipt.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/preflight.json",
+      "name": "preflight.json",
+      "bytes": 1108,
+      "sha256": "44f4c22be98531169f757443e4d48b9cf74a2014c1511f4e89aa1b9fab60b4fb",
+      "gitBlob": "9514dbb40274ba05d3c6de72d0235b095396d6af",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/preflight.json"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/build_snapshot.py",
+      "name": "build_snapshot.py",
+      "bytes": 28630,
+      "sha256": "1476a647f486324b1d86e40d2718f45c1fe537574bf645d26b8423b6f8a32f64",
+      "gitBlob": "c2aa6e15aaa022f709fd32aaf9069d7f21ab65df",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/build_snapshot.py"
+    },
+    {
+      "localPath": "/workspace/scratch/c1ec33aeb201/profile-evidence/archive-snapshot-c1ec-postutf8-v2/verify_archive.py",
+      "name": "verify_archive.py",
+      "bytes": 8260,
+      "sha256": "4c1d20f5f04d2e3f97998fd1f096d6e857f573fa249496779b18233be8eaa443",
+      "gitBlob": "0bd0c72941ea9772aedf83e44d675d34a2ace1ab",
+      "suggestedRepositoryPath": "dev/perf/import-study-c1ec/checkpoints/postutf8-v2/verify_archive.py"
+    }
+  ],
+  "scope": "Evidence only. No performance PR is supported by these completed experiments.",
+  "localGitObjectsWritten": true,
+  "remoteObjectsNotClaimed": true,
+  "includeThisManifestAlongsideFiles": true,
+  "sourceBase": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+}

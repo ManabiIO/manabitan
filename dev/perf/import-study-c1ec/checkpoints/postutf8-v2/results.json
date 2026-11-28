@@ -1,0 +1,676 @@
+{
+  "snapshot": "archive-snapshot-c1ec-postutf8-v2",
+  "createdAt": "2026-11-28T07:48:38.818682+00:00",
+  "status": "Durable checkpoint ready for parent publication; no product PR is supported by completed experiments.",
+  "completedConservativeScreens": [
+    {
+      "dictionary": "jmdict",
+      "runId": 46107561217,
+      "jobId": 140863611662,
+      "artifactId": 15251635264,
+      "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourceCandidate": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "auditPath": "evidence/profile-evidence/native-screen-jmdict-46107561217-audit/independent-audit.json",
+      "auditSha256": "0f31dcac23f655a717e42bd4581dc06942e691efc965419b1d00d57bbb1b8125",
+      "artifactSha256": "bb88c7ddcc93a43a92d49f3044115f38332df249df6f7a9b76adab7778914ab5",
+      "sourceAndPackagesVerified": true,
+      "timingObservationsAudited": 20,
+      "exhaustiveMediaReceiptsAudited": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9704240524923989,
+          0.893362831858407,
+          0.8176456131727862,
+          1.2699541284403604,
+          1.1472342416091608,
+          0.9161082819619708
+        ],
+        "medianPairedChangePercent": -5.673383277281507,
+        "equalWorkChangePercent": -1.7030651957152476,
+        "worstPairChangePercent": 26.99541284403604,
+        "descriptiveBootstrap95Percent": [
+          -14.449577748440333,
+          20.859418502476057
+        ],
+        "fasterPairs": 4
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.03075847605735,
+          0.932468646157144
+        ],
+        "medianPairedChangePercent": -1.8386438892753043,
+        "equalWorkChangePercent": -2.0433229120130125,
+        "worstPairChangePercent": 3.075847605735005,
+        "descriptiveBootstrap95Percent": [
+          -6.753135384285603,
+          3.075847605735005
+        ],
+        "fasterPairs": 1
+      },
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 295,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 4.256969288822232,
+            "maximumPairedChangePercent": 5.150054550004501
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 5.364567300958023,
+            "maximumPairedChangePercent": 6.441626755086172
+          }
+        }
+      },
+      "memoryPassed": false,
+      "artifactAuditStatus": "verified-with-failed-memory-gate",
+      "analysisAuditErrors": [],
+      "scope": "One six-pair screen; no independent opposite-order replication and no performance qualification claim.",
+      "memorySemanticFailures": []
+    },
+    {
+      "dictionary": "jitendex",
+      "runId": 46107561217,
+      "jobId": 140863611687,
+      "artifactId": 15250954839,
+      "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourceCandidate": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "auditPath": "evidence/profile-evidence/native-screen-jitendex-46107561217-audit/independent-audit.json",
+      "auditSha256": "a80eb6284b01621b0cda0e54e7910930286b96213ad3462b31e37029f064a529",
+      "artifactSha256": "d8c5c8acdeaf31dc03270986cc3a7c7a0e6f4d0d9de8f985773dc4f85d8fad70",
+      "sourceAndPackagesVerified": true,
+      "timingObservationsAudited": 20,
+      "exhaustiveMediaReceiptsAudited": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          1.2750788643533157,
+          1.2840721527941499,
+          1.2545646067415535,
+          1.2416738816738548,
+          1.2549463301421324,
+          1.235532704941472
+        ],
+        "medianPairedChangePercent": 25.475546844184294,
+        "equalWorkChangePercent": 25.754210444993177,
+        "worstPairChangePercent": 28.407215279414988,
+        "descriptiveBootstrap95Percent": [
+          23.86032933076634,
+          27.95755085737328
+        ],
+        "fasterPairs": 0
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.034040777393589,
+          0.9806071799607329
+        ],
+        "medianPairedChangePercent": 0.7323978677160836,
+        "equalWorkChangePercent": 0.6891495601164532,
+        "worstPairChangePercent": 3.4040777393588906,
+        "descriptiveBootstrap95Percent": [
+          -1.9392820039267122,
+          3.4040777393588906
+        ],
+        "fasterPairs": 1
+      },
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 435,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 7.603006315149507,
+            "maximumPairedChangePercent": 11.042471259996667
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 9.45788684747223,
+            "maximumPairedChangePercent": 14.47039239458845
+          }
+        }
+      },
+      "memoryPassed": false,
+      "artifactAuditStatus": "verified-with-failed-memory-gate",
+      "analysisAuditErrors": [],
+      "scope": "One six-pair screen; no independent opposite-order replication and no performance qualification claim.",
+      "memorySemanticFailures": []
+    },
+    {
+      "dictionary": "vndb",
+      "runId": 46107561217,
+      "jobId": 140863611462,
+      "artifactId": 15251703474,
+      "sourceBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourceCandidate": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "auditPath": "evidence/profile-evidence/native-screen-vndb-46107561217-audit/independent-audit.json",
+      "auditSha256": "5998dd96f971ba4cac72a940b57a3cb0cd9c9a16b76975104bd0a5b858aa4b75",
+      "artifactSha256": "f59561480d804009ba8b6088901993ab401427b80079e10725f3683a178497cb",
+      "sourceAndPackagesVerified": true,
+      "timingObservationsAudited": 20,
+      "exhaustiveMediaReceiptsAudited": 2,
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          0.9546252233166277,
+          1.0213134134014126,
+          1.0097330554061559,
+          1.001210894735065,
+          1.06557267247153,
+          0.9461063922127915
+        ],
+        "medianPairedChangePercent": 0.547197507061048,
+        "equalWorkChangePercent": -0.1463235857210088,
+        "worstPairChangePercent": 6.557267247152998,
+        "descriptiveBootstrap95Percent": [
+          -4.963419223529042,
+          4.344304293647117
+        ],
+        "fasterPairs": 2
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.0136415052928445,
+          1.004075553227711
+        ],
+        "medianPairedChangePercent": 0.8858529260277859,
+        "equalWorkChangePercent": 0.8784395854635196,
+        "worstPairChangePercent": 1.364150529284447,
+        "descriptiveBootstrap95Percent": [
+          0.4075553227711026,
+          1.364150529284447
+        ],
+        "fasterPairs": 0
+      },
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 423,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryPassed": false,
+      "artifactAuditStatus": "verified-with-failed-memory-gate",
+      "analysisAuditErrors": [],
+      "scope": "One six-pair screen; no independent opposite-order replication and no performance qualification claim.",
+      "memorySemanticFailures": []
+    }
+  ],
+  "completedExpandedVndbCells": [
+    {
+      "comparison": "conservative",
+      "runId": 46110757721,
+      "jobId": 140873534245,
+      "artifactId": 15253796293,
+      "auditPath": "evidence/profile-evidence/native-vndb-expanded-conservative-46110757721-audit/independent-audit.json",
+      "auditSha256": "d0d27ee542be9c1b8d725792966d3676799a8318e061f3482c2b9bd6e81691ae",
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          1.4786056003479342,
+          1.497497394899123,
+          1.4303506992367419,
+          1.5318439092402951,
+          1.4779787751269864,
+          1.600475993377469
+        ],
+        "medianPairedChangePercent": 48.80514976235286,
+        "equalWorkChangePercent": 50.22927798482291,
+        "worstPairChangePercent": 60.0475993377469,
+        "descriptiveBootstrap95Percent": [
+          45.4164737181864,
+          56.61599513088822
+        ],
+        "fasterPairs": 0
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          1.0093990120746512,
+          0.9838916854712643
+        ],
+        "medianPairedChangePercent": -0.335465122704226,
+        "equalWorkChangePercent": -0.32782925272184515,
+        "worstPairChangePercent": 0.9399012074651214,
+        "descriptiveBootstrap95Percent": [
+          -1.6108314528735734,
+          0.9399012074651214
+        ],
+        "fasterPairs": 1
+      },
+      "memoryPassed": false,
+      "artifactAuditStatus": "verified-with-failed-memory-gate",
+      "sourceAndPackagesVerified": true,
+      "analysisAuditErrors": [],
+      "scope": "One independent six-pair VNDB comparison. No pooling or subtraction across comparison hosts; no opposite-order replication or performance qualification claim."
+    },
+    {
+      "comparison": "baseline",
+      "runId": 46110757721,
+      "jobId": 140873534461,
+      "artifactId": 15253432785,
+      "auditPath": "evidence/profile-evidence/native-vndb-expanded-baseline-46110757721-audit/independent-audit.json",
+      "auditSha256": "170d5087abe9d869971ab8eb0a0990f489bdb560bc56aa0f1fef53dd62d93b9c",
+      "candidateVsBaseline": {
+        "count": 6,
+        "ratios": [
+          1.3578808529347148,
+          1.396306110657284,
+          1.470110461338535,
+          1.314910025706943,
+          1.4534945339639969,
+          1.4586485523032349
+        ],
+        "medianPairedChangePercent": 42.49003223106405,
+        "equalWorkChangePercent": 40.77188663285338,
+        "worstPairChangePercent": 47.0110461338535,
+        "descriptiveBootstrap95Percent": [
+          33.6395439320829,
+          46.43795068208849
+        ],
+        "fasterPairs": 0
+      },
+      "identicalCodeControl": {
+        "count": 2,
+        "ratios": [
+          0.9669111311108046,
+          1.0910968005724286
+        ],
+        "medianPairedChangePercent": 2.9003965841616575,
+        "equalWorkChangePercent": 2.697304672823142,
+        "worstPairChangePercent": 9.109680057242864,
+        "descriptiveBootstrap95Percent": [
+          -3.3088868889195377,
+          9.109680057242864
+        ],
+        "fasterPairs": 1
+      },
+      "memoryPassed": false,
+      "artifactAuditStatus": "verified-with-failed-memory-gate",
+      "sourceAndPackagesVerified": true,
+      "analysisAuditErrors": [],
+      "scope": "One independent six-pair VNDB comparison. No pooling or subtraction across comparison hosts; no opposite-order replication or performance qualification claim."
+    }
+  ],
+  "expandedChromeCorrectness": {
+    "scope": "Source, browser, worker-context and frozen-harness identity audit of expanded correctness canary; no performance or cancellation qualification. Raw case/counter and framed aggregate verification is independently recorded by history_review.",
+    "runId": 46110609684,
+    "jobId": 140873069816,
+    "artifactId": 15252308247,
+    "artifactBytes": 20003,
+    "artifactSha256": "a5f5e7b6ef7ea2baa5e7884f47ddb6e26960e7e639f6822e6fcc5430b41c2cd7",
+    "reportSha256": "775d31d5a206a1c06d505e101b546adaafdeb13db78f8a8fb186f6862a912e8f",
+    "status": "verified",
+    "sourceAndTreeIdentities": {
+      "A": [
+        "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+      ],
+      "B": [
+        "33936000588d976a1162631f78cfe7a0751de78b",
+        "7fbb396a00b054b044b169084b20ed09cd2dd551"
+      ]
+    },
+    "sourceHashesVerified": true,
+    "frozenHarnessVerified": true,
+    "pinnedBrowserVerified": true,
+    "dedicatedSharedWorkersVerified": true,
+    "caseCounts": {
+      "parserCasesPerArm": 53,
+      "directNativeCasesPerArm": 8
+    },
+    "independentCaseAudit": {
+      "path": "profile-evidence/native-gzip-expanded-independent-audit.json",
+      "sha256": "f7c6f17e61d19c509e79026ea7916e716ce83d475b409572c047741b5b71029f"
+    },
+    "hostedGates": {
+      "lint": "passed",
+      "mainTypes": "passed",
+      "testTypes": "passed",
+      "unitFiles": 670,
+      "passedTests": 15159,
+      "skippedTests": 47,
+      "releaseBuild": "passed",
+      "actualChromeCanary": "passed"
+    }
+  },
+  "completedUtf8ComponentScreens": {
+    "inlineAndWord": {
+      "path": "evidence/profile-evidence/utf8-parser-study-c1ec/cohort-01/cohort.json",
+      "sha256": "b5118e2bf5a6c32aae438674122397be7be0f20c8767ce7f906663d66431de8c",
+      "planSha256": "b95cd6390d3e1f986c7e733a115d4f49e700719ef0875f68ba987ba314db70d0",
+      "correctnessChildren": 4,
+      "timedChildren": 32,
+      "controlQualified": false,
+      "comparisons": {
+        "B/A": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": -0.13877049943256115,
+            "equalWorkChangePercent": 1.1654141903337134,
+            "fasterPairs": 4,
+            "worstPairChangePercent": 20.22427492179797,
+            "descriptiveBootstrap95Percent": [
+              -2.530446165697098,
+              9.305618606532873
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": -1.4350559459569534,
+            "equalWorkChangePercent": 0.4249554076462436,
+            "fasterPairs": 5,
+            "worstPairChangePercent": 18.87712531734451,
+            "descriptiveBootstrap95Percent": [
+              -2.844114133293474,
+              9.024314537109458
+            ]
+          }
+        },
+        "B/D": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": -3.6000658265713525,
+            "equalWorkChangePercent": -1.8613275013150021,
+            "fasterPairs": 5,
+            "worstPairChangePercent": 26.60468966318461,
+            "descriptiveBootstrap95Percent": [
+              -13.219168795026215,
+              5.600976983025441
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": -5.436806055443877,
+            "equalWorkChangePercent": -1.980451146118467,
+            "fasterPairs": 5,
+            "worstPairChangePercent": 25.82143285380223,
+            "descriptiveBootstrap95Percent": [
+              -10.978421043927245,
+              4.554072370046258
+            ]
+          }
+        },
+        "C/A": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": 4.038018809769595,
+            "equalWorkChangePercent": 3.971611183226309,
+            "fasterPairs": 1,
+            "worstPairChangePercent": 18.67435716884922,
+            "descriptiveBootstrap95Percent": [
+              0.0275129462401269,
+              9.947627878810827
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": 3.6892669443643555,
+            "equalWorkChangePercent": 3.547221006620549,
+            "fasterPairs": 2,
+            "worstPairChangePercent": 16.49688915330969,
+            "descriptiveBootstrap95Percent": [
+              -1.4168385592069677,
+              10.374492983078643
+            ]
+          }
+        },
+        "C/D": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": 3.0517215148515575,
+            "equalWorkChangePercent": 0.8609116142600959,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 13.82683368500257,
+            "descriptiveBootstrap95Percent": [
+              -10.031408585013256,
+              6.901133690253736
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": 3.0606116974483566,
+            "equalWorkChangePercent": 1.0670290760151913,
+            "fasterPairs": 2,
+            "worstPairChangePercent": 9.660547115994822,
+            "descriptiveBootstrap95Percent": [
+              -8.824152178716982,
+              7.75193585205376
+            ]
+          }
+        },
+        "D/A": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": 5.664521359620767,
+            "equalWorkChangePercent": 3.0841477825056973,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 19.96242445601184,
+            "descriptiveBootstrap95Percent": [
+              -5.039635386620289,
+              13.537265063764693
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": 6.252644632619031,
+            "equalWorkChangePercent": 2.454006962785016,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 17.037735389481835,
+            "descriptiveBootstrap95Percent": [
+              -5.980670420879852,
+              10.475946628661713
+            ]
+          }
+        },
+        "C/B": {
+          "parseLookupThreadCpuMs": {
+            "count": 8,
+            "medianPairedChangePercent": 3.9232937280408997,
+            "equalWorkChangePercent": 2.7738699192324745,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 21.75530973558597,
+            "descriptiveBootstrap95Percent": [
+              -3.8381503885277057,
+              11.658650958761928
+            ]
+          },
+          "parseLookupMs": {
+            "count": 8,
+            "medianPairedChangePercent": 3.5298728947343205,
+            "equalWorkChangePercent": 3.109053507965598,
+            "fasterPairs": 2,
+            "worstPairChangePercent": 19.90718638821134,
+            "descriptiveBootstrap95Percent": [
+              -0.14164185831317955,
+              11.734914673841335
+            ]
+          }
+        }
+      },
+      "candidateDecisions": {
+        "B": {
+          "checks": [
+            {
+              "baseline": "A",
+              "primaryCpu": false,
+              "secondaryWall": true
+            },
+            {
+              "baseline": "D",
+              "primaryCpu": false,
+              "secondaryWall": true
+            }
+          ],
+          "qualifiesForFurtherBrowserConsideration": false,
+          "decision": "Held; this fixed component screen does not support further qualification",
+          "productPrQualified": false
+        },
+        "C": {
+          "checks": [
+            {
+              "baseline": "A",
+              "primaryCpu": false,
+              "secondaryWall": false
+            },
+            {
+              "baseline": "D",
+              "primaryCpu": false,
+              "secondaryWall": false
+            }
+          ],
+          "qualifiesForFurtherBrowserConsideration": false,
+          "decision": "Held; this fixed component screen does not support further qualification",
+          "productPrQualified": false
+        }
+      },
+      "scope": "Node component only; no whole-import, browser or memory claim. No missing observations or performance replacements."
+    },
+    "pairedCjkV2": {
+      "path": "evidence/profile-evidence/utf8-pair-study-c1ec/cohort-01/cohort.json",
+      "sha256": "ffe7a5ce9592503f75c8802216469aec0d60a9456bf183fea87dc37014171304",
+      "planSha256": "1a393ce44fdafbf59707f98053e9301b4772a08eb9e071c6489520176c082ed3",
+      "correctnessChildren": 3,
+      "timedChildren": 36,
+      "controlQualified": false,
+      "comparisons": {
+        "B/A": {
+          "parseLookupThreadCpuMs": {
+            "count": 12,
+            "medianPairedChangePercent": 1.1541548389295775,
+            "equalWorkChangePercent": 0.8553312396622159,
+            "fasterPairs": 6,
+            "worstPairChangePercent": 36.724079249843534,
+            "descriptiveBootstrap95Percent": [
+              -11.910955917935128,
+              8.659186905032978
+            ]
+          },
+          "parseLookupMs": {
+            "count": 12,
+            "medianPairedChangePercent": 2.0681176439820037,
+            "equalWorkChangePercent": 1.0829583451290814,
+            "fasterPairs": 5,
+            "worstPairChangePercent": 34.50500179360161,
+            "descriptiveBootstrap95Percent": [
+              -11.831096770797034,
+              9.473546743579654
+            ]
+          }
+        },
+        "B/C": {
+          "parseLookupThreadCpuMs": {
+            "count": 12,
+            "medianPairedChangePercent": -5.830103593022451,
+            "equalWorkChangePercent": -6.795312042178814,
+            "fasterPairs": 8,
+            "worstPairChangePercent": 34.611725684135486,
+            "descriptiveBootstrap95Percent": [
+              -12.78577671666219,
+              5.268275303493164
+            ]
+          },
+          "parseLookupMs": {
+            "count": 12,
+            "medianPairedChangePercent": -5.105826402926028,
+            "equalWorkChangePercent": -6.2632187181068115,
+            "fasterPairs": 8,
+            "worstPairChangePercent": 33.74243422679035,
+            "descriptiveBootstrap95Percent": [
+              -11.928237055686397,
+              5.693886661770575
+            ]
+          }
+        },
+        "C/A": {
+          "parseLookupThreadCpuMs": {
+            "count": 12,
+            "medianPairedChangePercent": 2.69523381673884,
+            "equalWorkChangePercent": 8.20843183907578,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 46.085675712742116,
+            "descriptiveBootstrap95Percent": [
+              -0.4164443067202761,
+              18.462169228931913
+            ]
+          },
+          "parseLookupMs": {
+            "count": 12,
+            "medianPairedChangePercent": 4.12110836664934,
+            "equalWorkChangePercent": 7.837027218956738,
+            "fasterPairs": 3,
+            "worstPairChangePercent": 42.97825926800116,
+            "descriptiveBootstrap95Percent": [
+              0.05946432368977295,
+              17.176458350219413
+            ]
+          }
+        }
+      },
+      "candidateDecisions": {
+        "B": {
+          "checks": [
+            {
+              "baseline": "A",
+              "primaryCpu": false,
+              "secondaryWall": true
+            },
+            {
+              "baseline": "C",
+              "primaryCpu": false,
+              "secondaryWall": true
+            }
+          ],
+          "qualifiesForFurtherBrowserConsideration": false,
+          "decision": "Held; this fixed component screen does not support further qualification",
+          "productPrQualified": false
+        }
+      },
+      "scope": "Node component only; no whole-import, browser or memory claim. No missing observations or performance replacements."
+    }
+  },
+  "previousHeldExperiments": {
+    "stringMask64And16": "No supported JMdict component improvement; 16-byte candidate retired before planned Jitendex arms.",
+    "broadAndNarrowRecordFields": "Complete fixed 18-child cohorts and parity retained; no supported gain. Earlier inspector-biased cohort remains explicitly invalid.",
+    "publicationFusion": "Final JMdict component median difference 14.58 ms with wide variance. Jitendex first arm and separate private observer failed. No replacements, final activation claim or whole-import result.",
+    "descriptorClose": "Apparent close delay overlapped same-worker synchronous lookup-index flush; descriptor scheduling does not remove that measured flush.",
+    "crcPowers": "Exact #910 prior art; stopped before implementation/build/measurement.",
+    "canonicalConfigSnapshots": "Exact #880 prior art; stopped before implementation/disassembly/measurement."
+  },
+  "pendingOrUnapplied": [
+    "Direct-writer source/plan/reader are frozen; hosted component result remains pending and is not inferred here.",
+    "Native-await cancellation/bad-CRC browser plus CI drafts are unapplied and unexecuted.",
+    "Conservative confirmation plan remains unexecuted.",
+    "A new guarded group-burst source is being prepared separately; only its read-only prospective assessment is included. No qualification is claimed.",
+    "A possible pure fused-export diagnostic and maintained pair-specific test proposal are separate pending work; not executed by this checkpoint."
+  ],
+  "limits": [
+    "Logical decoded input/spans and specified serialized observables are compared; native paths need not preserve whole backing-heap bytes.",
+    "Component CPU/elapsed results and overlapping worker phase sums are not whole-import speedups.",
+    "No terminal-only exploratory check is reconstructed as an independently persisted observation.",
+    "Older queued-status and pre-publication receipts are retained with their original timestamps, not rewritten to current state.",
+    "The old1076-member payload is embedded unchanged. Its historical status and older broad privacy wording remain historical bytes, not new claims.",
+    "The current publication pattern screen checks only explicitly listed token/key/signed-URL patterns. It is not an exhaustive secret audit.",
+    "Both expanded VNDB cells are independent hosts; do not pool or subtract their effects.",
+    "Failed correctness processes, superseded unmeasured sourcev1, failed post-audit float assertion and all fixed performance observations remain retained.",
+    "The initial Python exact-float audit mismatch was corrected only in a separately named audit script; JavaScript means and all acquisition decisions were unchanged."
+  ]
+}
