@@ -29,6 +29,8 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+// eslint-disable-next-line @stylistic/semi
+import {copyOwnedTermScorePlan} from './term-score-plan.js'
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -81,10 +83,16 @@ const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {Omit<TermBankColumnChunk, 'scoreList'> & {scoreList: Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan}} TermBankWorkerColumnChunk */
+/** @typedef {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} TermBankColumnProgress */
+/** @typedef {(chunk: TermBankColumnChunk, progress: TermBankColumnProgress) => Promise<void>|void} TermBankColumnChunkCallback */
+/** @typedef {(chunk: TermBankWorkerColumnChunk, progress: TermBankColumnProgress) => Promise<void>|void} TermBankWorkerColumnChunkCallback */
+/** @typedef {Omit<TermBankColumnParserOptions, 'prepareWorkerScorePlan'> & {prepareWorkerScorePlan?: false}} RawTermBankColumnParserOptions */
+/** @typedef {TermBankColumnParserOptions & {prepareWorkerScorePlan: true}} WorkerTermBankColumnParserOptions */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, project_single_glossary_image_path?: (sourcePtr: number, sourceLength: number) => bigint, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, project_single_glossary_image_path?: (sourcePtr: number, sourceLength: number) => bigint, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, build_term_score_plan?: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -104,13 +112,17 @@ const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
  * singleChunk?: boolean,
  * prepareLookupIndexes?: boolean,
  * prepareLookupRoute?: boolean,
+ * prepareWorkerScorePlan?: boolean,
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, mediaHintRowsSkipped?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, mediaHintRowsSkipped?: number, nativeScorePlanGroups?: number, nativeScorePlanRows?: number, nativeScorePlanBytesAvoided?: number, nativeScorePlanMs?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, mediaHintPresent?: boolean, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
+/** @type {WeakMap<TermBankColumnChunk, {plan: import('./term-score-plan.js').TermScorePlan, scores: Int32Array, lookupBytes: Uint8Array}>} */
+// eslint-disable-next-line @stylistic/semi
+const nativeWorkerScorePlans = new WeakMap()
 /** @type {WebAssembly.Module|null} */
 let suppliedWasmModule = null;
 
@@ -207,6 +219,7 @@ async function getWasm() {
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
             build_term_string_plan: exports.build_term_string_plan,
             encode_term_lookup_index: exports.encode_term_lookup_index,
+            build_term_score_plan: typeof exports.build_term_score_plan === 'function' ? exports.build_term_score_plan : void 0,
             compact_term_lookup_keys: typeof exports.compact_term_lookup_keys === 'function' ? exports.compact_term_lookup_keys : void 0,
             encode_term_content: exports.encode_term_content,
             encode_term_content_no_hash: exports.encode_term_content_no_hash,
@@ -1643,6 +1656,38 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
     return length > 0 ? new Uint8Array(new Uint8Array(wasm.memory.buffer, scratch.outputPtr, length)) : null;
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * The whole lookup output is already owned when this helper runs. Reuse only
+ * its retired sequence workspace, preserving every original score on failure.
+ * @param {TermBankWasmExports} wasm
+ * @param {Int32Array|Float64Array} scores
+ * @param {number} count
+ * @param {ReturnType<typeof createNativeLookupIndexScratch>} scratch
+ * @returns {import('./term-score-plan.js').TermScorePlan|null}
+ */
+function prepareNativeTermScorePlan(wasm, scores, count, scratch) {
+    const build = wasm.build_term_score_plan
+    const memory = wasm.memory.buffer
+    if (typeof build !== 'function' || !(scores instanceof Int32Array) ||
+    scores.buffer !== memory || scores.length !== count || count < 2 || count >= 0xffff) { return null }
+    const uniqueCount = build(
+        scores.byteOffset,
+        count,
+        scratch.sequenceKeysPtr,
+        scratch.sequenceKeyByRowPtr,
+        scratch.sequenceSlotsPtr,
+        scratch.sequenceSlotsCount,
+    )
+    if (uniqueCount <= 0 || uniqueCount >= 0xffff || uniqueCount * 4 + count * 2 > count * 4 ||
+    wasm.memory.buffer !== memory) { return null }
+    return {
+        values: new Int32Array(memory, scratch.sequenceKeysPtr, uniqueCount),
+        keys: new Uint16Array(memory, scratch.sequenceKeyByRowPtr, count),
+    }
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
  * @param {number} rows
@@ -2327,6 +2372,12 @@ null :
     let nativeStringPlanChunkCount = 0;
     let nativeStringPlanFallbackChunkCount = 0;
     let nativeLookupIndexEncodeMs = 0;
+    /* eslint-disable @stylistic/semi */
+    let nativeScorePlanGroups = 0
+    let nativeScorePlanRows = 0
+    let nativeScorePlanBytesAvoided = 0
+    let nativeScorePlanMs = 0
+    /* eslint-enable @stylistic/semi */
     let nativeSegmentedLookupSegments = 0;
     let nativeSegmentedLookupFallbacks = segmentedLookup && nativeCompactionScratch === null ? 1 : 0;
     let compactContentMetadataGroups = 0;
@@ -2614,6 +2665,20 @@ null :
                         [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
                     ]);
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
+                    /* eslint-disable @stylistic/semi */
+                    if (options.prepareWorkerScorePlan === true && fusedStringPlan !== null &&
+                    start === 0 && end === rowCount && scoreList instanceof Int32Array) {
+                        const scorePlanStart = safePerformance.now()
+                        const scorePlan = prepareNativeTermScorePlan(parsed.wasm, scoreList, count, nativeLookupIndexScratch)
+                        nativeScorePlanMs += Math.max(0, safePerformance.now() - scorePlanStart)
+                        if (scorePlan !== null) {
+                            nativeWorkerScorePlans.set(chunk, {plan: scorePlan, scores: scoreList, lookupBytes: bytes})
+                            ++nativeScorePlanGroups
+                            nativeScorePlanRows += count
+                            nativeScorePlanBytesAvoided += count * 4 - scorePlan.values.byteLength - scorePlan.keys.byteLength
+                        }
+                    }
+                    /* eslint-enable @stylistic/semi */
                 } else if (nativeCompactionScratch !== null) {
                     ++nativeSegmentedLookupFallbacks;
                 }
@@ -2628,7 +2693,16 @@ null :
             const invokeColumnChunk = async () => {
                 if (dispatchStopped) { return; }
                 const tDispatchStart = Date.now();
-                const result = onChunk(chunk, progress);
+                /* eslint-disable @stylistic/semi */
+                let result
+                try {
+                    result = onChunk(chunk, progress)
+                } finally {
+                    // The private copier runs inside the worker's synchronous
+                    // callback. No borrowed score-plan capability crosses await.
+                    nativeWorkerScorePlans.delete(chunk)
+                }
+                /* eslint-enable @stylistic/semi */
                 await result;
                 chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
             };
@@ -2682,6 +2756,10 @@ null :
         nativeLookupScratchReuseMisses,
         nativeSegmentedLookupSegments,
         nativeSegmentedLookupFallbacks,
+        nativeScorePlanGroups,
+        nativeScorePlanRows,
+        nativeScorePlanBytesAvoided,
+        nativeScorePlanMs,
         lookupIndexPrepareMs: nativeLookupIndexEncodeMs,
         lookupIndexCompactMs: 0,
         lookupIndexEncodeMs: nativeLookupIndexEncodeMs,
@@ -2882,7 +2960,7 @@ class ParallelTermBankPipelineRun {
      * @param {ParallelTermBankSource[][]} groups
      * @param {number} totalBytes
      * @param {number} version
-     * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+     * @param {(chunk: TermBankWorkerColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
      * @param {Record<string, unknown>} options
      * @param {() => boolean} shouldCancel
      * @param {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} poolLease
@@ -2897,7 +2975,7 @@ class ParallelTermBankPipelineRun {
         this._totalBytes = totalBytes;
         /** @type {number} */
         this._version = version;
-        /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
+        /** @type {(chunk: TermBankWorkerColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
         const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
@@ -2913,7 +2991,7 @@ class ParallelTermBankPipelineRun {
         this._poolLease = poolLease;
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
-        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
+        /** @type {Array<{promise: Promise<{chunk: TermBankWorkerColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankWorkerColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
         this._resultSlots = [];
         /** @type {Set<() => void>} */
         this._pendingResultConsumers = new Set();
@@ -3063,7 +3141,7 @@ class ParallelTermBankPipelineRun {
     /** Creates one ordered result slot per byte-balanced source group. */
     _createSlots() {
         this._resultSlots = this._groups.map(() => {
-            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void} */
+            /** @type {(value: {chunk: TermBankWorkerColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void} */
             let resolve = () => {};
             const promise = new Promise((value) => { resolve = value; });
             return {promise, resolve};
@@ -3234,13 +3312,51 @@ export async function disposeParallelTermBankParser() {
     await parallelTermBankParserPool.dispose();
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Keep the raw default callback contract at the transport boundary. The
+ * importer explicitly accepts compact worker columns and needs no adapter.
+ * @param {TermBankColumnChunkCallback|TermBankWorkerColumnChunkCallback} onChunk
+ * @param {TermBankColumnParserOptions} options
+ * @returns {TermBankWorkerColumnChunkCallback}
+ */
+function getParallelTermColumnCallback(onChunk, options) {
+    if (options.prepareWorkerScorePlan === true) {
+        return /** @type {TermBankWorkerColumnChunkCallback} */ (onChunk)
+    }
+    return (chunk, progress) => {
+        if (chunk.scoreList === null) { throw new TypeError('Unexpected compact worker score columns') }
+        // Narrow only after checking the raw score field at this boundary.
+        return onChunk(/** @type {TermBankColumnChunk} */ (chunk), progress)
+    }
+}
+/* eslint-enable @stylistic/semi */
+
+/**
+ * @overload
+ * @param {Uint8Array[]} contentBytes
+ * @param {number} version
+ * @param {TermBankWorkerColumnChunkCallback} onChunk
+ * @param {WorkerTermBankColumnParserOptions} options
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+/**
+ * @overload
+ * @param {Uint8Array[]} contentBytes
+ * @param {number} version
+ * @param {TermBankColumnChunkCallback} onChunk
+ * @param {RawTermBankColumnParserOptions} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
 /**
  * Parses byte-balanced source-bank groups concurrently. Workers publish exact
  * complete column chunks in one message, allowing archive-ordered storage to
  * begin as soon as the first group is available and overlap later parsing.
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {TermBankColumnChunkCallback|TermBankWorkerColumnChunkCallback} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3252,15 +3368,35 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
         estimatedBytes: bytes.byteLength,
         resolvedAt: 0,
     }));
-    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel);
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, getParallelTermColumnCallback(onChunk, options), options, shouldCancel);
 }
 
+/**
+ * @overload
+ * @param {Promise<Uint8Array>[]} contentBytePromises
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankWorkerColumnChunkCallback} onChunk
+ * @param {WorkerTermBankColumnParserOptions} options
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+/**
+ * @overload
+ * @param {Promise<Uint8Array>[]} contentBytePromises
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankColumnChunkCallback} onChunk
+ * @param {RawTermBankColumnParserOptions} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
 /**
  * Starts parsing before every source ZIP entry has finished inflating.
  * @param {Promise<Uint8Array>[]} contentBytePromises
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {TermBankColumnChunkCallback|TermBankWorkerColumnChunkCallback} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3275,16 +3411,36 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
         estimatedBytes: estimatedByteLengths[index],
         resolvedAt: 0,
     }));
-    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel);
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, getParallelTermColumnCallback(onChunk, options), options, shouldCancel);
 }
 
+/**
+ * @overload
+ * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankWorkerColumnChunkCallback} onChunk
+ * @param {WorkerTermBankColumnParserOptions} options
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+/**
+ * @overload
+ * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankColumnChunkCallback} onChunk
+ * @param {RawTermBankColumnParserOptions} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
 /**
  * Parses an import-wide source sequence without eagerly inflating every bank.
  * Parser workers activate only a bounded lead window of byte-balanced groups.
  * @param {Array<() => Promise<Uint8Array>>} contentByteLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {TermBankColumnChunkCallback|TermBankWorkerColumnChunkCallback} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3299,9 +3455,29 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
         estimatedBytes: estimatedByteLengths[index],
         resolvedAt: 0,
     }));
-    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, getParallelTermColumnCallback(onChunk, options), options, shouldCancel, true);
 }
 
+/**
+ * @overload
+ * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankWorkerColumnChunkCallback} onChunk
+ * @param {WorkerTermBankColumnParserOptions} options
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
+/**
+ * @overload
+ * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
+ * @param {number[]} estimatedByteLengths
+ * @param {number} version
+ * @param {TermBankColumnChunkCallback} onChunk
+ * @param {RawTermBankColumnParserOptions} [options]
+ * @param {() => boolean} [shouldCancel]
+ * @returns {Promise<boolean>}
+ */
 /**
  * Sends raw ZIP payloads to parser workers for fused WASM inflate, CRC
  * validation, and parsing without materializing uncompressed banks in the
@@ -3309,7 +3485,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {Array<() => Promise<CompressedTermBankSource>>} sourceLoaders
  * @param {number[]} estimatedByteLengths
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {TermBankColumnChunkCallback|TermBankWorkerColumnChunkCallback} onChunk
  * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
@@ -3324,13 +3500,13 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
         estimatedBytes: estimatedByteLengths[index],
         resolvedAt: 0,
     }));
-    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, onChunk, options, shouldCancel, true);
+    return await parseTermBankWithWasmColumnChunksParallelSources(sources, version, getParallelTermColumnCallback(onChunk, options), options, shouldCancel, true);
 }
 
 /**
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: TermBankWorkerColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
@@ -3647,7 +3823,7 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
  * @param {number} version
  * @param {Record<string, unknown>} options
  * @param {() => boolean} shouldCancel
- * @returns {Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
+ * @returns {Promise<{chunk: TermBankWorkerColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, borrowsWorkerMemory: boolean}>}
  */
 function runParallelParserJob(worker, id, sources, version, options, shouldCancel) {
     return new Promise((resolve, reject) => {
@@ -3737,7 +3913,7 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                     profile.sourceTransferredBytes = sourceTransferredBytes;
                     profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));
                 }
-                const chunk = /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null);
+                const chunk = /** @type {TermBankWorkerColumnChunk|null} */ (data.chunk ?? null);
                 const ownsContentBytes = (
                     data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
                     registerOwnedTermContent(chunk?.contentBytesBuffer)
@@ -4109,6 +4285,37 @@ function tryProjectNativeGlossaryImagePath(row, source) {
  * @throws {Error} If the native string plan is incomplete.
  */
 export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+    // eslint-disable-next-line @stylistic/semi
+    return /** @type {TermBankColumnChunk} */ (copyWasmBackedColumnChunkInternal(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, false))
+}
+
+/* eslint-disable @stylistic/semi */
+/**
+ * Private worker transport may replace the owned raw score column with one
+ * compact buffer. The public copier above always retains its raw-column API.
+ * @param {TermBankColumnChunk} chunk
+ * @param {boolean} [shareContentBytes=false]
+ * @param {boolean} [projectImagePaths=false]
+ * @param {boolean} [prepareLookupRoute=false]
+ * @param {PreloadedTermBankSource} [preloadedSource]
+ * @returns {TermBankWorkerColumnChunk}
+ */
+export function copyWasmBackedWorkerColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
+    return copyWasmBackedColumnChunkInternal(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, true)
+}
+/* eslint-enable @stylistic/semi */
+
+/**
+ * @param {TermBankColumnChunk} chunk
+ * @param {boolean} shareContentBytes
+ * @param {boolean} projectImagePaths
+ * @param {boolean} prepareLookupRoute
+ * @param {PreloadedTermBankSource|undefined} preloadedSource
+ * @param {boolean} workerScorePlan
+ * @returns {TermBankWorkerColumnChunk}
+ * @throws {Error} If the native string plan is incomplete.
+ */
+function copyWasmBackedColumnChunkInternal(chunk, shareContentBytes, projectImagePaths, prepareLookupRoute, preloadedSource, workerScorePlan) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4199,14 +4406,24 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
             });
         }
     }
+    /* eslint-disable @stylistic/semi */
+    const nativeScorePlan = workerScorePlan ? nativeWorkerScorePlans.get(chunk) : void 0
+    const scorePlan = typeof nativeScorePlan !== 'undefined' && nativeScorePlan.scores === chunk.scoreList &&
+    nativeScorePlan.lookupBytes === chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.bytes ?
+        copyOwnedTermScorePlan(nativeScorePlan.plan.values, nativeScorePlan.plan.keys) :
+null
+    const scores = scorePlan === null ?
+{
+    scoreList: chunk.scoreList instanceof Float64Array ? new Float64Array(chunk.scoreList) : new Int32Array(chunk.scoreList),
+} :
+{scoreList: null, scorePlan}
+    /* eslint-enable @stylistic/semi */
     return {
         ...chunk,
         expressionBytesList: chunk.expressionBytesList.map((bytes) => new Uint8Array(bytes)),
         readingBytesList: chunk.readingBytesList.map((bytes) => new Uint8Array(bytes)),
         readingEqualsExpressionList: new Uint8Array(chunk.readingEqualsExpressionList),
-        scoreList: chunk.scoreList instanceof Float64Array ?
-            new Float64Array(chunk.scoreList) :
-            new Int32Array(chunk.scoreList),
+        ...scores,
         sequenceList: chunk.sequenceList instanceof Float64Array ?
             new Float64Array(chunk.sequenceList) :
             new Int32Array(chunk.sequenceList),
@@ -4298,6 +4515,10 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         lookupIndexPrepareMs: sum('lookupIndexPrepareMs'),
         lookupIndexCompactMs: sum('lookupIndexCompactMs'),
         lookupIndexEncodeMs: sum('lookupIndexEncodeMs'),
+        nativeScorePlanGroups: sum('nativeScorePlanGroups'),
+        nativeScorePlanRows: sum('nativeScorePlanRows'),
+        nativeScorePlanBytesAvoided: sum('nativeScorePlanBytesAvoided'),
+        nativeScorePlanMs: sum('nativeScorePlanMs'),
         rowCount,
         metaCapacity: sum('metaCapacity'),
         metaAllocatedBytes: sum('metaAllocatedBytes'),

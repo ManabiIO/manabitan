@@ -15,7 +15,7 @@ import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} f
 
 /**
  * @param {number} [count=128]
- * @returns {ArtifactChunk & {resolvedContentReferences: ContentReferences}}
+ * @returns {ArtifactChunk & {scoreList: Int32Array, resolvedContentReferences: ContentReferences}}
  */
 function fixture(count = 128) {
     const expression = new TextEncoder().encode('辞書')

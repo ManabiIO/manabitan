@@ -4,7 +4,7 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "3a57887352cbc53a62bd3bda797f6513a72634515e6ea65a9a4ae9120739a1b6",
+    "sourceDigest": "b484da9058302e2424115e0cb7aaf764d1e2985adec9e9fcaf43ba5b08d6b732",
     "sourceFileCount": 14,
     "targets": [
         {
@@ -52,6 +52,7 @@
                 "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
                 "-Wl,--export=build_term_string_plan",
                 "-Wl,--export=encode_term_lookup_index",
+                "-Wl,--export=build_term_score_plan",
                 "-Wl,--export=compact_term_lookup_keys",
                 "-Wl,--export=encode_term_content",
                 "-Wl,--export=encode_term_content_no_hash",
@@ -59,7 +60,7 @@
                 "-Wl,--export=encode_term_content_token_binary_dedup",
                 "-Wl,--strip-all"
             ],
-            "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+            "sha256": "a97f9f39eca091a39f746a3e1bd42be6d55e69d048802cee78bbb543c060228c"
         }
     ]
 }

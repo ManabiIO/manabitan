@@ -77,6 +77,8 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
 import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
+// eslint-disable-next-line @stylistic/semi
+import {readTermScore} from './term-score-plan.js'
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -5070,7 +5072,7 @@ void 0 :
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -5110,7 +5112,7 @@ void 0 :
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null)}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null)}} chunk
      * @returns {import('dictionary-database').DatabaseTermEntry[]}
      */
     _materializeArtifactChunkTermEntries(chunk) {
@@ -5137,7 +5139,7 @@ void 0 :
                 definitionTags: '',
                 termTags: '',
                 glossary: [],
-                score: chunk.scoreList[i] ?? 0,
+                score: readTermScore(chunk, i),
                 sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 termEntryContentBytes: chunk.contentBytesList[i],
                 termEntryContentDictName: Array.isArray(chunk.contentDictNameList) ? (chunk.contentDictNameList[i] ?? null) : null,
@@ -8177,7 +8179,7 @@ this._readTermContentSignature(
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[], sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
+     * @param {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[], scoreList: number[]|Int32Array|Float64Array|null, scorePlan?: import('./term-score-plan.js').TermScorePlan, sequenceList: (number|undefined)[], contentBytesList: Uint8Array[], contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, fixedContentOffsetBase?: number, fixedContentLength?: number, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithoutContentDedup(chunk) {
