@@ -1,0 +1,106 @@
+{
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+    "candidateLocalConstructionCommit": "59ad5a6ddb8342e563cfd09b6fe605cb76bae765",
+    "runtimePublication": {
+        "localConstructionCommit": "59ad5a6ddb8342e563cfd09b6fe605cb76bae765",
+        "remoteCommit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+        "identicalTree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+        "relationship": "All three product blobs and the complete tree are identical; API publication changes commit metadata only. No runtime change or measurement rerun."
+    },
+    "pairs": 12,
+    "expectedWorkers": 3,
+    "initialOrder": "AB",
+    "flags": {},
+    "expectedPackageEntries": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+    ],
+    "expectedAddedPackageEntries": [],
+    "expectedProductFiles": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "ext/js/dictionary/wasm/term-bank-parser.c"
+    ],
+    "runtimeSources": {
+        "A": {
+            "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+            "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+            "files": {
+                "dev/data/dictionary-wasm/manifest.json": {
+                    "gitBlob": "2c658ce7874cfaaf6be816ee40b140215523b7a0",
+                    "sha256": "a629d5be17edb377a890a06b00449c850ff34ef6f0fa13918e916dd5d694f770"
+                },
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+                    "gitBlob": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+                    "sha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+                },
+                "ext/js/dictionary/wasm/term-bank-parser.c": {
+                    "gitBlob": "403272a3e65cbd4084f6211a46df7d3db78979ac",
+                    "sha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a"
+                }
+            }
+        },
+        "B": {
+            "commit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+            "tree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+            "files": {
+                "dev/data/dictionary-wasm/manifest.json": {
+                    "gitBlob": "61dc19a07a653c241eea3ffb7c34c40c5f4cfab0",
+                    "sha256": "578c90b6afc9dfd3e546fbefe0fe12d4a911da4859258ba407021e89cc8b7684"
+                },
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+                    "gitBlob": "a4c784b7a7683ecc3039bd40c6bfcfdb5a3bfd12",
+                    "sha256": "91774a3c167689211fe49e75b68eb0f91bed42c319bf83e01325dfcf976d0fc3"
+                },
+                "ext/js/dictionary/wasm/term-bank-parser.c": {
+                    "gitBlob": "816fcf262f63ddc6c1b09ce43302425692c2311f",
+                    "sha256": "9b7167fa52c0752dfc10c1a55efea537581ca321ecb65743f113941317139bf4"
+                }
+            }
+        }
+    },
+    "protocolSourceCommit": "55113f0d9f85faf4a867a311d1d78dd9d2e80609",
+    "qualificationSourceHashes": {
+        "dev/perf/import-qualification-20261128-beb5.py": "326e8ca36aa0162ba4c22957b8331016284fef9f28a48cc395f3d664f1d7ffd4",
+        "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "421e7403b9222d56da989285e05814f1a695a0dfd1283cb0834ac315617527d3",
+        "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+        "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+        "dev/perf/crc-no-unroll-browser-20261128-beb5/run.py": "c8d2b6bf11ccf84753161f9c2e4b3652a8a17e95aa0e42b3c5a671e72f0910fb",
+        "dev/perf/crc-no-unroll-browser-20261128-beb5/audit-browser.py": "b9fa8c952d63e712cad908a58a5d1e0d71d0b25d5ffd0927203255e71d306cf5",
+        ".github/workflows/crc-no-unroll-browser-beb5.yml": "19166f2f199e349b02c756f160d21bf3058aa4cab6514411264f689ff29f3087",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/build.py": "b64bdf97a44a759469a58b0d28a0c385c3ae8766cb48a05a2b186d9324154c40",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/capture.mjs": "1ad69ae1941fb9ec03750ef4666655fa7fe876b874ffd0960b7d56b4a7128394",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/common.mjs": "3fc1aea2ab597591910d23af1a6c6a1944557ae79eb351f8579be1533aed9d65",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/fixtures.mjs": "fcefd24026dcdca74cdcd04a5dd0377b7d3094c1886522fda4e018cad8db8b75",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/registration.json": "4bd2152ab72f8ff50a77c7c10c2bc99bc7058643c33c57ef5dbf676d18a86ed3",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/verify.mjs": "260897f507a6d23e9b44ad1bb751e16d9904a79b54657fe1eeec11098e1d4b30"
+    },
+    "memoryAcquisition": {
+        "policy": "Concurrent per-PID smaps_rollup reads, cap4, all joined inside the original complete before/after process-inventory bracket; deterministic PID order.",
+        "scope": "Diagnostic non-atomic import-window samples only. All earlier serial acquisitions and failures remain unchanged and unpooled.",
+        "eligibility": "Original stable tree/identity and readability rules, pre/post brackets, at least5 fully contained scans and maximum250ms coverage gap remain unchanged.",
+        "cadence": "Original25ms wait during import and100ms after import.",
+        "limitations": "No acquisition-speed claim or equivalence of sampled process peaks across different acquisition policies. Not a hard total-process memory cap.",
+        "localSourceReviewCommit": "dbdc348ad704e71b2fa95a2e4ff780fa21d9a00a"
+    },
+    "failurePolicy": "Keep every complete/failed observation; no trimming, control subtraction, replacement or host pooling. Stop a dictionary cell on an ordinary semantic failure.",
+    "primaryMetric": "totalImportMs: browser file-input change through completedAtMonotonicMs; automation completion polling is excluded.",
+    "diagnosticMetrics": [
+        "parserSourceInflateMs",
+        "parserSourceCrcMs",
+        "step4.termParseMs",
+        "step4.bulkAddTermsMs"
+    ],
+    "phaseScope": "parserSourceInflateMs includes inflation and immediate whole-bank CRC. parserSourceCrcMs measures deferred verification inside parsing, not inflation. Keep these diagnostic counters separate; do not add them or substitute them for browser totalImportMs.",
+    "promotion": "No automatic promotion. Keep all failures, control observations and negative results. Current-base component evidence is not full-browser qualification.",
+    "correctnessPrerequisite": {
+        "registration": "dev/perf/crc-no-unroll-current-20261128-beb5/registration.json",
+        "candidateMatchesTimingRuntime": true,
+        "independentCrcVectors": 837,
+        "productionMalformedAndValidSourceCases": 157,
+        "allJmdictSourceGroups": 12,
+        "separateHostAndProcessesFromBrowserTiming": true
+    }
+}

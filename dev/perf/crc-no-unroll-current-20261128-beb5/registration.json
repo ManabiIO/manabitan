@@ -1,0 +1,47 @@
+{
+    "format": 1,
+    "scope": "Current-develop deterministic native and full JMdict source-output correctness. This helper starts no timing cohort.",
+    "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidateCommit": "19db774b564064a7e339d3c3a79ea8da04ab48b5",
+    "candidateTree": "6f6c0ba610392f6ae6aa6df5c826e3d677f6f1af",
+    "baselineSourceSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+    "candidateSourceSha256": "9b7167fa52c0752dfc10c1a55efea537581ca321ecb65743f113941317139bf4",
+    "baselineWasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "candidateWasmSha256": "91774a3c167689211fe49e75b68eb0f91bed42c319bf83e01325dfcf976d0fc3",
+    "fixture": {
+        "dictionary": "jmdict",
+        "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "archiveBytes": 15645766,
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "banks": 53,
+        "groups": 12,
+        "rows": 528299,
+        "compressedBytes": 15632849,
+        "decodedBytes": 171617523,
+        "workers": 3,
+        "deferredCrcGroups": 0
+    },
+    "correctness": {
+        "separateProcess": true,
+        "testExportVectors": 837,
+        "productionSourceCases": 157,
+        "fullProductionGroups": 12,
+        "fullOutputAndSpanDigests": true,
+        "sourceInputPreserved": true,
+        "corpusWasmCapacitiesMustAgree": true,
+        "standaloneDsFormatRecordsNotTested": 14
+    },
+    "reusedOracle": {
+        "commit": "887884769ad1b7d54872975920fc0f8fd43a56ee",
+        "verifySha256": "260897f507a6d23e9b44ad1bb751e16d9904a79b54657fe1eeec11098e1d4b30",
+        "fixturesSha256": "fcefd24026dcdca74cdcd04a5dd0377b7d3094c1886522fda4e018cad8db8b75",
+        "scope": "Oracle and fixture-generator bodies are byte-identical; capture changes only baseline identity, common changes only the registered helper path. Native build binds already-frozen current-baseline and candidate product commits."
+    },
+    "sourceFiles": {
+        "dev/perf/crc-no-unroll-current-20261128-beb5/build.py": "b64bdf97a44a759469a58b0d28a0c385c3ae8766cb48a05a2b186d9324154c40",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/capture.mjs": "1ad69ae1941fb9ec03750ef4666655fa7fe876b874ffd0960b7d56b4a7128394",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/common.mjs": "3fc1aea2ab597591910d23af1a6c6a1944557ae79eb351f8579be1533aed9d65",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/fixtures.mjs": "fcefd24026dcdca74cdcd04a5dd0377b7d3094c1886522fda4e018cad8db8b75",
+        "dev/perf/crc-no-unroll-current-20261128-beb5/verify.mjs": "260897f507a6d23e9b44ad1bb751e16d9904a79b54657fe1eeec11098e1d4b30"
+    }
+}

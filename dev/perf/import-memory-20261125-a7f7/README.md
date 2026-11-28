@@ -7,8 +7,11 @@ media, or storage checks. The qualification caller owns those independent
 checks and must pass all of them before reporting success.
 
 `chromium_memory.py`, `audit_memory.py`, and the actual Linux process-tree
-witnesses are copied without changes. `source-provenance.json` records their
-hashes. `protocol.py` contains the original function bodies for the marker
+witnesses were originally copied without changes. `source-provenance.json`
+retains that historical import record. The prospective parallel acquisition
+revision below changes only how the per-PID reads are acquired;
+`parallel-acquisition-provenance.json` binds its current source and tests.
+`protocol.py` contains the original function bodies for the marker
 overlay, fixed four-observation schedule, and paired memory comparison. The
 import-window tests change only their helper import. The paired-memory test
 is retained from the original protocol suite.
@@ -69,6 +72,25 @@ increase must be at most 5% and each individual paired increase at most 10%.
 Both independent replications must pass separately. These sampled maxima
 are not exact peak-memory measurements.
 
+## Prospective bounded parallel acquisition
+
+Each scan finishes its complete first process inventory before submitting
+one `smaps_rollup` read per discovered PID to a fresh thread pool, capped at
+four workers and at the discovered process count. It consumes results in the
+original sorted PID order and joins every submitted task before the second
+inventory. Even an unexpected exception joins pending readers before
+escaping; no partial result qualifies and no reader survives into the next
+scan. Both scan timestamps still bracket inventories, reads, and pool cleanup.
+
+Process selection, identities, errors, zombie handling, window coverage,
+scan waits, sampled maxima, and paired memory gates are unchanged. The
+observer threads belong to the separate Python observer, not to the
+benchmark's Chromium descendants. Reads remain non-atomic. Concurrent kernel
+reads can change observation overhead and scheduling, so use this revision
+only for a newly registered memory cohort, identically for both source arms.
+Earlier failed cohorts remain failed; they are not reinterpreted or replaced.
+There is no claim that this change will satisfy coverage on a particular host.
+
 ## Tests
 
 ```sh
@@ -81,6 +103,12 @@ rewritten title, an unrelated child, an unreaped zombie, and a zombie leader
 with a live sibling thread. Other cases reject denied reads, missing scan
 coverage, altered markers, forged maxima, incomplete schedules, and an
 individual memory regression hidden by an acceptable median.
+
+The parallel acquisition witnesses force out-of-order completion and verify
+sorted results, the inventory/timestamp bracket, a maximum four-reader pool,
+and complete joins on success and unexpected failure. Thirteen fixed snapshot
+cases compare concurrent and serial acquisition, including permission denial,
+PID reuse, process churn, metadata changes, and the narrow zombie exception.
 
 ## Complete-import semantic receipts
 

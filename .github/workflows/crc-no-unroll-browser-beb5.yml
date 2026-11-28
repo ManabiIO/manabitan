@@ -1,0 +1,206 @@
+name: Current-base CRC no-unroll browser qualification 20261128 beb5
+
+on:
+  push:
+    branches: ['test/crc-no-unroll-browser-20261128-beb5']
+    paths:
+      - '.github/workflows/crc-no-unroll-browser-beb5.yml'
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_COMMIT: 19db774b564064a7e339d3c3a79ea8da04ab48b5
+
+jobs:
+  source-checks:
+    name: Frozen CRC source, correctness and static gates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify unchanged acquisition and qualification rules
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py' -v
+      - name: Verify prospective source bindings without a benchmark
+        run: python dev/perf/crc-no-unroll-browser-20261128-beb5/run.py jmdict --verify-only --evidence builds/perf/crc-no-unroll-source-beb5/source-preflight
+      - name: Install pinned compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Restore the pinned source-correctness archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Acquire the registered JMdict source fixture
+        run: node --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", ["jmdict"])'
+      - name: Independently reproduce both current native modules and source manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/crc-no-unroll-current-20261128-beb5/build.py builds/perf/crc-no-unroll-source-beb5/native 2>&1 | tee builds/perf/crc-no-unroll-source-beb5/native-proof.log
+      - name: Capture exact source identities outside every timing process
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/crc-no-unroll-current-20261128-beb5/capture.mjs builds/e2e-dictionary-cache "$RUNNER_TEMP/crc-no-unroll-current-inputs" 2>&1 | tee builds/perf/crc-no-unroll-source-beb5/capture.log
+      - name: Verify independent vectors, malformed inputs and all JMdict source groups
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/crc-no-unroll-current-20261128-beb5/verify.mjs "$RUNNER_TEMP/crc-no-unroll-current-inputs" builds/perf/crc-no-unroll-source-beb5/native 2>&1 | tee builds/perf/crc-no-unroll-source-beb5/oracle.log
+      - name: Retain completed capture manifests after any correctness failure
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import shutil
+          source = Path(os.environ['RUNNER_TEMP']) / 'crc-no-unroll-current-inputs'
+          target = Path('builds/perf/crc-no-unroll-source-beb5/capture-identities')
+          target.mkdir(parents=True, exist_ok=True)
+          for name in ['manifest.json', 'conformance.json']:
+              if (source / name).is_file():
+                  shutil.copyfile(source / name, target / name)
+          PY
+      - name: Prepare exact product checkout for source gates
+        shell: bash
+        run: |
+          git worktree add --detach builds/crc-no-unroll-source-runtime "$CANDIDATE_COMMIT"
+          ln -s "$GITHUB_WORKSPACE/node_modules" builds/crc-no-unroll-source-runtime/node_modules
+          mkdir -p builds/perf/crc-no-unroll-source-beb5
+      - name: Build source-bound third-party assets
+        working-directory: builds/crc-no-unroll-source-runtime
+        run: npm run build:libs
+      - name: Complete JavaScript lint
+        working-directory: builds/crc-no-unroll-source-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:js 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-source-beb5/lint.log"
+      - name: Complete type validation
+        working-directory: builds/crc-no-unroll-source-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-source-beb5/types.log"
+      - name: Reproduce the exact frozen native bytes
+        working-directory: builds/crc-no-unroll-source-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:dictionary-wasm -- --check 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-source-beb5/native-build.log"
+      - name: Complete all-target build dry run
+        working-directory: builds/crc-no-unroll-source-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:build 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-source-beb5/build-dry-run.log"
+      - name: Complete JSON format gate
+        working-directory: builds/crc-no-unroll-source-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:json:format 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/crc-no-unroll-source-beb5/json-format.log"
+      - name: Retain source-gate evidence after any failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-no-unroll-source-beb5
+          path: builds/perf/crc-no-unroll-source-beb5
+          if-no-files-found: error
+          retention-days: 14
+
+  units:
+    name: Frozen CRC complete unit suite
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned compiler and versioned default linker
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Verify the exact unchanged unit-test compiler probe
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {mkdirSync, writeFileSync} from 'node:fs'
+          import {findCompiler} from './test/util/wasm-compiler.js'
+          const output = 'builds/perf/crc-no-unroll-units-beb5'
+          mkdirSync(output, {recursive: true})
+          const compiler = findCompiler(output)
+          assert.equal(compiler.command, process.env.MANABITAN_CLANG)
+          const compilerVersion = execFileSync(compiler.command, ['--version'], {encoding: 'utf8'})
+          const linkerVersion = execFileSync('wasm-ld-21', ['--version'], {encoding: 'utf8'})
+          assert.match(compilerVersion, /\bversion 21\.1\.8(?:\s|$)/)
+          assert.match(linkerVersion, /\bLLD 21\.1\.8(?:\s|$)/)
+          const receipt = {compiler, compilerVersion, linkerVersion, exactRepositoryProbePassed: true}
+          writeFileSync(output + '/compiler-probe.json', JSON.stringify(receipt, null, 2) + '\n')
+          console.log(JSON.stringify(receipt))
+          JS
+      - name: Complete unit suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/crc-no-unroll-units-beb5
+          npm run test:unit 2>&1 | tee builds/perf/crc-no-unroll-units-beb5/unit.log
+      - name: Retain full unit output after any failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-no-unroll-units-beb5
+          path: builds/perf/crc-no-unroll-units-beb5
+          if-no-files-found: error
+          retention-days: 14
+
+  browser:
+    name: Frozen CRC imports (${{ matrix.dictionary }}, 12 pairs)
+    needs: [source-checks, units]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Execute the unchanged 42-observation protocol
+        run: python dev/perf/crc-no-unroll-browser-20261128-beb5/run.py "$PERF_DICTIONARY" --evidence "builds/perf/crc-no-unroll-browser-beb5/$PERF_DICTIONARY"
+      - name: Independently audit original complete or partial receipts
+        if: always()
+        run: python dev/perf/crc-no-unroll-browser-20261128-beb5/audit-browser.py "builds/perf/crc-no-unroll-browser-beb5/$PERF_DICTIONARY" --out "builds/perf/crc-no-unroll-browser-beb5/$PERF_DICTIONARY/independent-audit.json"
+      - name: Retain every original package, observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-no-unroll-browser-beb5-${{ matrix.dictionary }}-AB
+          path: builds/perf/crc-no-unroll-browser-beb5/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
