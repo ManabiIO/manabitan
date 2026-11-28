@@ -1,0 +1,59 @@
+name: Fingerprint source verification 9bb32
+
+on:
+  push:
+    branches: [perf/import-slot-fingerprints-20261128]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install dependencies and pinned native tools
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Regenerate exact native artifacts
+        run: |
+          npm run build:dictionary-wasm -- --write
+          npm run build:dictionary-wasm -- --check
+          git diff --exit-code -- dev/data/dictionary-wasm/term-bank-parser.wasm
+          git add dev/data/dictionary-wasm/manifest.json dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm
+          if ! git diff --cached --quiet; then
+            test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'build: regenerate tagged content scanner'
+            git push origin "HEAD:$GITHUB_REF"
+          fi
+          git rev-parse HEAD
+      - name: Prepare generated libraries
+        run: |
+          npm run build:libs
+          npm run license-report:html
+      - name: Focused fingerprint and canonical scanner tests
+        run: node node_modules/vitest/vitest.mjs run test/term-content-slot-fingerprint.test.js test/native-canonical-scan.test.js test/term-content-metadata-arena.test.js --maxWorkers=2
+      - name: JavaScript lint
+        run: npm run test:js
+      - name: Type checking
+        run: npm run test:ts
+      - name: Complete unit suite
+        run: npm run test:unit -- --maxWorkers=2
+      - name: Build validation
+        run: npm run test:build
+      - name: Record final source and native identities
+        if: always()
+        run: |
+          git rev-parse HEAD
+          git status --short
+          cat dev/data/dictionary-wasm/manifest.json
