@@ -358,7 +358,7 @@ if (engine === 'hoshidicts') {
 }
 console.log(JSON.stringify({engine, dataset, pair, totalMs: result.totalMs, lookupStageMs: result.lookupStageMs,
     resultCount: result.resultCount, headwordPairCount: result.headwordPairCount,
-    resultSha256: result.resultSha256, status: result.status, eligible: result.validation.eligible}))
+    resultSha256: result.resultSha256, status: result.status, eligible: result.validation.eligible, validationErrors: result.validation.errors}))
 if (!result.validation.eligible) {
     throw new Error('Lookup qualification failed. See the saved receipt for details.')
 }
