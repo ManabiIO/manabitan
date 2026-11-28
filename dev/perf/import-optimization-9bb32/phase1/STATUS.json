@@ -1,0 +1,46 @@
+{
+  "asOfUtc": "2026-11-28T04:22:00Z",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "failedAndSupersededRecords": "Original bytes, empty logs, partial reports, linker errors, interrupted local validation, and invalidated early option-mismatched screens are retained verbatim",
+  "fingerprint": {
+    "component": "Screening signal only; full import gain and memory still unqualified",
+    "qualificationRun": 46104243724,
+    "qualificationState": "First Jitendex AB job running; other jobs incomplete as reported by root",
+    "source": "178ee43328141693e88b90b4b518d483c87b2fac",
+    "sourceQa": "PASS: 670 unit files, 15145 passed tests, 47 skipped; native/lint/types/build gates passed",
+    "sourceQaRun": 46102827974
+  },
+  "fullBrowserQualification": "PENDING; no complete browser performance/memory acceptance result exists in this checkpoint",
+  "minsize": {
+    "component": "All 3 JMdict producer pairs faster; first Jitendex pair regressed; next candidate SIGKILL stopped cohort without retry; VNDB parity later verified separately, not timed",
+    "focusedTests": "380 passed locally; pinned regeneration passed",
+    "qualificationRun": 46104898097,
+    "screenedSource": "483586aee547c1c568aac17e2faf413f71bc0477",
+    "source": "2907ba1bad0958c22fe363f88d7cceb4d4bc604e",
+    "sourceQa": "PENDING",
+    "sourceQaRun": 46104779877
+  },
+  "omissions": [
+    "Full dictionary archives and canonical .groups payloads",
+    "Node/Clang/compiler distributions and dependencies",
+    "Product ZIPs and duplicate rendered HTML"
+  ],
+  "publicationAuthorizedByThisCheckpoint": false,
+  "pullRequestsCreatedByThisTask": 0,
+  "rejectedOrHeld": {
+    "finalization-tail": "Dominated by blocking native flush; overlap/flush-policy alternatives already owned or rejected",
+    "no-media-specialization": "Static probe perturbed hint-capable kernel and grew Code section; no runtime test",
+    "parser-slot-fingerprints": "Only 101098 first-hash comparisons avoidable versus 854041 insertion tag encodes; shelved before runtime changes",
+    "record-fields": "31 warmed component pairs, 15 wins, paired median +0.211895 ms; no benefit",
+    "restrict": "No hot memory-operation reduction; reject guard/fallback complexity",
+    "score-plan": "Preparation moves roughly 8 ms from serial sink but adds CPU/buffers/complexity; no full-import claim"
+  },
+  "repository": "ManabiIO/manabitan",
+  "reviewsIncludedAfterStatusSnapshot": [
+    "profiling/record-field-proof-review.json; review only, with no new candidate or qualification result"
+  ],
+  "supersededQualification": {
+    "reason": "Prospective package-member gate omitted shipped canonical C source; superseded before any job or timing",
+    "run": 46102936165
+  }
+}

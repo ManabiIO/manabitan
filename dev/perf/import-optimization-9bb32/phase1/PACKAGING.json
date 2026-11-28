@@ -1,0 +1,44 @@
+{
+  "archiveBytes": 5737812,
+  "archiveSha256": "050a01b9994034c0e070d66e17d1f879b20d724772e8c187af354a879936d161",
+  "asOfUtc": "2026-11-28T04:22:00Z",
+  "byteIdenticalRepack": true,
+  "compressedUnder5MiB": false,
+  "deterministic": true,
+  "inventorySha256": "bd57cff8bd2624dfefa4881106ca75c1b00dc78b5e55918efbc35376d0f17206",
+  "originalsPreserved": true,
+  "patchChecks": [
+    {
+      "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "excludedUntrackedLinks": [
+        "node_modules",
+        "ext/lib"
+      ],
+      "gitApplyCheckExitCode": 0,
+      "gitStatus": " M ext/js/dictionary/term-bank-wasm-parser-worker.js\n M ext/js/dictionary/term-lookup-index-preparation.js\n M ext/js/dictionary/term-record-opfs-store.js\n?? ext/js/dictionary/term-record-score-plan.js\n?? ext/lib\n?? node_modules\n?? test/term-record-score-plan.test.js\n",
+      "name": "score-plan",
+      "newFiles": [
+        "ext/js/dictionary/term-record-score-plan.js",
+        "test/term-record-score-plan.test.js"
+      ],
+      "patchSha256": "833779ad0fe0aff03b63b838966c243c6f41ba945675f88c32ae3083b02505bb"
+    },
+    {
+      "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "excludedUntrackedLinks": [
+        "node_modules"
+      ],
+      "gitApplyCheckExitCode": 0,
+      "gitStatus": " M ext/js/dictionary/term-record-opfs-store.js\n?? node_modules\n",
+      "name": "record-fields",
+      "newFiles": [],
+      "patchSha256": "8ba0fc3de8d9aee5b5b92bb2fe09635627bd2cf779b1c863bb353138109030cc"
+    }
+  ],
+  "published": false,
+  "pythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "rawBytes": 55658475,
+  "repackedSha256": "050a01b9994034c0e070d66e17d1f879b20d724772e8c187af354a879936d161",
+  "verifiedMembers": 279,
+  "worktreesRemoved": false
+}
