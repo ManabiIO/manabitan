@@ -124,6 +124,8 @@ jobs:
           git worktree add --detach "$oracle_root/B" "$CANDIDATE_SHA"
           ln -s "$GITHUB_WORKSPACE/node_modules" "$oracle_root/A/node_modules"
           ln -s "$GITHUB_WORKSPACE/node_modules" "$oracle_root/B/node_modules"
+          npm --prefix "$oracle_root/A" run build:libs 2>&1 | tee "$oracle_root/libs-A.log"
+          npm --prefix "$oracle_root/B" run build:libs 2>&1 | tee "$oracle_root/libs-B.log"
           cp dev/perf/import-local-index-20261128-d2d1/actual-worker-oracle.mjs.txt builds/local-index-oracle.mjs
           node --check builds/local-index-oracle.mjs
           node builds/local-index-oracle.mjs \

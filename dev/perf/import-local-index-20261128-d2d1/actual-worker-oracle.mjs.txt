@@ -235,6 +235,7 @@ try {
         }
     }
     assert.equal(rowCount, fixture.termRows)
+    assert.deepEqual([...new Set(profiles.map((profile) => profile?.parallelWorkerCount ?? 0))], [3])
     if (dictionary === 'jmdict') {
         assert.equal(groups.length, 12)
         assert.equal(groups.reduce((total, group) => total + group.adoptedRows, 0), fixture.termRows)
@@ -269,6 +270,10 @@ try {
     }
     assert.equal(identities.A.dirty, '')
     assert.equal(identities.B.dirty, '')
+    assert.equal(identities.A.commitAndTree[0], process.env.BASE_SHA)
+    assert.equal(identities.B.commitAndTree[0], process.env.CANDIDATE_SHA)
+    assert.match(identities.A.commitAndTree[1], /^[a-f0-9]{40}$/)
+    assert.match(identities.B.commitAndTree[1], /^[a-f0-9]{40}$/)
     const report = {
         complete,
         error,
