@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:38:15.746Z",
+  "kind": "proposed-frozen-current-a300-complete-import-qualification",
+  "repository": "ManabiIO/manabitan",
+  "baseline": {
+    "commit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+    "tree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4"
+  },
+  "candidate": {
+    "commit": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+    "tree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+    "soleParent": "a300da36d00df8e353c5679b1528b50a1299b75f"
+  },
+  "acquisitionAuthorized": false,
+  "authorizationState": "Prepared for final independent and root review. Root must explicitly approve the frozen source/workflow/manifest before a separate publication activates this cohort.",
+  "fullStoragePolicyApproved": true,
+  "sourceBinding": {
+    "file": "source-binding.json",
+    "sha256": "c9da17e30c264ea31b10367294a9d31f431de705d52e3c9a3bedeee584a942f3"
+  },
+  "freshCorrectnessProof": {
+    "file": "fresh-correctness-proof.json",
+    "sha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8"
+  },
+  "criteria": {
+    "file": "prospective-review-criteria.json",
+    "sha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+    "scope": "7812 thresholds are byte-identical. The original f28 component source scope remains historical; this binding declares separate a300/61ac full qualification, with no transfer, pooling, or outcome-based retry."
+  },
+  "storagePolicy": {
+    "file": "storage-prerequisite-decision.json",
+    "sha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+    "vndbSahAllocationUnits": [
+      77,
+      77
+    ],
+    "allocationUnitBytes": 4096,
+    "sahFiles": 8,
+    "reserveFiles": 7,
+    "reserveFileBytes": 4096,
+    "knownProductPathSetUnchanged": true,
+    "exactCanonicalStorageEqualityAcrossEveryObservationRequired": true
+  },
+  "runtime": {
+    "node": "v22.22.0",
+    "clang": "21.1.8",
+    "lld": "21.1.8",
+    "clangPath": "/usr/bin/clang-21",
+    "wasmLdPath": "/usr/bin/wasm-ld-21",
+    "browser": {
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+      "version": "153.0.8010.12",
+      "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+    },
+    "browserProvenance": {
+      "sourceGitBlobSha1": "3a7dc580bfb8ec273e0fda0c3cc2b8157f9b9c4d",
+      "sourceSha256": "bfeeb222b68ece3ea10240a3350471962d8281b023a1391a58ad20844d9dc912",
+      "originalQualificationRun": 46130093248,
+      "binding": "The exact prior locked-browser binary identity is retained as an early gate. No source correctness or timing outcome transfers."
+    }
+  },
+  "expectedChangedPackageEntries": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "observer": {
+    "path": "dev/perf/import-qualification-20261125-a7f7.py",
+    "sha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef"
+  },
+  "acquisition": {
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "orders": [
+      "AB",
+      "BA"
+    ],
+    "pairsPerJob": 12,
+    "requestedFlags": {},
+    "observationsPerJob": 42,
+    "totalObservations": 252,
+    "perJob": {
+      "excludedWarmup": 4,
+      "candidate": 24,
+      "identicalBaselineControl": 8,
+      "exhaustiveMedia": 2,
+      "separateMemory": 4
+    },
+    "timer": "Unchanged a7f7 browser monotonic complete-import boundary.",
+    "comparison": "Each corpus and each order cell remain separate; no pooling or subtracting controls. Distinct job assignments do not establish physical-host independence.",
+    "attempts": 1,
+    "selectiveRetries": false,
+    "overwrite": false,
+    "resume": false,
+    "separateJobAssignments": 6
+  },
+  "memory": {
+    "maxPollGapMs": 250,
+    "minStableFullyReadSamples": 5,
+    "maxPairedMedianGrowthPct": 5,
+    "maxAnyPairedGrowthPct": 10,
+    "scope": "Separate whole-browser process-tree observations, unchanged sampler and memory overlay; included raw scans and markers."
+  },
+  "excludedPrerequisite": {
+    "runId": 46139360578,
+    "correctnessJobId": 140961651044,
+    "storageJobs": {
+      "jmdict": 140962634770,
+      "jitendex": 140962634795,
+      "vndb": 140962634718
+    },
+    "baselineObservationsPerCorpus": 1,
+    "candidateObservations": 0,
+    "allDurationsExcluded": true,
+    "countsToward252": false
+  },
+  "artifactPolicy": "All observations, failures, reports, scans, inventories and source-entry maps are retained. The unchanged postprocessing archive omits exactly root package-A.zip and package-B.zip while recording their byte identities.",
+  "productPrOpened": false,
+  "fullAcquisitionStarted": false,
+  "priorSourceResults": "The completed f28 component is mechanism evidence only; all prior failed full cohorts remain closed and separate."
+}

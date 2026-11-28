@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-28T11:42:06.031356+00:00",
+  "kind": "separate-current-a300-full-qualification-publication-preparation",
+  "repository": "ManabiIO/manabitan",
+  "parentCommit": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "parentTree": "5fe9ee5a3e2c27ce4e099cb3d6a598077027eac4",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "candidateTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+  "freshCorrectness": {
+    "runId": 46139360578,
+    "jobId": 140961651044,
+    "unitFiles": 701,
+    "unitPassed": 15921,
+    "unitSkipped": 47,
+    "focusedCases": 58,
+    "optionsCases": 32,
+    "dryBuildTargets": 7,
+    "reusedOnlyAfterExactArtifactSourceCommandsAndLogsVerified": true
+  },
+  "storagePrerequisite": {
+    "runId": 46139360578,
+    "exactlyOneExcludedBaselinePerCorpus": true,
+    "candidateObservations": 0,
+    "rootApprovalSha256": "f4d47059772d973275dcc79d59dbe2d5302bb01dd22ec8c2c9d281d190fdeb99",
+    "prospectiveVndbAllocationUnits": [
+      77,
+      77
+    ],
+    "unchangedKnownPathsAndEightSahFiles": true,
+    "exactCanonicalEqualityRequiredAcrossAllFullObservations": true
+  },
+  "criteriaSha256": "7812d2e91515ae2ed2038acecac3617661a40152d33501fe54f089bd2e8cdb9d",
+  "acquisition": {
+    "separateOrderCells": 6,
+    "observationsPerCell": 42,
+    "totalObservations": 252,
+    "pairedCandidateObservations": 144,
+    "identicalCodeObservations": 48,
+    "excludedWarmups": 24,
+    "exhaustiveMediaObservations": 12,
+    "separateMemoryObservations": 24,
+    "physicalHostIndependenceUnestablished": true,
+    "allOriginalControlsOutliersAndFailuresRetained": true,
+    "noSelectedRetry": true
+  },
+  "sourceReviews": {
+    "root": "93fc55cb361cd3a5853d26a4dcde295199f24f13985a1a0ae83e6da2ac523384",
+    "pipeline": "91f75c9f81af3a1ae621a594459c2131cd06fbf0255999171ae71dd5f80268e5"
+  },
+  "finalizationDelta": {
+    "bindingFields": [
+      "acquisitionAuthorized",
+      "authorizationState"
+    ],
+    "workflow": "Only the three matching occurrences of the finalized binding SHA differ from reviewed5e69e4f4; observer command, extraction, flags, schedule, memory policy and package entry gates are unchanged.",
+    "sourceBindingStatus": "The exact historical c9da prerequisite source-binding bytes remain preserved; the new proof records successful fresh correctness without silently rewriting historical status."
+  },
+  "observerSha256": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+  "archiveHelperSha256": "c667e543855dc082d5e0adcabb5ad1a92d9e1dadbe6b64e039d0965158863b1f",
+  "offlineVerification": {
+    "artifactReplay": "4c7ae5e4af0a1ea5179ed6eb8e25c31da5f47a568eb94fe519d68c99c547c056",
+    "positiveOriginalReplay": true,
+    "concreteCorruptionsRejected": 4,
+    "newNativeExecutions": 0,
+    "newTestSuites": 0,
+    "newBenchmarkObservations": 0
+  },
+  "publication": "Root owns exact remote tree/blob review and the only branch publication; no ref mutation by preparer.",
+  "productTreeChangedByTooling": false,
+  "productPrOpened": false,
+  "fullObservationsAcquired": 0
+}

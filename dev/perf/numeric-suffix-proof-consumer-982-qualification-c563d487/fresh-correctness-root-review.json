@@ -1,0 +1,67 @@
+{
+  "kind": "root-fresh-exact-head-correctness-review",
+  "recordedAtUtc": "2026-11-28T11:32:32.577078+00:00",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "candidate": "61ac55c50d9ade7b90dbeb9299de18e094e25044",
+  "candidateTree": "b8f6cfa6a83a87c2c494224a26804c95b7221f3f",
+  "originalArtifact": {
+    "bytes": 146783,
+    "sha256": "3d17262def25c405f1add4f4923694059479bbae83af4e9a93960985a4ba48a7",
+    "gitBlobSha1": "b9123d6e64bfd0f7faa3abb3aabdc693ed7c0577",
+    "artifactId": 15261456718,
+    "runId": 46139360578,
+    "jobId": 140961651044,
+    "headSha": "4b1d90e0cfbc4d19322105a92b1b3c0d9792436c"
+  },
+  "rootIndependentlyInspected": [
+    "completed successful original job metadata",
+    "all eleven terminal command receipts, exact argv and zero exit codes",
+    "exact native toolchain identities and source tree",
+    "source-clean complete result with no acquisition"
+  ],
+  "primaryLog": {
+    "bytes": 150192,
+    "sha256": "d04c52d83c1b788c6ad030170ee75244be8883b94c5bfb76f25337b6a050ee73",
+    "gitBlobSha1": "b78278c01c2d45c394986d005d130eeec64dd3dd"
+  },
+  "independentOriginalArtifactAuditSha256": "01df98e4886a6a58d0b197f09fa777b1b29a045f8214b0ce713c5be2935e38ac",
+  "independentRawAuditCompleted": true,
+  "units": {
+    "files": 701,
+    "passed": 15921,
+    "skipped": 47,
+    "focusedCases": 58
+  },
+  "options": {
+    "passed": 32
+  },
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "nativeCheck": {
+    "mode": "check",
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+      }
+    ]
+  },
+  "sameExactHeadCorrectnessMayBeReusedBySeparateFullQualification": true,
+  "condition": "Full qualification must bind original artifact bytes, all11 receipts/logs, original source proof and unchanged candidate tree; routine PR/merge gates remain required.",
+  "fullPerformanceAcquisitionAuthorizedByThisRecord": false
+}

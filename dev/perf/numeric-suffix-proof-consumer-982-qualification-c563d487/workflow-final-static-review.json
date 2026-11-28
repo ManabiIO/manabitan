@@ -1,0 +1,17 @@
+{
+  "workflowSha256": "26a7dfc66b84d887918171ddd2ca95cc5e0dea55c2ba88985a55cc9d46f198a9",
+  "bindingSha256": "2534bace6b8c3592cb423acd2b4b51da44345deb5491dc06c0060adbb1c1ee7e",
+  "yamlStructurePass": true,
+  "shellSyntaxPass": true,
+  "pythonBlocksSyntaxPass": [
+    "Verify frozen qualification tooling and syntax",
+    "Verify pinned browser before any observation",
+    "Run registered complete-import and separate memory cohorts",
+    "Preserve prospective criteria and exact correctness provenance",
+    "Print every raw observation and final result as compact JSON lines"
+  ],
+  "separateOrderCells": 6,
+  "freshCorrectnessDependency": true,
+  "finalWorkflowDelta": "Exactly three occurrences of the reviewed binding hash, no other byte changes",
+  "newObservations": 0
+}

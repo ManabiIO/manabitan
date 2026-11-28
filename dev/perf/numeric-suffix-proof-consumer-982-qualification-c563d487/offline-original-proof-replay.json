@@ -1,0 +1,61 @@
+{
+  "kind": "offline-original-artifact-verifier-replay",
+  "sourceSha256": "6cc9f18e7677ec22792e95f6184a8b806d2c6106aa90b97db1209db5a3710e39",
+  "proofSha256": "6349eaeb42e4f9167406b0cc7e3aaf8f66ca78d1abf8470e1f6c3b26ce3f8cf8",
+  "archiveSha256": "3d17262def25c405f1add4f4923694059479bbae83af4e9a93960985a4ba48a7",
+  "archiveMembers": 32,
+  "originalFiles": 30,
+  "commandsPassed": 11,
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "nativeCheck": {
+    "mode": "check",
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sha256": "9a1dd618597f5ca5ec85e620621f0fb9167b3486a708d9dc82292bd099c45554"
+      }
+    ]
+  },
+  "mutations": [
+    {
+      "name": "artifact-member-digest",
+      "rejected": true,
+      "invariant": "Original artifact member bytes and CRC"
+    },
+    {
+      "name": "missing-dry-target",
+      "rejected": true,
+      "invariant": "All seven explicit dry build targets"
+    },
+    {
+      "name": "wrong-native-reproduction",
+      "rejected": true,
+      "invariant": "Both exact native targets reproduced with pinned compiler and linker"
+    },
+    {
+      "name": "incorrect-unit-count",
+      "rejected": true,
+      "invariant": "Fresh complete unit case count"
+    }
+  ],
+  "newTestsExecuted": false,
+  "nativeExecuted": false,
+  "benchmarkExecuted": false,
+  "sourceGitAndApiGatesScope": "Read-only source review; actual hosted dependency will execute the repository/API checks."
+}
