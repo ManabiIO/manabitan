@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent evidence-only Jitendex corpus supplement review",
+  "status": "PASS",
+  "noNewAcquisition": true,
+  "studyCommit": "7657938904308d6b08d5ffda78124ee7695f3e14",
+  "evidenceParent": "f4afec3dfe68139abff937ad83b87c14e291442e",
+  "pack": {
+    "bytes": 131265,
+    "sha256": "7c511d1062aa4cb8699e29a3ec195fbcfb09ea324883677fd47ecf7d4f402b5c"
+  },
+  "manifestSha256": "35f43ab723c4786266aa4155b2397a61bf84bb16efe3873b3f19cc6d10ba962f",
+  "archive": {
+    "bytes": 97035,
+    "sha256": "81a9cd91a25b23baba61e519a876176f0489f3244746014574fa313e8e685d8d",
+    "memberCount": 7,
+    "memberBytes": 405088
+  },
+  "membersCompared": [
+    {
+      "bytes": 2542,
+      "path": "original/artifacts-metadata.json",
+      "sha256": "2630d6fa0a901e593e96fbe5ee526a6d1a3f4fabc82e3562c2f540d623e79b0d"
+    },
+    {
+      "bytes": 75419,
+      "path": "original/jitendex.zip",
+      "sha256": "aee1e091b0746d95d116d32fa9033d7fe9942f96163e2553f4383af5b041a1b3"
+    },
+    {
+      "bytes": 288938,
+      "path": "original/job.log",
+      "sha256": "11a9cc718421b3a9e00a4b3b77a98ad2a52c9371a3dc3529c53e3e54c3b95606"
+    },
+    {
+      "bytes": 2419,
+      "path": "review/command-receipt.json",
+      "sha256": "4bea186b7c4d0a7dbbbc572b9f79b450b8d74ba221a5277ba95742b138810bf4"
+    },
+    {
+      "bytes": 15021,
+      "path": "review/import-corpus-artifacts-5a86.py",
+      "sha256": "8245f5e0ff2bc2d2ff058b6b0d519337a4b8bbef0cece5d672e7ca343d37b25d"
+    },
+    {
+      "bytes": 2393,
+      "path": "review/import-corpus-jitendex-artifact-5a86.py",
+      "sha256": "d9c010af2b9d1760617b421bd23e0d1887b8f37acc01c3565b9cc7c268230f6e"
+    },
+    {
+      "bytes": 18356,
+      "path": "review/independent-audit.json",
+      "sha256": "69bacfd9df0b55198f2a38b97756fcd198ca61100b359f04b5f595e21043e5ee"
+    }
+  ],
+  "currentGithubArtifactMetadata": {
+    "id": 15249819961,
+    "name": "import-corpus-proof-jitendex-5a86",
+    "size_in_bytes": 75419,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249819961",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15249819961/zip",
+    "expired": false,
+    "created_at": "2026-11-28T05:37:07Z",
+    "expires_at": "2026-12-28T05:37:06Z",
+    "updated_at": "2026-11-28T05:37:07Z",
+    "digest": "sha256:aee1e091b0746d95d116d32fa9033d7fe9942f96163e2553f4383af5b041a1b3",
+    "workflow_run": {
+      "id": 46105432915,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-corpus-proof-20261128-5a86",
+      "head_sha": "7657938904308d6b08d5ffda78124ee7695f3e14"
+    }
+  },
+  "unchangedCheckerSha256": "8245f5e0ff2bc2d2ff058b6b0d519337a4b8bbef0cece5d672e7ca343d37b25d",
+  "wrapperSha256": "d9c010af2b9d1760617b421bd23e0d1887b8f37acc01c3565b9cc7c268230f6e",
+  "reproducedAuditSha256": "69bacfd9df0b55198f2a38b97756fcd198ca61100b359f04b5f595e21043e5ee",
+  "reproductionMatchesOriginalBytes": true,
+  "sourceHashesPerArm": {
+    "baseline": 19,
+    "mask": 19,
+    "suffix": 19
+  },
+  "archivedStudyCodeCopiesChecked": 17,
+  "counterAudit": {
+    "additionalTotals": {
+      "baseline": {
+        "encodedContentBytes": 389707807,
+        "keys": 597173,
+        "mediaRows": 339,
+        "preparedBufferBytes": 33315604,
+        "recentContentDedupHitCount": 73242,
+        "rows": 436555,
+        "stringBytes": 8536682
+      },
+      "mask": {
+        "encodedContentBytes": 389707807,
+        "keys": 597173,
+        "mediaRows": 339,
+        "preparedBufferBytes": 33315604,
+        "recentContentDedupHitCount": 73242,
+        "rows": 436555,
+        "stringBytes": 8536682
+      },
+      "suffix": {
+        "encodedContentBytes": 389707807,
+        "keys": 597173,
+        "mediaRows": 339,
+        "preparedBufferBytes": 33315604,
+        "recentContentDedupHitCount": 73242,
+        "rows": 436555,
+        "stringBytes": 8536682
+      }
+    },
+    "arms": {
+      "baseline": {
+        "crcReusedBytes": 0,
+        "crcReusedGlossaries": 0,
+        "crcScannedBytes": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseGroups": 22,
+        "scratchReuseMisses": 0,
+        "validatedGlossaryReuseCount": 85996
+      },
+      "mask": {
+        "crcReusedBytes": 0,
+        "crcReusedGlossaries": 0,
+        "crcScannedBytes": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseGroups": 22,
+        "scratchReuseMisses": 0,
+        "validatedGlossaryReuseCount": 85996
+      },
+      "suffix": {
+        "crcReusedBytes": 0,
+        "crcReusedGlossaries": 0,
+        "crcScannedBytes": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseGroups": 22,
+        "scratchReuseMisses": 0,
+        "validatedGlossaryReuseCount": 86020
+      }
+    },
+    "banksPerArm": 219,
+    "groupsPerArm": 22,
+    "sourceBytes": 538927310
+  },
+  "negativeReportGuardsRejected": [
+    "changed complete output digest",
+    "changed mask work",
+    "missing last group",
+    "changed media row",
+    "changed suffix allocation",
+    "changed CRC policy",
+    "changed bank coverage"
+  ],
+  "optimizedPythonRejected": true,
+  "additionalWrapperNegativeChecks": [
+    {
+      "case": "changed-checker",
+      "exitCode": 1,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "68f4bbaeaadfe747365f0ca6e98786f11fecc55f8cae2b94a085985a1c9cb39f"
+    },
+    {
+      "case": "changed-original-archive",
+      "exitCode": 1,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "1c23d19258a0699f2af5f747f30a314bee9631915ab56a5e7046f6f14e98895e"
+    }
+  ],
+  "handoffAppendOnlyToPublishedParent": true,
+  "proposedEvidenceOnlyPaths": [
+    "dev/perf/import-corpus-5a86/hosted-jitendex.json.txt",
+    "dev/perf/import-corpus-5a86/hosted-jitendex-manifest.json.txt",
+    "dev/perf/import-corpus-jitendex-artifact-5a86.py",
+    "dev/perf/import-experiments-20260914.md"
+  ],
+  "excludedFromAcquisitionWorkflowPaths": [
+    ".github/workflows/import-corpus-proof-5a86.yml",
+    "test/perf/import-corpus-20261128-5a86/**"
+  ],
+  "initialReviewPreparationFailure": {
+    "schemaVersion": 1,
+    "stage": "Reviewer preparation before auditor execution",
+    "noAcquisition": true,
+    "localGitLookup": {
+      "chunk_id": "db5679",
+      "wall_time_seconds": 2.663e-05,
+      "exit_code": 1,
+      "original_token_count": 201,
+      "output": "fatal: path 'dev/perf/import-corpus-artifacts-5a86.py' does not exist in 'f4afec3dfe68139abff937ad83b87c14e291442e'\nTraceback (most recent call last):\n  File \"<stdin>\", line 24, in <module>\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 466, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 571, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command '['git', 'show', 'f4afec3dfe68139abff937ad83b87c14e291442e:dev/perf/import-corpus-artifacts-5a86.py']' returned non-zero exit status 128.\n"
+    },
+    "metadataEndpointFailure": {
+      "error": "HTTPError: 400: GitHub Fetch URL is not an allowed public GitHub repository or search endpoint. (Response: None)",
+      "error_code": "INVALID_ARGUMENT"
+    },
+    "interpretation": "The local Git checkout lacked newly published commit f4afec3d. The original artifact extraction and member checks had passed before this lookup. No data report or frozen observer was changed; use exact raw files fetched from the published commit and the approved run-artifacts tool."
+  },
+  "interpretation": [
+    "All 436555 rows, 219 banks and 22 groups per arm are covered by full-group SHA-256 parity and counter checks.",
+    "Suffix increases validated glossary reuse by 24; all deferred-CRC counters remain zero.",
+    "339 projected media rows are per-parser-group records and are not the 236 installed unique media images.",
+    "The prior common checker is byte-identical to the published parent; only the original Jitendex artifact identity is added by the new wrapper."
+  ],
+  "limitations": [
+    "Every row canonical byte range is hashed live; complete-group SHA-256 digests and counters are compared, not retained byte arrays.",
+    "Per-group projected media-row counts can repeat references across groups; they are not installed unique media rows.",
+    "This replay does not rehash owned outputs after later heap reuse.",
+    "Independent zlib verifies source CRC/length; no direct zlib/native preloaded-source byte comparison.",
+    "No direct comparison of all raw metadata flag bits.",
+    "No browser, storage, exhaustive media-payload, process peak-memory, or performance claim."
+  ]
+}

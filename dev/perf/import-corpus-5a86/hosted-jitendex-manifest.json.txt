@@ -1,0 +1,51 @@
+{
+  "archiveBytes": 97035,
+  "archiveSha256": "81a9cd91a25b23baba61e519a876176f0489f3244746014574fa313e8e685d8d",
+  "artifactId": 15249819961,
+  "dictionary": "jitendex",
+  "format": "tar+gzip+base64",
+  "independentAuditSha256": "69bacfd9df0b55198f2a38b97756fcd198ca61100b359f04b5f595e21043e5ee",
+  "members": [
+    {
+      "bytes": 2542,
+      "path": "original/artifacts-metadata.json",
+      "sha256": "2630d6fa0a901e593e96fbe5ee526a6d1a3f4fabc82e3562c2f540d623e79b0d"
+    },
+    {
+      "bytes": 75419,
+      "path": "original/jitendex.zip",
+      "sha256": "aee1e091b0746d95d116d32fa9033d7fe9942f96163e2553f4383af5b041a1b3"
+    },
+    {
+      "bytes": 288938,
+      "path": "original/job.log",
+      "sha256": "11a9cc718421b3a9e00a4b3b77a98ad2a52c9371a3dc3529c53e3e54c3b95606"
+    },
+    {
+      "bytes": 2419,
+      "path": "review/command-receipt.json",
+      "sha256": "4bea186b7c4d0a7dbbbc572b9f79b450b8d74ba221a5277ba95742b138810bf4"
+    },
+    {
+      "bytes": 15021,
+      "path": "review/import-corpus-artifacts-5a86.py",
+      "sha256": "8245f5e0ff2bc2d2ff058b6b0d519337a4b8bbef0cece5d672e7ca343d37b25d"
+    },
+    {
+      "bytes": 2393,
+      "path": "review/import-corpus-jitendex-artifact-5a86.py",
+      "sha256": "d9c010af2b9d1760617b421bd23e0d1887b8f37acc01c3565b9cc7c268230f6e"
+    },
+    {
+      "bytes": 18356,
+      "path": "review/independent-audit.json",
+      "sha256": "69bacfd9df0b55198f2a38b97756fcd198ca61100b359f04b5f595e21043e5ee"
+    }
+  ],
+  "originalArtifactSha256": "aee1e091b0746d95d116d32fa9033d7fe9942f96163e2553f4383af5b041a1b3",
+  "originalReportSha256": "987f973ac981f75ca9fdbf6af3b6d3d45310afac58b027788a356839cea9bb29",
+  "schema": 1,
+  "scope": "Every complete canonical row byte range and prepared output feeds group SHA-256 receipts; equality of complete digests/counters is checked. No direct A/B retained-row-array, ownership-after-reuse, source-array zlib/native byte equality, exhaustive media-payload, storage, browser performance or process peak-memory claim.",
+  "status": "PASS complete corpus artifact audit; no import or timing acquisition",
+  "studyCommit": "7657938904308d6b08d5ffda78124ee7695f3e14"
+}

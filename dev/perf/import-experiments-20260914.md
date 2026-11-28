@@ -786,3 +786,47 @@ owned outputs after later heap reuse, directly compare zlib and native
 preloaded-source buffers, or compare all raw metadata flag bits. It provides
 no browser, storage, exhaustive image-byte, peak-process-memory or speed
 claim. Browser qualification for the two native candidates remains required.
+
+
+### Final Jitendex corpus receipt: all three locked corpora complete
+
+The same frozen study/run above completed Jitendex successfully, with no retry
+or source change: 436,555 rows, 219 banks, 22 groups and 538,927,310 decoded
+source bytes per arm. Baseline, composite-window and suffix outputs have
+identical complete-group SHA-256 digests and ordinary work/allocation counters.
+Validated glossary reuse is 85,996 for baseline/window and 86,020 for suffix
+(+24); all deferred-CRC counters are zero because Jitendex uses immediate CRC.
+All arms have 22 fused attempts, zero fallbacks, 76,087,296-byte maximum WASM
+heap and 389,707,807 canonical content bytes. These are parser/work receipts,
+not browser timing or process peak-memory measurements. The 339 projected
+media rows are per-parser-group records, not the 236 installed unique images.
+
+The original Jitendex artifact is ID 15249819961, 75,419 bytes, SHA-256
+`aee1e091b0746d95d116d32fa9033d7fe9942f96163e2553f4383af5b041a1b3`;
+its original report SHA-256 is
+`987f973ac981f75ca9fdbf6af3b6d3d45310afac58b027788a356839cea9bb29`.
+Both were independently checked against the downloaded bytes.
+`dev/perf/import-corpus-5a86/hosted-jitendex.json.txt` preserves the original ZIP
+and job log, artifact metadata, exact review code and results; its companion
+manifest binds every member.
+
+`dev/perf/import-corpus-jitendex-artifact-5a86.py` uses the unchanged prior
+checker, binding its SHA-256 before loading it and supplying only this original
+artifact identity. It independently checks all 22 groups, recorded source files
+against frozen Git, study code, complete bank/source coverage, every permitted
+counter direction and seven report rejection cases. The independent result is
+SHA-256 `69bacfd9df0b55198f2a38b97756fcd198ca61100b359f04b5f595e21043e5ee`.
+After extracting the pack, run its two adjacent review scripts using:
+
+```sh
+python3 <extraction>/review/import-corpus-jitendex-artifact-5a86.py \
+  --repo <repository> --archive <extraction>/original/jitendex.zip \
+  --out <new-review.json>
+```
+
+Across the three corpora this completes **7,613,164 rows, 937 banks, 204 groups
+and 4,978,537,800 source bytes per arm**. The limits stated in the preceding
+checkpoint remain: complete-byte hash parity, not retained-array or
+after-reuse ownership proof, and no browser speed, storage or exhaustive media
+payload claim. Browser qualification still determines whether a runtime PR
+is warranted. The frozen observer, workflow and candidates are unchanged.
