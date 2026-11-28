@@ -1,0 +1,198 @@
+name: Import qualification 81585d
+
+on:
+  push:
+    branches: [perf/import-probe-20261127-81585d]
+    paths:
+      - .github/workflows/import-qualification-81585d.yml
+      - dev/perf/qualify-import-81585d.py
+      - dev/perf/import-qualification-81585d.json
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    # Only this deliberately named acquisition commit can start the fixed study.
+    # Evidence and scaffold follow-ups use different commit messages.
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    name: Package preflight (${{ matrix.candidate }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [lazy-signatures, early-borrowed-release]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch exact candidate source
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("dev/perf/import-qualification-81585d.json"))["candidates"][os.environ["CANDIDATE_NAME"]]["commit"]; assert isinstance(sha,str) and re.fullmatch("[a-f0-9]{40}",sha); print(sha)')
+          git fetch origin "$candidate_sha"
+      - name: Verify source checkout, dependencies, manifest-bound native assets and package allowlist
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        run: python3 dev/perf/qualify-import-81585d.py "$CANDIDATE_NAME" jmdict 0 --prepare-only
+      - name: Preserve preflight packages and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-preflight-81585d-${{ matrix.candidate }}
+          path: builds/qualification
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
+
+  validate:
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    needs: preflight
+    name: Source validation (${{ matrix.candidate }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [lazy-signatures, early-borrowed-release]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve protocol and check out frozen product source
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qualification-validation
+          cp dev/perf/import-qualification-81585d.json builds/qualification-validation/protocol.json
+          cp .github/workflows/import-qualification-81585d.yml builds/qualification-validation/executed-workflow.yml
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("dev/perf/import-qualification-81585d.json"))["candidates"][os.environ["CANDIDATE_NAME"]]["commit"]; assert isinstance(sha,str) and re.fullmatch("[a-f0-9]{40}",sha); print(sha)')
+          git fetch origin "$candidate_sha"
+          git checkout --detach "$candidate_sha"
+          git rev-parse HEAD 'HEAD^{tree}' > builds/qualification-validation/source-identity.txt
+          sha256sum package-lock.json test/perf/dictionaries.lock.json dev/data/dictionary-wasm/manifest.json > builds/qualification-validation/input-sha256.txt
+      - uses: ./.github/actions/setup
+        id: setup
+      - name: Full unit suite
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:unit 2>&1 | tee builds/qualification-validation/unit.log
+      - name: Options unit suite
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:unit:options 2>&1 | tee builds/qualification-validation/options-unit.log
+      - name: Full JavaScript lint
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:js 2>&1 | tee builds/qualification-validation/javascript.log
+      - name: Main TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:ts:main 2>&1 | tee builds/qualification-validation/types-main.log
+      - name: Dev TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:ts:dev 2>&1 | tee builds/qualification-validation/types-dev.log
+      - name: Test TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:ts:test 2>&1 | tee builds/qualification-validation/types-test.log
+      - name: Bench TypeScript
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:ts:bench 2>&1 | tee builds/qualification-validation/types-bench.log
+      - name: All target dry builds
+        if: always() && steps.setup.outcome == 'success'
+        run: npm run test:build 2>&1 | tee builds/qualification-validation/build.log
+      - name: Install pinned native toolchain as in existing CI
+        if: always() && steps.setup.outcome == 'success'
+        id: native_toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update 2>&1 | tee builds/qualification-validation/native-install.log
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee -a builds/qualification-validation/native-install.log
+      - name: Verify pinned native rebuild byte equality
+        if: always() && steps.native_toolchain.outcome == 'success'
+        env:
+          MANABITAN_CLANG: /usr/bin/clang-21
+          MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+        run: npm run build:dictionary-wasm -- --check 2>&1 | tee builds/qualification-validation/native-rebuild.log
+      - name: Preserve final source state
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qualification-validation
+          git status --porcelain > builds/qualification-validation/source-status.txt
+          git diff --exit-code
+      - name: Preserve source validation and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-validation-81585d-${{ matrix.candidate }}
+          path: builds/qualification-validation
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
+
+
+  qualify:
+    if: "github.event.head_commit.message == 'test: acquire import qualification 81585d stage 1'"
+    needs: preflight
+    name: ${{ matrix.candidate }} ${{ matrix.dictionary }} host ${{ matrix.replica }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        candidate: [lazy-signatures, early-borrowed-release]
+        dictionary: [jmdict, jitendex, vndb]
+        replica: [0, 1]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch exact candidate source
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_sha=$(python3 -c 'import json, os, re; sha=json.load(open("dev/perf/import-qualification-81585d.json"))["candidates"][os.environ["CANDIDATE_NAME"]]["commit"]; assert isinstance(sha,str) and re.fullmatch("[a-f0-9]{40}",sha); print(sha)')
+          git fetch origin "$candidate_sha"
+      - name: Acquire fixed uninstrumented cohort and separate memory observations
+        env:
+          CANDIDATE_NAME: ${{ matrix.candidate }}
+          DICTIONARY_NAME: ${{ matrix.dictionary }}
+          REPLICA_NUMBER: ${{ matrix.replica }}
+        run: python3 dev/perf/qualify-import-81585d.py "$CANDIDATE_NAME" "$DICTIONARY_NAME" "$REPLICA_NUMBER"
+      - name: Preserve exact packages, every observation and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-qualification-81585d-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.replica }}
+          path: builds/qualification
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
+
