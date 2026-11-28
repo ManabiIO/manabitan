@@ -1,0 +1,726 @@
+{
+  "schemaVersion": 1,
+  "kind": "Read-only derivation of an existing completed component cohort; no new acquisition",
+  "originalArchive": {
+    "commit": "05f0cc67da3d070b31208f7afdd9700c759c672a",
+    "path": "builds/perf/import-overlap-20261128-da6c4/components-v1.tar.gz",
+    "sha256": "0b10131113eab3c5a627c5a009d1c2cbcaa222abdff2989b7fc306ba6e123bc1",
+    "member": "profiling/compression-scheduling-db-1m-replication.json",
+    "memberBytes": 1815727,
+    "memberSha256": "434f569b5a8db01fa96c549a6581f0e4bcda9e5cecf6f0e14f012de5f3562ba0"
+  },
+  "exactReplay": {
+    "archiveMember": "profiling/compression-scheduling-db-1m-replay.mjs",
+    "bytes": 10399,
+    "sha256": "47e321a6f4cfbdc355b0a9847ebd03cd084fb5266893ec99d5a470176be6b20d",
+    "gitBlob": "e61c8d33e16f4e298b5e9eb70a842544525656a8"
+  },
+  "source": {
+    "runtime": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "manifestSha256": "ced398e8147bf700c088d528d06f54cf44854213269a232bb3a3e7edea139f3e",
+    "sourceHashes": {
+      "ext/js/dictionary/term-bank-wasm-parser.js": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "ext/js/dictionary/dictionary-database.js": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-content-block-store.js": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+      "ext/js/dictionary/zstd-term-content.js": "c42f767b0f93e5f2f35c79c69558cee1f82ab4b4577cb736d006789b65ecd9fa",
+      "ext/js/dictionary/zstd-term-content-compression-worker.js": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "ext/lib/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "ext/lib/zstd-wasm.js": "bb19ec2403426db445d4df2eb7ee6731bdd5369ac538c530dd3e4357e40d146e",
+      "ext/lib/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "blockPlanOrigin": {
+      "source": "ext/js/dictionary/term-content-block-store.js",
+      "sourceSha256": "733812feb235bd7f5a0c951e760acaf0ec67b410d29e0d3ae2b2be136b09111f",
+      "functionSha256": "1dd9109318599d8b7e409f54fa78b37bfb20c33be22b59d6cce1bfb80d10e4d5",
+      "configuration": "ext/js/dictionary/dictionary-database.js",
+      "configurationSha256": "75da1c10c8cefd238e17aaabb44fca71f39e2f4e412660420c1e675d9cc7b84b"
+    }
+  },
+  "scope": "Compression component only. All exact current native parser+canonical-dedup spans preloaded. Production TermContentCompressionPool and worker entry, four Node worker threads replacing browser transport; actual shipped Zstd module, dictionary, compression settings, source bytes, span order and 1MiB block boundaries computed using the frozen production database target and block planner. Lookahead keeps at most two groups pending. Rotate changes only group-to-worker assignment in this scratch experiment. Explicit GC before each observation outside timing; all six order permutations balanced when three arms.",
+  "interpretation": {
+    "A": "Serial groups on the unchanged baseline codec pool, resetting first worker for every group.",
+    "C": "Identical serial code, separately scheduled as a control.",
+    "B": "Scratch scheduler rotates baseline pool._workers and keeps at most two codec groups pending.",
+    "candidate": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e implements a persistent span-worker cursor and allows the next content preparation only after predecessor metadata publication; successor metadata and records wait for predecessor completion.",
+    "limitation": "This is a scheduler prototype using baseline codec source, not a timing measurement of the candidate runtime. The product's publication gate can make its useful overlap window narrower. Parsing, dedup, record encoding, persistence, browser transport and UI are excluded.",
+    "completion": "All 36 observations retained, all six order permutations twice; three warmups are excluded from timing comparisons. No outliers removed.",
+    "roundtrip": "All 36 timed observations have identical hashes for every compressed block. One separate verification-only serial run decoded all 103 blocks and matched all 100,300,626 input bytes. This does not claim 36 separate decompression passes.",
+    "portability": "Node worker transport and one host. Magnitudes do not establish browser import latency or peak memory.",
+    "productionCorrectness": "The complete 528,299-row DB/store parity replay is bound to original runtime a20453bc325faff75a7f6a9c7d408a361c8fe981. Later lifecycle/metrics/lint changes in 5048 have focused test/build evidence but no repeated complete corpus replay yet."
+  },
+  "host": {
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logicalCpuCount": 9,
+    "parallelism": 9,
+    "memoryBytes": 10451423232,
+    "loadavg": [
+      1.78,
+      3.77,
+      4.48
+    ]
+  },
+  "node": "v24.22.3",
+  "groupCount": 12,
+  "inputBytes": 100300626,
+  "sourceBytes": 101143985,
+  "blockCount": 103,
+  "blockTargetBytes": 1048576,
+  "armMediansMs": {
+    "A": 78.6873235,
+    "B": 67.573001,
+    "C": 78.0942505
+  },
+  "comparisons": {
+    "B/A": {
+      "medianDeltaMs": -13.074684000000005,
+      "medianPercent": -16.515289090772804,
+      "fasterPairs": 12,
+      "equalWorkPercent": -17.29312100534174
+    },
+    "B/C": {
+      "medianDeltaMs": -10.645081500000003,
+      "medianPercent": -12.919712319263276,
+      "fasterPairs": 11,
+      "equalWorkPercent": -15.288805590278065
+    },
+    "C/A": {
+      "medianDeltaMs": -1.0119029999999967,
+      "medianPercent": -1.1922307620569284,
+      "fasterPairs": 7,
+      "equalWorkPercent": -2.366057318669612
+    }
+  },
+  "formulas": {
+    "medianDeltaMs": "median(candidate - comparator) across paired rounds",
+    "medianPercent": "median(100 * (candidate / comparator - 1)) across paired rounds",
+    "equalWorkPercent": "100 * (sum(candidate) / sum(comparator) - 1)",
+    "fasterPairs": "count(candidate < comparator)"
+  },
+  "pairedRows": [
+    {
+      "round": 0,
+      "A": 89.528285,
+      "B": 77.595777,
+      "C": 88.303864
+    },
+    {
+      "round": 1,
+      "A": 88.54005,
+      "B": 76.618735,
+      "C": 88.795241
+    },
+    {
+      "round": 2,
+      "A": 85.405815,
+      "B": 71.829937,
+      "C": 101.107364
+    },
+    {
+      "round": 3,
+      "A": 78.758903,
+      "B": 71.705238,
+      "C": 80.258089
+    },
+    {
+      "round": 4,
+      "A": 78.615744,
+      "B": 66.042254,
+      "C": 77.816359
+    },
+    {
+      "round": 5,
+      "A": 98.848738,
+      "B": 71.09682,
+      "C": 78.372142
+    },
+    {
+      "round": 6,
+      "A": 77.921659,
+      "B": 59.266869,
+      "C": 95.655609
+    },
+    {
+      "round": 7,
+      "A": 85.010571,
+      "B": 69.103748,
+      "C": 64.748619
+    },
+    {
+      "round": 8,
+      "A": 62.445216,
+      "B": 60.831314,
+      "C": 61.218415
+    },
+    {
+      "round": 9,
+      "A": 62.667163,
+      "B": 51.990574,
+      "C": 64.218294
+    },
+    {
+      "round": 10,
+      "A": 67.969856,
+      "B": 50.785635,
+      "C": 61.367711
+    },
+    {
+      "round": 11,
+      "A": 72.659488,
+      "B": 57.501558,
+      "C": 64.070768
+    }
+  ],
+  "observations": [
+    {
+      "round": 0,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "serial",
+      "elapsedMs": 89.528285,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 0,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "control",
+      "elapsedMs": 88.303864,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 0,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 77.595777,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 1,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 76.618735,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 1,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "control",
+      "elapsedMs": 88.795241,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 1,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "serial",
+      "elapsedMs": 88.54005,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 2,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "control",
+      "elapsedMs": 101.107364,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 2,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "serial",
+      "elapsedMs": 85.405815,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 2,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 71.829937,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 3,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 71.705238,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 3,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "serial",
+      "elapsedMs": 78.758903,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 3,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "control",
+      "elapsedMs": 80.258089,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 4,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "serial",
+      "elapsedMs": 78.615744,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 4,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 66.042254,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 4,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "control",
+      "elapsedMs": 77.816359,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 5,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "control",
+      "elapsedMs": 78.372142,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 5,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 71.09682,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 5,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "serial",
+      "elapsedMs": 98.848738,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 6,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "serial",
+      "elapsedMs": 77.921659,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 6,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "control",
+      "elapsedMs": 95.655609,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 6,
+      "order": [
+        "serial",
+        "control",
+        "lookahead-rotate"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 59.266869,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 7,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 69.103748,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 7,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "control",
+      "elapsedMs": 64.748619,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 7,
+      "order": [
+        "lookahead-rotate",
+        "control",
+        "serial"
+      ],
+      "mode": "serial",
+      "elapsedMs": 85.010571,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 8,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "control",
+      "elapsedMs": 61.218415,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 8,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "serial",
+      "elapsedMs": 62.445216,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 8,
+      "order": [
+        "control",
+        "serial",
+        "lookahead-rotate"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 60.831314,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 9,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 51.990574,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 9,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "serial",
+      "elapsedMs": 62.667163,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 9,
+      "order": [
+        "lookahead-rotate",
+        "serial",
+        "control"
+      ],
+      "mode": "control",
+      "elapsedMs": 64.218294,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 10,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "serial",
+      "elapsedMs": 67.969856,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 10,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 50.785635,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 10,
+      "order": [
+        "serial",
+        "lookahead-rotate",
+        "control"
+      ],
+      "mode": "control",
+      "elapsedMs": 61.367711,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 11,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "control",
+      "elapsedMs": 64.070768,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 11,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "lookahead-rotate",
+      "elapsedMs": 57.501558,
+      "maxPendingGroups": 2,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    },
+    {
+      "round": 11,
+      "order": [
+        "control",
+        "lookahead-rotate",
+        "serial"
+      ],
+      "mode": "serial",
+      "elapsedMs": 72.659488,
+      "maxPendingGroups": 1,
+      "outputBytes": 12326040,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+      "blockCount": 103
+    }
+  ],
+  "warmups": [
+    {
+      "label": "warm-serial",
+      "mode": "serial",
+      "elapsedMs": 113.00509,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747"
+    },
+    {
+      "label": "warm-control",
+      "mode": "control",
+      "elapsedMs": 79.205479,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747"
+    },
+    {
+      "label": "warm-lookahead-rotate",
+      "mode": "lookahead-rotate",
+      "elapsedMs": 74.373403,
+      "outputSha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747"
+    }
+  ],
+  "output": {
+    "bytes": 12326040,
+    "sha256": "f9bcbead26736ae31ae3776fb65618b457e8488e6e097b32451103d237e03747",
+    "allBlockHashArraysIdentical": true,
+    "verificationOnly": {
+      "checkedBlocks": 103,
+      "checkedBytes": 100300626
+    }
+  },
+  "failures": []
+}

@@ -767,8 +767,9 @@ Borrowed, partial, private, unwitnessed, media, and otherwise ineligible chunks
 remain serial. Failure joins all started persistence and unwinds successors
 before predecessor metadata rollback; abort, finish, close and purge drain
 owners before releasing resources. The legacy append API remains completion-only.
-Jitendex/VNDB full-media callbacks do not enable cross-group overlap. Jitendex
-still sees shared compression-pool rotation; VNDB uses generic compression.
+Jitendex/VNDB full-media callbacks do not enable cross-group overlap.
+Rotation changes only shared-span batches; private compression remains unchanged.
+VNDB uses generic compression.
 
 ### Component evidence
 
@@ -1192,3 +1193,39 @@ screen, and new alias screen remain queued. No complete-import gain, alias
 observation, production alias/FIFO implementation, or PR is claimed.
 
 <!-- da6c4 evidence checkpoint end -->
+
+### Review candidate: exact component-to-product source binding
+
+The corrected codec replay has now been inspected directly from its verified
+archive member. It imports the unchanged `9e10d3b3` production codec pool.
+Its B arm rotates that pool's worker array and admits at most two codec groups.
+It is a scheduling prototype, not a timing execution of runtime `5048ba3e`.
+The committed pool uses a persistent worker cursor; the product coordinator
+also waits for predecessor metadata publication before admitting successor
+content preparation. That additional barrier can make the useful overlap
+window narrower than the component's.
+
+The [compact review receipt](../../builds/perf/import-overlap-20261128-da6c4/corrected-codec-review-receipt.json)
+retains all 36 timing observations and all twelve paired rounds, with source,
+fixture, archive-member, script, and output hashes. The [exact replay source](../../builds/perf/import-overlap-20261128-da6c4/corrected-codec-replay.mjs)
+is byte-identical to the archived script. This is a read-only derivation of the
+existing cohort; it adds no observations and replaces none.
+
+B/A paired median change is -13.074684 ms / -16.515289%, with 12/12 faster;
+B/C is -10.6450815 ms / -12.919712%, with 11/12 faster. Equal-work changes
+are -17.293121% and -15.288806%, respectively. Identical C/A paired median is
+-1.011903 ms / -1.192231%. The difference between the arm medians
+(78.6873235 ms A and 67.573001 ms B) is 11.1143225 ms; it is a different
+statistic from the paired median change.
+
+Every timed observation has identical hashes for every output block.
+One separate verification-only serial run decoded all 103 blocks and matched
+100,300,626 input bytes. This does not claim 36 separate decompression passes.
+The full DB/store parity replay remains bound to original runtime `a20453bc`;
+the later `5048ba3e` lifecycle, diagnostic, and lint repairs have current focused
+test/build evidence but no repeated full-corpus parity acquisition.
+
+This component gain warrants review of the bounded-overlap candidate in a clean
+draft, held for complete current validation and the frozen browser timing,
+semantic, and memory gates. No full-import speedup or production memory result
+is inferred. The independent FIFO and VNDB alias studies remain separate.
