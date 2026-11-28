@@ -12,6 +12,20 @@ function compute(obs,kind,right){
  boots.sort((a,b)=>a-b);
  return {count:n,pairs,ratios,medianPairedChangePercent:(med(ratios)-1)*100,equalWorkChangePercent:(pairs.reduce((t,x)=>t+x.comparisonMs,0)/pairs.reduce((t,x)=>t+x.baselineMs,0)-1)*100,worstPairChangePercent:(Math.max(...ratios)-1)*100,fasterPairs:ratios.filter(x=>x<1).length,exactEnumeratedBootstrap95Percent:[boots[Math.ceil(.025*N)-1],boots[Math.ceil(.975*N)-1]].map(x=>(x-1)*100),exactEnumeratedBootstrapSampleCount:N};
 }
+function memoryAudit(memory) {
+ const pairs = {};for (const observation of memory.observations) {(pairs[observation.pair] ??= {})[observation.arm] = observation;}
+ const allQualified = memory.observations.every(o=>o.qualifiedForWholeTreePss);
+ const metrics = {};
+ for (const metric of ['maxSampledPrivateKiB','maxSampledPssKiB']) {
+  const changes = Object.values(pairs).map(pair => {
+   if(!pair.A?.qualifiedForWholeTreePss || !pair.B?.qualifiedForWholeTreePss) return null;
+   if(typeof pair.A[metric]!=='number'||typeof pair.B[metric]!=='number') throw Error('Qualified observation has no numeric maximum');
+   return (pair.B[metric]/pair.A[metric]-1)*100;
+  });
+  metrics[metric]={changes,medianPairedChangePercent:allQualified?med(changes):null,maximumPairedChangePercent:allQualified?Math.max(...changes):null};
+ }
+ return {metrics,allQualified};
+}
 const evidence = JSON.parse(await readFile(process.argv[2] ?? new URL('./hosted-46102503309.json', import.meta.url), 'utf8'));
 const output = [];
 for (const corpus of evidence.corpora) {
@@ -27,13 +41,13 @@ for (const corpus of evidence.corpora) {
     }
     assert.deepEqual(data['observations.json'].map(({totalImportMs, ...x}) => x), data['registered-plan.json'].schedule);
     const memory = data['memory/memory-comparison.json'];
-    const pairs = {};
-    for (const observation of memory.observations) { (pairs[observation.pair] ??= {})[observation.arm] = observation; }
+    const auditedMemory = memoryAudit(memory);
+    assert.equal(auditedMemory.allQualified, memory.everyObservationQualified);
     const memoryMetrics = {};
-    for (const metric of ['maxSampledPrivateKiB', 'maxSampledPssKiB']) {
-        const changes = Object.values(pairs).map(pair => (pair.B[metric] / pair.A[metric] - 1) * 100);
-        memoryMetrics[metric] = {medianPairedChangePercent: med(changes), maximumPairedChangePercent: Math.max(...changes)};
-        assert.deepEqual(memoryMetrics[metric], memory.metrics[metric]);
+    for (const [metric, {changes, ...values}] of Object.entries(auditedMemory.metrics)) {
+        memoryMetrics[metric] = values;
+        assert.deepEqual(values, memory.metrics[metric]);
+        assert.deepEqual(changes, memory.pairs.map(pair => pair[metric].changePercent));
     }
     output.push({dictionary: corpus.dictionary, candidate, control, memoryMetrics, memoryQualified: memory.everyObservationQualified, semanticFailures: data['memory/semantic-failures.json']});
 }
