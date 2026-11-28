@@ -1,0 +1,26 @@
+{
+    "schemaVersion": 1,
+    "requestNonce": "20261128_initial",
+    "repository": "ManabiIO/manabitan",
+    "sourceRunId": 46101887140,
+    "sourceRunAttempt": 1,
+    "sourceHeadSha": "a94a751b8068c00a44ce120c16fca6762afd3a03",
+    "alreadyExportedArtifactIds": [],
+    "expectedArtifactNames": [
+        "import-study-6b4c-typed-record-lengths-jmdict-AB-1",
+        "import-study-6b4c-typed-record-lengths-jmdict-BA-1",
+        "import-study-6b4c-dedup-lookahead-jmdict-AB-1",
+        "import-study-6b4c-dedup-lookahead-jmdict-BA-1",
+        "import-study-6b4c-typed-record-lengths-jitendex-AB-1",
+        "import-study-6b4c-typed-record-lengths-jitendex-BA-1",
+        "import-study-6b4c-dedup-lookahead-jitendex-AB-1",
+        "import-study-6b4c-dedup-lookahead-jitendex-BA-1",
+        "import-study-6b4c-typed-record-lengths-vndb-AB-1",
+        "import-study-6b4c-typed-record-lengths-vndb-BA-1",
+        "import-study-6b4c-dedup-lookahead-vndb-AB-1",
+        "import-study-6b4c-dedup-lookahead-vndb-BA-1"
+    ],
+    "purpose": "Read-only repackage of immutable completed original artifacts; no rerun, retiming, source change, gate change, or observation replacement",
+    "pendingPolicy": "Record cells whose artifact is unavailable when inventory runs. Do not wait or occupy a runner for pending source jobs. A later explicit request nonce may export newly completed IDs.",
+    "retentionPolicy": "Verify original published ZIP size and SHA-256; retain its full entry manifest and every qualification file, including raw failed memory receipts, semantic scans, packages, logs, and source/harness identities. Omit only reproducible qualification-sources worktrees."
+}

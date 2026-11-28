@@ -1,0 +1,80 @@
+name: Export frozen import study evidence 6b4c
+
+on:
+  push:
+    branches: ['perf/import-study-20261127-6b4c']
+    paths:
+      - '.github/workflows/import-study-evidence-export-6b4c.yml'
+      - 'dev/perf/export-import-study-evidence-6b4c.py'
+      - 'dev/perf/import-study-evidence-request-6b4c.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: import-study-evidence-export-6b4c-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    name: Inventory already finalized original artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.inventory.outputs.matrix }}
+      hasArtifacts: ${{ steps.inventory.outputs.hasArtifacts }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - id: inventory
+        name: Record available artifacts and pending cells without waiting
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python dev/perf/export-import-study-evidence-6b4c.py discover
+          --request dev/perf/import-study-evidence-request-6b4c.json
+          --output builds/perf/import-study-evidence-export-6b4c/inventory
+      - name: Retain source run, all artifact metadata, request, and pending status
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-inventory-6b4c-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/perf/import-study-evidence-export-6b4c/inventory
+          if-no-files-found: error
+          retention-days: 14
+
+  export:
+    needs: select
+    if: needs.select.outputs.hasArtifacts == 'true'
+    name: Export original artifact ${{ matrix.id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify original ZIP and retain every qualification file
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EXPORT_ARTIFACT_ID: ${{ matrix.id }}
+          EXPORT_ARTIFACT_NAME: ${{ matrix.name }}
+          EXPORT_ARTIFACT_SIZE: ${{ matrix.size }}
+          EXPORT_ARTIFACT_DIGEST: ${{ matrix.digest }}
+        run: >-
+          python dev/perf/export-import-study-evidence-6b4c.py export
+          --request dev/perf/import-study-evidence-request-6b4c.json
+          --output builds/perf/import-study-evidence-export-6b4c/artifact
+      - name: Retain original metadata, complete manifest, all evidence, and export failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-study-evidence-6b4c-${{ matrix.id }}
+          path: builds/perf/import-study-evidence-export-6b4c/artifact
+          if-no-files-found: error
+          retention-days: 14
