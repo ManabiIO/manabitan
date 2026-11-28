@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "dev/perf/jmdict-fifo-20261128-da6c4/component.mjs",
+    "blob": "603d80ee9ab75ba31725024634c1c9222aa0ddff",
+    "bytes": 32803,
+    "sha256": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407"
+  },
+  "plan": {
+    "path": "dev/perf/jmdict-fifo-20261128-da6c4/plan.json",
+    "blob": "08be9235d7b2b402e5548d36f44143f68ea40226",
+    "bytes": 9721,
+    "sha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f"
+  },
+  "tests": {
+    "path": "dev/perf/jmdict-fifo-20261128-da6c4/dispatcher-tests.mjs",
+    "blob": "e9c041e0112157333a9fa8ce56d723e6c09c0962",
+    "bytes": 11106,
+    "sha256": "9421c5e1501f8f6c4f6bac93d0b93420a95f1191af5d805921d8d9c89425038f"
+  },
+  "scope": "Deterministic V8 transport tests using exact5048 pool and hosted2 dispatcher/terminal acceptance source; fake workers and explicit ArrayBuffer stand-in for absent native SAB. No Node/corpus/timing execution.",
+  "results": [
+    {
+      "name": "FIFO keeps four physical slots, global queue order and original result order",
+      "passed": true
+    },
+    {
+      "name": "production metadata snapshot isolates both immediately poisoned caller columns",
+      "passed": true
+    },
+    {
+      "name": "held logical completions do not block FIFO draining or native source barriers",
+      "passed": true
+    },
+    {
+      "name": "A and C forward unchanged logical assignments including multiple queued jobs",
+      "passed": true
+    },
+    {
+      "name": "one worker failure rejects running and queued jobs and both public barriers",
+      "passed": true
+    },
+    {
+      "name": "initialization errors reject readiness before any dispatch and all workers terminate",
+      "passed": true
+    },
+    {
+      "name": "unexpected worker exit latches failure and rejects queued ownership",
+      "passed": true
+    },
+    {
+      "name": "idle failure after the final successful output rejects the exact terminal acceptance gate",
+      "passed": true
+    }
+  ],
+  "regressionProof": {
+    "oldComponentSha256": "f0043a72e5f72ac721d977d73070575c92aa90d512e374059e4f346b50f31bea",
+    "oldTerminalSource": "        pool.close();\n        await dispatcher.close();\n        workersTerminated = true;\n",
+    "expectedFailure": "Error: A terminal idle-worker failure must invalidate the cohort",
+    "observed": true
+  },
+  "successfulTimedRegion": {
+    "unchanged": true,
+    "priorSha256": "f41319c2b7aeeb6cb96afb8c6e4d65f3ab592ce4d202247f5b39c6d4a547614c",
+    "currentSha256": "f41319c2b7aeeb6cb96afb8c6e4d65f3ab592ce4d202247f5b39c6d4a547614c"
+  },
+  "dispatcherClass": {
+    "unchanged": true,
+    "sha256": "627fb7d6d41ecab6e76fa7a2b1e789a1defb0899c02e4b37f980b2e69ab6192d"
+  },
+  "limits": "V8 fake-worker/SAB-stand-in checks only. Hosted Node native-SAB tests, actual corpus codec/decode and environment-specific timing remain required."
+}

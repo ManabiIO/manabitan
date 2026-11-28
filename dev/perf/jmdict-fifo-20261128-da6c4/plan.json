@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "studyId": "jmdict-first-free-fifo-20261128-da6c4-hosted1",
+  "studyId": "jmdict-first-free-fifo-20261128-da6c4-hosted2",
   "scope": "Node scheduling component only. No parser, storage, browser, memory-qualification or whole-import speed claim.",
   "captureCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
   "runtimeCommit": "5048ba3e8a65fc41b9ae898c47b54d5731cd759e",
@@ -184,5 +184,22 @@
     },
     "controlDriftRule": "abs(median of paired C/A percentage differences) must be strictly less than half the smaller magnitude of the B/A and B/C paired-median percentage savings.",
     "failureOutcome": "If any rule fails, mark the hosted screen inconclusive or reject this candidate; do not use a favorable subset, pool local partial cohorts, or rerun unchanged timing."
-  }
+  },
+  "previousHostedCohort": {
+    "studyId": "jmdict-first-free-fifo-20261128-da6c4-hosted1",
+    "head": "587d684fa2cd356bb150fe48d167f7e36f309aa5",
+    "runId": 46111938461,
+    "jobId": 140877180682,
+    "componentSha256": "f0043a72e5f72ac721d977d73070575c92aa90d512e374059e4f346b50f31bea",
+    "planSha256": "aa7f3a27d4509f2226d361640d43a7f0ec3463cbe8331f5b51fcbc8629f5a20d",
+    "acquisitionCheck": {
+      "utc": "2026-11-28 05:35:30 UTC",
+      "status": "queued",
+      "conclusion": null
+    },
+    "supersededRegardlessOfOutcome": true,
+    "reason": "A latched idle-worker failure after the final successful ownership output could be omitted before acceptance. Hosted2 records terminal worker state and asserts no worker failure after all terminations are awaited, before decode/complete. This is outside timing; dispatch/order/codec/inputs are unchanged.",
+    "retention": "Preserve the original run and every eventual outcome separately; do not pool or promote its observations."
+  },
+  "terminalWorkerProof": "After all four worker terminations settle, record workerCount/allTerminated/failure and require failure===null before decoder verification or complete=true. A dedicated deterministic test injects an idle exit after the final successful output and executes this exact terminal block."
 }

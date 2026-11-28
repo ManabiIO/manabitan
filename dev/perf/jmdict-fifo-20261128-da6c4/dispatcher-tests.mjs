@@ -11,6 +11,10 @@ const start = componentSource.indexOf('class LogicalWorker');
 const end = componentSource.indexOf('async function main()');
 assert(start >= 0 && end > start);
 const dispatcherSource = componentSource.slice(start, end);
+const terminalStart = componentSource.indexOf('        pool.close();\n        await dispatcher.close();\n        workersTerminated = true;');
+const terminalEnd = componentSource.indexOf("        report.startupMemory.push({phase: 'all-four-workers-terminated'", terminalStart);
+assert(terminalStart >= 0 && terminalEnd > terminalStart);
+const terminalSource = componentSource.slice(terminalStart, terminalEnd);
 const {TermContentCompressionPool} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/zstd-term-content.js')));
 const results = await (async () => {
 
@@ -190,6 +194,33 @@ await test('unexpected worker exit latches failure and rejects queued ownership'
     assert.equal(pool._pending.size, 0);
     assert.match(String(dispatcher.failure), /exited unexpectedly: 7/);
     await cleanup(dispatcher, pool);
+});
+
+
+await test('idle failure after the final successful output rejects the exact terminal acceptance gate', async () => {
+    const {dispatcher, pool} = await setup('B-first-free-fifo');
+    const work = operation(pool, 1);
+    consume(dispatcher, 1); complete(dispatcher, 1);
+    assert.deepEqual((await work.completion).chunks.map((chunk) => chunk[0]), [1]);
+    await work.sourceConsumed;
+    assert.equal(pool._pending.size, 0);
+    dispatcher.physical[0].worker.emit('exit', 7);
+    const report = {}, witness = {};
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    const finish = new AsyncFunction(
+        'dispatcher', 'pool', 'report', 'witness', 'assert',
+        'let workersTerminated = false; try {\n' + terminalSource +
+        '\n} finally { witness.workersTerminated = workersTerminated; }',
+    );
+    let rejection = null;
+    try { await finish(dispatcher, pool, report, witness, assert); }
+    catch (error) { rejection = error; }
+    assert(rejection, 'A terminal idle-worker failure must invalidate the cohort');
+    assert.equal(witness.workersTerminated, true, 'The ownership flag is set before the acceptance assertion');
+    assert(dispatcher.physical.every(({worker}) => worker.terminated));
+    assert.equal(report.compressionWorkersFinalState.workerCount, 4);
+    assert.equal(report.compressionWorkersFinalState.allTerminated, true);
+    assert.match(report.compressionWorkersFinalState.failure.message, /exited unexpectedly: 7/);
 });
 
 return testResults;

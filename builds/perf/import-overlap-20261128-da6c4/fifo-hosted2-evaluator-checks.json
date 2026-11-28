@@ -1,0 +1,1262 @@
+{
+  "schemaVersion": 1,
+  "scope": "Pure synthetic evaluator checks in functions V8; no compression, corpus, Node timing or candidate performance data.",
+  "evaluator": {
+    "blob": "30618c45d3bd4fce17b9a9ecba27ca88a61cfa71",
+    "bytes": 9382,
+    "sha256": "ad7b8d250d212d7f889209d1bf3ca678510ffabe5286a1883fb79f15bd73a053"
+  },
+  "registeredPlan": {
+    "path": "dev/perf/jmdict-fifo-20261128-da6c4/plan.json",
+    "blob": "08be9235d7b2b402e5548d36f44143f68ea40226",
+    "bytes": 9721,
+    "sha256": "164b283162ba8e73fada533ea8733279582bbb0e5b17bbc56985773479c6951f"
+  },
+  "complete": true,
+  "passed": 8,
+  "cases": [
+    {
+      "name": "clear20ms20percent improvement advances",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "advance": true,
+        "pairedMedianSavingMs": 20,
+        "millisecondUpperEndpoint": -20
+      },
+      "result": {
+        "advance": true,
+        "outcome": "advance-to-separate-production-and-browser-qualification",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 20,
+            "pairedMedianSavingPercent": 19.999999999999996,
+            "fasterPairs": 12,
+            "candidateTotalMs": 960,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -20,
+              -20
+            ],
+            "pairedMedianDifferencePercent95": [
+              -19.999999999999996,
+              -19.999999999999996
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 20,
+            "pairedMedianSavingPercent": 19.999999999999996,
+            "fasterPairs": 12,
+            "candidateTotalMs": 960,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -20,
+              -20
+            ],
+            "pairedMedianDifferencePercent95": [
+              -19.999999999999996,
+              -19.999999999999996
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "pairedMedianPercent": 0,
+          "maximumAbsolutePercentExclusive": 9.999999999999998,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "sub5ms5percent improvement rejected",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 96,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "advance": false,
+        "medianSavingMsGate": false,
+        "medianSavingPercentGate": false
+      },
+      "result": {
+        "advance": false,
+        "outcome": "inconclusive-or-reject",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 4,
+            "pairedMedianSavingPercent": 4.0000000000000036,
+            "fasterPairs": 12,
+            "candidateTotalMs": 1152,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -4,
+              -4
+            ],
+            "pairedMedianDifferencePercent95": [
+              -4.0000000000000036,
+              -4.0000000000000036
+            ],
+            "checks": {
+              "medianSavingMs": false,
+              "medianSavingPercent": false,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": false
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 4,
+            "pairedMedianSavingPercent": 4.0000000000000036,
+            "fasterPairs": 12,
+            "candidateTotalMs": 1152,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -4,
+              -4
+            ],
+            "pairedMedianDifferencePercent95": [
+              -4.0000000000000036,
+              -4.0000000000000036
+            ],
+            "checks": {
+              "medianSavingMs": false,
+              "medianSavingPercent": false,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": false
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "pairedMedianPercent": 0,
+          "maximumAbsolutePercentExclusive": 2.0000000000000018,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "large control drift independently rejects",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 75,
+          "C": 90
+        }
+      ],
+      "expectation": {
+        "advance": false,
+        "bothPerformanceComparisonsPass": true,
+        "controlDriftPass": false
+      },
+      "result": {
+        "advance": false,
+        "outcome": "inconclusive-or-reject",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 25,
+            "pairedMedianSavingPercent": 25,
+            "fasterPairs": 12,
+            "candidateTotalMs": 900,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -25,
+              -25
+            ],
+            "pairedMedianDifferencePercent95": [
+              -25,
+              -25
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 15,
+            "pairedMedianSavingPercent": 16.666666666666664,
+            "fasterPairs": 12,
+            "candidateTotalMs": 900,
+            "controlTotalMs": 1080,
+            "pairedMedianDifferenceMs95": [
+              -15,
+              -15
+            ],
+            "pairedMedianDifferencePercent95": [
+              -16.666666666666664,
+              -16.666666666666664
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998,
+            -9.999999999999998
+          ],
+          "pairedMedianPercent": -9.999999999999998,
+          "maximumAbsolutePercentExclusive": 8.333333333333332,
+          "pass": false
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "retained slowtail fails equalwork despite favorable median andCI",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 500,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "advance": false,
+        "millisecondIntervalGate": true,
+        "equalWorkGate": false
+      },
+      "result": {
+        "advance": false,
+        "outcome": "inconclusive-or-reject",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 10,
+            "pairedMedianSavingPercent": 9.999999999999998,
+            "fasterPairs": 11,
+            "candidateTotalMs": 1490,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -10,
+              -10
+            ],
+            "pairedMedianDifferencePercent95": [
+              -9.999999999999998,
+              -9.999999999999998
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": false,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": false
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 10,
+            "pairedMedianSavingPercent": 9.999999999999998,
+            "fasterPairs": 11,
+            "candidateTotalMs": 1490,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -10,
+              -10
+            ],
+            "pairedMedianDifferencePercent95": [
+              -9.999999999999998,
+              -9.999999999999998
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": false,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": false
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "pairedMedianPercent": 0,
+          "maximumAbsolutePercentExclusive": 4.999999999999999,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "nine fasterpairs still fail uncertain upperinterval",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 90,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "advance": false,
+        "fasterPairsGate": true,
+        "millisecondIntervalGate": false
+      },
+      "result": {
+        "advance": false,
+        "outcome": "inconclusive-or-reject",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 10,
+            "pairedMedianSavingPercent": 9.999999999999998,
+            "fasterPairs": 9,
+            "candidateTotalMs": 1170,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -10,
+              5
+            ],
+            "pairedMedianDifferencePercent95": [
+              -9.999999999999998,
+              4.999999999999999
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": false,
+              "percentageInterval": false
+            },
+            "pass": false
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 10,
+            "pairedMedianSavingPercent": 9.999999999999998,
+            "fasterPairs": 9,
+            "candidateTotalMs": 1170,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -10,
+              5
+            ],
+            "pairedMedianDifferencePercent95": [
+              -9.999999999999998,
+              4.999999999999999
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": false,
+              "percentageInterval": false
+            },
+            "pass": false
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "pairedMedianPercent": 0,
+          "maximumAbsolutePercentExclusive": 4.999999999999999,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "fixed RNG and sharedindex bootstrap deterministic",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 80,
+          "C": 99
+        }
+      ],
+      "expectation": {
+        "repetitions": 2,
+        "byteIdenticalJSONResults": true
+      },
+      "result": {
+        "advance": true,
+        "outcome": "advance-to-separate-production-and-browser-qualification",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": 20,
+            "pairedMedianSavingPercent": 19.999999999999996,
+            "fasterPairs": 12,
+            "candidateTotalMs": 960,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              -20,
+              -20
+            ],
+            "pairedMedianDifferencePercent95": [
+              -19.999999999999996,
+              -19.999999999999996
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          },
+          "B/C": {
+            "pairedMedianSavingMs": 19,
+            "pairedMedianSavingPercent": 19.191919191919194,
+            "fasterPairs": 12,
+            "candidateTotalMs": 960,
+            "controlTotalMs": 1188,
+            "pairedMedianDifferenceMs95": [
+              -19,
+              -19
+            ],
+            "pairedMedianDifferencePercent95": [
+              -19.191919191919194,
+              -19.191919191919194
+            ],
+            "checks": {
+              "medianSavingMs": true,
+              "medianSavingPercent": true,
+              "fasterPairs": true,
+              "equalWork": true,
+              "millisecondInterval": true,
+              "percentageInterval": true
+            },
+            "pass": true
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009,
+            -1.0000000000000009
+          ],
+          "pairedMedianPercent": -1.0000000000000009,
+          "maximumAbsolutePercentExclusive": 9.595959595959597,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        },
+        "byteIdenticalJSONResults": true
+      },
+      "passed": true
+    },
+    {
+      "name": "partial cohort rejected before analysis",
+      "input": [
+        {
+          "round": 1,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 80,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "throws": true
+      },
+      "result": {
+        "error": "Error: Exactly twelve finite positive paired rows are required"
+      },
+      "passed": true
+    },
+    {
+      "name": "regressing candidate has positive magnitude driftlimit but still cannotadvance",
+      "input": [
+        {
+          "round": 0,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 1,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 2,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 3,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 4,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 5,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 6,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 7,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 8,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 9,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 10,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        },
+        {
+          "round": 11,
+          "A": 100,
+          "B": 120,
+          "C": 100
+        }
+      ],
+      "expectation": {
+        "advance": false,
+        "controlDriftPass": true,
+        "controlMagnitudeLimitPositive": true
+      },
+      "result": {
+        "advance": false,
+        "outcome": "inconclusive-or-reject",
+        "comparisons": {
+          "B/A": {
+            "pairedMedianSavingMs": -20,
+            "pairedMedianSavingPercent": -19.999999999999996,
+            "fasterPairs": 0,
+            "candidateTotalMs": 1440,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              20,
+              20
+            ],
+            "pairedMedianDifferencePercent95": [
+              19.999999999999996,
+              19.999999999999996
+            ],
+            "checks": {
+              "medianSavingMs": false,
+              "medianSavingPercent": false,
+              "fasterPairs": false,
+              "equalWork": false,
+              "millisecondInterval": false,
+              "percentageInterval": false
+            },
+            "pass": false
+          },
+          "B/C": {
+            "pairedMedianSavingMs": -20,
+            "pairedMedianSavingPercent": -19.999999999999996,
+            "fasterPairs": 0,
+            "candidateTotalMs": 1440,
+            "controlTotalMs": 1200,
+            "pairedMedianDifferenceMs95": [
+              20,
+              20
+            ],
+            "pairedMedianDifferencePercent95": [
+              19.999999999999996,
+              19.999999999999996
+            ],
+            "checks": {
+              "medianSavingMs": false,
+              "medianSavingPercent": false,
+              "fasterPairs": false,
+              "equalWork": false,
+              "millisecondInterval": false,
+              "percentageInterval": false
+            },
+            "pass": false
+          }
+        },
+        "control": {
+          "differencesPercent": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "pairedMedianPercent": 0,
+          "maximumAbsolutePercentExclusive": 9.999999999999998,
+          "pass": true
+        },
+        "bootstrap": {
+          "samples": 20000,
+          "seedHex": "0x000da6c4",
+          "finalState": 1110904116,
+          "resamplingUnit": "Twelve paired rounds with one shared index stream for all four metrics",
+          "interval": "95% percentile, type7"
+        }
+      },
+      "passed": true
+    }
+  ],
+  "priorEvaluator": {
+    "blob": "f5f421475b67db94508c4ab3c34bc09a5cb864fe",
+    "sha256": "b806927b326e56d30910ac703f538d097aa926ac0af0679742ddb50d018ce5d7"
+  },
+  "correction": "Hosted2 updates only the component-source binding and requires the explicit terminal worker receipt. The statistical evaluateFifoRows function is byte-identical to the magnitude-correct evaluator; all eight synthetic outputs were rerun and remain byte-identical.",
+  "componentSource": {
+    "path": "dev/perf/jmdict-fifo-20261128-da6c4/component.mjs",
+    "blob": "603d80ee9ab75ba31725024634c1c9222aa0ddff",
+    "bytes": 32803,
+    "sha256": "d807572f19125d79121be2bb4d355e5fe108cc6fbc2048b533d9ab8445ef1407"
+  },
+  "terminalProofGuardCheck": {
+    "synthetic": true,
+    "inputTerminalState": {
+      "workerCount": 4,
+      "allTerminated": true,
+      "failure": {
+        "message": "idle failure"
+      }
+    },
+    "expectedError": "Error: Terminal worker proof differs",
+    "actualError": "Error: Terminal worker proof differs",
+    "passed": true
+  }
+}

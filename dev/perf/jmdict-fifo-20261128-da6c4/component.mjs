@@ -521,6 +521,14 @@ async function main() {
         pool.close();
         await dispatcher.close();
         workersTerminated = true;
+        report.compressionWorkersFinalState = {
+            workerCount: dispatcher.physical.length, allTerminated: true,
+            failure: dispatcher.failure === null ? null : {
+                name: dispatcher.failure?.name ?? typeof dispatcher.failure,
+                message: String(dispatcher.failure),
+            },
+        };
+        assert.equal(dispatcher.failure, null, 'Compression worker failed before final acceptance');
         report.startupMemory.push({phase: 'all-four-workers-terminated', usage: process.memoryUsage()});
         for (const data of groupData) {
             assert.equal(sha(data.source), data.sourceSha256);
