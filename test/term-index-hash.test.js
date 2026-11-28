@@ -189,17 +189,91 @@ test('preserves complete index envelope bytes and rehashes caller mutations at a
     }
     const store = new TermRecordOpfsStore()
     const expected = store._createLookupIndexChunk(1, count, 0, index, fields, 1)
+    expect(store._createLookupIndexChunk(1, count, 0, index, fields, 1, true)).toEqual(expected)
+    expect(Reflect.get(store, '_lookupIndexWriteMetrics').nativeHashCallCount).toBe(0)
     respond()
     await api.initializeTermIndexHash()
-    const actual = store._createLookupIndexChunk(1, count, 0, index, fields, 1)
-    expect(actual).toEqual(expected)
     const metrics = Reflect.get(store, '_lookupIndexWriteMetrics')
+    expect(store._createLookupIndexChunk(1, count, 0, index, fields, 1)).toEqual(expected)
+    expect(metrics.nativeHashCallCount).toBe(0)
+    const actual = store._createLookupIndexChunk(1, count, 0, index, fields, 1, true)
+    expect(actual).toEqual(expected)
     expect(metrics.nativeHashCallCount).toBe(3)
     expect(metrics.nativeHashBytes).toBe(index.byteLength - 16 + fields.byteLength)
     words[2] = 1234
-    const changed = store._createLookupIndexChunk(1, count, 0, index, fields, 1)
+    const changed = store._createLookupIndexChunk(1, count, 0, index, fields, 1, true)
     expect(new DataView(changed.buffer).getUint32(32, true)).toBe(hashTermKeyBytes(fields))
     expect(changed).not.toEqual(expected)
+})
+
+test('opts in only during active import appends and keeps reader and repair hashing in JavaScript', async () => {
+    respond()
+    await api.initializeTermIndexHash()
+    const nativeHash = vi.spyOn(api, 'hashTermIndexBytes')
+    const {TermRecordOpfsStore} = await import('../ext/js/dictionary/term-record-opfs-store.js')
+    const {encodePersistedTermLookupIndex} = await import('../ext/js/dictionary/term-lookup-index.js')
+    const count = 10000
+    const encoder = new TextEncoder()
+    const rows = Array.from({length: count}, (_, i) => ({expressionBytes: encoder.encode(`term-${i}`), readingBytes: null, sequence: i}))
+    const index = encodePersistedTermLookupIndex(rows)
+    const fields = new Uint8Array(count * 12)
+    const words = new Uint32Array(fields.buffer)
+    for (let i = 0; i < count; ++i) {
+        words[i * 3] = i * 12
+        words[i * 3 + 1] = 9
+        words[i * 3 + 2] = i % 11
+    }
+    const writer = new TermRecordOpfsStore()
+    const handle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+        createWritable: async () => ({seek: async () => {}, write: async () => {}, close: async () => {}}),
+    }))
+    const state = writer._createShardState('test.mbtr', handle, 0, 'raw')
+    await writer.beginImportSession()
+    await writer._appendEncodedChunk(state, 1, count, 'raw', 0, index, fields, 1)
+    expect(nativeHash).toHaveBeenCalledTimes(3)
+    expect(Reflect.get(writer, '_lookupIndexWriteMetrics').nativeHashCallCount).toBe(3)
+    const chunk = state.pendingLookupIndexChunks[0]
+    const descriptor = state.pendingWriteChunks[0]
+    await writer.endImportSession()
+    nativeHash.mockClear()
+
+    const ordinaryState = writer._createShardState('ordinary.mbtr', handle, 0, 'raw')
+    await writer._appendEncodedChunk(ordinaryState, 1, count, 'raw', 0, index, fields, 1)
+    expect(nativeHash).not.toHaveBeenCalled()
+    expect(ordinaryState.pendingLookupIndexChunks[0]).toEqual(chunk)
+
+    const header = new Uint8Array(40)
+    header.set(encoder.encode('MBTIDX11'))
+    const view = new DataView(header.buffer)
+    view.setUint32(8, descriptor.byteLength, true)
+    view.setUint32(16, 1, true)
+    view.setUint32(20, count, true)
+    header.set(state.generationId, 24)
+    const stored = new File([new Uint8Array(header), new Uint8Array(chunk)], 'test.mbtr.mbti')
+    const writable = {
+        truncate: vi.fn(async () => {}), seek: vi.fn(async () => {}),
+        write: vi.fn(async () => {}), close: vi.fn(async () => {}),
+        abort: vi.fn(async () => {}),
+    }
+    const indexHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+        getFile: async () => stored,
+        createWritable: async () => writable,
+    }))
+    const directory = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+        getFileHandle: async () => indexHandle,
+    }))
+    state.fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+        getFile: async () => new File([new Uint8Array(descriptor)], 'test.mbtr'),
+    }))
+    const reader = new TermRecordOpfsStore()
+    Reflect.get(reader, '_shardStateByFileName').set(state.fileName, state)
+    const chunks = await reader._readPersistentDictionaryIndex(directory, 'Test', [state], () => true)
+    expect(chunks).toHaveLength(1)
+    expect(nativeHash).not.toHaveBeenCalled()
+    Reflect.set(reader, '_recordsDirectoryHandle', directory)
+    await expect(reader._rebuildLookupIndexForShard(state)).resolves.toMatchObject({recordCount: count})
+    expect(writable.write).toHaveBeenNthCalledWith(2, chunk)
+    expect(nativeHash).not.toHaveBeenCalled()
 })
 
 test('bounds the private native workspace and rejects incomplete or invalid streaming requests', async () => {

@@ -18,7 +18,7 @@
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 // eslint-disable-next-line @stylistic/semi
-import {hashTermIndexBytes as hashLookupIndexBytes, initializeTermIndexHash} from './term-index-hash.js'
+import {hashTermIndexBytes, initializeTermIndexHash} from './term-index-hash.js'
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -585,6 +585,15 @@ function getContentOffsetDelta(offset, base) {
         throw new RangeError(`Term content offset ${offset} is outside the encodable chunk range for base ${base}`);
     }
     return delta;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+function hashLookupIndexBytes(bytes) {
+    // eslint-disable-next-line @stylistic/semi
+    return hashTermLookupKeyBytes(bytes)
 }
 
 /**
@@ -6107,6 +6116,7 @@ view.chunks :
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                this._importSessionActive,
             );
             if (
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
@@ -6239,6 +6249,7 @@ view.chunks :
      * @param {Uint8Array} payload
      * @param {Uint8Array|null} recordFields
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
+     * @param {boolean} [useNativeHash=false] Internal opt-in for active import appends only.
      * @returns {Uint8Array}
      * @throws {Error} If the authoritative fields do not match the declared record count.
      */
@@ -6249,6 +6260,7 @@ view.chunks :
         payload,
         recordFields,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+        useNativeHash = false,
     ) {
         if (!(recordFields instanceof Uint8Array)) {
             throw new Error('Invalid authoritative term-record fields');
@@ -6272,9 +6284,10 @@ view.chunks :
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
         /* eslint-disable @stylistic/semi */
-        view.setUint32(24, hashLookupIndexBytes(base, this._lookupIndexWriteMetrics), true)
-        view.setUint32(28, hashLookupIndexBytes(derived, this._lookupIndexWriteMetrics), true)
-        view.setUint32(32, hashLookupIndexBytes(recordFields, this._lookupIndexWriteMetrics), true)
+        const hash = useNativeHash ? hashTermIndexBytes : hashLookupIndexBytes
+        view.setUint32(24, hash(base, this._lookupIndexWriteMetrics), true)
+        view.setUint32(28, hash(derived, this._lookupIndexWriteMetrics), true)
+        view.setUint32(32, hash(recordFields, this._lookupIndexWriteMetrics), true)
         /* eslint-enable @stylistic/semi */
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
