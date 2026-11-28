@@ -3352,7 +3352,10 @@ describe('TermRecordOpfsStore', () => {
         expect(fallback.prepared.bytes.byteLength).toBeGreaterThan(0);
         const totalBytes = fixture.expected.byteLength + expectedFallback.byteLength;
         expect(state.pendingLookupIndexBytes).toBe(totalBytes);
-        const route = Reflect.get(store, '_exactLookupRoute').shards.get(state);
+        const exactRoute = Reflect.get(store, '_exactLookupRoute');
+        assert.ok(exactRoute !== null);
+        const route = exactRoute.shards.get(state);
+        assert.ok(route);
         expect(route.chunks).toHaveLength(2);
         expect(route.chunks[0]).toMatchObject({start: 40, end: 40 + fixture.expected.byteLength});
         expect(route.chunks[0].header).toEqual(fixture.expected.slice(0, 40));
