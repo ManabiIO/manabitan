@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "scope": "Independent saved-receipt/source-binding/statistics audit only. No imports, measurements or reruns.",
+  "source": {
+    "planSha256": "992a8bce45aa320911688d33a583ec11a8f887cd3ae5b4082b395de2024f3aae",
+    "observationsSha256": "682ddeda57e54e9b0d7377ae1c597e17dc6483312069d76e2b8d23703c57a0ff",
+    "analysisSha256": "3002fe71c20c545e2ae2b292feddf35f5a1a1d67d74a6c6e09f75c20b38de4cb",
+    "auditorSha256": "16035056db986bf5405f8144a9805acb4a19d32b791a94e06e9ca17481a06230"
+  },
+  "all36RawReceiptsChecked": true,
+  "rawFiles": [
+    {
+      "path": "round-00-0-A.json",
+      "sha256": "6159f1d78349a5f622381c33fb32ea3f8dc4a3e0e4571c447e3e05ccbb682e67"
+    },
+    {
+      "path": "round-00-1-B.json",
+      "sha256": "0a9c9549d69edea0fa6ee92b1b7e0417ad6fe043775e28e223dae58b6fa5c577"
+    },
+    {
+      "path": "round-00-2-C.json",
+      "sha256": "9f3629e51a1e77b56a8b1227e5e64f7e7e6ce4a33609b9ac2a61e9d486adf1a4"
+    },
+    {
+      "path": "round-01-0-B.json",
+      "sha256": "308773dea8ed7efd8298da14c367cb1b38e9624d91a2a2b4c3fa42f64c63a6ad"
+    },
+    {
+      "path": "round-01-1-C.json",
+      "sha256": "73f6c3a9304762d317ddcd8872f58bf580b33f96326cc2bc614b4a16aee4c939"
+    },
+    {
+      "path": "round-01-2-A.json",
+      "sha256": "336a0b7f9fe227799512fc0d5efcffdd2c360f2a816afa4ccb4aca8bb5d72db9"
+    },
+    {
+      "path": "round-02-0-C.json",
+      "sha256": "5dddb87bc21b258162d429b9fcff43bb84ff62fc3c6df0904dcff4e363d6fe2c"
+    },
+    {
+      "path": "round-02-1-A.json",
+      "sha256": "56792c64940a1ed294af237d9cdb0f25a8977a6efd63845e33f97709ae064e76"
+    },
+    {
+      "path": "round-02-2-B.json",
+      "sha256": "e69d2967f0aa93ae5b71bc16ac71803156e19acf573ed40ccb619c4aa75d50c6"
+    },
+    {
+      "path": "round-03-0-A.json",
+      "sha256": "bbc38a3d23dc7fc640013d0b3f8491ff38cf931a8370de2dc7545c58a8cbe90e"
+    },
+    {
+      "path": "round-03-1-C.json",
+      "sha256": "120e8bf306533848fe2c40396fc147dd3a7f846e5189b4443ddeb17e167a6df4"
+    },
+    {
+      "path": "round-03-2-B.json",
+      "sha256": "8d4ac890ac1611ac073eeb2e5f82cddb31347754aa5a4afef63719409b4ff140"
+    },
+    {
+      "path": "round-04-0-C.json",
+      "sha256": "76997cc0628e4783756a3fe20e7b539e4d84059cb78ea699d8f286ddb2890acb"
+    },
+    {
+      "path": "round-04-1-B.json",
+      "sha256": "766ca90c996e7a6417878820c44d3c58dac736f3836c5e51479d494af2455c95"
+    },
+    {
+      "path": "round-04-2-A.json",
+      "sha256": "388debc4423b938639f22146b41612e7516ce765a4cb214e06b03738ae4ae433"
+    },
+    {
+      "path": "round-05-0-B.json",
+      "sha256": "afdc52d842e63d503a52dc383e8cc9905d34e8c767f9916ffc287ea9cff05b98"
+    },
+    {
+      "path": "round-05-1-A.json",
+      "sha256": "6b6b7b920d654b46d5f976f7e54d8185838faa120d4cdafe8cc9124b8ce72546"
+    },
+    {
+      "path": "round-05-2-C.json",
+      "sha256": "390e43274f4e61ebbb089d72c260f8c29c7c00977a46e0bacd2a851b12acbf5f"
+    },
+    {
+      "path": "round-06-0-C.json",
+      "sha256": "a2bc235d90f0c47b0da0233ad15f89a42b009fadf92e09c71f0f2224ae4af983"
+    },
+    {
+      "path": "round-06-1-B.json",
+      "sha256": "b477c2ff2c4144e87cc583c0b9ca809baf6069cfafe0547807487765a4baf145"
+    },
+    {
+      "path": "round-06-2-A.json",
+      "sha256": "abda9cf6b5f0217a8d165fcb7ac68ff55441a786ff82f0812d59889be74061cd"
+    },
+    {
+      "path": "round-07-0-A.json",
+      "sha256": "a4c4bb6a24a967a434e519f16ea2390207291bbf2e19e350f6774e9728210d3e"
+    },
+    {
+      "path": "round-07-1-C.json",
+      "sha256": "8eec4e0befd2f65c9a49ff6743a5d8cd2a4d61f6768a686acebbb10bcc9443c4"
+    },
+    {
+      "path": "round-07-2-B.json",
+      "sha256": "8dbfff798564c97797cd7faf59c43ae89d041e5f6e83577e13fc716b8c875a3f"
+    },
+    {
+      "path": "round-08-0-B.json",
+      "sha256": "84b84b04637e7086cdac7a8c1a9137ddfb0ebef31f02f2079d578fef807499a9"
+    },
+    {
+      "path": "round-08-1-A.json",
+      "sha256": "ed3a002704fcb2fd1eeb4fbac1bcfc72b36ba2a3ec0ab52feb01acb2c5c7e904"
+    },
+    {
+      "path": "round-08-2-C.json",
+      "sha256": "ca423fbe4f2c7da5ef4ec391b3950e06575862b0c94fa8692775743f7705c331"
+    },
+    {
+      "path": "round-09-0-C.json",
+      "sha256": "a4a59965866ae6b30ef3101b954f4a676be3f785976729d86ab0663817b376f8"
+    },
+    {
+      "path": "round-09-1-A.json",
+      "sha256": "63a97fde34d093df0891da1ca49e1ce19e44c1689e38079486a1902b37594f6b"
+    },
+    {
+      "path": "round-09-2-B.json",
+      "sha256": "5ea7b983ccd0a4893da53d7eb45f082755bc55076f6d1d5f49c69f5b6451b50a"
+    },
+    {
+      "path": "round-10-0-B.json",
+      "sha256": "fc6ad2acb5210c6d282fb89e855d6eb311cd82237b2b224810981910fda9e416"
+    },
+    {
+      "path": "round-10-1-C.json",
+      "sha256": "5a8d0593a88d581d2a802bba08df91e34370091516a39d9dd9afc5a236921fb9"
+    },
+    {
+      "path": "round-10-2-A.json",
+      "sha256": "32f8dff33e5fe5aecf601a46dcd5644e71c6d8dec22c9cc759c257b569717a44"
+    },
+    {
+      "path": "round-11-0-A.json",
+      "sha256": "9f997c430b003395958d9aeca8ee30b933f2496bb5258bee2e64c73bfcbce2d7"
+    },
+    {
+      "path": "round-11-1-B.json",
+      "sha256": "e175af097e98508d978256ff8aa4bb4a4def0e82697008952fdfa4efbde85419"
+    },
+    {
+      "path": "round-11-2-C.json",
+      "sha256": "0bc92b0a98af3b6df38490451665eb2b19666ce1a56e3e93076be48b9bf9bb2f"
+    }
+  ],
+  "pairs": {
+    "A": {
+      "deltaMs": [
+        42.86654500000054,
+        55.619711999999936,
+        103.88168099999916,
+        -24.477594000000636,
+        14.749997999999778,
+        -43.91099700000041,
+        -49.504994000000124,
+        -60.9226790000007,
+        12.35361300000045,
+        34.8318090000007,
+        -45.89202,
+        -76.02759500000002
+      ],
+      "percent": [
+        15.095620911343799,
+        15.740538346518672,
+        30.796800510860223,
+        -7.401528495716503,
+        5.267016094964161,
+        -13.608043821827554,
+        -13.907644280224352,
+        -16.402713461367423,
+        3.8760144795044305,
+        11.451746434771447,
+        -13.499936574565153,
+        -20.482013958550173
+      ]
+    },
+    "C": {
+      "deltaMs": [
+        -153.5768039999998,
+        -84.21425499999964,
+        93.67698199999904,
+        7.440053999999236,
+        -10.216713000000027,
+        -37.77596100000005,
+        -56.474021000000675,
+        -19.07156999999961,
+        -33.3711780000001,
+        29.671753000001218,
+        10.119667999999592,
+        -47.46411800000055
+      ],
+      "percent": [
+        -31.967854631200964,
+        -17.075512750107038,
+        26.956014504736437,
+        2.4900417460498536,
+        -3.349616944133471,
+        -11.933681830730801,
+        -15.56082633936361,
+        -5.786853392698688,
+        -9.156730154179504,
+        9.592525322560984,
+        3.5641318487751983,
+        -13.852938777027546
+      ]
+    }
+  },
+  "metrics": {
+    "A": {
+      "pairedMedianDeltaMs": -6.061990500000093,
+      "pairedMedianPercent": -1.7627570081060364,
+      "fasterPairs": 6,
+      "nativeEqualWorkPercent": -0.9178203215764791,
+      "fullGroupEqualWorkPercent": -4.974559191366856,
+      "fullGroupPairedMedianDeltaMs": -54.15724550000016,
+      "fullGroupPairedMedianPercent": -9.07371384847937,
+      "bootstrap95": {
+        "deltaMs": [
+          -47.69850700000006,
+          38.84917700000062
+        ],
+        "percent": [
+          -13.757844051025952,
+          13.273683673057622
+        ]
+      }
+    },
+    "C": {
+      "pairedMedianDeltaMs": -26.221373999999855,
+      "pairedMedianPercent": -7.4717917734390955,
+      "fasterPairs": 8,
+      "nativeEqualWorkPercent": -7.114688277005965,
+      "fullGroupEqualWorkPercent": -9.373316213604376,
+      "fullGroupPairedMedianDeltaMs": -40.38671149999948,
+      "fullGroupPairedMedianPercent": -6.718022662655931,
+      "bootstrap95": {
+        "deltaMs": [
+          -51.969069500000614,
+          8.779860999999414
+        ],
+        "percent": [
+          -14.706882558195577,
+          3.027086797412526
+        ]
+      }
+    }
+  },
+  "control": {
+    "pairedMedianPercent": 1.827161563313373,
+    "equalWorkPercent": 6.6715262515455676,
+    "strictAbsoluteLimitPercent": 0.8813785040530182,
+    "fullGroupPairedMedianPercent": -1.7546942830186207,
+    "fullGroupEqualWorkPercent": 4.853710671577982
+  },
+  "checks": {
+    "A.nativeSavingAtLeast3Percent": false,
+    "A.atLeast9FasterPairs": false,
+    "A.nativeEqualWorkLower": true,
+    "A.bothNativeIntervalUpperBoundsNegative": false,
+    "A.fullGroupEqualWorkAtMost1PercentRegression": true,
+    "C.nativeSavingAtLeast3Percent": true,
+    "C.atLeast9FasterPairs": false,
+    "C.nativeEqualWorkLower": true,
+    "C.bothNativeIntervalUpperBoundsNegative": false,
+    "C.fullGroupEqualWorkAtMost1PercentRegression": true,
+    "control.nativePairedMedianBelowHalfSmallerSaving": false,
+    "control.nativeEqualWorkBelowHalfSmallerSaving": false
+  },
+  "advance": false,
+  "discrepancies": [],
+  "bootstrap": {
+    "resamples": 20000,
+    "seed": 894660,
+    "finalState": 1110904116,
+    "generator": "xorshift32",
+    "quantile": "type7",
+    "sharedWholeRoundIndexes": true
+  },
+  "interpretation": "The declared native gain and control gates fail. Larger apparent B/C improvement does not rescue B/A six-of-twelve wins, the confidence intervals crossing zero, or control drift. Complete-group wall diagnostics are not a substitute endpoint. No browser promotion or unchanged rerun."
+}

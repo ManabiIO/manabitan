@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "runId": 46132124178,
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidate": "c98110712296be803fcb30b9295bb11c7d0b44bc",
+  "closedProductPr": 977,
+  "scope": "Independent full-artifact audit of two completed Vndb owned-overlap hosts, plus separate baseline-A diagnostic phase extraction. No observations excluded, pooled or reacquired.",
+  "decision": "NO_REPLICATED_OVERLAP_GAIN; AB timing/control nonregression passes but memory sampling coverage fails; BA fails all timing nonregression gates and the absolute median control gate. No exclusions or pooling.",
+  "statistics": {
+    "bootstrapSeed": 897,
+    "resamples": 10000,
+    "sampleUnit": "complete pair",
+    "interval": "descriptive sorted percentile indices249/9749; no population-general inference"
+  },
+  "gates": {
+    "medianChangePercentMax": 1,
+    "equalWorkChangePercentMax": 1,
+    "upper95PercentMax": 3,
+    "controlGate": "Absolute median paired control change and absolute equal-work control change must each be at most1% on each host; use unrounded values."
+  },
+  "findings": [
+    {
+      "order": "AB",
+      "jobId": 140941694505,
+      "artifactId": 15259377008,
+      "artifactBytes": 35741393,
+      "artifactSha256": "667053b284ddd24e82ec00d3ac1b34af02c95794e444bab84eb286336ea0223a",
+      "artifactMembers": 313,
+      "ordinaryObservations": 36,
+      "allOrdinarySummaryAndRawReportsRevalidated": true,
+      "allCanonicalReceiptsMatch": true,
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 5986.099999999991,
+        "otherMedianMs": 5940.1999999999825,
+        "medianPairedChangeMs": -42.95000000001164,
+        "medianPairedChangePercent": -0.7125942317547596,
+        "equalWorkChangePercent": -0.9893866798750595,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Ms": [
+          -245.70000000001164,
+          56.20000000001164
+        ],
+        "descriptiveBootstrap95Percent": [
+          -4.019967403750013,
+          0.9447409597934664
+        ],
+        "pairedMs": [
+          446.70000000001164,
+          -259.30000000004657,
+          -54.40000000002328,
+          -124.29999999998836,
+          118.29999999993015,
+          45,
+          -232.09999999997672,
+          -31.5,
+          -313,
+          -17.499999999883585,
+          67.40000000002328,
+          -360.4000000000233
+        ],
+        "pairedRatios": [
+          1.0746840098976815,
+          0.9570929790015316,
+          0.9910892710892673,
+          0.9791540886831709,
+          1.020289507083307,
+          1.0076446105495627,
+          0.9625076729234683,
+          0.9946588442756376,
+          0.94779069573485,
+          0.9970479580304172,
+          1.0112502086463067,
+          0.9442562603436777
+        ],
+        "baselineEqualWorkTotalMs": 72277.1,
+        "otherEqualWorkTotalMs": 71562.00000000003
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5995.499999999942,
+        "otherMedianMs": 5942.800000000047,
+        "medianPairedChangeMs": -23.550000000017462,
+        "medianPairedChangePercent": -0.3920379061921997,
+        "equalWorkChangePercent": 0.16327450996880266,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -123.79999999981374,
+          210.00000000011642
+        ],
+        "descriptiveBootstrap95Percent": [
+          -2.0399083853715805,
+          3.4492387037452055
+        ],
+        "pairedMs": [
+          -119.49999999994179,
+          210.00000000011642,
+          -123.79999999981374,
+          72.39999999990687
+        ],
+        "pairedRatios": [
+          0.9798213471572682,
+          1.034492387037452,
+          0.9796009161462842,
+          1.012337894718888
+        ],
+        "baselineEqualWorkTotalMs": 23947.399999999907,
+        "otherEqualWorkTotalMs": 23986.500000000175
+      },
+      "timingGates": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": true,
+        "upper95ChangeAtMost3Percent": true
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": true,
+        "absoluteEqualWorkChangeAtMost1Percent": true
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 411,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 35,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 292.783853,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 36,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 273.927152,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 38,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 340.611267,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 36,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 277.381115,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        }
+      ]
+    },
+    {
+      "order": "BA",
+      "jobId": 140941694488,
+      "artifactId": 15259322561,
+      "artifactBytes": 35949109,
+      "artifactSha256": "05096697e1e8fb51b2f47f0e22b2279af3c9986dab5931fd681cf9139d55cf44",
+      "artifactMembers": 313,
+      "ordinaryObservations": 36,
+      "allOrdinarySummaryAndRawReportsRevalidated": true,
+      "allCanonicalReceiptsMatch": true,
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 4996.549999999988,
+        "otherMedianMs": 5266.399999999994,
+        "medianPairedChangeMs": 141.10000000003492,
+        "medianPairedChangePercent": 2.7717861369815022,
+        "equalWorkChangePercent": 2.6248739143536426,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          74.19999999999709,
+          199.80000000001746
+        ],
+        "descriptiveBootstrap95Percent": [
+          1.308174544650642,
+          4.1531794071594685
+        ],
+        "pairedMs": [
+          89.30000000001746,
+          148.89999999999418,
+          59.09999999997672,
+          -204.80000000004657,
+          653.0999999999767,
+          203.20000000001164,
+          196.40000000002328,
+          145.90000000002328,
+          119,
+          136.30000000004657,
+          564.3000000000466,
+          -507.69999999995343
+        ],
+        "pairedRatios": [
+          1.015587634624451,
+          1.0269312159742434,
+          1.0105758562685616,
+          0.9626256911874653,
+          1.1395751410497468,
+          1.0402002097058205,
+          1.0428633784373686,
+          1.0305460179214518,
+          1.0239875828982643,
+          1.0285045067653864,
+          1.1157111220472526,
+          0.899109733317444
+        ],
+        "baselineEqualWorkTotalMs": 61069.600000000035,
+        "otherEqualWorkTotalMs": 62672.60000000015
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5052.600000000064,
+        "otherMedianMs": 5172.400000000023,
+        "medianPairedChangeMs": 53.54999999998836,
+        "medianPairedChangePercent": 1.0964475928026296,
+        "equalWorkChangePercent": 0.5147499435149694,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -347.70000000001164,
+          345.4000000000233
+        ],
+        "descriptiveBootstrap95Percent": [
+          -6.843679880329279,
+          7.156769300899812
+        ],
+        "pairedMs": [
+          -41.5,
+          -347.70000000001164,
+          148.59999999997672,
+          345.4000000000233
+        ],
+        "pairedRatios": [
+          0.9923544583640383,
+          0.9315632011967072,
+          1.0295744934920141,
+          1.0715676930089981
+        ],
+        "baselineEqualWorkTotalMs": 20359.40000000008,
+        "otherEqualWorkTotalMs": 20464.20000000007
+      },
+      "timingGates": {
+        "medianChangeAtMost1Percent": false,
+        "equalWorkChangeAtMost1Percent": false,
+        "upper95ChangeAtMost3Percent": false
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": false,
+        "absoluteEqualWorkChangeAtMost1Percent": true
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 593,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 3.0374799588661294,
+            "maximumPairedChangePercent": 3.6124781635331837
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 3.27462632085197,
+            "maximumPairedChangePercent": 3.660016673452371
+          }
+        }
+      },
+      "memoryObservations": [
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 59,
+          "maxSampledPrivateKiB": 1069336,
+          "maxSampledPssKiB": 1297738,
+          "maximumCoveredSampleGapMs": 195.961691,
+          "name": "B1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 59,
+          "maxSampledPrivateKiB": 1031580,
+          "maxSampledPssKiB": 1252492,
+          "maximumCoveredSampleGapMs": 119.153945,
+          "name": "A1",
+          "pair": 1,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "A",
+          "fullyContainedImportSampleCount": 58,
+          "maxSampledPrivateKiB": 1001372,
+          "maxSampledPssKiB": 1229735,
+          "maximumCoveredSampleGapMs": 123.674232,
+          "name": "A2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        },
+        {
+          "arm": "B",
+          "fullyContainedImportSampleCount": 55,
+          "maxSampledPrivateKiB": 1030304,
+          "maxSampledPssKiB": 1260017,
+          "maximumCoveredSampleGapMs": 143.90835,
+          "name": "B2",
+          "pair": 2,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true
+        }
+      ]
+    }
+  ],
+  "evidence": {
+    "audit.py": {
+      "blob": "34718e679a5c68c1e3be75acdb89dcc1a5936281",
+      "utf8Characters": 18460,
+      "sha256": "508414d0cb40f987c4351b72628f1b9e23fffbca5aea1e750f2d56776814018c"
+    },
+    "vndb-independent-audit.json": {
+      "blob": "36044f93eedcdc0c6b2f513c4e29dc6ce8b11b54",
+      "utf8Characters": 57313,
+      "sha256": "365a7fd416083b0c0ec5b2d869f1bdc1a4db672199a67239c20d4cb514ae06a8"
+    },
+    "final-independent-audit.log": {
+      "blob": "09478c4b003b728c04265f32b76ca7525479b719",
+      "utf8Characters": 10772,
+      "sha256": "aa9a8769a08398ba180d9402984836970604ccbb0b06f32f2afe05da45d20ec7"
+    },
+    "vndb-AB-evidence-encoded.json": {
+      "blob": "027d32f2426b2f78daa347881adc8ea8ab7b1c8b",
+      "utf8Characters": 698951,
+      "sha256": "c62b28fd127ab4f21578ec547e0b1bdfda6ade16ad6e9d4fdfe4c4d6b726f16d"
+    },
+    "vndb-BA-evidence-encoded.json": {
+      "blob": "5bbce3eeb31e8887634c7dd91fe4118b039e83b5",
+      "utf8Characters": 854203,
+      "sha256": "f81e8ffa1ff839ee928fa2303ce5ecb77445df2811359f012844f51de26767cb"
+    }
+  },
+  "originalJobLogs": {
+    "AB": {
+      "jobId": 140941694505,
+      "blob": "053e50c2b15fcd1b5f4dc3cbe9d053d8de1969df",
+      "characters": 375365
+    },
+    "BA": {
+      "jobId": 140941694488,
+      "blob": "947e8716bac8a7a7320bd50be05e6ef590424d54",
+      "characters": 375842
+    }
+  },
+  "rawEvidenceContents": "Both gzip+base64 envelopes include all36 observation timings and raw import phases, frozen plans, source/package inventories, every original member hash, all raw memory JSON/scans and both all-media summary/raw/canonical receipts. Full original ZIPs retain all per-observation raw reports and packages, with exact API digest/size bindings.",
+  "localDirectory": "/tmp/manabitan-da6c4-vndb-overlap-audit",
+  "limitations": [
+    "Source/raw phase counters are elapsed spans and may overlap or include waiting; they are not additive CPU costs or a removable-time guarantee.",
+    "Media ZIP batch count does not establish SQL write-batch/statement geometry.",
+    "The overlap candidate has no replicated current-source gain; preserve every candidate/control tail without exclusion or pooling.",
+    "Current-source source/semantic tests pass independently of performance; memory observations are separate and non-authoritative for timing.",
+    "AB all4 separate memory observations have covered-import scan gaps above250ms; their PSS/private maxima and paired aggregates remain null. Do not infer memory improvement or regression from missing coverage.",
+    "BA passes sampled-memory rules but fails every timing nonregression gate and the absolute median identical-code control gate.",
+    "No observation dropped, no timing rerun, no host pooling, no new PR or branch mutation."
+  ]
+}

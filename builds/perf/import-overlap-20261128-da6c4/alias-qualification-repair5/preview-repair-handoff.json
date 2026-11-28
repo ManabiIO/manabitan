@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "classification": "Qualification-harness correctness repair; no new product import or timing observation",
+  "originalFailure": {
+    "repository": "ManabiIO/manabitan",
+    "runId": 46134500034,
+    "jobId": 140946673357,
+    "researchCommit": "eaee9b0e408307410558adc69d7695e9ea506fbb",
+    "researchTree": "44319b6b69924e2719ef88a82fed01fe829eb671",
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+    "jobLogBlob": "5522ff02328928a9736bb5b8d10c34f7d5858514",
+    "artifactId": 15259058617,
+    "artifactBytes": 313694045,
+    "artifactSha256": "17c87059b7cbaedb250aee7a97a3f139f62a5c9a01e4ab19b7d72dc3dddb5d60",
+    "status": "Failure remains preserved: both real untimed imports and both full per-arm verifier commands exited0, then cross-arm constructor rejected preview differences; no ordinary cohort began.",
+    "originalProjectionDiffBlob": "3b1219cfdc133100efa79bddbdcff0f5d4edb490"
+  },
+  "originalHelperBlobs": {
+    "receipt_adapter": "4806fce39e3da82d53efa94d84f62c30912b6801",
+    "browser_proof": "504d64da8768ba5965a522651fc274dabc34e6f6",
+    "exporterUnchanged": "a8c87feab51f4cf333cdecdb024aa2d742ba0e58"
+  },
+  "findings": [
+    "Exactly20 old projection fields differ, all rawContentPreview.",
+    "A rawContentPreview is UTF-8 rendering of raw content-file bytes, including uint64 compact-block pointers; it is not a decoded definition.",
+    "The saved-file proof covers all29 sampled row ranges and132 compact references. Each changed pointer follows its original normal-span relocation; remaining reference bytes and pointed compressed frames are exact.",
+    "All named logical identities, headwords/readings, decodedContentDebug, readErrorDetails, direct hits and ordering remain exact; full row proof separately covers all6,648,310 rows/definitions and175 alias references.",
+    "One final sampled row retains the identical <read-null> diagnostic because its120-byte raw preview extends past EOF; its decoded content and actual compact reference are valid in the existing full verifier.",
+    "sqlTermRow is optional SQL diagnostic data absent before restart and present after; it was never in the original physical projection and is not newly normalized by this repair."
+  ],
+  "policy": {
+    "crossArm": "Omit only rawContentPreview in addition to the existing totalLength and rawEntryContentOffset exceptions, after complete per-arm verification plus exact saved-file pointer proof.",
+    "withinArm": "Retain and exactly compare the original full preview projection, plus stable logical row fields, against each own-arm preflight (A/C useA, B usesB). Preserve original exporter output and both physical/old semantic digests.",
+    "ordinary": "Hash-only bounded output after the existing timed endpoint; no new timed work.",
+    "source": "New helper/adapter and tests only; no product runtime or exporter edit. All original failed receipts remain failed; corrected binder replay is a separate analysis."
+  },
+  "sources": {
+    "probe_projection.py": {
+      "bytes": 12425,
+      "sha256": "097beded3bfa05eee7322950f435fbb1bda15bed54cd020e8c90ad3ee07731ae",
+      "blob": "eae9e24a256430d14d44493e6757d1fb4f4c5206"
+    },
+    "receipt_adapter.py": {
+      "bytes": 17965,
+      "sha256": "6adf7417a6e524073cd765e369618dbf2b791da9fbbf3ae904e68be854bea1d9",
+      "blob": "579ad31c74733a7af0d36c5e395e884be691b16f"
+    },
+    "test_probe_projection.py": {
+      "bytes": 8189,
+      "sha256": "e6ede75ec15dfd57014855a5f5661bcc1d8188fa5b5912ac712ca4b4da7c41ee",
+      "blob": "152e3c66e40bb533c6bea1be96f8994e6a8f89b5"
+    },
+    "test_receipt_adapter.py": {
+      "bytes": 19223,
+      "sha256": "ec1d8f1c012fe0adb6877d521dea7fad0f72b5a96ee4cc37e8856d46d46a5ed6",
+      "blob": "adc2b6e50b8176687c95d973e93d58128209c3c8"
+    }
+  },
+  "verification": {
+    "tests": 22,
+    "passed": 22,
+    "command": "MANABITAN_RECEIPT_SOURCE=/tmp/manabitan-da6c4-alias-comparator-repair/source python3 -m unittest -v test_probe_projection.py test_receipt_adapter.py",
+    "logBlob": "9379e060cc26d5748ca4b796be8f1440f3c20d1c",
+    "logSha256": "be4e965855592ec274eff0eb5bbb0885d3f8f0acdc10379adfb797f62ffd51db",
+    "mutants": [
+      "Changed content file",
+      "Changed relocation map",
+      "Changed non-pointer compact reference",
+      "Changed pointed frame",
+      "Wrong preview with recomputed digests",
+      "Wrong own-arm preview with stale or self-consistent receipts",
+      "Logical ID including bool-for-int",
+      "Expression/reading",
+      "Decoded content",
+      "Read errors",
+      "Row ordering",
+      "Restart mismatch"
+    ],
+    "savedArtifactProof": {
+      "blob": "165ea78060c4735fa50509c4a4129120d12ce211",
+      "sha256": "f08e14acc90260c9c0416f74fab9b90c7e02d67081b1b8ba79cb36fdcf88a1a9",
+      "rowCount": 29,
+      "compactReferences": 132,
+      "changedPreviewRows": 20,
+      "complete": true
+    },
+    "combinedBinderReplay": "Delegated to baseline_profile after copying these exact source files; pending at this handoff."
+  },
+  "limits": [
+    "No ordinary timing acquisition or product performance conclusion.",
+    "Synthetic helper tests use a170-span binary fixture and72 compact refs; six text previews change, because UTF-8 replacement can hide other pointer byte changes. All binary references are checked.",
+    "Actual binary OPFS export remains in original full artifact; this handoff contains hashes/proof, not all313MB."
+  ]
+}

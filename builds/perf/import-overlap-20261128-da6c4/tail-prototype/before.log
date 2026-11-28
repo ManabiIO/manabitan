@@ -1,0 +1,81 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-pipeline-completion.test.js --maxWorkers=1
+
+
+ RUN  v4.1.12 /tmp/manabitan-da6c4-owned-current-integration
+
+ ❯ test/term-bank-pipeline-completion.test.js (2 tests | 1 failed) 39ms
+   × retains parser budgets and source leases until admitted sink tickets complete 35ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-pipeline-completion.test.js > retains parser budgets and source leases until admitted sink tickets complete
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "error": "Error: storage overlapped active parsers: expected 0, got 0,1",
++     "name": "owned lookahead begins only after every validated result arrives and retains the same lead budget",
++     "stack": "Error: storage overlapped active parsers: expected 0, got 0,1
++     at assert (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:7:57)
++     at equal (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:8:41)
++     at eval (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:24:3)
++     at processTicksAndRejections (node:internal/process/task_queues:104:5)
++     at run (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:14:77)
++     at runParserChecks (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:18:2)
++     at /tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:388:20
++     at file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
++     "status": "failed",
++   },
++   {
++     "error": "Error: queued borrowed result not counted: expected 3, got undefined",
++     "name": "validated borrowed results allow the owned tail without awaiting worker-loop retirement",
++     "stack": "Error: queued borrowed result not counted: expected 3, got undefined
++     at assert (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:7:57)
++     at equal (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:8:41)
++     at eval (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:62:3)
++     at processTicksAndRejections (node:internal/process/task_queues:104:5)
++     at run (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:14:77)
++     at runParserChecks (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:55:2)
++     at /tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:388:20
++     at file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
++     "status": "failed",
++   },
++   {
++     "error": "Error: invalid result counted as validated: expected 1, got undefined",
++     "name": "invalid final results cannot enable tail overlap and still drain accepted storage",
++     "stack": "Error: invalid result counted as validated: expected 1, got undefined
++     at assert (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:7:57)
++     at equal (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:8:41)
++     at eval (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:85:4)
++     at processTicksAndRejections (node:internal/process/task_queues:104:5)
++     at run (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:14:77)
++     at runParserChecks (eval at <anonymous> (/tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:386:9), <anonymous>:77:2)
++     at /tmp/manabitan-da6c4-owned-current-integration/test/term-bank-pipeline-completion.test.js:388:20
++     at file:///workspace/scratch/da6c4dbd0097/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20",
++     "status": "failed",
++   },
++ ]
+
+ ❯ test/term-bank-pipeline-completion.test.js:396:70
+    394|     );
+    395|     expect(report.total).toBe(19);
+    396|     expect(report.results.filter(({status}) => status !== 'passed')).t…
+       |                                                                      ^
+    397|     expect(report.passed).toBe(19);
+    398|     expect(report.failed).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  05:46:59
+   Duration  314ms (transform 46ms, setup 29ms, import 33ms, tests 39ms, environment 0ms)
+

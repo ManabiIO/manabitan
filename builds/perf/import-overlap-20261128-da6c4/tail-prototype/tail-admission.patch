@@ -1,0 +1,100 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index ac53375..9ed45bf 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -2511,6 +2511,7 @@ export class DictionaryImporter {
+                             parserParallelWorkerWallMs: parserProfile.parallelWorkerWallMs ?? null,
+                             parserParallelSourceReadWallMs: parserProfile.parallelSourceReadWallMs ?? null,
+                             parserParallelOwnedContentBytes: parserProfile.parallelOwnedContentBytes ?? null,
++                            parserParallelOwnedTailLookaheadCount: parserProfile.parallelOwnedTailLookaheadCount ?? null,
+                             parserParallelPeakQueuedOwnedContentBytes: parserProfile.parallelPeakQueuedOwnedContentBytes ?? null,
+                             parserParallelSkipReason: parserProfile.parallelSkipReason ?? null,
+                             parserMetaCapacity: parserProfile.metaCapacity ?? null,
+@@ -2901,6 +2902,7 @@ export class DictionaryImporter {
+                 fastPathParserParallelWorkerWallMs: fastPathProfile?.parallelWorkerWallMs ?? null,
+                 fastPathParserParallelSourceReadWallMs: fastPathProfile?.parallelSourceReadWallMs ?? null,
+                 fastPathParserParallelOwnedContentBytes: fastPathProfile?.parallelOwnedContentBytes ?? null,
++                fastPathParserParallelOwnedTailLookaheadCount: fastPathProfile?.parallelOwnedTailLookaheadCount ?? null,
+                 fastPathParserParallelPeakQueuedOwnedContentBytes: fastPathProfile?.parallelPeakQueuedOwnedContentBytes ?? null,
+                 fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                 sourceZipLogicalRangeReadCount: sourceRangeReadCounts.logicalRequests,
+diff --git a/ext/js/dictionary/term-bank-wasm-parser.js b/ext/js/dictionary/term-bank-wasm-parser.js
+index 00603c0..2c78d23 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -122,7 +122,7 @@ const glossaryJsonDecoder = new TextDecoder();
+ /** @type {TextEncoder} */
+ const textEncoder = new TextEncoder();
+ 
+-/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrcMs?: number, sourceCrcScannedBytes?: number, sourceCrcReusedBytes?: number, sourceCrcReusedGlossaryCount?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number})|null} */
++/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrcMs?: number, sourceCrcScannedBytes?: number, sourceCrcReusedBytes?: number, sourceCrcReusedGlossaryCount?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number, parallelOwnedTailLookaheadCount?: number})|null} */
+ let lastTermBankWasmParseProfile = null;
+ /** @type {string|null} */
+ let lastParallelParserSkipReason = null;
+@@ -2941,6 +2941,10 @@ class ParallelTermBankPipelineRun {
+         this._nextSinkGroupIndex = 0;
+         /** @type {number} */
+         this._nextWorkerGroupIndex = 0;
++        /** @type {number} Successfully validated results, including queued borrowed results. */
++        this._validatedGroupResultCount = 0;
++        /** @type {number} Owned tail callbacks admitted before the previous owner retires. */
++        this._ownedTailLookaheadCount = 0;
+         /** @type {number|null} Null means each activation scans the whole read window. */
+         this._nextSourceActivationGroupIndex = null;
+         /** @type {number} */
+@@ -3037,13 +3041,13 @@ class ParallelTermBankPipelineRun {
+                 const {chunk, consume} = result;
+                 // The database may consume the cache's ownership witness while
+                 // publishing this chunk, so capture it before invoking the sink.
+-                const mayOverlap = (
++                const ownsSharedContent = (
+                     chunk !== null && consume === null &&
+                     typeof SharedArrayBuffer === 'function' &&
+                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                     hasOwnedTermContent(chunk.contentBytesBuffer)
+                 );
+-                if (pendingSink !== null && !mayOverlap) {
++                if (pendingSink !== null && !ownsSharedContent) {
+                     const previousSink = pendingSink;
+                     pendingSink = null;
+                     await retireSink(previousSink);
+@@ -3058,6 +3062,7 @@ class ParallelTermBankPipelineRun {
+                 processedRows += result.rowCount;
+                 exactTotalRows += result.rowCount;
+                 if (chunk !== null) {
++                    if (pendingSink !== null) { ++this._ownedTailLookaheadCount; }
+                     let released = false;
+                     /** @type {SinkOwner} */
+                     const owner = {
+@@ -3101,8 +3106,13 @@ class ParallelTermBankPipelineRun {
+                         pendingSink = null;
+                         await retireSink(previousSink);
+                     }
+-                    if (mayOverlap && owner.completion !== null) {
+-                        // The next callback may prepare one immutable group.
++                    if (
++                        ownsSharedContent && owner.completion !== null &&
++                        this._validatedGroupResultCount === this._groups.length
++                    ) {
++                        // Overlap only the drain after all parser results have
++                        // arrived. Assigned jobs and worker-loop completion
++                        // cannot prove this: borrowed results await their sinks.
+                         // No third callback starts before this owner retires.
+                         pendingSink = owner;
+                     } else {
+@@ -3136,6 +3146,7 @@ class ParallelTermBankPipelineRun {
+                 parallelSourceReadWallMs: getParallelSourceReadWallMs(this._sources, this._startedAt),
+                 parallelOwnedContentBytes: this._ownedContentBytes,
+                 parallelPeakQueuedOwnedContentBytes: this._peakQueuedOwnedContentBytes,
++                parallelOwnedTailLookaheadCount: this._ownedTailLookaheadCount,
+             };
+         } catch (error) {
+             this._fail(error);
+@@ -3230,6 +3241,7 @@ class ParallelTermBankPipelineRun {
+                 this._ownedContentBytes += ownedContentBytes;
+                 this._queuedOwnedContentBytes += ownedContentBytes;
+                 this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
++                ++this._validatedGroupResultCount;
+                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
+                 if (consumed !== null) { await consumed; }
+             }

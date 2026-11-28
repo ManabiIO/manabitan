@@ -1,0 +1,37 @@
+{
+  "scope": "Untimed extracted production pipeline control-flow regression; deterministic fake worker transport",
+  "base": "f28c2801fcfd9416f220b46b9cbafeee901c1cb2",
+  "priorRuntime": "Exact 54844293 owned-overlap changes integrated onto base before tail admission",
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "test/term-bank-pipeline-completion.test.js",
+    "--maxWorkers=1"
+  ],
+  "attempts": [
+    {
+      "name": "before",
+      "exitCode": 1,
+      "logSha256": "f7e327211d45159feaab6e676c9726da58558df3d7aaa4dfb9925c02c9d80c10"
+    },
+    {
+      "name": "after",
+      "exitCode": 0,
+      "logSha256": "580cdcd55cbfa1ed5999ef9776f8a2b86e50731d6540260a7855d995fbd7589d"
+    }
+  ],
+  "previous-parser.js": {
+    "bytes": 214677,
+    "sha256": "c7dcbdd26fe94f8e0e72d6dbc9097c21e21dd51ee9bd2294dfdf815c0eb57472"
+  },
+  "candidate-parser.js": {
+    "bytes": 215181,
+    "sha256": "78ebda1b888ef14352447845acb8f7dcd3fe95a011a5fe9bccaa29a640d226bb"
+  },
+  "candidate-test.js": {
+    "bytes": 27318,
+    "sha256": "6f23513c9d776f449bac84f547055a3581b1b37a61054d002dfb217bda6e3aa4"
+  }
+}

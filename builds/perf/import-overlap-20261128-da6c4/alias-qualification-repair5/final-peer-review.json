@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "Independent final alias qualification identity/projection ordering review",
+  "handoffBlob": "6c6dbd4a2b5953c535076e23496a2f8c20542184",
+  "reviewedFiles": {
+    "run.py": {
+      "bytes": 45443,
+      "sha256": "edb2bf3ebfdd8239ec650ea98a435994fffd97c99dda8878344ca19c9b3841d5"
+    },
+    "browser-verify.mjs": {
+      "bytes": 25812,
+      "sha256": "fecfc01fc190f289e83ded42aa97fe49f5f184e2ef5e27d812e0133d1dafa0e9"
+    },
+    "browser_proof.py": {
+      "bytes": 9004,
+      "sha256": "aff713c25c323af02d0b12dde187576e45730c748eeeb80c0a19da87057b6e5d"
+    },
+    "candidate-test-amendment.json": {
+      "bytes": 752,
+      "sha256": "a388c1443215b688e3a96c074a130507822fd98ac77db46b78ccb7d1b5a93325"
+    },
+    "probe_projection.py": {
+      "bytes": 12425,
+      "sha256": "097beded3bfa05eee7322950f435fbb1bda15bed54cd020e8c90ad3ee07731ae"
+    },
+    "receipt_adapter.py": {
+      "bytes": 17965,
+      "sha256": "6adf7417a6e524073cd765e369618dbf2b791da9fbbf3ae904e68be854bea1d9"
+    },
+    "test_probe_projection.py": {
+      "bytes": 8189,
+      "sha256": "e6ede75ec15dfd57014855a5f5661bcc1d8188fa5b5912ac712ca4b4da7c41ee"
+    },
+    "test_receipt_adapter.py": {
+      "bytes": 19223,
+      "sha256": "ec1d8f1c012fe0adb6877d521dea7fad0f72b5a96ee4cc37e8856d46d46a5ed6"
+    },
+    "test_browser_proof.py": {
+      "bytes": 10640,
+      "sha256": "ab8cd2259a0a7153b962271fd1e0a849fc41403f875a949b92a118b2276d89d1"
+    },
+    "test_candidate_identity.py": {
+      "bytes": 2794,
+      "sha256": "493c12e15e694250c31ecf475e809bdf54d253a1f015d5b4b3db62655bf58204"
+    },
+    "plan.json": {
+      "bytes": 19368,
+      "sha256": "d11d11c9ed54a5d374a9904d1e004aff034fc7b62e9a97ee3319f9b88d95f4cb"
+    },
+    "source-manifest.json": {
+      "bytes": 9294,
+      "sha256": "d0800c3da8c90736d821f2a434d484d4ecf67d8b9d7167aacfdaf873e9d8d842"
+    }
+  },
+  "decision": "No concrete integration blocker found.",
+  "findings": [
+    "run.py proves exact cce635 single parent2c023, both trees, equal ext tree64089ebc, exact before/after test blob, and exactly one changed test path before source setup/acquisition. The natural B7 candidate2c023 and its hashes remain explicit.",
+    "The full browser verifier independently repeats that source amendment and preserves its full persisted decoder, per-file/runtime source guards, all-row/native payload checks and post-read quiescence. Its report binds the actual amended source and original natural receipts separately.",
+    "bind_preflight verifies each complete browser verifier report, actual exact layout inventory, all170 groups, alias counts, same-arm complete normalized file vector, raw source/package/config links, exhaustive media and closed handles before proving raw-preview relocation.",
+    "The new byte proof runs only after both arms pass those full checks, before AliasReceiptComparator construction and final cross-arm comparison. It reads the exact content files already bound by the decoder and original normal-span map.",
+    "The four helper/adapter/test files exactly match the frozen individually tested hashes from handoff7728f44f263eb0768a9d3aadc01d0c3f67a52b94; final manifest binds all12 reviewed local files.",
+    "Every ordinary VNDB observation continues to require full own-arm previews/physical and old semantic digests, stable identities/decoded/errors/order, full normalized term-file hashes and unchanged route. Cross-arm removes only the newly proved preview field beyond the prior offset/length exceptions.",
+    "No numeric performance/memory gate, exporter byte, timing endpoint, ordinary observation body or runtime product source is changed by this repair."
+  ],
+  "validationAttribution": "Source/read-only hash comparison only. Baseline_profile owns the final34-test execution and full saved-artifact binder replay; I separately ran the22 helper/adapter cases and exact29-row/132-reference saved-byte proof. No additional import, timing or test rerun was performed for this final integration review.",
+  "limits": [
+    "The original eaee workflow remains failed; successful offline binder replay is analysis of its retained output, not qualification of the new cce source or a replacement browser cohort.",
+    "No timing or speed claim; the new source-specific preflight and prospective cohort remain required."
+  ]
+}

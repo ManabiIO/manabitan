@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "cohort": "jmdict-embedded-compact-list-native-20261128-da6c4-v1",
+  "planBlob": "4b014a1ee26e5db4e4dd458e0f955c91b4602ef0",
+  "planSha256": "992a8bce45aa320911688d33a583ec11a8f887cd3ae5b4082b395de2024f3aae",
+  "peerReviewBlob": "50743676d4e17f5d96e1aa520505a407180cef8b",
+  "source": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateProduct": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 163760,
+      "sha256": "19af2e5248c63fb7f3783e6c8e6eaf1da01befc5be8bb9c21e78931fbd2595f6",
+      "blob": "e9c67572ff11532585556463ec17902f64cdb7c9"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 70407,
+      "sha256": "3d6f798a14952a154100caa7fa407ec02c36e4553dc037f95dcae0961aa38ffd",
+      "blob": "410040d7d4b6fe208556d20671e1d866cb05d495"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "4c36ff7649b60b4bd03304aa4f4ff101c2c308be54af40d1e14e858978b47117",
+      "blob": "573facecb5e409c8b2bf4112749b8f5ce668e8f8"
+    },
+    {
+      "path": "test/term-bank-compact-child-list.test.js",
+      "bytes": 8544,
+      "sha256": "59f63b1855acbb0ea0dc13d262893462439c34c90c7c92cadba693831909e77b",
+      "blob": "ef1ae532a1bed8116c6236d3b45e585c79ce344c"
+    }
+  ],
+  "inputSha256": "e4bcb5c25b9f57610bb07b5a5246a1bf7372a80041edaaf78ce59e55dbc34721",
+  "observations": 36,
+  "pairedRounds": 12,
+  "processExitCode": 0,
+  "startedUtc": "2026-11-28T10:36:55.516818+00:00",
+  "finishedUtc": "2026-11-28T10:38:20.512861+00:00",
+  "allAttemptExitCodesZero": true,
+  "allMeasuredOutputAndSourceChecksPassed": true,
+  "rawObservationsSha256": "682ddeda57e54e9b0d7377ae1c597e17dc6483312069d76e2b8d23703c57a0ff",
+  "analysisSha256": "3002fe71c20c545e2ae2b292feddf35f5a1a1d67d74a6c6e09f75c20b38de4cb",
+  "analysis": {
+    "metrics": {
+      "A": {
+        "pairedMedianDeltaMs": -6.061990500000093,
+        "pairedMedianPercent": -1.7627570081060364,
+        "fasterPairs": 6,
+        "nativeEqualWorkPercent": -0.9178203215764791,
+        "fullGroupEqualWorkPercent": -4.974559191366856,
+        "fullGroupPairedMedianDeltaMs": -54.15724550000016,
+        "fullGroupPairedMedianPercent": -9.07371384847937,
+        "bootstrap95": {
+          "deltaMs": [
+            -47.69850700000006,
+            38.84917700000062
+          ],
+          "percent": [
+            -13.757844051025952,
+            13.273683673057622
+          ]
+        }
+      },
+      "C": {
+        "pairedMedianDeltaMs": -26.221373999999855,
+        "pairedMedianPercent": -7.4717917734390955,
+        "fasterPairs": 8,
+        "nativeEqualWorkPercent": -7.114688277005965,
+        "fullGroupEqualWorkPercent": -9.373316213604376,
+        "fullGroupPairedMedianDeltaMs": -40.38671149999948,
+        "fullGroupPairedMedianPercent": -6.718022662655931,
+        "bootstrap95": {
+          "deltaMs": [
+            -51.969069500000614,
+            8.779860999999414
+          ],
+          "percent": [
+            -14.706882558195577,
+            3.027086797412526
+          ]
+        }
+      }
+    },
+    "control": {
+      "pairedMedianPercent": 1.827161563313373,
+      "equalWorkPercent": 6.6715262515455676,
+      "strictAbsoluteLimitPercent": 0.8813785040530182,
+      "fullGroupPairedMedianPercent": -1.7546942830186207,
+      "fullGroupEqualWorkPercent": 4.853710671577982
+    },
+    "bootstrap": {
+      "resamples": 20000,
+      "generator": "xorshift32",
+      "seed": 894660,
+      "sharedIndexesAcrossComparisonsAndMetrics": true,
+      "percentile": "type7"
+    },
+    "checks": {
+      "A.nativeSavingAtLeast3Percent": false,
+      "A.atLeast9FasterPairs": false,
+      "A.nativeEqualWorkLower": true,
+      "A.bothNativeIntervalUpperBoundsNegative": false,
+      "A.fullGroupEqualWorkAtMost1PercentRegression": true,
+      "C.nativeSavingAtLeast3Percent": true,
+      "C.atLeast9FasterPairs": false,
+      "C.nativeEqualWorkLower": true,
+      "C.bothNativeIntervalUpperBoundsNegative": false,
+      "C.fullGroupEqualWorkAtMost1PercentRegression": true,
+      "control.nativePairedMedianBelowHalfSmallerSaving": false,
+      "control.nativeEqualWorkBelowHalfSmallerSaving": false
+    },
+    "advance": false
+  },
+  "armMedians": {
+    "A": {
+      "nativeFusedMs": 334.0116065000003,
+      "fullGroupMs": 623.2969500000003
+    },
+    "B": {
+      "nativeFusedMs": 308.4729514999998,
+      "fullGroupMs": 558.5567104999998
+    },
+    "C": {
+      "nativeFusedMs": 336.0978499999999,
+      "fullGroupMs": 599.4808634999996
+    }
+  },
+  "actualPostReuseCoverage": {
+    "attempts": 212262,
+    "hits": 66897,
+    "bytes": 11977682,
+    "compositeCalls": 208562
+  },
+  "decision": "STOP_NO_QUALIFIED_NATIVE_GAIN",
+  "interpretation": "All correctness and source checks passed, but the native primary saving/consistency/confidence and identical-control drift criteria failed. The candidate is not advanced to browser qualification or a PR from this cohort. No unchanged repeat, data exclusion or gate revision is authorized by these results. Lower secondary full-group sums are descriptive only. This is an inconclusive/noisy native component, not proof of a complete-import gain or regression.",
+  "unqualified": [
+    "Complete concurrent browser import",
+    "Receiver/private source ownership lease",
+    "Cold module startup",
+    "Browser memory"
+  ],
+  "independentArithmeticAudit": "Requested from import_history; pending when this receipt was authored."
+}

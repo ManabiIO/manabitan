@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-pipeline-completion.test.js --maxWorkers=1
+
+
+ RUN  v4.1.12 /tmp/manabitan-da6c4-owned-current-integration
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  05:50:30
+   Duration  272ms (transform 38ms, setup 29ms, import 25ms, tests 23ms, environment 0ms)
+

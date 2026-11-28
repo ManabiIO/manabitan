@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded read-only novelty screen for static nested data/style/language grammar and form-table/leaf-cell templates; no prototype or timing acquisition.",
+  "exactPrior": {
+    "branch": "perf/jmdict-neutral-metadata-objects-20261119",
+    "source": "c8acce2669112ef1493da3f80f4b7001a1f331dd",
+    "baseline": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "cPath": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "cBlob": "2961a986e4d14fbfe14692a8eca7c6a5020cc193",
+    "linkedPullRequests": [],
+    "mechanism": "Complete literal data:{content:glossary} and style:{listStyleType:circle} object grammar, compact or optional one-space variants. Key identity/source length/depth precede bounded 8-byte literal comparisons. General parser handles all other shapes; spaced match propagates normalization hint.",
+    "patch": "@@ -707,6 +707,76 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le\n     }\n }\n \n+/* Constant short literals specialize to word comparisons. The caller proves\n+ * the complete span is inside its logical source before entering this helper. */\n+static __attribute__((always_inline)) inline int common_literal_bytes_equal(\n+    const uint8_t* bytes, const uint8_t* expected, uint32_t length\n+) {\n+    uint32_t i = 0u;\n+    while (i + 8u <= length) {\n+        uint64_t first;\n+        uint64_t second;\n+        __builtin_memcpy(&first, bytes + i, sizeof(first));\n+        __builtin_memcpy(&second, expected + i, sizeof(second));\n+        if (first != second) { return 0; }\n+        i += 8u;\n+    }\n+    while (i < length) {\n+        if (bytes[i] != expected[i]) { return 0; }\n+        ++i;\n+    }\n+    return 1;\n+}\n+\n+/* These complete child objects contain no media/type markers. The caller has\n+ * validated the parent key and must still enforce the child nesting limit. */\n+static inline uint32_t common_structured_metadata_end(\n+    const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end,\n+    uint32_t* normalization_hint\n+) {\n+    static const uint8_t DATA_PREFIX[] = \"{\\\"content\\\":\";\n+    static const uint8_t DATA_SUFFIX[] = \"\\\"glossary\\\"}\";\n+    static const uint8_t STYLE_PREFIX[] = \"{\\\"listStyleType\\\":\";\n+    static const uint8_t STYLE_SUFFIX[] = \"\\\"circle\\\"}\";\n+    if (key_end >= len || src[key_end] != ':') { return 0u; }\n+    const uint32_t key_length = key_end - key_start;\n+    if (key_length != 6u && key_length != 7u) { return 0u; }\n+    uint32_t prefix;\n+    __builtin_memcpy(&prefix, src + key_start, sizeof(prefix));\n+    const int data = key_length == 6u && prefix == UINT32_C(0x74616422) &&\n+        src[key_start + 4u] == 'a' && src[key_start + 5u] == '\"';\n+    const int style = key_length == 7u && prefix == UINT32_C(0x79747322) &&\n+        src[key_start + 4u] == 'l' && src[key_start + 5u] == 'e' && src[key_start + 6u] == '\"';\n+    if (!data && !style) { return 0u; }\n+    uint32_t i = key_end + 1u;\n+    int spaced = 0;\n+    if (i < len && src[i] == ' ') { ++i; spaced = 1; }\n+    const uint32_t object_start = i;\n+    // The value discriminates these objects from the many other data/style\n+    // values. Check it first, then prove the complete child-key prefix.\n+    if (data) {\n+        const uint32_t prefix_length = sizeof(DATA_PREFIX) - 1u;\n+        const uint32_t suffix_length = sizeof(DATA_SUFFIX) - 1u;\n+        if (prefix_length > len - i) { return 0u; }\n+        i += prefix_length;\n+        if (i < len && src[i] == ' ') { ++i; spaced = 1; }\n+        if (suffix_length > len - i || !common_literal_bytes_equal(src + i, DATA_SUFFIX, suffix_length)) { return 0u; }\n+        if (!common_literal_bytes_equal(src + object_start, DATA_PREFIX, prefix_length)) { return 0u; }\n+        i += suffix_length;\n+    } else {\n+        const uint32_t prefix_length = sizeof(STYLE_PREFIX) - 1u;\n+        const uint32_t suffix_length = sizeof(STYLE_SUFFIX) - 1u;\n+        if (prefix_length > len - i) { return 0u; }\n+        i += prefix_length;\n+        if (i < len && src[i] == ' ') { ++i; spaced = 1; }\n+        if (suffix_length > len - i || !common_literal_bytes_equal(src + i, STYLE_SUFFIX, suffix_length)) { return 0u; }\n+        if (!common_literal_bytes_equal(src + object_start, STYLE_PREFIX, prefix_length)) { return 0u; }\n+        i += suffix_length;\n+    }\n+    if (spaced && normalization_hint != 0) { *normalization_hint = 1u; }\n+    return i;\n+}\n+\n static int parse_composite_span_impl(\n     const uint8_t* src,\n     uint32_t len,\n@@ -774,6 +844,16 @@ static int parse_composite_span_impl(\n                         continue;\n                     }\n                 }\n+                if (common_key_kind == COMMON_STRUCTURED_KEY_NONE &&\n+                    (src[i + 1u] == 'd' || src[i + 1u] == 's') && depth < MAX_JSON_NESTING) {\n+                    const uint32_t metadata_end = common_structured_metadata_end(src, len, i, s_end, normalization_hint);\n+                    if (metadata_end != 0u) {\n+                        if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }\n+                        state = OBJECT_AFTER_VALUE;\n+                        i = metadata_end;\n+                        continue;\n+                    }\n+                }\n                 if (validate_top_level_objects && depth == 2u) {\n                     glossary_key = common_key_kind != COMMON_STRUCTURED_KEY_NONE ?\n                         (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD : 0u) :",
+    "qualificationCommit": "16f3a6d6d1d1da9eb2916871f2c33961a2b1b887",
+    "runId": 44601088973,
+    "runConclusion": "success",
+    "workflowBlob": "fd473bcc02e2ded6fe02e9749439dc17264eb005",
+    "protocol": "A1 B1 B2 A2 B3 A3 A4 B4 plus separate candidate trace; old November19 baseline, no unchanged-code control arm or current-source qualification.",
+    "jobs": [
+      {
+        "dictionary": "jmdict",
+        "id": 135832368239,
+        "conclusion": "success",
+        "artifactId": 14568351577,
+        "artifactSha256": "c428c5fef63dc45dd06fc2a7df1b70f8535d0d18ca179fd24868e28331ad1e22",
+        "roundedLogPairs": [
+          [
+            1107.9,
+            1542.3
+          ],
+          [
+            1001.9,
+            1016.5
+          ],
+          [
+            1053.6,
+            1017.6
+          ],
+          [
+            1001.8,
+            1059.2
+          ]
+        ]
+      },
+      {
+        "dictionary": "jitendex",
+        "id": 135832368811,
+        "conclusion": "success",
+        "artifactId": 14567074575,
+        "artifactSha256": "4f9c2def6babc5e4bb89b4a5aa7a7b6fc412315c13ddc62b048c242efcfa9029",
+        "roundedLogPairs": [
+          [
+            1626.2,
+            1431.6
+          ],
+          [
+            1408.1,
+            1603.7
+          ],
+          [
+            1551.7,
+            1440.9
+          ],
+          [
+            1386.1,
+            1432.9
+          ]
+        ]
+      }
+    ],
+    "evidenceScope": "Job status and decoded logs inspected; original full artifact not downloaded/recomputed. Rounded printed milliseconds are only history context, not a new precision/performance claim."
+  },
+  "nearby": [
+    {
+      "pr": 831,
+      "head": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+      "mechanism": "1040-byte call-local validated flat data/style cache, exact raw equality; separate from static grammar.",
+      "reportedOutcome": "Both target Jitendex hosts slower; existing body labels do-not-merge."
+    },
+    {
+      "pr": 895,
+      "mechanism": "Complete literal metadata key-only selector, not complete child object grammar."
+    },
+    {
+      "pr": 972,
+      "mechanism": "Whole compact structured glossary list, including fixed suffix; current embedded-UL experiment is separately rejected."
+    },
+    {
+      "pr": 948,
+      "head": "dce83c54af038e7b4ac59c8d690026c532341f40",
+      "state": "open",
+      "merged": false,
+      "mechanism": "Top-level already-validated type key -> structured-content literal/colon/comma fusion; not data/style value grammar."
+    },
+    {
+      "branch": "perf/terminal-structured-tags-20261128-1c413",
+      "mechanism": "Already-known terminal tag dispatch; not broad object template."
+    }
+  ],
+  "searchCoverage": [
+    "PR searches style, suffix, template, forms (bounded30 results each)",
+    "Branch searches style, grammar, template, suffix, leaf, structured, metadata, table, literal",
+    "Direct exact-ref/commit/C patch and qualifier/workflow/log inspection for neutral metadata branch"
+  ],
+  "conclusion": "The two common static data/style shapes are occupied by an actual older implementation and browser campaign. No exact broader fixed language-suffix or form-table/leaf-cell template branch was found within this bounded screen; this does not establish exhaustive novelty. Any materially broader proposal must distinguish coverage/cost and obtain current-source evidence."
+}

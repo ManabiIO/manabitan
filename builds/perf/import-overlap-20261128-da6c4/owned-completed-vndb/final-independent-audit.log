@@ -1,0 +1,303 @@
+{
+  "decision": "NO_REPLICATED_OVERLAP_GAIN; AB timing/control nonregression passes but memory sampling coverage fails; BA fails all timing nonregression gates and the absolute median control gate. No exclusions or pooling.",
+  "cells": [
+    {
+      "order": "AB",
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 5986.099999999991,
+        "otherMedianMs": 5940.1999999999825,
+        "medianPairedChangeMs": -42.95000000001164,
+        "medianPairedChangePercent": -0.7125942317547596,
+        "equalWorkChangePercent": -0.9893866798750595,
+        "fasterPairs": 8,
+        "descriptiveBootstrap95Ms": [
+          -245.70000000001164,
+          56.20000000001164
+        ],
+        "descriptiveBootstrap95Percent": [
+          -4.019967403750013,
+          0.9447409597934664
+        ],
+        "pairedMs": [
+          446.70000000001164,
+          -259.30000000004657,
+          -54.40000000002328,
+          -124.29999999998836,
+          118.29999999993015,
+          45.0,
+          -232.09999999997672,
+          -31.5,
+          -313.0,
+          -17.499999999883585,
+          67.40000000002328,
+          -360.4000000000233
+        ],
+        "pairedRatios": [
+          1.0746840098976815,
+          0.9570929790015316,
+          0.9910892710892673,
+          0.9791540886831709,
+          1.020289507083307,
+          1.0076446105495627,
+          0.9625076729234683,
+          0.9946588442756376,
+          0.94779069573485,
+          0.9970479580304172,
+          1.0112502086463067,
+          0.9442562603436777
+        ],
+        "baselineEqualWorkTotalMs": 72277.1,
+        "otherEqualWorkTotalMs": 71562.00000000003
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5995.499999999942,
+        "otherMedianMs": 5942.800000000047,
+        "medianPairedChangeMs": -23.550000000017462,
+        "medianPairedChangePercent": -0.3920379061921997,
+        "equalWorkChangePercent": 0.16327450996880266,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -123.79999999981374,
+          210.00000000011642
+        ],
+        "descriptiveBootstrap95Percent": [
+          -2.0399083853715805,
+          3.4492387037452055
+        ],
+        "pairedMs": [
+          -119.49999999994179,
+          210.00000000011642,
+          -123.79999999981374,
+          72.39999999990687
+        ],
+        "pairedRatios": [
+          0.9798213471572682,
+          1.034492387037452,
+          0.9796009161462842,
+          1.012337894718888
+        ],
+        "baselineEqualWorkTotalMs": 23947.399999999907,
+        "otherEqualWorkTotalMs": 23986.500000000175
+      },
+      "nonregression": {
+        "medianChangeAtMost1Percent": true,
+        "equalWorkChangeAtMost1Percent": true,
+        "upper95ChangeAtMost3Percent": true
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": true,
+        "absoluteEqualWorkChangeAtMost1Percent": true
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 411,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "baselinePhaseMedians": {
+        "totalImportMs": 5986.099999999991,
+        "workerImportMs": 5953.0500000000175,
+        "archiveAndIndexMs": 85.5,
+        "termFastPathElapsedMs": 5750.5,
+        "importDataBanksElapsedMs": 5815.0,
+        "bulkFinalizationElapsedMs": 29.0,
+        "step4MediaResolveMs": 114.5,
+        "step4MediaWriteMs": 18.0,
+        "step4MediaZipBatchReadMs": 1761.5,
+        "step4MediaZipBatchInflateMs": 697.5,
+        "step4MediaZipBatchCount": 144.0,
+        "step4MediaZipBatchEntryCount": 146570.0,
+        "step4MediaZipBatchRangeBytes": 195649882.0,
+        "step4MediaZipBatchCompressedBytes": 188864129.0,
+        "step4MediaZipBatchUncompressedBytes": 188131284.0,
+        "step4TagReadMs": 1.5,
+        "step4BulkAddTagsMetaMs": 1.0,
+        "step4BulkAddTermsMs": 2780.5,
+        "commitMs": 0.9000000000232831,
+        "termContentEndImportSessionMs": 2.849999999976717,
+        "termContentEndImportSessionCloseWritableMs": 1.5,
+        "termRecordEndImportSessionMs": 22.10000000000582,
+        "termRecordEndImportSessionFlushPendingWritesMs": 9.799999999959255,
+        "termRecordEndImportSessionAwaitQueuedWritesMs": 1.400000000037835,
+        "termRecordEndImportSessionCloseWritableMs": 8.25,
+        "termRecordLookupIndexAwaitMs": 0.6500000000232831,
+        "createIndexesMs": 0.0,
+        "termsVirtualTableSyncMs": 0.0,
+        "totalMs": 28.249999999970896,
+        "dedupCanonicalScanMs": 126.94999999951688,
+        "contentCompressMs": 287.3500000005297,
+        "contentMetadataMs": 57.700000000331784,
+        "termRecordFieldEncodeMs": 422.59999999945285,
+        "termRecordValidationMs": 44.00000000032014,
+        "dedupRecentSourceCacheMs": 6.64999999984866,
+        "parserSourceInflateMs": 1359.5500000004831,
+        "parserResultCopyMs": 1828.7000000000698,
+        "parserLookupIndexEncodeMs": 668.3999999998923,
+        "mediaWriteShareOfTotalPercent": 0.3047115122850896
+      }
+    },
+    {
+      "order": "BA",
+      "candidate": {
+        "count": 12,
+        "baselineMedianMs": 4996.549999999988,
+        "otherMedianMs": 5266.399999999994,
+        "medianPairedChangeMs": 141.10000000003492,
+        "medianPairedChangePercent": 2.7717861369815022,
+        "equalWorkChangePercent": 2.6248739143536426,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          74.19999999999709,
+          199.80000000001746
+        ],
+        "descriptiveBootstrap95Percent": [
+          1.308174544650642,
+          4.1531794071594685
+        ],
+        "pairedMs": [
+          89.30000000001746,
+          148.89999999999418,
+          59.09999999997672,
+          -204.80000000004657,
+          653.0999999999767,
+          203.20000000001164,
+          196.40000000002328,
+          145.90000000002328,
+          119.0,
+          136.30000000004657,
+          564.3000000000466,
+          -507.69999999995343
+        ],
+        "pairedRatios": [
+          1.015587634624451,
+          1.0269312159742434,
+          1.0105758562685616,
+          0.9626256911874653,
+          1.1395751410497468,
+          1.0402002097058205,
+          1.0428633784373686,
+          1.0305460179214518,
+          1.0239875828982643,
+          1.0285045067653864,
+          1.1157111220472526,
+          0.899109733317444
+        ],
+        "baselineEqualWorkTotalMs": 61069.600000000035,
+        "otherEqualWorkTotalMs": 62672.60000000015
+      },
+      "control": {
+        "count": 4,
+        "baselineMedianMs": 5052.600000000064,
+        "otherMedianMs": 5172.400000000023,
+        "medianPairedChangeMs": 53.54999999998836,
+        "medianPairedChangePercent": 1.0964475928026296,
+        "equalWorkChangePercent": 0.5147499435149694,
+        "fasterPairs": 2,
+        "descriptiveBootstrap95Ms": [
+          -347.70000000001164,
+          345.4000000000233
+        ],
+        "descriptiveBootstrap95Percent": [
+          -6.843679880329279,
+          7.156769300899812
+        ],
+        "pairedMs": [
+          -41.5,
+          -347.70000000001164,
+          148.59999999997672,
+          345.4000000000233
+        ],
+        "pairedRatios": [
+          0.9923544583640383,
+          0.9315632011967072,
+          1.0295744934920141,
+          1.0715676930089981
+        ],
+        "baselineEqualWorkTotalMs": 20359.40000000008,
+        "otherEqualWorkTotalMs": 20464.20000000007
+      },
+      "nonregression": {
+        "medianChangeAtMost1Percent": false,
+        "equalWorkChangeAtMost1Percent": false,
+        "upper95ChangeAtMost3Percent": false
+      },
+      "controlGates": {
+        "absoluteMedianChangeAtMost1Percent": false,
+        "absoluteEqualWorkChangeAtMost1Percent": true
+      },
+      "passesAllHostGates": false,
+      "memory": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 593,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 3.0374799588661294,
+            "maximumPairedChangePercent": 3.6124781635331837
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 3.27462632085197,
+            "maximumPairedChangePercent": 3.660016673452371
+          }
+        }
+      },
+      "baselinePhaseMedians": {
+        "totalImportMs": 4996.549999999988,
+        "workerImportMs": 4967.200000000012,
+        "archiveAndIndexMs": 81.0,
+        "termFastPathElapsedMs": 4716.5,
+        "importDataBanksElapsedMs": 4798.0,
+        "bulkFinalizationElapsedMs": 69.0,
+        "step4MediaResolveMs": 96.5,
+        "step4MediaWriteMs": 23.5,
+        "step4MediaZipBatchReadMs": 1631.0,
+        "step4MediaZipBatchInflateMs": 470.0,
+        "step4MediaZipBatchCount": 144.0,
+        "step4MediaZipBatchEntryCount": 146570.0,
+        "step4MediaZipBatchRangeBytes": 195649882.0,
+        "step4MediaZipBatchCompressedBytes": 188864129.0,
+        "step4MediaZipBatchUncompressedBytes": 188131284.0,
+        "step4TagReadMs": 2.0,
+        "step4BulkAddTagsMetaMs": 2.0,
+        "step4BulkAddTermsMs": 2178.5,
+        "commitMs": 1.099999999976717,
+        "termContentEndImportSessionMs": 2.3500000000203727,
+        "termContentEndImportSessionCloseWritableMs": 1.1499999999650754,
+        "termRecordEndImportSessionMs": 63.10000000000582,
+        "termRecordEndImportSessionFlushPendingWritesMs": 9.500000000058208,
+        "termRecordEndImportSessionAwaitQueuedWritesMs": 1.8500000000058208,
+        "termRecordEndImportSessionCloseWritableMs": 50.70000000001164,
+        "termRecordLookupIndexAwaitMs": 0.8999999999650754,
+        "createIndexesMs": 0.0,
+        "termsVirtualTableSyncMs": 0.0,
+        "totalMs": 68.45000000004075,
+        "dedupCanonicalScanMs": 77.4000000001688,
+        "contentCompressMs": 247.2500000000582,
+        "contentMetadataMs": 43.950000000273576,
+        "termRecordFieldEncodeMs": 357.20000000009895,
+        "termRecordValidationMs": 34.49999999962165,
+        "dedupRecentSourceCacheMs": 7.099999999947613,
+        "parserSourceInflateMs": 1300.0000000001164,
+        "parserResultCopyMs": 1333.500000000393,
+        "parserLookupIndexEncodeMs": 480.64999999973224,
+        "mediaWriteShareOfTotalPercent": 0.47636196206149706
+      }
+    }
+  ]
+}

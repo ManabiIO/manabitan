@@ -1,0 +1,71 @@
+{
+  "metrics": {
+    "A": {
+      "pairedMedianDeltaMs": -6.061990500000093,
+      "pairedMedianPercent": -1.7627570081060364,
+      "fasterPairs": 6,
+      "nativeEqualWorkPercent": -0.9178203215764791,
+      "fullGroupEqualWorkPercent": -4.974559191366856,
+      "fullGroupPairedMedianDeltaMs": -54.15724550000016,
+      "fullGroupPairedMedianPercent": -9.07371384847937,
+      "bootstrap95": {
+        "deltaMs": [
+          -47.69850700000006,
+          38.84917700000062
+        ],
+        "percent": [
+          -13.757844051025952,
+          13.273683673057622
+        ]
+      }
+    },
+    "C": {
+      "pairedMedianDeltaMs": -26.221373999999855,
+      "pairedMedianPercent": -7.4717917734390955,
+      "fasterPairs": 8,
+      "nativeEqualWorkPercent": -7.114688277005965,
+      "fullGroupEqualWorkPercent": -9.373316213604376,
+      "fullGroupPairedMedianDeltaMs": -40.38671149999948,
+      "fullGroupPairedMedianPercent": -6.718022662655931,
+      "bootstrap95": {
+        "deltaMs": [
+          -51.969069500000614,
+          8.779860999999414
+        ],
+        "percent": [
+          -14.706882558195577,
+          3.027086797412526
+        ]
+      }
+    }
+  },
+  "control": {
+    "pairedMedianPercent": 1.827161563313373,
+    "equalWorkPercent": 6.6715262515455676,
+    "strictAbsoluteLimitPercent": 0.8813785040530182,
+    "fullGroupPairedMedianPercent": -1.7546942830186207,
+    "fullGroupEqualWorkPercent": 4.853710671577982
+  },
+  "bootstrap": {
+    "resamples": 20000,
+    "generator": "xorshift32",
+    "seed": 894660,
+    "sharedIndexesAcrossComparisonsAndMetrics": true,
+    "percentile": "type7"
+  },
+  "checks": {
+    "A.nativeSavingAtLeast3Percent": false,
+    "A.atLeast9FasterPairs": false,
+    "A.nativeEqualWorkLower": true,
+    "A.bothNativeIntervalUpperBoundsNegative": false,
+    "A.fullGroupEqualWorkAtMost1PercentRegression": true,
+    "C.nativeSavingAtLeast3Percent": true,
+    "C.atLeast9FasterPairs": false,
+    "C.nativeEqualWorkLower": true,
+    "C.bothNativeIntervalUpperBoundsNegative": false,
+    "C.fullGroupEqualWorkAtMost1PercentRegression": true,
+    "control.nativePairedMedianBelowHalfSmallerSaving": false,
+    "control.nativeEqualWorkBelowHalfSmallerSaving": false
+  },
+  "advance": false
+}

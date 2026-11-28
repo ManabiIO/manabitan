@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/manabitan-da6c4-alias-qualification-r5/rebind-saved-preflight.py", line 6, in <module>
+    from browser_proof import bind_preflight
+  File "/tmp/manabitan-da6c4-alias-qualification-r5/browser_proof.py", line 8, in <module>
+    from receipt_adapter import AliasReceiptComparator, file_vector, route_receipt, same
+  File "/tmp/manabitan-da6c4-alias-qualification-r5/receipt_adapter.py", line 13, in <module>
+    from qualification_receipts import (
+ModuleNotFoundError: No module named 'qualification_receipts'
