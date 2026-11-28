@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "qualification-workflow-validation-failure",
+  "complete": false,
+  "sourceCommit": "46060c7b0defec5bb36f58010d95ffe2a05c17c1",
+  "sourceTree": "ef5759772ff5d2b2e992ecee0fbaaf281cdacb4a",
+  "workflowRun": 46130108071,
+  "checkSuite": 124792719112,
+  "attempt": 1,
+  "workflowBlob": "f42cfecfe75dd2be40b9ed460a2ccb2c3fe67e00",
+  "sourceManifestBlob": "2dbae390995d59ccdc259f43c7d84da9be618376",
+  "workflowConclusion": "failure",
+  "dispatchedJobs": 0,
+  "importObservations": 0,
+  "timedObservations": 0,
+  "evidence": {
+    "workflow-run.json": {
+      "blob": "ed8b6f6612bf8f3717fa2d924146fb40920e5518",
+      "bytes": 12539,
+      "sha256": "9f1a81a81aec1d81204e499350eb503abe48c50c6d17cfb4b228e5c5ea64e8b7"
+    },
+    "workflow-jobs.json": {
+      "blob": "4f9bdd7bcd783d2155d1f2e7dff68294c20eaffa",
+      "bytes": 27,
+      "sha256": "b3dab5870ff3a8209160335de7c1077b89e461d875d9041ac9d8b8ed7c1666f6"
+    }
+  },
+  "exactAnnotation": null,
+  "annotationLimitation": "The connector does not expose the check-suite/check-run annotation route; its public run-page fetch returns run metadata, and the public web page was unavailable. No annotation text is reconstructed.",
+  "sourceDiagnosis": {
+    "kind": "confirmed workflow context defect, consistent with the zero-job failure",
+    "documentedContextAvailability": "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability",
+    "rule": "jobs.<job_id>.env permits github, needs, strategy, matrix, vars, secrets and inputs; runner is unavailable.",
+    "offendingJobEnvironmentExpressions": 6,
+    "correction": "Resolve RUNNER_TEMP in an initial shell step; write EVIDENCE and UPLOAD to GITHUB_ENV for subsequent steps."
+  },
+  "replacementWorkflowBlob": "67394899be7329237fa6a3af656344139b0cb781",
+  "replacementWorkflowSha256": "94e70d4c74d470c375c37cb6b1370902010c266b48baecd780346fd9093786dc",
+  "replacementSourceManifestBlob": "140615c8905cb3bc38453382e5a29f542237e41e",
+  "productOrMeasuredCodeChanged": false,
+  "protocolOrAcceptanceGateChanged": false,
+  "retry": "A new source-bound workflow commit is required; no unchanged rerun."
+}
