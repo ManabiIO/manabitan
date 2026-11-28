@@ -89,7 +89,7 @@ try {
         parserWorkerCounts: [],
         sourceFile: 'ext/js/dictionary/zstd-term-content.js',
         overlayOnly: null,
-        controlPackageSha256: packageSha256,
+        controlPackageSha256: null,
         candidatePackageSha256: null,
         pairs: [],
     }
@@ -104,17 +104,41 @@ try {
     if ((controlSourceText.match(/const COMPRESSION_WORKER_COUNT = 4;/gu) ?? []).length !== 1) {
         throw new Error('Frozen source does not contain one stock four-worker compression constant')
     }
-    const candidateSourceText = controlSourceText.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;')
-    await writeFile(overlayPath, candidateSourceText)
+    const workerInitializationAnchor = '                readyPromises.push(waitForCompressionWorkerReady(worker, abortController.signal));\n            }\n            await Promise.all(readyPromises);'
+    if ((controlSourceText.split(workerInitializationAnchor).length - 1) !== 1) {
+        throw new Error('Frozen compression worker initialization anchor is absent or ambiguous')
+    }
+    const instrumentedControlSourceText = controlSourceText.replace(
+        workerInitializationAnchor,
+        `${workerInitializationAnchor.slice(0, workerInitializationAnchor.indexOf('\n            await Promise.all(readyPromises);'))}\n            globalThis.__manabitanQualificationZstdWorkersCreated = workers.length;\n            await Promise.all(readyPromises);\n            globalThis.__manabitanQualificationZstdWorkersReady = workers.length;`,
+    )
+    const candidateSourceText = instrumentedControlSourceText.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;')
+    if ((instrumentedControlSourceText.match(/const COMPRESSION_WORKER_COUNT = 4;/gu) ?? []).length !== 1 ||
+        candidateSourceText.replace('const COMPRESSION_WORKER_COUNT = 2;', 'const COMPRESSION_WORKER_COUNT = 4;') !== instrumentedControlSourceText) {
+        throw new Error('Worker-count candidate is not a single-constant overlay of the shared diagnostic package')
+    }
     try {
+        await writeFile(overlayPath, instrumentedControlSourceText)
+        await run(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-dev'], {cwd: product})
+        const controlPackagePath = path.join(product, 'builds/manabitan-chrome-dev.zip')
+        workerCountScreen.controlPackageSha256 = await sha256File(controlPackagePath)
+        const controlExtensionDir = path.join(process.env.RUNNER_TEMP, 'cross-engine/manabitan-zstd-workers-4')
+        await mkdir(controlExtensionDir, {recursive: true})
+        await run('unzip', ['-q', controlPackagePath, '-d', controlExtensionDir])
+        workerCountScreen.sharedDiagnosticInstrumentation = {
+            sourceSha256: createHash('sha256').update(controlSource).digest('hex'),
+            instrumentedSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'),
+            patchSha256: createHash('sha256').update(workerInitializationAnchor).digest('hex'),
+            purpose: 'Record constructed and ready Zstd worker counts in the extension service worker global scope in both packages',
+        }
+        await writeFile(overlayPath, candidateSourceText)
         const {stdout: changedFiles} = await run('git', ['diff', '--name-only'], {cwd: product})
         if (changedFiles.trim() !== overlayRelativePath) throw new Error(`Unexpected worker-count overlay paths: ${changedFiles.trim()}`)
-        const {stdout: binaryPatch} = await run('git', ['diff', '--binary', '--', overlayRelativePath], {cwd: product})
         workerCountScreen.overlayOnly = {
             changedPaths: changedFiles.trim().split('\n'),
-            controlSourceSha256: createHash('sha256').update(controlSource).digest('hex'),
+            controlSourceSha256: createHash('sha256').update(instrumentedControlSourceText).digest('hex'),
             candidateSourceSha256: await sha256File(overlayPath),
-            patchSha256: createHash('sha256').update(binaryPatch).digest('hex'),
+            patchSha256: createHash('sha256').update('COMPRESSION_WORKER_COUNT: 4 -> 2').digest('hex'),
             expectedDiff: 'const COMPRESSION_WORKER_COUNT = 4; -> const COMPRESSION_WORKER_COUNT = 2;',
         }
         await run(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-dev'], {cwd: product})
@@ -132,14 +156,11 @@ try {
             {pair: 5, first: {arm: 'control', workers: 4}, second: {arm: 'candidate', workers: 4}, kind: 'same-code-control'},
             {pair: 6, first: {arm: 'candidate', workers: 4}, second: {arm: 'control', workers: 4}, kind: 'same-code-control'},
         ]
-        // The stock package has already been extracted into extensionDir, so the overlay package can
-        // replace the temporary worktree build output without changing the control arm.
-        await writeFile(overlayPath, controlSource)
         for (const item of schedule) {
             const pairReceipts = []
             for (const arm of [item.first, item.second]) {
                 const isCandidatePackage = item.kind === 'treatment' && arm.workers === 2
-                const packageDir = isCandidatePackage ? candidateExtensionDir : extensionDir
+                const packageDir = isCandidatePackage ? candidateExtensionDir : controlExtensionDir
                 const expectedPackageSha256 = isCandidatePackage ? workerCountScreen.candidatePackageSha256 : workerCountScreen.controlPackageSha256
                 const oracle = path.join(harness, 'test/qualification/hoshidicts-jmdict/fixtures/source-oracle.json')
                 const environment = {

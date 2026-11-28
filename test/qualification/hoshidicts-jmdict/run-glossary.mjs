@@ -60,9 +60,6 @@ function findNumericProperties(value, names, results = []) {
     }
     return results
 }
-function isCompressionWorkerTarget(targetInfo) {
-    return typeof targetInfo?.url === 'string' && targetInfo.url.includes('zstd-term-content-compression-worker.js')
-}
 function sourcePairs(sourceOracle) {
     return [...new Map(sourceOracle.matchedSourceRows.map(({expression, reading}) => {
         const pair = {expression, reading}
@@ -201,8 +198,7 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
     const profile = await mkdtemp(path.join(scratch, `cap-default-${dataset}-${pair}-${arm}-`))
     let context
     let record
-    let browserTargetSession = null
-    const compressionWorkerTargetsCreated = new Map()
+    let compressionWorkerAttestation = null
     const hostBefore = hostSnapshot()
     try {
         context = await chromium.launchPersistentContext(profile, getChromiumLaunchOptions({
@@ -214,19 +210,6 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
         }))
         const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker', {timeout: 30000})
         const extensionId = new URL(worker.url()).host
-        if (process.env.BENCH_EXPECTED_ZSTD_WORKERS) {
-            const browser = context.browser()
-            if (browser === null) throw new Error('Chromium browser handle is unavailable for worker target attestation')
-            browserTargetSession = await browser.newBrowserCDPSession()
-            browserTargetSession.on('Target.targetCreated', ({targetInfo}) => {
-                if (isCompressionWorkerTarget(targetInfo)) compressionWorkerTargetsCreated.set(targetInfo.targetId, targetInfo)
-            })
-            await browserTargetSession.send('Target.setDiscoverTargets', {discover: true})
-            const {targetInfos} = await browserTargetSession.send('Target.getTargets')
-            for (const targetInfo of targetInfos) {
-                if (isCompressionWorkerTarget(targetInfo)) compressionWorkerTargetsCreated.set(targetInfo.targetId, targetInfo)
-            }
-        }
         const page = context.pages()[0] ?? await context.newPage()
         await page.goto(`chrome-extension://${extensionId}/settings.html?popup-preview=false`)
         await page.waitForSelector('#dictionary-import-file-input', {state: 'attached', timeout: 30000})
@@ -357,23 +340,23 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
             }
         }
         if (process.env.BENCH_EXPECTED_ZSTD_WORKERS) {
-            const {targetInfos} = await browserTargetSession.send('Target.getTargets')
-            const liveCompressionWorkers = targetInfos.filter(isCompressionWorkerTarget)
+            compressionWorkerAttestation = await worker.evaluate(() => ({
+                createdCount: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersCreated'),
+                readyCount: Reflect.get(globalThis, '__manabitanQualificationZstdWorkersReady'),
+            }))
             record.compressionWorkerAttestation = {
                 expected: Number(process.env.BENCH_EXPECTED_ZSTD_WORKERS),
-                createdCount: compressionWorkerTargetsCreated.size,
-                liveCount: liveCompressionWorkers.length,
-                createdTargets: [...compressionWorkerTargetsCreated.values()].map(({type, url}) => ({type, url})),
-                liveTargets: liveCompressionWorkers.map(({type, url}) => ({type, url})),
+                actualCreatedCount: compressionWorkerAttestation.createdCount ?? null,
+                actualReadyCount: compressionWorkerAttestation.readyCount ?? null,
             }
             const foundParserWorkerCounts = [...new Set(findNumericProperties(
                 record.importDebugSnapshot ?? {},
                 new Set(['parserParallelWorkerCount', 'fastPathParserParallelWorkerCount']),
             ))]
             record.parserWorkerCounts = foundParserWorkerCounts
-            if (record.compressionWorkerAttestation.createdCount !== record.compressionWorkerAttestation.expected &&
-                record.compressionWorkerAttestation.liveCount !== record.compressionWorkerAttestation.expected) {
-                errors.push(`Observed ${record.compressionWorkerAttestation.createdCount} created and ${record.compressionWorkerAttestation.liveCount} live Zstd compression workers; expected ${record.compressionWorkerAttestation.expected}`)
+            if (record.compressionWorkerAttestation.actualCreatedCount !== record.compressionWorkerAttestation.expected ||
+                record.compressionWorkerAttestation.actualReadyCount !== record.compressionWorkerAttestation.expected) {
+                errors.push(`Observed ${record.compressionWorkerAttestation.actualCreatedCount} created and ${record.compressionWorkerAttestation.actualReadyCount} ready Zstd compression workers; expected ${record.compressionWorkerAttestation.expected}`)
             }
             if (record.hardwareConcurrency === null || foundParserWorkerCounts.length === 0) {
                 errors.push('Missing hardware concurrency or parser worker configuration attestation')
@@ -428,7 +411,6 @@ async function runManabitan(dataset, pair, spec, oracle, glossaryOracle) {
         record.validation = {eligible, errors}
         record.status = eligible ? 'passed' : 'failed'
     } finally {
-        await browserTargetSession?.detach().catch(() => {})
         await context?.close()
         // Retain the owned profile for cleanup and failure diagnosis.
     }
