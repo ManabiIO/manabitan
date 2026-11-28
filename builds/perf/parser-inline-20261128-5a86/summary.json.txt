@@ -1,0 +1,177 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "ed09ddbd9c20352e4690ade354e91a9bd70392a4",
+  "decision": "No replicated material complete-import gain; retain negative result, no PR and no further acquisition.",
+  "hosts": {
+    "AB": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "descriptiveBootstrap95Percent": [
+            -2.1682266183334686,
+            25.632708856607778
+          ],
+          "equalWorkChangePercent": 7.919746568109787,
+          "fasterPairs": 2,
+          "medianPairedChangePercent": 0.5013986043347352,
+          "ratios": [
+            1.5032626427406517,
+            1.00209698558327,
+            1.0093915343915036,
+            0.9810257115357546,
+            1.007930986503425,
+            0.9756097560975762
+          ],
+          "worstPairChangePercent": 50.32626427406517
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "descriptiveBootstrap95Percent": [
+            -0.3853034264547306,
+            0.17735334242678924
+          ],
+          "equalWorkChangePercent": -0.1027608412727421,
+          "fasterPairs": 1,
+          "medianPairedChangePercent": -0.10397504201397068,
+          "ratios": [
+            1.001773533424268,
+            0.9961469657354527
+          ],
+          "worstPairChangePercent": 0.17735334242678924
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "browser": {
+        "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "commonReceiptSha256": "43071d041744e025d7d10437cf1eef3085ba26a54a7cbb1f0b8fa8f210798cd6",
+      "imports": 26,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.1264152334411044,
+            "medianPairedChangePercent": 0.4571743965376518
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.5501247463190593,
+            "medianPairedChangePercent": 0.0002408932137043518
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 271,
+        "schemaVersion": 1
+      },
+      "policy": [
+        [
+          3,
+          12
+        ]
+      ]
+    },
+    "BA": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "count": 6,
+          "descriptiveBootstrap95Percent": [
+            -4.09404767583379,
+            1.4472989694026772
+          ],
+          "equalWorkChangePercent": -1.0209480511852553,
+          "fasterPairs": 3,
+          "medianPairedChangePercent": -0.18846224297602854,
+          "ratios": [
+            1.011296076099881,
+            0.9394307149161578,
+            1.0176499032881727,
+            0.9944339175745953,
+            0.9786883315671665,
+            1.0017968375658841
+          ],
+          "worstPairChangePercent": 1.764990328817273
+        },
+        "identicalCodeControl": {
+          "count": 2,
+          "descriptiveBootstrap95Percent": [
+            -1.7773620205779772,
+            1.497222893020278
+          ],
+          "equalWorkChangePercent": -0.16633004633410664,
+          "fasterPairs": 1,
+          "medianPairedChangePercent": -0.14006956377885516,
+          "ratios": [
+            0.9822263797942202,
+            1.0149722289302028
+          ],
+          "worstPairChangePercent": 1.497222893020278
+        },
+        "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+        "memoryPassed": true,
+        "status": "correctness-memory-passed",
+        "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+        "timingScope": "File input change through post-UI completion; fresh profile per observation"
+      },
+      "browser": {
+        "executable": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "153.0.8010.12",
+        "versionOutput": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "commonReceiptSha256": "43071d041744e025d7d10437cf1eef3085ba26a54a7cbb1f0b8fa8f210798cd6",
+      "imports": 26,
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -1.0168742170805434,
+            "medianPairedChangePercent": -1.4262032353643928
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -0.4591578605725677,
+            "medianPairedChangePercent": -0.9973234850032486
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 273,
+        "schemaVersion": 1
+      },
+      "policy": [
+        [
+          3,
+          12
+        ]
+      ]
+    }
+  },
+  "limits": "Browser semantic checks are sampled plus exact row counts/restart/lookups; separate local component verifies every emitted row/index digest. Sampled process peaks are not exact peaks or a memory reduction claim. Hosts remain separate.",
+  "localComponent": {
+    "completedObservations": 12,
+    "failedInitialObservations": 0,
+    "scope": "Fixed seven-bank component grouping, not the production planner or a complete import",
+    "summary": {
+      "equalWorkTotalChangePercent": 18.297550156449958,
+      "fasterPairs": 1,
+      "medianPairedChangePercent": 16.569624689726915
+    }
+  },
+  "run": "https://github.com/ManabiIO/manabitan/actions/runs/46102590692",
+  "schema": 1,
+  "validation": {
+    "jsonFormat": "passed",
+    "observerReceiptTestsPassed": 32,
+    "pinnedCompilerAndLinker": "21.1.8",
+    "sevenBuildTargets": "passed",
+    "unitFilesPassed": 669,
+    "unitTestsPassed": 15135,
+    "unitTestsSkipped": 47
+  }
+}

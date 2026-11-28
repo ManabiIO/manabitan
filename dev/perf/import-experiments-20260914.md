@@ -1,5 +1,55 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: parser field inlining did not qualify
+
+The `next_format3_field` force-inline experiment did not produce a replicated material JMdict complete-import gain. Preserve this negative result; do not open a product PR or acquire more observations of the unchanged candidate. This evidence-only follow-up changes no runtime, test, acquisition driver or workflow. Every measurement remains bound to the original candidate below.
+
+- Baseline: `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, tree `d99ea4d04658f7ec1c76acdc5f3684594212a471`.
+- Measured candidate: `ed09ddbd9c20352e4690ade354e91a9bd70392a4`, tree `e99da38d8f3d061f1f243f249f83f01470b5424c`.
+- Change: add `__attribute__((always_inline))` to `next_format3_field`; no grammar, admission, defaults, grouping, cache or numeric behavior changes.
+- Pinned Clang/LLD 21.1.8 rebuild: parser WASM grows from 67,659 to 68,066 bytes, **+407 bytes**. Baseline SHA-256 is `8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee`; candidate is `1cb15eda380145fe66c98e2b8397d1146552fc520dfdb600f22a0e478d7f6245`. The canonical scanner is unchanged.
+- All 554 release members per arm and host were independently rehashed. Only `js/dictionary/wasm/term-bank-parser.c` and `lib/term-bank-parser.wasm` differ.
+
+[Run 46102590692](https://github.com/ManabiIO/manabitan/actions/runs/46102590692) completed both prescribed hosts with the unchanged full qualifier. Each retained 26 observations: four warmups, six alternating candidate/baseline pairs, two interleaved identical-source control pairs, two separate exhaustive-media imports and four separate memory imports. No failed or slow timing observation was removed, replaced or retried. Flags are `{}` and every observation reports three parser workers and twelve groups.
+
+Negative percentages mean faster. Hosts remain separate; controls are not subtracted. Intervals are descriptive bootstrap intervals from the original registered analysis.
+
+| JMdict host | Median paired B/A | Equal-work B/A | Faster pairs | Descriptive 95% interval | Median control C/A |
+| ----------- | ----------------: | -------------: | -----------: | -----------------------: | -----------------: |
+| AB first    |          +0.5014% |       +7.9197% |          2/6 |    -2.1682% to +25.6327% |           -0.1040% |
+| BA first    |          -0.1885% |       -1.0209% |          3/6 |     -4.0940% to +1.4473% |           -0.1401% |
+
+The AB host retains its 1,105.8 ms first candidate import versus 735.6 ms baseline. Both hosts' intervals include zero. All 52 canonical receipts were rebuilt from the raw reports and agree on common digest `43071d041744e025d7d10437cf1eef3085ba26a54a7cbb1f0b8fa8f210798cd6`. They verify exact row counts, sampled content, restart and lookup behavior; browser checks do not prove equality of every persisted byte. Separate exhaustive-media observations passed. The locked JMdict archive has 528,299 rows, 15,645,766 bytes and SHA-256 `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f`. Both hosts use Chromium 153.0.8010.12, executable SHA-256 `8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e`, and Node 22.22.0.
+
+All eight separate memory observations qualify under the original coverage rules. The independent audit recomputes all **544 raw scans** and the unchanged 5% median/10% individual regression bounds. AB paired medians are +0.00024% PSS and +0.45717% private memory; BA medians are -0.99732% and -1.42620%. This passes the sampled memory screen and does not establish reduced peak memory. Hosted validation passed 15,135 tests with 47 skips across 669 files, all 32 observer/receipt tests, exact native regeneration, JSON formatting and all seven dry-run builds.
+
+The local component screen is also negative. Its initial invocation failed on an absent default cache path before any observation; that failure remains preserved. The corrected explicit-cache invocation completed all six pairs with default flags, all 528,299 rows, identical complete output/index digests, a +16.5696% median paired change, +18.2976% equal-work change and one faster pair. It uses fixed seven-bank component groups, not the production planner, and excludes inflation, worker IPC, global storage/deduplication, OPFS and UI. It is not a complete-import result. Its digest is `8f1001b400c6f34e67ae6981cf4532c0dbd7a7b8bc98a10086da224289dbfff1`.
+
+### Retained evidence and audit
+
+Machine-readable evidence is in `builds/perf/parser-inline-20261128-5a86/`: `summary.json.txt`, `manifest.json.txt` and `observations.tar.gz`. The archive retains every original hosted artifact member except the four independently verified reproducible release ZIP payloads. It includes raw observations, canonical receipts, raw memory scans, original overlay sources, complete source/package identities, frozen audit helpers, original job logs, the local failed and completed screens and their validation logs. The manifest records every original member's size, SHA-256 and ZIP CRC, all release-member hashes and original archive identities; the archive includes the deterministic packager. The validation ZIP is preserved verbatim.
+
+| Original artifact                                                                                                |      Bytes | SHA-256                                                            |
+| ---------------------------------------------------------------------------------------------------------------- | ---------: | ------------------------------------------------------------------ |
+| [AB / 15247255708](https://github.com/ManabiIO/manabitan/actions/runs/46102590692/artifacts/15247255708)         | 34,938,385 | `ead6e407f3c52389e0c120823212b395a40a2c42312d36001a445f04e1fefb9a` |
+| [BA / 15246947741](https://github.com/ManabiIO/manabitan/actions/runs/46102590692/artifacts/15246947741)         | 34,938,531 | `bbd66314ff1bf848817857fa7a95f8fdd5edb1494556f4b138874082f304f20a` |
+| [Validation / 15246695933](https://github.com/ManabiIO/manabitan/actions/runs/46102590692/artifacts/15246695933) |     48,785 | `2e63bd8c0e6b3f14ddf2d01fb409193810ee6d0d8137674a4ce60877782fe9f9` |
+
+Run the portable audit from this repository checkout using Python 3:
+
+```sh
+python3 dev/perf/verify-parser-inline-20261128-5a86.py
+```
+
+It verifies retained member hashes, reconstructs the exact schedule, rebuilds all 52 canonical receipts, recomputes paired statistics and all raw memory audits, and checks the complete and failed local screens. It refuses disabled Python assertions. Temporary extraction needs about 40 MiB of free space; set `TMPDIR` if necessary. To additionally rehash the original hosted ZIPs and all 554 release members per arm, place their original downloads in one directory named `AB.zip`, `BA.zip` and `validation.zip`, then run:
+
+```sh
+python3 dev/perf/verify-parser-inline-20261128-5a86.py \
+  --original-artifacts /path/to/original-artifacts
+```
+
+Both audit modes passed before publication. Original outer ZIP bytes cannot be reconstructed or rehashed from the compact bundle alone. Exact acquisition commands and environment are preserved in the unchanged [frozen workflow](https://github.com/ManabiIO/manabitan/blob/ed09ddbd9c20352e4690ade354e91a9bd70392a4/.github/workflows/parser-inline-screen-5a86.yml) and [driver](https://github.com/ManabiIO/manabitan/blob/ed09ddbd9c20352e4690ade354e91a9bd70392a4/dev/perf/parser-inline-screen-5a86.py), which calls `dev/perf/import-qualification-20261125-a7f7.py`. Their source guard intentionally identifies the original five-file experiment; this later evidence head is not a new measured candidate. Workflow path filters exclude this evidence-only follow-up, so it does not reacquire the study.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.
