@@ -98,7 +98,10 @@ describe('importer completion-ticket adapters', () => {
         const lazy = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallelLazy').mockImplementation(async (_sources, _lengths, _version, callback) => await consume(callback));
         const compressed = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksParallelCompressedLazy').mockImplementation(async (_sources, _lengths, _version, callback) => await consume(callback));
         const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => ({completion: completed.promise}), createSources(mode));
-        void read.then(() => { readSettled = true; }, () => { readSettled = true; });
+        void read.then(
+            () => { readSettled = true; },
+            () => { readSettled = true; },
+        );
 
         await published.promise;
         expect(readSettled).toBe(false);
@@ -129,7 +132,10 @@ describe('importer completion-ticket adapters', () => {
             callbackReturned = true;
         };
         const sequentialParser = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (_sources, _version, callback) => { await consume(callback); });
-        const overlappedParser = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksOverlapped').mockImplementation(async (_sources, _version, callback) => { await consume(callback); return true; });
+        const overlappedParser = vi.spyOn(parser, 'parseTermBankWithWasmColumnChunksOverlapped').mockImplementation(async (_sources, _version, callback) => {
+            await consume(callback);
+            return true;
+        });
         const read = importer._readTermBankFileFast(file, 3, 'Completion test', false, false, true, 'raw-bytes', () => {
             entered.resolve();
             return {completion: completed.promise};

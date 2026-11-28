@@ -1548,9 +1548,9 @@ export class DictionaryDatabase {
             throw new Error('Dictionary bulk import session ownership changed');
         }
         this._assertBulkImportSessionOwner(expectedSessionId);
-        const appendError = appendErrors.length === 1 ? appendErrors[0] : (
-            appendErrors.length > 1 ? new AggregateError(appendErrors, 'Failed to drain dictionary term chunks') : null
-        );
+        const appendError = appendErrors.length === 1 ?
+            appendErrors[0] :
+            (appendErrors.length > 1 ? new AggregateError(appendErrors, 'Failed to drain dictionary term chunks') : null);
         if (db !== null) {
             const tFinishBulkImportStart = safePerformance.now();
             let commitMs = 0;
@@ -5187,6 +5187,7 @@ void 0 :
     /**
      * @param {string} expectedSessionId
      * @returns {ArtifactTermChunkPipeline}
+     * @throws {Error} If admission is closed or the session no longer owns the import.
      */
     _getArtifactTermChunkPipeline(expectedSessionId) {
         if (typeof expectedSessionId !== 'string' || expectedSessionId.length === 0) {

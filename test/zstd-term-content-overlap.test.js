@@ -133,8 +133,11 @@ describe('shared compression across adjacent groups', () => {
             const first = begin(pool, [11, 12, 13]);
             expect(() => pool.beginCompressWrappedSpans(
                 new Uint8Array(new SharedArrayBuffer(1)),
-                Uint32Array.of(0), Uint32Array.of(1),
-                Uint32Array.of(1, 1), Uint32Array.of(1), 'jmdict',
+                Uint32Array.of(0),
+                Uint32Array.of(1),
+                Uint32Array.of(1, 1),
+                Uint32Array.of(1),
+                'jmdict',
             )).toThrow('block plan is invalid');
             const second = begin(pool, [21, 22]);
             expect(workers.map(({calls}) => calls.map(inputByte))).toEqual([[11, 22], [12], [13], [21]]);

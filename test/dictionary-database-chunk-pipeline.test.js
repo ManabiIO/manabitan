@@ -498,11 +498,9 @@ describe('ordered artifact term chunk persistence', () => {
             h.content[0].gate.reject(storageFailure);
             h.records[0].gate.resolve();
             await expect(first.completion).rejects.toBe(storageFailure);
-            if (cleanupFails) {
-                await expect(finishing).rejects.toMatchObject({errors: [storageFailure, cleanupFailure]});
-            } else {
-                await expect(finishing).rejects.toBe(storageFailure);
-            }
+            await (cleanupFails ?
+                expect(finishing).rejects.toMatchObject({errors: [storageFailure, cleanupFailure]}) :
+                expect(finishing).rejects.toBe(storageFailure));
             expect(rollback).toHaveBeenCalledOnce();
             expect(Reflect.get(h.database, '_bulkImportState')).toBe('idle');
             expect(Reflect.get(h.database, '_bulkImportTransactionOpen')).toBe(false);

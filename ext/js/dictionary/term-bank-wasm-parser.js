@@ -3149,7 +3149,12 @@ class ParallelTermBankPipelineRun {
             // A callback can fail while its predecessor is still persisting,
             // or a peer can fail while the sink awaits another parser result.
             // Drain both admitted tickets before releasing any active lease.
-            await Promise.allSettled([...sinkOwners].map(({completion}) => completion));
+            /** @type {Promise<void>[]} */
+            const completions = [];
+            for (const {completion} of sinkOwners) {
+                if (completion !== null) { completions.push(completion); }
+            }
+            await Promise.allSettled(completions);
             for (const owner of sinkOwners) { owner.release(); }
             await Promise.allSettled(this._workerLoops);
             throw this._error ?? new Error('Parallel term-bank pipeline failed');
