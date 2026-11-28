@@ -14,12 +14,12 @@ permissions:
 
 concurrency:
   group: import-macos-bda85f3c7e15-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   IMPORT_MAC_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
   IMPORT_MAC_LOOKAHEAD: 8dee0ebccd93dc3d64d3abcc581a17e93cc40af6
-  IMPORT_MAC_PRELOAD: 15e9577aadb513b2d4e6b194683bdfff8511ba36
+  IMPORT_MAC_PRELOAD: e974ec194f320da0cf3cd9f4525982722ce7836b
 
 jobs:
   validation:
