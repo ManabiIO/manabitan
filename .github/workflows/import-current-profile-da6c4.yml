@@ -1,0 +1,187 @@
+name: Frozen import cost profiles (da6c4)
+
+on:
+  push:
+    branches: [perf/prepared-score-screen-20261128-da6c4]
+    paths: [.github/workflows/import-current-profile-da6c4.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    name: Ordinary profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PROFILE_SOURCE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PROFILE_DICTIONARY: ${{ matrix.dictionary }}
+      PROFILE_OUTPUT: builds/perf/current-profile-20261128/${{ matrix.dictionary }}
+      MANABITAN_CHROMIUM_BROWSER: chromium
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+    steps:
+      - name: Check out the exact frozen product source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Guard the initial source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PROFILE_SOURCE"
+          git diff --no-ext-diff --exit-code "$PROFILE_SOURCE" -- .
+          git diff --no-ext-diff --cached --exit-code
+
+      - name: Set up pinned Node and repository libraries
+        uses: ./.github/actions/setup
+        with:
+          node-version: 22.22.0
+
+      - name: Install the locked Chromium runtime
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore checksum-pinned dictionary cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Verify the selected complete corpus
+        run: node dev/perf/prepare-dictionaries.js "$PROFILE_DICTIONARY"
+
+      - name: Record and guard all tracked sources and runtime files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          out = root / os.environ["PROFILE_OUTPUT"]
+          out.mkdir(parents=True, exist_ok=True)
+          pin = os.environ["PROFILE_SOURCE"]
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True).strip()
+          head = git("rev-parse", "HEAD")
+          if head != pin:
+              raise RuntimeError(f"Unexpected source head: {head}")
+          subprocess.run(["git", "diff", "--no-ext-diff", "--exit-code", pin, "--", "."], check=True)
+          subprocess.run(["git", "diff", "--no-ext-diff", "--cached", "--exit-code"], check=True)
+          unexpected = git("ls-files", "--others", "--exclude-standard", "--", "ext", "dev", "test")
+          if unexpected:
+              raise RuntimeError(f"Unexpected untracked source files: {unexpected}")
+          paths = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
+          tracked = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in paths if p}
+          runtime = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                     for p in sorted((root / "ext").rglob("*")) if p.is_file()}
+          receipt = {
+              "scope": "One diagnostic ordinary import per corpus; no comparison or speedup claim",
+              "source": pin, "tree": git("rev-parse", "HEAD^{tree}"),
+              "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+              "dictionary": os.environ["PROFILE_DICTIONARY"],
+              "tracked": tracked, "runtime": runtime,
+          }
+          receipt["trackedManifestSha256"] = hashlib.sha256(json.dumps(tracked, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+          receipt["runtimeManifestSha256"] = hashlib.sha256(json.dumps(runtime, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+          (out / "source-before.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("CURRENT_IMPORT_PROFILE_SOURCE " + json.dumps({
+              k: receipt[k] for k in ["scope", "source", "tree", "node", "dictionary", "trackedManifestSha256", "runtimeManifestSha256"]
+          }, separators=(",", ":")))
+          PY
+
+      - name: Capture one ordinary import with complete correctness checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROFILE_OUTPUT"
+          node dev/perf/import-benchmark.js "$PROFILE_DICTIONARY" \
+            --runs 1 --build-target chrome --media-check all \
+            --output "$PROFILE_OUTPUT" 2>&1 | tee "$PROFILE_OUTPUT/run.log"
+
+      - name: Guard source and runtime identity after the import
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          out = root / os.environ["PROFILE_OUTPUT"]
+          out.mkdir(parents=True, exist_ok=True)
+          pin = os.environ["PROFILE_SOURCE"]
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          subprocess.run(["git", "diff", "--no-ext-diff", "--exit-code", pin, "--", "."], check=True)
+          subprocess.run(["git", "diff", "--no-ext-diff", "--cached", "--exit-code"], check=True)
+          if head != pin:
+              raise RuntimeError(f"Unexpected source head after import: {head}")
+          unexpected = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "--", "ext", "dev", "test"], text=True).strip()
+          if unexpected:
+              raise RuntimeError(f"Unexpected untracked source files: {unexpected}")
+          before_path = out / "source-before.json"
+          if not before_path.exists():
+              (out / "source-after.json").write_text(json.dumps({"source": head, "complete": False, "reason": "Preparation did not produce the pre-import snapshot"}) + "\n")
+              raise RuntimeError("Missing pre-import source identity snapshot")
+          before = json.loads(before_path.read_text())
+          paths = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
+          tracked = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in paths if p}
+          runtime = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                     for p in sorted((root / "ext").rglob("*")) if p.is_file()}
+          receipt = {
+              "source": head, "complete": tracked == before["tracked"] and runtime == before["runtime"],
+              "trackedManifestSha256": hashlib.sha256(json.dumps(tracked, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+              "runtimeManifestSha256": hashlib.sha256(json.dumps(runtime, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+          }
+          if not receipt["complete"]:
+              receipt["changedTrackedPaths"] = sorted(p for p in set(tracked) | set(before["tracked"]) if tracked.get(p) != before["tracked"].get(p))
+              receipt["changedRuntimePaths"] = sorted(p for p in set(runtime) | set(before["runtime"]) if runtime.get(p) != before["runtime"].get(p))
+          (out / "source-after.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("CURRENT_IMPORT_PROFILE_SOURCE_AFTER " + json.dumps(receipt, separators=(",", ":")))
+          if not receipt["complete"]:
+              raise RuntimeError("Source/runtime identity changed during import")
+          PY
+
+      - name: Print the complete diagnostic summary for API retrieval
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib
+          out = pathlib.Path(os.environ["PROFILE_OUTPUT"])
+          summary = out / "summary.json"
+          if summary.exists():
+              report = json.loads(summary.read_text())
+              print("CURRENT_IMPORT_PROFILE_RESULT " + json.dumps({
+                  "scope": "Diagnostic only: one current ordinary import; no speedup or comparative timing claim",
+                  "summary": report,
+              }, separators=(",", ":")))
+          else:
+              full = out / "run-1.json"
+              report = json.loads(full.read_text()) if full.exists() else None
+              if isinstance(report, dict):
+                  report = {k: v for k, v in report.items() if k != "logs"}
+              print("CURRENT_IMPORT_PROFILE_FAILURE " + json.dumps({
+                  "scope": "Diagnostic only; failed or incomplete run retained without exclusion",
+                  "dictionary": os.environ["PROFILE_DICTIONARY"], "report": report,
+              }, separators=(",", ":")))
+          PY
+
+      - name: Preserve every diagnostic, failure, package, and source receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: current-import-profile-${{ matrix.dictionary }}-9e10d3b3-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            builds/perf/current-profile-20261128/${{ matrix.dictionary }}
+            builds/manabitan-chrome.zip
+          if-no-files-found: warn
+          retention-days: 30
