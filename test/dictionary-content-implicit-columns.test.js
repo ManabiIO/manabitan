@@ -11,7 +11,7 @@ import {TERM_CONTENT_SIGNATURE1_MBR6 as MBR6} from '../ext/js/dictionary/term-co
  * @param {number} [id]
  * @param {number} [signature1]
  * @param {string} [dictName]
- * @returns {Parameters<DictionaryDatabase['_setTermEntryContentMetaByHashPair']>[2]}
+ * @returns {{id: number, offset: number, length: number, dictName: string, signature1: number, signature2: number, signature3: number}}
  */
 function metadata(id = 0, signature1 = MBR6, dictName = 'codec') {
     return {id, offset: 100, length: 12, dictName, signature1, signature2: 22, signature3: 33};
