@@ -1,0 +1,379 @@
+{
+  "run": 46102288158,
+  "sourceCommit": "36f9ae58cde3a302cb2129e2af6cc86512d14fa1",
+  "scope": "Original warmed single-stream SIMD screen; negative JMdict result preserved before the separately registered first-pass study",
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "cpuModel": "Intel(R) Xeon(R) 6975P-C",
+      "cohorts": [
+        {
+          "file": "simd-cohort-1.json",
+          "rows": 528299,
+          "groups": 12,
+          "inputBytes": 23748240,
+          "ratio": 1.4201951253495189,
+          "control": 0.9986328121701193,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 16.459108500000255,
+              "nativeMs": 23.160300499999906,
+              "nativeOverJs": 1.4071418570452674,
+              "controlBOverA": 1.003734637595789
+            },
+            {
+              "round": 1,
+              "jsMs": 16.29234749999989,
+              "nativeMs": 23.138312500000268,
+              "nativeOverJs": 1.4201951253495189,
+              "controlBOverA": 0.9975528063491549
+            },
+            {
+              "round": 2,
+              "jsMs": 16.279257999999942,
+              "nativeMs": 23.001631500000272,
+              "nativeOverJs": 1.412941025936216,
+              "controlBOverA": 1.0007616188678576
+            },
+            {
+              "round": 3,
+              "jsMs": 16.330785000000034,
+              "nativeMs": 23.111825500000066,
+              "nativeOverJs": 1.4152305293346288,
+              "controlBOverA": 0.9845018150109088
+            },
+            {
+              "round": 4,
+              "jsMs": 15.114495499999947,
+              "nativeMs": 23.415388500000446,
+              "nativeOverJs": 1.5492007986638077,
+              "controlBOverA": 1.0178712758614836
+            },
+            {
+              "round": 5,
+              "jsMs": 14.800750999999764,
+              "nativeMs": 23.187393000000156,
+              "nativeOverJs": 1.5666362470391217,
+              "controlBOverA": 0.9986328121701193
+            },
+            {
+              "round": 6,
+              "jsMs": 14.881248500000112,
+              "nativeMs": 23.194119999999714,
+              "nativeOverJs": 1.5586138488312684,
+              "controlBOverA": 0.9851325831357179
+            }
+          ],
+          "repeats": 4
+        },
+        {
+          "file": "simd-cohort-2.json",
+          "rows": 528299,
+          "groups": 12,
+          "inputBytes": 23748240,
+          "ratio": 1.4367724203679286,
+          "control": 1.0003728468189446,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 18.171217999999783,
+              "nativeMs": 23.147764499999965,
+              "nativeOverJs": 1.2738697262891372,
+              "controlBOverA": 0.9913610096812276
+            },
+            {
+              "round": 1,
+              "jsMs": 16.709032000000107,
+              "nativeMs": 23.024868500000053,
+              "nativeOverJs": 1.3779893712574076,
+              "controlBOverA": 1.0048181898699
+            },
+            {
+              "round": 2,
+              "jsMs": 16.331625500000158,
+              "nativeMs": 23.07151499999989,
+              "nativeOverJs": 1.4126894472322837,
+              "controlBOverA": 1.0024705187762413
+            },
+            {
+              "round": 3,
+              "jsMs": 16.174689999999444,
+              "nativeMs": 23.239348500000133,
+              "nativeOverJs": 1.4367724203679286,
+              "controlBOverA": 1.0051759618883622
+            },
+            {
+              "round": 4,
+              "jsMs": 14.747990499999759,
+              "nativeMs": 23.07601700000052,
+              "nativeOverJs": 1.5646888977858304,
+              "controlBOverA": 1.0003728468189446
+            },
+            {
+              "round": 5,
+              "jsMs": 14.809625000000153,
+              "nativeMs": 23.143044000000145,
+              "nativeOverJs": 1.5627029043611778,
+              "controlBOverA": 1.0000053843757655
+            },
+            {
+              "round": 6,
+              "jsMs": 14.736374500000153,
+              "nativeMs": 23.039592499999628,
+              "nativeOverJs": 1.5634505284864597,
+              "controlBOverA": 0.9944211120743287
+            }
+          ],
+          "repeats": 4
+        },
+        {
+          "file": "simd-cohort-3.json",
+          "rows": 528299,
+          "groups": 12,
+          "inputBytes": 23748240,
+          "ratio": 1.4230965085067258,
+          "control": 1.0018919428087976,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 16.364204500000056,
+              "nativeMs": 23.148901500000093,
+              "nativeOverJs": 1.4146059773330266,
+              "controlBOverA": 1.0086286276012355
+            },
+            {
+              "round": 1,
+              "jsMs": 16.341307500000042,
+              "nativeMs": 23.029552499999554,
+              "nativeOverJs": 1.4092845691814744,
+              "controlBOverA": 1.0104098870596048
+            },
+            {
+              "round": 2,
+              "jsMs": 16.1796099999997,
+              "nativeMs": 23.025146500000076,
+              "nativeOverJs": 1.4230965085067258,
+              "controlBOverA": 0.99853656497894
+            },
+            {
+              "round": 3,
+              "jsMs": 16.298859000000263,
+              "nativeMs": 22.955857500000377,
+              "nativeOverJs": 1.4084334062893609,
+              "controlBOverA": 0.980131086031639
+            },
+            {
+              "round": 4,
+              "jsMs": 14.75450549999995,
+              "nativeMs": 23.142285999999743,
+              "nativeOverJs": 1.5684894353117982,
+              "controlBOverA": 1.0018919428087976
+            },
+            {
+              "round": 5,
+              "jsMs": 14.603584000000282,
+              "nativeMs": 23.046355000000105,
+              "nativeOverJs": 1.5781300672492218,
+              "controlBOverA": 1.0041767532139076
+            },
+            {
+              "round": 6,
+              "jsMs": 14.98236350000002,
+              "nativeMs": 23.165475499999943,
+              "nativeOverJs": 1.5461829837461836,
+              "controlBOverA": 0.9811933647015838
+            }
+          ],
+          "repeats": 4
+        }
+      ]
+    },
+    {
+      "dictionary": "jitendex",
+      "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+      "cohorts": [
+        {
+          "file": "simd-cohort-1.json",
+          "rows": 436555,
+          "groups": 22,
+          "inputBytes": 23589580,
+          "ratio": 0.9606350405657046,
+          "control": 0.9980008175411712,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 13.632200000000282,
+              "nativeMs": 13.095569000000069,
+              "nativeOverJs": 0.9606350405657046,
+              "controlBOverA": 0.981878621049345
+            },
+            {
+              "round": 1,
+              "jsMs": 13.184180500000323,
+              "nativeMs": 12.877236499999825,
+              "nativeOverJs": 0.9767187653415021,
+              "controlBOverA": 0.9822440604491521
+            },
+            {
+              "round": 2,
+              "jsMs": 13.428843499999985,
+              "nativeMs": 12.848110500000246,
+              "nativeOverJs": 0.956754801707255,
+              "controlBOverA": 0.9871156897462584
+            },
+            {
+              "round": 3,
+              "jsMs": 13.965329499999555,
+              "nativeMs": 13.314956999999566,
+              "nativeOverJs": 0.9534294912268264,
+              "controlBOverA": 1.0429099206510213
+            },
+            {
+              "round": 4,
+              "jsMs": 13.555385000000086,
+              "nativeMs": 12.996431000000072,
+              "nativeOverJs": 0.9587651697093066,
+              "controlBOverA": 1.0111173947797165
+            },
+            {
+              "round": 5,
+              "jsMs": 13.09364049999968,
+              "nativeMs": 12.896522500000202,
+              "nativeOverJs": 0.9849455161076491,
+              "controlBOverA": 0.9980008175411712
+            },
+            {
+              "round": 6,
+              "jsMs": 13.408344499999714,
+              "nativeMs": 13.222166499999972,
+              "nativeOverJs": 0.98611476606976,
+              "controlBOverA": 1.0031126301859912
+            }
+          ],
+          "repeats": 4
+        },
+        {
+          "file": "simd-cohort-2.json",
+          "rows": 436555,
+          "groups": 22,
+          "inputBytes": 23589580,
+          "ratio": 0.9772346477365835,
+          "control": 1.0030698022524809,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 13.108293000000387,
+              "nativeMs": 12.906776000000178,
+              "nativeOverJs": 0.9846267549863127,
+              "controlBOverA": 1.0030698022524809
+            },
+            {
+              "round": 1,
+              "jsMs": 13.209718999999936,
+              "nativeMs": 12.801187999999811,
+              "nativeOverJs": 0.9690734526601114,
+              "controlBOverA": 1.0033171720596257
+            },
+            {
+              "round": 2,
+              "jsMs": 13.134089000000316,
+              "nativeMs": 12.876308999999878,
+              "nativeOverJs": 0.98037321050585,
+              "controlBOverA": 0.996984346878003
+            },
+            {
+              "round": 3,
+              "jsMs": 13.452172500000117,
+              "nativeMs": 12.862673500000213,
+              "nativeOverJs": 0.9561781563535631,
+              "controlBOverA": 1.0004406689628231
+            },
+            {
+              "round": 4,
+              "jsMs": 13.129040000000202,
+              "nativeMs": 12.818361500000293,
+              "nativeOverJs": 0.9763365409809168,
+              "controlBOverA": 1.0066964739375075
+            },
+            {
+              "round": 5,
+              "jsMs": 13.053718499999874,
+              "nativeMs": 12.7565459999999,
+              "nativeOverJs": 0.9772346477365835,
+              "controlBOverA": 0.9989843050373904
+            },
+            {
+              "round": 6,
+              "jsMs": 13.168633499999956,
+              "nativeMs": 12.872211500000276,
+              "nativeOverJs": 0.9774902992022915,
+              "controlBOverA": 1.0046266022862682
+            }
+          ],
+          "repeats": 4
+        },
+        {
+          "file": "simd-cohort-3.json",
+          "rows": 436555,
+          "groups": 22,
+          "inputBytes": 23589580,
+          "ratio": 0.9774326083832683,
+          "control": 1.0005287404677152,
+          "totals": [
+            {
+              "round": 0,
+              "jsMs": 13.177778000000032,
+              "nativeMs": 12.89373949999991,
+              "nativeOverJs": 0.9784456453887658,
+              "controlBOverA": 0.9943251062964604
+            },
+            {
+              "round": 1,
+              "jsMs": 13.05882699999971,
+              "nativeMs": 12.809032500000058,
+              "nativeOverJs": 0.9808715974260431,
+              "controlBOverA": 1.0027805813656732
+            },
+            {
+              "round": 2,
+              "jsMs": 13.163173000000114,
+              "nativeMs": 12.706321499999703,
+              "nativeOverJs": 0.9652932085599416,
+              "controlBOverA": 0.9970958880877712
+            },
+            {
+              "round": 3,
+              "jsMs": 13.069066499999877,
+              "nativeMs": 12.746475500000003,
+              "nativeOverJs": 0.9753164466643522,
+              "controlBOverA": 1.0005287404677152
+            },
+            {
+              "round": 4,
+              "jsMs": 13.04264600000036,
+              "nativeMs": 12.748307499999953,
+              "nativeOverJs": 0.9774326083832683,
+              "controlBOverA": 1.0060122997958805
+            },
+            {
+              "round": 5,
+              "jsMs": 13.025588000000084,
+              "nativeMs": 12.964175499999882,
+              "nativeOverJs": 0.995285241633606,
+              "controlBOverA": 0.9982113820951181
+            },
+            {
+              "round": 6,
+              "jsMs": 13.146837000000374,
+              "nativeMs": 12.819783500000085,
+              "nativeOverJs": 0.9751230276909739,
+              "controlBOverA": 1.010332763776989
+            }
+          ],
+          "repeats": 4
+        }
+      ]
+    }
+  ]
+}

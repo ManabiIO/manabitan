@@ -1,0 +1,17 @@
+{
+  "complete": true,
+  "node": "v22.22.0",
+  "upstreamOracle": "libxxhash.so.0 XXH32",
+  "upstreamVersion": 803,
+  "upstreamVectors": 540,
+  "comparisons": 105768,
+  "refusalChecks": 36,
+  "zeroUpdateChecks": 13092,
+  "wasmPath": "/workspace/scratch/beb5caac0497/native-hash-three-stream/xxh32-three.wasm",
+  "wasmSha256": "04401e56da4ed009ca67def777e7c51e87251529b92eceb6951980907efbf75e",
+  "vectorsSha256": "b3e295850da18a9f8fab423504d2669bf697497ce85f3429af385cb09e56cfc3",
+  "scratchPointer": 1040,
+  "streamCapacity": 20480,
+  "wasmMemoryBytes": 65536,
+  "notes": "Independent correctness-only check, no performance or browser-import claim. Heterogeneous streams, independently partitioned updates, all short first splits, equal-length differing bytes, reset, finish, zero updates, rejection and input immutability."
+}

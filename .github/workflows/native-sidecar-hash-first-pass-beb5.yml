@@ -1,0 +1,94 @@
+name: Native sidecar hash first-pass screen 20261128 beb5
+
+on:
+  push:
+    branches: ['perf/native-sidecar-hash-cold-20261128-beb5']
+    paths:
+      - '.github/workflows/native-sidecar-hash-first-pass-beb5.yml'
+      - 'dev/perf/native-sidecar-hash-three-stream/**'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: First-pass XXH32 (${{ matrix.dictionary }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      MANABITAN_CLANG: /usr/bin/clang-21
+      MANABITAN_WASM_LD: /usr/bin/wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned native compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Reproduce frozen modules and check independent oracle vectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          single="$GITHUB_WORKSPACE/dev/perf/native-sidecar-hash-prototype"
+          triple="$GITHUB_WORKSPACE/dev/perf/native-sidecar-hash-three-stream"
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-sidecar-hash-first-pass-beb5/$PERF_DICTIONARY"
+          mkdir -p "$evidence" "$RUNNER_TEMP/hash-single" "$RUNNER_TEMP/hash-triple"
+          git rev-parse HEAD > "$evidence/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
+          node dev/perf/host-environment.js > "$evidence/host.json"
+          cp "$single/build.mjs" "$single/xxh32-stream.c" "$RUNNER_TEMP/hash-single/"
+          cp "$triple/build.mjs" "$triple/xxh32-three.c" "$RUNNER_TEMP/hash-triple/"
+          node "$RUNNER_TEMP/hash-single/build.mjs" --simd > "$evidence/build-single.json"
+          node "$RUNNER_TEMP/hash-triple/build.mjs" > "$evidence/build-triple.json"
+          cmp "$single/xxh32-stream-simd.wasm" "$RUNNER_TEMP/hash-single/xxh32-stream-simd.wasm"
+          cmp "$triple/xxh32-three.wasm" "$RUNNER_TEMP/hash-triple/xxh32-three.wasm"
+          node "$single/verify-native.mjs" "$single/xxh32-stream-simd.wasm" "$evidence/vectors-single.json"
+          node "$single/verify-admission.mjs" "$single/native-checksum.mjs" "$single/xxh32-stream-simd.wasm" "$evidence/admission-single.json"
+          node "$triple/verify-native.mjs" "$triple/xxh32-three.wasm" "$evidence/vectors-triple.json"
+      - name: Capture every selected-fixture checksum section
+        shell: bash
+        run: |
+          set -euo pipefail
+          single="$GITHUB_WORKSPACE/dev/perf/native-sidecar-hash-prototype"
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-sidecar-hash-first-pass-beb5/$PERF_DICTIONARY"
+          node --input-type=module -e 'import {ensureSelectedPinnedDictionaryCache} from "./dev/perf/dictionary-fixtures.js"; await ensureSelectedPinnedDictionaryCache("builds/e2e-dictionary-cache", [process.env.PERF_DICTIONARY])'
+          node --max-old-space-size=2048 "$single/capture-first-bank.mjs" \
+            "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            "$RUNNER_TEMP/hash-captures" --all-groups "$PERF_DICTIONARY" \
+            2>&1 | tee "$evidence/capture.log"
+          cp "$RUNNER_TEMP/hash-captures/manifest.json" "$evidence/capture-manifest.json"
+      - name: Preserve warmed comparison of all three algorithms
+        shell: bash
+        run: |
+          set -euo pipefail
+          triple="$GITHUB_WORKSPACE/dev/perf/native-sidecar-hash-three-stream"
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-sidecar-hash-first-pass-beb5/$PERF_DICTIONARY"
+          node --max-old-space-size=2048 "$triple/screen-three.mjs" \
+            "$RUNNER_TEMP/hash-captures" "$evidence/warm-three.json" 7 4 \
+            2>&1 | tee "$evidence/warm-three.log"
+      - name: Run eight alternating first-pass pairs and independent A/A pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          triple="$GITHUB_WORKSPACE/dev/perf/native-sidecar-hash-three-stream"
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-sidecar-hash-first-pass-beb5/$PERF_DICTIONARY"
+          node "$triple/first-pass-campaign.mjs" "$RUNNER_TEMP/hash-captures" \
+            "$evidence/first-pass" 8 2>&1 | tee "$evidence/first-pass.log"
+      - name: Retain every registered observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-sidecar-hash-first-pass-beb5-${{ matrix.dictionary }}
+          path: builds/perf/native-sidecar-hash-first-pass-beb5
+          if-no-files-found: error
+          retention-days: 14
