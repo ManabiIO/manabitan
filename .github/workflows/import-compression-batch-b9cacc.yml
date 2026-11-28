@@ -1,0 +1,75 @@
+name: Import compression batching screen
+
+on:
+  push:
+    branches: ['perf/import-compression-batch-20261127-b9cacc']
+    paths:
+      - '.github/workflows/import-compression-batch-b9cacc.yml'
+      - 'ext/js/dictionary/zstd-term-content.js'
+      - 'ext/js/dictionary/zstd-term-content-compression-worker.js'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Check the unchanged observation protocol
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare imports with independent order reversal and identical-code controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation_policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Current develop produces a 37-unit active SAH file. Register that
+            # source-specific expectation before acquiring this new cohort;
+            # historical receipts keep their own 129-131-unit expectation.
+            allocation_policy=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 6 \
+            --expected-package-entry js/dictionary/zstd-term-content.js \
+            --expected-package-entry js/dictionary/zstd-term-content-compression-worker.js \
+            "${allocation_policy[@]}" \
+            --evidence "builds/perf/compression-batch-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Retain all observations, separate memory runs, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compression-batch-${{ matrix.dictionary }}-${{ matrix.order }}-b9cacc
+          path: builds/perf/compression-batch-${{ matrix.dictionary }}-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 90

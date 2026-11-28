@@ -78,7 +78,7 @@ describe('TermContentCompressionPool', () => {
     test('dispatches shared-source spans without changing block order', async () => {
         const workers = Array.from({length: 2}, () => new MockCompressionWorker((message) => {
             return {
-                compressed: Uint8Array.of(/** @type {number} */ (message.contentBytes)).buffer,
+                compressedBatch: /** @type {Array<{contentBytes: number}>} */ (message.blocks).map(({contentBytes}) => Uint8Array.of(contentBytes).buffer),
                 sourceConsumed: true,
             };
         }));
@@ -105,19 +105,22 @@ describe('TermContentCompressionPool', () => {
         const result = await operation.completion;
 
         expect(result.chunks.map((bytes) => bytes[0])).toStrictEqual([...blockLengths]);
-        expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 2]);
+        expect(workers.map(({calls}) => calls.length)).toStrictEqual([1, 1]);
         const metadata = /** @type {Uint32Array} */ (workers[0].calls[0].message.sourceOffsets).buffer;
         expect(metadata).toBeInstanceOf(SharedArrayBuffer);
         for (let block = 0; block < blockLengths.length; ++block) {
-            const {message, transfer} = workers[block % workers.length].calls[Math.floor(block / workers.length)];
+            const {message, transfer} = workers[block % workers.length].calls[0];
             const offsets = /** @type {Uint32Array} */ (message.sourceOffsets);
             const lengths = /** @type {Uint32Array} */ (message.sourceLengths);
             expect(message.source).toBe(source);
             expect(transfer).toHaveLength(0);
             expect(offsets.buffer).toBe(metadata);
             expect(lengths.buffer).toBe(metadata);
-            expect(offsets).toStrictEqual(originalOffsets.subarray(blockStarts[block], blockStarts[block + 1]));
-            expect(lengths).toStrictEqual(originalLengths.subarray(blockStarts[block], blockStarts[block + 1]));
+            expect(offsets).toStrictEqual(originalOffsets);
+            expect(lengths).toStrictEqual(originalLengths);
+            expect(/** @type {unknown[]} */ (message.blocks)[Math.floor(block / workers.length)]).toStrictEqual({
+                start: blockStarts[block], end: blockStarts[block + 1], contentBytes: blockLengths[block],
+            });
         }
 
         pool.close();
@@ -148,6 +151,35 @@ describe('TermContentCompressionPool', () => {
 
         pool.close();
     });
+
+    test.each(['missing', 'extra', 'wrong-type', 'aliased', 'sparse'])(
+        'rejects a %s compressed batch without acknowledging its source',
+        async (kind) => {
+            const worker = new MockCompressionWorker(() => {
+                const first = Uint8Array.of(1).buffer;
+                switch (kind) {
+                    case 'missing': return {compressedBatch: [first]};
+                    case 'extra': return {compressedBatch: [first, new ArrayBuffer(1), new ArrayBuffer(1)]};
+                    case 'wrong-type': return {compressedBatch: [first, new Uint8Array(1)]};
+                    case 'sparse': {
+                        const compressedBatch = new Array(2);
+                        compressedBatch[0] = first;
+                        return {compressedBatch};
+                    }
+                    default: return {compressedBatch: [first, first]};
+                }
+            });
+            const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ ([worker])));
+            try {
+                const operation = pool.beginCompressWrappedSpans(
+                    new Uint8Array(new SharedArrayBuffer(4)), Uint32Array.of(0, 2), Uint32Array.of(2, 2),
+                    Uint32Array.of(0, 1, 2), Uint32Array.of(2, 2), 'jmdict',
+                );
+                await expect(operation.sourceConsumed).rejects.toThrow('invalid bytes');
+                await expect(operation.completion).rejects.toThrow('invalid bytes');
+            } finally { pool.close(); }
+        },
+    );
 
     test('rejects invalid span partitions before dispatch', async () => {
         const worker = new MockCompressionWorker(() => ({compressed: new ArrayBuffer(0)}));

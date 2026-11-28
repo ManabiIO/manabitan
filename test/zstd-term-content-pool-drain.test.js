@@ -47,17 +47,18 @@ class ControlledWorker {
 
 /**
  * @param {ControlledWorker[]} workers
+ * @param {boolean} [batch=false]
  * @returns {{pool: TermContentCompressionPool, source: Uint8Array, operation: ReturnType<TermContentCompressionPool['beginCompressWrappedSpans']>}}
  */
-function start(workers) {
+function start(workers, batch = false) {
     const pool = new TermContentCompressionPool(/** @type {Worker[]} */ (/** @type {unknown} */ (workers)));
     const source = new Uint8Array(new SharedArrayBuffer(8)).fill(7);
     const operation = pool.beginCompressWrappedSpans(
         source,
-        Uint32Array.of(0, 4),
-        Uint32Array.of(4, 4),
-        Uint32Array.of(0, 1, 2),
-        Uint32Array.of(4, 4),
+        batch ? Uint32Array.of(0, 2, 4, 6) : Uint32Array.of(0, 4),
+        batch ? Uint32Array.of(2, 2, 2, 2) : Uint32Array.of(4, 4),
+        batch ? Uint32Array.of(0, 1, 2, 3, 4) : Uint32Array.of(0, 1, 2),
+        batch ? Uint32Array.of(2, 2, 2, 2) : Uint32Array.of(4, 4),
         'jmdict',
     );
     return {pool, source, operation};
@@ -100,20 +101,46 @@ describe('shared compression job draining', () => {
         },
     );
 
-    test('drains later jobs queued on the same worker', async () => {
+    test('a failed single-worker batch has no later source reads queued independently', async () => {
         const worker = new ControlledWorker();
         const {pool, operation} = start([worker]);
-        let completed = false;
-        void operation.completion.finally(() => { completed = true; }).catch(() => {});
         try {
+            expect(worker.calls).toHaveLength(1);
+            expect(worker.calls[0].type).toBe('compress-spans-batch');
             worker.reply(0, {error: 'first job failed'});
-            await flush();
-            expect(completed).toBe(false);
-            worker.reply(1, {compressed: Uint8Array.of(2).buffer});
             await expect(operation.sourceConsumed).rejects.toThrow('first job failed');
             await expect(operation.completion).rejects.toThrow('first job failed');
         } finally { pool.close(); }
     });
+
+    test.each(['error-reply', 'invalid-reply', 'dispatch-throw'])(
+        'batched %s drains every worker before allowing source release',
+        async (failure) => {
+            const workers = [new ControlledWorker(), new ControlledWorker()];
+            workers[0].throwOnDispatch = failure === 'dispatch-throw';
+            const {pool, source, operation} = start(workers, true);
+            let sourceSettled = false;
+            let completionSettled = false;
+            void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+            void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+            try {
+                if (failure !== 'dispatch-throw') {
+                    workers[0].reply(0, failure === 'error-reply' ? {error: 'batch failed'} : {compressedBatch: []});
+                }
+                await flush();
+                expect(sourceSettled).toBe(false);
+                expect(completionSettled).toBe(false);
+                expect([...source]).toEqual(new Array(8).fill(7));
+                workers[1].reply(0, {type: 'source-consumed'});
+                await expect(operation.sourceConsumed).rejects.toThrow();
+                expect(completionSettled).toBe(false);
+                source.fill(0);
+                workers[1].reply(0, {compressedBatch: [Uint8Array.of(2).buffer, Uint8Array.of(3).buffer]});
+                await expect(operation.completion).rejects.toThrow();
+                expect(Reflect.get(pool, '_pending').size).toBe(0);
+            } finally { pool.close(); }
+        },
+    );
 
     test('preserves the first rejection observed while draining later failures', async () => {
         const workers = [new ControlledWorker(), new ControlledWorker()];
@@ -153,10 +180,10 @@ describe('shared compression job draining', () => {
         } finally { pool.close(); }
     });
 
-    test('the existing job timeout terminates an unresponsive reader', async () => {
+    test.each([false, true])('the existing job timeout terminates an unresponsive reader (batched=%s)', async (batch) => {
         vi.useFakeTimers();
         const workers = [new ControlledWorker(), new ControlledWorker()];
-        const {pool, operation} = start(workers);
+        const {pool, operation} = start(workers, batch);
         try {
             workers[0].reply(0, {error: 'first job failed'});
             await vi.advanceTimersByTimeAsync(60_000);
@@ -170,9 +197,9 @@ describe('shared compression job draining', () => {
         }
     });
 
-    test('closing the pool drains an outstanding reader instead of hanging', async () => {
+    test.each([false, true])('closing the pool drains an outstanding reader instead of hanging (batched=%s)', async (batch) => {
         const workers = [new ControlledWorker(), new ControlledWorker()];
-        const {pool, operation} = start(workers);
+        const {pool, operation} = start(workers, batch);
         workers[0].reply(0, {error: 'first job failed'});
         pool.close();
         await expect(operation.sourceConsumed).rejects.toThrow('first job failed');

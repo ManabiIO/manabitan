@@ -34,13 +34,60 @@ self.addEventListener('message', (event) => {
 /** @param {MessageEvent} event */
 async function compressContent(event) {
     const rawData = /** @type {unknown} */ (event.data);
-    const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
+    const data = /** @type {{type?: unknown, id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, blocks?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
         const {compressTermContentZstd, compressWrappedTermContentZstd, finishWrappedTermContentZstdSpans, prepareWrappedTermContentZstdSpans} = await modulePromise;
         await initialization;
         const dictName = typeof data.dictName === 'string' ? data.dictName : null;
         const options = data.compressionExperiments ?? {};
+        if (data.type === 'compress-spans-batch') {
+            if (
+                data.wrap !== true ||
+                !(data.source instanceof Uint8Array) ||
+                !(data.sourceOffsets instanceof Uint32Array) ||
+                !(data.sourceLengths instanceof Uint32Array) ||
+                data.sourceOffsets.length !== data.sourceLengths.length ||
+                !Array.isArray(data.blocks) ||
+                data.blocks.length === 0
+            ) {
+                throw new TypeError('Compression worker span batch is invalid');
+            }
+            const {source, sourceOffsets, sourceLengths, blocks} = data;
+            for (const block of blocks) {
+                if (
+                    typeof block !== 'object' || block === null ||
+                    !Number.isSafeInteger(block.start) || block.start < 0 ||
+                    !Number.isSafeInteger(block.end) || block.end < block.start || block.end > sourceOffsets.length ||
+                    !Number.isSafeInteger(block.contentBytes) || block.contentBytes < 0
+                ) {
+                    throw new RangeError('Compression worker span batch block is invalid');
+                }
+            }
+            const compressedBatch = [];
+            let envelopeMs = 0;
+            for (let index = 0; index < blocks.length; ++index) {
+                const {start, end, contentBytes} = blocks[index];
+                // Finish each prepared handle before preparing the next block:
+                // the codec reuses one native workspace within this worker.
+                const prepared = prepareWrappedTermContentZstdSpans(
+                    source,
+                    sourceOffsets.subarray(start, end),
+                    sourceLengths.subarray(start, end),
+                    contentBytes,
+                    dictName,
+                    options,
+                );
+                if (index + 1 === blocks.length) {
+                    self.postMessage({type: 'source-consumed', id});
+                }
+                const result = finishWrappedTermContentZstdSpans(prepared);
+                compressedBatch.push(ownCompressedBytes(result.bytes));
+                envelopeMs += result.envelopeMs;
+            }
+            self.postMessage({id, compressedBatch, envelopeMs}, compressedBatch);
+            return;
+        }
         /** @type {{bytes: Uint8Array, envelopeMs: number}} */
         let result;
         if (
@@ -76,15 +123,23 @@ async function compressContent(event) {
                 {bytes: compressTermContentZstd(data.content, dictName), envelopeMs: 0};
         }
         const {bytes, envelopeMs} = result;
-        const compressed = (
-            bytes.buffer instanceof ArrayBuffer &&
-            bytes.byteOffset === 0 &&
-            bytes.byteLength === bytes.buffer.byteLength
-        ) ?
-            bytes.buffer :
-            Uint8Array.from(bytes).buffer;
+        const compressed = ownCompressedBytes(bytes);
         self.postMessage({id, compressed, envelopeMs}, [compressed]);
     } catch (error) {
         self.postMessage({id, error: `${error}`});
     }
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ArrayBuffer}
+ */
+function ownCompressedBytes(bytes) {
+    return (
+        bytes.buffer instanceof ArrayBuffer &&
+        bytes.byteOffset === 0 &&
+        bytes.byteLength === bytes.buffer.byteLength
+    ) ?
+        bytes.buffer :
+        Uint8Array.from(bytes).buffer;
 }
