@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {prepareImportIndexChunkParts} from './term-record-import-index-chunk.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -111,9 +112,14 @@ const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+/** @typedef {import('./term-record-import-index-chunk.js').ImportIndexChunk} PendingLookupIndexChunk */
+/** @type {WeakMap<object, Uint8Array>} */
+const deferredLookupIndexRouteHeaders = new WeakMap();
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
+/** @type {WeakSet<object>} */
+const termRecordStoreOrigins = new WeakSet();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
@@ -787,7 +793,7 @@ class DenseIdRecordStore {
  * @property {number} segmentIndex
  * @property {string} logicalKey
  * @property {number} initialFileLength
- * @property {Uint8Array[]} pendingLookupIndexChunks
+ * @property {PendingLookupIndexChunk[]} pendingLookupIndexChunks
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
@@ -824,6 +830,8 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexWriteBytes
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
+ * @property {number} lookupIndexWorkerOwnedEnvelopeCount
+ * @property {number} lookupIndexWorkerOwnedEnvelopeBytes
  * @property {number} lookupIndexWorkerFileCount
  */
 
@@ -861,6 +869,7 @@ class DenseIdRecordStore {
 
 export class TermRecordOpfsStore {
     constructor() {
+        termRecordStoreOrigins.add(this);
         /** @type {FileSystemDirectoryHandle|null} */
         this._rootDirectoryHandle = null;
         /** @type {FileSystemDirectoryHandle|null} */
@@ -956,7 +965,7 @@ export class TermRecordOpfsStore {
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
+        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, workerOwnedEnvelopeCount: number, workerOwnedEnvelopeBytes: number}} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
@@ -1529,6 +1538,8 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            lookupIndexWorkerOwnedEnvelopeCount: this._lookupIndexWriteMetrics.workerOwnedEnvelopeCount,
+            lookupIndexWorkerOwnedEnvelopeBytes: this._lookupIndexWriteMetrics.workerOwnedEnvelopeBytes,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -6099,7 +6110,7 @@ view.chunks :
             lookupIndexBytes instanceof Uint8Array &&
             lookupIndexBytes.byteLength > 0
         ) {
-            const lookupIndexChunk = this._createLookupIndexChunk(
+            const lookupIndexChunk = this._createPendingLookupIndexChunk(
                 firstId,
                 count,
                 contentOffsetBase,
@@ -6111,7 +6122,14 @@ view.chunks :
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
                 (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES
             ) {
-                this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);
+                this._recordExactLookupRouteChunk(
+                    state,
+                    firstId,
+                    count,
+                    lookupIndexChunk,
+                    lookupIndexChunk instanceof Uint8Array ? lookupIndexBytes : lookupIndexChunk.payload,
+                    routeFilter,
+                );
             }
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -6145,7 +6163,7 @@ view.chunks :
      * @param {TermRecordShardState} state
      * @param {number} firstId
      * @param {number} count
-     * @param {Uint8Array} chunk
+     * @param {PendingLookupIndexChunk} chunk
      * @param {Uint8Array} payload
      * @param {Uint32Array|null} preparedFilter
      */
@@ -6175,7 +6193,9 @@ view.chunks :
         const start = shard.end;
         shard.end += chunk.byteLength;
         shard.recordCount += count;
-        shard.chunks.push({firstId, count, start, end: shard.end, header: chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES), filter});
+        const header = chunk instanceof Uint8Array ? chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES) : new Uint8Array(chunk.header);
+        if (!(chunk instanceof Uint8Array)) { deferredLookupIndexRouteHeaders.set(chunk, header); }
+        shard.chunks.push({firstId, count, start, end: shard.end, header, filter});
         route.bytes += filter.byteLength;
         ++route.chunkCount;
         this._exactLookupRoute = route;
@@ -6229,6 +6249,55 @@ view.chunks :
             generationId[i] = Math.floor(Math.random() * 256);
         }
         return generationId;
+    }
+
+    /**
+     * Snapshot ordinary input bytes before admission to the existing heavy I/O
+     * worker. Copy exactly the same payload and fields as the eager envelope;
+     * caller buffers and unknown aliases remain intact. Validation, framing and
+     * both copies finish synchronously before the ordered writer can use them.
+     * @param {number} firstId
+     * @param {number} count
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {Uint8Array|null} recordFields
+     * @param {number} recordFieldsFormat
+     * @returns {PendingLookupIndexChunk}
+     * @throws {Error} If the authoritative fields or lookup framing are invalid.
+     */
+    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat) {
+        if (
+            !termRecordStoreOrigins.has(this) ||
+            Object.getOwnPropertyDescriptor(this, '_importSessionActive')?.value !== true ||
+            !isHeavyImportSource(Object.getOwnPropertyDescriptor(this, '_rawTermBankSourceBytes')?.value) ||
+            !hasOriginalTermRecordAppendMethods(this) ||
+            !Number.isSafeInteger(firstId) || firstId < 0 || firstId > MAX_TERM_RECORD_ID ||
+            !Number.isSafeInteger(count) || count <= 0 || count > MAX_TERM_RECORD_ID ||
+            !Number.isSafeInteger(contentOffsetBase) || contentOffsetBase < 0 ||
+            !Number.isSafeInteger(recordFieldsFormat) ||
+            !isPlainFixedLookupIndexBytes(payload) || !isPlainFixedLookupIndexBytes(recordFields)
+        ) {
+            return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
+        }
+        if (getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength) {
+            throw new Error('Invalid authoritative term-record fields');
+        }
+        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
+        const {base} = splitPersistedTermLookupIndex(payload);
+        const byteLength = LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength + recordFields.byteLength;
+        const header = new Uint8Array(LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, firstId, true);
+        view.setUint32(4, count, true);
+        writeSafeU64Le(view, 8, contentOffsetBase);
+        view.setUint32(16, payload.byteLength, true);
+        view.setUint32(20, base.byteLength, true);
+        view.setUint32(36, recordFieldsFormat, true);
+        const payloadCopy = new Uint8Array(payload.byteLength);
+        payloadCopy.set(payload);
+        const fieldsCopy = new Uint8Array(recordFields.byteLength);
+        fieldsCopy.set(recordFields);
+        return {header, payload: payloadCopy, recordFields: fieldsCopy, byteLength};
     }
 
     /**
@@ -6392,14 +6461,28 @@ view.chunks :
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
-                    // _createLookupIndexChunk owns each complete buffer. The
-                    // existing queue budget remains charged until this worker
-                    // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
-                } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
-                    await state.lookupIndexWritable.writeChunks(chunks);
+                    // The complete logical byte charge remains until the worker
+                    // acknowledges its writes/flushes and validates every header.
+                    const headers = await state.lookupIndexWritable.writeOwnedIndexChunks(chunks);
+                    for (let i = 0; i < chunks.length; ++i) {
+                        const chunk = chunks[i];
+                        if (chunk instanceof Uint8Array) { continue; }
+                        const header = headers[i];
+                        if (!(header instanceof Uint8Array)) { throw new Error('Missing completed import index header'); }
+                        deferredLookupIndexRouteHeaders.get(chunk)?.set(header);
+                        ++this._lookupIndexWriteMetrics.workerOwnedEnvelopeCount;
+                        this._lookupIndexWriteMetrics.workerOwnedEnvelopeBytes += chunk.byteLength;
+                    }
                 } else {
-                    await state.lookupIndexWritable.write(new Blob(chunks));
+                    // Unsupported startup retains the existing local writer;
+                    // it hashes the same private copies before any local write.
+                    const parts = prepareImportIndexChunkParts(chunks);
+                    await (state.lookupIndexWritable instanceof SyncImportIndexWriter ?
+                        state.lookupIndexWritable.writeChunks(parts) :
+                        state.lookupIndexWritable.write(new Blob(parts)));
+                    for (const chunk of chunks) {
+                        if (!(chunk instanceof Uint8Array)) { deferredLookupIndexRouteHeaders.get(chunk)?.set(chunk.header); }
+                    }
                 }
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
@@ -7551,7 +7634,7 @@ view.chunks :
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, workerOwnedEnvelopeCount: number, workerOwnedEnvelopeBytes: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7560,6 +7643,8 @@ view.chunks :
             awaitMs: 0,
             maxQueuedBytes: 0,
             workerFileCount: 0,
+            workerOwnedEnvelopeCount: 0,
+            workerOwnedEnvelopeBytes: 0,
         };
     }
 
@@ -7889,5 +7974,86 @@ view.chunks :
                 record.reading = '';
             }
         }
+    }
+}
+
+const originalTermRecordFieldEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactRecordFields']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactRecordFields'));
+const originalTermRecordChunkEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactChunkRecords']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactChunkRecords'));
+const originalTermRecordAppend = /** @type {TermRecordOpfsStore['_appendEncodedChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_appendEncodedChunk'));
+const originalTermRecordEnvelope = /** @type {TermRecordOpfsStore['_createLookupIndexChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_createLookupIndexChunk'));
+/** @type {Array<[string, unknown]>} */
+const originalTermRecordAppendMethods = [
+    ['_encodeArtifactRecordFields', originalTermRecordFieldEncoder],
+    ['_encodeArtifactChunkRecords', originalTermRecordChunkEncoder],
+    ['_appendEncodedChunk', originalTermRecordAppend],
+    ['_createLookupIndexChunk', originalTermRecordEnvelope],
+];
+
+/**
+ * Preserve custom encoder/append/envelope contracts. Inspect only known store
+ * objects and fixed method descriptors, without invoking accessors.
+ * @param {TermRecordOpfsStore} store
+ * @returns {boolean}
+ */
+function hasOriginalTermRecordAppendMethods(store) {
+    if (!termRecordStoreOrigins.has(store) || Object.getPrototypeOf(store) !== TermRecordOpfsStore.prototype) { return false; }
+    for (const [name, method] of originalTermRecordAppendMethods) {
+        const own = Object.getOwnPropertyDescriptor(store, name);
+        const prototype = Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, name);
+        if (
+            (typeof own !== 'undefined' && (!('value' in own) || own.value !== method)) ||
+            prototype?.value !== method
+        ) { return false; }
+    }
+    return true;
+}
+
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isHeavyImportSource(value) {
+    return typeof value === 'number' && Number.isSafeInteger(value) && value >= MIN_INDEX_WORKER_SOURCE_BYTES;
+}
+
+const LOOKUP_VIEW_SHADOW_NAMES = ['buffer', 'byteOffset', 'byteLength', 'length', 'constructor', 'subarray', 'slice', 'set', Symbol.iterator];
+const LOOKUP_BUFFER_SHADOW_NAMES = ['byteLength', 'resizable', 'maxByteLength', 'constructor', 'transfer', 'transferToFixedLength'];
+const ARRAY_BUFFER_RESIZABLE_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable');
+const TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag);
+
+/**
+ * Reject proxy wrappers without traps, then inspect only a fixed set of own
+ * descriptors. No caller graph, prepared-index map or projected row is walked.
+ * Shared/resizable and custom views keep the existing eager behavior. Global
+ * intrinsic replacement is outside the existing encoder contract.
+ * @param {unknown} value
+ * @returns {value is Uint8Array<ArrayBuffer>}
+ */
+function isPlainFixedLookupIndexBytes(value) {
+    if (!ArrayBuffer.isView(value) || Object.getPrototypeOf(value) !== Uint8Array.prototype) { return false; }
+    for (const name of LOOKUP_VIEW_SHADOW_NAMES) {
+        if (Object.hasOwn(value, name)) { return false; }
+    }
+    // Preserve intrinsic identity and supply the backing buffer as the receiver.
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const byteLengthGetter = ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const resizableGetter = ARRAY_BUFFER_RESIZABLE_DESCRIPTOR?.get;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const tagGetter = TYPED_ARRAY_TAG_DESCRIPTOR?.get;
+    if (typeof byteLengthGetter !== 'function' || typeof tagGetter !== 'function') { return false; }
+    try {
+        if (Reflect.apply(tagGetter, value, []) !== 'Uint8Array') { return false; }
+        const buffer = value.buffer;
+        if (Object.getPrototypeOf(buffer) !== ArrayBuffer.prototype) { return false; }
+        for (const name of LOOKUP_BUFFER_SHADOW_NAMES) {
+            if (Object.hasOwn(buffer, name)) { return false; }
+        }
+        return Reflect.apply(byteLengthGetter, buffer, []) === buffer.byteLength &&
+        !(typeof resizableGetter === 'function' && Reflect.apply(resizableGetter, buffer, []) === true);
+    } catch {
+        // A forged prototype does not establish an ArrayBuffer internal brand.
+        return false;
     }
 }

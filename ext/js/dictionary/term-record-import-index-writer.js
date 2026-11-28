@@ -17,6 +17,7 @@
 
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
+import {prepareImportIndexChunkParts} from './term-record-import-index-chunk.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
 const MAX_UNFLUSHED_BYTES = 16 * 1024 * 1024;
@@ -127,49 +128,88 @@ export class SyncImportIndexWriter {
             total += chunk.byteLength;
             if (!Number.isSafeInteger(total)) { throw new RangeError('Import index chunk length overflow'); }
         }
+        await this._enqueue(() => this._writeChunkBytes(ownedChunks, total));
+    }
+
+    /**
+     * Hashing belongs to the same ordered operation as the writes, so an older
+     * failure remains authoritative and active work counts toward yielding.
+     * @param {import('./term-record-import-index-chunk.js').ImportIndexChunk[]} chunks
+     * @returns {Promise<(Uint8Array|null)[]>} Completed headers in logical chunk order.
+     */
+    async writeIndexChunks(chunks) {
+        if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
+        const owned = [...chunks];
+        /** @type {(Uint8Array|null)[]} */
+        const headers = [];
         await this._enqueue(async () => {
-            this._validateWriteLength(total);
-            if (ownedChunks.length === 1) {
-                await this._writeBytes(ownedChunks[0]);
-                return;
+            const parts = prepareImportIndexChunkParts(owned);
+            let total = 0;
+            for (const part of parts) {
+                total += part.byteLength;
+                if (!Number.isSafeInteger(total)) { throw new RangeError('Import index chunk length overflow'); }
             }
-            if (total === 0) { return; }
-            /** @type {Uint8Array|null} */
-            let scratch = null;
-            let sourceIndex = 0;
-            let sourceOffset = 0;
-            for (let completed = 0; completed < total;) {
-                const length = Math.min(MAX_WRITE_BYTES, total - completed);
-                while (ownedChunks[sourceIndex].byteLength === sourceOffset) {
-                    ++sourceIndex;
-                    sourceOffset = 0;
-                }
-                const first = ownedChunks[sourceIndex];
-                if (first.byteLength - sourceOffset >= length) {
-                    // The queued chunks own these bytes until the batch finishes.
-                    // Keep each OPFS request the same size as a coalesced write.
-                    await this._writeBytes(first.subarray(sourceOffset, sourceOffset + length));
-                    sourceOffset += length;
+            await this._writeChunkBytes(parts, total);
+            for (const chunk of owned) {
+                if (chunk instanceof Uint8Array) {
+                    headers.push(null);
                 } else {
-                    scratch ??= new Uint8Array(Math.min(MAX_WRITE_BYTES, total));
-                    let filled = 0;
-                    while (filled < length) {
-                        const source = ownedChunks[sourceIndex];
-                        const count = Math.min(source.byteLength - sourceOffset, length - filled);
-                        scratch.set(source.subarray(sourceOffset, sourceOffset + count), filled);
-                        sourceOffset += count;
-                        filled += count;
-                        if (sourceOffset === source.byteLength) {
-                            ++sourceIndex;
-                            sourceOffset = 0;
-                        }
-                    }
-                    await this._writeBytes(scratch.subarray(0, length));
+                    const header = new Uint8Array(chunk.header.byteLength);
+                    header.set(chunk.header);
+                    headers.push(header);
                 }
-                completed += length;
-                if (completed < total) { await this._yieldIfNeeded(); }
             }
         });
+        return headers;
+    }
+
+    /**
+     * @param {Uint8Array[]} ownedChunks
+     * @param {number} total
+     * @returns {Promise<void>}
+     */
+    async _writeChunkBytes(ownedChunks, total) {
+        this._validateWriteLength(total);
+        if (ownedChunks.length === 1) {
+            await this._writeBytes(ownedChunks[0]);
+            return;
+        }
+        if (total === 0) { return; }
+        /** @type {Uint8Array|null} */
+        let scratch = null;
+        let sourceIndex = 0;
+        let sourceOffset = 0;
+        for (let completed = 0; completed < total;) {
+            const length = Math.min(MAX_WRITE_BYTES, total - completed);
+            while (ownedChunks[sourceIndex].byteLength === sourceOffset) {
+                ++sourceIndex;
+                sourceOffset = 0;
+            }
+            const first = ownedChunks[sourceIndex];
+            if (first.byteLength - sourceOffset >= length) {
+                // The queued chunks own these bytes until the batch finishes.
+                // Keep each OPFS request the same size as a coalesced write.
+                await this._writeBytes(first.subarray(sourceOffset, sourceOffset + length));
+                sourceOffset += length;
+            } else {
+                scratch ??= new Uint8Array(Math.min(MAX_WRITE_BYTES, total));
+                let filled = 0;
+                while (filled < length) {
+                    const source = ownedChunks[sourceIndex];
+                    const count = Math.min(source.byteLength - sourceOffset, length - filled);
+                    scratch.set(source.subarray(sourceOffset, sourceOffset + count), filled);
+                    sourceOffset += count;
+                    filled += count;
+                    if (sourceOffset === source.byteLength) {
+                        ++sourceIndex;
+                        sourceOffset = 0;
+                    }
+                }
+                await this._writeBytes(scratch.subarray(0, length));
+            }
+            completed += length;
+            if (completed < total) { await this._yieldIfNeeded(); }
+        }
     }
 
     /** @returns {Promise<void>} */
