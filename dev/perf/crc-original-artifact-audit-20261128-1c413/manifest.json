@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "repository": "ManabiIO/manabitan",
+  "publication": {
+    "runId": 46115840063,
+    "headSha": "7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+    "headTree": "72a4a70599071cfc4b69e5d17c4c5fce659cb9e3",
+    "headBranch": "perf/crc-gap-slicing-20261128",
+    "runAttempt": 1,
+    "event": "push",
+    "workflowPath": ".github/workflows/import-crc-gap-slicing-1c413.yml"
+  },
+  "baseline": {
+    "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+  },
+  "expectedRunConclusion": "failure",
+  "artifacts": [
+    {
+      "kind": "correctness",
+      "jobId": 140889356637,
+      "jobName": "Native rebuild, unit tests, types, lint, and dry build",
+      "id": 15254302339,
+      "name": "crc-gap-slicing-validation-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 52321,
+      "sha256": "fbd915c7ae7de262121172b400934e3bc6f19424ede30a3c2ce4459fc9bc881f",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jitendex-AB",
+      "jobId": 140889356741,
+      "jobName": "Complete import (jitendex, AB)",
+      "id": 15255396867,
+      "name": "crc-gap-slicing-jitendex-AB-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35608352,
+      "sha256": "2cdd3027da0ff409fd2138950677c9b065e8f2f64daf2c111460cd0a26128481",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jitendex-BA",
+      "jobId": 140889356775,
+      "jobName": "Complete import (jitendex, BA)",
+      "id": 15255103618,
+      "name": "crc-gap-slicing-jitendex-BA-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35606966,
+      "sha256": "4b267e7fefce647a801626e08bf876d23e2dd133a153ebeddeb97df30d24fe93",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jmdict-AB",
+      "jobId": 140889356656,
+      "jobName": "Complete import (jmdict, AB)",
+      "id": 15255151181,
+      "name": "crc-gap-slicing-jmdict-AB-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35583314,
+      "sha256": "8d068e2518ba00b9ce267767eab189c7a0d796190016de789010dbc43a7d5872",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "jmdict-BA",
+      "jobId": 140889356681,
+      "jobName": "Complete import (jmdict, BA)",
+      "id": 15254655880,
+      "name": "crc-gap-slicing-jmdict-BA-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35610970,
+      "sha256": "b078b85071715a44c8839843da8a2048ce34490f44f155acd364ebbfb9cd4120",
+      "expectedConclusion": "success"
+    },
+    {
+      "kind": "vndb-AB",
+      "jobId": 140889356696,
+      "jobName": "Complete import (vndb, AB)",
+      "id": 15255920869,
+      "name": "crc-gap-slicing-vndb-AB-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35749941,
+      "sha256": "41647b3c7455fd1a2425e4b14b887c7efec3ecf1db09ead76f6611ce02bdd3a8",
+      "expectedConclusion": "failure"
+    },
+    {
+      "kind": "vndb-BA",
+      "jobId": 140889356667,
+      "jobName": "Complete import (vndb, BA)",
+      "id": 15256001758,
+      "name": "crc-gap-slicing-vndb-BA-7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+      "sizeBytes": 35783228,
+      "sha256": "6cd760bd95353fb4bf5eecd4a3c7d154eb4ff23169aa05ff0a429a24f1ce5242",
+      "expectedConclusion": "failure"
+    }
+  ],
+  "sourceProof": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "7a8cf122aa1cff7c67d2533f1b00f8a7c78882d2",
+    "changedPaths": [
+      ".github/workflows/import-crc-gap-slicing-1c413.yml",
+      "dev/data/dictionary-wasm/manifest.json",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "dev/perf/crc-gap-slicing-20261128/PLAN.md",
+      "dev/perf/crc-gap-slicing-20261128/audit-crc.py",
+      "dev/perf/crc-gap-slicing-20261128/test-audit-crc.py",
+      "dev/perf/crc-gap-slicing-20261128/verify-source.py",
+      "ext/js/dictionary/wasm/term-bank-parser.c",
+      "test/term-bank-crc.test.js",
+      "test/term-bank-source-crc-reuse.test.js"
+    ],
+    "expectedPackageEntries": [
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "parent": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "passed": true,
+    "sources": {
+      ".github/workflows/import-crc-gap-slicing-1c413.yml": {
+        "bytes": 6655,
+        "gitBlob": "fbeb295c536ef5d8a52b4b1a68a0a3162f3f9d48",
+        "sha256": "0abe9ddff5e91168f0d4091cdc66f27efe98e5a0513e59772aff164b02cbf188"
+      },
+      "dev/data/dictionary-wasm/manifest.json": {
+        "bytes": 2588,
+        "gitBlob": "136504deb3bd43fb52f2aa211aab4e59f2043b21",
+        "sha256": "453d6b36b68f3c1b539ee2cb43fa476211d81a0315b90849b9b89edabc5347e8"
+      },
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+        "bytes": 67943,
+        "gitBlob": "dc1673cd501778a8a48e8faa4cc5c81076f2a19d",
+        "sha256": "b362d9b0106c28e9cb495d66c650463c771e165cb8ebadc4a66adda973466fd9"
+      },
+      "dev/perf/crc-gap-slicing-20261128/PLAN.md": {
+        "bytes": 10944,
+        "gitBlob": "b8ceb8292ad974d51413f494822a15c1adc90697",
+        "sha256": "24a183ccc64d204050b3212f49737002710ff9031466e441b56445d938de40a3"
+      },
+      "dev/perf/crc-gap-slicing-20261128/audit-crc.py": {
+        "bytes": 8045,
+        "gitBlob": "b979857985a75051afa9bba950914244f3479df5",
+        "sha256": "fd83a3f0fa7aad901bd48e3c5e4270ae70a11e3e644103db6bd58179d45d73d9"
+      },
+      "dev/perf/crc-gap-slicing-20261128/test-audit-crc.py": {
+        "bytes": 5903,
+        "gitBlob": "1718a31859cbff6a4e2529d4c875761aa215e580",
+        "sha256": "81eb9a61b5600663dc0dd4f5ab6c75c1773c05079ee5e627f3aad1d4c8478519"
+      },
+      "dev/perf/crc-gap-slicing-20261128/verify-source.py": {
+        "bytes": 4968,
+        "gitBlob": "0aaef4850e313aa38b5c6a46bd5f485c779102c3",
+        "sha256": "4f7216e1f37f44e568f5383fe2fe297199cebc0b9bf3916bc018e8ae021251c9"
+      },
+      "ext/js/dictionary/wasm/term-bank-parser.c": {
+        "bytes": 159622,
+        "gitBlob": "1c28f8316300604021ce79e1bd78d88d4ae1f3a7",
+        "sha256": "eea3064cf869d880115dcd42055293784874c9d5092e962d4fea52284fe93a47"
+      },
+      "test/term-bank-crc.test.js": {
+        "bytes": 11252,
+        "gitBlob": "7dee143227238507532cb8a16341b199542e7e43",
+        "sha256": "507452151ecf4a6a0767d04e0aff41f7edb6f9a328f278c27209b8002c55d706"
+      },
+      "test/term-bank-source-crc-reuse.test.js": {
+        "bytes": 14727,
+        "gitBlob": "30e3cc1ef6943b039674f21f83121b84d961d51b",
+        "sha256": "467dbd5e03dd3be3cb18b244b9f72c540ec1c6fc425d28cf3a22d677dcf9ca5d"
+      }
+    },
+    "tree": "72a4a70599071cfc4b69e5d17c4c5fce659cb9e3",
+    "unchangedObserverHashes": {
+      "dev/bin/build-dictionary-wasm.js": "27fef161414a1bb3fb4e674607a04da6c9a34b9561c5e1a7b7a6a71194e5f54a",
+      "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17",
+      "dev/perf/import-memory-20261125-a7f7/README.md": "687943ffc81758e973767cbcf9a63567e842a02d1828150270c1f8e0ddf88529",
+      "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+      "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+      "dev/perf/import-memory-20261125-a7f7/source-provenance.json": "218b3f8f0723585f3f51493a25b568614dc72cd7e5418caa818ba1c232845adf",
+      "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+      "dev/perf/import-memory-20261125-a7f7/test_import_window.py": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518",
+      "dev/perf/import-memory-20261125-a7f7/test_protocol.py": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba",
+      "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d",
+      "dev/perf/import-qualification-20261125-a7f7.py": "cad1b3fb25766cbd22a1c4260718a0b92353e87276751217ca18dc9eea29c6ef",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "qualificationPolicy": {
+    "primaryTarget": "vndb",
+    "originalHostsPerDictionary": 2,
+    "measuredPairsPerHost": 12,
+    "targetMedianChangePercentAtMost": -2,
+    "targetFasterPairsAtLeast": 9,
+    "targetAbsoluteControlMedianAtMost": 1,
+    "targetAbsoluteControlEqualWorkAtMost": 1,
+    "nonTargetAbsoluteControlMedianAtMost": 3,
+    "nonTargetAbsoluteControlEqualWorkAtMost": 3,
+    "repeatedNonTargetRegressionPercent": 3,
+    "repeatedNonTargetDefinition": "Paired-median slowdown greater than 3 percent for the same dictionary on both original hosts",
+    "requireAllSixSourceSemanticMediaMemoryCells": true,
+    "requireSeparateFullCorrectness": true,
+    "noRetriesReplacementsExclusionsOrPooling": true,
+    "scope": "Independent qualification of original CRC-gap runtime; identical runtime already exists in PR 979, so no duplicate product PR."
+  },
+  "auditAcquisition": "None. Read-only GET of exactly the seven original artifacts; no browser, dictionary import, process sampling, native execution, timing acquisition, retries or replacement observations."
+}

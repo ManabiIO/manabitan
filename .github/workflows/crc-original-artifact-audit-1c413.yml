@@ -1,0 +1,85 @@
+name: Audit original CRC gap slicing artifacts 20261128
+
+on:
+  push:
+    branches: [audit/crc-original-20261128-1c413]
+    paths:
+      - 'dev/perf/crc-original-artifact-audit-20261128-1c413/**'
+      - '.github/workflows/crc-original-artifact-audit-1c413.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit-records:
+    name: Read original CRC gap records without import acquisition
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Preserve launcher inputs before Python setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/crc-original-artifact-audit/launcher-sources
+          git rev-parse HEAD > builds/perf/crc-original-artifact-audit/checked-out-head.txt
+          uname -a > builds/perf/crc-original-artifact-audit/launcher-host.txt
+          cp dev/perf/crc-original-artifact-audit-20261128-1c413/audit_transport.py \
+            dev/perf/crc-original-artifact-audit-20261128-1c413/audit_crc.py \
+            dev/perf/crc-original-artifact-audit-20261128-1c413/test_audit_crc.py \
+            dev/perf/crc-original-artifact-audit-20261128-1c413/manifest.json \
+            dev/perf/crc-original-artifact-audit-20261128-1c413/README.md \
+            dev/perf/crc-original-artifact-audit-20261128-1c413/source-binding.json \
+            builds/perf/crc-original-artifact-audit/launcher-sources/
+          cp .github/workflows/crc-original-artifact-audit-1c413.yml \
+            builds/perf/crc-original-artifact-audit/launcher-sources/workflow.yml
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12.10'
+          architecture: 'arm64'
+      - name: Verify Python and the immutable auditor source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code HEAD -- .
+          python3 -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11 or newer is required"'
+          python3 - <<'PY'
+          import json
+          import sys
+          sys.path.insert(0, "dev/perf/crc-original-artifact-audit-20261128-1c413")
+          from audit_crc import verify_auditor_source
+          print(json.dumps({"verifiedAuditorSources": verify_auditor_source()}, sort_keys=True))
+          PY
+      - name: Run pure archive, identity and statistical tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/crc-original-artifact-audit
+          python3 -m unittest discover \
+            -s dev/perf/crc-original-artifact-audit-20261128-1c413 \
+            -p 'test_*.py' -v \
+            2>&1 | tee builds/perf/crc-original-artifact-audit/pure-tests.log
+      - name: Audit only the seven frozen original artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 dev/perf/crc-original-artifact-audit-20261128-1c413/audit_crc.py \
+            --manifest dev/perf/crc-original-artifact-audit-20261128-1c413/manifest.json \
+            --output builds/perf/crc-original-artifact-audit/evidence \
+            2>&1 | tee builds/perf/crc-original-artifact-audit/audit.log
+      - name: Preserve every original archive and audit outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: crc-original-artifact-audit-${{ github.sha }}
+          path: builds/perf/crc-original-artifact-audit
+          if-no-files-found: error
+          retention-days: 14
