@@ -113,8 +113,8 @@ This does not establish a whole-import gain.
 All recorded semantic checks pass. Candidate memory observation B2 exceeds the
 fixed sampling-gap limit (252.093481 ms against 250 ms), so the complete memory
 comparison remains unqualified. The separate 1.57-1.60 ms warm-validator saving
-is unchanged. Jitendex and VNDB remain separate pending qualifications at this
-addendum's cutoff.
+is unchanged. This addendum's cutoff predates the remaining two score cohorts,
+whose completed results appear below.
 
 The addendum also preserves a later read-only cross-file verification for the
 seven completed cohorts and the reviewed auditors prepared for later results.
@@ -123,6 +123,27 @@ Preparation of an auditor is not a completed compression or CRC measurement.
 The archive, member manifest and checksum are stored here as
 `score-jmdict-browser-addendum-20261128-1b47.*`. Archive SHA-256:
 `5d400949b03587909a973cac958b4276ddfe5adf6318427b01782e0fb044b4b0`.
+
+## Completed score results across all three dictionaries
+
+The [remaining-score browser addendum](score-remaining-browser-addendum-README.md)
+preserves Jitendex and VNDB separately: 52 raw reports, 52 canonical receipts
+and 846 memory scan rows. Both pass their original semantic and memory gates,
+but neither establishes a whole-import gain.
+
+Jitendex has an unresolved adverse signal: five of six candidate pairs are
+slower, with +0.900% paired median and +3.387% equal-work timing. The complete
++17.679% fifth pair remains included. VNDB's paired median is -1.019%, with an
+interval spanning zero and a more favorable identical-code control. Those
+results do not cancel Jitendex's adverse evidence or JMdict's coverage failure.
+
+PR #978 remains a held component-only draft. Its small warm-validator saving is
+not a browser non-regression or merge-readiness claim. The addendum also explains
+why the metric named `termRecordValidationMs` does not time the changed loop.
+
+The archive, member manifest and checksum are stored here as
+`score-remaining-browser-addendum-20261128-1b47.*`. Archive SHA-256:
+`3153e88443f1712e78d2ed500585b81baa738ff3e651c50b228e5f48257d06b8`.
 
 ## Why JMdict gains stayed small
 

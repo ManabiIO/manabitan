@@ -1,0 +1,2525 @@
+{
+  "format": 1,
+  "study": "Indexed score validator: complete Jitendex and VNDB browser evidence",
+  "scope": "All two completed source-bound raw cohorts, including every unfavorable observation, at2026-11-28T07:51:17Z. No whole-import gain established; held component-only draft. Published score JMdict raw cohort remains separate. No new acquisitions.",
+  "sourceBindings": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "915268441352c3c7aa50fc0fbd44f73f5a826d79",
+    "productPrHeadAtReview": "b15bad43acdfd54d541895cac1109c0e5ba51b2f",
+    "runtimeGitBlob": "b17f72437f196aa1fd21b282c03f147aad7d633f",
+    "runtimeSha256": "63942c3dc97eab215293bf04a138844d505605386bc61322b3f2f29e20d1d769",
+    "actualAuditorSha256": "292eea976f78c24ce93f441b468c9a3efad62ad539cd9425c74eec893ee27ca0",
+    "fixedPublicationCutoffUtc": "2026-11-28T07:51:17Z",
+    "publishedScoreJmdictCommit": "54b933253e05dfa8b9cfe0b7211cb8eac34eb500",
+    "rawMembers": 408,
+    "rawReports": 52,
+    "canonicalReceipts": 52,
+    "rawMemoryScanRows": 846,
+    "newAcquisitions": 0,
+    "independentReadmeSha256": "ef37658590265d884aa46562ac91fedbcec8be07f648dcaa3e7094d86903ff40",
+    "actualAuditHashes": {
+      "score-jitendex": "f42397a580c513d69040784f9cf22451020c2544a375f3fc2d4826f4c69814f1",
+      "score-vndb": "a99c0b744e1e725dc556495f3822b8413c756a41a652a0411f39a973d2bd737a"
+    }
+  },
+  "memberPathBase": "Original workspace-relative path; contents are byte-for-byte unchanged",
+  "archiveMetadata": "gzip timestamp, tar ownership and file timestamps normalized; payload paths and contents preserved",
+  "symlinkPolicy": "All payload files and their directory components must be regular, non-symlink paths; symlink targets are never read",
+  "manifestPlacement": "External to archive so every archive member, without a self-hash exception, has a digest",
+  "spec": {
+    "path": "evidence/score-remaining-browser-addendum-20261128-1b47/bundle-spec.json",
+    "sha256": "da263299e3e575b69da9e0e49d1706d25a768e969da962646b59c9d70d2bcaae"
+  },
+  "archive": {
+    "file": "score-remaining-browser-addendum-20261128-1b47.tar.gz",
+    "bytes": 3654143,
+    "sha256": "3153e88443f1712e78d2ed500585b81baa738ff3e651c50b228e5f48257d06b8"
+  },
+  "totalPayloadBytes": 47504150,
+  "members": [
+    {
+      "path": "evidence/audit-hosted-import-artifact-v2-1b47-derivation.json",
+      "bytes": 578,
+      "sha256": "1e609bf2a6f0ae122c624f26e3956c12f02eadcfba81101f2db285e6fb48b375"
+    },
+    {
+      "path": "evidence/audit-hosted-import-artifact-v2-1b47.patch",
+      "bytes": 6565,
+      "sha256": "597304d1a09d36e778e5dce2bc37627de2ae4a70eb53f36c18aefab4cc2a0f14"
+    },
+    {
+      "path": "evidence/audit-hosted-import-artifact-v2-1b47.py",
+      "bytes": 11147,
+      "sha256": "292eea976f78c24ce93f441b468c9a3efad62ad539cd9425c74eec893ee27ca0"
+    },
+    {
+      "path": "evidence/durable-bundles/package-evidence-v2.py",
+      "bytes": 6789,
+      "sha256": "68b0f97d8e5b40fb5485420419739d95af0e6c47e02a577a09b790ff75f60684"
+    },
+    {
+      "path": "evidence/durable-bundles/scan-evidence-archives.py",
+      "bytes": 2416,
+      "sha256": "7dc85d50b904fb7c31cc87159c1af7e04f1793385974aa430ce653f03c02c54f"
+    },
+    {
+      "path": "evidence/durable-bundles/stage-pending-browser-cohort.py",
+      "bytes": 11295,
+      "sha256": "9eec5a3decd7a9119596dbb5460c5fc8a4dea52f0c85c98e14d8ae8cca6103e7"
+    },
+    {
+      "path": "evidence/generic-artifact-auditor-v2-independent-review-1b47.json",
+      "bytes": 963,
+      "sha256": "49a3c9cb5e631a8bf87ba1ece47f31da449d4cc703c9ad093a079645bfb7b46c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/cohort-record.json",
+      "bytes": 120140,
+      "sha256": "6a91ab9b0e5bed9eb7fb893d0db096e517647da6bc1662d92ca85e907d453522"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/baseline-tree.txt",
+      "bytes": 41,
+      "sha256": "e7eeeeb8dc66c5568919c561aa5546fd54e30233922c4842c40e77998c42da4a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/candidate-sha.txt",
+      "bytes": 41,
+      "sha256": "293916a1127b9c588579c0bad28705cec32e9f336ce63730c362f11495edf5ce"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex-driver.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex-summary.log",
+      "bytes": 17699,
+      "sha256": "da383201003212769ea4566e533bbecc6fc86194d864211bcd982a79e87c5f8e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/analysis.json",
+      "bytes": 1316,
+      "sha256": "b888f9506e9ea43787d0b376b9178e37ccd37b1af2aa36cd9dd55d6c9c9010e1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/build-A.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/build-B.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/host-after.json",
+      "bytes": 504,
+      "sha256": "bf9b4a9388cf3779472235f3d3076e8ea2964cec772828604e8cbb1a1a9a08a6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/host-before.json",
+      "bytes": 504,
+      "sha256": "99a0677c6acbe50464fbbb0b63cb504b6ea3c5850cb82e931a1b2a6eead53f18"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/run-1.html",
+      "bytes": 83690,
+      "sha256": "7b41a3af198300ca9aa11d613d39794d3b260b290f4354433cf8764147eecb7c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/run-1.json",
+      "bytes": 150911,
+      "sha256": "7c01ca2261c13b34299d683ffbea91d06cdc634ee17a4e7e35698b68faaffea1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/run.log",
+      "bytes": 1777,
+      "sha256": "4f06c910b575f6185ff983fded097b6ce808dc6837b00e4693ac2940b2456c26"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-A/summary.json",
+      "bytes": 59193,
+      "sha256": "ceee0822100ba6e1cc3c27add000bc6f3f6afcbf475689bad866bf6553a5be4f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/host-after.json",
+      "bytes": 504,
+      "sha256": "47812f823317238e56bde0e191025dded0874bd8c2e51a585e6dbe38656d7a68"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/host-before.json",
+      "bytes": 504,
+      "sha256": "a5bbbbbc6628765cbc7bdd2c1c4ede5cfaaf7426c97b6152e44ddbf98a88514b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/run-1.html",
+      "bytes": 83897,
+      "sha256": "58ab8990affd0546f3c2b8eb9b942c385d1bf1a2a6f3230f3363163feee08d48"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/run-1.json",
+      "bytes": 151290,
+      "sha256": "621fbe9e846c93b7ce98bda05465fd81b99ed04136bf9681b53c17c0bcc5f36e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/run.log",
+      "bytes": 1776,
+      "sha256": "e4da33340b85f55b959a251b698e5c572f5f0392f4a3943c8bae8549b3a64992"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-01-C/summary.json",
+      "bytes": 59264,
+      "sha256": "4192a3c7360788c05c0da5cd141e57eeb21a198db73cdadb228aebb2337ad02e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/host-after.json",
+      "bytes": 504,
+      "sha256": "8a81649f627c0374b26108f085ad72d762402acb4d76be0b0f47e60aed3a7b33"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/host-before.json",
+      "bytes": 504,
+      "sha256": "d0edc5ec4b88f553925ae9d8aa1ffe2b6578d75d9baf51b4715d1a35cf9dcd97"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/run-1.html",
+      "bytes": 83704,
+      "sha256": "79a222db9d376aed7c78ef2a72d2604119c42454d5828d99c63b623785789a69"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/run-1.json",
+      "bytes": 150960,
+      "sha256": "db82b8273fbf9d8cb8339a04f3c3b696bd31bb36aaa3a5f421a05e8d1d5219d2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/run.log",
+      "bytes": 1776,
+      "sha256": "46bd02e9fafc7aba9a7450135c1cf4006eb698223303d48bc98f4d5cbfbb8af2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-A/summary.json",
+      "bytes": 59222,
+      "sha256": "714507eb08757d9b6913eab229ef65b7f476f4632ca1f4721615219b1ca656f6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/host-after.json",
+      "bytes": 504,
+      "sha256": "29fa29505b52829085228ff925418665ac18409ecb5ece16166e55c7ed9fc1ef"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/host-before.json",
+      "bytes": 504,
+      "sha256": "21da5d265750cd275bd8f6f2f4fe52267c204db97762e607156b0d3b6ee0a2f0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/run-1.html",
+      "bytes": 83615,
+      "sha256": "6594402ea3d94ac52254518256a7cf3767aa3e2818b05c2e2037fc8e70559f56"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/run-1.json",
+      "bytes": 150790,
+      "sha256": "e07e9424ded5c2ef070337ed0ad28deeb25ea6fc1fc604bfc4ccfea4775144cc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/run.log",
+      "bytes": 1776,
+      "sha256": "26950c9589d5b7a8ce6ce1c8005803a7ddb87edf49271b2a58c298e39b1c21aa"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/control-02-C/summary.json",
+      "bytes": 59213,
+      "sha256": "5e416e3a733d9f7985f87f7c06dece3ead48473ad662576173c27f0390b75d14"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-A/canonical-receipt.json",
+      "bytes": 25137,
+      "sha256": "c4f3c22f8819f58494ec1095bc4834206c2d5a7a77b8468e0f5e16bee5395587"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-A/run-1.html",
+      "bytes": 83669,
+      "sha256": "75a8aee199f7effda234e8cfcd76c1f4135cc3e15a5e8f5b8a022d543718ebee"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-A/run-1.json",
+      "bytes": 150934,
+      "sha256": "439778a32c4d26fadaa7e8db3a99a8ae76b5e0243fa90b873e00ef3a2ea72a4a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-A/run.log",
+      "bytes": 1794,
+      "sha256": "7e8ac2c06a4ae3c37e4555fd900766abb4b8fd00ddba783f80fdfe685670153c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-A/summary.json",
+      "bytes": 59244,
+      "sha256": "4f7bca31c953ee9a7ce25cfa53f6ea0da71a23ba05210510e7a85a474fbc1b7e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-B/canonical-receipt.json",
+      "bytes": 25137,
+      "sha256": "c4f3c22f8819f58494ec1095bc4834206c2d5a7a77b8468e0f5e16bee5395587"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-B/run-1.html",
+      "bytes": 83926,
+      "sha256": "7c7eb33fddc0baa0d400834e965e725de672c1c395876e3f8b3f0872998025eb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-B/run-1.json",
+      "bytes": 151254,
+      "sha256": "9fd7c777df0897fc189881cdb81d86fd3e891f27037ebeb551a3d73390fc10a8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-B/run.log",
+      "bytes": 1795,
+      "sha256": "e1a8600d7c098418efba3feb67888b151fb1ebb7d04c96c243a4bbc557195b3d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/exhaustive-media-B/summary.json",
+      "bytes": 59319,
+      "sha256": "4c01133a6bd81bcf083ddd8f8bf5ba0b53dfc9b6717ca389b976dad8ae8fa79e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/fixtures.log",
+      "bytes": 169,
+      "sha256": "f5b95e5225fed2af6fb0c993938f1634a9bb30264bf34ccc1f681aa0114e8ce3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/libs-A.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/libs-B.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/license-A.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/license-B.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/markers.jsonl",
+      "bytes": 140,
+      "sha256": "8d9fb9be49c045c3ce1ffd36501a8c8591e803c8c8d5f663c07e8670a8ae1c4d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/memory.json",
+      "bytes": 2014465,
+      "sha256": "b28434d82ddf040e614168b92e9d45db85fda89ff5ebccfac8afdf2a5ea773d2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/run-1.html",
+      "bytes": 83908,
+      "sha256": "15851ebe3150d3324f3a7d27bb665eb2765256bfce88c6cd6878d1220f3b5107"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/run-1.json",
+      "bytes": 151328,
+      "sha256": "a9e9443cecc78f1703bda833327e793f7ec938d4915db909650d51c33e9110f3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/run.log",
+      "bytes": 1768,
+      "sha256": "8245bcb179b90103e878b13451cfe5eb85de15fae061d36e33b7485f0d5ba7c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A1/summary.json",
+      "bytes": 59350,
+      "sha256": "59cff096c5a591178fc865860acdb1528604a84689593f426388a307d90e5bec"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/markers.jsonl",
+      "bytes": 140,
+      "sha256": "41a08ab209d43b430a3574656bc9b90836c445c298a1e695fe618e6a6fc5efa1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/memory.json",
+      "bytes": 2032851,
+      "sha256": "e4770298a37fa8e6f3cfa5a5f15128081b9e4489c3a561fdc9ed00ce7a49d87b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/run-1.html",
+      "bytes": 83938,
+      "sha256": "1f02b28b6b3654876278167f86ae03fdefeecaca45db7395e4346933bd48ebad"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/run-1.json",
+      "bytes": 151348,
+      "sha256": "6bf54685dd8a25206c411238d76f03de0fefe69b562738e3c8f4c1907502eb6f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/run.log",
+      "bytes": 1768,
+      "sha256": "17607009ec21cdd46794902060e17f6baccf6c701ab26619eb15b7339268265f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/A2/summary.json",
+      "bytes": 59332,
+      "sha256": "dd45f43826adedbbcd44367d2afd2b85082ca4cfa852aca95356d7b40c1e6b52"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/markers.jsonl",
+      "bytes": 140,
+      "sha256": "adc717521436c5f99059afc3cc57b1d9d5b70a1f07b39cc121452acc2a78d421"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/memory.json",
+      "bytes": 2147983,
+      "sha256": "d033276ef9a2a9cc27c44826fef2a6bf74e7ccf3c59ff92901045f2745884fab"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/run-1.html",
+      "bytes": 83756,
+      "sha256": "f53558665b74fec5d849420c6f4e2c3a55df78570dd7af14663b4f848247a45b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/run-1.json",
+      "bytes": 150949,
+      "sha256": "eab6f68611fe092bdc16cd6e9ce8e8c3dc4c1966f3dbdc7a22c89962c63c9de8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/run.log",
+      "bytes": 1769,
+      "sha256": "d6d8936f1e3736da160c593b6781db59821f0cdacc6bbe4a79584548fe00e39c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B1/summary.json",
+      "bytes": 59160,
+      "sha256": "9ae3395f7f1d22102f2b8e65861db0f572a3420ce2d2d43c85f344c01e621962"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/markers.jsonl",
+      "bytes": 140,
+      "sha256": "7a3d7a831d110db50c130127e6b58d8cc76b38fcd625475f481faee8c149e054"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/memory.json",
+      "bytes": 2112480,
+      "sha256": "8bff1be5990e434f76a2618a60cc11c4f30907e73471c153150a751eca646903"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/run-1.html",
+      "bytes": 84021,
+      "sha256": "ec30804d9d2fad80092b1783f83574b7447d51b4c853f523982d1220f1d08839"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/run-1.json",
+      "bytes": 151458,
+      "sha256": "09009ea1d636dace1aae623d86df67cc3a736442cd36909b4fe4cbccbb0411bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/run.log",
+      "bytes": 1768,
+      "sha256": "6a52854c7039250e85243108fc1078d6eaf67ca2a3e1a6957e99aec6f5da967b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/B2/summary.json",
+      "bytes": 59277,
+      "sha256": "42cf95867c28bbcb7c08f82eff6e59f974e5ee75548196af7e9f2727003cc0c3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/harness-instrumented.js",
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/harness-original.js",
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/memory-audit.json",
+      "bytes": 456,
+      "sha256": "614134fe162b10c2bc012aa289254160f212d60f0aeb092286bb18fa5b3f38b5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/memory-comparison.json",
+      "bytes": 10139,
+      "sha256": "94b03b67b4fe274987c05eedea4726256a84c22a0ce1b0cc7aebc1c365e212b8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/observations.json",
+      "bytes": 8513,
+      "sha256": "e48b46e254379abc1f76c41c269739d58c3c8a57b1de0f53ed37fa18975d03e5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/plan.json",
+      "bytes": 129298,
+      "sha256": "f6a99f7afe9d0156c67d1a0bb83cb2b8647e5e55555230a9e7a77941ac2bfa61"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/observations.json",
+      "bytes": 2458,
+      "sha256": "2d2a03e5fe5f75519cc20c20e9dbe65ee667f2aa38764a60db6bfdc64c4aaaf3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/host-after.json",
+      "bytes": 504,
+      "sha256": "12ee427537bb25e08e10974897eaf38ee12ad1b9f8af2a492df1179d4615dd93"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/host-before.json",
+      "bytes": 504,
+      "sha256": "e68bb34d8b35926d63c779296a686f3eea6c49d131d99717cc86a740e755121a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/run-1.html",
+      "bytes": 83627,
+      "sha256": "02b721d9f3d047c7776426ba3c27282042459420b5697ade4affdd86ccc8e3f2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/run-1.json",
+      "bytes": 150952,
+      "sha256": "f1bba1fbfc397a94878f6bedd69b551fcb2712a193ece93c2339b388e6f0f0ae"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/run.log",
+      "bytes": 1768,
+      "sha256": "7ed7a11fc4738ac0746324cef65848260f94ce5de3e594861bd07453af1a7723"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-A/summary.json",
+      "bytes": 59289,
+      "sha256": "76d5fb7285fc787260bb7877a98a645d7876fcb7302d637af26b94fadd425ee1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/host-after.json",
+      "bytes": 503,
+      "sha256": "56456906e8de042fc01a27d6c2e021a9196ba6cef1c8492e4f9c72eff0774907"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/host-before.json",
+      "bytes": 504,
+      "sha256": "684287e54c53aa09973ba18b8ca6f487ee0b9bcfc2ff68c60a1f16e44b02720b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/run-1.html",
+      "bytes": 83839,
+      "sha256": "c01723ea792d9fa31fa59443416cab03f997e568c1d0787518e066ee90e58fd1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/run-1.json",
+      "bytes": 151098,
+      "sha256": "9cba33408b828747c4f2eabb7704597ad6ea7411a08d2bb3beda78f147153c5e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/run.log",
+      "bytes": 1767,
+      "sha256": "0a9123be900231d02e9019e0e2f077cbf38800b249f53bbfe99eaeb52245786b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-01-B/summary.json",
+      "bytes": 59202,
+      "sha256": "68bacd5930e8f15a812ae730a7214176d5d017b12e13eab0a41505d436a7ef3c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/host-after.json",
+      "bytes": 504,
+      "sha256": "462096ee5ce878dd1f886894124074e8de84706a67da6755c48373aadec4ba64"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/host-before.json",
+      "bytes": 503,
+      "sha256": "0c6de26a8cae917a02f74097a1e37a1f13079c0ed37563dee518d09d2b974226"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/run-1.html",
+      "bytes": 83711,
+      "sha256": "ecdd74a0a631e10791f45dc0920ab389692ebab07e9ea926b52258ee784ec36e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/run-1.json",
+      "bytes": 150865,
+      "sha256": "99d7a6a17baa9a87bfcfb6bfdc6cf60c627f672889dd99735f3ac95abe00011a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/run.log",
+      "bytes": 1768,
+      "sha256": "5697eef531c40ea24a8c185d5f768c2e04d790a8d7158d6849e9ca9bd334e27b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-A/summary.json",
+      "bytes": 59092,
+      "sha256": "dbd9b575f8575d9d4571d28f8c4cd75519b17282673766209cc4962a6e454392"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/host-after.json",
+      "bytes": 503,
+      "sha256": "e7d0cd23245df134043ded9be15516151c26e99346d9a936997194dbbb1c31b8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/host-before.json",
+      "bytes": 503,
+      "sha256": "0b578cffd0d1e7170e97590c4294df5482006bde4305be6a537ab23825be001a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/run-1.html",
+      "bytes": 83810,
+      "sha256": "3ce121a475e0ace17ab2f8116c240fcc7fb36402b4707719af2fc44d88f5ae56"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/run-1.json",
+      "bytes": 151100,
+      "sha256": "31a7c040a71869949cfcb12d313d1d021089b56e0085f8b3cb71b6799972202a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/run.log",
+      "bytes": 1768,
+      "sha256": "3a8da35e1065d4cd191deb8c6b6613ff75814f6f1d06663b590b4ee4fa06f717"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-02-B/summary.json",
+      "bytes": 59166,
+      "sha256": "186d5e822b80d758ade8f87eea449b110c8091eff2bfb09b2026cec3f7c63edd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/host-after.json",
+      "bytes": 504,
+      "sha256": "90337bbc4795f062391db600e202cefbdac1a17cb4119cd147a2bba0751a04e0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/host-before.json",
+      "bytes": 504,
+      "sha256": "42b7e8c3b3af1826282fc18fe716af34fd8ac1d69caebd0c15359a4c7b474dcf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/run-1.html",
+      "bytes": 83674,
+      "sha256": "6c8e5bced50b74df3407c87fa1a97aee93e4bbdfb86b406205d96433b50eb676"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/run-1.json",
+      "bytes": 150988,
+      "sha256": "e6551e411bd67f31a972d7ac3e5b0adc5fac599348153181500463b02f2b9a6c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/run.log",
+      "bytes": 1767,
+      "sha256": "841ce91c4160f047238e457598b4e7c466eb66a2b57d6b8f4200f511bd601bdf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-A/summary.json",
+      "bytes": 59287,
+      "sha256": "038764482b42bbbb24a08043702ea7738b4e1ec2f2e5b5cd6d9c06c94d7c06a3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/host-after.json",
+      "bytes": 504,
+      "sha256": "6b2214a5cd1df4613172d2396424ff3ebf70a27fcef6d0683c9c8ae107f7725e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/host-before.json",
+      "bytes": 504,
+      "sha256": "a3efbfeaca64be3af586d356eb07fe9a8b5742de73d9b1ea53dc89bc7d88875c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/run-1.html",
+      "bytes": 83954,
+      "sha256": "e4e33b10075d06ba36437f508ae5e221ed4938aa8dca2da414b74321fe2c99ad"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/run-1.json",
+      "bytes": 151392,
+      "sha256": "175e45a2acec78c3925a196e98f4197c60f0c8608ce4af7b45b2dee127072e72"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/run.log",
+      "bytes": 1767,
+      "sha256": "c6c0943c37d8e0854443045c9aba68f7b1c9fa24b445b466006f1f515261f546"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-03-B/summary.json",
+      "bytes": 59376,
+      "sha256": "8739e6d19c9978b4e17b52dddfd31919d5a9487b3f1e53a219d576531567711f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/host-after.json",
+      "bytes": 504,
+      "sha256": "0268833f55c80dfae5254ce1b1f22df22cbf36279c0e5a5e92372ab72fe3e72c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/host-before.json",
+      "bytes": 504,
+      "sha256": "60bd673fe258a32b6a08af76077f503d462c14b377b3113ff6e182489059f869"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/run-1.html",
+      "bytes": 84304,
+      "sha256": "432e0adb80330a433479137e7fc5a0c01f7cbbe100e1702d682936b9f22532bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/run-1.json",
+      "bytes": 151128,
+      "sha256": "7181a5f1fb19973eb5780c78f812956c9b8a2634e4caf97b3cb39a779230f493"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/run.log",
+      "bytes": 1856,
+      "sha256": "b412b260b9425de1ba3bf5d41dd1148f74d22008175c44743ddc1093a9f6f849"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-A/summary.json",
+      "bytes": 59213,
+      "sha256": "8922f49794ffa2b9d572d015f6af0a6c849d1ea6482a248cc07d1ea5097377a8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/host-after.json",
+      "bytes": 504,
+      "sha256": "10b587b89776524a4ccccda8431783e2986b27f97d47ca1be84335a5822312ef"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/host-before.json",
+      "bytes": 504,
+      "sha256": "15d2fdf5032836bdc6f06ade9a7d4c2a702fd4f55984cb218f1b0326141a69d0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/run-1.html",
+      "bytes": 83789,
+      "sha256": "bef60d8eeae647090b5f401b3369aa47d312fc6ea157ba2254a27db1c55571aa"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/run-1.json",
+      "bytes": 151212,
+      "sha256": "fd51b5332772c7ec38236da1c496151365b7cc2c8bb2324aa708684409d7a50b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/run.log",
+      "bytes": 1767,
+      "sha256": "8374ad4ff8723a050651d038435b7a33b3a7d2354a271d3f9181654d4e2ea2ae"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-04-B/summary.json",
+      "bytes": 59307,
+      "sha256": "6978e32b5d7842356c38d7adf5e23ccb1dcbfb006a8eb9472151f31dfb2efb16"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/host-after.json",
+      "bytes": 503,
+      "sha256": "ca3e091223de6b867eb0d482b89150d17a72628bae11107bacb6898a6da0f0e1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/host-before.json",
+      "bytes": 504,
+      "sha256": "e66e619fcdd8edd2eccb54871305f9f5086da7c08c860e6120cb99a9b3d763d9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/run-1.html",
+      "bytes": 83877,
+      "sha256": "3d4e0edb5a0fbecf1925d6e9f50fc6dec9a7876d2bee69b1ae4822a9af1ace80"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/run-1.json",
+      "bytes": 151195,
+      "sha256": "ff8742118b7c3635d45730664442a77c59b111ed56029ff9efaf5b904bbf2842"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/run.log",
+      "bytes": 1767,
+      "sha256": "b9cd66023f0b79453b1d70c9ea3af6fd4fab4d3b8c5c556ec075fb96addbcb46"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-A/summary.json",
+      "bytes": 59291,
+      "sha256": "336904c582a58c5d31cf435f13a412702dd48b7c1066b43a5ca69dbd76d3d3bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/host-after.json",
+      "bytes": 504,
+      "sha256": "14f317b2d48e08e1c2b71892c5bbcc3a14d01e71fd03a9938c66f1052c9929c6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/host-before.json",
+      "bytes": 503,
+      "sha256": "b7cd471ae23062a3b02410b07d7eae84383b809208cbf34f27466800afb72f15"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/run-1.html",
+      "bytes": 84002,
+      "sha256": "a8e594ce6d57e87384e20f6c3928788ce67f065f5eed401fd5e1019e50a9a5b9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/run-1.json",
+      "bytes": 151464,
+      "sha256": "65c856f6ed3fce41b584ede46437d04351a4f808e03b147ecb8cffc20504d831"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/run.log",
+      "bytes": 1767,
+      "sha256": "2a36a755b88ca3e7befbb0eece715363ec89d4ee31dbd26bef45e0ab1baa1a32"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-05-B/summary.json",
+      "bytes": 59398,
+      "sha256": "6b9aa9b07d26aab4d28d135ca947481904cf2cb85da755b3554038c0cfff8105"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/host-after.json",
+      "bytes": 504,
+      "sha256": "15e64c4876d9a11f8fe3b8a03184772144a89e1007122a4448f3a987ef54e570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/host-before.json",
+      "bytes": 504,
+      "sha256": "c7b1fbee465b24641ac27f641306f4db34624716b2b051f908258c9ae3c41962"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/run-1.html",
+      "bytes": 84641,
+      "sha256": "ad6cbbc8f90e8ae9b395db53ac0a996c03a2fd59573987e4fe88f76899cb65b1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/run-1.json",
+      "bytes": 151732,
+      "sha256": "09de9db85798f25d21597ccb70a730f442a3888054a10ff57e54253703d4f66f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/run.log",
+      "bytes": 1857,
+      "sha256": "b9af512ea1a07b1d1e5599ec2781e9f96115112bfb695aeaca5961430417ca41"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-A/summary.json",
+      "bytes": 59261,
+      "sha256": "b722b783c775dc61e76ea9417249a98712ad43a332eb245ab5c27407b123bb23"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/host-after.json",
+      "bytes": 504,
+      "sha256": "a2d39e203a304c5aac9bbd613e479e15a8dd4e831b31b9a076461deac22832ec"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/host-before.json",
+      "bytes": 504,
+      "sha256": "d65277a5a35d71dea48f44966e1c949fc4bde368137e3e38ee120c9c1ea08ed4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/run-1.html",
+      "bytes": 83636,
+      "sha256": "d238dfbc066bacca72e1f8eae22dabac4ab2570cadbc4afb5118ea08342bf550"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/run-1.json",
+      "bytes": 150773,
+      "sha256": "8768f3aaeae29d22e049758305d1123113c46a2da599706df44f7d120f64457a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/run.log",
+      "bytes": 1768,
+      "sha256": "b7d33a0a28c093e858e514800871f49b7ad548481f3aa48b7f73d98aad0bdd59"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/pair-06-B/summary.json",
+      "bytes": 59105,
+      "sha256": "d11795cf69b2da86a8db1800ae936e94a432d9ddec0e8dd4bff3eca0fe42f353"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/registered-plan.json",
+      "bytes": 3317,
+      "sha256": "8a14c6d6844e0d251520947d44628b292737c158c1e8bd9bfbca869212269bd4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/source-identities.json",
+      "bytes": 128938,
+      "sha256": "bd9f19072d397ad4cc32c67a4b093f8bdc93c715d590051046ef1e1f198134ca"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/host-after.json",
+      "bytes": 504,
+      "sha256": "b2310856a8a4186dfd039312b6a1125c7ae7e92b8cd9a007a266694aba5f39df"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/host-before.json",
+      "bytes": 503,
+      "sha256": "e1d0804b0859dc578f9a4533e6366dd6c7b0ae5ea4eb20407fb07b1147b7366c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/run-1.html",
+      "bytes": 83911,
+      "sha256": "dcade2f388418b3fc20cf852c71b0e80018ae7ebb09b2681aff0e3f357910035"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/run-1.json",
+      "bytes": 151412,
+      "sha256": "5d02e6d3fd5eb3424f0e669d0c37417c5839d4f787c9daba442d7efb695ea3df"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/run.log",
+      "bytes": 1771,
+      "sha256": "5983b5f3da8dab6b5864f2016de7a295d7e46193994efee63ccb9a3ad4b0f96e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-A/summary.json",
+      "bytes": 59455,
+      "sha256": "a300fadbb965bd08a3fcb3d010e251f82c12d51d71dc1f1f33199aba45d55306"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/host-after.json",
+      "bytes": 504,
+      "sha256": "e28496084bd084b31c10d20891d0434ae576b1a5e9dcc04efb0b2dba63393f27"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/host-before.json",
+      "bytes": 504,
+      "sha256": "125f53ece305d413e047ca3004f6fe16136bf5cfeef4783db1930bef76298bac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/run-1.html",
+      "bytes": 84531,
+      "sha256": "7c1757963d546d039d826749ccd997849d0a188dfd3e5b6b1d6e9fc6893b62e6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/run-1.json",
+      "bytes": 151602,
+      "sha256": "adca46878d734bbc09ad9cc0a7fb3e20434a76043605cd25035daf94a464f486"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/run.log",
+      "bytes": 1860,
+      "sha256": "acdb89a7bb4d69e53fbca280039df30daf8f5703d2aec49329b64da11ccae31c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-1-B/summary.json",
+      "bytes": 59314,
+      "sha256": "e3262db415009318a24ffcadf50f97c96afc94e7ceae3f71c2f6550f32cdd4ed"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/host-after.json",
+      "bytes": 504,
+      "sha256": "eb1a7d80add11f0cba81dcb78972eb2fb3a85e2eafa76f2eaf2a549d6511a060"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/host-before.json",
+      "bytes": 504,
+      "sha256": "92d751ce6d98528fa446543453884a36d8a8dae81a405bf7f6c826c53ccb0217"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/run-1.html",
+      "bytes": 83951,
+      "sha256": "0654d6bb6a55558f83de551d43413caccf6dfaba2dcc66fd2897f08d3236209f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/run-1.json",
+      "bytes": 151432,
+      "sha256": "52c745200215ecf460a68203d7887c546edc3a5f063f16b9c2d60658fba5b563"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/run.log",
+      "bytes": 1771,
+      "sha256": "c0dccf156574ef1090fd4c442e5f82d9534e78f523411fdf39307c7042e6876a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-A/summary.json",
+      "bytes": 59430,
+      "sha256": "cd00ed9f3176fb31b2e671128d4204db8dc2257d9fa7892ba74e98f5ccf133b2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/canonical-receipt.json",
+      "bytes": 25139,
+      "sha256": "6dfbf08b44b83b754b51b315069df77f82e30585b901eb6f61f630810f30ddac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/host-after.json",
+      "bytes": 504,
+      "sha256": "a2a11130e88b37d9e1ec6487b87e9e817617faeed335c8ffa192f06b7faa7a17"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/host-before.json",
+      "bytes": 504,
+      "sha256": "6e6faf4606e29b7c1877d73fcf3b6c120f1c4e36df2d1b844d338a7c84ae665f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/run-1.html",
+      "bytes": 83856,
+      "sha256": "ae045caf776437a679a5628fbb0c122f7326bbd2187cd5db62c097ad681e0867"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/run-1.json",
+      "bytes": 151083,
+      "sha256": "25b525bc2864e379fa2412ce2cadf15b2d26295360947f56bbbea1af92216e11"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/run.log",
+      "bytes": 1771,
+      "sha256": "e6c49d8f75f682ee70985a6571aa34693c6cc7b0ee5670fe14e8015a2fdfdfab"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/warmup-2-B/summary.json",
+      "bytes": 59207,
+      "sha256": "c1a097f486731bd993b26411218abd6e98dafe614def8c112f5fb68d1a991769"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/worktree-A.log",
+      "bytes": 158,
+      "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/jitendex/worktree-B.log",
+      "bytes": 135,
+      "sha256": "764169731340a5506bfa60423e2fd2ae415e8b886f74a219a6de27276db7653b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/raw/source-diff.txt",
+      "bytes": 106,
+      "sha256": "94c578aea8ba54a02156789ad347fd233f461519c258f3642b18c67a052d41b2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/scripts/evidence/audit-hosted-import-artifact-v2-1b47.py",
+      "bytes": 11147,
+      "sha256": "292eea976f78c24ce93f441b468c9a3efad62ad539cd9425c74eec893ee27ca0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/scripts/stage-pending-browser-cohort.py",
+      "bytes": 11295,
+      "sha256": "9eec5a3decd7a9119596dbb5460c5fc8a4dea52f0c85c98e14d8ae8cca6103e7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/README.md",
+      "bytes": 5219,
+      "sha256": "1cec94e0790193da81afd9484ffd6968f66830a4921f75f36f99468475457a68"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/analysis.json",
+      "bytes": 1316,
+      "sha256": "b888f9506e9ea43787d0b376b9178e37ccd37b1af2aa36cd9dd55d6c9c9010e1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/artifact-metadata.json",
+      "bytes": 2591,
+      "sha256": "603676180533d68cfd8f70b085eb567bf71354a0ea9ba11b5b894902487662a6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/emitted-source-identities.json",
+      "bytes": 911,
+      "sha256": "3421deba87c0248fda5cbb83e985797530226a4ce79ff1cbdf4bddcddd08e5d1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/independent-artifact-audit.json",
+      "bytes": 185391,
+      "sha256": "f42397a580c513d69040784f9cf22451020c2544a375f3fc2d4826f4c69814f1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/independent-artifact-audit.log",
+      "bytes": 1689,
+      "sha256": "3a7b1fcc60eb74fd7c393d9745931a361612a6cd2505947b502367e782982049"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/job.log",
+      "bytes": 332012,
+      "sha256": "d2e141e67f8bf65677e60dc256cd064e7340ab699cce4aee0af7e83708faae0a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/memory/memory-audit.json",
+      "bytes": 456,
+      "sha256": "614134fe162b10c2bc012aa289254160f212d60f0aeb092286bb18fa5b3f38b5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/memory/memory-comparison.json",
+      "bytes": 10139,
+      "sha256": "94b03b67b4fe274987c05eedea4726256a84c22a0ce1b0cc7aebc1c365e212b8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/missing-emitted-files.json",
+      "bytes": 41,
+      "sha256": "78c19a717ca14aa64deee0fb2008622eb42904d3fa2a980ec92a3b78eae6bf31"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/observations.json",
+      "bytes": 2458,
+      "sha256": "2d2a03e5fe5f75519cc20c20e9dbe65ee667f2aa38764a60db6bfdc64c4aaaf3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/registered-plan.json",
+      "bytes": 3317,
+      "sha256": "8a14c6d6844e0d251520947d44628b292737c158c1e8bd9bfbca869212269bd4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/result-summary.json",
+      "bytes": 3687,
+      "sha256": "8a5670ece1d66a5b1b50e881188b2c530bba7f9d319935264a629b395f8ab097"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/retrieval-manifest.json",
+      "bytes": 964,
+      "sha256": "9e23fa4b631175fcf4631e5ed0b9710ee1471f089c260fe6985dfd668a9d58e5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/snapshots/evidence/hosted-score-jitendex-46106456744/run-statuses.json",
+      "bytes": 3495,
+      "sha256": "8c17fe169732807b76280a27ce651f9eaf5228c8894dbde7d8546c18eadbd095"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py",
+      "bytes": 13354,
+      "sha256": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/test_import_window.py",
+      "bytes": 9404,
+      "sha256": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/test_protocol.py",
+      "bytes": 2039,
+      "sha256": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-jitendex/validators/dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+      "bytes": 21080,
+      "sha256": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/cohort-record.json",
+      "bytes": 116584,
+      "sha256": "c9a61a44180fefb0e50d267a7e5a9f5d8eb90aa20a06949c75146d2f4edca763"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/baseline-tree.txt",
+      "bytes": 41,
+      "sha256": "e7eeeeb8dc66c5568919c561aa5546fd54e30233922c4842c40e77998c42da4a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/candidate-sha.txt",
+      "bytes": 41,
+      "sha256": "293916a1127b9c588579c0bad28705cec32e9f336ce63730c362f11495edf5ce"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/source-diff.txt",
+      "bytes": 106,
+      "sha256": "94c578aea8ba54a02156789ad347fd233f461519c258f3642b18c67a052d41b2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb-driver.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb-summary.log",
+      "bytes": 17773,
+      "sha256": "1e1d0712e6d88fa0bbbefd642b7a1ee2338d319d8cea9522f48f2535beaad665"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/analysis.json",
+      "bytes": 1320,
+      "sha256": "c1253e94c68bf6262d3f4af628fd7517d39bb03879fde9e8d05ca5a8725ff702"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/build-A.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/build-B.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/host-after.json",
+      "bytes": 497,
+      "sha256": "21c8719a76cf18b8f13804f5ab350d90019305423b91d34071bc289d0dbacd8e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/host-before.json",
+      "bytes": 497,
+      "sha256": "075e8e8a89390e6b1348a9ee2ea6d7eefb97f363bf49748cc381cb13ed6e6380"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/run-1.html",
+      "bytes": 84446,
+      "sha256": "b6c30c519dc37cc61f2ce452fb0f9477f81e7770759cf6db35234c694a14aed8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/run-1.json",
+      "bytes": 153330,
+      "sha256": "77d4ba029f9d9d31b2c5a275a792edc69f6a95ae5c6a5f64c656d48ef4c63e9f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/run.log",
+      "bytes": 1740,
+      "sha256": "d251cdb7430804a398f5611a1d477ba899ae22ae779986e3812bc22fc204804d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-A/summary.json",
+      "bytes": 60238,
+      "sha256": "89498f53e6a69b1242327d951f6c89f1f5ffb7bb193663ba612e62c787c7a456"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/host-after.json",
+      "bytes": 497,
+      "sha256": "dd8d640bdf289b5932870f505484afdeb0a8635e1f592cd5d9f3d260a4d80736"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/host-before.json",
+      "bytes": 497,
+      "sha256": "d7cd744ae2188277ba606d6c44f74ded9b9c8062d2ce0ea5cf912f013bbb48a6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/run-1.html",
+      "bytes": 84668,
+      "sha256": "801aeca05293a03ffe4f7af51ed4a59a59bb5842df292698a9ddcaea3f8db22e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/run-1.json",
+      "bytes": 153720,
+      "sha256": "1f7c30267c74ba440f3856eb7cee7b3d08dc1c3c16f529a80971e276214d7b6c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/run.log",
+      "bytes": 1740,
+      "sha256": "9aeffdab648699957198c8b1069e9ff331c7f7762a3913172517e54cd2bd0506"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-01-C/summary.json",
+      "bytes": 60312,
+      "sha256": "c3c1c8e3dafe16e0b82b928e6440b16872e56ed0850bfe085351ca5f9c86d9a5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/host-after.json",
+      "bytes": 495,
+      "sha256": "78fde43972c7fb849bfe41a4e519aa83a2f0b1ff279b785bb732a2db2dadb2b5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/host-before.json",
+      "bytes": 496,
+      "sha256": "de8198e673236675e29e151e9a3d47d7d5cac1ec646acad79838d5e20753beec"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/run-1.html",
+      "bytes": 85137,
+      "sha256": "b74726f83dcccb0763d2b6b59c008e91e9d25ccf93b111b19f7df697af1f5755"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/run-1.json",
+      "bytes": 153672,
+      "sha256": "b3e39a5196e751517c68dec091ccbfa6c7a6cbbb4a676b6fb389f03781d5d5a2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/run.log",
+      "bytes": 1829,
+      "sha256": "ff177bf9b52fc2221c38565a9517693b0cf7a6a88479a54e2a79711a54bf9804"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-A/summary.json",
+      "bytes": 60185,
+      "sha256": "69b61a73371287cf8d62984b9b8993e3e9c9507ba37636d0aefeb02625a27faf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/host-after.json",
+      "bytes": 496,
+      "sha256": "355a5b4bb4b7ee333511227506650b661f7c7ed9ee8b0464eca1687265ce360a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/host-before.json",
+      "bytes": 497,
+      "sha256": "741f0feb001fb51ae4eda51dcfddbf536062f0e33928c89f99d930b2ba64a5dc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/run-1.html",
+      "bytes": 84483,
+      "sha256": "dc8f8106ba41658afaf4025060850770367c0320e5aca8ea624c32a01a78be6e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/run-1.json",
+      "bytes": 153391,
+      "sha256": "cede335eefaf8fc445becfe32fc53d739fa7b3c702e6e3fc98066b0fbfa0cf00"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/run.log",
+      "bytes": 1741,
+      "sha256": "1ed294edf2e69d7d9ac027d9ee834fc233a39e1b75168242a155a5c5f0bcb00e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/control-02-C/summary.json",
+      "bytes": 60224,
+      "sha256": "4997bfbfdc7361a2fc5ff9ebc276431926b433503638f1215ca52ccee692da05"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-A/canonical-receipt.json",
+      "bytes": 25756,
+      "sha256": "72d9c2f3d7248b35ea76c0b33aa00cb55bc5aa252d9753977ef0449920c360bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-A/run-1.html",
+      "bytes": 85338,
+      "sha256": "93de4b864a3aff8ab9632051eb910e7235b9eaba42f9c195fb389acc2051cea3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-A/run-1.json",
+      "bytes": 154042,
+      "sha256": "90f4b0331e22ca0070bb9c6bc8cbab76c6215c92bdcb0add2c98229273d83e8f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-A/run.log",
+      "bytes": 1847,
+      "sha256": "d5915cd9dd1cd7e00403eba65518e2df5c298d361c6b0c8bb940d2e1d35f9ed5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-A/summary.json",
+      "bytes": 60288,
+      "sha256": "ee0ac4aa26df332b384fa64354e033ee0c1ad7fef29edf108985e7f902a0a96e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-B/canonical-receipt.json",
+      "bytes": 25756,
+      "sha256": "72d9c2f3d7248b35ea76c0b33aa00cb55bc5aa252d9753977ef0449920c360bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-B/run-1.html",
+      "bytes": 84603,
+      "sha256": "38e27297667f7ac49bf2b60444ee5374d4fe72c28dfdee7db7d88d5bed1098b6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-B/run-1.json",
+      "bytes": 153584,
+      "sha256": "21c462b4788eb4ce8a2eb0863d5943c06a5a145d05763ad42677cbf3981e96b2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-B/run.log",
+      "bytes": 1758,
+      "sha256": "ee55e93b1b7a17116c33aa6edb0ee4c726d62072afad7013b5bc809ff6393466"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/exhaustive-media-B/summary.json",
+      "bytes": 60255,
+      "sha256": "5d0e784669a57174bbdef0d41461a5db9ab3ab79e627804ab7abc4eb57b1ab0e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/fixtures.log",
+      "bytes": 171,
+      "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/libs-A.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/libs-B.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/license-A.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/license-B.log",
+      "bytes": 215,
+      "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/markers.jsonl",
+      "bytes": 142,
+      "sha256": "61cf512bb4eaabcfe659c23b8d29a87961d7ea05e0308b4ddea447682e5019d9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/memory.json",
+      "bytes": 4692436,
+      "sha256": "77fb4b086b4b2d74b677ac9b0bcc91f58b943fbf6fa08b730d4884ed5d584266"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/run-1.html",
+      "bytes": 85237,
+      "sha256": "be9ecaf97e50d15dce4421725c2422b1bff9d0d608042be6bc0c8be3cbbcb6ca"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/run-1.json",
+      "bytes": 153859,
+      "sha256": "829ecbc2d4364870125255b176637aae1de7ed79b2330177b40f663347652eac"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/run.log",
+      "bytes": 1820,
+      "sha256": "36df9f4f52d73cc3db3e663dc87dde905ce7d6cb808ac40e0085094f4e2b82aa"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A1/summary.json",
+      "bytes": 60225,
+      "sha256": "5b620944527a97371b442ecb95b8716327d12f14a0d50809fa1f6a2dd86b9557"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/markers.jsonl",
+      "bytes": 142,
+      "sha256": "18119d7660218c49380b2009eb75e655662bda72295dfb20ffeaca87dc7d20e6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/memory.json",
+      "bytes": 4692440,
+      "sha256": "e3605d152e37e7e013aec26095df286ddf99030e37c0b1bb9d648ebfdc6fdce2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/run-1.html",
+      "bytes": 84398,
+      "sha256": "a49d7754de27470a722ea08b0e14e3aadc9a3cbbaf74cf0d3cd44bc5b2fddc6a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/run-1.json",
+      "bytes": 153249,
+      "sha256": "789d6730c28479a7d06f5e522e5e7f9e44717e9bf10951606259143bbd481877"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/run.log",
+      "bytes": 1731,
+      "sha256": "37ec4fc5795b789b0e77425b112f2833dd47a4f2b8e9cbc8c2150a8683046a2f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/A2/summary.json",
+      "bytes": 60118,
+      "sha256": "b26d07a7db200b46e672160a61f84f754f047e58b7676468e0503e41a5ff18b3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/markers.jsonl",
+      "bytes": 142,
+      "sha256": "679207a8f20ccef017b54f4cdf71d2ef1631f6236864f6abf9b45421b72520c1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/memory.json",
+      "bytes": 4608531,
+      "sha256": "d2c588ed84f224775ea5cf14a9919a3cec2f7715babbb63c6b5db8f59f3e6524"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/run-1.html",
+      "bytes": 84663,
+      "sha256": "0993e74503e6d0e7a461c63f07a71f1b229bb0b54eccc9d49d3ae1cce95023e4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/run-1.json",
+      "bytes": 153731,
+      "sha256": "7a537f4f192eae9140cb09e42afbefcfa69bb612ed431e0fe3c788d9277ea870"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/run.log",
+      "bytes": 1731,
+      "sha256": "c46fd253613b8a565302d2fec211426e632a66dea7bc32acbe94cdd1ba617026"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B1/summary.json",
+      "bytes": 60250,
+      "sha256": "dd519abc7e40ce277d94946fb78a9b984277b175f658e54b3b90f5d78bd2de59"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/markers.jsonl",
+      "bytes": 142,
+      "sha256": "995e58c20189dfbc1bbb9a721bfcf1ffd7224d29660d91a014822ad51ebd65b9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/memory.json",
+      "bytes": 4576375,
+      "sha256": "09ac5558b84c64598f17e86d7835f87ee3dd84c330ff54545a7849540af9773a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/run-1.html",
+      "bytes": 84598,
+      "sha256": "bfb13250dfcbc799246a38e26b0736b905022acbbbe985d054afbf7df86c63d9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/run-1.json",
+      "bytes": 153595,
+      "sha256": "dff3af1ab7cdfa46859fdfcfad22410f159ddf8b71b0f7261944068ed0d03941"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/run.log",
+      "bytes": 1731,
+      "sha256": "7b4b15906df26234d298f002dcb3a9f9b185ae3591837a2c9b810953917efca0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/B2/summary.json",
+      "bytes": 60298,
+      "sha256": "f8da76c51b72a58a0acd9b0773d94a77a72ad45c8ae96777f749cffb604a71f3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/harness-instrumented.js",
+      "bytes": 326351,
+      "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/harness-original.js",
+      "bytes": 325917,
+      "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/memory-audit.json",
+      "bytes": 454,
+      "sha256": "c3d49b05b6fcd62a045676c00f0e7ecde0415ee2f213707524e563625bb743dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/memory-comparison.json",
+      "bytes": 10151,
+      "sha256": "95453528e0d1efb6562d6e48aff2cb696aa0236a96bf4e63b76419d5bbfe1807"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/observations.json",
+      "bytes": 8529,
+      "sha256": "4097e2712708a699ed3198c640a2dbea03ba72d29ab58f330bbab30c49580095"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/plan.json",
+      "bytes": 129294,
+      "sha256": "eb47f0d49effb0506b4cddb187f020dd8d5323ef67d7c27032a293d10f5a33f4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/observations.json",
+      "bytes": 2467,
+      "sha256": "66f863ecca3673cc591cae7eaa4a96d31ac43cd51a57f1578d4c08f09aeb51ad"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/host-after.json",
+      "bytes": 497,
+      "sha256": "e5ee2dcbe4bb2791bb6e4de6a29eb57c5ac9bac8d1cd125a015e5ea08734054c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/host-before.json",
+      "bytes": 497,
+      "sha256": "1c6f2259603ed8f05c4a867a2a31cde66934c41a7295cbe8a6220603fdf38006"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/run-1.html",
+      "bytes": 84582,
+      "sha256": "552737eaa13aea963dbffa4cf851181dd224979fd3b94b29bd6a50fe5830f501"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/run-1.json",
+      "bytes": 153581,
+      "sha256": "c5f8da3a4ffa615137ce04d5b7790a2bb551bdaec5d957bde32f31fb81f98f64"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/run.log",
+      "bytes": 1731,
+      "sha256": "02e6c8dc2a92762f324e8592be5e31e05da2ef737f3591348ab3b1b77414f5a2"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-A/summary.json",
+      "bytes": 60197,
+      "sha256": "e82dceea3afd5354a3cb3b1dd0e5f693429c6c11da01aeace08b3232f411b16d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/host-after.json",
+      "bytes": 497,
+      "sha256": "8a3e6e593b1f7dabede8045bbbed90a6d48739762dcb81eee7713307c02f6330"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/host-before.json",
+      "bytes": 497,
+      "sha256": "cfe825d2cb542776dc27c129d92ec9cae9bc87fb6c4e08369ffb7747a93bb21f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/run-1.html",
+      "bytes": 84506,
+      "sha256": "91268b4033524f50dd9ddd5db8ac953c45cb2df10ee5e1ea2a18abb6afc3e86b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/run-1.json",
+      "bytes": 153341,
+      "sha256": "4821c7d07ab031eae6d53878d58ea49bff651cdbbc7f046368839b97fd04937b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/run.log",
+      "bytes": 1731,
+      "sha256": "0900eb32926a115b21cc9764a1b04876f89ad4222b13fac6eb5fc0d7b9c81552"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-01-B/summary.json",
+      "bytes": 60070,
+      "sha256": "831b12cda9f0866f9e6ed9b839fe92865eb14c98e99b9045fe86b895c598f830"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/host-after.json",
+      "bytes": 496,
+      "sha256": "e155ab629ba60f04b5045e45b14aaa3dccc3f197f49e588653516eaa52a2b69a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/host-before.json",
+      "bytes": 497,
+      "sha256": "649e1ff13fd47b759e4163b20613bc5a624f6a90b92f2b74cecf8d2b114aff07"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/run-1.html",
+      "bytes": 84581,
+      "sha256": "086e1d054cd10623d0aca491c9ac882018f113a0cbd141f662f17398ba61e0ff"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/run-1.json",
+      "bytes": 153539,
+      "sha256": "dd94965b94d7b215a2aa0fe141d3419907b929a7981f076f72c87e9d2ae70adb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/run.log",
+      "bytes": 1731,
+      "sha256": "a4a4f000c704801fe8ce9b43fa731919a6c827be695880274880f0ad6cc110cf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-A/summary.json",
+      "bytes": 60233,
+      "sha256": "c1a0575f6033f3edcfc7f5e5d4c9b59fcc5e56100bfc5ed31a52ebdf2488be3c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/host-after.json",
+      "bytes": 497,
+      "sha256": "b16a6f4e8d0639de54dc1cb6c8222e13c3eeee48e71fcf5159433834b6a2d17b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/host-before.json",
+      "bytes": 497,
+      "sha256": "e63c944248fd3aeef2e4e4232acf58da48a7af5da1f276c9b71babf0f84d2c54"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/run-1.html",
+      "bytes": 84578,
+      "sha256": "9afe6f5aa95cada075657f57a8f5527618dee88ef642783a6a9887a46369c93e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/run-1.json",
+      "bytes": 153528,
+      "sha256": "c88450af577ff0bfdc0d2d22935f9a00516b1774d832712919341cf96884b752"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/run.log",
+      "bytes": 1731,
+      "sha256": "c1023a40cc0a7a95aca32091a0c5576a0a5ee6fb796fdc0aa80dcfde46979a9b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-02-B/summary.json",
+      "bytes": 60187,
+      "sha256": "e2d541c81cbbb95895e233f579d678ea00f77885f398845b5908b3aece7bb0f5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/host-after.json",
+      "bytes": 497,
+      "sha256": "dd7e4b6d13ac9aae3edd2fec58c3eb13f0539a3e1cd9f7ff73d5ca3bae485068"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/host-before.json",
+      "bytes": 496,
+      "sha256": "117bd8fc24c316f8923e2621277659fd171e499dbcd90ad60dbc58e0a4668749"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/run-1.html",
+      "bytes": 84706,
+      "sha256": "66a0f4d1924ec8cbc013285c4aafe63edb395b196562cadededa648d235ebfe5"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/run-1.json",
+      "bytes": 153740,
+      "sha256": "34768711aac1eb7eebd512eb66316df7d6e6dc296448a3f44d046dd72852ce10"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/run.log",
+      "bytes": 1731,
+      "sha256": "c47aeba3b049cf50f4156c5b7006e513b78db625142e4ab9a1f55f6fdb1c7a5e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-A/summary.json",
+      "bytes": 60181,
+      "sha256": "2395910a99621dd768bcce42af3a0da1f878067f798af4e91e17b16d0cbbc76d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/host-after.json",
+      "bytes": 497,
+      "sha256": "dddce2a712c1e5cc4ce1bd8d7336e294b29b136775638c3e2346c2ae55716b59"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/host-before.json",
+      "bytes": 497,
+      "sha256": "a25b1e6fcba05d0527ff22450420051926b2e7d6ceffe0173507b84062c58f45"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/run-1.html",
+      "bytes": 84566,
+      "sha256": "5e8a984253e470c1220ba4772cc8e2af238367f38761f261ad54605fd4c1e479"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/run-1.json",
+      "bytes": 153478,
+      "sha256": "240656a8902f0f57ccfdaa4fb2a0e5d0303efd900b27d6aa9a12058b2a611794"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/run.log",
+      "bytes": 1731,
+      "sha256": "404aae0c38577fe75c71286b87f9f8f94d6ece0257fa43a048e7e2b2fabf55ad"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-03-B/summary.json",
+      "bytes": 60232,
+      "sha256": "0b1ea7a106185b24eccb9a7fa69172f81c14a43abc84a9edab993f129e84165c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/host-after.json",
+      "bytes": 497,
+      "sha256": "2aff9281e8416d610221af51b3ea145649d02a7b4838c630d9ff7dfef9b58814"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/host-before.json",
+      "bytes": 497,
+      "sha256": "0b6ec3880e07ec101c1cbe0f6ce794d4f419b6eb6db3a4790b46adec8c437247"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/run-1.html",
+      "bytes": 84525,
+      "sha256": "784a9a96b618b82bfb82f438841cb5ba00d49a27676b686d63d86532735c0038"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/run-1.json",
+      "bytes": 153434,
+      "sha256": "0bafe7ef7cb079a83423bd25d5263ff18f10f6f3cc46eba0a34c68c9b4b61eb6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/run.log",
+      "bytes": 1731,
+      "sha256": "db03c3430e3da2d245fae72ea39d41fc29abef8f5d1af672d81748f233ff46a7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-A/summary.json",
+      "bytes": 60193,
+      "sha256": "4c0ba0df3edc588e15110a757632d556d2d71efa88a7b71d82ba2862af3ed263"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/host-after.json",
+      "bytes": 497,
+      "sha256": "3333710376cf2fa2f3a196b7c58dede04bc8ca6cae3f81891376552975a733ec"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/host-before.json",
+      "bytes": 497,
+      "sha256": "efbea7af8197dbf8a4efcf984ccc33712cba64541e64587d9b0938c5cfcb5c40"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/run-1.html",
+      "bytes": 84490,
+      "sha256": "b6c5b7b46fb1ba214c7d5230c65d6a3607d96a5d42498bcc554b751d91191a71"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/run-1.json",
+      "bytes": 153298,
+      "sha256": "84cdcdbd9a5dff1759f82f410cb6d00a5de8470c427022561eff0e3b2f15808e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/run.log",
+      "bytes": 1732,
+      "sha256": "c715264cc65de877fc1e757060a5f6f8db000298d96d155b7461d7e505bf133f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-04-B/summary.json",
+      "bytes": 60106,
+      "sha256": "3313d6c6f95247f548726dac1df6eebeaec073fc17f50907875e0baded205629"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/host-after.json",
+      "bytes": 496,
+      "sha256": "c0ccb18002f14c9a7697812f2873bd43f5412db05288aa460696dbab0bf02f27"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/host-before.json",
+      "bytes": 497,
+      "sha256": "8a4b0b8bc9e6491e392c49470ecbaa8248680d3a7e591eaf90bac61484ae2a64"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/run-1.html",
+      "bytes": 85438,
+      "sha256": "4cc608c024b65e18d102e6b16830cd8051367351377c5bdc03cd89e676c7edca"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/run-1.json",
+      "bytes": 154136,
+      "sha256": "dd5df6a62e5a345ed42b04e65fece44f18e0f409d7d34f2668b9a008fbc1bf9b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/run.log",
+      "bytes": 1820,
+      "sha256": "c8e2cea09bc405002f5e6002628b01d04bfa40f5ef60a8dd0ca836abc4a36d66"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-A/summary.json",
+      "bytes": 60210,
+      "sha256": "8e60b2c8ecb5bbafeb6c6df817851a657a1d3003c1c1eabf534a00ac0fc14c05"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/host-after.json",
+      "bytes": 497,
+      "sha256": "e36c3b89f22e44c00221f0c01f32f17020f8afabbb594d0683aa979302c4fcf9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/host-before.json",
+      "bytes": 496,
+      "sha256": "d909d9e6db038e6da15f14abe23f0c7f39c42c5f2c3f06d8b0b2a98e517d9daf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/run-1.html",
+      "bytes": 84764,
+      "sha256": "d9a9f47c4da21b6a0ddddd47bcd09b411a54b4f77587fde0208a49e6b60c186d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/run-1.json",
+      "bytes": 153855,
+      "sha256": "5ed27526fd8f71c577d92d8340e7f1d8fd37ea8eb7094590bbba254c81a00c40"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/run.log",
+      "bytes": 1731,
+      "sha256": "810b69f2a60576181e60accabafa49f8e183f78a6ace95d1b4c246d734e527d8"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-05-B/summary.json",
+      "bytes": 60348,
+      "sha256": "25bd3f187a19948814a7821e87cadc39e0e6420b12396a1fbfe7a9d3e8a910de"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/host-after.json",
+      "bytes": 497,
+      "sha256": "eca599fffc537f1e12b1014087461379efa3d3e7eab4144f87aa30bbd8005167"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/host-before.json",
+      "bytes": 497,
+      "sha256": "35e16ec2fd6fe233f11cd331a1b9b8a61cbfa5263b10fdab0c24faf1f9d21c40"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/run-1.html",
+      "bytes": 84722,
+      "sha256": "84dc19729b955f9c93f994050a20ca3d731c2a4a75e371c7691061bb9718594f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/run-1.json",
+      "bytes": 153803,
+      "sha256": "e2aac9fedb58a54acf5a27605345604646bf0434fce92ea42c745132c1bcd9f9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/run.log",
+      "bytes": 1731,
+      "sha256": "d1547fd0a39a9f2dd51f9996890cf15a4d76021f7e38c1946afec122c56da40d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-A/summary.json",
+      "bytes": 60306,
+      "sha256": "5f3380a8e5ba248410f3c5717980028281bfd3748523d298d52f8d7d3107d863"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/host-after.json",
+      "bytes": 497,
+      "sha256": "c3de094d060aa6f3b701af3ff236da6dfb4db9f2c13bdbee483e2aa3a8ad7a3b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/host-before.json",
+      "bytes": 497,
+      "sha256": "8edfa2a126a2585ec4a09092941f4bf04a00091f7c37214a6371968c3864ad32"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/run-1.html",
+      "bytes": 84703,
+      "sha256": "e774d596ddecb8bbc67469c03d43c3020c4c5b608e0d2fde8fccd665beb1c992"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/run-1.json",
+      "bytes": 153826,
+      "sha256": "123a4668e08c2a236425fcef5bc4b5c0973d196bc9529c2e11a1043fc436131e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/run.log",
+      "bytes": 1731,
+      "sha256": "668ed9b68ce96f4b4dbe8a9f232275ae62c22beaacd23a5dc8c860927dc3c5f6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/pair-06-B/summary.json",
+      "bytes": 60307,
+      "sha256": "8a4c9c6869835ecec6e0aac0f4961717a262ebbf139eecc8adec749aacf44c3e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/registered-plan.json",
+      "bytes": 3408,
+      "sha256": "4c8e6f81cf6f87d306ac872e11ee16f6e0d2a6f2bd1cca0b6bb40fd7225a4e53"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/source-identities.json",
+      "bytes": 128938,
+      "sha256": "c83092e43a58bcf54faeecc174bed5c3c783e8fbff8d87a936853b2fba0ae8f3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/host-after.json",
+      "bytes": 497,
+      "sha256": "4056dfa28a699bc1707a635c0e01352cfee4902602babc6fe6f7ee936a65daf3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/host-before.json",
+      "bytes": 497,
+      "sha256": "e010b354baac9286e72357b66897bc988b93be8db366dcd5561bcd03b8bb38dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/run-1.html",
+      "bytes": 84725,
+      "sha256": "08dab2f9e3b76834dc8bada59c00ac7ab75e52c86b292b147d257b49c8c74ec9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/run-1.json",
+      "bytes": 153772,
+      "sha256": "f16acf9257a8208903318210b794757699844cf3ad3720f9383867cdb44d0010"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/run.log",
+      "bytes": 1736,
+      "sha256": "e7e1299b29df3b4e67f0d15241f013078c2376378344ecbd8461df931db1c495"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-A/summary.json",
+      "bytes": 60188,
+      "sha256": "910477d24a2f8ca15c85fd263654a123b1937f1c791554dc99b9dc76c5127267"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/host-after.json",
+      "bytes": 495,
+      "sha256": "a96c46e01487d8a7be438636de9ce4c2c761b635bee893d72ea9058ecbf47b3d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/host-before.json",
+      "bytes": 497,
+      "sha256": "b3c79181a380ae3ff3d777ecfa6a8583b2cbfd9c2fc0047854ac90388c299701"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/run-1.html",
+      "bytes": 84445,
+      "sha256": "31668080bf8047e8e453545473047e79556e426bf010d7cc2c1ca8f6b778b116"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/run-1.json",
+      "bytes": 153392,
+      "sha256": "f20c8a80156b3219ad19f65fbf451eeb385fe8bd559cc47d11a216639c236c79"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/run.log",
+      "bytes": 1734,
+      "sha256": "12df48b559277bf746cd78cdbf676244129b0c02c9fc2032b986af8e510d6474"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-1-B/summary.json",
+      "bytes": 60250,
+      "sha256": "33e050b4f72240f8a6950a7ba556ab3f233379a638cca56df87eb7ca2cb9a8bf"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/host-after.json",
+      "bytes": 497,
+      "sha256": "a4a3f0e1607d8972339c2b4a14c75fa8b5b0ab2b7598989d3734da1b5b5da6cc"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/host-before.json",
+      "bytes": 497,
+      "sha256": "caef937692a803f349ce635cbc7ca6fb7e5d60cefbc8b7e98cc520fe082d08b9"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/run-1.html",
+      "bytes": 84677,
+      "sha256": "f5e0efcccc2c8c4adbab66832d5eb1c94d1f5499d90714efad85fb8b1a588b2e"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/run-1.json",
+      "bytes": 153740,
+      "sha256": "0cb8f4645f162dd89ae406f7b223d948b3ed20a0f4a63d9c9c485674ff760ddb"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/run.log",
+      "bytes": 1734,
+      "sha256": "78d3bcf19f1cd461383ca0d080cc22f0765128e7702a87e15164ce18595c49f3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-A/summary.json",
+      "bytes": 60241,
+      "sha256": "ac185db538eab5b11d191e6d7d2a9ef3854b77d7045256a98273c2bb4bf08861"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/canonical-receipt.json",
+      "bytes": 25751,
+      "sha256": "2e6d45e75ee43fca5f21545b7b029ef795f3244fbb0b311073f3ffb41bf569b4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/host-after.json",
+      "bytes": 497,
+      "sha256": "c7bb860f332926c5753fe63be9ffb3908dcdabc1134baa5bb642488f3d856986"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/host-before.json",
+      "bytes": 495,
+      "sha256": "eaf2f343577c741a347beea5e85fe3366e3c1fdd1d60d50091eae9147435f505"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/run-1.html",
+      "bytes": 84542,
+      "sha256": "6c39717c10a5a669deac3085896a44babc73ef9c9881879c0019761b2c0fba08"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/run-1.json",
+      "bytes": 153521,
+      "sha256": "bd9d9fb3bc06a0430693f9c4ee9c3673a932946158436c47e867b15286b89aa1"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/run.log",
+      "bytes": 1734,
+      "sha256": "8e24b1a8c8b724c1988ecbcd9af9a2c60fc85624a66d30a213426913969fd6f3"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/warmup-2-B/summary.json",
+      "bytes": 60129,
+      "sha256": "49db3c532f941231b9ab3cf4ba637f55af3947e7fdf9b970ec2afa31203653df"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/worktree-A.log",
+      "bytes": 158,
+      "sha256": "667be7a775be4c6229b2a42f2bb278a6c8b35f0a6f3f437d40b1e6f16a24d2e4"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/raw/vndb/worktree-B.log",
+      "bytes": 135,
+      "sha256": "764169731340a5506bfa60423e2fd2ae415e8b886f74a219a6de27276db7653b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/scripts/evidence/audit-hosted-import-artifact-v2-1b47.py",
+      "bytes": 11147,
+      "sha256": "292eea976f78c24ce93f441b468c9a3efad62ad539cd9425c74eec893ee27ca0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/scripts/stage-pending-browser-cohort.py",
+      "bytes": 11295,
+      "sha256": "9eec5a3decd7a9119596dbb5460c5fc8a4dea52f0c85c98e14d8ae8cca6103e7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/README.md",
+      "bytes": 2617,
+      "sha256": "b11616ffcdc249312e9e7f090d5fede50f561e517b956ba76c0f69f28ecfcee0"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/analysis.json",
+      "bytes": 1320,
+      "sha256": "c1253e94c68bf6262d3f4af628fd7517d39bb03879fde9e8d05ca5a8725ff702"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/artifact-metadata.json",
+      "bytes": 3446,
+      "sha256": "0310ed82a9a76ff7b79896ac979b946d632bd9c367b75a04551dac70a4473464"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/browser-identity.json",
+      "bytes": 264,
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/emitted-source-identities.json",
+      "bytes": 911,
+      "sha256": "e528ba87e4fdf006831605f2d91dc90cf7dc96c9eab6f087dfcc1d70a42ca35b"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/independent-artifact-audit.json",
+      "bytes": 184703,
+      "sha256": "a99c0b744e1e725dc556495f3822b8413c756a41a652a0411f39a973d2bd737a"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/independent-artifact-audit.log",
+      "bytes": 1691,
+      "sha256": "2dfb21fc47ef0d3ab6163c9aa88782bfe47a32da17041d1f474abd99d138525f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/job.log",
+      "bytes": 331859,
+      "sha256": "097a9cf27b389124a3bae74bf477d3d0290fdfc929a3a9f4a8115c0dc6f12574"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/memory/memory-audit.json",
+      "bytes": 454,
+      "sha256": "c3d49b05b6fcd62a045676c00f0e7ecde0415ee2f213707524e563625bb743dd"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/memory/memory-comparison.json",
+      "bytes": 10151,
+      "sha256": "95453528e0d1efb6562d6e48aff2cb696aa0236a96bf4e63b76419d5bbfe1807"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/memory/semantic-failures.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/missing-emitted-files.json",
+      "bytes": 41,
+      "sha256": "78c19a717ca14aa64deee0fb2008622eb42904d3fa2a980ec92a3b78eae6bf31"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/observations.json",
+      "bytes": 2467,
+      "sha256": "66f863ecca3673cc591cae7eaa4a96d31ac43cd51a57f1578d4c08f09aeb51ad"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/registered-plan.json",
+      "bytes": 3408,
+      "sha256": "4c8e6f81cf6f87d306ac872e11ee16f6e0d2a6f2bd1cca0b6bb40fd7225a4e53"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/result-summary.json",
+      "bytes": 3175,
+      "sha256": "2407ceb1441a27344fd589e86253ad35fe5b0d0e122233a8b4426daca8f8667f"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/retrieval-manifest.json",
+      "bytes": 805,
+      "sha256": "95c4974e5e1588c4e2e4bdc6b57493acff5dba0ff6f13dbf6aa479bb6701b498"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/snapshots/evidence/hosted-score-vndb-46106456744/run-statuses.json",
+      "bytes": 3495,
+      "sha256": "8c17fe169732807b76280a27ce651f9eaf5228c8894dbde7d8546c18eadbd095"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+      "bytes": 5362,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+      "bytes": 18389,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/protocol.py",
+      "bytes": 4187,
+      "sha256": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+      "bytes": 21897,
+      "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py",
+      "bytes": 13354,
+      "sha256": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/test_import_window.py",
+      "bytes": 9404,
+      "sha256": "2479bc22da238d6be79f5c7717502844ddad4a01b51d9e622d241360c215d518"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/test_protocol.py",
+      "bytes": 2039,
+      "sha256": "ac0ff1ed7a1ea18197bc839d93d89592fb135dc9a47e83c5b42f3a7aee88f1ba"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/cohorts/score-vndb/validators/dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+      "bytes": 21080,
+      "sha256": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-jitendex/review-record.json",
+      "bytes": 1420,
+      "sha256": "243fda0fc0f80269a3c4a2c1cfe79e0d4250096e96d40802d9e4f0fc09923c44"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-jitendex/snapshots/evidence/score-jitendex-independent-pr-review-1b47.json",
+      "bytes": 31639,
+      "sha256": "fe0178d643cc47eba366a9480174cbe283bb591c7dc425115d363a3ee1e48330"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-jitendex/snapshots/evidence/score-jitendex-pr978-body-addendum-1b47.md",
+      "bytes": 1844,
+      "sha256": "57016eb4705ae374d225fd86c5b345e7c59ae52c7d1b24a12c3226dd506e9e31"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-vndb/review-record.json",
+      "bytes": 1083,
+      "sha256": "a10df16f8013de422b87b09b06bb97dffc5137da7fbb3ea318914e75d3157b57"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-vndb/snapshots/evidence/score-all-corpora-pr978-browser-section-1b47.md",
+      "bytes": 4463,
+      "sha256": "97937c82eb7cbf887ead5cf3127648c3011b1f6650a4995f7d540ca365c9cb65"
+    },
+    {
+      "path": "evidence/pending-studies-raw-addendum-20261128-1b47/later-reviews/score-vndb/snapshots/evidence/score-vndb-independent-pr-review-1b47.json",
+      "bytes": 32938,
+      "sha256": "62b2a8a786dfd3e5b7e392de277784a0625c263a1b697e8b31e7a9874105ff2c"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/README.md",
+      "bytes": 18105,
+      "sha256": "ef37658590265d884aa46562ac91fedbcec8be07f648dcaa3e7094d86903ff40"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/bundle-spec.json",
+      "bytes": 95684,
+      "sha256": "da263299e3e575b69da9e0e49d1706d25a768e969da962646b59c9d70d2bcaae"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/published-cohort-ledger-at-seal.json",
+      "bytes": 795,
+      "sha256": "20d004cb80d3168a0e528ee97bb1d72761c6f957bde825d538bccc68a3fea006"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/recovery-note.json",
+      "bytes": 1683,
+      "sha256": "ab2aa5f07dda5baf40ad82acfe1f389fc3a80f7a98c5e76f667928d7952c1c9f"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/sealing-scope-history.json",
+      "bytes": 1627,
+      "sha256": "2aedfee06d6dd2db531588e7e0c9c4a71d646fd006d01467f0d101ec8b99d895"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/snapshots/evidence/hosted-pending-screens-status-20261128075117.json",
+      "bytes": 32101,
+      "sha256": "70c43a614a6f9102849c5d40d6a641f94402b2897c756cd3f1873555c1b7ab25"
+    },
+    {
+      "path": "evidence/score-remaining-browser-addendum-20261128-1b47/snapshots/evidence/score-remaining-publication-readme-review-1b47.json",
+      "bytes": 2214,
+      "sha256": "1c66614b2e0c6c9fda0daa4894cc639458b10fc4b4a843be836d549f73811a26"
+    }
+  ],
+  "omissions": [
+    {
+      "originalArtifactMember": "jitendex/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "d2f7e1378586651a084c571a3ba3d8fcff9778d337d2f3665ea74e92b16a03a6",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "cohort": "score-jitendex"
+    },
+    {
+      "originalArtifactMember": "jitendex/package-B.zip",
+      "bytes": 16805726,
+      "sha256": "88581aed5825ada87da16d06231528590ad95bcb5144dd68bdff1dca4a24094f",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "cohort": "score-jitendex"
+    },
+    {
+      "cohort": "score-jitendex",
+      "originalOuterArtifact": "score-validation-1b47-screen-jitendex-15254097229.zip",
+      "bytes": 34968497,
+      "sha256": "5af77600a2703129f30d394a466f7b39b2cb5abbc89c506c4faac8184d0b5658",
+      "included": false,
+      "reason": "All original non-package members retained individually; outer ZIP and duplicate extension packages omitted",
+      "reconstruction": "Exact original Actions artifact required for repeating package/container-byte verification"
+    },
+    {
+      "originalArtifactMember": "vndb/package-A.zip",
+      "bytes": 16805714,
+      "sha256": "addba50cf084723fb5c6a52c1c626a6613ec9b944f8701cbb5d4ef17e92fe266",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "cohort": "score-vndb"
+    },
+    {
+      "originalArtifactMember": "vndb/package-B.zip",
+      "bytes": 16805726,
+      "sha256": "9586124e9158579cdf1ea06640df6fff6a7e35b807b6f4c9266215f1fe17b4fe",
+      "included": false,
+      "reason": "Duplicate complete extension ZIP; exact digest and full package inventories retained",
+      "verification": "Exact member digest rechecked from original verified outer artifact",
+      "reconstruction": "Exact original Actions artifact required for repeating container-byte verification; a rebuilt ZIP is not claimed byte-identical",
+      "cohort": "score-vndb"
+    },
+    {
+      "cohort": "score-vndb",
+      "originalOuterArtifact": "score-validation-1b47-screen-vndb-15254620204.zip",
+      "bytes": 35260207,
+      "sha256": "76fb49b5928b9b247839b744302e294bd5911f1c127ae0e70fb4f282e4711135",
+      "included": false,
+      "reason": "All original non-package members retained individually; outer ZIP and duplicate extension packages omitted",
+      "reconstruction": "Exact original Actions artifact required for repeating package/container-byte verification"
+    }
+  ],
+  "verification": {
+    "verifiedMembers": 484,
+    "allMemberBytesAndHashesMatch": true
+  }
+}
