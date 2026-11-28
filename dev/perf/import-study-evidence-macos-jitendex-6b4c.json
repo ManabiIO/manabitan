@@ -1,0 +1,110 @@
+{
+    "schemaVersion": 1,
+    "purpose": "One bounded macOS read-only fallback for the four already finalized original Jitendex artifacts; no new imports, polling, waiting, reruns, or observation replacement",
+    "repository": "ManabiIO/manabitan",
+    "sourceRunId": 46101887140,
+    "sourceRunAttempt": 1,
+    "sourceHeadSha": "a94a751b8068c00a44ce120c16fca6762afd3a03",
+    "sourceWorkflowPath": ".github/workflows/import-study-6b4c.yml",
+    "publicationBaseCommit": "30e105952b4168ae8c5b689d7cd2154cce1cc16a",
+    "publicationBaseTree": "ecc3233ac4c9af703c5821003ff40f05efd1afa0",
+    "exporterSha256": "3afcd6ae2add3685b6e5b74be1f23f99cb886393d60ae8526f4e3d1c35457b71",
+    "requestSha256": "4f0741f79eeba92a5ff8ad1f94de2f35d0922cbd12d4b243bb608f4f8881f24b",
+    "runnerLabel": "macos-15",
+    "maximumParallelExports": 1,
+    "maximumArtifactCount": 4,
+    "artifactTimeoutSeconds": 300,
+    "jobTimeoutMinutes": 45,
+    "artifacts": [
+        {
+            "id": 15248780124,
+            "name": "import-study-6b4c-typed-record-lengths-jitendex-AB-1",
+            "size_in_bytes": 561220945,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248780124",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248780124/zip",
+            "expired": false,
+            "created_at": "2026-11-28T04:31:33Z",
+            "expires_at": "2026-12-12T04:30:49Z",
+            "updated_at": "2026-11-28T04:31:33Z",
+            "digest": "sha256:e48c00b8cc41e18bb544de836140e9489e958addbbe0021cf40678299701c62e",
+            "workflow_run": {
+                "id": 46101887140,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "perf/import-study-20261127-6b4c",
+                "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+            }
+        },
+        {
+            "id": 15248990142,
+            "name": "import-study-6b4c-typed-record-lengths-jitendex-BA-1",
+            "size_in_bytes": 561217833,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248990142",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248990142/zip",
+            "expired": false,
+            "created_at": "2026-11-28T04:38:31Z",
+            "expires_at": "2026-12-12T04:37:38Z",
+            "updated_at": "2026-11-28T04:38:31Z",
+            "digest": "sha256:1933a0cb62169bc4d9964586b6c7c4e88eb930f78ed64ff6156484a8e90eb5f1",
+            "workflow_run": {
+                "id": 46101887140,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "perf/import-study-20261127-6b4c",
+                "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+            }
+        },
+        {
+            "id": 15247839338,
+            "name": "import-study-6b4c-dedup-lookahead-jitendex-AB-1",
+            "size_in_bytes": 561368116,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247839338",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15247839338/zip",
+            "expired": false,
+            "created_at": "2026-11-28T04:23:05Z",
+            "expires_at": "2026-12-12T04:22:26Z",
+            "updated_at": "2026-11-28T04:23:05Z",
+            "digest": "sha256:00680c8a142446d7336242b929f2749f0c2eed825d224a702c3f7d64601299f2",
+            "workflow_run": {
+                "id": 46101887140,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "perf/import-study-20261127-6b4c",
+                "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+            }
+        },
+        {
+            "id": 15248480980,
+            "name": "import-study-6b4c-dedup-lookahead-jitendex-BA-1",
+            "size_in_bytes": 561354845,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248480980",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15248480980/zip",
+            "expired": false,
+            "created_at": "2026-11-28T04:25:24Z",
+            "expires_at": "2026-12-12T04:24:32Z",
+            "updated_at": "2026-11-28T04:25:24Z",
+            "digest": "sha256:220022dacfc1c73d07fd33d5ca44d8592cf40c4f659aba009c1320097ea8b110",
+            "workflow_run": {
+                "id": 46101887140,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "perf/import-study-20261127-6b4c",
+                "head_sha": "a94a751b8068c00a44ce120c16fca6762afd3a03"
+            }
+        }
+    ],
+    "preservationPolicy": "Unchanged exporter verifies original ZIP published byte length and SHA-256, records every original ZIP entry, and retains every qualification file plus registered plan/tree files; only qualification-sources worktrees are omitted. Each original has its own artifact root; hidden files are included.",
+    "failurePolicy": "Attempt each fixed independent original at most once in the listed order. Retain every partial export and failed transfer log. No retries, substitute artifacts, or waiting for unfinished source cells. Any failure fails the job.",
+    "acceptancePolicy": "Receiver must explicitly allow this new outer workflow run/head/branch/attempt, require the unchanged exporter SHA, and verify exact selected/retained/actually uploaded filename sets, lengths and hashes. Original memory/semantic failures remain unchanged.",
+    "availabilityQualification": "No alternate pool capacity is asserted. A macOS job may also queue; no queue-fix claim or runner provisioning.",
+    "localPreparationBaseCommit": "6cc7c87d348d829fb94dee54eca04a621b20373b",
+    "localPreparationBaseTree": "ecc3233ac4c9af703c5821003ff40f05efd1afa0",
+    "publicationParentPolicy": "Local preparation base 6cc7c87d348d829fb94dee54eca04a621b20373b and required remote publication parent 30e105952b4168ae8c5b689d7cd2154cce1cc16a have the same tree ecc3233ac4c9af703c5821003ff40f05efd1afa0. The published wrapper must have the exact remote parent, enforced before export.",
+    "metadataProvenance": {
+        "frozenSelectionFile": "mac-export-jitendex-metadata.json",
+        "frozenSelectionSha256": "e41b90b2305930873d54cf0b7ccdee438e44d381b8d8abec725f38160b789915",
+        "independentInventoryFile": "original-artifacts-20261128-0451.json",
+        "independentInventorySha256": "035324253d1ae350c8f410c911a8f9f56da2b22d3c4f89b68792e304431fc459",
+        "selectionPolicy": "Exact unchanged artifact objects selected by the four frozen candidate/dictionary/order names; explicit AB then BA order for each candidate."
+    }
+}
