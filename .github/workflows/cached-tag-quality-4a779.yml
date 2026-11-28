@@ -1,0 +1,37 @@
+name: Cached tag source quality 4a779
+
+on:
+  push:
+    branches: [perf/cached-tag-quality-20261128-4a779]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Cached tag validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Validate source and regression coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/cached-tag-quality
+          npx eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-cached-tags.test.js 2>&1 | tee builds/perf/cached-tag-quality/lint.log
+          npm run test:ts 2>&1 | tee builds/perf/cached-tag-quality/types.log
+          npm run test:unit -- --maxWorkers=2 2>&1 | tee builds/perf/cached-tag-quality/unit.log
+          npm run test:build 2>&1 | tee builds/perf/cached-tag-quality/build.log
+      - name: Preserve validation results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cached-tag-quality
+          path: builds/perf/cached-tag-quality
+          if-no-files-found: error
+          retention-days: 14

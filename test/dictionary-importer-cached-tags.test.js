@@ -7,13 +7,18 @@
 import {readFile} from 'node:fs/promises'
 import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js'
 import {afterEach, beforeAll, expect, test, vi} from 'vitest'
-import {BlobReader, TextWriter, Uint8ArrayWriter as BundledByteWriter, ZipReader} from '../ext/lib/zip.js'
+import {BlobReader, TextWriter as BundledTextWriter, Uint8ArrayWriter as BundledByteWriter, ZipReader} from '../ext/lib/zip.js'
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
 import {DictionarySourceIntegrityError} from '../ext/js/dictionary/dictionary-source-integrity-error.js'
 import {DictionaryZipReadScope} from '../ext/js/dictionary/dictionary-zip-read-scope.js'
 import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
+
+// The bundle uses the installed ZIP implementation; its ambient declarations
+// still describe the legacy zip.js API.
+const TextWriter = /** @type {typeof import('@zip.js/zip.js').TextWriter} */ (/** @type {unknown} */ (BundledTextWriter))
+const ByteWriter = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayWriter} */ (/** @type {unknown} */ (BundledByteWriter))
 
 beforeAll(async () => {
     parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
@@ -23,7 +28,7 @@ afterEach(() => { vi.restoreAllMocks() })
 
 /**
  * @param {number} level
- * @returns {Promise<{text: string, bytes: Uint8Array, reader: ZipReader<Blob>, term: import('@zip.js/zip.js').Entry, tag: import('@zip.js/zip.js').Entry, raw: RawZipPayloadReader, importer: DictionaryImporter}>}
+ * @returns {Promise<{text: string, bytes: Uint8Array, reader: import('@zip.js/zip.js').ZipReader<Blob>, term: import('@zip.js/zip.js').Entry, tag: import('@zip.js/zip.js').Entry, raw: RawZipPayloadReader, importer: DictionaryImporter}>}
  */
 async function fixture(level = 6) {
     const text = '\ufeff' + JSON.stringify([['日本語', 'name', 0, '意味', 0]])
@@ -32,7 +37,7 @@ async function fixture(level = 6) {
     await zip.add('tag_bank_1.json', new TextReader(text), {useWebWorkers: false})
     const bytes = Uint8Array.from(await zip.close())
     const blob = new Blob([bytes])
-    const reader = new ZipReader(new BlobReader(blob))
+    const reader = /** @type {import('@zip.js/zip.js').ZipReader<Blob>} */ (/** @type {unknown} */ (new ZipReader(new BlobReader(blob))))
     const entries = await reader.getEntries()
     const term = entries.find((entry) => entry.filename === 'term_bank_1.json')
     const tag = entries.find((entry) => entry.filename === 'tag_bank_1.json')
@@ -69,7 +74,7 @@ test.each(['cold-cache', 'oversized', 'unsupported', 'binary'])('retains ordinar
         if (mode === 'unsupported') { Reflect.set(tag, 'compressionMethod', 99) }
         const ordinary = vi.spyOn(tag, 'getData').mockResolvedValue('ordinary')
         const batchRead = vi.spyOn(raw, 'readBatch')
-        const writer = mode === 'binary' ? new BundledByteWriter() : new TextWriter()
+        const writer = mode === 'binary' ? new ByteWriter() : new TextWriter()
         await expect(importer._getData(tag, writer, void 0, raw)).resolves.toBe('ordinary')
         expect(ordinary).toHaveBeenCalledOnce()
         if (mode !== 'unsupported') { expect(batchRead).not.toHaveBeenCalled() }
