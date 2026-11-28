@@ -60,6 +60,7 @@ jobs:
             --expected-package-entry js/dictionary/term-content-canonical-layout.js \
             --expected-package-entry js/dictionary/term-content-metadata-arena.js \
             --expected-package-entry lib/term-content-canonical-scan-v1.wasm \
+            --expected-package-entry js/dictionary/wasm/term-content-canonical-scan-v1.c \
             "${qualification_extra_args[@]}" \
             --evidence "builds/perf/slot-fingerprints-$PERF_DICTIONARY-$PERF_ORDER"
       - name: Emit read-only evidence summary

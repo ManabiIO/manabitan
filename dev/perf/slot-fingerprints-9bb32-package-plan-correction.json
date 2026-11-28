@@ -1,0 +1,18 @@
+{
+  "kind": "prospective-package-inventory-correction",
+  "supersededWorkflowCommit": "df79e77b966f67073229f2fd462491e8aee96e50",
+  "supersededRun": 46102936165,
+  "observedStateBeforeCorrection": "All six jobs queued with no steps or timed observations",
+  "reason": "The normal extension package includes the changed native C source as well as the scanner binary and JavaScript. The exact package difference list must include js/dictionary/wasm/term-content-canonical-scan-v1.c.",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "178ee43328141693e88b90b4b518d483c87b2fac",
+  "unchanged": "Product commits, qualification script, fixtures, Node/browser versions, production flags, worker policy, schedule, controls, memory and semantic gates",
+  "failurePolicy": "Retain any superseded pre-timing package-gate failure. No timing from that acquisition may be used or pooled.",
+  "expectedPackageEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-content-canonical-layout.js",
+    "js/dictionary/term-content-metadata-arena.js",
+    "lib/term-content-canonical-scan-v1.wasm",
+    "js/dictionary/wasm/term-content-canonical-scan-v1.c"
+  ]
+}
