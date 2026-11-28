@@ -45,3 +45,16 @@ components. The score loop's owning phases were flat, and CRC's unchanged
 inflation phase also moved. Rejected CRC variants remain visible. Do not add
 component timings to overlapping worker phases or apply their percentages to a
 whole import.
+
+## Held score-cache investigation
+
+The [complete cache experiment readout](cache-held-README.md) preserves both
+source revisions, all actual numeric inputs and all fixed observations. V2's
+warm JMdict encoder improvement did not pass its predeclared common-path
+criterion: all four upper bounds exceeded +5%, and the all-in-range control
+showed a positive slowdown against both identical baselines. There is no cache
+product PR. The conditional first-use study was never implemented or run.
+
+The cache archive, external member manifest and checksum file are stored here
+as `score-cache-held-evidence-20261128-1b47.*`. Its archive SHA-256 is
+`3a2ef15ec420b06bcff2db905b69454520c291479ac6a20a6af1344b0788acda`.
