@@ -799,6 +799,47 @@ static __attribute__((always_inline)) inline int json_string_matches_ascii(
     const char* keyword, uint32_t keyword_length
 ) {
     if (start >= end || src[start] != '"') { return 0; }
+    if (keyword_length >= 8u) {
+        if (end - start < 2u) { return 0; }
+        const uint8_t first = src[start + 1u];
+        if (first == '\\') { goto long_literal_miss; }
+        if (first != (uint8_t)keyword[0]) { return 0; }
+        // Wide reads require a complete quoted literal within the logical end.
+        // Other spellings retain the same bounded escaped-keyword decoder.
+        if (keyword_length > end - start - 2u || src[start + keyword_length + 1u] != '"') {
+            goto long_literal_miss;
+        }
+        const uint8_t* literal = src + start + 1u;
+        uint32_t k = 0u;
+        for (; keyword_length - k >= 8u; k += 8u) {
+            uint64_t actual;
+            uint64_t expected;
+            __builtin_memcpy(&actual, literal + k, sizeof(actual));
+            __builtin_memcpy(&expected, keyword + k, sizeof(expected));
+            if (actual != expected) { goto long_literal_miss; }
+        }
+        if (keyword_length - k >= 4u) {
+            uint32_t actual;
+            uint32_t expected;
+            __builtin_memcpy(&actual, literal + k, sizeof(actual));
+            __builtin_memcpy(&expected, keyword + k, sizeof(expected));
+            if (actual != expected) { goto long_literal_miss; }
+            k += 4u;
+        }
+        if (keyword_length - k >= 2u) {
+            uint16_t actual;
+            uint16_t expected;
+            __builtin_memcpy(&actual, literal + k, sizeof(actual));
+            __builtin_memcpy(&expected, keyword + k, sizeof(expected));
+            if (actual != expected) { goto long_literal_miss; }
+            k += 2u;
+        }
+        if (k < keyword_length && literal[k] != (uint8_t)keyword[k]) { goto long_literal_miss; }
+        return 1;
+
+long_literal_miss:
+        return json_string_matches_ascii_escaped(src, start, end, keyword, keyword_length);
+    }
     uint32_t i = start + 1u;
     for (uint32_t k = 0u; k < keyword_length; ++k) {
         if (i >= end) { return 0; }
