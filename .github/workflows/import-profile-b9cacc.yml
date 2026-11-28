@@ -1,0 +1,68 @@
+name: Frozen JMdict import profile
+
+on:
+  push:
+    branches: ['perf/jmdict-profile-20261127-b9cacc']
+    paths: ['.github/workflows/import-profile-b9cacc.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Build frozen release package
+        run: |
+          npm run build:libs
+          npm run license-report:html
+          npm run build -- --target chrome
+          git diff --exit-code
+      - name: Acquire ordinary production-default reference
+        run: node dev/perf/import-benchmark.js jmdict --runs 1 --build-target chrome --no-build --media-check sample --output builds/perf/jmdict-profile-b9cacc/ordinary
+      - name: Acquire separate non-authoritative CPU trace
+        run: node dev/perf/import-benchmark.js jmdict --trace --build-target chrome --no-build --media-check sample --output builds/perf/jmdict-profile-b9cacc/trace
+      - name: Record source and acquisition scope
+        if: always()
+        run: |
+          mkdir -p builds/perf/jmdict-profile-b9cacc
+          git rev-parse HEAD HEAD^{tree} > builds/perf/jmdict-profile-b9cacc/source.txt
+          git status --short >> builds/perf/jmdict-profile-b9cacc/source.txt
+          python - <<'PY'
+          import json
+          import pathlib
+          root = pathlib.Path('builds/perf/jmdict-profile-b9cacc')
+          report = {'scope': 'One ordinary reference plus a separate CPU trace; no A/B timing comparison or performance claim.', 'baseline': '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2', 'summaries': {}}
+          for name in ('ordinary', 'trace'):
+              path = root / name / 'summary.json'
+              if path.exists():
+                  value = json.loads(path.read_text())
+                  report['summaries'][name] = {key: value[key] for key in ('gitSha', 'source', 'fixture', 'hostEnvironment', 'browserVersion', 'authoritativeTiming', 'traceEnabled', 'timingBoundary', 'timing')}
+          (root / 'acquisition.json').write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          PY
+      - name: Retain original reference and trace
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-current-profile-b9cacc
+          path: builds/perf/jmdict-profile-b9cacc
+          if-no-files-found: error
+          retention-days: 90
