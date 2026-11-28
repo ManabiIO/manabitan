@@ -1,0 +1,225 @@
+name: Recover exact numeric suffix 972 artifact bytes
+
+on:
+  push:
+    branches:
+      - perf/numeric-suffix-972-artifact-recovery-20261128-c563d487
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recover-original-bytes:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify original artifact and emit bounded byte receipts
+        shell: bash
+        env:
+          RECOVERY_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          import pathlib
+          import re
+          import sys
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          import zipfile
+          
+          REPOSITORY = "ManabiIO/manabitan"
+          ARTIFACT_ID = 15256173851
+          ARTIFACT_BYTES = 136615
+          ARTIFACT_SHA256 = "8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db"
+          SOURCE_RUN = 46126462448
+          SOURCE_HEAD = "d28d74f9c1047491670942ec6e0414cc9c823101"
+          SOURCE_TREE = "169ea236aa1ba9a17583878be0b11d5f5cd795f9"
+          BASELINE = {
+              "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+              "cSha256": "7e836d21cb68165dc0fd6fe8aec074d50b77706debe2360b352b9cc34a67d24a",
+              "wasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695"
+          }
+          EXPECTED_PRODUCT = {
+              "ext/js/dictionary/wasm/term-bank-parser.c": {
+                  "bytes": 164449,
+                  "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+                  "gitBlobSha1": "5a9033fda78144bfa1edf038b52f6804eeba23f5"
+              },
+              "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+                  "bytes": 69998,
+                  "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+                  "gitBlobSha1": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124"
+              },
+              "dev/data/dictionary-wasm/manifest.json": {
+                  "bytes": 2588,
+                  "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+                  "gitBlobSha1": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd"
+              },
+              "test/term-bank-row-suffix-reuse.test.js": {
+                  "bytes": 15101,
+                  "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+                  "gitBlobSha1": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+              },
+              "test/term-bank-row-suffix-token-end-fixtures.js": {
+                  "bytes": 3037,
+                  "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+                  "gitBlobSha1": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+              },
+              "test/term-bank-row-suffix-token-ends.test.js": {
+                  "bytes": 7560,
+                  "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+                  "gitBlobSha1": "8ba263fc060391555a5070d65d6313fdd96607b4"
+              }
+          }
+          LABELS = [
+              "all-dry-build-targets", "apply-check", "apply-patch",
+              "build-candidate-libraries", "build-native-candidate", "complete-unit-suite",
+              "create-baseline", "create-candidate", "dependencies-baseline",
+              "dependencies-candidate", "fetch-baseline", "options-unit-suite",
+              "reproduce-baseline", "reproduce-candidate", "scoped-lint",
+              "strict-main-types", "strict-test-types"
+          ]
+          sha = lambda data: hashlib.sha256(data).hexdigest()
+          blob = lambda data: hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+          stage = "metadata"
+          def emit(tag, value):
+              print(tag + " " + json.dumps(value, separators=(",", ":"), sort_keys=True), flush=True)
+          
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, msg, headers, newurl):
+                  return None
+          
+          try:
+              token = os.environ["RECOVERY_GITHUB_TOKEN"]
+              api = "https://api.github.com/repos/" + REPOSITORY + "/actions/artifacts/" + str(ARTIFACT_ID)
+              headers = {
+                  "Authorization": "Bearer " + token,
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28"
+              }
+              no_redirect = urllib.request.build_opener(NoRedirect())
+              request = urllib.request.Request(api, headers=headers)
+              with no_redirect.open(request, timeout=30) as response:
+                  metadata_bytes = response.read(65537)
+              assert len(metadata_bytes) <= 65536
+              metadata = json.loads(metadata_bytes)
+              assert metadata["id"] == ARTIFACT_ID
+              assert metadata["size_in_bytes"] == ARTIFACT_BYTES
+              assert metadata["digest"] == "sha256:" + ARTIFACT_SHA256
+              assert metadata["expired"] is False
+              assert metadata["workflow_run"]["id"] == SOURCE_RUN
+              assert metadata["workflow_run"]["head_sha"] == SOURCE_HEAD
+          
+              stage = "download"
+              download_request = urllib.request.Request(api + "/zip", headers=headers)
+              try:
+                  no_redirect.open(download_request, timeout=30)
+              except urllib.error.HTTPError as redirect:
+                  assert redirect.code == 302
+                  location = redirect.headers["Location"]
+              else:
+                  raise AssertionError("Expected artifact redirect")
+              parsed = urllib.parse.urlsplit(location)
+              assert parsed.scheme == "https" and parsed.hostname
+              assert parsed.username is None and parsed.password is None
+              # The authorization header is never forwarded to the artifact storage URL.
+              with urllib.request.urlopen(urllib.request.Request(location), timeout=30) as response:
+                  archive_bytes = response.read(ARTIFACT_BYTES + 1)
+              assert len(archive_bytes) == ARTIFACT_BYTES and sha(archive_bytes) == ARTIFACT_SHA256
+              del headers, token, request, download_request, location
+          
+              stage = "archive"
+              archive = zipfile.ZipFile(io.BytesIO(archive_bytes))
+              infos = archive.infolist()
+              expected_names = {"product/" + name for name in EXPECTED_PRODUCT}
+              expected_names.update(label + suffix for label in LABELS for suffix in [".log", ".receipt.json"])
+              expected_names.update(["preparation-start.json", "compiled-source-binding.json", "result.json", "rebuilt-candidate.diff"])
+              assert len(infos) == len(expected_names) == 44
+              assert {entry.filename for entry in infos} == expected_names
+              assert sum(entry.file_size for entry in infos) <= 2 * 1024 * 1024
+              content = {}
+              member_manifest = []
+              for entry in infos:
+                  path = pathlib.PurePosixPath(entry.filename)
+                  assert not path.is_absolute() and ".." not in path.parts and not entry.is_dir()
+                  assert ((entry.external_attr >> 16) & 0o170000) != 0o120000
+                  data = archive.read(entry)  # Reading to EOF checks each member's original CRC.
+                  assert len(data) == entry.file_size
+                  content[entry.filename] = data
+                  member_manifest.append({"path": entry.filename, "bytes": len(data), "sha256": sha(data), "crc32": entry.CRC})
+          
+              stage = "product-identities"
+              expected_hashes = {}
+              for name, expected in EXPECTED_PRODUCT.items():
+                  data = content["product/" + name]
+                  assert len(data) == expected["bytes"]
+                  assert sha(data) == expected["sha256"]
+                  assert blob(data) == expected["gitBlobSha1"]
+                  expected_hashes[name] = expected["sha256"]
+              start = json.loads(content["preparation-start.json"])
+              binding = json.loads(content["compiled-source-binding.json"])
+              result = json.loads(content["result.json"])
+              assert start["toolingHead"] == SOURCE_HEAD and start["toolingTree"] == SOURCE_TREE
+              assert start["bindingSha256"] == "331f3ecafe5aeff9bea6c2415772d6c8b26b6620f5cb21bfdbbb0219202c9b05"
+              assert start["node"] == "v22.22.0"
+              assert "21.1.8" in start["compiler"] and "21.1.8" in start["linker"]
+              assert start["binding"]["baseline"] == binding["baseline"] == result["baseline"] == BASELINE
+              assert binding["productFilesSha256"] == result["productFilesSha256"] == expected_hashes
+              assert binding["candidateSource"] == expected_hashes["ext/js/dictionary/wasm/term-bank-parser.c"]
+              assert binding["extWasmSha256"] == expected_hashes["dev/data/dictionary-wasm/term-bank-parser.wasm"]
+              assert binding["rebuiltDiffSha256"] == sha(content["rebuilt-candidate.diff"]) == "113139f4799adbc3a030d5691a33e1666ee7bdd99cfd7017885fc6111e17b4f4"
+              assert result["fixedSource"] is True and result["oldBaselineGainTransferred"] is False
+              assert result["productPrOpened"] is False and result["performanceQualificationPending"] is True
+          
+              stage = "original-receipts"
+              for label in LABELS:
+                  receipt = json.loads(content[label + ".receipt.json"])
+                  assert receipt["label"] == label and receipt["exitCode"] == 0
+                  assert math.isfinite(receipt["startedEpoch"]) and receipt["finishedEpoch"] >= receipt["startedEpoch"]
+                  assert receipt["logSha256"] == sha(content[label + ".log"])
+                  assert receipt["scope"] == "Build/correctness command, not a benchmark observation"
+              unit = re.sub(r"\x1b\[[0-9;]*m", "", content["complete-unit-suite.log"].decode())
+              assert re.search(r"Test Files\s+671 passed\s+\(671\)", unit)
+              assert re.search(r"Tests\s+15180 passed\s+\|\s+47 skipped\s+\(15227\)", unit)
+              assert "test/term-bank-row-suffix-reuse.test.js (32 tests)" in unit
+              assert "test/term-bank-row-suffix-token-ends.test.js (9 tests)" in unit
+          
+              # Emit only after every byte/source/receipt check has passed.
+              stage = "emit"
+              output_names = ["product/" + name for name in EXPECTED_PRODUCT]
+              output_names.extend(label + ".receipt.json" for label in LABELS)
+              output_names.extend(["preparation-start.json", "compiled-source-binding.json", "result.json"])
+              assert len(output_names) == 26
+              emit("NUMERIC_972_RECOVERY_START", {
+                  "sourceRun": SOURCE_RUN, "sourceHead": SOURCE_HEAD, "artifactId": ARTIFACT_ID,
+                  "artifactBytes": ARTIFACT_BYTES, "artifactSha256": ARTIFACT_SHA256,
+                  "fileCount": len(output_names), "productCount": 6, "receiptCount": 17,
+                  "originalAuditSha256": "eec68624e1d5a0e8bab9334a2a4b077b146aefa5a397b0fa887985b89f29ab47",
+                  "scope": "Byte recovery from one already completed artifact; no checkout, compiler, tests, native execution or benchmark"
+              })
+              for name in output_names:
+                  data = content[name]
+                  encoded = base64.b64encode(data).decode("ascii")
+                  chunk_size = 8192
+                  count = (len(encoded) + chunk_size - 1) // chunk_size
+                  emit("NUMERIC_972_RECOVERY_FILE", {"path": name, "bytes": len(data), "sha256": sha(data), "gitBlobSha1": blob(data), "chunks": count})
+                  for index in range(count):
+                      emit("NUMERIC_972_RECOVERY_CHUNK", {"path": name, "index": index, "data": encoded[index * chunk_size:(index + 1) * chunk_size]})
+              emit("NUMERIC_972_RECOVERY_COMPLETE", {
+                  "complete": True, "files": len(output_names), "productFiles": 6, "originalReceipts": 17,
+                  "artifactSha256": ARTIFACT_SHA256, "all44Members": member_manifest,
+                  "compilationExecuted": False, "testsExecuted": False, "benchmarkExecuted": False
+              })
+          except BaseException as error:
+              # Never print HTTP exception text, signed download URLs, request headers or credentials.
+              emit("NUMERIC_972_RECOVERY_FAILED", {"complete": False, "stage": stage, "errorType": type(error).__name__})
+              sys.exit(1)
+          
+          PY

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "reviewer": "root",
+  "reviewedAtUtc": "2026-11-28 09:06:11 UTC",
+  "workflowGitBlobSha": "b28c604bf3bd0f2c9e6298afaf6bc6354a9b4480",
+  "workflowPath": ".github/workflows/numeric-suffix-972-artifact-recovery-c563d487.yml",
+  "parent": "d28d74f9c1047491670942ec6e0414cc9c823101",
+  "artifact": {
+    "id": 15256173851,
+    "bytes": 136615,
+    "digest": "sha256:8ddf1aca49709b03a17fa2e46aae67ce7de43fd8c303ef82e0c47fa07845e4db",
+    "runId": 46126462448,
+    "sourceHead": "d28d74f9c1047491670942ec6e0414cc9c823101"
+  },
+  "productFiles": [
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "bytes": 164449,
+      "sha256": "f0e5d47cea0cfc0ef0da16696a12738679501033dc5c2a7d3cc7b96f19baf12f",
+      "gitBlobSha": "5a9033fda78144bfa1edf038b52f6804eeba23f5"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "bytes": 69998,
+      "sha256": "a8cfe12e4963a0e3f5bde2c9baff2cb6208037ae3fb1042cc86840462a13b968",
+      "gitBlobSha": "d933df2a3c2458ce9acbd3319cc1e2ca4f977124"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "bytes": 2588,
+      "sha256": "c35cfb7305826968d079a6df51689ff0dd81b917962eac209342dc492ea8711e",
+      "gitBlobSha": "b2a6b0f6e817c90c0b7cd12611fb1656445294bd"
+    },
+    {
+      "path": "test/term-bank-row-suffix-reuse.test.js",
+      "bytes": 15101,
+      "sha256": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f",
+      "gitBlobSha": "c53d398439bd1579724b1bcd1144e9696b88b28b"
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-end-fixtures.js",
+      "bytes": 3037,
+      "sha256": "85c9ff808b94d759472e588cbce3518b7a21d04778992a042926456a69e0accc",
+      "gitBlobSha": "9ee155a57cc1c316fce83c8d2740afa39864238c"
+    },
+    {
+      "path": "test/term-bank-row-suffix-token-ends.test.js",
+      "bytes": 7560,
+      "sha256": "cf3b6f8ea25067b74ff3ea644af522d783ccea985aa590c036886282657177cd",
+      "gitBlobSha": "8ba263fc060391555a5070d65d6313fdd96607b4"
+    }
+  ],
+  "readOnlyPermissions": true,
+  "noCheckoutBuildTestOrBenchmark": true,
+  "authConfinedToApiHost": true,
+  "allChecksBeforeBase64Emission": true,
+  "preOutageKnownGitBlobIdentitiesRequired": true,
+  "artifactMetadataSource": "Purpose-built fetch_workflow_run_artifacts; generic fetch does not support artifact URL",
+  "reason": "Recover exact compiled output after execution workspace unavailability. This does not repeat or replace any observation, alter source or thresholds, or open a product PR."
+}
