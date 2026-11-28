@@ -1,0 +1,35 @@
+{
+  "complete": true,
+  "kind": "lossless-evidence-compaction-after-complete-cold-proof",
+  "originalPipelineSha256": "4571a33abcf884341389e39d87e123a3a5de6b769045a55d158e72044c4cd321",
+  "originalVerificationSha256": "3b7cef17e4603172ef10bbeafddb4a3c6f150a997119caf40bfb36b6b1f6377a",
+  "archive": "preserved-record-files.tar.gz",
+  "archiveBytes": 134804146,
+  "archiveSha256": "3e1d7324f132b1882b8822bbf2bd0ca12b54d64971e204b405cc882ae65f21d3",
+  "members": [
+    {
+      "file": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "bytes": 38,
+      "sha256": "f947065d6944d265eca38c7f38a9716c4a50997ac74e821937cb9c2755c7e784"
+    },
+    {
+      "file": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "bytes": 399513708,
+      "sha256": "d3d8469a24d2217eaa124076a648ffe18cf510f33cc6f845c126bc05ddaf79ec"
+    },
+    {
+      "file": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "bytes": 26,
+      "sha256": "069c2d0e42f696dda96999c211da22594f08e4f7b686b51c675e21a1bddf6c5a"
+    },
+    {
+      "file": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+      "bytes": 2386124,
+      "sha256": "f078e0becb324be70825d7a3422dc05c877d289e03d9c15e115069a3a68e2484"
+    }
+  ],
+  "allArchiveMembersVerifiedAgainstOriginalHashes": true,
+  "contentAndCanonicalMetadataLeftAtOriginalPaths": true,
+  "uncompressedMembersRemoved": true,
+  "restoration": "Extract archive members back under natural-A-6/opfs; all exact raw SHA256 witnesses retained."
+}

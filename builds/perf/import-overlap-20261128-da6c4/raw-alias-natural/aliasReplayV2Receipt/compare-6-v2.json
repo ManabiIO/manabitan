@@ -1,0 +1,7 @@
+{
+  "a": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-A-6/pipeline.json",
+  "b": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-6/pipeline.json",
+  "verifyA": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-A-6/verification-v2.json",
+  "verifyB": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-6/verification-v2.json",
+  "reportPath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/comparison-6-v2.json"
+}

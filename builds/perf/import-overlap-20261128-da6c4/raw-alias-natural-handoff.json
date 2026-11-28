@@ -1,0 +1,682 @@
+{
+  "schema": "manabitan.native-record-alias.natural-proof-handoff.v1",
+  "complete": true,
+  "summary": {
+    "schema": "manabitan.native-record-alias.current-natural-proof.v1",
+    "complete": true,
+    "scope": "Complete actual native/parser/importer/DB term-storage correctness proof, instrumented Node24 component. No timing estimate or full-browser qualification. Browser media/SQLite equality remains a required separate preflight.",
+    "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+    "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+    "comparisonSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+    "logicalSha256": "ec3b399cf741c74c7d0ca2d2e5d963961d6aeafbe9cad5aefec123166b7a63f0",
+    "rows": 6648310,
+    "canonicalEntries": 157150,
+    "canonicalMetadataLogicalSha256": "589b06e87ae121e881b2b830d9c09567614617a3465cf56d6f856eee8ba2c963",
+    "aliasGroups": [
+      1,
+      87,
+      91,
+      92,
+      105,
+      123,
+      126,
+      139
+    ],
+    "aliasRows": 175,
+    "aliasCount": 8,
+    "aliasInputBytes": 2983,
+    "normalContentSpansVerified": 170,
+    "addedContentBytes": 2260,
+    "netTermStorageBytes": -428980,
+    "arms": {
+      "A": {
+        "attempt": "A6",
+        "pipelineSha256": "4571a33abcf884341389e39d87e123a3a5de6b769045a55d158e72044c4cd321",
+        "verificationSha256": "3b7cef17e4603172ef10bbeafddb4a3c6f150a997119caf40bfb36b6b1f6377a",
+        "localHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "localStatus": "",
+        "localTreeIncludingWorkingChanges": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+        "remoteEquivalent": {
+          "commit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+          "tree": "d911260f1a57f518d59b3a12127fcc3b2293c918"
+        },
+        "policy": {
+          "workerCount": 3,
+          "sourceGroupsPerWorker": 3,
+          "blockTargetBytes": 1048576,
+          "minimumBytes": 524288,
+          "minSavingsRatio": 0.1,
+          "referencePackTargetBytes": 4194304,
+          "nativeImageProjection": true,
+          "prepareExactLookupRoute": true,
+          "sourceBytes": 4267992967,
+          "fixtureTermBanks": 665,
+          "sourceBatchMaxBytes": 201326592,
+          "useMediaPipeline": true,
+          "contentStorageMode": "raw-bytes",
+          "contentDedupEnabled": true,
+          "skipImageMetadata": true,
+          "wasmPassThroughTermContent": true,
+          "usePrecomputedContentForMediaRows": true,
+          "canonicalRowsFastPath": true,
+          "mediaReferenceDiscoveryIncluded": true,
+          "mediaRequirementResolutionIncluded": false,
+          "mediaPayloadWritesIncluded": false,
+          "sqliteIncluded": false,
+          "browserTermFileEqualityEstablished": false
+        },
+        "privateLeaseClaims": 0,
+        "nativePreparedGroups": 162,
+        "verifiedRows": 6648310,
+        "coldLookupProbes": 82,
+        "coldRecordProbes": 20,
+        "pipelineMaxRssKiB": 893328,
+        "verifierMaxRssKiB": 861184,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449,
+            "normalizedSha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+            "rawSha256": "f50a48e23056054a13f90dfa7aad53ba3a80a6f6e7125289a5ad52dc2f9f686e",
+            "headerInvariant": {
+              "kind": "content",
+              "generationRange": null
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38,
+            "normalizedSha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+            "rawSha256": "f947065d6944d265eca38c7f38a9716c4a50997ac74e821937cb9c2755c7e784",
+            "headerInvariant": {
+              "kind": "descriptor",
+              "generationRange": [
+                8,
+                24
+              ]
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708,
+            "normalizedSha256": "c533b5176fc5a57d3a3b2e19f6648fadba13ceb5707bfb2f65de1e2d5c0ff175",
+            "rawSha256": "d3d8469a24d2217eaa124076a648ffe18cf510f33cc6f845c126bc05ddaf79ec",
+            "headerInvariant": {
+              "kind": "index",
+              "generationRange": [
+                24,
+                40
+              ],
+              "descriptorBytes": 38,
+              "chunkCount": 181,
+              "rowCount": 6608135
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26,
+            "normalizedSha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+            "rawSha256": "069c2d0e42f696dda96999c211da22594f08e4f7b686b51c675e21a1bddf6c5a",
+            "headerInvariant": {
+              "kind": "descriptor",
+              "generationRange": [
+                8,
+                24
+              ]
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124,
+            "normalizedSha256": "7c0c01f91e2c92fd5bfcc6c57e9dd905bc991ef6622f7708a5724e1303bf446f",
+            "rawSha256": "f078e0becb324be70825d7a3422dc05c877d289e03d9c15e115069a3a68e2484",
+            "headerInvariant": {
+              "kind": "index",
+              "generationRange": [
+                24,
+                40
+              ],
+              "descriptorBytes": 26,
+              "chunkCount": 11,
+              "rowCount": 40175
+            }
+          }
+        ],
+        "canonicalAliasReadCount": 0,
+        "canonicalAliasReadFileOperations": 0,
+        "canonicalAliasEnsureLoadedCalls": 0
+      },
+      "B": {
+        "attempt": "B7",
+        "pipelineSha256": "c5a49eac7551f74415d2d48a8c2c54dc582b715819c4ee84f376eaf8b158536e",
+        "verificationSha256": "6a9842f3bb21d570a51cdb6d5922e15b693ada1bfe1ffa6bf0ae4321dcaabb70",
+        "localHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+        "localStatus": "M eslint.config.js\n M ext/js/dictionary/dictionary-database.js\n M ext/js/dictionary/dictionary-importer.js\n M ext/js/dictionary/term-bank-wasm-parser.js\n M ext/js/dictionary/term-content-block-store.js\n M ext/js/dictionary/term-import-metrics.js\n M test/term-bank-wasm-parser.test.js\n?? ext/js/dictionary/native-term-record-alias.js\n?? ext/js/dictionary/native-term-record-ownership.js\n?? test/dictionary-native-record-alias-lifecycle.test.js\n?? test/native-term-record-alias.test.js\n?? test/native-term-record-ownership.test.js\n?? test/util/native-term-record-fixture.js",
+        "localTreeIncludingWorkingChanges": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+        "remoteEquivalent": {
+          "commit": "2c02336b135ee01661ca2a788395afec75e66712",
+          "tree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505"
+        },
+        "policy": {
+          "workerCount": 3,
+          "sourceGroupsPerWorker": 3,
+          "blockTargetBytes": 1048576,
+          "minimumBytes": 524288,
+          "minSavingsRatio": 0.1,
+          "referencePackTargetBytes": 4194304,
+          "nativeImageProjection": true,
+          "prepareExactLookupRoute": true,
+          "sourceBytes": 4267992967,
+          "fixtureTermBanks": 665,
+          "sourceBatchMaxBytes": 201326592,
+          "useMediaPipeline": true,
+          "contentStorageMode": "raw-bytes",
+          "contentDedupEnabled": true,
+          "skipImageMetadata": true,
+          "wasmPassThroughTermContent": true,
+          "usePrecomputedContentForMediaRows": true,
+          "canonicalRowsFastPath": true,
+          "mediaReferenceDiscoveryIncluded": true,
+          "mediaRequirementResolutionIncluded": false,
+          "mediaPayloadWritesIncluded": false,
+          "sqliteIncluded": false,
+          "browserTermFileEqualityEstablished": false
+        },
+        "privateLeaseClaims": 170,
+        "nativePreparedGroups": 170,
+        "verifiedRows": 6648310,
+        "coldLookupProbes": 82,
+        "coldRecordProbes": 194,
+        "pipelineMaxRssKiB": 901592,
+        "verifierMaxRssKiB": 859132,
+        "files": [
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7535709,
+            "normalizedSha256": "9c8c2fd6517c73b6e86f585a602fd5d77f2453713d309813d6e488ce868d1d82",
+            "rawSha256": "9c8c2fd6517c73b6e86f585a602fd5d77f2453713d309813d6e488ce868d1d82",
+            "headerInvariant": {
+              "kind": "content",
+              "generationRange": null
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38,
+            "normalizedSha256": "046cfa639d53adfb65a9b2f1a0d48009e48c97606721708a260373749b0d352e",
+            "rawSha256": "2cfe8296935839c23da0004319f11f372e79144060ee901a0421cef1584ff749",
+            "headerInvariant": {
+              "kind": "descriptor",
+              "generationRange": [
+                8,
+                24
+              ]
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399094016,
+            "normalizedSha256": "7cddeb55d18331068d0fab1e59d96adf4c7703fc88dc2f1996434c7b5115cf35",
+            "rawSha256": "08d74a0bcb44a9cb7263775b57cc05f53ff17c2d6ab6d88914421dc96ec23120",
+            "headerInvariant": {
+              "kind": "index",
+              "generationRange": [
+                24,
+                40
+              ],
+              "descriptorBytes": 38,
+              "chunkCount": 169,
+              "rowCount": 6608310
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26,
+            "normalizedSha256": "868ae810f872c67ba23c3d0f09176fa14946bee24cb66335f63f603d66641527",
+            "rawSha256": "246cec330795ac512fd25a89a1d35713e9c90e1c2dbdaab357976983c41f0410",
+            "headerInvariant": {
+              "kind": "descriptor",
+              "generationRange": [
+                8,
+                24
+              ]
+            }
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2374576,
+            "normalizedSha256": "bca794a257112ecad13c61cab2c4162de5478bf2a92e8851a5551d8e57835a6c",
+            "rawSha256": "cdefc7c994543a9fcb9fd00a62377f614cbcf839e4b37189540dcbc41baaa8e9",
+            "headerInvariant": {
+              "kind": "index",
+              "generationRange": [
+                24,
+                40
+              ],
+              "descriptorBytes": 26,
+              "chunkCount": 1,
+              "rowCount": 40000
+            }
+          }
+        ],
+        "canonicalAliasReadCount": 8,
+        "canonicalAliasReadFileOperations": 0,
+        "canonicalAliasEnsureLoadedCalls": 0
+      }
+    },
+    "failuresRetained": [
+      {
+        "attempt": "A3",
+        "stage": "setup",
+        "groupsCompleted": 0,
+        "cause": "Harness used bare dense ZIP entries lacking actual getData fallback; repaired through real importer catalog."
+      },
+      {
+        "attempt": "A5",
+        "stage": "observer",
+        "groupsCompleted": 0,
+        "receivedRows": 40000,
+        "cause": "Observer assumed resolvedDictNames array; uniform production path supplies resolvedUniformDictName; product unaffected."
+      },
+      {
+        "attempt": "A6 verifierv1",
+        "stage": "cold-readback",
+        "rowsVerified": 40000,
+        "cause": "Fresh read harness omitted actual owner Zstd initialization; separately source-bound v2 fixed it, A6 acquisition was not repeated."
+      },
+      {
+        "attempt": "B6",
+        "stage": "pipeline",
+        "groupsCompleted": 28,
+        "rowsCompleted": 1120000,
+        "exitCode": 137,
+        "cause": "External kill, cause unproven. Allpartialoutputretained; B7 allowed only after267095750B lossless completed-evidence compaction and materially improved headroom."
+      }
+    ],
+    "unsupportedClaims": [
+      "No browser equality established yet.",
+      "Diagnostic wall/phase values are not a candidate gain estimate.",
+      "Single-run RSS values are diagnostic, not a memory qualification.",
+      "All-media payload import and SQLite work were excluded; native media reference discovery was included."
+    ]
+  },
+  "summaryBlob": {
+    "sha": "008adf754595f36087bad627099208ca241d0773"
+  },
+  "retainedBlobBatches": {
+    "aliasReplayFinalReceipts": [
+      {
+        "path": "product-common.mjs",
+        "blob": "4f370066b72e27c6bd20291d398007862966124c",
+        "characters": 10197
+      },
+      {
+        "path": "product-arm.mjs",
+        "blob": "6190afc5c46c947cb1f39614b5c3bc3db346bf89",
+        "characters": 20838
+      },
+      {
+        "path": "product-worker-adapter.mjs",
+        "blob": "aa13d38f281062854b9d8b522ad344e8a672ff7a",
+        "characters": 4941
+      },
+      {
+        "path": "product-worker-bridge.mjs",
+        "blob": "9357cd2fa8fc12e3b830b073d7a5c670ac05f6a8",
+        "characters": 1808
+      },
+      {
+        "path": "product-verify.mjs",
+        "blob": "fb0d6cf4ad01654593c091b6e3083ed48ba676c0",
+        "characters": 16864
+      },
+      {
+        "path": "product-compare.mjs",
+        "blob": "7082eb88bea2b03f1c4ad3c0f35cd0c8be9e46a4",
+        "characters": 9713
+      },
+      {
+        "path": "prepare-bindings.py",
+        "blob": "683aee9aafcbf7bca0dbf17f16c36afe1aa8ab8c",
+        "characters": 7591
+      },
+      {
+        "path": "plan-3.json",
+        "blob": "b00af5dc9db149e5e0032621b54248575306c558",
+        "characters": 4027
+      },
+      {
+        "path": "config-A-3.json",
+        "blob": "0230a1340537f7bfa624db594ee5971a7b3c0edc",
+        "characters": 51761
+      },
+      {
+        "path": "config-B-3.json",
+        "blob": "86c71ba173205101cb82a413a52353fa54ed4751",
+        "characters": 52586
+      },
+      {
+        "path": "verify-A-3.json",
+        "blob": "8c9d43bcda017e71b4da04c4168922cd52dbb199",
+        "characters": 378
+      },
+      {
+        "path": "verify-B-3.json",
+        "blob": "cbd9631f1da10f2167567860ee5bd1bba6c7b009",
+        "characters": 374
+      },
+      {
+        "path": "compare-3.json",
+        "blob": "5f65fd939c30a0f3a34f367a7d6e30f05e9ad451",
+        "characters": 484
+      }
+    ],
+    "aliasReplayAttempt6": [
+      {
+        "path": "product-arm.mjs",
+        "blob": "1f7995a2ae6b84dcb7d8de3140792f4f67c15dd8",
+        "characters": 21624
+      },
+      {
+        "path": "prepare-bindings.py",
+        "blob": "5cfdb757776cea6c0da368e5a617e70275459410",
+        "characters": 7591
+      },
+      {
+        "path": "plan-6.json",
+        "blob": "42c52ef85099b8a6df57619a71f49db776b22b62",
+        "characters": 4027
+      },
+      {
+        "path": "config-A-6.json",
+        "blob": "1dde9ce887b0de4fa8a8c9714a95967ed61ed92a",
+        "characters": 51761
+      },
+      {
+        "path": "config-B-6.json",
+        "blob": "8079fc08a12d8564026a6f1df0f6260026eec559",
+        "characters": 52586
+      },
+      {
+        "path": "natural-A-5/pipeline.json",
+        "blob": "daeadd0e9c462116644edf96a5058d23d411ee9a",
+        "characters": 59609
+      },
+      {
+        "path": "natural-A-5.log",
+        "blob": "87df909489163d0b88fc22ae12e22728d3e593c7",
+        "characters": 1766
+      }
+    ],
+    "aliasReplayV2Receipt": [
+      {
+        "path": "product-verify-v2.mjs",
+        "storedPath": "product-verify-v2.mjs",
+        "bytes": 17385,
+        "sha256": "f65a1bc8d75546887e0e2fe7e900dec511aa5e87e421e8a30383571cee3fe935",
+        "storedBytes": 17385,
+        "storedSha256": "f65a1bc8d75546887e0e2fe7e900dec511aa5e87e421e8a30383571cee3fe935",
+        "blob": {
+          "sha": "345dc688ff715435a1b63c383f01692fd2191858"
+        }
+      },
+      {
+        "path": "verify-A-6-v2.json",
+        "storedPath": "verify-A-6-v2.json",
+        "bytes": 951,
+        "sha256": "f068648673d2fe2918834b9dc9abd93cd95fee2acf1bbffef1068d96c061094a",
+        "storedBytes": 951,
+        "storedSha256": "f068648673d2fe2918834b9dc9abd93cd95fee2acf1bbffef1068d96c061094a",
+        "blob": {
+          "sha": "1fab0b5e9c1abbfd493d3a2d9f98d0bea61afe71"
+        }
+      },
+      {
+        "path": "verify-B-6-v2.json",
+        "storedPath": "verify-B-6-v2.json",
+        "bytes": 947,
+        "sha256": "5e4e972f97b262c124190ad09e0c9c80bf9fbf82fecf8c38caba9c12223f1914",
+        "storedBytes": 947,
+        "storedSha256": "5e4e972f97b262c124190ad09e0c9c80bf9fbf82fecf8c38caba9c12223f1914",
+        "blob": {
+          "sha": "5fc39ff7a5fc93e3b46ac464562327edc7c35b85"
+        }
+      },
+      {
+        "path": "compare-6-v2.json",
+        "storedPath": "compare-6-v2.json",
+        "bytes": 493,
+        "sha256": "109e1f3fee6baf35b1cfb8c3a31fbfc7b31cf5b6ed3814eea32a1127e0c9b601",
+        "storedBytes": 493,
+        "storedSha256": "109e1f3fee6baf35b1cfb8c3a31fbfc7b31cf5b6ed3814eea32a1127e0c9b601",
+        "blob": {
+          "sha": "01d8a0b14be39bd557aa4d1e59aa8cdb401ee4e2"
+        }
+      },
+      {
+        "path": "natural-A-6/pipeline.json",
+        "storedPath": "natural-A-6/pipeline.json.gz",
+        "bytes": 956767,
+        "sha256": "4571a33abcf884341389e39d87e123a3a5de6b769045a55d158e72044c4cd321",
+        "storedBytes": 141649,
+        "storedSha256": "1004ab908b381a828175ccad8f894636778e2afaa9e8ce345c7537c4fd4a689b",
+        "blob": {
+          "sha": "e186da3f97c6363931fbe9ddec547a34e1cd76eb"
+        }
+      },
+      {
+        "path": "natural-A-6/verification.json",
+        "storedPath": "natural-A-6/verification.json.gz",
+        "bytes": 87322,
+        "sha256": "c8184493289ba69fb7193e96b54bb7d7fdce50e2fc2b23353ed08fb04a3bb7d4",
+        "storedBytes": 10040,
+        "storedSha256": "bb6cc833923b051fbce609e73c706cdace4c8db0a80d6c97d18e74d2141caeb5",
+        "blob": {
+          "sha": "63a8bbf24c1e5e9ddb75df7a23a0cb1dbf7933ec"
+        }
+      },
+      {
+        "path": "verify-A-6.log",
+        "storedPath": "verify-A-6.log",
+        "bytes": 415,
+        "sha256": "89ab2f3a654e29415874129dd82857bcaf56a479413864c78ec462ebd1529be7",
+        "storedBytes": 415,
+        "storedSha256": "89ab2f3a654e29415874129dd82857bcaf56a479413864c78ec462ebd1529be7",
+        "blob": {
+          "sha": "f1ce98ce092a74907dd60e4431f82da0064558e6"
+        }
+      }
+    ],
+    "aliasReplayA6VerificationReceipt": [
+      {
+        "path": "natural-A-6/verification-v2.json",
+        "bytes": 114112,
+        "sha256": "3b7cef17e4603172ef10bbeafddb4a3c6f150a997119caf40bfb36b6b1f6377a",
+        "storedBytes": 18378,
+        "storedSha256": "64efd018a8b2c4d6922ffab379d35791a08832f538e79c7334a09cfaad47c3f2",
+        "gzip": true,
+        "blob": {
+          "sha": "877bdec05f541a4163270f8739294cf9355dbef1"
+        }
+      },
+      {
+        "path": "verify-A-6-v2.log",
+        "bytes": 1006,
+        "sha256": "ade965a5a7d69f8ce4d88b8aa376f51b8f3dd38de48e1f029e37522ba69318c5",
+        "storedBytes": 1006,
+        "storedSha256": "ade965a5a7d69f8ce4d88b8aa376f51b8f3dd38de48e1f029e37522ba69318c5",
+        "gzip": false,
+        "blob": {
+          "sha": "7abd13219b9e0d867e8f2448273ab40882ba9616"
+        }
+      },
+      {
+        "path": "natural-A-6.log",
+        "bytes": 17205,
+        "sha256": "0e254d9dece9449231e45e783c214937af4f24d71d2104680aa5612f78d91e5d",
+        "storedBytes": 17205,
+        "storedSha256": "0e254d9dece9449231e45e783c214937af4f24d71d2104680aa5612f78d91e5d",
+        "gzip": false,
+        "blob": {
+          "sha": "349c0fd3d18e05885ebb49e53258dd271c8d9ec2"
+        }
+      }
+    ],
+    "aliasReplayB6FailureReceipts": [
+      {
+        "path": "natural-B-6/pipeline.json",
+        "bytes": 204128,
+        "sha256": "e6acc3c75709883c07a13f68f0d47376d6eeba5cae7aedcf26c44c884a4fd9ae",
+        "storedBytes": 43283,
+        "storedSha256": "63e398bf1f90eeb8828cbfabc653d18913a14831ee89054df40c110d63e0859c",
+        "gzip": true,
+        "blob": {
+          "sha": "51123410207bb90f406d503b95fd1ffed0f1fb3d"
+        }
+      },
+      {
+        "path": "natural-B-6/process-failure.json",
+        "bytes": 2388,
+        "sha256": "3a18dd10d25634cd27055b23b5ca92112805d2ee58c8f0bc14f12416021c8930",
+        "storedBytes": 2388,
+        "storedSha256": "3a18dd10d25634cd27055b23b5ca92112805d2ee58c8f0bc14f12416021c8930",
+        "gzip": false,
+        "blob": {
+          "sha": "acceae4bfc42956a9ac1f90b5704e022bc606870"
+        }
+      },
+      {
+        "path": "natural-B-6.log",
+        "bytes": 2428,
+        "sha256": "2ae4eaffad81d02f61f72521a91073551d7e11d0c705217904abf2dff02fe787",
+        "storedBytes": 2428,
+        "storedSha256": "2ae4eaffad81d02f61f72521a91073551d7e11d0c705217904abf2dff02fe787",
+        "gzip": false,
+        "blob": {
+          "sha": "8b0dacd51e2f2914fc6fca898a9b678e7ab5ed1f"
+        }
+      }
+    ],
+    "aliasReplayB7ProspectiveReceipt": [
+      {
+        "path": "natural-A-6/record-archive-receipt.json",
+        "bytes": 1582,
+        "sha256": "f976672c83e346231b42b873d7a530ab8936146921f9a05af73e802184e20f8a",
+        "blob": {
+          "sha": "27923107a6e014ee37ee9dfb8f826e61e53a529b"
+        }
+      },
+      {
+        "path": "B7-resource-plan.json",
+        "bytes": 1013,
+        "sha256": "4d93e0eab5eb284f908bfd4737ba97dc9b0e8c3db90d4bc7be67ff0c1eda37a4",
+        "blob": {
+          "sha": "5625845c91d1fdf551502cae844788fafbaecc12"
+        }
+      },
+      {
+        "path": "config-B-7.json",
+        "bytes": 52812,
+        "sha256": "1fdc63ed6a547e3649825dc69d79aa817294f9d0d70d40106b1a4b312c39df9c",
+        "blob": {
+          "sha": "44db7895ab64979f91497791810464cb9e91876d"
+        }
+      },
+      {
+        "path": "verify-B-7-v2.json",
+        "bytes": 947,
+        "sha256": "36fdb806f765f96c53eddcd770717d55e0b3aee064b7f1a3dd635c8fa2896176",
+        "blob": {
+          "sha": "9d0839638d39ef80e86a570e7d135a76144b7c29"
+        }
+      },
+      {
+        "path": "compare-A6-B7-v2.json",
+        "bytes": 497,
+        "sha256": "6b9f72666bc312af24e324cc1fefbdc4952b689410f8549b461f35b1b7578dad",
+        "blob": {
+          "sha": "12bcddd273f5cd00acccd52fdd6e2358de5b6789"
+        }
+      }
+    ],
+    "aliasReplayFinalProofReceipt": [
+      {
+        "path": "natural-B-7/pipeline.json",
+        "bytes": 976566,
+        "sha256": "c5a49eac7551f74415d2d48a8c2c54dc582b715819c4ee84f376eaf8b158536e",
+        "storedBytes": 142157,
+        "storedSha256": "c347ca3481cc3e38339fdd2a8ac46def28ddb8e1f505952365153c5364cce5c3",
+        "gzip": true,
+        "blob": {
+          "sha": "d27b582a7b60909fe99ff835ede01679fdac87d8"
+        }
+      },
+      {
+        "path": "natural-B-7/verification-v2.json",
+        "bytes": 107913,
+        "sha256": "6a9842f3bb21d570a51cdb6d5922e15b693ada1bfe1ffa6bf0ae4321dcaabb70",
+        "storedBytes": 17647,
+        "storedSha256": "3934222b1ff44758e5080dd5d1bfd621287577ed6144dd2ab42965a9b288e4b3",
+        "gzip": true,
+        "blob": {
+          "sha": "0137b334c0d7c0f4fcc51e9612bafac2afe56b06"
+        }
+      },
+      {
+        "path": "natural-B-7.log",
+        "bytes": 17037,
+        "sha256": "87c80801a4f328ee871ff9e2db8a223b900664bca3abe4bb55202c1bcb496a09",
+        "storedBytes": 17037,
+        "storedSha256": "87c80801a4f328ee871ff9e2db8a223b900664bca3abe4bb55202c1bcb496a09",
+        "gzip": false,
+        "blob": {
+          "sha": "5a0e9e827e8b9b739a70bf3980a8b79f70204194"
+        }
+      },
+      {
+        "path": "verify-B-7-v2.log",
+        "bytes": 1007,
+        "sha256": "995194c1b477482a1a3fa834429456c575b3057e07fd8c8a7de94cf89f007dc5",
+        "storedBytes": 1007,
+        "storedSha256": "995194c1b477482a1a3fa834429456c575b3057e07fd8c8a7de94cf89f007dc5",
+        "gzip": false,
+        "blob": {
+          "sha": "836414d89b5e2e35c5f77d9b0d80b6f37d33eee5"
+        }
+      },
+      {
+        "path": "comparison-A6-B7-v2.json",
+        "bytes": 41340,
+        "sha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+        "storedBytes": 41340,
+        "storedSha256": "4071c8fbb28548263311334ba257695aa42d8058b9468bc83415d37e4d843964",
+        "gzip": false,
+        "blob": {
+          "sha": "43c25201ae2953b519e6b215f98e5568f7cf3b6a"
+        }
+      },
+      {
+        "path": "compare-A6-B7-v2.log",
+        "bytes": 2678,
+        "sha256": "45b9d50ffd5e183557406dff0db2d2025bf6618fa1ec77b688f829cb471176a1",
+        "storedBytes": 2678,
+        "storedSha256": "45b9d50ffd5e183557406dff0db2d2025bf6618fa1ec77b688f829cb471176a1",
+        "gzip": false,
+        "blob": {
+          "sha": "fa481e83242c1b209f373673ce822dcc9488ca14"
+        }
+      }
+    ]
+  },
+  "historicalSetupFailureA3": {
+    "reportBlob": "bbcf80d9f80bf3c44db5592015ef34c19ce583c3",
+    "logBlob": "5ccb67bce621dca3775fbd4f42c1bcad06f7b615"
+  },
+  "recordFilePreservation": {
+    "baselineFourRecordFiles": "Losslessly retained locally in natural-A-6/preserved-record-files.tar.gz (134804146B SHA3e1d7324f132b1882b8822bbf2bd0ca12b54d64971e204b405cc882ae65f21d3); no claim this 134MB archive was uploaded as a Git blob.",
+    "candidate": "Complete natural-B-7/opfs files and canonical metadata retained locally. Per-file hashes in full verified receipts.",
+    "failedB6": "All partial files retained locally; file sizes/hashes in external-kill receipt.",
+    "durableScope": "All listed JSON reports/logs/source/configs are exact immutable Git blobs. gzip blobs decompress to reported original byte counts/SHA256. Physical binary trees remain local and reproducible from pinned corpus/source; hosted full exports are required."
+  }
+}

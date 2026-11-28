@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "complete": false,
+  "outcome": "external-process-exit-137",
+  "attempt": "B6",
+  "timeUtc": "2026-11-28T08:41:36.232655+00:00",
+  "command": "node --expose-gc product-arm.mjs config-B-6.json > natural-B-6.log 2>&1",
+  "execSession": 21961,
+  "exitCode": 137,
+  "javascriptFailureReceipt": [],
+  "completedGroups": 28,
+  "completedRows": 1120000,
+  "lastGroup": 27,
+  "lastReportedGroupRss": 719785984,
+  "peakRssUnknown": true,
+  "cleanupObserved": false,
+  "performanceConclusion": null,
+  "reason": "Process was externally killed. Cause is unproven; no cgroup counters exposed. Subsequent host MemAvailable2636508KiB, Shmem6513176KiB. No unchanged retry. Partial outputs are retained.",
+  "sourceBinding": {
+    "planSha256": "4a590be7c909a6c2da3d5fa38d5b990585fd6ba7f304a6cc823f9e82f302fac7",
+    "pipelineReportSha256": "e6acc3c75709883c07a13f68f0d47376d6eeba5cae7aedcf26c44c884a4fd9ae"
+  },
+  "files": [
+    {
+      "path": "natural-B-6/opfs/manabitan-term-content.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "natural-B-6/opfs/manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "natural-B-6/opfs/manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+      "bytes": 66356292,
+      "sha256": "574ebe7a9a92b1c750f7d2c4a369078a2bd58e499f0ec84407cbf805a8c4e29f"
+    },
+    {
+      "path": "natural-B-6/opfs/manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "natural-B-6/opfs/manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+      "bytes": 2374576,
+      "sha256": "4396f670c03db5f06d84193476559b2a2c8efc3cb87dcfd3d03d1ad1f67892e3"
+    },
+    {
+      "path": "natural-B-6/opfs.staging/5c63e367-163a-43df-a856-37cc89b53ac8.write",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "natural-B-6/pipeline.json",
+      "bytes": 204128,
+      "sha256": "e6acc3c75709883c07a13f68f0d47376d6eeba5cae7aedcf26c44c884a4fd9ae"
+    }
+  ]
+}

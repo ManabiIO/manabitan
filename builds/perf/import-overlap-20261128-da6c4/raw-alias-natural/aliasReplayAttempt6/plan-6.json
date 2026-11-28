@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "mode": "full-native-term-storage-diagnostic",
+  "timingClaim": false,
+  "sourceManifestSha256": "df0bba78956b41c2949c5b6baa95853c60ec55c10aa9ea2ff3e2ccbcc3a7862e",
+  "nativeFixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true
+  },
+  "historicalOracle": {
+    "source": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "scope": "Prior group geometry/content input bytes and canonical counts only. Current native source/assets are freshly bound independently; no historical timing or source equivalence claim."
+  },
+  "baselineCommit": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "candidateRemoteEquivalent": {
+    "commit": "2c02336b135ee01661ca2a788395afec75e66712",
+    "tree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505"
+  },
+  "localCandidateHead": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "localCandidateTreeIncludingWorkingChanges": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "localCandidateStatus": "M eslint.config.js\n M ext/js/dictionary/dictionary-database.js\n M ext/js/dictionary/dictionary-importer.js\n M ext/js/dictionary/term-bank-wasm-parser.js\n M ext/js/dictionary/term-content-block-store.js\n M ext/js/dictionary/term-import-metrics.js\n M test/term-bank-wasm-parser.test.js\n?? ext/js/dictionary/native-term-record-alias.js\n?? ext/js/dictionary/native-term-record-ownership.js\n?? test/dictionary-native-record-alias-lifecycle.test.js\n?? test/native-term-record-alias.test.js\n?? test/native-term-record-ownership.test.js\n?? test/util/native-term-record-fixture.js",
+  "changedRuntime": [
+    "ext/js/dictionary/dictionary-database.js",
+    "ext/js/dictionary/dictionary-importer.js",
+    "ext/js/dictionary/native-term-record-alias.js",
+    "ext/js/dictionary/native-term-record-ownership.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-content-block-store.js",
+    "ext/js/dictionary/term-import-metrics.js"
+  ],
+  "harnessHashes": {
+    "product-common.mjs": "350ed8ef03a560c9b20943556c18360a1a02e600dd20435ecce08da55f6376be",
+    "product-arm.mjs": "6ef6c891337de6852001f345244aa8df5f8f2c8e7aa6004e72c8c9e30133fd94",
+    "product-worker-adapter.mjs": "ced16fa521b212e3579b149bb0b7302ae884049810cf3861c8abf517b6f9a7b0",
+    "product-worker-bridge.mjs": "79f6a29160c007d1ba0fe2d48c5d1a0dffadc32e41aa916c7e9a986000b2257d",
+    "product-verify.mjs": "25acce7179e2875f1095bcfa4998c50dc697a3654636f2ff2a04dbdf5a9d9c3b",
+    "product-compare.mjs": "1d1c6d871e98e933f666250e0fb299e7b635f8b9c6efee35dbb2b2fb4f8ebd8c",
+    "prepare-bindings.py": "02c175653130aa461ec13fa868a19f70390699e24589a3f06279766de58718e8",
+    "archived/raw-alias-node-opfs.mjs": "6591a3b882169007f7825a7e242a3264c87fac75c278bbf80e2920b073c6f92b",
+    "archived/raw-alias-node-opfs.test.mjs": "e44f28a23fe218d44e5975a596bab8fe7dde3aec9f15734d59b2e2ca02f48e39"
+  },
+  "node": "v24.22.3",
+  "sequence": [
+    "A full170-group pipeline",
+    "A full persisted verification",
+    "B full170-group pipeline",
+    "B full persisted verification",
+    "cross-arm canonical/relocation proof"
+  ],
+  "failurePolicy": "Stop on every failure, retain all files/receipts. A new source-bound attempt requires an identified repair, never repeat an unchanged cohort.",
+  "scope": "Native term-storage component only. Real private receiver and importer callback, canonical dedup and actual codecs/records/files. Explicit component lifecycle entry-state instead of SQLite; no media writes or browser timing. Separate verification reads every row/definition and reopens actual runtime readers."
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-alias-browser-proof-helper-handoff",
+  "createdAt": "2026-11-28 08:51:22 UTC",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "candidate": "2c02336b135ee01661ca2a788395afec75e66712",
+  "candidateTree": "17995fab3d9e2fd226f0cc37d306f5dfc7e39505",
+  "protocolBlob": "7801b5fd696fffe4f250b98a19d6d80406518705",
+  "files": [
+    {
+      "path": "browser-layout-export.mjs",
+      "bytes": 21138,
+      "sha256": "300bfdf6f0dddb9cd545b5c2b6aee779480a352b4f2369e2666193966a6fc022",
+      "blob": "a8c87feab51f4cf333cdecdb024aa2d742ba0e58"
+    },
+    {
+      "path": "test-browser-layout-export.mjs",
+      "bytes": 13143,
+      "sha256": "64d61a1d6de5c2a34e00af32c5411faf41455215dd12acb5163aba41b51192b4",
+      "blob": "39652928ea834a11ed6f5325d92361a12bf9e2b2"
+    },
+    {
+      "path": "receipt_adapter.py",
+      "bytes": 16156,
+      "sha256": "00436c3a81419c2af64d4ae0ca026889f2a9caaa7a60fe228008961bc2c1cdea",
+      "blob": "4806fce39e3da82d53efa94d84f62c30912b6801"
+    },
+    {
+      "path": "test_receipt_adapter.py",
+      "bytes": 16195,
+      "sha256": "2103e4cc147f6d70e4ac5954f2bdaf3f46b43e8cc47124049c011a62a8eb6fd6",
+      "blob": "7568c5bfd7612d19c20ec2598f9948bbf6f99c06"
+    },
+    {
+      "path": "harness_overlay.py",
+      "bytes": 2444,
+      "sha256": "e98b5d457dff320fecb5ed4a8df8bd5419ff18eab1ce676b797c408d02d418f0",
+      "blob": "6fc4231407c58d28021aefce47476e9b678feb45"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9780,
+      "sha256": "b3131569c50a18f178924c47fcb85d1e985fb0c26442986c8fc7f7e504991aa6",
+      "blob": "91a3d86f0fb8d7981c6e575cd01b956b954de712"
+    },
+    {
+      "path": "exporter-unit.log",
+      "bytes": 2699,
+      "sha256": "e48eb40f01ff52c2de417b519525c788a1dcb449ae8e6eb63fd6b0ffd927db40",
+      "blob": "2bdb761e507b28f648902a58b27543981ef29ae8"
+    },
+    {
+      "path": "adapter-unit.log",
+      "bytes": 2385,
+      "sha256": "c3b3ae6b6dce6aa8042c67f9eebf6730a781e2f80bb802df4a2808e5e64116a7",
+      "blob": "278aac838f84e9fbc4931a13f3cc64530fea1175"
+    },
+    {
+      "path": "adapter-unit-attempt-1.log",
+      "bytes": 3961,
+      "sha256": "4de371a90bf914b2866923d7906504e2b124bc2a09137cfee54979fdf0e6b827",
+      "blob": "de52ac4e77a097c284ec5c788556e32e92cfe187"
+    }
+  ],
+  "testedStockSource": {
+    "base": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "checkedByteForByteAgainstGit": true,
+    "files": [
+      {
+        "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+        "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+        "sha256": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51"
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+        "sha256": "381b0a66ad64b7464c573e350fe740c23b2d64ec5e0be3cbe5acb0d34ae7d98d"
+      }
+    ]
+  },
+  "validation": {
+    "node": {
+      "cases": 8,
+      "passed": 8
+    },
+    "python": {
+      "cases": 13,
+      "passed": 13
+    },
+    "actualBrowserExecution": false,
+    "corpusTiming": false,
+    "nativeParserExecution": false
+  },
+  "sourceReview": {
+    "baselineProfile": "Read-only bounded-range/header/linkage/identity-gated projection review found no concrete success-path blocker; full integration still required.",
+    "criticalPath": "Requested; independent review pending when this handoff was written."
+  },
+  "exactPolicy": {
+    "chunkBytes": 262144,
+    "normalization": [
+      ".mbtr header[8,24)",
+      ".mbtr.mbti header[24,40)"
+    ],
+    "requiresValidatedHeaderLinkage": true,
+    "rawHashesRetained": true,
+    "ordinaryMode": "hash-only",
+    "preflightMode": "export",
+    "sameOverlayAllArms": true,
+    "hookAfterOriginalTimedEndpoint": true,
+    "stockValidatorUnchanged": true,
+    "overlaySourceDirty": true,
+    "activationSource": "raw term-file-fast-path phase details",
+    "candidateVndbAliases": 8,
+    "candidateVndbAliasInputBytes": 2983,
+    "genericAndOtherDictionaryAliases": 0
+  },
+  "orchestrationOwner": "/root/baseline_profile",
+  "refsOwner": "/root",
+  "currentNaturalProof": {
+    "status": "Passed according to separate complete source-bound A6/B7 proof; not a browser proof.",
+    "handoffBlob": "72fe7c8aa5d93d0e60d7690ff88e3960bafb8623",
+    "coreBlob": "008adf754595f36087bad627099208ca241d0773"
+  },
+  "pending": [
+    "Full actual A/B browser export preflight plus complete row/definition/native lookup/canonical/alias/media comparison against the natural proof",
+    "Freeze hosted runtime/package/fixture/workflow/orchestrator/helper/witness identities before any ordinary observation",
+    "Prospective balanced full-browser cohort and memory gates; no performance conclusion yet"
+  ]
+}

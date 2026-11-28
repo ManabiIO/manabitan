@@ -1,0 +1,14 @@
+{
+  "root": "/home/agent/manabitan-da6c4dbd0097/raw-alias-product",
+  "pipelineReport": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-6/pipeline.json",
+  "opfsDirectory": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-6/opfs",
+  "reportPath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-6/verification-v2.json",
+  "verifierSourceSha256": "f65a1bc8d75546887e0e2fe7e900dec511aa5e87e421e8a30383571cee3fe935",
+  "priorVerifierFailure": {
+    "arm": "A",
+    "sourceSha256": "25acce7179e2875f1095bcfa4998c50dc697a3654636f2ff2a04dbdf5a9d9c3b",
+    "report": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-A-6/verification.json",
+    "reportSha256": "c8184493289ba69fb7193e96b54bb7d7fdce50e2fc2b23353ed08fb04a3bb7d4",
+    "reason": "Fresh verifier omitted codec initialization; first 40000 raw rows passed and first compressed definition failed. No pipeline rerun."
+  }
+}

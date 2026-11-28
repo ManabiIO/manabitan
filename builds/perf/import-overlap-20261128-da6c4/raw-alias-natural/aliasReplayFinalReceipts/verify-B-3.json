@@ -1,0 +1,6 @@
+{
+  "root": "/home/agent/manabitan-da6c4dbd0097/raw-alias-product",
+  "pipelineReport": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-3/pipeline.json",
+  "opfsDirectory": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-3/opfs",
+  "reportPath": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-B-3/verification.json"
+}

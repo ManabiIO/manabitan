@@ -1,0 +1,17 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+Error [TypeError]: Cannot read properties of null (reading '0')
+    at store.appendBatchFromArtifactChunkResolvedContent (file:///home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-arm.mjs:159:124)
+    at DictionaryDatabase._appendResolvedArtifactTermRecords (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/dictionary-database.js:10132:53)
+    at db._appendResolvedArtifactTermRecords (file:///home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-arm.mjs:119:41)
+    at DictionaryDatabase._bulkAddArtifactTermsChunkWithContentDedup (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/dictionary-database.js:8658:28)
+    at async DictionaryDatabase.bulkAddArtifactTermsChunk (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/dictionary-database.js:5095:17)
+    at async file:///home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-arm.mjs:206:35
+    at async ParallelTermBankPipelineRun.handleParsedChunk [as _onChunk] (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/dictionary-importer.js:5238:21)
+    at async ParallelTermBankPipelineRun._runPipeline (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/term-bank-wasm-parser.js:3018:25)
+    at async ParallelTermBankPipelineRun.run (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/term-bank-wasm-parser.js:2953:13)
+    at async parseTermBankWithWasmColumnChunksParallelSources (file:///home/agent/manabitan-da6c4dbd0097/current-baseline-dcfc/ext/js/dictionary/term-bank-wasm-parser.js:3406:12)
+
+Node.js v24.22.3

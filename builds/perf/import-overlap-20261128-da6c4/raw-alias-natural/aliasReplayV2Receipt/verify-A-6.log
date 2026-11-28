@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'corrupt' !== 'ok'
+
+    at file:///home/agent/manabitan-da6c4dbd0097/alias-product-replay/product-verify.mjs:154:55 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'corrupt',
+  expected: 'ok',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.3

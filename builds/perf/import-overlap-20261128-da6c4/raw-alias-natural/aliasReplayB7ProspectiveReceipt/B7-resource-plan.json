@@ -1,0 +1,19 @@
+{
+  "kind": "single-new-attempt-after-lossless-completed-evidence-compaction",
+  "attempt": "B7",
+  "priorAttempt": "B6",
+  "priorExitCode": 137,
+  "notAnUnchangedEnvironmentRetry": true,
+  "sourceAndAcquisitionHarnessUnchanged": true,
+  "productAndParserParametersUnchanged": true,
+  "onlyAcquisitionConfigChange": "fresh outputDirectory and attemptMetadata, same plan-6 and source/harness hashes",
+  "archiveReceipt": "/home/agent/manabitan-da6c4dbd0097/alias-product-replay/natural-A-6/record-archive-receipt.json",
+  "archiveReceiptSha256": "f976672c83e346231b42b873d7a530ab8936146921f9a05af73e802184e20f8a",
+  "releasedTmpfsBytes": 267095750,
+  "memAvailableBytesBefore": 3573882880,
+  "freeOutputBytesBefore": 1776504832,
+  "requireMemAvailableBytes": 2147483648,
+  "requireFreeOutputBytes": 576716800,
+  "maximumFurtherLocalAttempts": 1,
+  "failurePolicy": "Any new process kill or incomplete result stops local acquisition; preserve receipt and move correctness to hosted runner. No timing conclusion."
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "scope": "Test-only repair of stale shared-batch worker assumptions; no production source changes or performance result",
+  "repairedTestBlob": "2271f2744adda13d0e902281aadbae80c2f2dd3d",
+  "originalHostedFailure": {
+    "run": 46121740432,
+    "job": 140907547397,
+    "head": "c4330b235eaa31a62c48837578f230038dc48226",
+    "logBlob": "7a7daec74adfce8e909dd909b583299f9f52bb1a"
+  },
+  "receipt": {
+    "sourceCandidate": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+    "runtimePoolGitBlob": "1310d598e4e230eed12c415eb4fbf9be60c8c5a4",
+    "originalTestGitBlob": "d8c0c5d06ce963f3e8557276efa1736848e18ae0",
+    "localTreeScope": "Isolated dcfc02 checkout overlaid with the exact current-candidate pool and overlap test; this is pool-focused verification, not a complete candidate checkout or a browser qualification. Runtime pool unchanged during all three tests.",
+    "node": "v24.22.3",
+    "files": {
+      "ext/js/dictionary/zstd-term-content.js": {
+        "gitBlob": "1310d598e4e230eed12c415eb4fbf9be60c8c5a4",
+        "sha256": "4454ba014404a67a4e8c833538792131f18e5c27dd619678f98749a9191384d8",
+        "bytes": 42332
+      },
+      "test/zstd-term-content-initialization.test.js": {
+        "gitBlob": "2271f2744adda13d0e902281aadbae80c2f2dd3d",
+        "sha256": "af52bd08e04b6de29a2759ad3d9cd7c43c0f896622d321887d0699450d7e761b",
+        "bytes": 17873
+      },
+      "test/zstd-term-content-overlap.test.js": {
+        "gitBlob": "b152488474601d4a1ee2156803635cfbe3e22a6c",
+        "sha256": "60a6e1fe5b535c76eb0dccbf57281f13e18e875ac112e0e4330468169774decc",
+        "bytes": 7478
+      }
+    },
+    "logs": {
+      "rotation-test-repair-before.log": {
+        "sha256": "7985741e3f1ec7df0f0070100535692764df30044cf2916bb7681325935a609c",
+        "bytes": 1194
+      },
+      "rotation-test-repair-focused.log": {
+        "sha256": "4540790485f59a91c957cc3e554411daf0e4168776e3f9edbe2e1b1372128fb2",
+        "bytes": 243
+      },
+      "rotation-test-repair-lint.log": {
+        "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+        "bytes": 694
+      },
+      "rotation-test-repair-cleanup-diagnostic.log": {
+        "sha256": "08db1cfafca81315cc80304eae06ade6921556712522e7e59f623420bebbda3c",
+        "bytes": 1267
+      }
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run test/zstd-term-content-initialization.test.js --maxWorkers=1 -t 'late failed spans batch'",
+        "stage": "unchanged source",
+        "log": "rotation-test-repair-before.log",
+        "exit": 1,
+        "result": "Exact 5000ms timeout reproduced; one failed case",
+        "startChunk": "0b4934",
+        "endChunk": "6bbf1d"
+      },
+      {
+        "command": "node node_modules/vitest/vitest.mjs run test/zstd-term-content-initialization.test.js --maxWorkers=1 -t 'late failed spans batch'",
+        "stage": "cleanup guard only; stale expectation unchanged",
+        "log": "rotation-test-repair-cleanup-diagnostic.log",
+        "exit": 1,
+        "result": "Failed in74ms with actual call count1 vs expected2; cleanup completed instead of spawning an unjoined replacement",
+        "chunk": "f48910"
+      },
+      {
+        "command": "node node_modules/vitest/vitest.mjs run test/zstd-term-content-initialization.test.js test/zstd-term-content-overlap.test.js test/zstd-term-content-pool.test.js test/zstd-term-content-pool-drain.test.js test/zstd-term-content-startup-overlap.test.js --maxWorkers=1",
+        "stage": "final repair",
+        "log": "rotation-test-repair-focused.log",
+        "exit": 0,
+        "result": "38 tests /5 files passed",
+        "startChunk": "cfedaf",
+        "endChunk": "e1fb69"
+      },
+      {
+        "command": "node node_modules/eslint/bin/eslint.js test/zstd-term-content-initialization.test.js",
+        "stage": "final repair",
+        "log": "rotation-test-repair-lint.log",
+        "exit": 0,
+        "startChunk": "ff8156",
+        "endChunk": "8351f4"
+      }
+    ],
+    "audit": {
+      "conclusion": "Only startup-recovery fixture assumed each adjacent shared batch restarted at worker0. No runtime repair required.",
+      "reviewed": [
+        "test/zstd-term-content-initialization.test.js",
+        "test/zstd-term-content-overlap.test.js",
+        "test/zstd-term-content-pool.test.js",
+        "test/zstd-term-content-pool-drain.test.js",
+        "test/zstd-term-content-block-plan.test.js",
+        "test/zstd-term-content-packed-dispatch.test.js",
+        "test/zstd-term-content-startup-overlap.test.js",
+        "test/zstd-compression-worker-context.test.js",
+        "test/zstd-generic-decoder-context.test.js",
+        "test/zstd-term-content-single-block-rejection.test.js",
+        "test/term-content-block-store.test.js"
+      ],
+      "otherContexts": "Single/fresh pools, one-worker plans, automatic responses, unaffected private packed dispatch, or mocked shared APIs. New overlap suite intentionally tests rotation, ordering, envelope assignment, validation and terminal close/drain."
+    }
+  },
+  "diff": "diff --git a/test/zstd-term-content-initialization.test.js b/test/zstd-term-content-initialization.test.js\nindex d8c0c5d..2271f27 100644\n--- a/test/zstd-term-content-initialization.test.js\n+++ b/test/zstd-term-content-initialization.test.js\n@@ -288,13 +288,13 @@ describe('term content zstd initialization', () => {\n     test.each(['unwrapped', 'wrapped', 'spans'])('a late failed %s batch cannot clear a replacement pool startup', async (mode) => {\n         /** @type {RecoveryWorker[]} */\n         const instances = [];\n+        /** @type {Array<{worker: RecoveryWorker, id: number}>} */\n+        const dispatches = [];\n         class RecoveryWorker {\n             constructor() {\n                 this.generation = Math.floor(instances.length / 4);\n                 /** @type {Map<string, Set<(event: unknown) => void>>} */\n                 this.listeners = new Map();\n-                /** @type {Array<{id: number}>} */\n-                this.calls = [];\n                 this.terminated = false;\n                 instances.push(this);\n                 if (this.generation === 0) {\n@@ -329,7 +329,8 @@ describe('term content zstd initialization', () => {\n              * @param {Transferable[]} [transfer]\n              */\n             postMessage(message, transfer = []) {\n-                this.calls.push(structuredClone(message, {transfer}));\n+                const {id} = structuredClone(message, {transfer});\n+                dispatches.push({worker: this, id});\n                 if (this.generation > 0) {\n                     queueMicrotask(() => this.emit('message', {\n                         data: {id: message.id, compressed: Uint8Array.of(9).buffer},\n@@ -368,19 +369,26 @@ describe('term content zstd initialization', () => {\n         };\n         /** @type {Promise<unknown>[]} */\n         const pending = [];\n+        let cleaningUp = false;\n         try {\n             await initializeTermContentZstd();\n             await flush();\n             const first = begin();\n             const peer = begin();\n-            const retry = first.completion.catch(() => begin().completion);\n+            const retry = first.completion.catch((error) => {\n+                if (cleaningUp) { throw error; }\n+                return begin().completion;\n+            });\n             pending.push(first.sourceConsumed, peer.sourceConsumed, peer.completion, retry);\n             for (const promise of pending) { void promise.catch(() => {}); }\n             await flush();\n             expect(instances).toHaveLength(4);\n-            expect(instances[0].calls).toHaveLength(2);\n-            instances[0].emit('message', {data: {id: instances[0].calls[0].id, error: 'first batch failed'}});\n-            instances[1].emit('message', {data: {id: instances[1].calls[0].id, compressed: Uint8Array.of(8).buffer}});\n+            expect(dispatches).toHaveLength(4);\n+            // Target the first batch's jobs; later shared batches can start\n+            // on different workers without changing startup ownership.\n+            const [failedJob, completedJob] = dispatches;\n+            failedJob.worker.emit('message', {data: {id: failedJob.id, error: 'first batch failed'}});\n+            completedJob.worker.emit('message', {data: {id: completedJob.id, compressed: Uint8Array.of(8).buffer}});\n             await expect(peer.completion).rejects.toThrow();\n             await flush();\n             expect(instances).toHaveLength(8);\n@@ -398,11 +406,16 @@ describe('term content zstd initialization', () => {\n             await expect(retry).resolves.toMatchObject({chunks: [Uint8Array.of(9), Uint8Array.of(9)]});\n             await expect(other.completion).resolves.toMatchObject({chunks: [Uint8Array.of(9), Uint8Array.of(9)]});\n         } finally {\n+            cleaningUp = true;\n+            const workerCount = instances.length;\n             for (const worker of instances) {\n                 worker.emit('error', {message: 'test cleanup'});\n                 worker.terminate();\n             }\n             await Promise.allSettled(pending);\n+            await flush();\n+            expect(instances).toHaveLength(workerCount);\n+            expect(instances.every((worker) => worker.terminated)).toBe(true);\n         }\n     });\n });\n",
+  "logs": {
+    "rotation-test-repair-before.log": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/rotation-test-repair\n\n ❯ test/zstd-term-content-initialization.test.js (12 tests | 1 failed | 11 skipped) 5014ms\n     × a late failed spans batch cannot clear a replacement pool startup 5011ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/zstd-term-content-initialization.test.js > term content zstd initialization > a late failed spans batch cannot clear a replacement pool startup\nError: Test timed out in 5000ms.\nIf this is a long-running test, pass a timeout value as the last argument or configure it globally with \"testTimeout\".\n ❯ test/zstd-term-content-initialization.test.js:288:49\n    286|     });\n    287|\n    288|     test.each(['unwrapped', 'wrapped', 'spans'])('a late failed %s bat…\n       |                                                 ^\n    289|         /** @type {RecoveryWorker[]} */\n    290|         const instances = [];\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed (1)\n      Tests  1 failed | 11 skipped (12)\n   Start at  03:46:35\n   Duration  5.34s (transform 138ms, setup 27ms, import 66ms, tests 5.01s, environment 0ms)\n\n",
+    "rotation-test-repair-cleanup-diagnostic.log": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/rotation-test-repair\n\n ❯ test/zstd-term-content-initialization.test.js (12 tests | 1 failed | 11 skipped) 77ms\n     × a late failed spans batch cannot clear a replacement pool startup 74ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/zstd-term-content-initialization.test.js > term content zstd initialization > a late failed spans batch cannot clear a replacement pool startup\nAssertionError: expected [ { id: 1, …(7) } ] to have a length of 2 but got 1\n\n- Expected\n+ Received\n\n- 2\n+ 1\n\n ❯ test/zstd-term-content-initialization.test.js:385:40\n    383|             await flush();\n    384|             expect(instances).toHaveLength(4);\n    385|             expect(instances[0].calls).toHaveLength(2);\n       |                                        ^\n    386|             instances[0].emit('message', {data: {id: instances[0].call…\n    387|             instances[1].emit('message', {data: {id: instances[1].call…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed (1)\n      Tests  1 failed | 11 skipped (12)\n   Start at  03:47:34\n   Duration  388ms (transform 162ms, setup 27ms, import 120ms, tests 77ms, environment 0ms)\n\n",
+    "rotation-test-repair-focused.log": "\n RUN  v4.1.12 /home/agent/manabitan-da6c4dbd0097/rotation-test-repair\n\n\n Test Files  5 passed (5)\n      Tests  38 passed (38)\n   Start at  03:47:59\n   Duration  1.44s (transform 155ms, setup 62ms, import 158ms, tests 451ms, environment 0ms)\n\n",
+    "rotation-test-repair-lint.log": "▲ [WARNING] The CommonJS \"module\" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]\n\n    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:\n      2 │ ...typeof module!==\"undefined\"){module.exports=api}else if(typeof d...\n        ╵                                 ~~~~~~\n\n  This file is considered to be an ECMAScript module because the enclosing \"package.json\" file sets the type of this file to \"module\":\n\n    package.json:11:12:\n      11 │     \"type\": \"module\",\n         ╵             ~~~~~~~~\n\n  Node's package format requires that CommonJS files in a \"type\": \"module\" package use the \".cjs\" file extension.\n\n"
+  },
+  "remainingGate": "Root will run combined full test types after parser ticket fixture repair. No full candidate or browser gate claimed by this receipt."
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-28 08:49:14 UTC",
+  "study": "Current JMdict descriptor tail novelty check",
+  "status": "No prototype; related mechanisms already under qualification",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "observationScope": "Historical 9e10 single ordinary observation, diagnostic attribution only",
+  "ordinaryReceiptBlob": "eb83eefb6b0e63055e7a4e0e3abb5605e9d624fb",
+  "ordinaryMs": {
+    "recordTotal": 22.6,
+    "preparePendingWrites": 10.5,
+    "queuedWriteWait": 3.6,
+    "closeRegion": 8.4
+  },
+  "sourceFinding": "The 45-byte JMdict descriptor remains buffered until finalization. Current code serially prepares/drains it before starting descriptor close and sidecar finalization together. A potential earlier pending flush was considered, but related independently owned finalization experiments already cover removal of this serial dependency.",
+  "related": [
+    {
+      "head": "2e1621f4c4d3892723109ce3ea7e848e81affd10",
+      "branch": "perf/import-descriptor-index-finalization-20261128-6b4c",
+      "runtimeBlob": "bdc574de83d99687d75f3ad1638aee9fab2f5b56",
+      "mechanism": "For each existing shard, overlap descriptor preparation, queue drain and close with index sealing; retain bounded sequential shard pairs and complete error joins."
+    },
+    {
+      "head": "ebc56e97ecfb6543a85d6d2c61cc6568391b24f6",
+      "branch": "perf/import-finalization-overlap-20261128-0119",
+      "reportBlob": "44f7e83d13ceb4da21b03138bfd185b664e573ba",
+      "mechanism": "Same tail dependency, frozen 9e10 prototype; report says initial12-pair JMdict ABscreen/sourcevalidation published, no candidate elapsed result in report."
+    },
+    {
+      "pr": 868,
+      "head": "25b0bbfb7e08c1d680b2f47601f83a92ffec905b",
+      "run": 45458101618,
+      "scope": "Historical instrumented diagnostic. Long descriptor-close promises include synchronous local index flush delaying the same worker; they are not independent descriptor I/O durations."
+    }
+  ],
+  "decision": "Do not create a duplicate finalization candidate. Earlier flush during metadata would require a separate lifecycle owner and concrete incremental evidence; defer until current all-worker trace and existing mechanisms are resolved. No timings acquired or gate changed."
+}

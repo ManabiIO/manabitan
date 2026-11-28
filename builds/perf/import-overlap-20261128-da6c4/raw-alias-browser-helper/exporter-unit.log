@@ -1,0 +1,17 @@
+✔ original physical probe digest is retained and only two declared location fields are omitted from semantic projection (6.708768ms)
+✔ generation normalization changes exactly the16 schema bytes and validates pair linkage (61.37496ms)
+✔ normalization honors sliced chunk boundaries without changing adjacent bytes (0.890319ms)
+✔ browser range reader enforces exact sequential bounded coverage and catches short snapshots (58.578006ms)
+✔ Node range validation rejects transport corruption, noncanonical base64 and every changed coordinate (1.103662ms)
+✔ exclusive probe performs no write/flush/truncate and closes a handle when getSize fails (0.835158ms)
+✔ failed worker termination still joins the observed close before rejecting the proof (2.413911ms)
+{"kind":"native-alias-post-endpoint-layout","complete":true,"arm":"A","mode":"hash-only","dictionary":"jmdict","sourceCommit":"dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16","protocolBlob":"7801b5fd696fffe4f250b98a19d6d80406518705","physicalOutputDigestSha256":"b951c4022fa07b058e70cef1e889df7c8f6fafac7b963355f8fbfdd95ce5c7ed","semanticProbeDigestSha256":"7fda392240edff56333254fdb8dd2105ed0b6ce238611b9ffd197aab2af23b03","files":[{"path":"manabitan-term-content.bin","bytes":262161,"sha256":"b06b1e12bf8c7a4ec4c9eba955536cf0f83fe59e325945daff134b98f991e28c","normalizedSha256":"b06b1e12bf8c7a4ec4c9eba955536cf0f83fe59e325945daff134b98f991e28c","header":{"kind":"content","generationRange":null,"generationId":null},"chunks":2},{"path":"manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr","bytes":26,"sha256":"bbb7340ca839b51152f32e8008456b78e23ddd2855ecb0510523c9e7ecd1975c","normalizedSha256":"b0948463613a826ef2335756a8b68240c79809c8d20a9f9a15480745f077e6e5","header":{"kind":"descriptor","generationRange":[8,24],"generationId":"07070707070707070707070707070707"},"chunks":1},{"path":"manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti","bytes":65,"sha256":"d07e2467b06650b9b24389cf1cc2772037da7dcf71c3e97373e5599e72b6cd36","normalizedSha256":"4cef408679fa8dc359de045c9910a3994cceff2f5e2111a446916dd9aec07e96","header":{"kind":"index","generationRange":[24,40],"generationId":"07070707070707070707070707070707","descriptorBytes":26,"chunkCount":1,"rowCount":528299},"chunks":1}],"headerLinkage":{"pairs":1,"rows":528299,"normalization":"Only descriptor[8,24) and index[24,40), after magic/version/length/generation linkage validation"}}
+✔ complete hash-only helper binds all deterministic bytes and retains failed inventory receipts (56.37341ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 332.183899
