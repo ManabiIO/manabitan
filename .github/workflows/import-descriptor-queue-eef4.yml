@@ -1,0 +1,264 @@
+name: Frozen descriptor queue qualification eef4
+
+on:
+  push:
+    branches: [experiment/import-descriptor-queue-20261128-eef4]
+    # Product/evidence commits alone must not reacquire a frozen cohort.
+    paths: [.github/workflows/import-descriptor-queue-eef4.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-descriptor-queue-eef4-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+  # Replace once with the reviewed, frozen product commit before publication.
+  PERF_CANDIDATE: 88e5022923cd5f8506c6831e25bbf6649be33379
+  MANABITAN_E2E_STRICT_RUNTIME: '1'
+  MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+
+jobs:
+  validate:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Frozen candidate validation
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    env:
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_CANDIDATE }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Bind validation to the frozen candidate and unchanged harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/descriptor-queue-validation
+          [[ "$PERF_BASELINE" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$PERF_CANDIDATE"
+          git fetch --no-tags origin "$PERF_BASELINE"
+          git rev-parse HEAD HEAD^{tree} > builds/descriptor-queue-validation/source.txt
+          git diff --name-only "$PERF_BASELINE" "$PERF_CANDIDATE" > builds/descriptor-queue-validation/changed-files.txt
+          git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
+            package.json package-lock.json .github/actions/setup/action.yml \
+            test/perf/dictionaries.lock.json test/e2e test/chromium dev/perf \
+            > builds/descriptor-queue-validation/frozen-harness.diff
+      - id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned dictionary WASM toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Run every validation gate and retain individual failures
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+          import time
+
+          output = pathlib.Path('builds/descriptor-queue-validation')
+          output.mkdir(parents=True, exist_ok=True)
+          baseline = os.environ['PERF_BASELINE']
+          candidate = os.environ['PERF_CANDIDATE']
+          changed = subprocess.check_output(
+              ['git', 'diff', '--name-only', '--diff-filter=ACMR', '-z', baseline, candidate],
+          ).decode().split('\0')
+          lint_files = [name for name in changed if name.endswith(('.js', '.mjs', '.ts'))]
+          if not lint_files:
+              raise RuntimeError('No changed JavaScript/TypeScript files to lint')
+          checks = [
+              ('pinned-native-rebuild', ['npm', 'run', 'build:dictionary-wasm', '--', '--check']),
+              ('qualification-observers', ['python3', '-m', 'unittest', 'discover', '-s', 'dev/perf/import-memory-20261125-a7f7', '-p', 'test_*.py']),
+              ('types-main', ['npm', 'run', 'test:ts:main']),
+              ('types-dev', ['npm', 'run', 'test:ts:dev']),
+              ('types-test', ['npm', 'run', 'test:ts:test']),
+              ('types-bench', ['npm', 'run', 'test:ts:bench']),
+              ('unit', ['npx', 'vitest', 'run', '--maxWorkers=2']),
+              ('unit-options', ['npx', 'vitest', 'run', '--config', 'test/data/vitest.options.config.json', '--maxWorkers=2']),
+              ('test-build', ['npm', 'run', 'test:build']),
+              ('build-all', ['npm', 'run', 'build', '--', '--all']),
+          ]
+          # Candidate-local directives cover its new semicolon-free sections;
+          # preserve all normal lint rules and avoid rewriting existing code.
+          # Match the bounded per-file command used in local validation.
+          checks[2:2] = [
+              (f'scoped-lint-{index:02d}', ['node', '--max-old-space-size=1536',
+                  'node_modules/eslint/bin/eslint.js', name])
+              for index, name in enumerate(lint_files)
+          ]
+          results = []
+          for name, command in checks:
+              started = time.monotonic()
+              with (output / f'{name}.log').open('wb') as log:
+                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+              record = {'name': name, 'command': command, 'exitCode': result.returncode,
+                        'elapsedSeconds': time.monotonic() - started}
+              results.append(record)
+              (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+              print(json.dumps(record), flush=True)
+          status = subprocess.check_output(['git', 'status', '--porcelain'], text=True)
+          (output / 'source-status.txt').write_text(status)
+          if status:
+              raise RuntimeError('Validation changed tracked or unignored source files')
+          sys.exit(1 if any(record['exitCode'] != 0 for record in results) else 0)
+          PY
+      - name: Preserve all validation results and built packages
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: descriptor-queue-eef4-validation
+          path: |
+            builds/descriptor-queue-validation
+            builds/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  qualify:
+    if: github.repository == 'ManabiIO/manabitan'
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+    steps:
+      # The unchanged helper runs from the baseline tree, independently building
+      # both frozen product revisions in separate worktrees before any timing.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Freeze identities and every qualification dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/descriptor-queue-context
+          [[ "$PERF_BASELINE" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PERF_CANDIDATE" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          git fetch --no-tags origin "$PERF_CANDIDATE"
+          git rev-parse HEAD HEAD^{tree} "$PERF_CANDIDATE" "${PERF_CANDIDATE}^{tree}" > builds/descriptor-queue-context/sources.txt
+          # This also freezes Python auditors, which the helper's JS/MJS/HTML
+          # required_same expansion does not enumerate on its own.
+          git diff --exit-code "$PERF_BASELINE" "$PERF_CANDIDATE" -- \
+            package.json package-lock.json .github/actions/setup/action.yml \
+            test/perf/dictionaries.lock.json test/e2e test/chromium dev/perf \
+            > builds/descriptor-queue-context/frozen-harness.diff
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          paths = subprocess.check_output([
+              'git', 'ls-tree', '-r', '--name-only', os.environ['PERF_BASELINE'],
+              'package.json', 'package-lock.json', '.github/actions/setup/action.yml',
+              'test/perf/dictionaries.lock.json', 'test/e2e', 'test/chromium', 'dev/perf',
+          ], text=True).splitlines()
+          hashes = {name: hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() for name in paths}
+          policy = {
+              'baseline': os.environ['PERF_BASELINE'], 'candidate': os.environ['PERF_CANDIDATE'],
+              'dictionary': os.environ['PERF_DICTIONARY'], 'initialOrder': os.environ['PERF_ORDER'],
+              'pairs': 12, 'expectedParserWorkers': 3,
+              'vndbSahAllocationUnits': [37, 37] if os.environ['PERF_DICTIONARY'] == 'vndb' else None,
+              'qualificationSourcesSha256': hashes,
+          }
+          pathlib.Path('builds/descriptor-queue-context/frozen-inputs.json').write_text(json.dumps(policy, indent=2) + '\n')
+          PY
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Assert exact runtime and retain host identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v22.22.0
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {createHash} from 'node:crypto'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from 'playwright'
+          const executable = chromium.executablePath()
+          const versionOutput = execFileSync(executable, ['--version'], {encoding: 'utf8'}).trim()
+          const version = versionOutput.match(/\d+\.\d+\.\d+\.\d+/)?.[0]
+          assert.equal(version, '153.0.8010.12')
+          writeFileSync('builds/descriptor-queue-context/browser.json', JSON.stringify({
+            executable, version, versionOutput,
+            sha256: createHash('sha256').update(readFileSync(executable)).digest('hex'),
+          }, null, 2) + '\n')
+          JS
+          node dev/perf/host-environment.js > builds/descriptor-queue-context/host-before.json
+      - name: Restore pinned dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Acquire the fixed complete-import, correctness and separate memory cohorts
+        shell: bash
+        run: |
+          set -euo pipefail
+          receipt_args=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Fresh frozen-baseline receipt: one151552-byte active SAH file,
+            # exactly37 4096-byte units. Exact cross-observation bytes remain
+            # required; this is a prospectively fixed admission value.
+            receipt_args+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --expected-workers 3 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/dictionary-importer.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            "${receipt_args[@]}" \
+            --evidence builds/perf/import-descriptor-queue \
+            2>&1 | tee builds/descriptor-queue-context/qualification.log
+      - name: Preserve final host context
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p builds/descriptor-queue-context
+          node dev/perf/host-environment.js > builds/descriptor-queue-context/host-after.json
+          git status --porcelain > builds/descriptor-queue-context/source-status.txt
+      - name: Retain every prescribed observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: descriptor-queue-eef4-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: |
+            builds/perf/import-descriptor-queue
+            builds/descriptor-queue-context
+          if-no-files-found: error
+          retention-days: 30
