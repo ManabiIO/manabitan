@@ -465,6 +465,31 @@ static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t len
         crc = crc32_step16(data + offset, crc);
         offset += 16u;
     }
+    /* Use the existing slicing tables for the remainder as well. Short row
+     * gaps otherwise end with up to fifteen dependent byte-at-a-time steps. */
+    if (length - offset >= 8u) {
+        crc ^= crc32_read_u32_le(data + offset);
+        const uint32_t second = crc32_read_u32_le(data + offset + 4u);
+        crc =
+            crc32_table[7][crc & 0xffu] ^
+            crc32_table[6][(crc >> 8u) & 0xffu] ^
+            crc32_table[5][(crc >> 16u) & 0xffu] ^
+            crc32_table[4][crc >> 24u] ^
+            crc32_table[3][second & 0xffu] ^
+            crc32_table[2][(second >> 8u) & 0xffu] ^
+            crc32_table[1][(second >> 16u) & 0xffu] ^
+            crc32_table[0][second >> 24u];
+        offset += 8u;
+    }
+    if (length - offset >= 4u) {
+        crc ^= crc32_read_u32_le(data + offset);
+        crc =
+            crc32_table[3][crc & 0xffu] ^
+            crc32_table[2][(crc >> 8u) & 0xffu] ^
+            crc32_table[1][(crc >> 16u) & 0xffu] ^
+            crc32_table[0][crc >> 24u];
+        offset += 4u;
+    }
     while (offset < length) {
         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
     }
@@ -472,6 +497,13 @@ static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t len
 }
 
 #if defined(TERM_BANK_CRC_TEST)
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_update_test(uint32_t crc, uint32_t data_ptr, uint32_t length) {
+    const uint8_t* data = (const uint8_t*)(uintptr_t)data_ptr;
+    (void)crc32_bytes(data, 0u);
+    return crc32_update_gap(crc, data, length);
+}
+
 __attribute__((visibility("default")))
 uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
     Crc32Shift shift;

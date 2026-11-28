@@ -25,7 +25,7 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest'
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 import {findCompiler} from './util/wasm-compiler.js'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_update_test: (crc: number, input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number}} Exports */
 /** @type {Exports} */
 let wasm
 /** @type {string | undefined} */
@@ -51,6 +51,7 @@ beforeAll(async () => {
         '-Wl,--export=wasm_alloc',
         '-Wl,--export=inflate_and_join_term_banks',
         '-Wl,--export=term_bank_crc32_test',
+        '-Wl,--export=term_bank_crc32_update_test',
         '-Wl,--export=term_bank_crc32_combine_test',
         '-DTERM_BANK_CRC_TEST',
         '-Wl,--strip-all',
@@ -118,6 +119,36 @@ function candidateCrc(bytes, alignment = 0) {
 }
 
 describe('term bank CRC32', () => {
+    test('updates arbitrary CRC states across short gap tails and unaligned inputs', () => {
+        const bytes = randomBytes(65568, 0x8931a5e7)
+        const next = makeRandom(0x51a73b92)
+        wasm.wasm_reset_heap()
+        const pointer = writeBytes(bytes)
+        const lengths = [
+            ...Array.from({length: 129}, (_, length) => length),
+            255,
+            256,
+            257,
+            511,
+            512,
+            513,
+            1023,
+            1024,
+            1025,
+            ...Array.from({length: 32}, (_, tail) => 65520 + tail),
+        ]
+        for (const length of lengths) {
+            for (let alignment = 0; alignment < 16; ++alignment) {
+                const randomState = ((next() << 24) | (next() << 16) | (next() << 8) | next()) >>> 0
+                const view = bytes.subarray(alignment, alignment + length)
+                for (const state of [0, 0xffffffff, randomState]) {
+                    expect(wasm.term_bank_crc32_update_test(state, pointer + alignment, length) >>> 0)
+                        .toBe(crc32(view, state))
+                }
+            }
+        }
+    })
+
     test('combines exact source spans with the independent zlib CRC', () => {
         const first = randomBytes(8192, 0x51a73b92)
         for (const length of [0, 1, 2, 3, 4, 7, 8, 15, 16, 17, 31, 32, 63, 64, 255, 256, 257, 511, 512, 1023, 1024, 65535, 65536, 1048577]) {
