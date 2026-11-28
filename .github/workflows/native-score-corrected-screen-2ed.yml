@@ -1,0 +1,74 @@
+name: Corrected native score qualification 2ed
+
+on:
+  push:
+    branches: ['perf/native-score-corrected-screen-20261128-2ed']
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Twelve paired imports (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Fetch frozen source revisions
+        run: git fetch --no-tags --depth=1 origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 13e7a7e6c1568de0af563d0577385e9ba16892c1
+      - name: Verify frozen qualification driver
+        run: |
+          sha256sum --check <<'EOF'
+          e40161963984bcf0e28c28d2930cc989345f9c239a74ed7306331c7a98a762c7  dev/perf/import-qualification-native-score-2ed.py
+          EOF
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fixed corrected-source comparison
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          extra=()
+          if [[ "$DICTIONARY" == vndb ]]; then
+            extra=(--vndb-sah-allocation-units 37 37)
+          fi
+          python3 dev/perf/import-qualification-native-score-2ed.py \
+            --baseline 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 \
+            --candidate 13e7a7e6c1568de0af563d0577385e9ba16892c1 \
+            --dictionary "$DICTIONARY" --initial-order BA --pairs 12 \
+            --expected-package-entry js/dictionary/dictionary-database.js \
+            --expected-package-entry js/dictionary/dictionary-importer.js \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser-worker.js \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --expected-package-entry js/dictionary/wasm/term-bank-parser.c \
+            --expected-package-entry lib/term-bank-parser.wasm \
+            --expected-package-entry js/dictionary/term-score-plan.js \
+            --expected-added-package-entry js/dictionary/term-score-plan.js \
+            --evidence "builds/perf/native-score-corrected-screen-$DICTIONARY" "${extra[@]}"
+      - name: Print compact result
+        if: always()
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          if [[ -f "builds/perf/native-score-corrected-screen-$DICTIONARY/analysis.json" ]]; then
+            cat "builds/perf/native-score-corrected-screen-$DICTIONARY/analysis.json"
+          fi
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: native-score-corrected-screen-2ed-${{ matrix.dictionary }}
+          path: builds/perf/native-score-corrected-screen-${{ matrix.dictionary }}
+          retention-days: 14
