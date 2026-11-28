@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "state": "registered prospective experiment; approved for publication; no diagnostic performance observations acquired",
+  "purpose": "Distinguish native stream transport overhead using actual pinned Chromium; component diagnostic only, no full-import, memory, PR or speedup qualification.",
+  "arms": {
+    "A": {
+      "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "meaning": "original WASM inflater"
+    },
+    "B": {
+      "sha": "20c8ecf87964ce2a24033474865b8241e1ec2eaa",
+      "meaning": "bounded ReadableStream.pipeThrough native transport"
+    },
+    "C": {
+      "sha": "b00df9aea6cc752aad2096bf6dc075dc8981575b",
+      "meaning": "same native guards/chunk math/error retry, direct writer transport"
+    },
+    "D": {
+      "sha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "meaning": "byte-identical independent A control"
+    }
+  },
+  "fixture": {
+    "dictionary": "jmdict",
+    "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "archiveBytes": 15645766,
+    "termBankCount": 53,
+    "rows": 528299,
+    "compressedTermSourceBytes": 15632849,
+    "rawTermSourceBytes": 171617523,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "identities": {
+    "parserWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "chromiumVersion": "153.0.8010.12",
+    "browserLock": "Source preparation checks exact playwright-core/browsers.json bytes and hash across all three real dependency directories; the actual Chromium version must match the pinned metadata.",
+    "sourceBoundary": "Only parser runtime and candidate unit tests may differ between product trees. Research harness/canary identities are recorded separately; timed workers import unmodified runtime.",
+    "runtimeSha256": {
+      "A": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca",
+      "B": "b72aa058caf868a6494dcb060457c944cff5e68fa2ee63b51710cc3976af3d5a",
+      "C": "e26709edfa46fd7b1b0702d92c993da22a25bbcad7ba5861e738ef41d405fe40",
+      "D": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    "candidateTree": "00575b15d0b5e467c10307fe0315bb45109979cc",
+    "candidateUnitSha256": "2df980f558d3531fb17a9cd7c93f56ba1a78fce74bcb63d7436ee008e3d77839",
+    "harnessSha256": "ecb786fdc056f8e215ee92fde55235c432c446cd168ebc96e58807efb5017b55",
+    "workerFunctionSha256": "b9b0645b156125598b0701841282d0dfa235bf8c6e5bbb6968fbc7bd41c6ea53",
+    "browserLockSha256": "545d52f8382c391e605562c330e9c1c534a16045898203037a49bb8bd769a946"
+  },
+  "grouping": {
+    "source": "Capture actual baseline three-worker production lazy planner in a separate untimed Chrome preflight; observe worker parse messages without altering payloads or scheduling.",
+    "hardwareConcurrency": 4,
+    "deviceMemoryGiB": 8,
+    "productionWorkers": 3,
+    "pipelineGroupsPerWorker": 4,
+    "groups": [
+      {
+        "files": [
+          "term_bank_1.json",
+          "term_bank_2.json",
+          "term_bank_3.json",
+          "term_bank_4.json",
+          "term_bank_5.json"
+        ],
+        "compressedBytes": [
+          232927,
+          201497,
+          204746,
+          200041,
+          261354
+        ],
+        "rows": 50000
+      },
+      {
+        "files": [
+          "term_bank_6.json",
+          "term_bank_7.json",
+          "term_bank_8.json",
+          "term_bank_9.json"
+        ],
+        "compressedBytes": [
+          285667,
+          290985,
+          286576,
+          290973
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_10.json",
+          "term_bank_11.json",
+          "term_bank_12.json",
+          "term_bank_13.json"
+        ],
+        "compressedBytes": [
+          285278,
+          294349,
+          288324,
+          293356
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_14.json",
+          "term_bank_15.json",
+          "term_bank_16.json",
+          "term_bank_17.json"
+        ],
+        "compressedBytes": [
+          294296,
+          249827,
+          219292,
+          259297
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_18.json",
+          "term_bank_19.json",
+          "term_bank_20.json",
+          "term_bank_21.json",
+          "term_bank_22.json"
+        ],
+        "compressedBytes": [
+          283040,
+          278583,
+          286687,
+          280559,
+          257038
+        ],
+        "rows": 50000
+      },
+      {
+        "files": [
+          "term_bank_23.json",
+          "term_bank_24.json",
+          "term_bank_25.json",
+          "term_bank_26.json",
+          "term_bank_27.json"
+        ],
+        "compressedBytes": [
+          310787,
+          308587,
+          303992,
+          333406,
+          327402
+        ],
+        "rows": 50000
+      },
+      {
+        "files": [
+          "term_bank_28.json",
+          "term_bank_29.json",
+          "term_bank_30.json",
+          "term_bank_31.json"
+        ],
+        "compressedBytes": [
+          319120,
+          293949,
+          303907,
+          268676
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_32.json",
+          "term_bank_33.json",
+          "term_bank_34.json",
+          "term_bank_35.json",
+          "term_bank_36.json"
+        ],
+        "compressedBytes": [
+          195735,
+          337549,
+          284530,
+          185671,
+          303667
+        ],
+        "rows": 50000
+      },
+      {
+        "files": [
+          "term_bank_37.json",
+          "term_bank_38.json",
+          "term_bank_39.json",
+          "term_bank_40.json"
+        ],
+        "compressedBytes": [
+          336653,
+          325795,
+          341827,
+          327365
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_41.json",
+          "term_bank_42.json",
+          "term_bank_43.json",
+          "term_bank_44.json"
+        ],
+        "compressedBytes": [
+          327770,
+          343507,
+          328238,
+          340246
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_45.json",
+          "term_bank_46.json",
+          "term_bank_47.json",
+          "term_bank_48.json"
+        ],
+        "compressedBytes": [
+          339568,
+          345914,
+          353697,
+          350718
+        ],
+        "rows": 40000
+      },
+      {
+        "files": [
+          "term_bank_49.json",
+          "term_bank_50.json",
+          "term_bank_51.json",
+          "term_bank_52.json",
+          "term_bank_53.json"
+        ],
+        "compressedBytes": [
+          343674,
+          330347,
+          337477,
+          366750,
+          291633
+        ],
+        "rows": 48299
+      }
+    ],
+    "expectedGroupCount": 12,
+    "existingReceipt": "history-native-results/private-record-validator-jmdict-parity-fe916.json",
+    "existingReceiptSha256": "ff1ddaa65122ca12232c6b90be510610bcf79af157015d0b3125604fc1cb184b",
+    "validation": "Preflight must reproduce the frozen ordered bank membership exactly, all53banks once, and528299rows. No custom partition algorithm substitutes for the production planner."
+  },
+  "correctnessPreflight": {
+    "canary": "Run the unchanged original native gzip canary SHA2566308397a9c7d7c6e05bdc8cacbb77c9b5129d87db43fcc28c56ea5b3901752e8 on A versus C under actual Chrome before timing. B already has exact-head hosted green canary; full-corpus admission is rechecked for all3.",
+    "nativeAdmission": "One complete untimed corpus pass in each of A/B/C, after one initial first-group inflate solely to initialize the real decoder and install the WASM counter. The initial group warms the native capability cache before counts reset. A must report 0 native/12 WASM calls; B/C must report 53 native/0 WASM calls. No counter wrappers exist in measured workers.",
+    "parity": "Framed logical joined source bytes and bank spans/counts/lengths; all rows score/sequence/reading relation, every row encoded content including tags/rules with length/two-hash metadata, exact relative metadata/unique-index/unique-row/unique-signature maps, logical slab ranges and flags, every record/index key/string plan and index binary/route bytes. Absolute WASM addresses and unreferenced heap bytes are excluded.",
+    "failurePolicy": "Stop on the first fixture, source, canary, admission, parity or observation error. Preserve all completed and failed records without replacement. Handled worker errors return completed passes/groups and the current partial group/stage. Persist each preflight/observation ID before launch; timeout or worker-process failure retains that active ID. Incomplete observations never enter statistics."
+  },
+  "measurement": {
+    "host": "One isolated GitHub-hosted job, no concurrent benchmark process from this workflow.",
+    "launch": "Fresh Chromium process and fresh real dedicated module worker per observation, launched serially; COOP same-origin/COEP require-corp, require crossOriginIsolated and SharedArrayBuffer/sharedWASM.",
+    "compilation": "Module fetch, WASM compile/instantiation, ZIP reads and compressed-input transfer are outside all timers.",
+    "retention": "Keep only resident compressed corpus and one decoded/source/result group. No whole decoded corpus or complete output retention.",
+    "warmupsPerObservation": 2,
+    "warmupUnit": "Two excluded complete 53-bank, 12-group passes in each measured observation worker, with the same validation and natural reference release policy as the measured pass. Untimed admission workers instead use the separately specified one-pass probe.",
+    "measuredPassesPerObservation": 1,
+    "primaryTimer": "Sum worker performance.now intervals around inflateCompressedTermBankSourcesWasm for all12groups, including complete source CRC validation and native stream completion.",
+    "secondaryTimer": "Parse and completed lookup construction timed separately after logical source hashing; report separately and as sum of measured components, never as a contiguous import time.",
+    "outsideTimers": "Source digest/spans, complete framed output projection hashing, fixture I/O, startup/compilation and result serialization. Verification is the same per-group policy for every arm; it may influence subsequent GC, which is not forcibly removed.",
+    "instrumentation": "Timed workers do not wrap DecompressionStream/WASM functions or attach inspector/tracing; activation counters belong to separate untimed preflight workers.",
+    "options": "Production JMdict semantic options/version3: validateGlossaryTypes=true; emitContentSlab, computeContentHashes, token binary content, prepared lookup and route=true; media flags=false; singleChunk=true, maxPendingChunks=1, compactContentMetadata=true. Secondary component covers parse, lookup and route construction; it excludes worker result copying, ownership transfer, compression and storage.",
+    "gcPolicy": "No forced GC, inspector or memory sampler in any timed observation. Identical per-group digest/parity work remains outside timers; release references naturally. Native allocation, reclamation and retention costs remain in the fresh-browser worker lifecycle. No separate post-pass GC probe in this fixed budget."
+  },
+  "schedule": [
+    {
+      "id": "triple-01-A",
+      "kind": "comparison",
+      "triple": 1,
+      "arm": "A"
+    },
+    {
+      "id": "triple-01-B",
+      "kind": "comparison",
+      "triple": 1,
+      "arm": "B"
+    },
+    {
+      "id": "triple-01-C",
+      "kind": "comparison",
+      "triple": 1,
+      "arm": "C"
+    },
+    {
+      "id": "triple-02-C",
+      "kind": "comparison",
+      "triple": 2,
+      "arm": "C"
+    },
+    {
+      "id": "triple-02-B",
+      "kind": "comparison",
+      "triple": 2,
+      "arm": "B"
+    },
+    {
+      "id": "triple-02-A",
+      "kind": "comparison",
+      "triple": 2,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-A",
+      "kind": "identical-control",
+      "pair": 1,
+      "arm": "A"
+    },
+    {
+      "id": "control-01-D",
+      "kind": "identical-control",
+      "pair": 1,
+      "arm": "D"
+    },
+    {
+      "id": "triple-03-B",
+      "kind": "comparison",
+      "triple": 3,
+      "arm": "B"
+    },
+    {
+      "id": "triple-03-C",
+      "kind": "comparison",
+      "triple": 3,
+      "arm": "C"
+    },
+    {
+      "id": "triple-03-A",
+      "kind": "comparison",
+      "triple": 3,
+      "arm": "A"
+    },
+    {
+      "id": "triple-04-A",
+      "kind": "comparison",
+      "triple": 4,
+      "arm": "A"
+    },
+    {
+      "id": "triple-04-C",
+      "kind": "comparison",
+      "triple": 4,
+      "arm": "C"
+    },
+    {
+      "id": "triple-04-B",
+      "kind": "comparison",
+      "triple": 4,
+      "arm": "B"
+    },
+    {
+      "id": "control-02-D",
+      "kind": "identical-control",
+      "pair": 2,
+      "arm": "D"
+    },
+    {
+      "id": "control-02-A",
+      "kind": "identical-control",
+      "pair": 2,
+      "arm": "A"
+    },
+    {
+      "id": "triple-05-C",
+      "kind": "comparison",
+      "triple": 5,
+      "arm": "C"
+    },
+    {
+      "id": "triple-05-A",
+      "kind": "comparison",
+      "triple": 5,
+      "arm": "A"
+    },
+    {
+      "id": "triple-05-B",
+      "kind": "comparison",
+      "triple": 5,
+      "arm": "B"
+    },
+    {
+      "id": "triple-06-B",
+      "kind": "comparison",
+      "triple": 6,
+      "arm": "B"
+    },
+    {
+      "id": "triple-06-A",
+      "kind": "comparison",
+      "triple": 6,
+      "arm": "A"
+    },
+    {
+      "id": "triple-06-C",
+      "kind": "comparison",
+      "triple": 6,
+      "arm": "C"
+    }
+  ],
+  "observations": 22,
+  "comparisons": [
+    "C/B primary transport comparison",
+    "C/A baseline comparison",
+    "B/A reproduction of current native mechanism",
+    "D/A identical-code controls"
+  ],
+  "statistics": "Retain every group and arm; six complete paired ratios per runtime comparison, paired median, equal-work ratio, faster count, and descriptive bootstrap of 10000 complete-pair resamples using Python random.Random(897) and sorted indices 249/9749 exactly as the existing qualification reader. Retain both identical-code controls. Never pool hosts or select/remove tails.",
+  "decision": "This can justify considering a new full-import experiment only if the mechanism improvement is clear relative to controls and correctness passes. It cannot qualify a PR, excuse the existing JMdict memory failure, or change frozen old results.",
+  "budget": {
+    "jobs": 1,
+    "measuredComponentCorpora": 22,
+    "excludedWarmupComponentCorpora": 44,
+    "optionalRepeats": 0,
+    "jobTimeoutMinutes": 30,
+    "untimedAdmissionCorpora": 3,
+    "untimedAdmissionInitializationGroups": 3,
+    "untimedProductionPlannerCorpora": 1
+  },
+  "supersedesProspectiveDraft": {
+    "path": "plan-draft-v3.json",
+    "sha256": "443cb12f0f4d1eb6c4f31056b8297f44a45701948ba5363ee9dbc34be9dfb616",
+    "reason": "Final source identities, independent projection review, complete failure retention, and one untimed admission pass per arm are registered before acquisition. The22-observation schedule and no-forced-GC policy are unchanged."
+  },
+  "rootReview": "Source guards, fixed schedule, no-forced-GC timers, correctness gates and revised partial-failure retention approved before publication.",
+  "gatePolicy": {
+    "beforeTiming": [
+      "Exact source runtime and changed-unit ESLint",
+      "Main source types",
+      "Test source types",
+      "Exactly 46 focused tests across native-inflate and source-CRC files",
+      "Unchanged original 20-case actual-Chrome integrity canary",
+      "Full-corpus source, semantic and native-admission preflight"
+    ],
+    "deferredUntilDiagnosticSupportsAdvancement": [
+      "Full unit suite",
+      "Release build validation"
+    ],
+    "failure": "Stop before timing if any gate fails; always upload source identities, plan, logs and failure evidence. This job cannot qualify a PR."
+  },
+  "revision": 4,
+  "independentReview": {
+    "agent": "history_review",
+    "scope": "Exact worker projection and source/metadata/lookup lifetimes; real baseline WASM Node projection smoke only. All embedded timings discarded. No browser, native-path activation or performance evidence.",
+    "harnessSha256": "ecb786fdc056f8e215ee92fde55235c432c446cd168ebc96e58807efb5017b55",
+    "workerFunctionSha256": "b9b0645b156125598b0701841282d0dfa235bf8c6e5bbb6968fbc7bd41c6ea53",
+    "staticConclusion": "No remaining material blocker; unique signatures and logical range/metadata omissions were corrected before acquisition.",
+    "receipts": {
+      "first-group": {
+        "path": "profile-evidence/native-writer-component-review/first-group/receipt.json",
+        "sha256": "2f4ce7d9ea73206d49b11058e6775c4de65c00ac713b95231dc280a724476e94"
+      },
+      "full-corpus": {
+        "path": "profile-evidence/native-writer-component-review/full-corpus/receipt.json",
+        "sha256": "07cae310f4e6e7241e7b4199877f1ecf17ec88d0bd422a0dbaeee000cabe95f6"
+      }
+    }
+  }
+}

@@ -1,0 +1,172 @@
+name: Native writer component diagnostic c1ec
+
+on:
+  push:
+    branches:
+      - research/import-native-writer-component-c1ec
+    paths:
+      - .github/workflows/native-writer-component-c1ec.yml
+      - dev/perf/native-writer-component-c1ec.mjs
+      - dev/perf/native-writer-component-c1ec.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-writer-component-c1ec-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/research/import-native-writer-component-c1ec'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Register the prospective source and observation plan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, shutil, subprocess
+          evidence = pathlib.Path('builds/perf/native-writer-component-c1ec')
+          evidence.mkdir(parents=True, exist_ok=False)
+          source = pathlib.Path('dev/perf/native-writer-component-c1ec.json')
+          plan = json.loads(source.read_text())
+          assert plan['schemaVersion'] == 1 and plan['observations'] == 22
+          assert plan['arms']['A']['sha'] == '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+          assert plan['arms']['B']['sha'] == '20c8ecf87964ce2a24033474865b8241e1ec2eaa'
+          assert plan['arms']['C']['sha'] == 'b00df9aea6cc752aad2096bf6dc075dc8981575b'
+          assert plan['arms']['D']['sha'] == plan['arms']['A']['sha']
+          assert plan['fixture']['dictionary'] == 'jmdict'
+          assert plan['measurement']['warmupsPerObservation'] == 2
+          assert plan['measurement']['measuredPassesPerObservation'] == 1
+          assert plan['budget']['jobs'] == 1 and plan['budget']['optionalRepeats'] == 0
+          shutil.copyfile(source, evidence / 'prospective-plan.json')
+          files = ['dev/perf/native-writer-component-c1ec.json', 'dev/perf/native-writer-component-c1ec.mjs', '.github/workflows/native-writer-component-c1ec.yml']
+          receipt = {'wrapperSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+                     'files': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files}}
+          (evidence / 'wrapper-identity.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - uses: ./.github/actions/setup
+      - name: Prepare exact source trees and identical pinned dependencies
+        id: inputs
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import errno, hashlib, json, os, pathlib, shutil, subprocess
+          root = pathlib.Path.cwd()
+          evidence = root / 'builds/perf/native-writer-component-c1ec'
+          plan = json.loads((root / 'dev/perf/native-writer-component-c1ec.json').read_text())
+          inputs = pathlib.Path(os.environ['RUNNER_TEMP']) / 'native-writer-component-inputs'
+          inputs.mkdir(exist_ok=False)
+          def link_or_copy(source, target):
+              if os.path.lexists(target):
+                  assert pathlib.Path(source).read_bytes() == pathlib.Path(target).read_bytes(), target
+                  return target
+              try:
+                  os.link(source, target)
+                  return target
+              except OSError as error:
+                  if error.errno != errno.EXDEV:
+                      raise
+                  return shutil.copy2(source, target)
+          receipt = {}
+          for arm in ['A', 'B', 'C']:
+              target = inputs / arm
+              subprocess.run(['git', 'worktree', 'add', '--detach', str(target), plan['arms'][arm]['sha']], check=True)
+              assert (target / 'package-lock.json').read_bytes() == (root / 'package-lock.json').read_bytes()
+              shutil.copytree(root / 'node_modules', target / 'node_modules', symlinks=True, copy_function=link_or_copy)
+              assert not (target / 'node_modules').is_symlink()
+              browser_lock = target / 'node_modules/playwright-core/browsers.json'
+              assert browser_lock.read_bytes() == (root / 'node_modules/playwright-core/browsers.json').read_bytes()
+              assert hashlib.sha256(browser_lock.read_bytes()).hexdigest() == plan['identities']['browserLockSha256']
+              shutil.copytree(root / 'ext/lib', target / 'ext/lib', dirs_exist_ok=True, symlinks=True, copy_function=link_or_copy)
+              hashes = {p: hashlib.sha256((target / p).read_bytes()).hexdigest() if (target / p).exists() else 'absent' for p in ['ext/js/dictionary/term-bank-wasm-parser.js', 'ext/lib/term-bank-parser.wasm', 'test/term-bank-native-inflate.test.js']}
+              assert hashes['ext/js/dictionary/term-bank-wasm-parser.js'] == plan['identities']['runtimeSha256'][arm]
+              assert hashes['ext/lib/term-bank-parser.wasm'] == plan['identities']['parserWasmSha256']
+              tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=target, text=True).strip()
+              if arm == 'C':
+                  assert tree == plan['identities']['candidateTree']
+                  assert hashes['test/term-bank-native-inflate.test.js'] == plan['identities']['candidateUnitSha256']
+              receipt[arm] = {'source': plan['arms'][arm]['sha'], 'tree': tree, 'hashes': hashes}
+          canary = inputs / 'B/dev/perf/native-gzip-canary-c1ec.mjs'
+          assert hashlib.sha256(canary.read_bytes()).hexdigest() == '6308397a9c7d7c6e05bdc8cacbb77c9b5129d87db43fcc28c56ea5b3901752e8'
+          assert canary.read_bytes() == (inputs / 'C/dev/perf/native-gzip-canary-c1ec.mjs').read_bytes()
+          (evidence / 'source-identities-before-gates.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - name: Lint the exact runtime and changed tests
+        id: lint
+        working-directory: ${{ runner.temp }}/native-writer-component-inputs/C
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-native-inflate.test.js 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-writer-component-c1ec/lint.log"
+      - name: Check exact main source types
+        id: main_types
+        if: ${{ !cancelled() && steps.inputs.outcome == 'success' }}
+        working-directory: ${{ runner.temp }}/native-writer-component-inputs/C
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts:main 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-writer-component-c1ec/main-types.log"
+      - name: Check exact test source types
+        id: test_types
+        if: ${{ !cancelled() && steps.inputs.outcome == 'success' }}
+        working-directory: ${{ runner.temp }}/native-writer-component-inputs/C
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts:test 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-writer-component-c1ec/test-types.log"
+      - name: Verify all 46 native and CRC focused cases
+        id: focused
+        if: ${{ !cancelled() && steps.inputs.outcome == 'success' }}
+        working-directory: ${{ runner.temp }}/native-writer-component-inputs/C
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/builds/perf/native-writer-component-c1ec"
+          npx vitest run test/term-bank-native-inflate.test.js test/term-bank-source-crc-reuse.test.js --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile="$evidence/focused.json" 2>&1 | tee "$evidence/focused.log"
+          python3 - <<'PY'
+          import json, os, pathlib
+          report = json.loads((pathlib.Path(os.environ['GITHUB_WORKSPACE']) / 'builds/perf/native-writer-component-c1ec/focused.json').read_text())
+          assert report['success'] is True
+          assert report['numTotalTests'] == report['numPassedTests'] == 46
+          assert report['numFailedTests'] == report['numPendingTests'] == 0
+          PY
+      - name: Install matching Chromium after source gates pass
+        if: ${{ success() && steps.lint.outcome == 'success' && steps.main_types.outcome == 'success' && steps.test_types.outcome == 'success' && steps.focused.outcome == 'success' }}
+        run: npx playwright install --with-deps chromium
+      - name: Restore locked JMdict source archive
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch and verify the locked JMdict fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js jmdict 2>&1 | tee builds/perf/native-writer-component-c1ec/fixtures.log
+      - name: Run the unchanged actual Chrome integrity canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          inputs="$RUNNER_TEMP/native-writer-component-inputs"
+          node "$inputs/B/dev/perf/native-gzip-canary-c1ec.mjs" "$inputs/A" "$inputs/C" builds/perf/native-writer-component-c1ec/integrity-canary.json 2>&1 | tee builds/perf/native-writer-component-c1ec/integrity-canary.log
+      - name: Run the fixed 22-observation component diagnostic without forced GC
+        shell: bash
+        run: |
+          set -euo pipefail
+          inputs="$RUNNER_TEMP/native-writer-component-inputs"
+          node dev/perf/native-writer-component-c1ec.mjs "$inputs/A" "$inputs/B" "$inputs/C" builds/e2e-dictionary-cache builds/perf/native-writer-component-c1ec/component dev/perf/native-writer-component-c1ec.json 2>&1 | tee builds/perf/native-writer-component-c1ec/component.log
+      - name: Preserve plans, source gates, every observation, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-writer-component-c1ec-${{ github.run_id }}
+          path: builds/perf/native-writer-component-c1ec
+          if-no-files-found: error
+          retention-days: 30
