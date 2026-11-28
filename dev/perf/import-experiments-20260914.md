@@ -884,4 +884,136 @@ artifacts/job logs, and validation receipts. Pinned ZIPs, reproducible source
 spools, and Node OPFS output bytes are excluded; their identities and performed
 checks remain recorded. No source optimization is promoted from this checkpoint.
 
+### Follow-up checkpoint: lifecycle repair, rejected cache view, and VNDB route proof
+
+The current source candidate is
+`5048ba3e8a65fc41b9ae898c47b54d5731cd759e`, tree
+`9d5adaad4be1660b5d22c0e54a5d964e8a11d264`. This supersedes the validation
+status above; it does not rebind the earlier full DB replay to newly edited
+source files. The original DB parity receipt remains bound to `a20453bc`.
+
+The broader local unit attempt exposed three real lifecycle-ordering regressions
+in the unchanged 66-test import-cleanup suite. An unconditional await of an empty
+pipeline drain added a microtask before established cleanup ownership. The repair
+closes admission synchronously when no owner exists, claims FINALIZING before a
+real drain, and permits already admitted owners to complete under that lifecycle.
+A gated two-owner test checks that competing close/purge/finalization cannot take
+ownership while the drain is pending. Existing assertions were not weakened.
+
+An independent diagnostic repair now subtracts the union of overlapping consumer
+wall intervals when deriving `termParseMs`. Per-chunk elapsed sums remain intact.
+Nine deterministic cases cover overlapping and reversed completion, disjoint
+work, failures, aggregation failure, yielder exclusion, and backward clock
+movement. Changes in this derived counter alone are not import-speed evidence.
+
+Validation on the latest source: seven focused suites pass all 146 tests,
+including the existing 66-test cleanup suite; all seven build targets pass;
+repository-config lint passes for the three changed test files; diff checks pass.
+The scoped TypeScript retry exited 137 without diagnostics and is incomplete.
+The fixed twelve-shard full-unit attempt retains shard 1 (57 files / 954 tests,
+pass) and shard 2 (the three cleanup failures before exit 137); shards 3–12 were
+not run. It is not a complete-unit pass.
+
+The original [hosted verification](https://github.com/ManabiIO/manabitan/actions/runs/46105070655)
+failed lint before types, units, builds, or browser qualification. Its raw log is
+retained. Besides formatting/JSDoc, the failure drain now explicitly collects
+only non-null completion promises before `allSettled`; it still releases every
+borrowed owner only after real completions settle. The intermediate `805390c8`
+cohort is also retained. Current
+[qualification 46108795917](https://github.com/ManabiIO/manabitan/actions/runs/46108795917)
+and [workflow lint 46108795914](https://github.com/ManabiIO/manabitan/actions/runs/46108795914)
+were queued at this checkpoint. No complete-import gain or PR is claimed yet.
+
+#### Rejected recent-cache origin view
+
+A separate prototype retained the full already-charged owned source view when
+three JMdict groups began pending content at offsets 49, 289, and 366. It added
+an exact contiguous-range/non-alias proof and otherwise preserved scalar and
+copied fallbacks, physical-byte accounting, FIFO eviction, and covered-payload
+metrics. It recovered bulk mapping for 89,237 entries but required 89,234 extra
+contiguity comparisons, 18 alias-pair checks, six small arrays, and three map
+insertions per corpus. Three focused files pass 165 tests; all 362,032 resolved
+references and 720 replay passes preserve mapping/cache/eviction checks.
+
+The prospectively fixed twelve-round A/B/C replay retained all 36 observations,
+each with twenty full-corpus passes. Median times are A 2.700 ms, B 4.146 ms, and
+identical C 2.325 ms. B/A paired median is **+33.34% / +1.032 ms**; equal-work
+total is **+41.54% / +1.193 ms**, with B faster in only 4/12 pairs. Identical
+control drift is −7.93% by equal-work totals. About 91.8% of the measured
+candidate regression appears in the nine groups whose row work is unchanged;
+the exact mechanism is unestablished. No unchanged rerun, source promotion, or
+cache-origin PR is warranted. The complete rejected patch and all observations
+remain in the evidence.
+
+#### Current cost attribution, with separate cohorts
+
+Source-identical baseline A observations from external run `46102526376` were
+reused only for attribution while this study's own hosted jobs queued. They are
+not pooled with component timings or presented as a candidate comparison.
+
+| Corpus / retained baseline cohort | Complete import median | Relevant overlapping counters |
+| --- | ---: | --- |
+| JMdict, BA, 12 observations | 1,070.1 ms | Compression 357.4 ms; canonical scan 106.8 ms; metadata publication 73.4 ms; recent cache 42.45 ms; finalization 129 ms |
+| Jitendex, AB, 6 observations | 1,583.55 ms | Compression 622.8 ms; canonical scan 80.1 ms; exact comparison 51.7 ms |
+| VNDB, AB, 6 observations | 5,955.45 ms | Worker parsing sum 8,552.5 ms; CRC 1,878.85 ms; result copy 1,863.6 ms; mixed lookup preparation/encoding 846.25 ms |
+
+These counters overlap and must not be summed. VNDB's lookup counter includes
+worker preparation; subtracting its worker counterpart per observation leaves
+180.1–222.3 ms, median 216.9 ms, of owner-side lookup encoding. Compaction before
+that encoder is outside this particular clock. The VNDB external cohort failed
+memory sample coverage (267.10 ms gap versus the 250 ms gate), despite no semantic
+failures; it is not a memory-qualified comparison.
+
+The independent exact-source JMdict diagnostic trace attributes the long
+finalization interval to one import-worker task with 117.691 ms wall time but
+1.820 ms thread CPU. A 116.866 ms sample gap brackets the synchronous index
+writer flush; later close work is below 0.4 ms. This supports a flush-wait
+inference, not an exact kernel/fsync duration. Concurrent descriptor and index
+close counters do not establish that the 45-byte descriptor causes the wait.
+Prior #868/#821 work already covers this route.
+
+The recent-cache trace contains mostly validation/extent-loop samples, but its
+weights are wall samples, not CPU duration. Some apparent JIT-adjacent spans have
+negligible thread CPU, and no optimization/deoptimization events establish a
+JIT cause. The trace reports zero borrowed cache bytes and no hidden cache copy.
+Its parser preserves negative raw sample deltas and joins profiles by process
+and profile ID. Original trace bytes and the attribution scripts are retained.
+
+#### Actual VNDB mixed-content route census
+
+A complete native-parser/global-dedup/content-store diagnostic covers all 170
+groups and 6,648,310 rows with real persisted content offsets. It preserves the
+actual 512 KiB compression threshold: group 0 stores 503,818 bytes as raw-v6;
+group 1 stores new content as raw-block-v2 while 31 rows reuse earlier raw-v6
+content. No synthetic offset ranges or forced route selection were used.
+
+Only 175 later references to initial raw content cause eight mixed groups
+`[1, 87, 91, 92, 105, 123, 126, 139]` to discard their whole prepared lookup maps.
+Those groups contain 320,000 rows (4.81%); the other 162 groups / 6,328,310 rows
+retain their prepared bytes. Twenty-seven content-name slices become thirty
+fallback encoder runs. The discarded prepared payload totals 16,876,960 bytes.
+Fallback compaction reconstructs offsets for 1,856,155 source-key entries
+(7,424,620 bytes of offset arrays), copies 508,101 selected keys / 9,051,685
+string bytes, and creates 2,560,000 bytes of row-ID arrays. Transferred plans do
+not contain full hashes or offsets; the encoded lookup format also does not
+persist full key hashes.
+
+All 6,648,310 row-key references pass the source oracle. Native dedup matches
+the browser/capture: 170 calls, zero fallback, 157,864 scanned representatives,
+157,150 global uniques, and 714 persisted hits. Two record destinations match
+the browser, and actual persisted content is 7,533,449 bytes. This diagnostic
+intercepts only final record encoding/appending and therefore proves route
+counts, not record-persistence parity or speed. The initial pre-execution syntax
+failure and the successful three-group gate are retained. A separate subset
+prototype and exact ten-group replay capture are in progress, with no gain
+claimed at this checkpoint.
+
+The follow-up raw archive is `components-v2.tar.gz`: 91 files, 11,535,260
+uncompressed bytes, 1,295,660 compressed bytes, SHA-256
+`8d426c47c2921d0f66d7b963ce66cefde4c26a8330ce87419aeec743d2112fae`.
+`components-v2-index.json` records each member's size/hash, exact scope, and
+exclusions. It preserves original baseline reports used above and the original
+diagnostic trace; large unrelated external product packages are excluded with
+their archive identities retained. The immutable v1 archive remains unchanged.
+
 <!-- da6c4 evidence checkpoint end -->
