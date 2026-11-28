@@ -1,0 +1,160 @@
+{
+  "archive": {
+    "name": "evidence.tar.gz",
+    "bytes": 150342,
+    "sha256": "638ed9f344da234b6855990f3ca80ae65b483b39e6bd79b34cb07c36f51e0f6a"
+  },
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "localCandidate": "4df50f0a4de2706e5f04782706d6d4ac7c1b021b",
+  "publishedCandidate": "f3fd2373de6e74f6243008ff3f1f68703d688973",
+  "localCandidateTree": "576dbae482bfeba948f880602c85282a5ebfdd8e",
+  "members": {
+    "native-hash/benchmark.mjs": {
+      "bytes": 7146,
+      "sha256": "04fa71a5bf446e7bb9663062f017e5dc97211eab75cdb58da809c04611ac1d74"
+    },
+    "native-hash/canonical-with-scalar-hash.wasm": {
+      "bytes": 3416,
+      "sha256": "c095630e65a01a051f76aa5daacb672f6aeda15da388885b871ea9f24d740f99"
+    },
+    "native-hash/cold-one.mjs": {
+      "bytes": 3307,
+      "sha256": "259e004a64a414efac98d2b41a979365bb7e1cfaa183fa00f5b74306c23aab28"
+    },
+    "native-hash/cold-run.py": {
+      "bytes": 2882,
+      "sha256": "683b17765f1362fadba4397a7d44d0236a4b218e87246e267250a0a534be4bf0"
+    },
+    "native-hash/envelope-one.mjs": {
+      "bytes": 3129,
+      "sha256": "17940496bfd46d8a7c2c76d198b0c3c042637500d611d2606771e142fa9ec306"
+    },
+    "native-hash/envelope-run.py": {
+      "bytes": 3016,
+      "sha256": "197d5787b4187324849e88fe53dd651970cddbecb9eb2b4707969cdec57242f1"
+    },
+    "native-hash/experiment-summary.json": {
+      "bytes": 8579,
+      "sha256": "fd16b8546c04ca5d8fa5782cf2e4bf4cc5334b35b468a80f70b4a6ae1ecd9cfd"
+    },
+    "native-hash/final-hasher-tests.log": {
+      "bytes": 629,
+      "sha256": "900cfbbe4ac1b6651a88b2372ab5d180e79a3e724dc212e44f97dfcc54b6293d"
+    },
+    "native-hash/focused-test.log": {
+      "bytes": 1229,
+      "sha256": "3acca7946a6e97b1bad2b1b4e549d3cdb17dc48583635e20a4d68bba03c4af4f"
+    },
+    "native-hash/frozen-canonical-source.c": {
+      "bytes": 6853,
+      "sha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b"
+    },
+    "native-hash/hash-prototype-explicit-simd.wasm": {
+      "bytes": 2660,
+      "sha256": "34ae876496f50515a6c69ce0feb477ae15583954d3a7c366285609de568211df"
+    },
+    "native-hash/hash-prototype-scalar.c": {
+      "bytes": 4202,
+      "sha256": "5607c2c8f82b2997d331af7955202bb67cbb466182c82e43a5ffcb594f32416d"
+    },
+    "native-hash/hash-prototype-simd.wasm": {
+      "bytes": 2246,
+      "sha256": "75738532d2a66f3d81671f6465d4bf920e05d19dcbc289633767d5ee4144dc0b"
+    },
+    "native-hash/hash-prototype.c": {
+      "bytes": 5530,
+      "sha256": "61b000fdd6cc353d9ae8f90949442467517a5ffdecceec12a0a9071af15664d3"
+    },
+    "native-hash/hash-prototype.wasm": {
+      "bytes": 2232,
+      "sha256": "1a88833b2f87e2b9d82b829a52690b8e5378e81638567469bcda9c8b5b66381e"
+    },
+    "native-hash/jmdict-checksum-cold.json": {
+      "bytes": 339393,
+      "sha256": "46bc3588b056bc0e58c6bb481af9c1d8ed6257d9845425690d31d6a963ba55cd"
+    },
+    "native-hash/jmdict-checksum-screen.json": {
+      "bytes": 16055,
+      "sha256": "defd63ab6e5db04fb59cc80546bf1219aacad0ddb8635eae8dfeb299168a2172"
+    },
+    "native-hash/jmdict-checksum-simd-screen.json": {
+      "bytes": 16113,
+      "sha256": "64d4e363390d9b2242108c36776645fd736ba00a1854e493b7b84d30333f279c"
+    },
+    "native-hash/jmdict-envelope-integrated.json": {
+      "bytes": 1021805,
+      "sha256": "68e61716b30b3af2d0cba715276b5f32a9e8a736f84898e09090fcd511c067bc"
+    },
+    "native-hash/lint.log": {
+      "bytes": 1044,
+      "sha256": "55bff22493f56e4158d3a3008b389d9565a888d884f093d784c2de384d2f7ed3"
+    },
+    "native-hash/pinned-check.log": {
+      "bytes": 584,
+      "sha256": "04b4f7b3eb08719a4070835a1d0e6742fc103b725fa4130a291d719cb3254200"
+    },
+    "native-hash/product-focused-tests.log": {
+      "bytes": 9783,
+      "sha256": "68165602f22bd6cbfbc6452ec09ead7244f31a7498ae0728c75326e892f75ba1"
+    },
+    "native-hash/reproduction.json": {
+      "bytes": 2066,
+      "sha256": "4553dad7c5ef78b41374476c3023e9146041a2a4645209fd0cfd55c44dae3841"
+    },
+    "native-hash/store-isolated-tests.log": {
+      "bytes": 4715,
+      "sha256": "7d8f49c23e51a561eea0529e4b6507968a720a5f82babd59786b345161f39e39"
+    },
+    "native-hash/toolchain-receipt.json": {
+      "bytes": 1686,
+      "sha256": "b96709f8df5e47c323fb48c1bef8fede8f66eb5eed8a6c610276f36ed7f838cd"
+    },
+    "input-manifests/jmdict-lookup-payloads.v8.json": {
+      "bytes": 24378,
+      "sha256": "3bb19aaaa005210b97303d768f25e36eb0b7b34a8c3b4c1c3df3e0bf7e632312"
+    },
+    "input-manifests/jmdict-lookup-payloads-baseline.v8.json": {
+      "bytes": 24437,
+      "sha256": "2b3d8538fbee64508910b9d1cf5376c558c548a26579938fb8749699e18c209d"
+    },
+    "input-manifests/jmdict-lookup-payloads-baseline-raw-v6.v8.json": {
+      "bytes": 72993,
+      "sha256": "99794fef152c17af8306bef8aec1e2cef28060b5cd046191e6bda4e0ece14866"
+    },
+    "input-manifests/lookup-capture-parity.json": {
+      "bytes": 1441,
+      "sha256": "971f5b75127202007ee28c795ff9a2346aee2673596a53024bc8246069091f4d"
+    },
+    "input-manifests/capture-fidelity-correction.json": {
+      "bytes": 2638,
+      "sha256": "9bf8cccdcb9aefe2f36efe0cecae4dd34ab4e07e1310ad2dbbd1426eeb222574"
+    },
+    "regeneration/capture-lookup-payloads.mjs": {
+      "bytes": 8135,
+      "sha256": "94aaf9d63d34bf395d12475f6a4118b2c9146fd69c63d637ffa55fdf8393054a"
+    },
+    "regeneration/parser-replay.mjs": {
+      "bytes": 14088,
+      "sha256": "34a1a1894c10442c40e62a9c4d89bb30132d43d884428e496c5de7ffe1854ef6"
+    },
+    "regeneration/verify-regenerated-input.mjs": {
+      "bytes": 1524,
+      "sha256": "2d16be656d13d2d1781270fb248a439992cb0efa5e95e5f03edd7dce02aea3c2"
+    }
+  },
+  "omittedInputs": {
+    "jmdict-lookup-payloads.v8": {
+      "bytes": 23762823,
+      "sha256": "fe9839942a9c0bbf27a2da1e602fd346d315079ec94a8a24b335a6e708245d63"
+    },
+    "jmdict-lookup-payloads-baseline.v8": {
+      "bytes": 23763209,
+      "sha256": "4db5087d285e1ddb80b51cee662fb45b240b2c060e7110c36dd42b78824b2c9c"
+    },
+    "jmdict-lookup-payloads-baseline-raw-v6.v8": {
+      "bytes": 23789509,
+      "sha256": "2fde77cf160f1d2d45edcc55dc4b728ff92d6df1622e3081df5cbc94f1515712"
+    }
+  },
+  "regeneration": "See README.md. Whole captured V8 SHA identifies the acquired container; per-frame manifests allow deterministic byte comparisons after regenerating metadata-bearing captures."
+}
