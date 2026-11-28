@@ -1,0 +1,885 @@
+{
+  "schema": 1,
+  "kind": "new-unmeasured-production-reconstruction",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "baselineTree": "d911260f1a57f518d59b3a12127fcc3b2293c918",
+  "productTree": "49a7c6ac1270ff8ef19f4e6fb7bdad7970f294eb",
+  "productFiles": [
+    {
+      "path": "dev/bin/audit-release-packages.js",
+      "mode": "100644",
+      "blob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d",
+      "bytes": 4062,
+      "classification": "byte-identical-recovered-earlier-staged-file",
+      "previousInaccessibleSha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "blob": "0921b1806a239e1b753f199af642849afdad4077",
+      "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+      "bytes": 3159,
+      "classification": "new-native-source-digest-preserving-current-develop-parser-target",
+      "previousInaccessibleSha256": "bae016842bceb2decc94dbfdeedb1f621933f71d782c402b04290becf9c20194"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "mode": "100644",
+      "blob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753,
+      "classification": "exact-frozen-native-binary",
+      "previousInaccessibleSha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a"
+    },
+    {
+      "path": "dev/dictionary-wasm.js",
+      "mode": "100644",
+      "blob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "bytes": 7244,
+      "classification": "byte-identical-recovered-earlier-staged-file",
+      "previousInaccessibleSha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d"
+    },
+    {
+      "path": "eslint.config.js",
+      "mode": "100644",
+      "blob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b",
+      "bytes": 39532,
+      "classification": "new-reconstructed-build-or-fixture-change",
+      "previousInaccessibleSha256": null
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "blob": "c7426300d25a4933eed2f2565ce8628684f52ab3",
+      "sha256": "65f8d900ed478050925320002c333ddda77f01271ee8840ba28f7333b43700a8",
+      "bytes": 613623,
+      "classification": "new-production-reconstruction",
+      "previousInaccessibleSha256": "c8efdef3f177a6e492d620feb36405520ebc07072a44df0e067f11d2edd0caab"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "mode": "100644",
+      "blob": "674a5c898ebde0f7a866d81a28fd553ebfa37cda",
+      "sha256": "766fa925129b312929aa0de285c84b443d64aeed01f54f539237c54c5f849c72",
+      "bytes": 16807,
+      "classification": "Concrete hosted lint/type repair; runtime helper/store expressions preserved",
+      "previousInaccessibleSha256": "ca7beadcb931e922513ec265ba03e26dc00f064a8f2a340f2d9ab811d891c8a6"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "mode": "100644",
+      "blob": "e3d79065ee729efbfe8b9b53d279a3116596fc3d",
+      "sha256": "2da53d89fd0d9aca83ecfd9e5ed4857aa3784197bf5987464d6711de822529a5",
+      "bytes": 368766,
+      "classification": "Concrete hosted lint/type repair; runtime helper/store expressions preserved",
+      "previousInaccessibleSha256": "4c71422c766964cf8d9725920c1415d0ba37fbc8ed940a07e2550e6816674187"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "mode": "100644",
+      "blob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+      "bytes": 6660,
+      "classification": "new-comment-header-exact-frozen-kernel",
+      "previousInaccessibleSha256": "d8f63721cad11e6cb5eccf5a296106b2c208ba67689d5d3d14fc1faf82d8d75d"
+    },
+    {
+      "path": "test/dictionary-wasm-build.test.js",
+      "mode": "100644",
+      "blob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+      "bytes": 7552,
+      "classification": "Concrete hosted lint/type repair; runtime helper/store expressions preserved",
+      "previousInaccessibleSha256": "e5a66b3c77f7762c9972bb2df4110a09ad30b351e8c99f7268614d5aec161acc"
+    },
+    {
+      "path": "test/release-package-native-assets.test.js",
+      "mode": "100644",
+      "blob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174",
+      "bytes": 5421,
+      "classification": "new-reconstructed-build-or-fixture-change",
+      "previousInaccessibleSha256": "f8b9d904e0378a28f752c981ec30a7117efda00b43e48912225d0e63c0908516"
+    },
+    {
+      "path": "test/term-record-fields-native.test.js",
+      "mode": "100644",
+      "blob": "bfdafcd86db1ca223132faa194250647321dea31",
+      "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+      "bytes": 40450,
+      "classification": "Concrete hosted test matcher/type/style repair; complete cases preserved",
+      "previousInaccessibleSha256": null
+    },
+    {
+      "path": "test/term-record-import-fields.test.js",
+      "mode": "100644",
+      "blob": "cd8e5658ea9c2e62e7d1dbf20fc815f4de6f4328",
+      "sha256": "1b47cc1e8616dfeb0583ffbc5f0885e111ff8bdeaa3a91e17f7fde4e3270c3a1",
+      "bytes": 20498,
+      "classification": "Concrete hosted lint/type repair; runtime helper/store expressions preserved",
+      "previousInaccessibleSha256": null
+    }
+  ],
+  "sourceState": "Separately reviewed correctness repair of the concrete failures in original run46127174624. Current source remains unexecuted at freeze; original passing and failing gates remain bound only to their exact original product. No full corpus or browser-performance result is claimed.",
+  "recoveryReason": "The shared executor became unavailable before the earlier production worktree could be committed. Only hashes, review receipts, partial logs, and the already published component kit were recoverable. Unmatched files were reconstructed and independently reviewed as new source.",
+  "exactRecovery": {
+    "originalFrozenComponent": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "nativeWasmBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+    "nativeWasmSha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+    "nativeKernelBodyFromFirstIncludeSha256": "b9b88351aac52e9498053415345be352035605ee165ad04f9581ff3120a1c589",
+    "nativeKernelBodyUnchanged": true,
+    "productionCCommentHeader": "New GPL comment header; full C differs from the inaccessible worktree. Pinned Clang/LLD21.1.8 reproduction passed original validation140924247165 for these unchanged C/WASM/native-manifest bytes; the new correctness workflow repeats the gate.",
+    "unchangedBaselineNativeFileCount": 14,
+    "unchangedBaselineNativeSourceDigest": "7b5bb45309d141eaa296ecef6c3cef7a94f22760266217a7c26dc467ea6db39c",
+    "reconstructedNativeSourceFileCount": 15,
+    "reconstructedNativeSourceDigest": "8eb4a4abe2804cc81d5218af8f250c25a351f8c4481aa6903bfd2270aeab1a9c"
+  },
+  "earlierInaccessibleEvidence": {
+    "scope": "Historical evidence applies only to its exact old source hashes; it is not execution evidence for this reconstructed source.",
+    "productionPath": "/workspace/scratch/1c4137568bc6/native-record-integration",
+    "finalStoreSha256": "4c71422c766964cf8d9725920c1415d0ba37fbc8ed940a07e2550e6816674187",
+    "testHistory": [
+      "The published standalone stage1 helper retained 51 passing focused cases and complete 12-call captured parity. Its bytes and test results remain in the frozen component kit.",
+      "Earlier production attempt003 passed 48 new focused cases. It used the then-current inaccessible production source.",
+      "Final local production attempt004 was killed after the release-asset test output; it did not complete all 52 planned focused cases.",
+      "The existing direct-field-column test process failed with a worker exit on the candidate; a separately retained exact-baseline attempt also exited. Neither is a complete passing full suite.",
+      "The complete main-source type attempt and one bounded-heap retry were killed. Full main, dev and test types remained incomplete.",
+      "The final scoped lint attempt was interrupted by executor loss; its completion is unknown."
+    ],
+    "capturedReplay": {
+      "reportSha256": "39c5b3e6fac24ab1eb9e037d370ba620de625187ca725f21023076bce8c51939",
+      "rows": 528299,
+      "nativeCalls": 12,
+      "javascriptCalls": 0,
+      "inputCopiedBytes": 8618752,
+      "outputCopiedBytes": 4239960,
+      "tableBytesRequested": 6291456,
+      "memoryGrowthBytes": 2293760,
+      "maximumLinearMemoryBytes": 2424832,
+      "maximumScratchBytes": 824288,
+      "fullOutputBytesMatched": true,
+      "readinessWasExplicitlyAwaited": true,
+      "limitation": "Captured replay of old source; it does not prove ordinary importer startup, readiness coverage, or performance."
+    },
+    "actualImporterAttempt": {
+      "corpus": "jmdict",
+      "outcome": "process exited 137 before any term payload was published",
+      "zeroTermPayloadBytesPublished": true,
+      "localRetryPerformed": false,
+      "cause": "The kernel kill cause was not established. No new local corpus retry was authorized.",
+      "jitendexAttempted": false
+    },
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+  },
+  "originalFailedComponent": {
+    "run": 46115204690,
+    "job": 140887357214,
+    "head": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "artifactId": 15254144071,
+    "artifactSha256": "c46d327aefbe24c26e6ef3c3b3375a0f786205efb00d56568d242a68d5cf1e7e",
+    "artifactBytes": 3926247,
+    "fullJobLogBlob": "e4a21498ae72dba0526895f2ea008fd57e6784fe",
+    "apiMetadataBlob": "5d50a03556216ee4dd642ec91c8618305cae55a8",
+    "failureReceiptBlob": "ec309849ccc643476a926c439d60f409248e1b8b",
+    "failure": "Clang rejected -fuse-ld=wasm-ld-21 during preparation. Focused tests and the complete acquisition step were not reached.",
+    "warmupObservations": 0,
+    "measuredObservations": 0,
+    "performanceConclusion": null,
+    "unchangedAndNeverRerun": true
+  },
+  "separatelyCorrectedComponent": {
+    "run": 46123144616,
+    "job": 140911790961,
+    "head": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+    "tree": "ec4ea111593b9ac7f94018b3406661291f0cd14e",
+    "branch": "perf/native-record-fields-linker-20261128-1c413",
+    "difference": "Only the workflow and its workflow SHA in source.json changed. The workflow resolves the absolute executable linker path without realpath. All 77 kit files, native/wrapper/captures, runtime, fixed 42-record schedule, thresholds and no-rerun rule remain byte-identical.",
+    "evidenceGate": "No production timing or PR until this original corrected study nominates and its complete artifact audit passes.",
+    "auditedResult": {
+      "run": 46123144616,
+      "head": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+      "recordsOnlyAuditRun": 46126612006,
+      "conclusion": "success",
+      "componentNomination": true,
+      "correctedArtifact": {
+        "id": 15254998779,
+        "bytes": 4076464,
+        "sha256": "e4b76382586a00d8824e85804e3a978942fd452f61c2006aedc1342c5d84d654",
+        "members": 217,
+        "records": 42
+      },
+      "originalFailedMembers": 82,
+      "originalFailedObservations": 0,
+      "completionReceipt": "7a88aa027bb49f3de5c2c118454936a0b4d9458c",
+      "readerResult": "c41c034efa9021adc77c328ffc50066912e6e195",
+      "scope": "Complete standalone-call component evidence, including original startup/copy boundary. No production integration or whole-browser gain follows from this result."
+    }
+  },
+  "independentStaticReviews": {
+    "lifecycleAndDiagnosticFenceBlob": "4cabc15d6edc9f8422b12c36df8aef6a9c582887",
+    "helperTestsBlob": "928f8d36df52657d77ac68519040bb7a1a105f22",
+    "scope": "Source-only review and syntax parsing do not imply unit execution, types, lint, native rebuild or import correctness.",
+    "currentRepair": {
+      "root": "59463a54a24dc814d6bc77564d42c59c812d4646",
+      "implementation": "a88fddc5a64db7a4d2c7ada216b5eb3464c22de6",
+      "productControlAndCorpus": "292b40bf19d6d697119c70233d6816d62c940ad0",
+      "helperTest": "aa8ea9b5706269501bb917a674d598ec366f0f04",
+      "setupArchive": "fb165900f4ed3392826d4b3aa4fbf1ee53edaffb",
+      "completeTreeProof": "ef90d1d65d005e10cd5db360f263cfb3c04f99a3",
+      "scope": "Static source/type intent and full Git boundary only. No repaired-source execution claim."
+    }
+  },
+  "correctnessOnlyPlan": {
+    "nodeVersion": "22.22.0",
+    "host": "ubuntu-26.04",
+    "compilerVersion": "21.1.8",
+    "gates": [
+      "exact-source-boundary",
+      "pinned-native-byte-rebuild",
+      "changed-source-lint",
+      "complete-unit-suite",
+      "complete-options-unit-suite",
+      "main-types",
+      "dev-types",
+      "test-types",
+      "all-target-dry-build",
+      "normal-startup-untimed-corpus-parity"
+    ],
+    "corpusPlan": "Fresh exact-baseline and reconstructed-candidate processes, real importer/parser/compression/index workers, disk-backed OPFS, all three pinned corpora. No helper preload, explicit readiness wait, timing comparison or browser qualification. Preserve original failures and activation/fallback counts. A zero-native result cannot establish readiness coverage.",
+    "nodeMediaLimit": "Node importer parity does not replace the separate browser media gate. Any VNDB media limitation must be retained explicitly."
+  },
+  "prospectiveBrowserQualification": {
+    "status": "Unpublished and acquisition disabled. Corrected component nomination and complete artifact audit passed; full repaired product correctness and retained three-corpus activation remain mandatory.",
+    "baselineControl": "Exact dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16 runtime plus inert new assets/build/fixture declarations so packaged member sets match. No store or database activation in A/C.",
+    "candidatePackagedDelta": [
+      "js/dictionary/term-record-opfs-store.js",
+      "js/dictionary/dictionary-database.js"
+    ],
+    "unchangedQualifier": "dev/perf/import-qualification-20261125-a7f7.py",
+    "cells": [
+      "jmdict/AB",
+      "jmdict/BA",
+      "jitendex/AB",
+      "jitendex/BA",
+      "vndb/AB",
+      "vndb/BA"
+    ],
+    "measuredPairs": 24,
+    "controls": 8,
+    "warmupPairs": 2,
+    "mediaImports": 2,
+    "memoryImports": 4,
+    "totalReportsPerCell": 74,
+    "previousDraft": {
+      "measuredPairs": 12,
+      "controls": 4,
+      "totalReportsPerCell": 42
+    },
+    "revisionReason": "Before any production candidate timing, original baseline-only contrasts in other completed studies showed enough single-observation drift to justify the existing qualifier's maximum 24-pair option.",
+    "primaryGates": "At least 2% paired-median JMdict improvement and at least 18/24 faster on each original host; absolute A/C paired median and equal-work drift at most 1%.",
+    "nonTargetGates": "Each Jitendex/VNDB control at most 3% absolute drift; no repeated non-target median slowdown above 3% on both hosts.",
+    "activationGate": "Audit all 74 reports per cell. Every B must have nativeRows > 0, no native failures, calls === nativeCalls + javascriptCalls and native attempts accounted for. Preserve readiness JavaScript calls.",
+    "noRerunsPruningOrTuning": true,
+    "fullSemanticMediaMemoryAndCorrectnessRequired": true,
+    "previousUnpublishedControlBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "controlBaselineRevision": "Before any production correctness or timing acquisition, use current develop with accepted parser PR972; all numeric gates and original frozen component studies remain unchanged.",
+    "inertControl": {
+      "commit": "83fb6a76367e36a663ed1100191bf7959c5beb38",
+      "tree": "028127accdcfb7e312016566a18f65aa52e3c72d",
+      "soleParent": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+      "referenceCreated": false,
+      "priorUnreferencedControl": "34d4e54e649d00e922f25c7c198efe47b89617e9",
+      "reason": "Carry exact same repaired helper/build-test bytes as the new product; no runtime activation in A/C."
+    },
+    "activationExpectationsSealed": false
+  },
+  "productCommit": "d4038d0cfaeda8f019afc9ead47d035df633f284",
+  "correctnessKitAncestry": "The correctness-only kit commit has the exact reviewed current-baseline product commit as sole parent; that product commit has dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16 as its sole parent.",
+  "unexecutedBaselineRevision": {
+    "priorBaseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "priorProductCommit": "fc4ddf77039c67db0fcea57eb4b6dd862a53c0da",
+    "priorProductTree": "e97cf5538de67d646bfd9a556ec3c0bed5445a5e",
+    "priorRecoveryManifestBlob": "38fd834ab8b1e32b94d22969a808f21f9b0c886d",
+    "currentBaseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+    "reason": "Develop accepted PR972 before this reconstructed source was executed or published. Rebase now avoids validating stale parser integration. No original frozen performance study or result changed.",
+    "retainedNonManifestProductBlobs": 12,
+    "onlyProductFileRecomputed": "dev/data/dictionary-wasm/manifest.json",
+    "currentDevelopDelta": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "before": "e9de2e2ba5aa6bc8b0d22c6352d4edb001c774a3",
+        "after": "2c658ce7874cfaaf6be816ee40b140215523b7a0"
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "before": "da90749e2f22d0f6696f96935baabfdf4089659a",
+        "after": "1ee5f273b61704f775cfb95c847a1df1296e17c8"
+      },
+      {
+        "path": "dev/perf/import-lookup-screen.js",
+        "before": "e4efa15a14f3e781b7ab93ada9e1c86ae6d96bf2",
+        "after": "1d43fd63f3fb426469e47fd4fb73165cbe535d4f"
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "before": "ccfba94ced59e465859ccec855f4e6947f23f413",
+        "after": "403272a3e65cbd4084f6211a46df7d3db78979ac"
+      },
+      {
+        "path": "test/term-bank-format3-row.test.js",
+        "before": "7feb11376fd96b88ef0b33fee1281a1ff1c78a2e",
+        "after": "4d988074b666954887ca14ce9aeb6364143d19c0"
+      }
+    ],
+    "currentParserSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+    "currentParserGitBlob": "1ee5f273b61704f775cfb95c847a1df1296e17c8"
+  },
+  "correctnessGuardRepair": {
+    "kind": "New correctness-only kit revision; exact reviewed product and corpus driver unchanged",
+    "originalKitCommit": "9f60facdc3b0d1ee307ab5cb8aa8e06b94cfa544",
+    "originalRun": 46125649822,
+    "originalCorpusJob": 140919541894,
+    "originalCorpusFailure": "The source preflight treated every tracked file as mode100644 and rejected unchanged protected dev/perf/prepare-dictionaries.js mode100755. It failed before Node setup, comparator tests, smoke tests, fixture fetch or any importer run.",
+    "originalCorpusObservations": 0,
+    "originalArtifact": {
+      "id": 15255972488,
+      "name": "native-record-fields-corpus-9f60facdc3b0d1ee307ab5cb8aa8e06b94cfa544",
+      "bytes": 54395,
+      "sha256": "25f8c92cea22daf577dbb89cb1c9720b30bb49d0a5b442fdc3b27a81a72e985e"
+    },
+    "decodedOriginalLog": {
+      "blob": "b57b521324f1b23ebd69a6cdf890ea017d8776af",
+      "bytes": 278291,
+      "sha256": "97be306fef66ec7ebc948b2774a25a4b189a72612f83f5544f481b76fab203dd"
+    },
+    "failureReceiptBlob": "2e32c83279c962d7cd801b9fac28309828fad9a8",
+    "originalValidationJob": {
+      "id": 140919542172,
+      "statusAtRepairAuthoring": "queued; original is preserved without cancellation or a result claim",
+      "finalOutcome": {
+        "conclusion": "failure",
+        "cause": "Same protected executable-mode source preflight",
+        "allLaterGatesSkipped": true,
+        "completeFailureReceipt": "4fbcb8cab5e61482fad0c678eff4c43bdad9e346",
+        "artifact": {
+          "id": 15255893823,
+          "bytes": 258399,
+          "sha256": "7e492a7b0f8f6d08de76c072a2cca20eb59e3360dbfced08a5f82c6223026904"
+        }
+      }
+    },
+    "changedLogic": "tracked() accepts only regular Git blob modes100644/100755. Every bound path still matches its exact manifest mode. Every protected path matches the baseline's complete Git entry (mode/type/blob/path) and exact bytes.",
+    "protectedModesVerifiedAgainstCompleteBaselineTree": [
+      {
+        "path": ".github/actions/setup/action.yml",
+        "mode": "100644",
+        "gitBlob": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+        "bytes": 930
+      },
+      {
+        "path": "dev/bin/build-dictionary-wasm.js",
+        "mode": "100644",
+        "gitBlob": "69e615807ae5293273ed5a67be58cb7dd44ab34c",
+        "bytes": 5192
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "gitBlob": "1ee5f273b61704f775cfb95c847a1df1296e17c8",
+        "bytes": 69068
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "mode": "100644",
+        "gitBlob": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+        "bytes": 1624
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/README.md",
+        "mode": "100644",
+        "gitBlob": "1a550c19857bc64565383312c90f7a621a8fea39",
+        "bytes": 7514
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/audit_memory.py",
+        "mode": "100644",
+        "gitBlob": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+        "bytes": 5362
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/chromium_memory.py",
+        "mode": "100644",
+        "gitBlob": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+        "bytes": 18389
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/protocol.py",
+        "mode": "100644",
+        "gitBlob": "aac7cb9471c97c8562cf5f3cd23dd2b4b5c68614",
+        "bytes": 4187
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py",
+        "mode": "100644",
+        "gitBlob": "7526351c04d74651fdaa1b6d11f09abac32d3716",
+        "bytes": 21897
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/source-provenance.json",
+        "mode": "100644",
+        "gitBlob": "469c05cff04483bf7708eceb75f7cf9cbe1ebcce",
+        "bytes": 2122
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/test_chromium_memory.py",
+        "mode": "100644",
+        "gitBlob": "218bb2984e3d66ff0c413e324d4c9a239277b6c5",
+        "bytes": 13354
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/test_import_window.py",
+        "mode": "100644",
+        "gitBlob": "0824ece9c963337ba9c9cd11c1fb101a66e1ac2f",
+        "bytes": 9404
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/test_protocol.py",
+        "mode": "100644",
+        "gitBlob": "39ce3eb5b1a001a0627ad2fcd0194b154fb34368",
+        "bytes": 2039
+      },
+      {
+        "path": "dev/perf/import-memory-20261125-a7f7/test_qualification_receipts.py",
+        "mode": "100644",
+        "gitBlob": "bc1173eb042be5a793f78c99dcdc91a8865a6625",
+        "bytes": 21080
+      },
+      {
+        "path": "dev/perf/import-qualification-20261125-a7f7.py",
+        "mode": "100644",
+        "gitBlob": "964ab9c061b2490b65852344244f11dce62fa644",
+        "bytes": 19981
+      },
+      {
+        "path": "dev/perf/prepare-dictionaries.js",
+        "mode": "100755",
+        "gitBlob": "0a768a6c0fafa1e4d21ea2dc69363517e8ee06bf",
+        "bytes": 1539
+      },
+      {
+        "path": "package-lock.json",
+        "mode": "100644",
+        "gitBlob": "46d4c84c09debdc6e307a3cfa948bb924a4d903b",
+        "bytes": 333801
+      },
+      {
+        "path": "package.json",
+        "mode": "100644",
+        "gitBlob": "55e166cdeec6ac759a25296c33025e6e52ea9c82",
+        "bytes": 9515
+      },
+      {
+        "path": "test/chromium/extension-two-dictionary-import.e2e.js",
+        "mode": "100644",
+        "gitBlob": "142825fbd36090d693de416801eac50312194ef2",
+        "bytes": 325917
+      },
+      {
+        "path": "test/e2e/import-timing.js",
+        "mode": "100644",
+        "gitBlob": "6788524700bf8075d04a6899eb15fb8003a4c187",
+        "bytes": 3293
+      },
+      {
+        "path": "test/perf/dictionaries.lock.json",
+        "mode": "100644",
+        "gitBlob": "eb72e9afb9feb0be1e7ebf9b807344cf6c9333e2",
+        "bytes": 3047
+      }
+    ],
+    "productCommitUnchanged": "5545e5c26daaaa13af18a4f6f94e762b3856446c",
+    "productTreeUnchanged": "9bb3a0dcbf22e9b2d55c15f21bb5444fc64e00a9",
+    "coreCorpusAndTestBytesUnchanged": true,
+    "newBranch": "test/native-record-fields-mode-20261128-1c413",
+    "measuredStudiesModified": false,
+    "originalCorrectnessRunRerun": false,
+    "verification": "Static source/tree identity review only. The new correctness revision must still execute all gates."
+  },
+  "correctnessSourceAndCorpusRepair": {
+    "originalSource": {
+      "commit": "9b75d8f0839b58bdc236ab9a27e95bcc0f521989",
+      "tree": "9079eb387ac3bca6d5c8dcc04318ea4b60abf542",
+      "productCommit": "5545e5c26daaaa13af18a4f6f94e762b3856446c",
+      "productTree": "9bb3a0dcbf22e9b2d55c15f21bb5444fc64e00a9"
+    },
+    "completeOriginalFailureReceipt": "455d940a7ad3786dc425aa0b86c004c73080127f",
+    "originalRun": 46127174624,
+    "originalAttempt": 1,
+    "originalValidation": {
+      "job": 140924247165,
+      "conclusion": "failure",
+      "log": {
+        "blob": "74a1ab16c202440a5f92b6c0d46f5ff1ca38f961",
+        "sha256": "e7d3b09ab9b187d64ed7373c488dc59234e6cf0484e1fb74bb09c2e954a437a3",
+        "bytes": 1144009
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Bind the original attempt and exact reconstructed source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Prepare the pinned Node runtime and dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Bind generated assets and the setup-produced license document",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install the pinned native toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Reproduce every checked-in native target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Changed-source lint",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8
+        },
+        {
+          "name": "Complete ordinary unit suite",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9
+        },
+        {
+          "name": "Complete options unit suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete main-source types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Complete development-source types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete test-source types",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 13
+        },
+        {
+          "name": "All-target dry builds",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Retain every outcome and require all independent correctness gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 15
+        },
+        {
+          "name": "Preserve exact source, every log and every failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Prepare the pinned Node runtime and dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ],
+      "passed": [
+        "source before setup",
+        "pinned Node/dependency setup",
+        "generated asset identity",
+        "pinned compiler/linker installation",
+        "exact native reproduction",
+        "options unit suite",
+        "main types",
+        "development types",
+        "all-target dry builds"
+      ],
+      "failed": {
+        "lint": {
+          "errors": 85,
+          "warnings": 0,
+          "files": [
+            "ext/js/dictionary/term-record-fields.js",
+            "ext/js/dictionary/term-record-opfs-store.js",
+            "test/dictionary-wasm-build.test.js",
+            "test/term-record-fields-native.test.js",
+            "test/term-record-import-fields.test.js"
+          ]
+        },
+        "ordinaryUnits": {
+          "filesFailed": 1,
+          "filesPassed": 670,
+          "testsFailed": 1,
+          "testsPassed": 15272,
+          "testsSkipped": 47,
+          "case": "does not inspect a chunk rejected by the private ownership witness",
+          "location": "test/term-record-fields-native.test.js:486",
+          "error": "Must not read unowned input",
+          "repairHypothesis": "The deep mock argument matcher reads the intentionally throwing rowCount getter after tryEncode returns null; replace only the assertion with direct argument identity checks and retain the read-count guard."
+        },
+        "testTypes": [
+          {
+            "path": "test/term-record-fields-native.test.js",
+            "line": 589,
+            "code": "TS2554",
+            "cause": "The pinned TypeScript lib models ArrayBuffer constructor with only one argument; test must type the actual Node22 resizable constructor narrowly."
+          },
+          {
+            "path": "test/term-record-import-fields.test.js",
+            "line": 83,
+            "code": "TS2719",
+            "cause": "ReturnType<typeof vi.fn<...>> selects an incompatible overload; annotate the actual Mock function type directly."
+          },
+          {
+            "path": "test/term-record-import-fields.test.js",
+            "line": 158,
+            "code": "TS2345",
+            "cause": "The intentional always-throwing rowCount accessor inferred void; declare its nominal numeric return type."
+          }
+        ]
+      },
+      "artifact": {
+        "id": 15256866545,
+        "name": "native-record-fields-correctness-9b75d8f0839b58bdc236ab9a27e95bcc0f521989",
+        "bytes": 326068,
+        "sha256": "faf77bec6f4f84a095a3e6faa924c723193f402d873a80076d9f8799af53355a",
+        "createdAt": "2026-11-28T09:00:29Z",
+        "apiMetadataOnly": true,
+        "zipBytesIndependentlyAudited": false
+      }
+    },
+    "originalCorpus": {
+      "job": 140924246997,
+      "conclusion": "failure",
+      "log": {
+        "blob": "b6c5922529251a47530954d3f0404c122be31952",
+        "bytes": 334035,
+        "sha256": "60b612196d5f589c1d65a1f7c81b6e777c799695afa75eb64d878b94eaac8e81"
+      },
+      "diagnosisBlob": "6f6d1f8c78817b52c0940561f8121205655b933c",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Bind the original attempt and exact reconstructed source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Prepare the candidate with pinned Node",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Bind the candidate generated assets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Check out the exact unmodified baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Build baseline assets using the same dependency installation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify the pure correctness comparator",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Fetch and verify all pinned corpus archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run the original untimed importer parity sequence",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 11
+        },
+        {
+          "name": "Preserve all untimed originals, comparisons and failures",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 12
+        },
+        {
+          "name": "Post Restore pinned dictionary archives",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 21
+        },
+        {
+          "name": "Post Check out the exact unmodified baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Post Prepare the candidate with pinned Node",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ],
+      "actualJmdictArmsCompletedAccordingToLog": true,
+      "finalExactRuntimeDeltaComparison": "failed",
+      "rawSidecarUpload": "failed because a valid raw OPFS member name contains |",
+      "corpusArtifactCreated": false,
+      "internalCorpusEvidenceAccessible": false,
+      "completeParityClaim": false
+    },
+    "productRepairFiles": [
+      {
+        "path": "ext/js/dictionary/term-record-fields.js",
+        "blob": "674a5c898ebde0f7a866d81a28fd553ebfa37cda",
+        "sha256": "766fa925129b312929aa0de285c84b443d64aeed01f54f539237c54c5f849c72",
+        "bytes": 16807,
+        "mode": "100644"
+      },
+      {
+        "path": "ext/js/dictionary/term-record-opfs-store.js",
+        "blob": "e3d79065ee729efbfe8b9b53d279a3116596fc3d",
+        "sha256": "2da53d89fd0d9aca83ecfd9e5ed4857aa3784197bf5987464d6711de822529a5",
+        "bytes": 368766,
+        "mode": "100644"
+      },
+      {
+        "path": "test/term-record-import-fields.test.js",
+        "blob": "cd8e5658ea9c2e62e7d1dbf20fc815f4de6f4328",
+        "sha256": "1b47cc1e8616dfeb0583ffbc5f0885e111ff8bdeaa3a91e17f7fde4e3270c3a1",
+        "bytes": 20498,
+        "mode": "100644"
+      },
+      {
+        "path": "test/dictionary-wasm-build.test.js",
+        "blob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+        "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67",
+        "bytes": 7552,
+        "mode": "100644"
+      },
+      {
+        "path": "test/term-record-fields-native.test.js",
+        "blob": "bfdafcd86db1ca223132faa194250647321dea31",
+        "sha256": "5363c7103ac7d73eaddd1db841e687cd64221bab0eeba4906e60577b87bb64fd",
+        "bytes": 40450,
+        "mode": "100644"
+      }
+    ],
+    "productChanges": "Runtime helper/store executable guard, lifecycle and ABI expressions are unchanged. Accurate JSDoc intrinsic-getter types and narrowly justified capture-only lint handling fix typed lint. Tests repair hostile-object matcher traversal, test-only constructor/mock/accessor typing, and style while preserving cases/owned comparisons.",
+    "corpusChanges": "Each checkout uses its own ordinary npm ci. Shared strict read-only ext inventory preflight runs before fixtures/smokes/imports and repeats inside acquisition; every completed runtime must equal preflight. Full unexpected-path and arm/failure receipts are printed. Every available evidence/source file is preserved in a hash-verified PAX tar.gz before artifact upload.",
+    "driverAlgorithmsUnchanged": [
+      "run.mjs",
+      "node-opfs-disk.mjs",
+      "node-runtime.mjs",
+      "node-import-worker-bridge.mjs",
+      "test-opfs.mjs",
+      "baseline-open-connection.txt"
+    ],
+    "helperReadinessWait": false,
+    "exactRuntimeDeltaRelaxed": false,
+    "corpusReplayOrReplacement": false,
+    "newBranch": "test/native-record-fields-checks-20261128-1c413",
+    "originalRunsModifiedOrRerun": false,
+    "measuredCohortsModified": false,
+    "verification": "New complete original correctness and three-corpus gates are mandatory; static review is not execution."
+  }
+}
