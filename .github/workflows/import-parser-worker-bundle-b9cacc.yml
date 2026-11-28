@@ -1,0 +1,271 @@
+name: Import parser worker bundle qualification
+
+on:
+  push:
+    branches: ['perf/parser-worker-bundle-20261128-b9cacc']
+    paths:
+      - '.github/workflows/import-parser-worker-bundle-b9cacc.yml'
+      - '.gitignore'
+      - 'dev/build-libs.js'
+      - 'eslint.config.js'
+      - 'ext/js/dictionary/term-bank-wasm-parser.js'
+      - 'test/term-bank-worker-bundle.test.js'
+      - 'test/web-asset-paths.test.js'
+      - 'dev/perf/import-qualification-20261125-a7f7.py'
+      - 'dev/perf/import-memory-20261125-a7f7/package_entries.py'
+      - 'dev/perf/import-memory-20261125-a7f7/test_package_entries.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate parser worker bundle and every package target
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Test strict package deltas and observation protocol
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Run normal JavaScript lint
+        run: npm run test:js
+      - name: Check main, development, and test types
+        run: |
+          npm run test:ts:main
+          npm run test:ts:dev
+          npm run test:ts:test
+      - name: Run full units and options tests
+        run: |
+          npm run test:unit
+          npm run test:unit:options
+      - name: Validate all extension build targets
+        run: npm run test:build
+      - name: Record final deterministic bundle and exact source graph
+        shell: bash
+        run: |
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          import esbuild from 'esbuild';
+          import {buildTermBankParserWorker} from './dev/build-libs.js';
+
+          const baseline = '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2';
+          const output = 'builds/perf/parser-worker-bundle-validation';
+          fs.mkdirSync(output, {recursive: true});
+          const filename = 'ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js';
+          const originalWorker = 'ext/js/dictionary/term-bank-wasm-parser-worker.js';
+          const before = fs.readFileSync(filename);
+          const metadata = await buildTermBankParserWorker();
+          const bytes = fs.readFileSync(filename);
+          assert.deepEqual(bytes, before, 'Bundle changed when rebuilt from unchanged source');
+          assert.deepEqual(fs.readFileSync(originalWorker), execFileSync('git', ['show', baseline + ':' + originalWorker]));
+          assert.equal(esbuild.version, '0.25.1');
+          assert.equal(bytes.length, 174314);
+          const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+          assert.equal(sha256, 'f6c0c2b6c19f686d1280cc0c456357a944208a2e9f56a588788a8da58e4611a6');
+          assert.equal(Object.keys(metadata.outputs).length, 1);
+          assert.deepEqual(Object.values(metadata.outputs)[0].imports, []);
+          assert.deepEqual(Object.values(metadata.outputs)[0].exports, []);
+          const sources = Object.entries(metadata.inputs).map(([path, value]) => ({
+              path, bytes: value.bytes, sha256: crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex'),
+          }));
+          assert.equal(sources.length, 23);
+          assert.equal(sources.reduce((sum, source) => sum + source.bytes, 0), 444657);
+          const report = {
+              scope: 'Deterministic generated-asset and package proof; no elapsed-time or memory claim',
+              baseline, candidate: execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim(),
+              esbuild: esbuild.version, filename, bytes: bytes.length, sha256, sources,
+              metafileNote: 'The raw esbuild metafile precedes the complete GPL/copyright prefix; final packaged bytes and digest are recorded above.',
+          };
+          fs.writeFileSync(output + '/bundle.json', JSON.stringify(report, null, 2) + '\n');
+          fs.writeFileSync(output + '/esbuild-metafile.json', JSON.stringify(metadata, null, 2) + '\n');
+          console.log(JSON.stringify(report, null, 2));
+          JS
+      - name: Build both frozen sources for all seven package targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          TASK_BASELINE_DIR="$PWD/.tmp-parser-worker-bundle-baseline"
+          git worktree add --detach "$TASK_BASELINE_DIR" 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+          ln -s "$PWD/node_modules" "$TASK_BASELINE_DIR/node_modules"
+          cp ext/legal-npm.html "$TASK_BASELINE_DIR/ext/legal-npm.html"
+          node dev/bin/build.js --all --version 0.0.0.0 > builds/perf/parser-worker-bundle-validation/candidate-build.log 2>&1
+          (
+            cd "$TASK_BASELINE_DIR"
+            node dev/bin/build.js --all --version 0.0.0.0
+          ) > builds/perf/parser-worker-bundle-validation/baseline-build.log 2>&1
+      - name: Require the exact declared package delta in every target
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+          import zipfile
+
+          root = pathlib.Path.cwd()
+          baseline = root / ".tmp-parser-worker-bundle-baseline"
+          sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
+          from package_entries import validate_package_entry_delta
+
+          added = "js/dictionary/term-bank-wasm-parser-worker.bundle.js"
+          changed = "js/dictionary/term-bank-wasm-parser.js"
+          original_worker = "js/dictionary/term-bank-wasm-parser-worker.js"
+          proof = json.loads((root / "builds/perf/parser-worker-bundle-validation/bundle.json").read_text())
+          variants = json.loads((root / "dev/data/manifest-variants.json").read_text())["variants"]
+
+          def members(path):
+              if path.is_dir():
+                  return {str(file.relative_to(path)).replace("\\", "/"): hashlib.sha256(file.read_bytes()).hexdigest()
+                          for file in path.rglob("*") if file.is_file()}
+              with zipfile.ZipFile(path) as archive:
+                  files = [info for info in archive.infolist() if not info.is_dir()]
+                  names = [info.filename for info in files]
+                  if len(names) != len(set(names)):
+                      raise RuntimeError(f"Duplicate ZIP package members in {path}")
+                  return {info.filename: hashlib.sha256(archive.read(info)).hexdigest() for info in files}
+
+          results = []
+          for variant in variants:
+              filename = variant.get("fileName")
+              if variant.get("buildable") is False or not isinstance(filename, str) or not filename:
+                  continue
+              a = members(baseline / "builds" / filename)
+              b = members(root / "builds" / filename)
+              delta = validate_package_entry_delta(a, b, [changed], [added])
+              assert original_worker in b and a[original_worker] == b[original_worker]
+              assert b[added] == proof["sha256"]
+              results.append({"target": variant["name"], "filename": filename, "baselineMembers": len(a),
+                              "candidateMembers": len(b), "bundleSha256": b[added], **delta})
+          assert len(results) == 7, results
+          output = root / "builds/perf/parser-worker-bundle-validation/all-target-package-deltas.json"
+          output.write_text(json.dumps({"baseline": proof["baseline"], "candidate": proof["candidate"], "targets": results}, indent=2) + "\n")
+          print(output.read_text())
+          PY
+      - name: Print available build evidence and failure context
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          root = pathlib.Path("builds/perf/parser-worker-bundle-validation")
+          for name in ("bundle.json", "all-target-package-deltas.json", "candidate-build.log", "baseline-build.log"):
+              path = root / name
+              if path.is_file():
+                  print(f"{name}:")
+                  content = path.read_text(errors="replace")
+                  print("\n".join(content.splitlines()[-40:]) if name.endswith(".log") else content)
+          PY
+      - name: Retain deterministic bundle, package deltas, and build logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-validation-b9cacc
+          path: builds/perf/parser-worker-bundle-validation
+          if-no-files-found: warn
+          retention-days: 90
+  qualify:
+    needs: validate
+    name: ${{ matrix.dictionary }} (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Check the unchanged observation protocol
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare imports with independent order reversal and identical-code controls
+        id: compare
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation_policy=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            # Current develop produces a 37-unit active SAH file. Register that
+            # source-specific expectation before acquiring this new cohort;
+            # historical receipts keep their own 129-131-unit expectation.
+            allocation_policy=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_ORDER" \
+            --pairs 6 \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-added-package-entry js/dictionary/term-bank-wasm-parser-worker.bundle.js \
+            "${allocation_policy[@]}" \
+            --evidence "builds/perf/parser-worker-bundle-$PERF_DICTIONARY-$PERF_ORDER"
+      - name: Print source identities, every observation, analysis, and failure context
+        if: always()
+        env:
+          EVIDENCE_DIR: builds/perf/parser-worker-bundle-${{ matrix.dictionary }}-${{ matrix.order }}
+          QUALIFICATION_OUTCOME: ${{ steps.compare.outcome }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+
+          root = pathlib.Path(os.environ["EVIDENCE_DIR"])
+          print(json.dumps({"baseline": os.environ["PERF_BASELINE"], "candidate": os.environ["PERF_CANDIDATE"], "dictionary": os.environ["PERF_DICTIONARY"], "order": os.environ["PERF_ORDER"], "outcome": os.environ["QUALIFICATION_OUTCOME"], "evidence": str(root)}, indent=2))
+          for name in ("registered-plan.json", "source-identities.json", "analysis.json", "observations.json", "memory/memory-comparison.json", "memory/memory-audit.json", "memory/memory-audit-failure.json", "memory/semantic-failures.json"):
+              path = root / name
+              if not path.is_file():
+                  print(f"{name}: unavailable")
+                  continue
+              try:
+                  data = json.loads(path.read_text())
+                  if name == "source-identities.json":
+                      data = {**{key: value for key, value in data.items() if key != "arms"}, "arms": {arm: {key: value for key, value in identity.items() if key != "entries"} for arm, identity in data["arms"].items()}}
+                  print(f"{name}:")
+                  print(json.dumps(data, indent=2, sort_keys=True))
+              except Exception as error:
+                  print(f"{name}: {type(error).__name__}: {error}")
+          if os.environ["QUALIFICATION_OUTCOME"] != "success":
+              logs = sorted(root.rglob("*.log"), key=lambda path: path.stat().st_mtime) if root.exists() else []
+              for path in logs[-5:]:
+                  print(f"Failure context: {path.relative_to(root)} (last 40 lines)")
+                  lines = path.read_text(errors="replace").splitlines()
+                  print("\n".join(lines[-40:])[-12000:])
+          PY
+      - name: Retain all observations, separate memory runs, and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: parser-worker-bundle-${{ matrix.dictionary }}-${{ matrix.order }}-b9cacc
+          path: builds/perf/parser-worker-bundle-${{ matrix.dictionary }}-${{ matrix.order }}
+          if-no-files-found: error
+          retention-days: 90

@@ -91,6 +91,43 @@ async function buildLib(scriptPath) {
 }
 
 /**
+ * Keep the generated worker beside its source so import.meta.url assets retain
+ * their existing locations while startup loads a single module.
+ * @returns {Promise<import('esbuild').Metafile>}
+ * @throws {Error} The source copyright header is missing.
+ */
+export async function buildTermBankParserWorker() {
+    const root = path.join(dirname, '..');
+    const entryPoint = path.join(extDir, 'js/dictionary/term-bank-wasm-parser-worker.js');
+    const outputPath = path.join(extDir, 'js/dictionary/term-bank-wasm-parser-worker.bundle.js');
+    const result = await esbuild.build({
+        absWorkingDir: root,
+        entryPoints: [entryPoint],
+        bundle: true,
+        minify: false,
+        sourcemap: false,
+        target: 'es2020',
+        format: 'esm',
+        outfile: outputPath,
+        write: false,
+        metafile: true,
+        banner: {js: '// @ts-nocheck'},
+    });
+    // Ordinary source headers are removed by bundling. Preserve every input's
+    // copyright notice with the worker's complete GPL header in the output.
+    const notices = new Set();
+    for (const fileName of Object.keys(result.metafile.inputs)) {
+        const source = fs.readFileSync(path.resolve(root, fileName), 'utf8');
+        for (const notice of source.match(/^ \* Copyright[^\n]*/gm) ?? []) { notices.add(notice); }
+    }
+    const header = fs.readFileSync(entryPoint, 'utf8').match(/^\/\*[\s\S]*?\*\//)?.[0];
+    if (typeof header === 'undefined') { throw new Error('Missing parser worker copyright header'); }
+    const banner = header.replace(/^ \* Copyright[^\n]*\n/m, `${[...notices].join('\n')}\n`);
+    fs.writeFileSync(outputPath, `${banner}\n${result.outputFiles[0].text}`);
+    return result.metafile;
+}
+
+/**
  * Bundles libraries.
  */
 export async function buildLibs() {
@@ -104,6 +141,7 @@ export async function buildLibs() {
             await buildLib(path.join(devLibPath, f.name));
         }
     }
+    await buildTermBankParserWorker();
 
     const schemaDir = path.join(extDir, 'data/schemas/');
     const schemaFileNames = fs.readdirSync(schemaDir);

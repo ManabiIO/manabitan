@@ -19,4 +19,5 @@ dictionaries/
 ext/manifest.json
 
 ext/lib/*
+ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js
 /.tmp-*

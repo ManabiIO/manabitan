@@ -32,6 +32,8 @@ const resources = [
     ['dictionary/zstd-term-content.js', /\bfetch\((new URL\('[^']*jmdict\.zdict', import\.meta\.url\))\)/, 'lib/zstd-dicts/jmdict.zdict'],
     ['dictionary/dictionary-importer.js', /deflate: \[(.+)\]/, 'lib/z-worker.js'],
     ['dictionary/dictionary-importer.js', /inflate: \[(.+)\]/, 'lib/z-worker.js'],
+    ['dictionary/term-bank-wasm-parser.js', /(new URL\('[^']*\.wasm', import\.meta\.url\))/, 'lib/term-bank-parser.wasm'],
+    ['dictionary/term-bank-wasm-parser.js', /(new URL\('[^']*worker\.bundle\.js', import\.meta\.url\))/, 'js/dictionary/term-bank-wasm-parser-worker.bundle.js'],
     ['display/display-generator.js', /loadFromFiles\(\[(.+)\]\)/, 'templates-display.html'],
 ];
 

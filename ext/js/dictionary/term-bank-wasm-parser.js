@@ -3537,7 +3537,7 @@ async function createParallelParserWorkers(abortController, workerCount) {
     try {
         for (let i = 0; i < workerCount; ++i) {
             const worker = new Worker(
-                new URL('term-bank-wasm-parser-worker.js', import.meta.url),
+                new URL('term-bank-wasm-parser-worker.bundle.js', import.meta.url),
                 {type: 'module', name: `manabitan-term-bank-parser-${i + 1}`},
             );
             workers.push(worker);

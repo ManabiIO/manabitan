@@ -127,7 +127,7 @@ export default [
     {
         // Emscripten output is reproduced by build:zstd-wasm and covered by
         // WASM behavior tests. Keep its handwritten wrapper and types linted.
-        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
+        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'ext/js/dictionary/term-bank-wasm-parser-worker.bundle.js', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',
