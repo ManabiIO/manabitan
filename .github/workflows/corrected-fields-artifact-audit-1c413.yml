@@ -1,0 +1,116 @@
+name: Read corrected fields records and preserve original launcher failure
+
+on:
+  push:
+    branches: [audit/native-record-fields-linker-20261128-1c413]
+    paths:
+      - 'dev/perf/corrected-fields-audit-20261128-1c413/**'
+      - '.github/workflows/corrected-fields-artifact-audit-1c413.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: corrected-fields-readonly-audit-1c413
+  cancel-in-progress: false
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  audit:
+    name: Inspect both studies without acquisition
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Preserve launcher context before dependency setup
+        id: startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir setup-evidence
+          printf '{"stage":"before-setup","runId":"%s","attempt":"%s","head":"%s","runnerOs":"%s","runnerArch":"%s"}\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_SHA" "$RUNNER_OS" "$RUNNER_ARCH" > setup-evidence/launcher.json
+          uname -a > setup-evidence/uname.txt
+          sw_vers > setup-evidence/os.txt
+          [[ "$GITHUB_RUN_ATTEMPT" == 1 ]]
+          [[ "$RUNNER_OS" == macOS ]]
+          [[ "$RUNNER_ARCH" == ARM64 ]]
+      - id: audit_source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: audit-source
+          fetch-depth: 1
+          persist-credentials: false
+      - id: previous_source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: b5743f37aa49eef96319e594ed42acd7a5e857f3
+          path: previous-source
+          fetch-depth: 1
+          persist-credentials: false
+      - id: corrected_source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: e5d6d7273fafc84affe808bc4383b55107a3c99b
+          path: corrected-source
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Preserve exact audit source before Python installation
+        id: snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R audit-source/dev/perf/corrected-fields-audit-20261128-1c413 setup-evidence/auditor-source
+          cp audit-source/.github/workflows/corrected-fields-artifact-audit-1c413.yml setup-evidence/workflow.yml
+      - id: python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12.10'
+          architecture: arm64
+          check-latest: false
+      - name: Check pure auditor logic
+        id: tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover \
+            -s audit-source/dev/perf/corrected-fields-audit-20261128-1c413 \
+            -p 'test_*.py' 2>&1 | tee auditor-tests.log
+      - name: Inspect the corrected records and the separate original failure
+        id: inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 audit-source/dev/perf/corrected-fields-audit-20261128-1c413/audit_fields.py \
+            --manifest audit-source/dev/perf/corrected-fields-audit-20261128-1c413/manifest.json \
+            --published-checkout corrected-source \
+            --previous-checkout previous-source \
+            --output audit-evidence 2>&1 | tee auditor-console.log
+      - name: Preserve every launcher and reader outcome
+        if: always()
+        shell: bash
+        env:
+          AUDIT_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p setup-evidence
+          printf '%s\n' "$AUDIT_STEP_RESULTS" > setup-evidence/step-outcomes.json
+      - name: Preserve source, every original member, and all analysis
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: corrected-fields-readonly-audit-${{ github.sha }}
+          path: |
+            setup-evidence
+            audit-evidence
+            auditor-tests.log
+            auditor-console.log
+            audit-source/dev/perf/corrected-fields-audit-20261128-1c413
+            audit-source/.github/workflows/corrected-fields-artifact-audit-1c413.yml
+          if-no-files-found: error
+          retention-days: 14
+          include-hidden-files: true
+          compression-level: 6

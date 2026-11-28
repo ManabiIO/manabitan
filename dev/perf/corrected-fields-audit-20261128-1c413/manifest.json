@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "repository": "ManabiIO/manabitan",
+  "runId": 46123144616,
+  "headSha": "e5d6d7273fafc84affe808bc4383b55107a3c99b",
+  "jobId": 140911790961,
+  "artifact": {
+    "id": 15254998779,
+    "name": "native-record-fields-1c413-e5d6d7273fafc84affe808bc4383b55107a3c99b",
+    "sizeBytes": 4076464,
+    "sha256": "e4b76382586a00d8824e85804e3a978942fd452f61c2006aedc1342c5d84d654"
+  },
+  "previousFailedStudy": {
+    "schemaVersion": 1,
+    "enabled": true,
+    "repository": "ManabiIO/manabitan",
+    "runId": 46115204690,
+    "headSha": "b5743f37aa49eef96319e594ed42acd7a5e857f3",
+    "jobId": 140887357214,
+    "artifact": {
+      "id": 15254144071,
+      "name": "native-record-fields-1c413-b5743f37aa49eef96319e594ed42acd7a5e857f3",
+      "sizeBytes": 3926247,
+      "sha256": "c46d327aefbe24c26e6ef3c3b3375a0f786205efb00d56568d242a68d5cf1e7e"
+    }
+  },
+  "note": "Root authorized one read-only audit after exact original artifact metadata and independently recomputed numeric gates were available. Full archive/source/capture/all42-receipt qualification is still required. The previous failed study remains separately verified and contributes zero performance observations. No import/component rerun or new timing is authorized."
+}

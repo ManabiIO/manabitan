@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "Read-only audit launcher support and pre-execution correction",
+  "tuple": {
+    "runner": "macos-15",
+    "architecture": "arm64",
+    "python": "3.12.10",
+    "runnerImagesReadmeGitBlob": "a69cab6b34307d373b1aedeb5a60891dd18f2bdf",
+    "pythonManifestGitBlob": "8468b3406cb309a299b2ead4109d0a2b2467153b",
+    "pythonManifestSha256": "036beb1ca605c3cbc208ef44b9867cff68a9cdc07c9dd711b080ef31a258f363",
+    "reason": "Official current runner-images supported table omits macos-14 and lists macos-15 as arm64; Python3.12.12 is Linux-only while3.12.10 has Darwin-arm64."
+  },
+  "priorFieldsWorkflow": {
+    "blob": "6ed84ad21ccfb5b487dedcc90d72fc26d2eb9944",
+    "runner": "macos-14",
+    "python": "3.12.12",
+    "published": false,
+    "executed": false
+  },
+  "triggerEvidence": {
+    "separateWatchdogReadOnlyAuditRun": 46121998730,
+    "failureStage": "Python setup, before pure tests or any original artifact reading",
+    "importsOrTimingsRerun": false
+  },
+  "pythonVersions": {
+    "repository": "actions/python-versions",
+    "commit": "9bc1fe8f6b4befbb1edd3955a1adc8fc086b3e08",
+    "blob": "8468b3406cb309a299b2ead4109d0a2b2467153b",
+    "path": "versions-manifest.json",
+    "bytes": 841422,
+    "sha256": "036beb1ca605c3cbc208ef44b9867cff68a9cdc07c9dd711b080ef31a258f363",
+    "entries": [
+      {
+        "version": "3.12.12",
+        "stable": true,
+        "release_url": "https://github.com/actions/python-versions/releases/tag/3.12.12-18393146713",
+        "files": [
+          {
+            "filename": "python-3.12.12-linux-22.04-arm64.tar.gz",
+            "arch": "arm64",
+            "platform": "linux",
+            "platform_version": "22.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.12-18393146713/python-3.12.12-linux-22.04-arm64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.12-linux-22.04-x64.tar.gz",
+            "arch": "x64",
+            "platform": "linux",
+            "platform_version": "22.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.12-18393146713/python-3.12.12-linux-22.04-x64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.12-linux-24.04-arm64.tar.gz",
+            "arch": "arm64",
+            "platform": "linux",
+            "platform_version": "24.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.12-18393146713/python-3.12.12-linux-24.04-arm64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.12-linux-24.04-x64.tar.gz",
+            "arch": "x64",
+            "platform": "linux",
+            "platform_version": "24.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.12-18393146713/python-3.12.12-linux-24.04-x64.tar.gz"
+          }
+        ]
+      },
+      {
+        "version": "3.12.10",
+        "stable": true,
+        "release_url": "https://github.com/actions/python-versions/releases/tag/3.12.10-14343898437",
+        "files": [
+          {
+            "filename": "python-3.12.10-darwin-arm64.tar.gz",
+            "arch": "arm64",
+            "platform": "darwin",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-darwin-arm64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-darwin-x64.tar.gz",
+            "arch": "x64",
+            "platform": "darwin",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-darwin-x64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-linux-20.04-x64.tar.gz",
+            "arch": "x64",
+            "platform": "linux",
+            "platform_version": "20.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-linux-20.04-x64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-linux-22.04-arm64.tar.gz",
+            "arch": "arm64",
+            "platform": "linux",
+            "platform_version": "22.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-linux-22.04-arm64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-linux-22.04-x64.tar.gz",
+            "arch": "x64",
+            "platform": "linux",
+            "platform_version": "22.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-linux-22.04-x64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-linux-24.04-arm64.tar.gz",
+            "arch": "arm64",
+            "platform": "linux",
+            "platform_version": "24.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-linux-24.04-arm64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-linux-24.04-x64.tar.gz",
+            "arch": "x64",
+            "platform": "linux",
+            "platform_version": "24.04",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-linux-24.04-x64.tar.gz"
+          },
+          {
+            "filename": "python-3.12.10-win32-arm64.zip",
+            "arch": "arm64",
+            "platform": "win32",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-win32-arm64.zip"
+          },
+          {
+            "filename": "python-3.12.10-win32-x64.zip",
+            "arch": "x64",
+            "platform": "win32",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-win32-x64.zip"
+          },
+          {
+            "filename": "python-3.12.10-win32-x86.zip",
+            "arch": "x86",
+            "platform": "win32",
+            "download_url": "https://github.com/actions/python-versions/releases/download/3.12.10-14343898437/python-3.12.10-win32-x86.zip"
+          }
+        ]
+      }
+    ]
+  },
+  "runnerImages": {
+    "repository": "actions/runner-images",
+    "path": "README.md",
+    "gitBlob": "a69cab6b34307d373b1aedeb5a60891dd18f2bdf",
+    "supportedLabel": "macos-15",
+    "architecture": "arm64",
+    "oldProposedLabelAbsent": true
+  },
+  "unchangedCode": {
+    "correctedReader": "c4bcede86fddf5f4af18b01b1b7d98c5d4423cba",
+    "originalReader": "efae89e883492a0217c62e6a86bf867d11537158",
+    "previousFailure": "887a4ca7e8361261ebc237c7481ffab55876a245",
+    "transport": "999868771f9f0c2ae9df861de3e5331e2ec89a72",
+    "originalPureTests": "19296d04f3e1905191416f7c6fee50331a31a64c",
+    "previousFailurePureTests": "b6f2e2706c5be82200d5579cf75c6cb54fe21100"
+  },
+  "newTimingOrImportAcquired": false,
+  "qualificationDecisionNotInferredFromLauncher": true
+}
