@@ -1,0 +1,114 @@
+name: Canonical sidecar checksum source follow-up 20261128 beb5
+
+on:
+  push:
+    branches: ['test/canonical-sidecar-source-20261128-beb5']
+    paths: ['.github/workflows/canonical-sidecar-source-beb5.yml']
+
+permissions:
+  contents: read
+
+env:
+  ORIGINAL_COMMIT: 570ccc3968046269cb00d2053e49d3c32367031a
+  CANDIDATE_COMMIT: ee903e032650430839468fef391b8d820196e61d
+
+jobs:
+  source-checks:
+    name: Comments-only source correction and complete static gates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.CANDIDATE_COMMIT }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Prove exact comment-only source change
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/canonical-sidecar-source-beb5
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {createHash} from 'node:crypto'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          const original = process.env.ORIGINAL_COMMIT
+          const candidate = process.env.CANDIDATE_COMMIT
+          const filename = 'ext/js/dictionary/term-content-canonical-scan.js'
+          const git = (...args) => execFileSync('git', args, {encoding: 'utf8'}).trim()
+          const sha256 = (value) => createHash('sha256').update(value).digest('hex')
+          const report = {complete: false, original, candidate, workflowCommit: process.env.GITHUB_SHA, filename}
+          try {
+              assert.equal(git('rev-parse', 'HEAD'), candidate)
+              assert.equal(git('rev-parse', 'HEAD^{tree}'), 'f58ad9767d17583b2cf285696ce341ef422297c9')
+              assert.equal(git('rev-parse', 'HEAD^'), original)
+              assert.equal(git('diff', '--name-only', original, candidate), filename)
+              const before = execFileSync('git', ['show', original + ':' + filename], {encoding: 'utf8'})
+              const after = readFileSync(filename, 'utf8')
+              const changes = [
+                  ['/** @type {unknown} */\n', 'const checksumTypedPrototype = /** @type {object} */ (Object.getPrototypeOf(checksumUint8Prototype))'],
+                  ['/** @type {(this: WeakMap<WebAssembly.Memory, CanonicalInstance>, key: WebAssembly.Memory) => CanonicalInstance|undefined} */\n', 'const checksumWeakMapGet = WeakMap.prototype.get'],
+              ]
+              let recovered = after
+              for (const [annotation, declaration] of changes) {
+                  assert.equal(before.split(declaration).length, 2)
+                  assert.equal(recovered.split(annotation + declaration).length, 2)
+                  recovered = recovered.replace(annotation + declaration, declaration)
+              }
+              assert.equal(recovered, before)
+              report.originalSourceSha256 = sha256(before)
+              report.correctedSourceSha256 = sha256(after)
+              report.correctedBlob = git('rev-parse', 'HEAD:' + filename)
+              assert.equal(report.correctedBlob, '02456bab6712d4722780167505531600686e2733')
+              report.nativeSha256 = Object.fromEntries(['term-content-canonical-scan-v1.wasm', 'term-bank-parser.wasm'].map((name) => [
+                  name, sha256(readFileSync('dev/data/dictionary-wasm/' + name)),
+              ]))
+              assert.equal(report.nativeSha256['term-content-canonical-scan-v1.wasm'], '631a1c430f50579f2ca7227f05ee3793a508d3e5c2ab988024b1616e1f7b8896')
+              assert.equal(report.nativeSha256['term-bank-parser.wasm'], '8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee')
+              report.complete = true
+              report.proof = 'Removing only the two unique inserted JSDoc comments recovers the entire frozen scanner byte-for-byte; every other tracked file is unchanged.'
+              report.timingAttribution = 'Original run 46112170828 remains bound to 570ccc3968046269cb00d2053e49d3c32367031a. This job does not rerun or replace any import observation.'
+          } catch (error) {
+              report.error = String(error)
+              throw error
+          } finally {
+              writeFileSync('builds/perf/canonical-sidecar-source-beb5/comment-only-proof.json', JSON.stringify(report, null, 2) + '\n')
+          }
+          JS
+      - name: Complete JavaScript lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:js 2>&1 | tee builds/perf/canonical-sidecar-source-beb5/lint.log
+      - name: Complete type validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:ts 2>&1 | tee builds/perf/canonical-sidecar-source-beb5/types.log
+      - name: Install pinned compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Reproduce exact native bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/canonical-sidecar-source-beb5/native-build.log
+      - name: Complete all-target build gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:build 2>&1 | tee builds/perf/canonical-sidecar-source-beb5/build.log
+      - name: Complete JSON format gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:json:format 2>&1 | tee builds/perf/canonical-sidecar-source-beb5/json-format.log
+      - name: Retain proof and every available source-gate log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: canonical-sidecar-source-beb5-ee903e0
+          path: builds/perf/canonical-sidecar-source-beb5
+          if-no-files-found: error
+          retention-days: 14
