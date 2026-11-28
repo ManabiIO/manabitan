@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/llvm-21/bin/clang",
+    "--target=wasm32-freestanding",
+    "-matomics",
+    "-mbulk-memory",
+    "-nostdlib",
+    "-Wl,--no-entry",
+    "-Wl,--shared-memory",
+    "-Wl,--max-memory=4294967296",
+    "-Wl,--export=probe",
+    "-Wl,--strip-all",
+    "-o",
+    "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-local-validation/compiler-discovery-diagnostic/probe.wasm",
+    "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-local-validation/compiler-discovery-diagnostic/probe.c"
+  ],
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "clang: error: unable to execute command: posix_spawn failed: No such file or directory\nclang: error: linker command failed with exit code 1 (use -v to see invocation)\n"
+}

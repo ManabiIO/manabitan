@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "previousProductCommit": "a8194e107c741dc1fd7e38cd9602e1aaacfc95ee",
+  "productCommit": "e90c4c04172b691985858609094887f9541541dd",
+  "previousResearchCommit": "c76723e9da97046d55ba529b71fcbc10d4da6638",
+  "reason": "Test-only documentation/whitespace repairs found by local scoped lint; no runtime or protocol changes.",
+  "runtimeSourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057"
+  },
+  "testBeforeSha256": "fd01fd5583f05c7220fba85fb08b2c8531928eadd0c3ee485dfebbe22f5d0806",
+  "testAfterSha256": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+  "testExecutableAstEqual": true,
+  "previousRunId": 46108777430,
+  "previousRunObservedStatus": "queued before amendment; no browser observation acquired",
+  "allOriginalCohortAndDecisionGatesUnchanged": true,
+  "localNode": "24.22.3",
+  "localCorrectnessIsNotBrowserQualification": true,
+  "fullCopyManifestSha256": "3332a215bafffe09f0402fcabeb498bc0ce7cb45245de8e3ff78943eb122339f"
+}

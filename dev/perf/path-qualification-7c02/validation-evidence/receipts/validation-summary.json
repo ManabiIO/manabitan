@@ -1,0 +1,89 @@
+{
+  "status": "required-local-unit-coverage-and-dry-build-complete-with-preserved-setup-failures",
+  "headBeforeTestOnlyStyleChanges": "a8194e107c741dc1fd7e38cd9602e1aaacfc95ee",
+  "node": "v24.22.3",
+  "hostedQualificationNode": "22.22.0; local evidence here uses24.22.3",
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057",
+    "test/term-bank-media-projection.test.js": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "unit": {
+    "originalFullSuite": {
+      "receipt": "full-unit-attempt-1.json",
+      "exitCode": 1,
+      "passedFiles": 667,
+      "failedFiles": 2,
+      "passedTests": 15138,
+      "skippedTests": 68,
+      "assertionFailures": 0,
+      "failures": "Compiler discovery before tests in term-bank-crc and term-bank-memory-page;21unexecuted cases"
+    },
+    "firstCompilerRepair": {
+      "receipt": "native-compiler-repair-attempt-1.json",
+      "exitCode": 1,
+      "passedTests": 0,
+      "skippedTests": 21,
+      "failure": "Debian Clang requires executable wasm-ld-21; test helper ignores MANABITAN_WASM_LD; exact suppressed diagnostic retained"
+    },
+    "completedTargetedRepair": {
+      "receipt": "native-compiler-repair-attempt-2.json",
+      "exitCode": 0,
+      "passedFiles": 2,
+      "passedTests": 21,
+      "compiler": "Clang/LLD21.1.8 verified with hashes; private PATH alias to pinned wasm-ld; no shared toolchain edits"
+    },
+    "combinedUniqueCoverage": {
+      "passedTests": 15159,
+      "inheritedSkippedTests": 47,
+      "filesExecutedSuccessfullyAcrossAttempts": 669,
+      "caveat": "This combines previously unexecuted native cases with the original full run; it does not relabel the original exit1 as a successful single full-suite invocation."
+    }
+  },
+  "build": {
+    "firstAttempt": {
+      "receipt": "all-target-dry-build-attempt-1.json",
+      "exitCode": 1,
+      "failure": "copyDictionaryWasm refuses symlinked ext/lib output directory"
+    },
+    "repair": "Replace only validation worktree ext/lib symlink with real generated-output directory; original target unchanged",
+    "completedAttempt": {
+      "receipt": "all-target-dry-build-attempt-2.json",
+      "exitCode": 0,
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ]
+    }
+  },
+  "sourceUnchangedInAllCompletedAttempts": true,
+  "receipts": {
+    "all-target-dry-build-attempt-1.json": "26af4c06de72fb9c9aa4f32fa656cc9cccc65690de3106a7734bac201fef09cd",
+    "full-unit-attempt-1.json": "c295f406782a507e2a512e44e67ba2865b4f45a66cfc8d706a41df52a9166574",
+    "types-test-attempt-1.json": "b00022179d84170e6258e3040f1b420d3e4779c1bfe47d9eb060e9bc5fbb710c",
+    "native-compiler-repair-attempt-1.json": "2463ea9253c2298586e185ef8234c6729cbdae566963a3ffae2656ddbfd97b6c",
+    "all-target-dry-build-attempt-2.json": "6c3e1d0dc8fca801f220dde275f730fd24ab5ce7929f3722c190a2e0fd648ac9",
+    "build-output-directory-repair.json": "4d7b8946029b16a6ef0f69685b829df14d2013bf2479eec6e5377ffd4bf1d574",
+    "native-compiler-repair-attempt-2.json": "048772342f8b41e4a5b4048ea3ff2553bb64fec838064c6dbcc0fb4127604435",
+    "test-style-equivalence.json": "785783c07d80b660b50e3268702bc47459fbebc0ae001a16d1a2a6ee6b684295",
+    "browser-after-recovery.json": "4b6d6c9e2bcb7dff109fb5514553475f84763461a3816ab32ea4b50be55f5a4d",
+    "eslint-attempt-1.json": "8f2264c74737fb9a5518aa5ffd81b26d34242968a5804d6af6fd52d26000faad",
+    "types-main-attempt-1.json": "543db0b1955aeaca8302fa917b230471fc02a9d4f604b9339f7643dcd0e0e45e",
+    "vndb-restore.json": "65b82cc8635836ea92985099d7de7bcda271c0016ce513c181e72e54f317158c",
+    "eslint-attempt-2.json": "e34c044b38559f4d087007cabc1dee4e3202136dab842c47a1d05d2604cf6bf5"
+  },
+  "notClaimed": [
+    "Node22 equivalence from this local run",
+    "browser or integration qualification",
+    "performance or memory qualification",
+    "single-invocation full-suite pass"
+  ]
+}

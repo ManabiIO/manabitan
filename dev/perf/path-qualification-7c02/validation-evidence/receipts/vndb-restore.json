@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+  "expectedBytes": 291705969,
+  "expectedSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "destination": "/tmp/manabitan-7c02-builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+  "purpose": "Restore immutable input after executor temporary-directory reset; no timing acquisition",
+  "bytes": 291705969,
+  "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+}

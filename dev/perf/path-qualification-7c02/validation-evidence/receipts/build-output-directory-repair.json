@@ -1,0 +1,8 @@
+{
+  "action": "replace only validation worktree ext/lib symlink with a real empty generated-output directory",
+  "oldSymlinkTarget": "/workspace/scratch/7c02210aa375/manabitan/ext/lib",
+  "path": "/tmp/manabitan-path-validation-7c02/ext/lib",
+  "sourceFilesChanged": false,
+  "reason": "copyDictionaryWasm refuses to write through a symlinked output directory",
+  "timeUtc": "2026-11-28T05:16:21.295891+00:00"
+}

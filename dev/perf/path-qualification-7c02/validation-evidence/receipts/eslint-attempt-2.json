@@ -1,0 +1,17 @@
+{
+  "kind": "scoped ESLint after test-only documentation/formatting fixes",
+  "runtimeCandidate": "a8194e107c741dc1fd7e38cd9602e1aaacfc95ee",
+  "node": "24.22.3",
+  "started": "2026-11-28T05:08:19.561258+00:00",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "--max-old-space-size=1536",
+    "/workspace/scratch/7c02210aa375/manabitan/node_modules/eslint/bin/eslint.js",
+    "ext/js/dictionary/term-bank-wasm-parser.js",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+    "test/term-bank-media-projection.test.js"
+  ],
+  "complete": true,
+  "exitCode": 0,
+  "finished": "2026-11-28T05:08:29.976298+00:00"
+}

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "scope": "Preserved complete original projection component; packaging and verification do not run imports or timings.",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateParserSha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+  "completeOriginalObservations": 3060,
+  "plannerGroups": 170,
+  "sourceRows": 6648310,
+  "groupLocalMediaRows": 146725,
+  "uniqueMediaFiles": 146570,
+  "rawProjectionFixturesIncluded": false,
+  "rawProjectionFixtureBytesOmitted": 7077646,
+  "files": [
+    {
+      "path": "README.md",
+      "sizeBytes": 4147,
+      "sha256": "e80952ef10c4563dd66b2aa0dcb8f20bc33a5339b8b78995681829729ca36126"
+    },
+    {
+      "path": "REPRODUCE.md",
+      "sizeBytes": 4068,
+      "sha256": "35e41289dbc243f39b474dcc0a74323295450f238c3338cb259523fe91fdbc5c"
+    },
+    {
+      "path": "SUMMARY.md",
+      "sizeBytes": 7940,
+      "sha256": "cbd823d587ab11e47a911838de82f657268b1cf77329c45621dc97b7dbdfec77"
+    },
+    {
+      "path": "baseline-planner-census.json.gz",
+      "sizeBytes": 45108,
+      "sha256": "2f1f2107b4471c1b93c21a84fedc60121729f6da7b9a866c28ab2c280b294980",
+      "uncompressedSizeBytes": 488572,
+      "uncompressedSha256": "1edb466e299e8e8532cf3991beab83383112e64df1288366f63fdfea9d4ea64b",
+      "compression": "gzip level9, mtime0, empty filename; bytes deterministically verified"
+    },
+    {
+      "path": "benchmark-plan.md",
+      "sizeBytes": 7771,
+      "sha256": "80b7b1878e524a7567daa7bca90b54b6653a47c4d2130707242fa9bcfae26132"
+    },
+    {
+      "path": "component-result.json.gz",
+      "sizeBytes": 66035,
+      "sha256": "732322df73e52fa7551a2c919109fb3214178c0aaf18c5d1112341f5a5d116d5",
+      "uncompressedSizeBytes": 708980,
+      "uncompressedSha256": "294fdad7cd4e052737597cc422f2d6ee0527cc48f5f067d58f5e56e2efe87c34",
+      "compression": "gzip level9, mtime0, empty filename; bytes deterministically verified"
+    },
+    {
+      "path": "fixture-manifest.json.gz",
+      "sizeBytes": 49007,
+      "sha256": "c686f02cea211024c14a44dd342f3591e0c8244b147f5ad50985af4fda702b13",
+      "uncompressedSizeBytes": 258368,
+      "uncompressedSha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2",
+      "compression": "gzip level9, mtime0, empty filename; bytes deterministically verified"
+    },
+    {
+      "path": "frozen-inputs.json",
+      "sizeBytes": 4046,
+      "sha256": "e84184b5356d72594a6abd0d701c647d3fb5e8e364e400acf70f7bd67a71b954"
+    },
+    {
+      "path": "independent-audit.json",
+      "sizeBytes": 1461,
+      "sha256": "1d27061dbb149ffc36aeb90c7ff7ab7f816589c243f0409e33fa9f935ef0ee54"
+    },
+    {
+      "path": "loaded-probes.tar.gz",
+      "sizeBytes": 121610,
+      "sha256": "6c297d21eb086be77a1c058935d2321501cc8624d8fb114ff5911ad6b46c641c"
+    },
+    {
+      "path": "reproduction/capture-worker.mjs",
+      "sizeBytes": 5489,
+      "sha256": "3e507fe3ec39d987fba9f31d3821863ca33e03096d5751719183809d30c4cc41"
+    },
+    {
+      "path": "reproduction/path-component.mjs",
+      "sizeBytes": 27750,
+      "sha256": "50202feb9a645709a5bd38c2088a433cb8da964448dcb0e57afebc9b63ef7e44"
+    },
+    {
+      "path": "verify-evidence.py",
+      "sizeBytes": 7362,
+      "sha256": "50c79fa7ba8f88a38294ab644e495b58f6f9ba66107a13e1a6c6866357b9ddc8"
+    }
+  ],
+  "filePayloadBytesExcludingThisManifest": 351794
+}

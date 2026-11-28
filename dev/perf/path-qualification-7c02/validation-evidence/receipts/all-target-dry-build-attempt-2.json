@@ -1,0 +1,37 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:build"
+  ],
+  "cwd": "/tmp/manabitan-path-validation-7c02",
+  "head": "a8194e107c741dc1fd7e38cd9602e1aaacfc95ee",
+  "node": "v24.22.3",
+  "startedUtc": "2026-11-28T05:16:21.572155+00:00",
+  "sourceBefore": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057",
+    "test/term-bank-media-projection.test.js": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "status": "complete",
+  "log": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-local-validation/all-target-dry-build-attempt-2.log",
+  "setupRepair": "build-output-directory-repair.json",
+  "previousFailureRetained": "all-target-dry-build-attempt-1.json",
+  "exitCode": 0,
+  "elapsedSeconds": 1.0176603290001367,
+  "completedUtc": "2026-11-28T05:16:22.591301+00:00",
+  "sourceAfter": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057",
+    "test/term-bank-media-projection.test.js": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "logSha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d",
+  "gitStatusAfter": " M test/term-bank-media-projection.test.js\n?? node_modules\n",
+  "sourceUnchanged": true
+}

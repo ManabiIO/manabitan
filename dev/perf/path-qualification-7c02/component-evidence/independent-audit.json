@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "scope": "Independent saved-data arithmetic and current source/fixture identity audit only; no benchmark rerun",
+  "resultSha256": "294fdad7cd4e052737597cc422f2d6ee0527cc48f5f067d58f5e56e2efe87c34",
+  "fixtureManifestSha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2",
+  "sourceReceiptsChecked": 14,
+  "fixtureGroupsChecked": 170,
+  "observationsChecked": 3060,
+  "aggregateMetricsChecked": 54,
+  "comparisons": {
+    "B/A": {
+      "cpuMedianPercent": -25.472355088552195,
+      "cpuMedianSavedPerCorpusMs": 83.10075000000002,
+      "cpuFasterPairs": 6,
+      "wallMedianPercent": -30.918749196079574,
+      "wallMedianSavedPerCorpusMs": 79.80685649999873,
+      "wallFasterPairs": 6
+    },
+    "B/C": {
+      "cpuMedianPercent": -24.459704320915108,
+      "cpuMedianSavedPerCorpusMs": 77.93981249999999,
+      "cpuFasterPairs": 6,
+      "wallMedianPercent": -32.06010703475495,
+      "wallMedianSavedPerCorpusMs": 82.66354256250236,
+      "wallFasterPairs": 6
+    },
+    "C/A": {
+      "cpuMedianPercent": 1.9245559338478935,
+      "cpuMedianSavedPerCorpusMs": -6.419374999999974,
+      "cpuFasterPairs": 3,
+      "wallMedianPercent": 2.28487982733222,
+      "wallMedianSavedPerCorpusMs": -5.608757812499732,
+      "wallFasterPairs": 2
+    }
+  },
+  "gates": {
+    "completeAndMatching": true,
+    "relativeGain": true,
+    "absoluteCpuGain": true,
+    "unchangedControls": true
+  },
+  "allGatesPass": true
+}

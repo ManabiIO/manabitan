@@ -1,0 +1,1087 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete Node24 actual-worker path-copy correctness evidence only; no new timings or memory-performance claim.",
+  "archiveCompression": "deterministic tar metadata, gzip level9 mtime0 empty filename",
+  "files": [
+    {
+      "path": "RESULT.md",
+      "sizeBytes": 3300,
+      "sha256": "62233e5474e8d3c27258ab872647abc999929e176751e6854246e0d79a7f6f3c"
+    },
+    {
+      "path": "evidence.tar.gz",
+      "sizeBytes": 315241,
+      "sha256": "d37a6081cabf79f8439ef24683488d0c61755de2219d1ce2bc3bdc2ee54a8d76"
+    },
+    {
+      "path": "verify-evidence.py",
+      "sizeBytes": 3813,
+      "sha256": "487c1540e5cf5ee0869359723b4b8cb02687c150ea5ddc71fe8b7f31a1fe6ce6"
+    }
+  ],
+  "members": [
+    {
+      "path": "complete-run/frozen-inputs.json",
+      "sizeBytes": 2736,
+      "sha256": "717c87912d3213a3cb93720627025a0d41731ba9d3cf4e7871693d9e92d32fdc"
+    },
+    {
+      "path": "complete-run/monitor-receipt.json",
+      "sizeBytes": 3615,
+      "sha256": "f79899c90089294daea443ac830a6426e485479456270f69b0ce0cdddbd5e76e"
+    },
+    {
+      "path": "complete-run/oracle/group-000001.json",
+      "sizeBytes": 1193,
+      "sha256": "78cc1e686d1606c5d2094b6e9303bb5ef625a2604e97392678fe7100722e3d1f"
+    },
+    {
+      "path": "complete-run/oracle/group-000005.json",
+      "sizeBytes": 1193,
+      "sha256": "eb0ff8c96d723f91bd48ad676779c0a3f55790c21b7cf63b5650df9bdfe84e02"
+    },
+    {
+      "path": "complete-run/oracle/group-000009.json",
+      "sizeBytes": 1196,
+      "sha256": "c8e05cc4022dd2cdd68206a9a4c18f24b11096565caa34bbc7120286e862a0c3"
+    },
+    {
+      "path": "complete-run/oracle/group-000013.json",
+      "sizeBytes": 1198,
+      "sha256": "c24856f3a556e2179d76471d02de0fde12b4d86c81fb40c7d8cdc270e51406b1"
+    },
+    {
+      "path": "complete-run/oracle/group-000017.json",
+      "sizeBytes": 1198,
+      "sha256": "e8fc7387e66fb5e203cb7c9ecb6f6ce55c25d84ffb9c2fe6592a53e3d4a7da10"
+    },
+    {
+      "path": "complete-run/oracle/group-000021.json",
+      "sizeBytes": 1198,
+      "sha256": "09d1f8d0d3f96fb1f92ec699455749316792da086998237a205f0a6df90a585b"
+    },
+    {
+      "path": "complete-run/oracle/group-000025.json",
+      "sizeBytes": 1198,
+      "sha256": "b154d6d11f2a5aa7696c02205c4e92f9f1a3f7b487e3c109c23ab3707329e66e"
+    },
+    {
+      "path": "complete-run/oracle/group-000029.json",
+      "sizeBytes": 1198,
+      "sha256": "217e320dc3ffb110d3968ecd0bbf85bfd3dedb45f3525b546f1b08db5193c555"
+    },
+    {
+      "path": "complete-run/oracle/group-000033.json",
+      "sizeBytes": 1198,
+      "sha256": "6ddc77e3410b8e865f68b6e4ae689719d7627a32f6da0a600876be41e53a6684"
+    },
+    {
+      "path": "complete-run/oracle/group-000037.json",
+      "sizeBytes": 1199,
+      "sha256": "c9de78043a8d25540b2fd1fab2305fafc39ffe7f46ac163fecdf12b82a95fbb7"
+    },
+    {
+      "path": "complete-run/oracle/group-000041.json",
+      "sizeBytes": 1199,
+      "sha256": "1436a5f70264b399a3575efc62cd44835c1e38a7979702b473952c90806435fe"
+    },
+    {
+      "path": "complete-run/oracle/group-000045.json",
+      "sizeBytes": 1199,
+      "sha256": "399aca59ca1db7fa1c6e291a485f0e99402010785436974856bd8ccfc96feaad"
+    },
+    {
+      "path": "complete-run/oracle/group-000049.json",
+      "sizeBytes": 1199,
+      "sha256": "ab92dde6883486d0cdf0c13c31be82abf75b8ed4128ed97ae653a71109c44c1e"
+    },
+    {
+      "path": "complete-run/oracle/group-000053.json",
+      "sizeBytes": 1199,
+      "sha256": "daca967e10bfecd94b4e9edb93ffff6e6ae2919278854fa30f792a7d3ebf783d"
+    },
+    {
+      "path": "complete-run/oracle/group-000057.json",
+      "sizeBytes": 1199,
+      "sha256": "285897a9e9213b5d2ee67ef698bd1b1676e5f882912666ab564dc819afb20282"
+    },
+    {
+      "path": "complete-run/oracle/group-000061.json",
+      "sizeBytes": 1199,
+      "sha256": "be91bde4f5c1d55757c94be953498725e6e8df1eebc5fb202db04148e1a82d04"
+    },
+    {
+      "path": "complete-run/oracle/group-000065.json",
+      "sizeBytes": 1199,
+      "sha256": "134638a9dc999e96821e6c4b52b3f61a3fe9f3a24ab94bb99a8bb160d467a286"
+    },
+    {
+      "path": "complete-run/oracle/group-000069.json",
+      "sizeBytes": 1200,
+      "sha256": "5c420b1e7cfa6374777b635531ec964bc7c55d187dd033652fb51e54271821c5"
+    },
+    {
+      "path": "complete-run/oracle/group-000073.json",
+      "sizeBytes": 1199,
+      "sha256": "9370089ea092fee4bb4a5d73409fd9af57d812ba3adbf3023c3fa1618d8a9abc"
+    },
+    {
+      "path": "complete-run/oracle/group-000077.json",
+      "sizeBytes": 1199,
+      "sha256": "47bfb8303df103d9b07dd318a40a8bce8d2ebbf1ac68752eae5a17cb6fd53205"
+    },
+    {
+      "path": "complete-run/oracle/group-000081.json",
+      "sizeBytes": 1199,
+      "sha256": "8bfcb1b60673ab324f3967b1c276df709966305e6a00762bad061e11cc347c07"
+    },
+    {
+      "path": "complete-run/oracle/group-000085.json",
+      "sizeBytes": 1199,
+      "sha256": "9248f5e08ed5983a9bad6acedebaba27382a2f8f27d6887a0e19b1e8fb9f514a"
+    },
+    {
+      "path": "complete-run/oracle/group-000089.json",
+      "sizeBytes": 1199,
+      "sha256": "ecc759e8c72092113c604ec76fc394efb2a05bff4dfc7b6dcf5339e8d9357cf5"
+    },
+    {
+      "path": "complete-run/oracle/group-000093.json",
+      "sizeBytes": 1199,
+      "sha256": "1d712caa167f67c5faa0e1c0577a6399804ea07a072bb2c79360db3a2282eb00"
+    },
+    {
+      "path": "complete-run/oracle/group-000097.json",
+      "sizeBytes": 1200,
+      "sha256": "62a8bc940615d4aa2b99883f1078191d6713943110ccbe76a81acf87bbd46b7a"
+    },
+    {
+      "path": "complete-run/oracle/group-000101.json",
+      "sizeBytes": 1204,
+      "sha256": "5cf2c1c9904cb560f0268df9bd1e35ebb20ce9a1d076f3864b03005c19b8c541"
+    },
+    {
+      "path": "complete-run/oracle/group-000105.json",
+      "sizeBytes": 1204,
+      "sha256": "251c3593f8282f48b0149ce6fa75b7ea5d65667e50d50bc4d45f1d472629af36"
+    },
+    {
+      "path": "complete-run/oracle/group-000109.json",
+      "sizeBytes": 1204,
+      "sha256": "4bac64c94a9893cbfa0e749b6f9fa4476ef8a27eea53b940480b20aa18ab8a97"
+    },
+    {
+      "path": "complete-run/oracle/group-000113.json",
+      "sizeBytes": 1204,
+      "sha256": "e73c5819236c4f5e052ae2abb4aac7b51a43b633aac040a1cf6328dbbe1677e7"
+    },
+    {
+      "path": "complete-run/oracle/group-000117.json",
+      "sizeBytes": 1204,
+      "sha256": "8c16edd793a3a96524c2c0690016fcb6467e91b9586e95f1fc70994694489ccc"
+    },
+    {
+      "path": "complete-run/oracle/group-000121.json",
+      "sizeBytes": 1204,
+      "sha256": "39671ce7937a210ebfa1e1bf3b9b87a96d772d633f8f6485be4b272f88878114"
+    },
+    {
+      "path": "complete-run/oracle/group-000125.json",
+      "sizeBytes": 1204,
+      "sha256": "c98fe4de4cc868397a2e9305e690fab465c3dcdaf56d7e55a57011760357e410"
+    },
+    {
+      "path": "complete-run/oracle/group-000129.json",
+      "sizeBytes": 1204,
+      "sha256": "dfb94743f94314d9a735f5a40dbc0f102c5f7e40bc7c379463f39205c2719b42"
+    },
+    {
+      "path": "complete-run/oracle/group-000133.json",
+      "sizeBytes": 1204,
+      "sha256": "4f29d6b11d172dddd4ab24ee7821fc5270a4a86bde6c0cf8a060927251035da4"
+    },
+    {
+      "path": "complete-run/oracle/group-000137.json",
+      "sizeBytes": 1204,
+      "sha256": "106394ba7d4482857dc57554edbca324f752fd29f334599c8531a7c59c1fe3da"
+    },
+    {
+      "path": "complete-run/oracle/group-000141.json",
+      "sizeBytes": 1204,
+      "sha256": "322735d78bd2f910ddb5a679b6f1b4eb1106870d93227bf68c82d802325e47dc"
+    },
+    {
+      "path": "complete-run/oracle/group-000145.json",
+      "sizeBytes": 1204,
+      "sha256": "4fab709b513810f5b791500039e70ceb9c57790736125a0520bda0fc5c8cd02c"
+    },
+    {
+      "path": "complete-run/oracle/group-000149.json",
+      "sizeBytes": 1204,
+      "sha256": "7086fe55327e84f4694b318fbe4b4b8646e23f9d0772c5094164dd6b2b1be0fc"
+    },
+    {
+      "path": "complete-run/oracle/group-000153.json",
+      "sizeBytes": 1204,
+      "sha256": "da6aba24abd7971e306bb70754e97d4b929b9dc73d6519ad9c3e4905522278a5"
+    },
+    {
+      "path": "complete-run/oracle/group-000157.json",
+      "sizeBytes": 1204,
+      "sha256": "91a161ad5c44f1059540bf59e39482aa111bbae3344b8410fa0e685b7f285814"
+    },
+    {
+      "path": "complete-run/oracle/group-000161.json",
+      "sizeBytes": 1204,
+      "sha256": "68299332f5a906f565650529fae9f84f71eb25fa5e0d1ef17d94f157fe7ffad9"
+    },
+    {
+      "path": "complete-run/oracle/group-000165.json",
+      "sizeBytes": 1204,
+      "sha256": "f0a7ceb969004808722e252ddf9a251d21ab44c84b27174e82658d64e46774fd"
+    },
+    {
+      "path": "complete-run/oracle/group-000169.json",
+      "sizeBytes": 1204,
+      "sha256": "dcb4a9b5e1a7309a6e54205a2d99ebf7562c783ceb44d994d5bbb95f72b90071"
+    },
+    {
+      "path": "complete-run/oracle/group-000173.json",
+      "sizeBytes": 1204,
+      "sha256": "010b9265794d895804d091e38f7a0e19063c565b4b16e80acec234a439af6bd1"
+    },
+    {
+      "path": "complete-run/oracle/group-000177.json",
+      "sizeBytes": 1204,
+      "sha256": "7085b2f5b6d4546a6c3748717cb71694127ed2f71acce09321c78da14092b98a"
+    },
+    {
+      "path": "complete-run/oracle/group-000181.json",
+      "sizeBytes": 1204,
+      "sha256": "08e9f1a31648b8e6b3fef1b06b8c1c73e32c6776303774a8d24a22514ae2a542"
+    },
+    {
+      "path": "complete-run/oracle/group-000185.json",
+      "sizeBytes": 1204,
+      "sha256": "ab10ce02174e6ace7a32dde5147b0ca72a132fdf4a707d74cbdc24886179b557"
+    },
+    {
+      "path": "complete-run/oracle/group-000189.json",
+      "sizeBytes": 1204,
+      "sha256": "fbf541b067f06055908e28ae35e518bedac04bef2301146fb2db1c2ad37fec4e"
+    },
+    {
+      "path": "complete-run/oracle/group-000193.json",
+      "sizeBytes": 1204,
+      "sha256": "9a9c255b92907f3e5f67fe5332ad725814ae96822da8157405b9ae2008ae8a22"
+    },
+    {
+      "path": "complete-run/oracle/group-000197.json",
+      "sizeBytes": 1204,
+      "sha256": "ecf79ccc10a2d3f19f8020e186c313207efdf7cce443928e1d36413d28f51a7a"
+    },
+    {
+      "path": "complete-run/oracle/group-000201.json",
+      "sizeBytes": 1204,
+      "sha256": "99722fff921c9e3a8b0bccde67bc5b7ba8d87aba1ddb34f6786fd1d397e7a38a"
+    },
+    {
+      "path": "complete-run/oracle/group-000205.json",
+      "sizeBytes": 1204,
+      "sha256": "baa973284a1a53ae7482ac22dc2336a092e527e46b1e6966e56fb571cc9e789f"
+    },
+    {
+      "path": "complete-run/oracle/group-000209.json",
+      "sizeBytes": 1204,
+      "sha256": "123df10174e6146656f2af5ffa5d30afad15d28b54adff4166a6d3f971f0fbeb"
+    },
+    {
+      "path": "complete-run/oracle/group-000213.json",
+      "sizeBytes": 1204,
+      "sha256": "ce91b6785b5b13e0c8e4c52b41b7df5f7b8133e6129ee6b559d49c63879a002d"
+    },
+    {
+      "path": "complete-run/oracle/group-000217.json",
+      "sizeBytes": 1204,
+      "sha256": "7a782541b2a3f8d8878bf478fe2893ad031f72ae4ca5e1c47b45c815ccf10cb0"
+    },
+    {
+      "path": "complete-run/oracle/group-000221.json",
+      "sizeBytes": 1204,
+      "sha256": "6c6bab5c3f628316c4b474048c1036355b8e587e6308ec47c88ef53066d0018f"
+    },
+    {
+      "path": "complete-run/oracle/group-000225.json",
+      "sizeBytes": 1204,
+      "sha256": "a7f33d2e69bd3f3d5b75da9b344491a359a06f35c73b9da3f34c6a9cc82aa32a"
+    },
+    {
+      "path": "complete-run/oracle/group-000229.json",
+      "sizeBytes": 1204,
+      "sha256": "6443a60ede35d1d946ddba25b76c751b924437f66adeb54c56f65288b80a2b8f"
+    },
+    {
+      "path": "complete-run/oracle/group-000233.json",
+      "sizeBytes": 1204,
+      "sha256": "0256f6c67620311b5e76a165c8e136d909e2a82a7981d926d843081f990027ed"
+    },
+    {
+      "path": "complete-run/oracle/group-000237.json",
+      "sizeBytes": 1204,
+      "sha256": "eb12832b3272fe1536806a6bfe33cfd2f1fc6e6eb719ca09e642e586feb5c1eb"
+    },
+    {
+      "path": "complete-run/oracle/group-000241.json",
+      "sizeBytes": 1204,
+      "sha256": "6b1a5ae16b36a60448c34981c1b939ff836653dc25d6f79140ffcfa823098e6e"
+    },
+    {
+      "path": "complete-run/oracle/group-000245.json",
+      "sizeBytes": 1204,
+      "sha256": "18a153be17ac8f920532b743a6c5655cbd71c0ac4fe6e0b85aa40261a4bcea48"
+    },
+    {
+      "path": "complete-run/oracle/group-000249.json",
+      "sizeBytes": 1204,
+      "sha256": "5c6baf74b23bc86bdc2d9334de36d0696090ed641010e92c84372940293db450"
+    },
+    {
+      "path": "complete-run/oracle/group-000253.json",
+      "sizeBytes": 1204,
+      "sha256": "8dda231bec31f9dd8c20148ccf48c26f2033fe4b2d6ca0deaaae814de16f6928"
+    },
+    {
+      "path": "complete-run/oracle/group-000257.json",
+      "sizeBytes": 1204,
+      "sha256": "57d45089ff883d4e875ea40e7f6dd7a733a0ac7396784bc39a4a6c49b606fdc7"
+    },
+    {
+      "path": "complete-run/oracle/group-000261.json",
+      "sizeBytes": 1204,
+      "sha256": "e8f1d6e97f858677207674b7faaba6e3c95ee63189d49d54b20c620f2cf0e934"
+    },
+    {
+      "path": "complete-run/oracle/group-000265.json",
+      "sizeBytes": 1204,
+      "sha256": "746cc331252d8753ff18dc021a801eaac93cc24e257a8c3b44b5d1c5e660ac5b"
+    },
+    {
+      "path": "complete-run/oracle/group-000269.json",
+      "sizeBytes": 1204,
+      "sha256": "f08ee8eea3f98e3885129303deeb94d57a0c03717b7cdae40e61b9d3a0045c89"
+    },
+    {
+      "path": "complete-run/oracle/group-000273.json",
+      "sizeBytes": 1204,
+      "sha256": "c912bf90accdf924b77f375a1c79786c9de699ab91ee86d050b5cb3a0442a43e"
+    },
+    {
+      "path": "complete-run/oracle/group-000277.json",
+      "sizeBytes": 1204,
+      "sha256": "ced20734cd6b7594499eac4e9dbd9780eeab610d30f6bab93ae0315519b51939"
+    },
+    {
+      "path": "complete-run/oracle/group-000281.json",
+      "sizeBytes": 1204,
+      "sha256": "82f03cec8c02c09977c6c33d1e9e8c641b7100537b9324e4ceee0782db861c82"
+    },
+    {
+      "path": "complete-run/oracle/group-000285.json",
+      "sizeBytes": 1204,
+      "sha256": "259e1f6b6b9b4a12b347e63f7aa9d780b612684c75da3d893b7e78e94160b9ef"
+    },
+    {
+      "path": "complete-run/oracle/group-000289.json",
+      "sizeBytes": 1204,
+      "sha256": "d42cedce79c461906a70f6ef28c6b443b92a22d5e318d78333a30545349d0978"
+    },
+    {
+      "path": "complete-run/oracle/group-000293.json",
+      "sizeBytes": 1204,
+      "sha256": "19eaa8451c5368a020ed076a92b38317b221cc39b4efb6b73e044e35ffe42998"
+    },
+    {
+      "path": "complete-run/oracle/group-000297.json",
+      "sizeBytes": 1204,
+      "sha256": "52a6ef99a468dcd67430815f6673696cfcc15a7375ddb1d51082f96b4745ee85"
+    },
+    {
+      "path": "complete-run/oracle/group-000301.json",
+      "sizeBytes": 1204,
+      "sha256": "4960f7f257de2ce4614579ab205cb245527b50c2643999eb31a8f8ed7779afce"
+    },
+    {
+      "path": "complete-run/oracle/group-000305.json",
+      "sizeBytes": 1204,
+      "sha256": "4fbae3b554935ce98962afc4e90c13482de08d1a92f194d071089e5e0d45b9f9"
+    },
+    {
+      "path": "complete-run/oracle/group-000309.json",
+      "sizeBytes": 1204,
+      "sha256": "0d549e9af866a667edbf9a652c1b373ae446c8ee65776faea2c8fefb95c23f11"
+    },
+    {
+      "path": "complete-run/oracle/group-000313.json",
+      "sizeBytes": 1204,
+      "sha256": "1d266d6302352bb2edd0461840b34f65408ae82acb74a1f7b85fec338cace03e"
+    },
+    {
+      "path": "complete-run/oracle/group-000317.json",
+      "sizeBytes": 1204,
+      "sha256": "95945dadd67625ce34191ed74920a069ed0afe4b93ff8d63c9a15efdfa99ea31"
+    },
+    {
+      "path": "complete-run/oracle/group-000321.json",
+      "sizeBytes": 1204,
+      "sha256": "cc41867eee96fd9ff54e4513fb3292240d4c0ae38291b1ff38a08220cbcbacb2"
+    },
+    {
+      "path": "complete-run/oracle/group-000325.json",
+      "sizeBytes": 1204,
+      "sha256": "53275d8e776b6c7db448493c1530d664be4be7339c07ff4f0cdc9103b3d215f1"
+    },
+    {
+      "path": "complete-run/oracle/group-000329.json",
+      "sizeBytes": 1204,
+      "sha256": "a31fe2bb50b9270da89812ecbe60d80395a14d2b01edd6f5b0365781b7c0eb93"
+    },
+    {
+      "path": "complete-run/oracle/group-000333.json",
+      "sizeBytes": 1204,
+      "sha256": "c0c4a2e964427beb9038086e802afd50103bd88bb862f78a6225f3ed51660c24"
+    },
+    {
+      "path": "complete-run/oracle/group-000337.json",
+      "sizeBytes": 1204,
+      "sha256": "90ff4e9ca6fe890b636f6d92ebb0f763c66a4e3fc4d6c00d8baac3e9e3355eab"
+    },
+    {
+      "path": "complete-run/oracle/group-000341.json",
+      "sizeBytes": 1204,
+      "sha256": "d413dd3ebeeb62a9c6c585c4c0efe43a8dab9fdf84818a1816e1277f1176500d"
+    },
+    {
+      "path": "complete-run/oracle/group-000345.json",
+      "sizeBytes": 1204,
+      "sha256": "46250638260e69078fb084e979f2ea3e8c4b6edec7519df11b95f2d3962c23ce"
+    },
+    {
+      "path": "complete-run/oracle/group-000349.json",
+      "sizeBytes": 1204,
+      "sha256": "00c8e9c128d3c337bd1351353e13d031edbf70fcea511e0382cdeb1ac5fec3be"
+    },
+    {
+      "path": "complete-run/oracle/group-000353.json",
+      "sizeBytes": 1204,
+      "sha256": "4522b6b5562fa696eba01a6ac217f763993ce89e5c02c8491156262b1720ee91"
+    },
+    {
+      "path": "complete-run/oracle/group-000357.json",
+      "sizeBytes": 1204,
+      "sha256": "a1c5c20dc4a5e1e2b700dd0b433523994cf5940b46a2689c7cb25859872cf505"
+    },
+    {
+      "path": "complete-run/oracle/group-000361.json",
+      "sizeBytes": 1204,
+      "sha256": "f2e02c262542bf6601d6e5303a5d470ec7c5164e1e83ea0c0a96c68789b7c540"
+    },
+    {
+      "path": "complete-run/oracle/group-000365.json",
+      "sizeBytes": 1204,
+      "sha256": "264e03e805b6ef597327b821bc2d5cab7f9faea4dc655c077b81248b22e67ad8"
+    },
+    {
+      "path": "complete-run/oracle/group-000369.json",
+      "sizeBytes": 1204,
+      "sha256": "5ac544f75c99fa2094dd789ea6110c7d5a1ae8db4cc872049d9d60ebaa53fbbe"
+    },
+    {
+      "path": "complete-run/oracle/group-000373.json",
+      "sizeBytes": 1204,
+      "sha256": "5380c07648c6d133cad404bc07f5b7bd6199beee83feb906cf04d8a0cfcbb3d0"
+    },
+    {
+      "path": "complete-run/oracle/group-000377.json",
+      "sizeBytes": 1204,
+      "sha256": "cd20442534fe3d0ad66dac7c0a8fded9e83ecf92fba2c076c048414782670f92"
+    },
+    {
+      "path": "complete-run/oracle/group-000381.json",
+      "sizeBytes": 1204,
+      "sha256": "65e596168c04e41791b839670345b5f28c61ea6223f1f449102f1606908a33e2"
+    },
+    {
+      "path": "complete-run/oracle/group-000385.json",
+      "sizeBytes": 1204,
+      "sha256": "e2bb4f66b5e2ff935af338f8a6ddd9a995189746b77454c8fb893d2119acc7d6"
+    },
+    {
+      "path": "complete-run/oracle/group-000389.json",
+      "sizeBytes": 1204,
+      "sha256": "3c19b11e3fb03453d95b505a9963ba96c2e943ce73bb9cafdc26756fd3791a95"
+    },
+    {
+      "path": "complete-run/oracle/group-000393.json",
+      "sizeBytes": 1205,
+      "sha256": "106a27206a70d2eda1b8a1124803bfe47e78958ff03aa34c2dec5ece7b8b0b8e"
+    },
+    {
+      "path": "complete-run/oracle/group-000397.json",
+      "sizeBytes": 1205,
+      "sha256": "76877995db93cced49674abf94305ae7254b83f89629d5c7361717993537e41a"
+    },
+    {
+      "path": "complete-run/oracle/group-000401.json",
+      "sizeBytes": 1205,
+      "sha256": "5e46fb8824e9dfe91101202565192319a00e659045e709099f093ded681b4e57"
+    },
+    {
+      "path": "complete-run/oracle/group-000405.json",
+      "sizeBytes": 1205,
+      "sha256": "00f8863d4651c090425e67404c948ba8f0569a570f6223a9d64b38dd0c05cfee"
+    },
+    {
+      "path": "complete-run/oracle/group-000409.json",
+      "sizeBytes": 1205,
+      "sha256": "22ec42b513fc87326de23ac9c8617e8ede584225949f30ca1982abd88a5cd120"
+    },
+    {
+      "path": "complete-run/oracle/group-000413.json",
+      "sizeBytes": 1205,
+      "sha256": "a86ea6b6cb46c06cd6b0ec2fb1c2643aa850b9b8d3364c0d74c277af6040ab56"
+    },
+    {
+      "path": "complete-run/oracle/group-000417.json",
+      "sizeBytes": 1205,
+      "sha256": "3cf9ffd31a108d77b3dcbb7b6f6a5805231ee5246c04920a8e76952cf986abf9"
+    },
+    {
+      "path": "complete-run/oracle/group-000421.json",
+      "sizeBytes": 1205,
+      "sha256": "f0ddaba0e7d915c1efd3d37cedd6d3935d71ca835aaa7211a88e1cf9b1f3321d"
+    },
+    {
+      "path": "complete-run/oracle/group-000425.json",
+      "sizeBytes": 1206,
+      "sha256": "e9f5b4282eaea123706af3ab860c3d20d26d7436f87f28345d9cbe3eef05ff5e"
+    },
+    {
+      "path": "complete-run/oracle/group-000429.json",
+      "sizeBytes": 1206,
+      "sha256": "9d1b066e32d836141d71dfac43996c8f54ec4bd81273328414d3b09c530c1e79"
+    },
+    {
+      "path": "complete-run/oracle/group-000433.json",
+      "sizeBytes": 1205,
+      "sha256": "31be80e2f0955514f939760c2f7981602cb3cdce085c4090969ce9bd34f97474"
+    },
+    {
+      "path": "complete-run/oracle/group-000437.json",
+      "sizeBytes": 1205,
+      "sha256": "4bf28b3573b4fd74d5322fa97d313ecff2e58fee01c17f42a40bd9c2ba0e2dbd"
+    },
+    {
+      "path": "complete-run/oracle/group-000441.json",
+      "sizeBytes": 1205,
+      "sha256": "dbc07b988f409335d75074fa5adb8915096de6f5fbdeddee54e368dfeff4eb23"
+    },
+    {
+      "path": "complete-run/oracle/group-000445.json",
+      "sizeBytes": 1205,
+      "sha256": "ad5f7f606ff49e188dbfb383a1f4ee5f44bb7941d4cadeefd86e4fbf32ff3713"
+    },
+    {
+      "path": "complete-run/oracle/group-000449.json",
+      "sizeBytes": 1205,
+      "sha256": "27ea93fe7ed183a8655ea1c45a993b8373c46034b3a465d6881ea4dfeedd4019"
+    },
+    {
+      "path": "complete-run/oracle/group-000453.json",
+      "sizeBytes": 1206,
+      "sha256": "9594225430d0881bf109c3f07d2d8f1b8bc8fc2a1d375efe6ba314f17a440dc2"
+    },
+    {
+      "path": "complete-run/oracle/group-000457.json",
+      "sizeBytes": 1205,
+      "sha256": "58b075307abf7f81f93f38ffecc0bb515d44cce0e7609dbfe6955a45676ca40e"
+    },
+    {
+      "path": "complete-run/oracle/group-000461.json",
+      "sizeBytes": 1205,
+      "sha256": "faae00e6bbc65a677d4f33b28ab9ba3022dfb3274b63124af8960afce13afc04"
+    },
+    {
+      "path": "complete-run/oracle/group-000465.json",
+      "sizeBytes": 1205,
+      "sha256": "ae8c826a1d970e56f725c0f4bf3b5e25f9c1b62f9d9897d30bee43cf8339987b"
+    },
+    {
+      "path": "complete-run/oracle/group-000469.json",
+      "sizeBytes": 1205,
+      "sha256": "a94f3ab3a97a104fbae9307f867cfd2164d4be8ab14f03a767a08ea8596e91ba"
+    },
+    {
+      "path": "complete-run/oracle/group-000473.json",
+      "sizeBytes": 1205,
+      "sha256": "a483868daef87cafc477e628c8faa3b302f2c5685c4c8af7a7bd74d76b53a70c"
+    },
+    {
+      "path": "complete-run/oracle/group-000477.json",
+      "sizeBytes": 1205,
+      "sha256": "d82f531cc88912214730f1b59726d2a95f323ea7caa58a09787f1dbd186754ac"
+    },
+    {
+      "path": "complete-run/oracle/group-000481.json",
+      "sizeBytes": 1205,
+      "sha256": "4e0e2beebf412a80382870134ce156e06590fc1a9788232206a3ac03df27fd0d"
+    },
+    {
+      "path": "complete-run/oracle/group-000485.json",
+      "sizeBytes": 1205,
+      "sha256": "25850caf5653d83f044f8a9cfc695ea8bd2a7123924d0d5791b4da70dc664b16"
+    },
+    {
+      "path": "complete-run/oracle/group-000489.json",
+      "sizeBytes": 1206,
+      "sha256": "d5187f103402b0363280c5cdae40bf66015d2843c59c755af8d2b59b18ed3359"
+    },
+    {
+      "path": "complete-run/oracle/group-000493.json",
+      "sizeBytes": 1205,
+      "sha256": "1600b646277a98382922d41bdf8bdd8092634c4c97468277217abffe1aacbbe5"
+    },
+    {
+      "path": "complete-run/oracle/group-000497.json",
+      "sizeBytes": 1205,
+      "sha256": "2e3e697c79080fe076e9ca3280040153fddeecae5092b90f714ee5f59e707e6c"
+    },
+    {
+      "path": "complete-run/oracle/group-000501.json",
+      "sizeBytes": 1205,
+      "sha256": "7778430aab04eb13e8072db0fcfc6868a0017b003c88593293e74d5b9066c0ca"
+    },
+    {
+      "path": "complete-run/oracle/group-000505.json",
+      "sizeBytes": 1205,
+      "sha256": "e22b25c010885c827e2ea936583192305af6ca2c4a0cb6e12ee58dc1b5221fc8"
+    },
+    {
+      "path": "complete-run/oracle/group-000509.json",
+      "sizeBytes": 1205,
+      "sha256": "13a5dfd146489f562be435bf7a0122fbb24cce2a4d710f051a45d3a12284aac2"
+    },
+    {
+      "path": "complete-run/oracle/group-000513.json",
+      "sizeBytes": 1205,
+      "sha256": "f68f643321aee0e67f9c21dd6162a223f5dd6d0ec30f19bb6cf0c390c27797f8"
+    },
+    {
+      "path": "complete-run/oracle/group-000517.json",
+      "sizeBytes": 1205,
+      "sha256": "d72ad48164b0f876ae25950a134786c9010a96c82a8e9724f8b1e63008f5b0e5"
+    },
+    {
+      "path": "complete-run/oracle/group-000521.json",
+      "sizeBytes": 1205,
+      "sha256": "91ea3d9b5d4f3a6cceb4a951860c6f0f4e579403850d73e303f5a750be15c83b"
+    },
+    {
+      "path": "complete-run/oracle/group-000525.json",
+      "sizeBytes": 1205,
+      "sha256": "ef6d2e5ccd8603b46aaba570643f78acf9468da1f262439157be17d5b7c0d61c"
+    },
+    {
+      "path": "complete-run/oracle/group-000529.json",
+      "sizeBytes": 1205,
+      "sha256": "9376b8cec8b6e417e53103945c59fbd2131b9b8e19c20ac6755f647caef4f43b"
+    },
+    {
+      "path": "complete-run/oracle/group-000533.json",
+      "sizeBytes": 1205,
+      "sha256": "39462c500fb52951645c1a2db6a8ef7af9b819494f9f36c7741f1ece3598d1a5"
+    },
+    {
+      "path": "complete-run/oracle/group-000537.json",
+      "sizeBytes": 1205,
+      "sha256": "1af9c44598848192ddfb1e3dc10f1d5df7ea4ee5af67d0b7578833dc60e06e38"
+    },
+    {
+      "path": "complete-run/oracle/group-000541.json",
+      "sizeBytes": 1205,
+      "sha256": "736852ac9d3c79d073f77f5eaf25b9743ecab97a679649183b02bf83a2cf1c6a"
+    },
+    {
+      "path": "complete-run/oracle/group-000545.json",
+      "sizeBytes": 1179,
+      "sha256": "e1a096b7fa5d819568d5ceb73b1e8e760d65a731b7bbde4bfedb53e2ff6a8fe4"
+    },
+    {
+      "path": "complete-run/oracle/group-000548.json",
+      "sizeBytes": 1179,
+      "sha256": "648bb218933714928c187c8222590b75b6976775b7e3d9a5178f6dde0a703603"
+    },
+    {
+      "path": "complete-run/oracle/group-000551.json",
+      "sizeBytes": 1179,
+      "sha256": "2c1ef72c9199df000546f223c030c9a4237df6e96084bf0270d3b1c0b3b7d295"
+    },
+    {
+      "path": "complete-run/oracle/group-000554.json",
+      "sizeBytes": 1205,
+      "sha256": "51a1bc2b365cdc6ab179590deb8cbe9be2d508fbf31b1a115fb9af938b8a4939"
+    },
+    {
+      "path": "complete-run/oracle/group-000558.json",
+      "sizeBytes": 1205,
+      "sha256": "1d7d707fb6a04bf99e0c6559fa62b6373106691c05644a8a4db4ea7335cdbcae"
+    },
+    {
+      "path": "complete-run/oracle/group-000562.json",
+      "sizeBytes": 1205,
+      "sha256": "ed2ce983f8c5de147f4be7dcd93178f588cf3d28db450a1c76c6cbc518cf7b79"
+    },
+    {
+      "path": "complete-run/oracle/group-000566.json",
+      "sizeBytes": 1205,
+      "sha256": "4587c70aa3b1499d26b0a7a34ee887281a9fc2d0a8a243cdc53228caa9aec790"
+    },
+    {
+      "path": "complete-run/oracle/group-000570.json",
+      "sizeBytes": 1206,
+      "sha256": "af485e59b0e4b4ba533b82b75e1e2f10b53f8220fc3aa0492f2348c374d7c8f4"
+    },
+    {
+      "path": "complete-run/oracle/group-000574.json",
+      "sizeBytes": 1206,
+      "sha256": "f2c0c6d653b56c22a87bdf28270da3f1715de87cf809d293d0c8cfd29a52f8c4"
+    },
+    {
+      "path": "complete-run/oracle/group-000578.json",
+      "sizeBytes": 1206,
+      "sha256": "705d1b03194ba6f518bb2eda31b1ffab2d790732207fd7c713ffe537d31c4566"
+    },
+    {
+      "path": "complete-run/oracle/group-000582.json",
+      "sizeBytes": 1206,
+      "sha256": "e3f2187764a7208f2fe38b0beafdfd27f0daf6736c77e92696f27570eeb36ffd"
+    },
+    {
+      "path": "complete-run/oracle/group-000586.json",
+      "sizeBytes": 1206,
+      "sha256": "5e42929bbe8eba22d3117e9d2b3fa66e336bb20058fbee5ae6c67bc1599a6e29"
+    },
+    {
+      "path": "complete-run/oracle/group-000590.json",
+      "sizeBytes": 1206,
+      "sha256": "8dc4d06064cde1aa89c726b32c1df0ebaa223cfe97160ae34ef2ac7ccbe928bb"
+    },
+    {
+      "path": "complete-run/oracle/group-000594.json",
+      "sizeBytes": 1179,
+      "sha256": "b7cb008f06e15e3de9c1af06e1db27ee15c6067e0cd91dc0ea09a7770e786083"
+    },
+    {
+      "path": "complete-run/oracle/group-000597.json",
+      "sizeBytes": 1205,
+      "sha256": "cecfc38108c31a0b13b48def320cb44e860f77e8d112353cb00b54094b5acc39"
+    },
+    {
+      "path": "complete-run/oracle/group-000601.json",
+      "sizeBytes": 1179,
+      "sha256": "41e596e79d5e6cb553c493f76ad86051a65931309386b6ccaaf049d54e59454b"
+    },
+    {
+      "path": "complete-run/oracle/group-000604.json",
+      "sizeBytes": 1179,
+      "sha256": "45eaefc2a44167d014cefb0fd8408f73b0ba56cac0ac4e7bf4b2fec7bd446a8b"
+    },
+    {
+      "path": "complete-run/oracle/group-000607.json",
+      "sizeBytes": 1179,
+      "sha256": "a6eab148256e778ed0f49806b6835a789ed226409bde7318969113702d857fbc"
+    },
+    {
+      "path": "complete-run/oracle/group-000610.json",
+      "sizeBytes": 1206,
+      "sha256": "85348662e0dbc0311b83e41822849272fc58d12bab279d994a731d1004601cac"
+    },
+    {
+      "path": "complete-run/oracle/group-000614.json",
+      "sizeBytes": 1206,
+      "sha256": "031210d31930251d2aea4f1357ab43370808dfb3c5899c3e945c2c12c176a8d2"
+    },
+    {
+      "path": "complete-run/oracle/group-000618.json",
+      "sizeBytes": 1179,
+      "sha256": "889fd02d9246cf2fe5ffc40efddb21263c23f2c266e64e00c228732876e7d07e"
+    },
+    {
+      "path": "complete-run/oracle/group-000621.json",
+      "sizeBytes": 1179,
+      "sha256": "887befbbaf2bae14d924375fc46218d1b13122be43676c2907ce28d7a4c0cfcd"
+    },
+    {
+      "path": "complete-run/oracle/group-000624.json",
+      "sizeBytes": 1179,
+      "sha256": "a47a01717652680f7c8b7659f9b860e9b21c98eed44b03b4cd46b9187e17bf92"
+    },
+    {
+      "path": "complete-run/oracle/group-000627.json",
+      "sizeBytes": 1206,
+      "sha256": "df40d1a2b357bff71b2bba4326150c6edd2a3015a54bb9217656a06f18515690"
+    },
+    {
+      "path": "complete-run/oracle/group-000631.json",
+      "sizeBytes": 1206,
+      "sha256": "cc2f69ed2099a9f90a92cd53755ec3de689fca2981cf52d7246bcdcd4d960aa5"
+    },
+    {
+      "path": "complete-run/oracle/group-000635.json",
+      "sizeBytes": 1179,
+      "sha256": "d22e56faccea2618c8de696e251bc94de38b6f57c182ecb0c7b108e547763c4b"
+    },
+    {
+      "path": "complete-run/oracle/group-000638.json",
+      "sizeBytes": 1205,
+      "sha256": "cad01617cfd03aa0cbac64f60cf68b8168317b1b2c122b8384a2ea817aa2580a"
+    },
+    {
+      "path": "complete-run/oracle/group-000642.json",
+      "sizeBytes": 1179,
+      "sha256": "c9ac99b05a0efffc07a39b9ead72dea0b1c05be2f89396b20ed710acc5696548"
+    },
+    {
+      "path": "complete-run/oracle/group-000645.json",
+      "sizeBytes": 1179,
+      "sha256": "5e3011f3912b19006ebba707b1fa9c4a8eed2bbb16931c17283ee4883ae3caba"
+    },
+    {
+      "path": "complete-run/oracle/group-000648.json",
+      "sizeBytes": 1206,
+      "sha256": "1300ee14e9d201fa8973ad82c0109fda18cf1c0558cd5fa6739c31dd16fe4d28"
+    },
+    {
+      "path": "complete-run/oracle/group-000652.json",
+      "sizeBytes": 1179,
+      "sha256": "d1460609eef4ddf88e697b55a1a507b57cd4362bcc2b0a74766fd54e1b4a64ab"
+    },
+    {
+      "path": "complete-run/oracle/group-000655.json",
+      "sizeBytes": 1206,
+      "sha256": "712c80ce4c6c4795720df4da3de137c8e66e5085657f37c41dad7c9ef6fb16aa"
+    },
+    {
+      "path": "complete-run/oracle/group-000659.json",
+      "sizeBytes": 1179,
+      "sha256": "651351ea74e33b7326aa2889c3df5c9a376436de8cbd4eab1069abae8aa50b51"
+    },
+    {
+      "path": "complete-run/oracle/group-000662.json",
+      "sizeBytes": 1206,
+      "sha256": "0f3dd687e4934b33760a1ebf181e3537660892c893ab85e966d6e9d1892710fb"
+    },
+    {
+      "path": "complete-run/oracle/manifest.json",
+      "sizeBytes": 303924,
+      "sha256": "3332a215bafffe09f0402fcabeb498bc0ce7cb45245de8e3ff78943eb122339f"
+    },
+    {
+      "path": "complete-run/resource-samples.jsonl",
+      "sizeBytes": 2580,
+      "sha256": "ac430ea630e1ab602338865f9d723190770f434ebe9ad6dd6e1117ee44f5cbc7"
+    },
+    {
+      "path": "complete-run/stderr.log",
+      "sizeBytes": 642,
+      "sha256": "82c909a57f54a60e1ae9e652168960af9b695e7bc82827cf55f047ec75622d5e"
+    },
+    {
+      "path": "complete-run/stdout.log",
+      "sizeBytes": 666,
+      "sha256": "e9ef614714c1cf25a29f3c3df0c62b1e5c47328ebef6c306abe3bfafcce8a709"
+    },
+    {
+      "path": "hosted-package/PLAN.md",
+      "sizeBytes": 5926,
+      "sha256": "c4936b0d8aa5506579e586ef99af23c90b79bac7894b45b827d6e824e19dac8e"
+    },
+    {
+      "path": "hosted-package/download-fixture.py",
+      "sizeBytes": 1345,
+      "sha256": "a2353d406dd19ada7109a43221d8691a7b91197bdd116bcbe791cedf95dd4263"
+    },
+    {
+      "path": "hosted-package/oracle.mjs",
+      "sizeBytes": 16730,
+      "sha256": "578a6ab02734d031a806c38d8f5148dfb6cd9ed9f98719be94ae79f8dc84b660"
+    },
+    {
+      "path": "hosted-package/package-manifest.json",
+      "sizeBytes": 1974,
+      "sha256": "5ce3106ea36c0d42ce7c68ada002dc9ff8e39ce7026a6d84dfb9640f09459956"
+    },
+    {
+      "path": "hosted-package/public-false-branch-proof.json",
+      "sizeBytes": 991,
+      "sha256": "3375a6468cc7c8c3eed94295b05730cd3e2160e9999ae00a969302adb7fbac9c"
+    },
+    {
+      "path": "hosted-package/reference-manifest.json",
+      "sizeBytes": 258368,
+      "sha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2"
+    },
+    {
+      "path": "hosted-package/worker.mjs",
+      "sizeBytes": 7668,
+      "sha256": "88153533e411e480e566b241797f4ec7f456756422769731c46468ffbb451401"
+    },
+    {
+      "path": "hosted-package/workflow.yml",
+      "sizeBytes": 2672,
+      "sha256": "7d3ad0743e9659b92ab19cf7549e50bc36bf0b70f28ff21f1ba9826134879956"
+    },
+    {
+      "path": "hosted-package/zero-alias-diagnostic.json",
+      "sizeBytes": 1749,
+      "sha256": "c0c16cde36c96eaac38a1659c6ec61a38ef1906e3fa948951df60b1469082c40"
+    },
+    {
+      "path": "loaded-source/baseline/ext/js/dictionary/path-copy-oracle-candidate-7c02.js",
+      "sizeBytes": 215521,
+      "sha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518"
+    },
+    {
+      "path": "loaded-source/baseline/ext/js/dictionary/path-copy-oracle-observer-v2-7c02.js",
+      "sizeBytes": 17251,
+      "sha256": "ca83e6d0669417b15eb90e7fc0c22343f78fdba03df2d867fcbccf78e49943cc"
+    },
+    {
+      "path": "loaded-source/baseline/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sizeBytes": 16935,
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    {
+      "path": "loaded-source/baseline/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sizeBytes": 210111,
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    {
+      "path": "loaded-source/baseline/ext/js/dictionary/term-lookup-route.js",
+      "sizeBytes": 4192,
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    {
+      "path": "loaded-source/baseline/ext/lib/term-bank-parser.wasm",
+      "sizeBytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    {
+      "path": "loaded-source/baseline/test/perf/dictionaries.lock.json",
+      "sizeBytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "path": "loaded-source/candidate/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sizeBytes": 16945,
+      "sha256": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057"
+    },
+    {
+      "path": "loaded-source/candidate/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sizeBytes": 215521,
+      "sha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518"
+    },
+    {
+      "path": "monitor/path-copy-local-restored-monitor.py",
+      "sizeBytes": 9008,
+      "sha256": "9e5e1c2f0c16d449fd0218826624103fa24a68dc6920cdc1fe452ba5fd423faa"
+    },
+    {
+      "path": "monitor/path-copy-local-restored-plan.md",
+      "sizeBytes": 3295,
+      "sha256": "9260d8ce5f49659163fac3dbd18d37b02974185cd00e3196e008a74783f654a0"
+    }
+  ],
+  "loadedSourceMapping": [
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "member": "loaded-source/baseline/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "member": "loaded-source/baseline/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    {
+      "originalPath": "/tmp/manabitan-path-validation-7c02/ext/js/dictionary/term-bank-wasm-parser.js",
+      "member": "loaded-source/candidate/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518"
+    },
+    {
+      "originalPath": "/tmp/manabitan-path-validation-7c02/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "member": "loaded-source/candidate/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sha256": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/lib/term-bank-parser.wasm",
+      "member": "loaded-source/baseline/ext/lib/term-bank-parser.wasm",
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/test/perf/dictionaries.lock.json",
+      "member": "loaded-source/baseline/test/perf/dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/oracle.mjs",
+      "member": "hosted-package/oracle.mjs",
+      "sha256": "578a6ab02734d031a806c38d8f5148dfb6cd9ed9f98719be94ae79f8dc84b660"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/worker.mjs",
+      "member": "hosted-package/worker.mjs",
+      "sha256": "88153533e411e480e566b241797f4ec7f456756422769731c46468ffbb451401"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-copy-oracle-candidate-7c02.js",
+      "member": "loaded-source/baseline/ext/js/dictionary/path-copy-oracle-candidate-7c02.js",
+      "sha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-copy-oracle-observer-v2-7c02.js",
+      "member": "loaded-source/baseline/ext/js/dictionary/path-copy-oracle-observer-v2-7c02.js",
+      "sha256": "ca83e6d0669417b15eb90e7fc0c22343f78fdba03df2d867fcbccf78e49943cc"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/term-lookup-route.js",
+      "member": "loaded-source/baseline/ext/js/dictionary/term-lookup-route.js",
+      "sha256": "20941239d1699c196dee96a5145059593da59a0b6f5ef032994ef3a807875543"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/public-false-branch-proof.json",
+      "member": "hosted-package/public-false-branch-proof.json",
+      "sha256": "3375a6468cc7c8c3eed94295b05730cd3e2160e9999ae00a969302adb7fbac9c"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/zero-alias-diagnostic.json",
+      "member": "hosted-package/zero-alias-diagnostic.json",
+      "sha256": "c0c16cde36c96eaac38a1659c6ec61a38ef1906e3fa948951df60b1469082c40"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/reference-manifest.json",
+      "member": "hosted-package/reference-manifest.json",
+      "sha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2"
+    },
+    {
+      "originalPath": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-copy-hosted/package-manifest.json",
+      "member": "hosted-package/package-manifest.json",
+      "sha256": "5ce3106ea36c0d42ce7c68ada002dc9ff8e39ce7026a6d84dfb9640f09459956"
+    }
+  ],
+  "sourceRows": 6648310,
+  "groupLocalMediaRows": 146725,
+  "groups": 170,
+  "preparedIndexes": 170,
+  "preparedRoutes": 170,
+  "priorPartialGroupsReused": 0
+}

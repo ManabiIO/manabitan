@@ -1,0 +1,12 @@
+{
+  "action": "Private wasm-ld-21 PATH alias to the restored pinned linker",
+  "alias": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-local-validation/compiler-discovery-diagnostic/bin/wasm-ld-21",
+  "target": "/tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/llvm-21/bin/wasm-ld",
+  "linkerSha256": "83c1ad07cb7801d52fd53cf0bdf39e4318c29a883c5d1353151ece1b2ccdf9f2",
+  "testHelperSha256": "3576bd5c761b358976e959f4753bfd47518df38d30603586175b3a34a96a4ce8",
+  "probeExitCode": 0,
+  "stdout": "",
+  "stderr": "",
+  "stdintExists": true,
+  "stddefExists": true
+}

@@ -110,7 +110,7 @@ jobs:
           fi
           python3 dev/perf/import-qualification-20261125-a7f7.py \
             --baseline 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 \
-            --candidate a8194e107c741dc1fd7e38cd9602e1aaacfc95ee \
+            --candidate e90c4c04172b691985858609094887f9541541dd \
             --dictionary "$DICTIONARY" --initial-order "$INITIAL_ORDER" \
             --pairs 12 --flags '{}' --expected-workers 3 \
             --expected-package-entry js/dictionary/term-bank-wasm-parser.js \

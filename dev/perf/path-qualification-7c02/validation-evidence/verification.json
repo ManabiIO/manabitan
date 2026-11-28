@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "scope": "Evidence byte/hash/count verification only; no tests or builds rerun",
+  "manifestSha256": "64fdf891512732056f734b396b3c1cad9d25d5f011f4ce49c9bc00b66139e154",
+  "payloadFiles": 34,
+  "completeGzipLogs": 11,
+  "compressedLogBytes": 6419,
+  "uncompressedLogBytes": 22819,
+  "uncompressedLogLines": 364,
+  "originalSourceComparisons": 31,
+  "unitOriginalExitCode": 1,
+  "targetedRepairExitCode": 0,
+  "combinedUniquePassingTests": 15159,
+  "inheritedSkippedTests": 47,
+  "suitesCoveredAcrossAttempts": 669,
+  "dryBuildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "styleReceiptAndFileHashesVerified": true,
+  "astComparisonRerun": false,
+  "singleCleanFullSuitePassClaimed": false
+}

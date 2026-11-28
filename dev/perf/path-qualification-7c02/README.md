@@ -3,8 +3,8 @@
 ## Frozen comparison
 
 Baseline: `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`.
-Candidate: `a8194e107c741dc1fd7e38cd9602e1aaacfc95ee`.
-Candidate tree: `51030cc9641b3f7689e8e26d2471c20cf478a570`.
+Candidate: `e90c4c04172b691985858609094887f9541541dd`.
+Candidate tree: `586061b2dfb33d9ebd3fc12a340f4def5a09abea`.
 
 The only changed packaged entries are `js/dictionary/term-bank-wasm-parser.js`
 and `js/dictionary/term-bank-wasm-parser-worker.js`. The third product-commit
@@ -85,3 +85,13 @@ previously qualified, explicitly scoped projection CPU saving and the code's
 complexity. The PR, if any, must say that no reliable whole-import improvement
 was established. No PR is automatic, and failed or inconclusive results stay
 in the record.
+
+## Pre-measurement amendment and preserved local evidence
+
+The executable runtime remains byte-identical to the original candidate. The new product commit changes only test JSDoc and whitespace; the before/after executable ASTs are identical. Local scoped lint and main/test type checks pass. This amendment occurred before any browser timing observation: the original validation job was still queued, and its uncorrected tests contain the separately retained lint errors. The schedule, fixtures, flags, package-entry policy, resource/memory protocol and decision gates above are unchanged.
+
+The complete [projection component evidence](component-evidence/README.md), [local validation evidence](validation-evidence/README.md), and [complete copy oracle](complete-copy-evidence/RESULT.md) are preserved here with portable saved-data verifiers. They retain every original observation and failed setup attempt.
+
+Local Node 24.22.3 validation covers 15,159 unique passing tests across 669 suites and 47 inherited skips, plus all seven dry-build targets. The original full-suite exit 1 and subsequent targeted compiler repairs remain separate; this is not a claim of one clean full-suite invocation. The new untimed original-reference oracle passed all 170 production groups, 6,648,310 rows, 146,725 media rows and 170 lookup routes, with complete baseline value/byte and same-module alias parity. Prior incomplete oracles remain separate and were not combined.
+
+These local results do not satisfy or replace the pending Node 22 browser import, non-regression or memory gates. No whole-import speedup is claimed and no optimization PR has been opened.

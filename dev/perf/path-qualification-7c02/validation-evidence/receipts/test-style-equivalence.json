@@ -1,0 +1,10 @@
+{
+  "complete": true,
+  "node": "v24.22.3",
+  "parser": "acorn",
+  "scope": "test-only JSDoc and whitespace repair; executable AST identical",
+  "beforeSha256": "fd01fd5583f05c7220fba85fb08b2c8531928eadd0c3ee485dfebbe22f5d0806",
+  "afterSha256": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+  "equalAst": true,
+  "setupFailure": "Initial generic JSON AST serializer rejected BigInt before comparison; structural normalization preserves BigInt."
+}

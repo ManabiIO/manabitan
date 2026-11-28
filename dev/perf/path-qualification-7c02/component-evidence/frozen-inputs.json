@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-11-28T04:30:32.152Z",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baseRoot": "/workspace/scratch/7c02210aa375/manabitan",
+  "candidateRoot": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-batch-prototype",
+  "trackedInputs": [
+    {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 210111,
+      "sha256": "31854cfb3d20ba60b701ec31cf19de26bd55cc745cc4f998cb33f0554ec83cca"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "bytes": 16935,
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-batch-prototype/ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 215521,
+      "sha256": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-batch-prototype/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "bytes": 16945,
+      "sha256": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/lib/term-bank-parser.wasm",
+      "bytes": 67659,
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/test/perf/dictionaries.lock.json",
+      "bytes": 3047,
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/reserved-envelope/vndb-dense/manifest.json",
+      "bytes": 488572,
+      "sha256": "1edb466e299e8e8532cf3991beab83383112e64df1288366f63fdfea9d4ea64b"
+    }
+  ],
+  "scripts": [
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-component/path-component.mjs",
+      "bytes": 27750,
+      "sha256": "50202feb9a645709a5bd38c2088a433cb8da964448dcb0e57afebc9b63ef7e44"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-component/capture-worker.mjs",
+      "bytes": 5489,
+      "sha256": "3e507fe3ec39d987fba9f31d3821863ca33e03096d5751719183809d30c4cc41"
+    },
+    {
+      "path": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-component/benchmark-plan.md",
+      "bytes": 7771,
+      "sha256": "80b7b1878e524a7567daa7bca90b54b6653a47c4d2130707242fa9bcfae26132"
+    }
+  ],
+  "probes": {
+    "A": {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-projection-probe-7c02-A.js",
+      "bytes": 210183,
+      "sha256": "9d911bbcb37561e5974bde19c015194fc52b859d505172a9546f4d053e3ac2a6"
+    },
+    "B": {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-projection-probe-7c02-B.js",
+      "bytes": 215593,
+      "sha256": "236314bc4a28de269ec607e085fd6089f77a1a23a57fe34722e462669b01faf5"
+    },
+    "C": {
+      "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-projection-probe-7c02-C.js",
+      "bytes": 210183,
+      "sha256": "9d911bbcb37561e5974bde19c015194fc52b859d505172a9546f4d053e3ac2a6"
+    }
+  },
+  "observer": {
+    "path": "/workspace/scratch/7c02210aa375/manabitan/ext/js/dictionary/path-capture-observer-7c02.js",
+    "bytes": 17027,
+    "sha256": "5508ea149c03b72b50c9d281cbfecf56dd7aeddd5c528d8f46d651e3c54e2bf2"
+  },
+  "baselineAdapter": "rows.map(({row}) => row.termEntryContentBytes.length > 0 ? projectOneForExperiment(row, source) : null)",
+  "schedule": [
+    [
+      "A",
+      "B",
+      "C"
+    ],
+    [
+      "C",
+      "B",
+      "A"
+    ],
+    [
+      "B",
+      "C",
+      "A"
+    ],
+    [
+      "A",
+      "C",
+      "B"
+    ],
+    [
+      "C",
+      "A",
+      "B"
+    ],
+    [
+      "B",
+      "A",
+      "C"
+    ]
+  ],
+  "repetitions": 8,
+  "excludedWarmupObservationsPerArmGroup": 2
+}

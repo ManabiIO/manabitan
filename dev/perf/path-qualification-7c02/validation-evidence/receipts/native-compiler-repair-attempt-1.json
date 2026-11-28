@@ -1,0 +1,53 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "test/term-bank-crc.test.js",
+    "test/term-bank-memory-page.test.js",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/tmp/manabitan-path-validation-7c02",
+  "head": "a8194e107c741dc1fd7e38cd9602e1aaacfc95ee",
+  "node": "v24.22.3",
+  "startedUtc": "2026-11-28T05:16:46.075871+00:00",
+  "sourceBefore": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057",
+    "test/term-bank-media-projection.test.js": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "status": "complete",
+  "log": "/workspace/scratch/7c02210aa375/import-experiments-7c02/path-local-validation/native-compiler-repair-attempt-1.log",
+  "setupRepair": "Pinned Clang and wasm-ld restored after /tmp reset; explicit environment paths",
+  "previousFailureRetained": "full-unit-attempt-1.json",
+  "compilerVersions": {
+    "MANABITAN_CLANG": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/llvm-21/bin",
+    "MANABITAN_WASM_LD": "Debian LLD 21.1.8"
+  },
+  "compilerSha256": {
+    "MANABITAN_CLANG": "ca624b13939495e48e99218a7def4039e443b9584dfccb161521952bd4a65289",
+    "MANABITAN_WASM_LD": "83c1ad07cb7801d52fd53cf0bdf39e4318c29a883c5d1353151ece1b2ccdf9f2"
+  },
+  "environment": {
+    "MANABITAN_CLANG": "/tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/llvm-21/bin/clang",
+    "MANABITAN_WASM_LD": "/tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/llvm-21/bin/wasm-ld",
+    "LD_LIBRARY_PATH": "/tmp/manabitan-sequence64-bootstrap-7c02/llvm/usr/lib/x86_64-linux-gnu"
+  },
+  "exitCode": 1,
+  "elapsedSeconds": 1.0204068000002735,
+  "completedUtc": "2026-11-28T05:16:47.108672+00:00",
+  "sourceAfter": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "69f6f44bb25b1ade2e77ad51a5c830ac359ec3d44f364a3c0ed6131728f54518",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "b368f85dc737f4cd2567fa1723e69f3276f6f8c0441085af3b94ac80ed2a0057",
+    "test/term-bank-media-projection.test.js": "67a770783421fb212285e9d36e82ea24519a00787dd15b38db73c0884bcfa87f",
+    "dev/data/dictionary-wasm/manifest.json": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+  },
+  "logSha256": "6a76c5410d96a0490943981e347435642d2d450fb5adff1361b89946fd78fcca",
+  "sourceUnchanged": true
+}

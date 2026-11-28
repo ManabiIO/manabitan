@@ -1,0 +1,16 @@
+{
+  "kind": "types-main",
+  "node": "24.22.3",
+  "started": "2026-11-28T05:09:34.996889+00:00",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "--max-old-space-size=1536",
+    "/workspace/scratch/7c02210aa375/manabitan/node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--project",
+    "jsconfig.json"
+  ],
+  "complete": true,
+  "exitCode": 0,
+  "finished": "2026-11-28T05:09:48.329048+00:00"
+}

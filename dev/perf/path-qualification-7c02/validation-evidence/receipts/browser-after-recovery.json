@@ -1,0 +1,9 @@
+{
+  "kind": "browser availability after executor replacement",
+  "node": "v24.22.3",
+  "executable": "/home/agent/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+  "exists": false,
+  "timed": false,
+  "complete": false,
+  "error": "Error: browserType.launch: Executable doesn't exist at /home/agent/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+}
