@@ -26,6 +26,49 @@ let initialization = null;
 /** @type {Map<number, {source: number, sourceCapacity: number, destination: number, destinationCapacity: number, dictionary: number, dictionaryCapacity: number, prepared: object|null}>} */
 const contextBuffers = new Map();
 const TERM_CONTENT_BLOCK_ENVELOPE_BYTES = 12;
+const ARRAY_BUFFER_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get;
+
+/**
+ * Reuses the already initialized codec's XXH32 implementation for large import
+ * integrity payloads. The temporary allocation never replaces context buffers.
+ * Return null when the caller should keep its portable checksum path.
+ * @param {Uint8Array} content
+ * @returns {number|null}
+ */
+export function tryHashImportBytes(content) {
+    const module = moduleInstance;
+    if (
+        module === null || !ArrayBuffer.isView(content) ||
+        Object.getPrototypeOf(content) !== Uint8Array.prototype ||
+        Object.hasOwn(content, 'buffer') || Object.hasOwn(content, 'byteLength') ||
+        Object.hasOwn(content, 'byteOffset') ||
+        typeof ARRAY_BUFFER_BYTE_LENGTH_GETTER !== 'function'
+    ) { return null; }
+    const {buffer, byteLength} = content;
+    // Match the portable checksum's existing large-payload boundary. Module
+    // aliases stay portable because an allocation can grow and detach them.
+    if (byteLength < 1024 || byteLength > 0xffffffff - TERM_CONTENT_BLOCK_ENVELOPE_BYTES || buffer === module.HEAPU8.buffer) {
+        return null;
+    }
+    try {
+        // Establish private storage by its intrinsic identity, not its prototype.
+        ARRAY_BUFFER_BYTE_LENGTH_GETTER.call(buffer);
+    } catch { return null; }
+    const outputLength = byteLength + TERM_CONTENT_BLOCK_ENVELOPE_BYTES;
+    const pointer = module._malloc(outputLength);
+    if (pointer === 0) { return null; }
+    try {
+        module.HEAPU8.set(content, pointer + TERM_CONTENT_BLOCK_ENVELOPE_BYTES);
+        if (module._manabitan_write_block_envelope(pointer, outputLength) !== 1) { return null; }
+        const view = new DataView(module.HEAPU8.buffer, pointer, TERM_CONTENT_BLOCK_ENVELOPE_BYTES);
+        const first = view.getUint32(4, true);
+        // The envelope maps a zero hash pair to (1, 0). Portable recomputation
+        // preserves exact XXH32 for both that case and a genuine (1, 0) pair.
+        return first === 1 && view.getUint32(8, true) === 0 ? null : first;
+    } finally {
+        module._free(pointer);
+    }
+}
 
 /**
  * @param {string} [path='/lib/zstd.wasm']

@@ -20,6 +20,7 @@ import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-rec
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
+import {tryHashImportBytes} from '../../lib/zstd-wasm.js';
 import {toError} from '../core/to-error.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -6270,9 +6271,9 @@ view.chunks :
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        view.setUint32(24, tryHashImportBytes(base) ?? hashLookupIndexBytes(base), true);
+        view.setUint32(28, tryHashImportBytes(derived) ?? hashLookupIndexBytes(derived), true);
+        view.setUint32(32, tryHashImportBytes(recordFields) ?? hashLookupIndexBytes(recordFields), true);
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
