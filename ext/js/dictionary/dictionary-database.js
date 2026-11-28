@@ -77,6 +77,8 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
 import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
+import {admitNativeTermRecordLease, assertNativeTermRecordLease} from './native-term-record-ownership.js';
+import {tryCreateNativeTermRecordAliases} from './native-term-record-alias.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -557,6 +559,12 @@ export class DictionaryDatabase {
         this._bulkImportState = BULK_IMPORT_STATE_IDLE;
         /** @type {Promise<string>|null} */
         this._bulkImportSetupPromise = null;
+        /** @type {Set<Promise<void>>} */
+        this._nativeTermRecordAppends = new Set();
+        /** @type {Error[]} */
+        this._nativeTermRecordAppendErrors = [];
+        /** @type {Error|null} */
+        this._nativeTermRecordAppendCancellation = null;
         /** @type {boolean} */
         this._bulkImportTransactionOpen = false;
         /** @type {DictionaryImportJournal} */
@@ -898,9 +906,12 @@ export class DictionaryDatabase {
             return;
         }
         this._beginExclusiveDatabaseCleanup();
+        this._cancelNativeTermRecordAppends();
         /** @type {Error[]} */
         const errors = [];
         try {
+            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
+            errors.push(...this._nativeTermRecordAppendErrors);
             const db = this._requireDb();
             if (this._bulkImportJournalRecord !== null) {
                 await this._rollbackBulkImport(db, errors, true, true);
@@ -974,6 +985,8 @@ export class DictionaryDatabase {
             throw new Error('A dictionary bulk import is already active');
         }
         this._transitionBulkImportState(BULK_IMPORT_STATE_IDLE, BULK_IMPORT_STATE_ACTIVE);
+        this._nativeTermRecordAppendErrors.length = 0;
+        this._nativeTermRecordAppendCancellation = null;
     }
 
     /**
@@ -1029,6 +1042,7 @@ export class DictionaryDatabase {
 
     /** Returns the lifecycle to idle after setup or finalization cleanup. */
     _endBulkImportLifecycle() {
+        this._nativeTermRecordAppendErrors.length = 0;
         this._generationMediaWrite = null;
         if (this._bulkImportState === BULK_IMPORT_STATE_IDLE) { return; }
         if (this._bulkImportState === BULK_IMPORT_STATE_ACTIVE) {
@@ -1451,10 +1465,13 @@ export class DictionaryDatabase {
         this._assertBulkImportSessionOwner(expectedSessionId);
         const db = this._beginBulkImportFinalization();
         if (db === null) { return; }
+        this._cancelNativeTermRecordAppends();
         /** @type {Error[]} */
         const errors = [];
         let rollbackSucceeded = true;
         try {
+            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
+            errors.push(...this._nativeTermRecordAppendErrors);
             rollbackSucceeded = await this._rollbackBulkImport(db, errors, true, true);
             this._restoreRuntimeAfterBulkImportFailure(db, errors);
             if (!rollbackSucceeded || errors.length > 0) {
@@ -1535,6 +1552,12 @@ export class DictionaryDatabase {
             let termRecordSessionEnded = false;
             let sqlitePublished = false;
             try {
+                if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
+                if (this._nativeTermRecordAppendCancellation !== null) { throw this._nativeTermRecordAppendCancellation; }
+                if (this._nativeTermRecordAppendErrors.length === 1) { throw this._nativeTermRecordAppendErrors[0]; }
+                if (this._nativeTermRecordAppendErrors.length > 1) {
+                    throw new AggregateError(this._nativeTermRecordAppendErrors, 'Native term-record persistence failed');
+                }
                 const generationMedia = publication?.summary.generationMedia;
                 if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
                     await this._awaitGenerationMediaPublication(generationMedia);
@@ -1937,9 +1960,12 @@ export class DictionaryDatabase {
             throw error;
         }
 
+        this._cancelNativeTermRecordAppends();
         /** @type {Error[]} */
         const errors = [];
         try {
+            if (this._nativeTermRecordAppends.size > 0) { await Promise.all(this._nativeTermRecordAppends); }
+            errors.push(...this._nativeTermRecordAppendErrors);
             // An early media writer may still be waiting for the index the
             // abandoned import will never supply. Cancel before joining it.
             const mediaWrite = this._generationMediaWrite;
@@ -5071,9 +5097,10 @@ void 0 :
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {object|null} [nativeRecordLease]
      * @returns {Promise<void>}
      */
-    async bulkAddArtifactTermsChunk(chunk) {
+    async bulkAddArtifactTermsChunk(chunk, nativeRecordLease = null) {
         this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
@@ -5092,7 +5119,7 @@ void 0 :
                 (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
             );
             if (hasHashArrays || hasContentSlab) {
-                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
+                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk, nativeRecordLease);
                 return;
             }
             const rows = this._materializeArtifactChunkTermEntries(chunk);
@@ -8370,9 +8397,10 @@ this._readTermContentSignature(
 
     /**
      * @param {ArtifactTermRecordChunk} chunk
+     * @param {object|null} [nativeRecordLease]
      * @returns {Promise<void>}
      */
-    async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
+    async _bulkAddArtifactTermsChunkWithContentDedup(chunk, nativeRecordLease = null) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
@@ -8392,6 +8420,9 @@ this._readTermContentSignature(
         let stagedContentMetadata = null;
         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
+        const nativeAliasOwner = this._beginNativeTermRecordAppend(chunk, nativeRecordLease);
+        /** @type {Error|null} */
+        let nativeAppendError = null;
 
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(this._requireDb());
@@ -8451,6 +8482,7 @@ this._readTermContentSignature(
                     previousResolvedUniformDictName: contentDedupPlan.resolvedUniformDictName,
                 };
             }
+            nativeAliasOwner?.validateOwner();
             const tContentStoreStart = safePerformance.now();
             let preparedLookupIndexes = null;
             let recordAppended = false;
@@ -8521,6 +8553,7 @@ this._readTermContentSignature(
                     const persistenceResult = earlyContentPersistence === null ?
                         await pendingContentPersistence :
                         await earlyContentPersistence.storage;
+                    nativeAliasOwner?.validateOwner();
                     const {
                         pendingOffsets,
                         pendingLengths,
@@ -8661,21 +8694,80 @@ this._readTermContentSignature(
                     contentLengths,
                     resolvedContentDictNames,
                     importMetrics,
+                    nativeAliasOwner,
                 );
             }
             if (useLocalTransaction) {
                 this._requireDb().exec('COMMIT');
             }
+            nativeAliasOwner?.validateOwner();
             stagedContentMetadata = null;
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
+            nativeAppendError = toError(e);
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {
                 try { this._requireDb().exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
             throw e;
+        } finally {
+            nativeAliasOwner?.finish(nativeAppendError);
+        }
+    }
+
+    /**
+     * Registers the private append before its first await. Finalization closes
+     * admission through the existing lifecycle state, then joins this owner
+     * before closing or truncating either store. Completion includes rollback.
+     * @param {ArtifactTermRecordChunk} sourceChunk
+     * @param {object|null} lease
+     * @returns {(import('./native-term-record-alias.js').NativeRecordAliasOwner & {finish: (error: Error|null) => void})|null}
+     * @throws {Error} If the native input lease or database admission is no longer active.
+     */
+    _beginNativeTermRecordAppend(sourceChunk, lease) {
+        if (lease === null) { return null; }
+        assertNativeTermRecordLease(lease, sourceChunk);
+        const sessionId = this._bulkImportJournalRecord?.sessionId;
+        if (
+            !this._bulkImportTransactionOpen || this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE ||
+            typeof sessionId !== 'string' || this._nativeTermRecordAppendCancellation !== null ||
+            this._nativeTermRecordAppendErrors.length > 0
+        ) { throw new Error('Native term-record storage admission is closed'); }
+        admitNativeTermRecordLease(lease, sourceChunk);
+        const blockSession = this._termContentBlockImportSession;
+        /** @type {() => void} */
+        let resolveCompletion = () => {};
+        /** @type {Promise<void>} */
+        const completion = new Promise((resolve) => { resolveCompletion = resolve; });
+        this._nativeTermRecordAppends.add(completion);
+        const validateOwner = () => {
+            if (this._nativeTermRecordAppendCancellation !== null) { throw this._nativeTermRecordAppendCancellation; }
+            this._assertBulkImportSessionOwner(sessionId);
+            if (
+                !this._nativeTermRecordAppends.has(completion) || !this._bulkImportTransactionOpen ||
+                this._termContentBlockImportSession !== blockSession
+            ) { throw new Error('Native term-record storage ownership changed'); }
+        };
+        return {
+            sourceChunk,
+            lease,
+            validateOwner,
+            finish: (error) => {
+                if (!this._nativeTermRecordAppends.delete(completion)) { return; }
+                if (error !== null && error !== this._nativeTermRecordAppendCancellation) {
+                    this._nativeTermRecordAppendErrors.push(error);
+                }
+                resolveCompletion();
+            },
+        };
+    }
+
+    /** Cancels admitted private appends without abandoning their live writes. */
+    _cancelNativeTermRecordAppends() {
+        if (this._nativeTermRecordAppends.size > 0 && this._nativeTermRecordAppendCancellation === null) {
+            this._nativeTermRecordAppendCancellation = new Error('Native term-record append was cancelled by database cleanup');
         }
     }
 
@@ -10126,15 +10218,42 @@ null :
      * @param {Uint32Array} contentLengths
      * @param {string|(string|null)[]} resolvedContentDictNames
      * @param {Record<string, number>} importMetrics
+     * @param {import('./native-term-record-alias.js').NativeRecordAliasOwner|null} [nativeAliasOwner]
      * @returns {Promise<void>}
      */
-    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics) {
+    async _appendResolvedArtifactTermRecords(chunk, contentOffsets, contentLengths, resolvedContentDictNames, importMetrics, nativeAliasOwner = null) {
+        if (nativeAliasOwner !== null) {
+            const aliasStart = safePerformance.now();
+            const pendingAliases = tryCreateNativeTermRecordAliases(
+                nativeAliasOwner,
+                chunk,
+                resolvedContentDictNames,
+                this._termContentZstdInitialized ? this._termContentBlockImportSession : null,
+                resolveTermContentZstdDictName(chunk.dictionary),
+                (offset, length, name) => this._readTermEntryContentBytes(offset, length, name),
+            );
+            if (pendingAliases !== null) {
+                const aliases = await pendingAliases;
+                importMetrics.contentAliasMs += safePerformance.now() - aliasStart;
+                if (aliases !== null) {
+                    chunk = aliases.chunk;
+                    resolvedContentDictNames = aliases.contentDictName;
+                    importMetrics.contentAliasCount += aliases.aliasCount;
+                    importMetrics.contentAliasInputBytes += aliases.inputBytes;
+                    this._addTermContentBlockProfile(importMetrics, aliases.blockStorage);
+                }
+            }
+        }
         const metrics = await this._termRecordStore.appendBatchFromArtifactChunkResolvedContent(
             chunk,
             contentOffsets,
             contentLengths,
             resolvedContentDictNames,
         );
+        if (nativeAliasOwner !== null) {
+            assertNativeTermRecordLease(nativeAliasOwner.lease, nativeAliasOwner.sourceChunk);
+            nativeAliasOwner.validateOwner();
+        }
         importMetrics.termRecordBuildMs += metrics.buildRecordsMs;
         importMetrics.termRecordEncodeMs += metrics.encodeMs;
         importMetrics.termRecordWriteMs += metrics.appendWriteMs;

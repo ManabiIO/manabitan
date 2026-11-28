@@ -78,6 +78,16 @@ export class TermContentBlockImportSession {
     }
 
     /**
+     * Additional references may share the selected storage family without
+     * making a new compression-selection decision for a small payload.
+     * @param {string} dictionary
+     * @returns {boolean}
+     */
+    isBlockStorageSelected(dictionary) {
+        return !this._closed && this._blockEnabledDictionaries.has(dictionary);
+    }
+
+    /**
      * @param {string} dictionary
      * @param {Uint8Array[]} contentBytesList
      * @param {string|null} compressionDictName

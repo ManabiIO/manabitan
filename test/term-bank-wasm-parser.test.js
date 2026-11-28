@@ -47,6 +47,8 @@ import {
     TermBankWasmResourceError,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
+import {hasNativeTermRecordLease, NativeTermRecordImportOwner} from '../ext/js/dictionary/native-term-record-ownership.js';
+import {createNativeRecordFixture} from './util/native-term-record-fixture.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const termBankParserWasmPath = path.resolve(__dirname, '../ext/lib/term-bank-parser.wasm');
@@ -1694,6 +1696,90 @@ describe('term-bank WASM parser', () => {
             }
         } finally {
             releaseFirstSink();
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
+    maybeTest.each([
+        {ownership: 'owned', privateSink: true},
+        {ownership: 'borrowed', privateSink: true},
+        {ownership: 'conflicting', privateSink: true},
+        {ownership: 'owned', privateSink: false},
+    ])('binds receiver record ownership only through the private importer sink: $ownership/$privateSink', async ({ownership, privateSink}) => {
+        /** @implements {WorkerMock} */
+        class RecordWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                addWorkerListener(this.listeners, type, listener);
+            }
+
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(/** @type {WorkerMessage} */ message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    const {source} = createNativeRecordFixture();
+                    emitWorkerMessage(this.listeners, {
+                        type: 'result',
+                        id: message.id,
+                        rowCount: source.rowCount,
+                        resultSentEpochMs: Date.now(),
+                        ownsContentBytes: ownership !== 'borrowed',
+                        borrowsWorkerMemory: ownership === 'conflicting',
+                        chunk: {...source, mediaRows: [], contentBytesBuffer: new Uint8Array(new SharedArrayBuffer(8))},
+                        profile: {chunkDispatchMs: 0},
+                    });
+                });
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('Worker', RecordWorker);
+        const owner = new NativeTermRecordImportOwner(() => {});
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const count = getParallelTermBankParserWorkerCount();
+        /** @type {Array<{lease: object, chunk: object}>} */
+        const leases = [];
+        let chunks = 0;
+        try {
+            await importer._readTermBankFileFast(
+                /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'})),
+                3,
+                'Receiver fixture',
+                false,
+                false,
+                true,
+                'raw-bytes',
+                (chunk) => {
+                    ++chunks;
+                    const lease = owner.claim(chunk);
+                    const eligible = ownership === 'owned' && privateSink;
+                    expect(lease !== null).toBe(eligible);
+                    if (lease !== null) {
+                        expect(hasNativeTermRecordLease(lease, chunk)).toBe(true);
+                        leases.push({lease, chunk});
+                    }
+                },
+                {loaders: Array.from({length: count}, () => async () => textEncoder.encode('[]')), estimatedByteLengths: new Array(count).fill(24 * 1024 * 1024)},
+                null,
+                false,
+privateSink ? owner : null,
+            );
+            expect(chunks).toBe(count);
+            for (const {lease, chunk} of leases) { expect(hasNativeTermRecordLease(lease, chunk)).toBe(false); }
+        } finally {
+            owner.close();
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);
         }

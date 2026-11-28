@@ -68,6 +68,7 @@ import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
+import {NativeTermRecordImportOwner} from './native-term-record-ownership.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
@@ -1520,6 +1521,12 @@ export class DictionaryImporter {
             archiveReader,
             disposeParser: disposeParallelTermBankParser,
         });
+        const nativeRecordOwner = new NativeTermRecordImportOwner(() => {
+            if (importSession.failed || importSession.state !== 'active') {
+                throw new Error('Native term-record import is no longer active');
+            }
+            this._throwIfCancelled();
+        });
         const rawZipPayloadReader = RawZipPayloadReader.supportsArchive(archiveContent) ?
             new RawZipPayloadReader(archiveContent) :
             null;
@@ -2103,8 +2110,11 @@ export class DictionaryImporter {
                     step4TimingBreakdown.termSerializationMs += importMetrics.serializationMs;
                 }
                 const tTermsWriteStart = Date.now();
+                const nativeRecordLease = directArtifactChunk === null ? null : nativeRecordOwner.claim(directArtifactChunk);
                 await (directArtifactChunk !== null ?
-                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
+                    (nativeRecordLease === null ?
+                        dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
+                        dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk, nativeRecordLease)) :
                     bulkAdd('terms', termList, {trackProgress}));
                 const tTermsWriteEnd = Date.now();
                 importMetrics.bulkAddTermsMs += Math.max(0, tTermsWriteEnd - tTermsWriteStart);
@@ -2346,6 +2356,7 @@ export class DictionaryImporter {
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
                             allowNativeImageProjection,
+                            nativeRecordOwner,
                         );
                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
@@ -2905,6 +2916,7 @@ export class DictionaryImporter {
                 ok: false,
             });
         } finally {
+            nativeRecordOwner.close();
             acceptMediaPrefetch = false;
             sourceMediaPreparation?.cancel();
             if (stagedSourceMedia.preparation !== null) {
@@ -5074,9 +5086,10 @@ export class DictionaryImporter {
      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
      * @param {boolean} [allowNativeImageProjection]
+     * @param {NativeTermRecordImportOwner|null} [nativeRecordOwner]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false) {
+    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false, nativeRecordOwner = null) {
         this._lastFastTermBankReadProfile = null;
         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
         let deferredSourceBatch = null;
@@ -5235,17 +5248,23 @@ export class DictionaryImporter {
                     }
                     importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);
                     const tChunkSinkStart = Date.now();
-                    await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
-                        {
-                            ...columnPayload,
-                            dictionary: dictionaryTitle,
-                            dictionaryTotalRows: chunkProgress.totalRows,
-                            contentDictNameList: null,
-                            uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
-                        },
-                        requirementsForChunk,
-                        chunkProgress,
-                    );
+                    const sinkChunk = {
+                        ...columnPayload,
+                        dictionary: dictionaryTitle,
+                        dictionaryTotalRows: chunkProgress.totalRows,
+                        contentDictNameList: null,
+                        uniformContentDictName: RAW_TERM_CONTENT_TOKEN_DICT_NAME,
+                    };
+                    const nativeRecordLease = nativeRecordOwner?.bind(columnChunk, sinkChunk) ?? null;
+                    try {
+                        await /** @type {(termList: DirectTermChunk, requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */ (/** @type {unknown} */ (onChunk))(
+                            sinkChunk,
+                            requirementsForChunk,
+                            chunkProgress,
+                        );
+                    } finally {
+                        nativeRecordOwner?.release(nativeRecordLease);
+                    }
                     importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
                     return;
                 }

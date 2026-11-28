@@ -29,6 +29,7 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+import {registerReceivedNativeTermRecordChunk} from './native-term-record-ownership.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -3742,6 +3743,9 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                     data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
                     registerOwnedTermContent(chunk?.contentBytesBuffer)
                 );
+                if (ownsContentBytes && chunk !== null) {
+                    registerReceivedNativeTermRecordChunk(chunk);
+                }
                 resolve({
                     chunk,
                     profile,
