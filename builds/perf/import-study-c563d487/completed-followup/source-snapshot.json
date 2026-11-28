@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28 07:39:13 UTC",
+  "scope": "Primary GitHub metadata snapshots only. Other authors' reported performance is not independently qualified by this study.",
+  "repository": "ManabiIO/manabitan",
+  "develop": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "pullRequests": [
+    {
+      "number": 977,
+      "url": "https://github.com/ManabiIO/manabitan/pull/977",
+      "title": "perf(import): overlap bounded owned JMdict content preparation",
+      "head": "4702e9e9d73dda0d0f6ea83dce399a249ebb13a6",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "draft": true,
+      "state": "open",
+      "createdAt": "2026-11-28T06:00:06Z",
+      "updatedAt": "2026-11-28T06:01:55Z",
+      "body": "## Why this is worth reviewing\n\nJMdict currently finishes the ordered content/record sink for one owned group before the next group can prepare its content. Existing reserved content offsets make a narrower dependency possible: after the first group's metadata is published, the next immutable group can prepare deduplication/compression while the first group finishes persistence.\n\nA completed, source-bound scheduling prototype showed a repeatable compression-component gain with the actual **1 MiB database block target**. This draft implements that mechanism with bounded ownership and failure handling. **HOLD: no whole-import speedup or browser-memory pass has been established.**\n\n## What changes\n\n- Admit at most two eligible append owners. The successor starts content preparation after predecessor metadata publication; its metadata and record writes still wait for predecessor completion.\n- Preserve immutable parser ownership through full completion. Producer lead, owned-byte accounting, source release, progress, and metrics retire at completion.\n- Latch failure/cancellation, join every started operation, and unwind successor metadata before predecessor rollback. Legacy completion-only appends use the same queue.\n- Claim finalization ownership before draining active appends, preserving the existing synchronous behavior when no owner is pending.\n- Continue physical worker assignment across adjacent shared-span compression batches. All four workers were already active in the corrected workload; this balances partial worker rounds.\n- Account overlapping sink wall intervals by their union when deriving parser wall time; retain per-consumer work sums.\n\nCross-group preparation requires complete immutable owned shared content, complete native dedup metadata, and the existing JMdict compression path. The worker cursor applies to all shared-span batches, so cross-corpus timing checks remain required even where the sink stays serial. Borrowed, private, partial, unwitnessed, media, and otherwise ineligible chunks keep completion-ordered sink behavior. Codec settings, block geometry, worker counts, producer budgets, and stored formats stay fixed.\n\nThe diff contains **seven runtime files, six focused test files, and the required copyright-header registration**. It contains no experiment harness or unrelated optimization.\n\n## Completed gain evidence and its scope\n\nThe corrected replay uses frozen baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, exact native-parser/dedup spans for **528,299 JMdict rows**, 12 groups, 100,300,626 input bytes, and **103 blocks**. It runs the shipped codec and dictionary on four real Node workers. Twelve rounds balance all six A/B/C orders twice; all 36 observations are retained.\n\n| Comparison | Paired median change | Equal-work change | Faster pairs |\n| --- | ---: | ---: | ---: |\n| Prototype B / serial A | **−13.0747 ms / −16.5153%** | −17.2931% | 12/12 |\n| Prototype B / identical serial C | **−10.6451 ms / −12.9197%** | −15.2888% | 11/12 |\n| Identical C / A | −1.0119 ms / −1.1922% | −2.3661% | 7/12 |\n\nElapsed arm medians are A 78.6873 ms, B 67.5730 ms, and C 78.0943 ms. Their difference is a different statistic from the paired median change.\n\n**This is a scheduling prototype, not a timing run of this PR's runtime.** B rotates the baseline pool's worker array and permits two pending codec groups. The committed cursor uses the same successful physical-worker sequence, but production's metadata-publication gate can make its useful overlap window narrower. Parsing, dedup, records, OPFS, browser transport, and UI are excluded. All arms also drift downward during the cohort; balanced orders and the identical control reduce simple order bias but do not establish a stable production magnitude.\n\nAll 36 timed observations have identical per-block compressed hashes and output bytes. One separate verification-only run decodes all 103 blocks and matches every input block; this does not claim 36 separate decode passes.\n\nA separate 100-observation five-arm ablation favors the combined mechanism, but its identical-control drift makes the magnitude inconclusive. Rotation alone is not established as a worthwhile optimization. The earlier 4 MiB/31-block screen is superseded and is not the basis for this draft.\n\nImmutable evidence:\n\n- [All 36 observations, paired arithmetic, exact source and fixture bindings](https://github.com/ManabiIO/manabitan/blob/a1f7c234db525d960b38a90f1930b7354f1cb18e/builds/perf/import-overlap-20261128-da6c4/corrected-codec-review-receipt.json).\n- [Exact corrected replay source](https://github.com/ManabiIO/manabitan/blob/a1f7c234db525d960b38a90f1930b7354f1cb18e/builds/perf/import-overlap-20261128-da6c4/corrected-codec-replay.mjs). Its inherited warmup comment about an idle fourth worker applies to the superseded 4 MiB screen; all four are active at 1 MiB.\n- [Raw evidence archive and member hashes](https://github.com/ManabiIO/manabitan/blob/a1f7c234db525d960b38a90f1930b7354f1cb18e/builds/perf/import-overlap-20261128-da6c4/components-v1-index.json), including complete timings, ablation, failed attempts, and DB/store parity receipts.\n- [Full experiment handoff and later validation history](https://github.com/ManabiIO/manabitan/blob/a1f7c234db525d960b38a90f1930b7354f1cb18e/dev/perf/import-experiments-20260914.md).\n\n## Correctness and validation provenance\n\nThe full DB/store replay is bound to the **original implementation `a20453bc`**, not the later repaired runtime. It covers all 528,299 rows, exact metadata/dedup results, all 103 compressed blocks, persisted content/record hashes, and 36 source-derived reopened probes per arm. Only validated random generation IDs are masked. A forced-response gate proves successor compression starts before predecessor completion. SQLite setup/journaling/COMMIT and the browser producer are outside that replay.\n\nThe current runtime `5048ba3e` repairs three cleanup/finalization regressions exposed by existing tests, fixes overlapping diagnostic clocks, and resolves the original lint diagnostics. It has:\n\n- **146 passing tests across seven focused/cleanup suites**, including all 66 existing cleanup tests with their assertions unchanged.\n- **All seven build targets passing**.\n- Passing exact-config lint for the three repaired test files and a clean diff check.\n\nComplete current lint, all type projects, the full unit suite, and browser qualification remain pending. Local whole-suite/type attempts exited 137 or exhausted their configured heaps; they are incomplete, not passes. Earlier main/scoped type passes belong to the earlier runtime and are not relabeled as current-head passes.\n\nThis clean branch's entire **`ext/` tree, `test/` tree, and ESLint configuration exactly match `5048ba3e8a65fc41b9ae898c47b54d5731cd759e`**. Research-only files are excluded. Normal PR checks run unchanged.\n\n## Gates before promotion\n\n[The frozen current-runtime qualification](https://github.com/ManabiIO/manabitan/actions/runs/46108795917) first requires full lint, main/test types, unit tests, and builds. It then covers JMdict, Jitendex, and VNDB in independent AB/BA cells, each with 12 timing pairs, four warmups, interleaved identical-code controls, exhaustive media checks, and separate process-tree memory observations. Existing PSS/private bounds remain +5% paired median and +10% per pair, with the prospective sampling-coverage checks intact.\n\nRetaining two owned source groups increases the live source window; the earlier component's sampled RSS is not a peak or browser-memory qualification. Cancellation/finalization ordering and this retained-owner memory cost are the main review risks. This draft stays held until current validation and browser correctness, performance, and memory evidence justify promotion.\n\nThis differs from #874's within-one-private-batch experiment and #955's borrowed-source release work. It also does not include the separate FIFO-dispatch or VNDB raw-alias experiments.\n"
+    },
+    {
+      "number": 978,
+      "url": "https://github.com/ManabiIO/manabitan/pull/978",
+      "title": "perf: restore indexed compact score-key validation",
+      "head": "b15bad43acdfd54d541895cac1109c0e5ba51b2f",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "draft": true,
+      "state": "open",
+      "createdAt": "2026-11-28T06:14:09Z",
+      "updatedAt": "2026-11-28T06:14:09Z",
+      "body": "## Why\n\nPR #944 introduced indexed score-key validation in `parseCompactRecordFields`. Integration commit `a35b064d5d37960429ce591c9f6f17a2df0486c5` subsequently restored the older iterator loop while integrating split-reference provenance handling. Develop `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` contains that older loop.\n\n## Change\n\nRestore the two indexed-loop lines from the accepted optimization. Every compact `Uint16Array` score key receives the existing bounds check, in the same order, with the same rejection error. The existing boundary and malformed-input tests remain applicable.\n\n## Measured benefit\n\nThe component comparison uses all 12 actual compact field buffers captured from an unchanged-baseline JMdict public-sink replay: 528,299 rows and 4,239,960 field bytes. The capture is bound to the pinned dictionary, source hashes, and complete persisted content/record/index digests.\n\nTwenty-four balanced A/B/C blocks, with eight complete traversals per observation and two excluded warmups, give these warm validator medians:\n\n| Arm | Time per complete captured corpus |\n| --- | ---: |\n| Baseline A | 2.5594 ms |\n| Indexed loop B | 0.9852 ms |\n| Identical baseline C | 2.5867 ms |\n\nThat is about **1.57–1.60 ms saved per complete warm validation**. Paired median changes are −62.71% against A and −64.02% against C; the identical-code C/A control is +0.885%. B is faster in 23/24 and 24/24 blocks respectively. Returned typed views and input bytes match.\n\nThe scope of this result is compact-field validation. The enclosing Node sink measurement is retained but inconclusive: unchanged parser/compression phases move substantially while the owning record phases are flat. Complete browser import qualification remains pending.\n\n## Validation\n\n- Local Node 24.22.3: 669 full unit suites passed, 15,135 tests passed and 47 expected conditional skips; all-target build dry run, scoped ESLint, main types and test types passed.\n- Hosted Node 22.22.0: validation of the identical runtime blob passed on frozen study head `915268441352c3c7aa50fc0fbd44f73f5a826d79` in [run 46106456744](https://github.com/ManabiIO/manabitan/actions/runs/46106456744), including pinned native reproduction. This PR contains that two-line product change; the study workflow stays on its experimental branch. Its three complete-import jobs are queued at this draft's preparation time.\n- The earlier local prerequisite failures and corrected complete run are preserved with source and log hashes. The product diff stayed fixed throughout validation.\n\n## Reproduction and evidence\n\nThe [scope and reproduction README](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/score-restoration-README.md), [complete evidence archive](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/score-restoration-evidence-20261128-1b47.tar.gz), and [per-member hash manifest](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/score-restoration-evidence-20261128-1b47.manifest.json) are preserved at immutable evidence commit `3c3ba7600a8811df6b8631b72a0ac5379f8b60d1`. The archive contains all 12 actual numeric buffers, frozen probe/capture scripts, complete observations, source/history bindings, failures and validation logs. Archive SHA-256: `56e214cf9107725113593c25eb290e36c390b02bf51e169e2632a3726a518841`.\n\nOriginal modifications to existing project code; no third-party source was imported.\n\n"
+    },
+    {
+      "number": 979,
+      "url": "https://github.com/ManabiIO/manabitan/pull/979",
+      "title": "perf: reduce short-gap CRC work with existing slicing tables",
+      "head": "5909db31ebe859fce1cc4b38324271ddf9f3dd59",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "draft": true,
+      "state": "open",
+      "createdAt": "2026-11-28T06:14:14Z",
+      "updatedAt": "2026-11-28T06:14:14Z",
+      "body": "## Why\n\nThe incremental source-gap CRC helper consumes full 16-byte blocks, then handles every remaining byte serially. VNDB has many short gaps between exact raw spans covered by CRC witnesses, so those dependent tail steps are a recurring cost even when most source bytes are already covered.\n\n## Change\n\nUse the existing slicing tables for an optional eight-byte tail and then an optional four-byte tail, leaving at most three scalar bytes. This adds 25 production C lines, with no new table or allocation and no change to witness selection, group sizing, admission, persisted formats, or CRC semantics.\n\nThe checked-in parser WASM and native manifest are regenerated with the pinned Clang/LLD 21.1.8 toolchain. The WASM grows by 284 bytes; the CRC helper is the only changed production function body. A test-only export permits an independent Node-zlib oracle over 8,160 combinations of input length, alignment and preceding CRC state.\n\n## Measured benefit and limits\n\nThis is a component optimization. It does not establish a complete-browser import speedup.\n\n| Measurement | Result | Scope |\n| --- | --- | --- |\n| Captured-gap replay, 120,012 spans from the first 12 VNDB banks, 24 balanced blocks | Paired CRC-only improvement of 21.21%; medians 103.97 → 82.49 ms for sixteen repeats | Exploratory selection screen; concatenates gaps into one CRC state and excludes the verifier's combination work |\n| Complete sequential VNDB parser, all 665 banks / 6,648,310 rows, first order | Summed CRC phase 62.01 ms lower, or 8.65% | All compared parser outputs exact; unchanged inflation also improves |\n| Same complete corpus, reverse initial order | Summed CRC phase 49.87 ms lower, or 6.82% | Supports a CRC-stage signal, without attributing the enclosing parser change |\n| Selected direct production-verifier replay | Geometric change −3.19%; descriptive 95% interval [−7.38%, +1.74%] | Inconclusive; unchanged whole-bank control's equal-work time moves +3.89% |\n\nThe local full-parser cohorts use 332 groups and scan 872 MB. The browser production census uses 170 groups and scans 568 MB across three workers. These percentages must not be applied to complete-browser time or summed worker durations. Wider slicing32 was slower in the complete parser; padding was inconclusive. Their observations remain in the evidence, including failed or incomplete attempts and the limits of retained acquisition-script provenance.\n\n## Validation\n\n- Hosted validation of the identical four product blobs passed on frozen study head `3080deb631a7536fabe8ccb2f77f8f55e11ef061` in [run 46107723369](https://github.com/ManabiIO/manabitan/actions/runs/46107723369): pinned native reproduction, full units, all-target build, scoped lint, and main/test types. This PR contains those four files; the study workflow stays on its experimental branch.\n- The initial hosted run passed native reproduction, 669 unit files / 15,136 tests with 47 conditional skips, and builds, then failed test-only array formatting. The current trial changes only that formatting; runtime source and WASM bytes are unchanged. Both receipts are retained.\n- Complete browser comparison, restart, media, storage and memory jobs for JMdict, Jitendex and VNDB remain queued at draft preparation. Keep this draft unmerged pending those regression/correctness observations; a flat browser result will remain a flat result.\n\n## Reproduction and evidence\n\nThe [scope and reproduction README](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/crc8_4-README.md), [complete evidence archive](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/crc8_4-evidence-20261128-1b47-v2.tar.gz), and [per-member hash manifest](https://github.com/ManabiIO/manabitan/blob/3c3ba7600a8811df6b8631b72a0ac5379f8b60d1/dev/perf/import-evidence-20261128-1b47/crc8_4-evidence-20261128-1b47-v2.manifest.json) are preserved at immutable evidence commit `3c3ba7600a8811df6b8631b72a0ac5379f8b60d1`. Archive SHA-256: `4d47af5543a594dfc4083efabfd568250dfc28d48f53e9361b53722f0d3dd823`.\n\nThe compact bundle includes the measured source/native checkpoints, current test file, frozen observations, independent oracle checks, scripts, input hashes, reconstruction instructions and rejected variants. Large dictionary archives and reproducible raw source captures are omitted with explicit hashes and recipes.\n\nOriginal modifications to existing project code; no third-party source was imported.\n"
+    },
+    {
+      "number": 980,
+      "url": "https://github.com/ManabiIO/manabitan/pull/980",
+      "title": "perf(import): allocate content metadata IDs only when needed",
+      "head": "a9085d1ce49aa0e74662f7b3818ab546068a1376",
+      "base": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "draft": false,
+      "state": "open",
+      "createdAt": "2026-11-28T06:20:45Z",
+      "updatedAt": "2026-11-28T06:20:45Z",
+      "body": "Normal imports use positive zero for every term-content metadata ID, while the database eagerly allocates a Float64 column for those zeros. This change keeps that column implicit until a caller writes a nonzero ID or negative zero.\n\nThe gain is **4 MiB of live import-time ID-column capacity for JMdict and Jitendex, and 2 MiB for VNDB**. This is an allocation-only change; no import-speed, process-peak or permanent per-installed-dictionary saving is claimed.\n\n## Behavior\n\nValid numeric reads synthesize positive zero. Missing and malformed numeric indexes retain their prior undefined result. Legacy IDs and signed zero materialize the existing representation. Allocation/interner failures, growth, rollback/reuse, contiguous publication and alias checks retain their supported behavior. Independent review found no blocker for the existing internal numeric-index API; arbitrary non-number TypedArray property keys are outside that contract.\n\n## Direct allocation evidence\n\n| Pinned corpus |      Rows | Metadata entries | Live ID capacity before |   After |\n| ------------- | --------: | ---------------: | ----------------------: | ------: |\n| JMdict        |   528,299 |          362,032 |         4,194,304 bytes | 0 bytes |\n| Jitendex      |   436,555 |          363,243 |         4,194,304 bytes | 0 bytes |\n| VNDB          | 6,648,310 |          157,150 |         2,097,152 bytes | 0 bytes |\n\nComplete-corpus replays use the real planner, native workers and DB owner, with equal metadata/reference/cache digests and exact-read counters. Their temporary raw backing is separate from the browser persistence/readback/media qualification. Both implementations clear these columns at successful import cleanup.\n\n## Browser qualification\n\n[Measured-source run 46104994552](https://github.com/ManabiIO/manabitan/actions/runs/46104994552) retains six independent host/order cells, each with 12 paired comparisons and four unchanged-code controls. All 216 ordinary, 12 exhaustive-media and 24 instrumented semantic receipts agree, and exact package/harness identities pass. All six timing intervals cross zero; there is no speed claim.\n\n| Dictionary | AB equal-work time change | BA equal-work time change |\n| ---------- | ------------------------: | ------------------------: |\n| JMdict     |                   +0.252% |                   +0.248% |\n| Jitendex   |                   +1.147% |                   −1.551% |\n| VNDB       |                   −0.595% |                   −0.439% |\n\nThe full report retains paired medians, intervals, every slow tail and controls separately. No hosts, orders or controls are pooled or subtracted.\n\nFive memory cells pass the unchanged screen: all observations qualified, median paired change <= +5% and maximum pair <= +10%, separately for sampled PSS and private bytes. VNDB AB's four observations fail only the 250 ms covered-scan-gap rule (253.025–303.469 ms); its comparison metrics remain null. Its successful independent BA cell does not erase this observer limitation. All 2,142 raw scans and the original failures are retained. Passing this regression screen is not evidence of reduced process peaks.\n\n## Validation and exact source relationship\n\n- Measured source `da03aa70f88d4b0616eeab8ed251f48a17f8de13`: all 670 discovered unit files pass as eight sequential one-worker shards, with 15,156 passing tests, 47 existing skips and zero failures; 230 focused cases; 30-seed differential replay covering 7,500 operations/315,604 comparisons; seven dry builds; four hosted TypeScript projects.\n- Review source `b0a4532ed4209ad289aa28ac58a92a10e9d54841`: 21 changed-file tests pass and required scoped repository ESLint passes for the runtime and all three changed JS tests, with unchanged rules/configuration. Independent lifecycle/call-site review finds no blocker.\n- The review source fixes lint style. Its sole runtime delta from the measured source is whitespace. The complete `ext` diff is checked to contain only the database file, and full ASTs are exactly equal after removing only source locations. Measured source/package identities remain unchanged. Test-only edits use typed snapshots and multiline formatting.\n- The extra [whole-repository static rerun 46111003657](https://github.com/ManabiIO/manabitan/actions/runs/46111003657) remains queued as of 2026-11-28 06:15:44 UTC. It is additional evidence, not a missing required changed-code gate. Prior lint findings, exit 137 attempts and the wrapper exit 127 are preserved.\n\nThe evidence directory contains three digest-verified archives, a portable verifier for all 2,771 indexed payloads, the exact local source Git bundle, the independent receipt auditor with `MANABITAN_STUDY_ROOT` override, the AST verifier and the final source-review receipt. The initial `f17102b` campaign remains separate and is not relabeled as final-source evidence.\n\n**Review:** [Complete evidence and reproduction instructions](https://github.com/ManabiIO/manabitan/blob/a9085d1ce49aa0e74662f7b3818ab546068a1376/builds/perf/20261128-lazy-content-ids/README.md) · [Code and tests only](https://github.com/ManabiIO/manabitan/commit/1cf97f9333f4e08df91d893be5a4927b870359d4). The evidence is isolated in the following commit.\n"
+    }
+  ],
+  "jobs": [
+    {
+      "run": 46113243549,
+      "jobs": [
+        {
+          "id": 140881240942,
+          "name": "Exact candidate correctness",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Confirm exact candidate source",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Bind the exact numeric product diff and rebuilt artifacts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install compiler required by native unit fixtures",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Reproduce every pinned native artifact from both frozen sources",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Lint the focused production regression suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Check strict main types",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Check strict test types",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run complete unit suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run options unit suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Validate every build target",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Retain every correctness and native reproduction log",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            }
+          ]
+        },
+        {
+          "id": 140903281788,
+          "name": "jmdict (AB)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140903281805,
+          "name": "jmdict (BA)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140903281809,
+          "name": "vndb (AB)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140903281821,
+          "name": "jitendex (AB)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140903281848,
+          "name": "vndb (BA)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140903281858,
+          "name": "jitendex (BA)",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46113243549,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "run": 46119683668,
+      "jobs": [
+        {
+          "id": 140901220200,
+          "name": "jmdict fixed component cohort",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46119683668,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140901220379,
+          "name": "Three fixed synthetic negative-control cohorts",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46119683668,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 140901220416,
+          "name": "vndb fixed component cohort",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 46119683668,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    }
+  ]
+}

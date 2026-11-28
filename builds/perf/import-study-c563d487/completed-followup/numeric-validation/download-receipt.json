@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:16:41.668070+00:00",
+  "runId": 46113243549,
+  "jobId": 140881240942,
+  "artifactId": 15253880864,
+  "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549/artifacts/15253880864",
+  "apiBytes": 50962,
+  "apiSha256": "95a1d369fb421e3f9a9fb49e320abccbee5be54025d0969ba83b3e056c6eae64",
+  "apiBytesAndDigestVerified": true,
+  "originalFiles": [
+    {
+      "path": "build.log",
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+    },
+    {
+      "path": "compiler.txt",
+      "bytes": 122,
+      "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+    },
+    {
+      "path": "linker.txt",
+      "bytes": 18,
+      "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+    },
+    {
+      "path": "lint.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "path": "native-baseline.log",
+      "bytes": 500,
+      "sha256": "a6b6cf1c3278e4d6074cc813af34bd985ec7e9fb1675c9e8ecd80ec8948cc079"
+    },
+    {
+      "path": "native-candidate.log",
+      "bytes": 500,
+      "sha256": "1622cd8e4d73e8d4b6d4b80635059fb6fcb32f0c3f44bfbb92f5e3f1546bfa97"
+    },
+    {
+      "path": "options.log",
+      "bytes": 590,
+      "sha256": "55986748dcd43858fe991f04ca7b8d09e2e3a7964a884ba08aadc746ab7bdc9b"
+    },
+    {
+      "path": "source-binding.json",
+      "bytes": 900,
+      "sha256": "0c8a02a8876f941074058a17bbda798e448c08ce3bbb8cf12692d0624b287904"
+    },
+    {
+      "path": "source-identity.txt",
+      "bytes": 82,
+      "sha256": "4f2086c3b1b3c1319cfbe3e7753f62f0c1867bd896d86a4bf70b8d1bd70878b1"
+    },
+    {
+      "path": "types-main.log",
+      "bytes": 74,
+      "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+    },
+    {
+      "path": "types-test.log",
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+    },
+    {
+      "path": "unit.log",
+      "bytes": 592482,
+      "sha256": "d62818ebb7b1a5c49ea2c2c14f046684ec58a09dff16afa1304a33ded10ebe5d"
+    }
+  ],
+  "source": "Original first-attempt GitHub Actions artifact; no replacement or rerun"
+}

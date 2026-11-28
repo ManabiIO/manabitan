@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "status": "source_only_single_successor_proposal_pending_root_decision",
+  "authorization": "Analysis only. No implementation, compiler, test, corpus replay, timing acquisition, CI launch or publication is authorized or performed for this successor.",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "identities": {
+    "baselineC": {
+      "path": "/workspace/scratch/c563d487c718/manabitan/ext/js/dictionary/wasm/term-bank-parser.c",
+      "sha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a"
+    },
+    "currentCandidateC": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/term-bank-parser.c",
+      "sha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68"
+    },
+    "currentCandidatePatch": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/candidate.patch",
+      "sha256": "34a56bd9e40f5cd52ffa3ae3c8914ded15d89df6958d6dc54d4a517735c5b117"
+    },
+    "opportunityResult": {
+      "path": "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/run-4-prior-streak/result.json",
+      "sha256": "c70338754be1040215faf478bbcd179bd9af7ca3b5ff51de4f6c60586e6d1b31"
+    },
+    "opportunityReconciliation": {
+      "path": "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/run-4-prior-streak/independent-reconciliation.json",
+      "sha256": "83f920edc827c4af098d322e88352bd1ccaacfef006ad3f2298027a6e39a6bc0"
+    }
+  },
+  "singleProposedCandidate": {
+    "name": "Prior-streak admission with a read-only boolean key check and baseline late interning",
+    "objective": "Keep the established interner source path unchanged while limiting additional prefix-selector key work to rows with an existing prior exact-content witness.",
+    "callerAdmission": "Retain the existing original-lookback-positive arm. Add recent_content_match_streak != 0 only to the current new-pointer-admission arm, which already requires validated glossary reuse enabled, strict glossary validation, and a prior row.",
+    "strictSelectorAdmission": "At the existing pre-glossary selector point, require nonnull glossary_witness, original parser-local lookback == 0, a prior row, nonnull key_escape_mask, and the read-only boolean key predicate. Keep the current first-prefix selection loop and shared full glossary proof unchanged.",
+    "booleanKeyPredicate": {
+      "expressionArm": "Compare the current expression with the previous completed row expression using the existing equal raw-token length in [2,34] and <=32 raw-body-byte equality. An exact match returns true immediately.",
+      "readingArm": "If expression matching fails, require nonempty current reading, current raw-token length in [3,34], and equal previous-reading token length. Reject reading raw-equal to the current expression, then compare current and previous reading bodies exactly.",
+      "readingAliasProof": "The strict string scanner has validated both current token extents and quote delimiters. Equal raw-token lengths plus equal bodies imply equal raw tokens. The reading arm is already bounded to <=32 body bytes, so this alias exclusion can compare bounded bodies too. Empty reading remains excluded. The baseline late interner still computes its authoritative empty/equal-reading flag independently.",
+      "unionSemantics": "An expression match admits even when reading aliases expression. Only the reading-only arm excludes empty/raw-equal-to-expression reading. Semantically equal but raw-different escaped forms do not become raw aliases.",
+      "writes": "No metadata, key mask, interner IDs, heap bytes, cache state or policy state are written.",
+      "bound": "Each added byte-equality operation is bounded by the existing 32 raw-body-byte limit. No unbounded expression-reading comparison is added. Expression-first short circuit is logical OR evaluation, not a corpus-selected predicate."
+    },
+    "lateInterner": "Restore the baseline block verbatim, including independent reading alias computation, per-field adjacent bounded reuse, escape fallback, UTF-8/key decoding, hash/probe behavior and IDs. key_escape_mask carries only its baseline two escape bits.",
+    "sourceEditsRelativeToCurrentCandidate": [
+      "Remove the four KEY_IDENTITY_CHECKED / KEY_READING_EQUALS_EXPRESSION / KEY_ADJACENT_EXPRESSION_MATCH / KEY_ADJACENT_READING_MATCH definitions.",
+      "Replace high-bit-producing adjacent_key_identity with the read-only boolean predicate.",
+      "Restore strict key_escape_mask assignment to its baseline two escape bits without early identity bookkeeping.",
+      "Call the boolean predicate from the existing pre-glossary prefix-selector guard, after current header grammar checks.",
+      "Add the sole prior-streak != 0 conjunct to the new pointer-admission arm; preserve the old positive-lookback arm.",
+      "Restore every late-interner hunk to the frozen baseline source.",
+      "Retain current parser-local first-candidate bounds, lookback-positive proof guard, caller original-lookback-only budget refill, and newest-content-witness reasoning."
+    ],
+    "unchangedInterfaces": "No new parser parameter, exported ABI, option, metadata column, allocation or persistent state is required. The existing witness pointer carries admission."
+  },
+  "correctnessInvariants": [
+    "Current key/header/score grammar and escape validation precede the helper. Current sequence, term tags and closing syntax still parse after any glossary witness.",
+    "The helper admits work only. Full bounded glossary byte equality alone authorizes grammar/hint reuse.",
+    "Scan at most the existing four prior records newest-first. Tag/rule lengths and first up-to-four-byte signatures select only the first candidate. No second attempt follows bounds, sample or full-equality failure.",
+    "Candidates longer than 511 bytes remain allowed when the immediately preceding glossary is short. Current logical-bank bounds remain authoritative.",
+    "Only original positive-lookback witnesses refill the original four-miss budget. Added selector witnesses never refill it. Existing exact full-content matching alone updates its original streak and four-match admission.",
+    "A selected witness remains the newest full-content witness when remaining fields match: skipped newer rows failed a necessary prefix condition.",
+    "Preserve opt-out and generic fallback, the existing source CRC admission and validation, bank boundaries, ownership, durability, worker policy, thresholds and caches."
+  ],
+  "tradeoffAgainstOnlyAddingTheConjunct": {
+    "oneConjunctOnly": "Suppresses early identity evaluation outside the prior-streak gate, but retains current KEY_IDENTITY_CHECKED and adjacent-match flag logic in the late interner for all rows.",
+    "proposedSingleCandidate": "Removes that late-interner rewrite entirely, while repeating some bounded comparisons early and later on rows passing the prior-streak/original-lookback gate.",
+    "scopeCorrection": "The early predicate can run on 85,314 observed JMdict rows, not just the 44,466 key admissions; 40,848 predicates reject. Actual additional comparison bytes were not measured.",
+    "inactivePathLimit": "The new pointer/selector guard still exists. Restoring baseline interning removes its new high-bit processing, but does not establish zero overhead or a Jitendex improvement.",
+    "missingCoverage": "No successor Jitendex/VNDB gate counts were acquired. Zero original Jitendex prefix proofs does not prove that the successor early predicate would be inactive.",
+    "attributionLimit": "Source analysis cannot establish that the current candidate late-interner branches caused the reported Jitendex timing concern.",
+    "decision": "One source design for a later decision, composed before local-screen completion and unchanged by that result. Do not acquire both alternatives and select favorable timings. No implementation decision is made here."
+  },
+  "availableOpportunity": {
+    "boundary": "Prior untimed run-4 observer: fixed seven-bank groups, eight groups, 528299 JMdict rows. Not production-browser planner counts or runtime estimates.",
+    "existingAdmissionMatches": 4,
+    "existingMissBudget": 4,
+    "originalLookbackZeroRows": 353880,
+    "priorStreakPositiveLookbackZeroRows": 85314,
+    "keyRejectedWithinThatGate": 40848,
+    "selectorAdmissions": 44466,
+    "priorRecordsInspected": 100878,
+    "selectedCandidates": 44181,
+    "extraGlossaryProofs": 44102,
+    "reusableGlossaryBytes": 8059365,
+    "sameCandidateFullContentWitnesses": 43068,
+    "sameCandidateFullContentBytes": 7650826,
+    "retainedProofPercent": 55.057302,
+    "retainedReusableBytesPercent": 44.155951,
+    "tailMisses": 75,
+    "middleMisses": 3,
+    "fullComparisonMisses": 1,
+    "failedFullBytesOffered": 31,
+    "failedFullLogicalBytesCompared": 8,
+    "selectedSignatureCollisions": 0,
+    "largestSelectedAndProvenGlossaryBytes": 4522,
+    "baselineExistingGlossaryReuses": 54629,
+    "prospectiveTotalReuseCountAtThisFixedGrouping": 98731,
+    "prospectiveCountLimit": "98731 is expected only if a future source exactly implements this predicate and unchanged proof. It is not an executed successor result. Native/output counts require independent qualification.",
+    "metadataDigest": "d6965c13c73fbe3312802d1e4800b0acd8942f317b3ed065d7c8edd25c1c0809"
+  },
+  "mandatoryFutureQualification": {
+    "allUniqueCaveat": "All-unique rows have no prior exact-content streak. Existing unique/common-prefix/unequal-glossary negatives become inactive for the added selector. They remain parity and inactive-path controls, but cannot establish active futile-probe non-regression.",
+    "activeShortMiss": {
+      "rows": [
+        "X_n",
+        "X_n",
+        "Y_n"
+      ],
+      "geometry": "Use identical short raw expression keys, empty reading, headers and term tags. X_n is a valid 242-byte glossary; Y_n has equal length with a string-byte difference near the end outside the existing middle/tail samples. Each repeating block uses new content identities.",
+      "state": "The second X_n establishes streak1 without original admission4. Y_n has original lookback0, passes key/prefix admission, selects adjacent X_n, passes samples and fails full equality. Its raw-content miss resets the streak.",
+      "isolatedExpectations": {
+        "oldGlossaryReuses": 0,
+        "newSelectorAdmissions": 1,
+        "selectedDistance": 1,
+        "newFullComparisonMisses": 1,
+        "newProofs": 0,
+        "recentFullContentMatches": 1
+      }
+    },
+    "activeOlderLongMiss": {
+      "rows": [
+        "L_n(header A)",
+        "S_n(header B)",
+        "S_n(header B)",
+        "L_prime_n(header A)"
+      ],
+      "geometry": "L_n/L_prime_n are valid 4096-byte glossaries with a late difference outside samples. S_n is short and repeats exact full content. A/B have distinct raw tag/rule prefixes; keys are short and identical.",
+      "state": "The final row has streak1 and original lookback0 because the immediate predecessor is short. The first matching prefix is L_n at distance3. Perform one bounded long proof and reject. Retain and count the old adjacent-long probe on the first S_n separately.",
+      "companions": "The same prelude must cover exact long success and current logical-bank bounds rejection with readable next-bank bytes. No new length cap is introduced."
+    },
+    "activeFirstPrefixOnly": {
+      "rows": [
+        "Q(header A)",
+        "H(header A)",
+        "S(header B)",
+        "S(header B)",
+        "Q(header A)"
+      ],
+      "geometry": "All glossaries short; H differs from Q outside samples; S repeats exact full content; keys short and equal.",
+      "state": "Final Q has streak1/original lookback0. H at distance3 is the first matching prefix and fails its full proof. Earlier Q at distance4 must not be tried. Ordinary downstream content dedup may find Q; there is no new glossary proof or original-budget refill."
+    },
+    "otherCorrectness": [
+      "Active 31/32/33 raw-body-byte boundaries across ASCII, UTF-8 and escaped tokens.",
+      "Empty reading, raw reading equal to expression, permitted reading-only equality, expression equality despite reading alias, raw-different escaped semantic equality, lone/paired surrogates.",
+      "Active malformed keys/headers and malformed fields after an exact glossary witness; fallback, opt-out, first rows and independent calls.",
+      "Existing lookback1/lookback4, four-miss expiry and readmission retain original policy/counters. Separate old and new proof origins.",
+      "Independent complete outputs, hashes, dedup IDs, key plans/indexes, hints/media, negative-zero/fallback behavior, bank bounds, CRC failure and ownership after failure/reuse."
+    ],
+    "protocol": "Freeze this single source and independently reviewed active diagnostics before new timing. Separate source-bound qualification; preserve every failure. Do not alter or relabel current frozen acquisitions."
+  },
+  "historyReview": {
+    "scope": "Bounded primary review: metadata/diffs for 615 and 769; metadata for 756 and 762; two top-20 PR searches. Not an exhaustive novelty claim.",
+    "sources": [
+      {
+        "url": "https://github.com/ManabiIO/manabitan/pull/615",
+        "head": "8ed950c1d542eae4348eb97bd045309a002fbef7",
+        "reviewed": "metadata and diff",
+        "relationship": "Merged four-match/four-miss budget, without this bounded-key prefix selector."
+      },
+      {
+        "url": "https://github.com/ManabiIO/manabitan/pull/769",
+        "head": "07d347683d4417bef558174d93a4f8051e2179e0",
+        "reviewed": "metadata and C diff",
+        "relationship": "Merged bounded late interner. Preserve it verbatim and keep independent reading alias metadata."
+      },
+      {
+        "url": "https://github.com/ManabiIO/manabitan/pull/762",
+        "head": "e61eefce3de1e60e6527317a5b6a353f8808e1b2",
+        "reviewed": "metadata",
+        "relationship": "Introduced the existing 32-byte bound after an unbounded prototype regressed; integrated by 769."
+      },
+      {
+        "url": "https://github.com/ManabiIO/manabitan/pull/756",
+        "head": "1937d0a8acb624f4daba7596633395848512f622",
+        "reviewed": "metadata",
+        "relationship": "Unbounded adjacent-key predecessor was not promoted, including adverse Jitendex results. Keep every additional equality bounded."
+      }
+    ],
+    "conclusion": "No exact duplicate of this combination was found in reviewed sources. It does not revive CRC, nested-object cache, string-run, score or canonical-config candidates."
+  },
+  "disposition": "Preserve as a source-only prospective successor. Await root decision after current frozen evidence. No successor implementation/acquisition performed."
+}

@@ -1,5 +1,42 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: completed local screen and numeric correctness gate
+
+The separate local JMdict prefix screen completed all 16 preregistered children, but its unchanged-code controls were much larger than the candidate effect. **The local result is inconclusive and will not be rerun or pooled with hosted observations.** The numeric-suffix candidate passed its complete correctness prerequisite; its six full-browser comparison cells remain queued at the **07:39:13 UTC** status cutoff. No new performance PR has qualified.
+
+This update follows evidence commit [`3e80f72e2b83f2a9d9295361fe2c1395876e3432`](https://github.com/ManabiIO/manabitan/commit/3e80f72e2b83f2a9d9295361fe2c1395876e3432). The previous canonical document is preserved byte for byte below. The [completed-evidence index](../../builds/perf/import-study-c563d487/completed-followup/index.json) binds the original local outputs, all preparation failures and limitations, independent replays, and the original numeric correctness artifact. Earlier checkpoint status statements retain their original cutoffs.
+
+### Separate local JMdict component
+
+The local study used the same frozen baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, recovered prefix C `358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68` and WASM `b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de` as the hosted prefix cohort. A genuine detached sparse candidate checkout contained exactly the three recovered C/WASM/manifest changes. Its 377 source/library files per arm, original runner, locked archive, Node 22.22.0 executable and environment influences were bound before measurement. There was no local compiler or rebuilt product.
+
+Each fresh child ran two excluded full-corpus warmups and one measured pass over all 528,299 rows in the same eight groups: seven banks per group, with four in the final group. The four fixed blocks were `ABCD`, `DCBA`, `ABCD`, `DCBA`: B was candidate, A/C/D were baseline. All 16 exited successfully once, with no replacement children. Rich content/key/index/dedup/media digests, per-group work, 54,629 baseline versus 134,731 candidate glossary reuses, and 63,963,136-byte maximum WASM heaps matched the frozen expectations. Two independent audits reconciled every raw child and all statistics.
+
+| Component metric | Candidate median paired change | Candidate pairs faster | Same-code median paired change |
+| --- | ---: | ---: | ---: |
+| Elapsed | −4.3551% | 3/4 | +17.1091% |
+| CPU | −5.6222% | 3/4 | +15.2834% |
+| Parse | −0.9387% | 2/4 | +18.2063% |
+| Native parse | −4.9662% | 3/4 | +15.5056% |
+
+All elapsed candidate changes are retained: **+5.9918%, −5.2744%, −15.1418%, −3.4359%**. All elapsed same-code changes are retained: **+40.2242%, +6.5503%, +4.4546%, +27.6679%**. These controls prevent attributing the favorable median to the patch. Inflate, CPU, lookup and native statistics remain in the original result; none are selected as a substitute success metric. The host exposed nine Xeon 8573C CPUs but lacked sysfs/cgroup visibility; namespace process checks cannot establish whole-host isolation. All 34 resource snapshots, the Node proxy warning, and preparation-only formatting/resource failures are retained. A brief executor outage occurred after acquisition and both audits finished; recovery checks found their exact original hashes intact. No acquisition was interrupted or repeated.
+
+### Numeric-suffix correctness and pending browser work
+
+[Correctness job 140881240942](https://github.com/ManabiIO/manabitan/actions/runs/46113243549/job/140881240942) passed against exact product `399feae29fea358560af27af68f03dfb6d8b6f58`. Clang/LLD 21.1.8 reproduced both frozen parser and canonical-scanner artifacts. Scoped lint, strict main/test types, **670 unit files with 15,167 passed and 47 existing skips**, 32 options tests, and all seven dry-run build targets passed. The existing vendored pako bundler warning remains in the logs. Original artifact `15253880864` is 50,962 bytes with SHA-256 `95a1d369fb421e3f9a9fb49e320abccbee5be54025d0969ba83b3e056c6eae64`; its 12 original files and independent audit are preserved.
+
+The six JMdict/Jitendex/VNDB AB/BA jobs of [run 46113243549](https://github.com/ManabiIO/manabitan/actions/runs/46113243549) are still queued at this checkpoint. Correctness alone supplies no import-speed, nonregression or browser-memory result. The frozen 252-observation protocol and VNDB promotion criteria remain unchanged. Separately, all three jobs of corrected original-prefix [run 46119683668](https://github.com/ManabiIO/manabitan/actions/runs/46119683668) are queued, with zero of its 80 fresh observations acquired. The original completed Jitendex result is not rerun.
+
+### One source-only successor and bounded history review
+
+After the earlier untimed opportunity review, one separate successor was authorized for source/test/diagnostic preparation. It adds prior nonzero exact-content streak admission only to the extra prefix-selector arm, replaces key-mask bookkeeping with a read-only expression-first predicate, and restores the baseline late interner verbatim. Each additional equality is bounded to 32 raw body bytes; at most three such comparisons can run, so the aggregate bound is 96 bytes. Original four-match/four-miss policy, logical-bank bounds, first-prefix-only selection and full glossary equality remain authoritative. Source C `f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb` and its independent review are preserved here as uncompiled source evidence, not a qualified product.
+
+Prior untimed metadata suggests 44,102 additional proofs over 8,059,365 glossary bytes, from 44,466 admissions and 85,314 helper exposures. These are opportunities, not executed successor counts or runtime savings. The original all-unique negatives deactivate under this new admission rule. Separate active cases must establish a streak before testing an adjacent short mismatch, an older long mismatch, and a first-prefix mismatch that must not continue to an older exact match. Dynamic correctness, native diagnostics, active negatives, compiler reproduction and every timing gate remain outstanding at this source checkpoint. The completed local point estimate does not select or tune this design.
+
+Primary metadata also identified separately owned [#977](https://github.com/ManabiIO/manabitan/pull/977) (owned JMdict content overlap), [#978](https://github.com/ManabiIO/manabitan/pull/978) (the already-studied indexed score restoration), [#979](https://github.com/ManabiIO/manabitan/pull/979) (short-gap CRC), and [#980](https://github.com/ManabiIO/manabitan/pull/980) (lazy metadata-ID allocation). Their descriptions and exact heads are snapshotted; their reported timing/allocation results are not independently qualified by this study. No duplicate candidate or PR was created, no combined runtime was measured, and current develop still matched the frozen baseline when checked.
+
+
+
 ## November 28, 2026: original prefix cohort and separate corrections
 
 The original prefix-selector run has finished, with **16 accepted observations out of 96 planned**. Its Jitendex cell completed; JMdict, VNDB and the negative-control job stopped at distinct preflight or measurement-harness checks. The original failures and partial receipts remain failures. A separate corrected cohort has been published for 80 fresh children and queued as run 46119683668; its observations remain pending at this checkpoint. No prefix performance PR or full-import gain has qualified.

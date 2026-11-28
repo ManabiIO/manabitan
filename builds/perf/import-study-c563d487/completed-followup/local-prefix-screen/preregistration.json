@@ -1,0 +1,329 @@
+{
+  "schema": 1,
+  "study": "Separately preregistered local JMdict prefix-selector component screen",
+  "preregisteredAtUtc": "2026-11-28T07:18:35.960331+00:00",
+  "scope": "Local sequential native compressed-source inflation + per-bank CRC + strict parsing + completed lookup component only. No complete browser import, storage, compression, UI, release, process-memory, equivalence or PR claim.",
+  "authorizationBoundary": "Preparation only. The exact plan/controller and a fresh no-arguments resource snapshot require parent plus independent benchmark review before invocation. No observation exists at freezing.",
+  "measurementCount": 16,
+  "schedule": [
+    {
+      "pair": 0,
+      "arm": "A"
+    },
+    {
+      "pair": 0,
+      "arm": "B"
+    },
+    {
+      "pair": 0,
+      "arm": "C"
+    },
+    {
+      "pair": 0,
+      "arm": "D"
+    },
+    {
+      "pair": 1,
+      "arm": "D"
+    },
+    {
+      "pair": 1,
+      "arm": "C"
+    },
+    {
+      "pair": 1,
+      "arm": "B"
+    },
+    {
+      "pair": 1,
+      "arm": "A"
+    },
+    {
+      "pair": 2,
+      "arm": "A"
+    },
+    {
+      "pair": 2,
+      "arm": "B"
+    },
+    {
+      "pair": 2,
+      "arm": "C"
+    },
+    {
+      "pair": 2,
+      "arm": "D"
+    },
+    {
+      "pair": 3,
+      "arm": "D"
+    },
+    {
+      "pair": 3,
+      "arm": "C"
+    },
+    {
+      "pair": 3,
+      "arm": "B"
+    },
+    {
+      "pair": 3,
+      "arm": "A"
+    }
+  ],
+  "roles": {
+    "A": "baseline",
+    "B": "candidate",
+    "C": "baseline same-code control",
+    "D": "baseline same-code control"
+  },
+  "childPolicy": {
+    "freshNodePerArm": true,
+    "heapMiB": 512,
+    "warmupFullCorpusPasses": 2,
+    "measuredFullCorpusPasses": 1,
+    "timeoutSeconds": 180,
+    "fixedMeasuredExecArgv": [
+      "--expose-gc",
+      "--max-old-space-size=512"
+    ],
+    "diagnosticModuleInTimedChildren": false,
+    "gcBetweenWarmupsAndMeasuredPass": "Unchanged runner calls exposed globalThis.gc once outside its clocks"
+  },
+  "workload": {
+    "dictionary": "jmdict",
+    "rows": 528299,
+    "banks": 53,
+    "filesPerGroup": 7,
+    "groups": 8,
+    "flags": {},
+    "validateGlossaryTypes": true,
+    "inputCache": "Existing verified compressed archive via a filename symlink; no new archive or decoded-corpus copies"
+  },
+  "boundary": {
+    "included": [
+      "native decompression",
+      "CRC verification",
+      "strict parsing",
+      "completed lookup construction"
+    ],
+    "excluded": [
+      "archive I/O",
+      "compilation",
+      "two full warmups",
+      "explicit GC",
+      "all-row output/index/dedup/media digest",
+      "controller provenance/resource checks",
+      "browser/workers/storage/compression/UI"
+    ]
+  },
+  "analysis": {
+    "unit": "One complete measured corpus pass in one fresh child",
+    "pairsPerComparison": 4,
+    "statistics": [
+      "all four paired percent changes",
+      "median paired percent change",
+      "equal-work sum ratio",
+      "faster pair count",
+      "all same-code changes and largest absolute control change"
+    ],
+    "metrics": [
+      "elapsedMs",
+      "cpuMs",
+      "inflateMs",
+      "inflateCpuMs",
+      "parseMs",
+      "nativeParseMs",
+      "lookupMs"
+    ],
+    "primary": "elapsedMs",
+    "cpuAndInternalProfiles": "Descriptive only",
+    "controls": "Retain every outlier. Noisy or overlapping same-code changes make attribution inconclusive; no control subtraction or adjusted speed claim.",
+    "noPoolingWith": [
+      "original hosted prefix run46110806989",
+      "corrected hosted prefix run46119683668",
+      "numeric suffix cohorts",
+      "excluded local rehearsals"
+    ],
+    "adaptiveRetuningOrRetry": false,
+    "selectedObservationReplacement": false,
+    "timingDirectedEarlyStop": false,
+    "failures": "Keep every raw stdout/stderr/status, completed observation and resource snapshot. A failure stops this cohort as incomplete; never replace or silently resume a child."
+  },
+  "sources": {
+    "baseline": {
+      "root": "/workspace/scratch/c563d487c718/manabitan",
+      "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "trackedChanges": "",
+      "changedPaths": [],
+      "cSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+      "wasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "trackedWasmSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "manifestSha256": "ddffecdd5f333c623b20447bb219a358e15c425f906d90509d0e1443701f0224",
+      "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    },
+    "candidate": {
+      "root": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/candidate",
+      "head": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+      "trackedChanges": "M dev/data/dictionary-wasm/manifest.json\n M dev/data/dictionary-wasm/term-bank-parser.wasm\n M ext/js/dictionary/wasm/term-bank-parser.c",
+      "changedPaths": [
+        "dev/data/dictionary-wasm/manifest.json",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "ext/js/dictionary/wasm/term-bank-parser.c"
+      ],
+      "cSha256": "358428813d7452f55dfd084ee84cc1437e944bd790acaed41adf1634d477cf68",
+      "wasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+      "trackedWasmSha256": "b188cd7ca5ba1802eec6edf18b71f0ed3a98a471cab7c59dc2e5ae473999a6de",
+      "manifestSha256": "2c4f561f03e2b97b44747bcd18529388ef40876d24d1a42f40d9a6740eeb74ff",
+      "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+    }
+  },
+  "inventorySha256": "ae8abde1dd1b149b3796203aa804777ef79061624726cfdc7e95edd157d0a914",
+  "inventoryFilesPerArm": {
+    "baseline": 377,
+    "candidate": 377
+  },
+  "sourceAndLibChecks": "Verify both Git identities, complete materialized source/lib inventory, runner/lock/archive/Node hashes and inherited Node environment before and after every child. Abort on drift without replacement.",
+  "runner": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/runner/dev/perf/x/hosted/screen.mjs",
+    "sha256": "8519bfea747260803f87c1358a34f1d4a1ff431de891ffa3603ca70a422a19fa",
+    "bytes": 19854
+  },
+  "diagnosticFields": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/runner/dev/perf/x/hosted/diagnostic-fields.json",
+    "sha256": "98f5cc1e64388648fa30c6d12a0f0c41da5f809febecfc9b44a9a914f7bd0eb8",
+    "bytes": 904
+  },
+  "runnerProvenance": {
+    "unchangedFromToolingCommit": "268296d7ddd1933cb756fcd9794a89ba40386e23",
+    "alsoUnchangedInCorrectedToolingCommit": "59530bb6db9320063c955d0a42219690bcabb47d",
+    "localControllerHasNoGitToolingHeadClaim": true
+  },
+  "controllerSha256": "adb7cf2d45a471c211c774a33048e11c0ab10555fbb680c2e7ef889310b95c4a",
+  "freezeScriptSha256": "7df92af9c547ba99e6cb65503b5c211c144af91408da8a920f4c4ee0e8d9cbfd",
+  "initialPreparationDiffFormattingFailure": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/initial-freeze-formatting-failure.json",
+    "sha256": "c104bd394ac231b1eddb5c0ef3e5e844a195f8216de8c68f1ecdf9d9c722c234",
+    "bytes": 865
+  },
+  "nodeProbeWarningRetention": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/node-probe-warning-retention.json",
+    "sha256": "c67b612aae48a3c2c11e2e5fc223af2936949829e89c68834d606b06a37278cc",
+    "bytes": 749
+  },
+  "resourceMetadataLimitation": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/resource-metadata-limitation.json",
+    "sha256": "9fe9972c20bee5f168cd7cec294976789b18668b03a6b288ad551ca188a6ed40",
+    "bytes": 605
+  },
+  "node": {
+    "path": "/workspace/scratch/c563d487c718/experiments/node-v22.22.0-linux-x64/bin/node",
+    "sha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+    "bytes": 123405064
+  },
+  "nodeVersion": "v22.22.0",
+  "nodePreparationProbe": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/node-preparation-probe.json",
+    "sha256": "a5f110ae774a20da59967ce2495ea9bcfacc8f962d17d5ba85a40e9036012cca",
+    "bytes": 1399
+  },
+  "nodeEnvironment": {
+    "NODE_OPTIONS": null,
+    "NODE_COMPILE_CACHE": null,
+    "NODE_DISABLE_COMPILE_CACHE": null,
+    "observedPreparationStderrRetained": "(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "environmentLimit": "The local environment emits an Undici proxy-agent warning. It is not suppressed; proxy variables are recorded by presence only, without their values or value hashes. Nonsecret Node influence variables are bound by presence/hash. This cohort is local and separate from hosted results.",
+    "probeOnlyExtraArgv": [
+      "--input-type=module",
+      "-e",
+      "read-only identity script; not used by measured children"
+    ]
+  },
+  "lock": {
+    "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/runner/test/perf/dictionaries.lock.json",
+    "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "bytes": 3047
+  },
+  "archive": {
+    "path": "/workspace/scratch/c563d487c718/experiments/sequence-probe-opportunity/JMdict.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "bytes": 15645766
+  },
+  "cacheDir": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/cache",
+  "compileProvenance": {
+    "localBuildPerformed": false,
+    "localCompilerVersionClaimed": false,
+    "origin": "Exact recovered Git binary diff from original hosted candidate build; uninstrumented bytes copied without compiling locally",
+    "hostedRun": 46110806989,
+    "hostedJob": 140873688700,
+    "artifactId": 15252152901,
+    "verifiedArtifact": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-evidence/jmdict.zip",
+      "sha256": "5400984f61fd9d6dca019f0ab35cbefcb50a5088fbe487a1fa09b380cb41ab6b",
+      "bytes": 327357
+    },
+    "recoveryAudit": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-evidence/jmdict/independent-preflight-audit.json",
+      "sha256": "c699d570792f790661266efee765deaf15afb7a0a7f70e76b3efdb7303dfb808",
+      "bytes": 4460
+    },
+    "downloadReceipt": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-evidence/jmdict/download-receipt.json",
+      "sha256": "aa05422712c613f9c4e6be8ea6dd054ce65d71c7e18da6bdafdefd2d4145f2ad",
+      "bytes": 1192
+    },
+    "exactRecoveredDiff": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/recovered-candidate.diff",
+      "sha256": "b618db944dbd79c11bd68e857717902f68c1364f6b9de546dd3c94880b3d48b4",
+      "bytes": 16929
+    },
+    "manifestToolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "provenanceLimit": "Original build/six smoke modes passed but that original job later failed lint; this recovery does not turn that job into a completed qualification."
+  },
+  "priorExcludedMechanics": {
+    "reusedWithoutAnotherInvocation": true,
+    "rawReceipt": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-jmdict-rehearsal/diagnostic.stdout.json",
+    "rawReceiptSha256": "e81a9517eea7dd22fb01254f9f01dd6cae6757de9f80ace9714f633279ee3301",
+    "audit": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-jmdict-rehearsal/audit.json",
+      "sha256": "2f51e348645e6e75524e736ebf83b077993365662e63c11afdd38454fbfffa76",
+      "bytes": 7576
+    },
+    "frozenExpectedMechanics": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector/hosted/expected-mechanics.json",
+      "sha256": "83df64e419d9e72f4af1d799b326b6ee0acf9497bcb4837c2f6d6ee86cee4e83",
+      "bytes": 13457
+    },
+    "expectedCandidateReuses": 134731,
+    "expectedBaselineReuses": 54629,
+    "expectedNewProofs": 80102,
+    "allRowRichDigest": "2f8e0f8b55166fe47a30dcc09a2cdcef68b5ff27bd586acc3f0753f15de18b11",
+    "scope": "Mechanics/output expectation only, not a timed observation or a clean candidate product run"
+  },
+  "resourcePolicy": {
+    "singleLocalCohort": true,
+    "teamLocalCpuWorkSuspendedDuringMeasurements": "Parent, benchmark reviewer and glossary investigator must acknowledge the window before invocation",
+    "backgroundVisibility": "Process names/states only, no arguments or environment-secret dump. ps sees the current execution namespace and cannot prove whole-host quiet. lscpu and cgroup counters are unavailable here; failure/nulls are retained, with available /proc model/affinity/memory/load facts. Shared-host contention remains a limitation requiring explicit review before measurement.",
+    "snapshots": "Before/after every child and cohort; retain all without selecting or replacing timings",
+    "preparationSnapshot": {
+      "path": "/workspace/scratch/c563d487c718/experiments/jmdict-prefix-selector-local-screen/preparation-resources.json",
+      "sha256": "ed5f297664ac032af12caa90d6c3fb6389a424b7ec9d7b14149f856fc79b5638",
+      "bytes": 2940
+    },
+    "newDiskBudgetBytes": 31457280,
+    "newUniqueFileBlocksBytesAtFreeze": 8990720,
+    "newWorktreeMetadataBlocksBytesAtFreeze": 430080
+  },
+  "hostedCohortsUnchanged": {
+    "originalRun": 46110806989,
+    "correctedRun": 46119683668,
+    "modified": false,
+    "replaced": false,
+    "resultsNotPooled": true
+  }
+}

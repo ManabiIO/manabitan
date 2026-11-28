@@ -1,0 +1,93 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1436,6 +1436,30 @@
+ 
+ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+ 
++/* Admit a glossary probe without changing the interner's authoritative key
++ * state. Every added equality scan is bounded by 32 raw token-body bytes. */
++static int adjacent_key_matches(
++    const uint8_t* src, const TermRowMeta* current, const TermRowMeta* previous
++) {
++    const uint32_t expression_length = current->expression_length;
++    if (expression_length >= 2u && expression_length <= 34u &&
++        expression_length == previous->expression_length && content_bytes_equal_between(
++            src, current->expression_start + 1u, src, previous->expression_start + 1u, expression_length - 2u)) {
++        return 1;
++    }
++    const uint32_t reading_length = current->reading_length;
++    if (reading_length <= 2u || reading_length > 34u || reading_length != previous->reading_length) { return 0; }
++    // Strict scanning has validated both quotes, so equal bounded bodies also
++    // establish raw token equality. This bypass applies only to reading admission.
++    if (reading_length == expression_length && content_bytes_equal_between(
++            src, current->reading_start + 1u, src, current->expression_start + 1u, reading_length - 2u)) {
++        return 0;
++    }
++    return content_bytes_equal_between(
++        src, current->reading_start + 1u, src, previous->reading_start + 1u, reading_length - 2u
++    );
++}
++
+ /* Samples only reject candidates. Only full equality with a successful earlier
+  * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
+  * A witness also lets content dedup avoid comparing this same glossary twice. */
+@@ -1536,8 +1560,27 @@
+     meta->glossary_may_contain_media = 0u;
+     meta->glossary_requires_normalization = 0u;
+     meta->glossary_requires_text_normalization = 0u;
++    if (glossary_witness != 0 && glossary_lookback == 0u && prior_count > 0u && key_escape_mask != 0 &&
++        adjacent_key_matches(src, meta, &prior_rows[prior_count - 1u])) {
++        const uint32_t tags_prefix = read_content_signature(src + meta->definition_tags_start, meta->definition_tags_length, 0u);
++        const uint32_t rules_prefix = read_content_signature(src + meta->rules_start, meta->rules_length, 0u);
++        const uint32_t first = prior_count > RECENT_CONTENT_DEDUP_WINDOW ? prior_count - RECENT_CONTENT_DEDUP_WINDOW : 0u;
++        for (uint32_t k = prior_count; k > first;) {
++            const TermRowMeta* prior = &prior_rows[--k];
++            if (meta->definition_tags_length == prior->definition_tags_length &&
++                meta->rules_length == prior->rules_length &&
++                tags_prefix == read_content_signature(src + prior->definition_tags_start, prior->definition_tags_length, 0u) &&
++                rules_prefix == read_content_signature(src + prior->rules_start, prior->rules_length, 0u)) {
++                // Probe only the first prefix match, even if its glossary fails.
++                // These local bounds do not change the caller's probe policy.
++                prior_count = k + 1u;
++                glossary_lookback = 1u;
++                break;
++            }
++        }
++    }
+     if (
+-        !(glossary_witness != 0 && reuse_validated_glossary(
++        !(glossary_witness != 0 && glossary_lookback > 0u && reuse_validated_glossary(
+             src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+         )) &&
+         !parse_value_span_with_glossary_hints(
+@@ -3379,13 +3422,15 @@
+         }
+         uint32_t key_escape_mask;
+         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
++                rows, row_count, glossary_lookback > 0u ||
++                    (validated_glossary_reuse_enabled && validate_glossary_types != 0u && row_count > 0u && recent_content_match_streak != 0u) ?
++                    &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+             return -1;
+         }
+         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
+         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+         if (validated_glossary_reuse_enabled && row_count > 0u) {
+-            if (glossary_witness != 0xffffffffu) {
++            if (glossary_witness != 0xffffffffu && glossary_lookback > 0u) {
+                 glossary_reuse_probe_budget = VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET;
+             } else if (glossary_reuse_probe_budget > 0u) {
+                 --glossary_reuse_probe_budget;
+@@ -3565,8 +3610,9 @@
+             }
+         } else {
+ #if RECENT_CONTENT_DEDUP_WINDOW > 0
+-            // The glossary witness is the newest matching raw glossary. If the
+-            // remaining fields match too, it is the newest full-content match.
++            // Newer rows skipped by prefix selection fail a necessary content
++            // condition. If the remaining fields match, this witness is still
++            // the newest full-content match.
+             if (
+                 glossary_witness != 0xffffffffu &&
+                 raw_term_content_tokens_equal(src, parsed_row, &rows[glossary_witness], 1)

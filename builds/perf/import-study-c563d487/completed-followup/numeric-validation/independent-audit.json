@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28 07:17:14 UTC",
+  "scope": "Exact-head correctness gate only; no import-latency observations",
+  "repository": "ManabiIO/manabitan",
+  "runId": 46113243549,
+  "toolingCommit": "ee9450923d14e95b7958feeffffde4998cf8c5d9",
+  "jobId": 140881240942,
+  "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549/job/140881240942",
+  "jobConclusion": "success",
+  "allJobStepsSuccess": true,
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run ./.github/actions/setup",
+      "conclusion": "success"
+    },
+    {
+      "name": "Confirm exact candidate source",
+      "conclusion": "success"
+    },
+    {
+      "name": "Bind the exact numeric product diff and rebuilt artifacts",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install compiler required by native unit fixtures",
+      "conclusion": "success"
+    },
+    {
+      "name": "Reproduce every pinned native artifact from both frozen sources",
+      "conclusion": "success"
+    },
+    {
+      "name": "Lint the focused production regression suite",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check strict main types",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check strict test types",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run complete unit suite",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run options unit suite",
+      "conclusion": "success"
+    },
+    {
+      "name": "Validate every build target",
+      "conclusion": "success"
+    },
+    {
+      "name": "Retain every correctness and native reproduction log",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run ./.github/actions/setup",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "sourceBinding": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "candidateTree": "5e3262fc31b50faf75abed53e45c21c9f9c74a07",
+    "changedFileSha256": {
+      "dev/data/dictionary-wasm/manifest.json": "6cf200239142277f2ea63612339ca86a50a25ea74f4c29fb9432ac980cc0bdd4",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a",
+      "ext/js/dictionary/wasm/term-bank-parser.c": "461021621f35788899ab4b5b62603423f54e0ee766ff8f1ca20529fca4da1372",
+      "test/term-bank-row-suffix-reuse.test.js": "f42ed34c28d5b02594726cd7e07b52eb6f87aab594d67c3e8bc4620c30c1a80f"
+    },
+    "expectedChangedPackageEntries": [
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "scope": "Exact numeric-admission candidate; original suffix variant cannot satisfy these hashes"
+  },
+  "sourceIdentityMatchesPublishedProduct": true,
+  "nativeReproduction": {
+    "command": "npm run build:dictionary-wasm -- --check",
+    "compiler": "Ubuntu clang version 21.1.8 (6ubuntu1)",
+    "linker": "Ubuntu LLD 21.1.8",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "399feae29fea358560af27af68f03dfb6d8b6f58",
+    "canonicalScannerBothArmsSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "baselineParserSha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+    "candidateParserSha256": "18524ff89d179878aff0d681987c1b6f7b6274c25db050421436abd25c4b004a",
+    "bothFrozenSourcesReproduceExactly": true
+  },
+  "lint": {
+    "passed": true,
+    "retainedWarning": "Existing vendored pako-inflate.js CommonJS module variable warning from the bundler remains in lint.log; no lint error."
+  },
+  "strictMainTypesPassed": true,
+  "strictTestTypesPassed": true,
+  "unit": {
+    "filesPassed": 670,
+    "testsPassed": 15167,
+    "testsSkipped": 47,
+    "testsTotal": 15214
+  },
+  "options": {
+    "filesPassed": 1,
+    "testsPassed": 32
+  },
+  "build": {
+    "command": "npm run test:build",
+    "dryRun": true,
+    "allTargetsPassed": true,
+    "targets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ]
+  },
+  "artifact": {
+    "id": 15253880864,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/46113243549/artifacts/15253880864",
+    "bytes": 50962,
+    "sha256": "95a1d369fb421e3f9a9fb49e320abccbee5be54025d0969ba83b3e056c6eae64",
+    "apiBytesAndSha256IndependentlyVerified": true,
+    "files": [
+      {
+        "path": "build.log",
+        "bytes": 280,
+        "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda"
+      },
+      {
+        "path": "compiler.txt",
+        "bytes": 122,
+        "sha256": "77467400b91c4cebb6c3e29d8a611af518a2f4078c22baf276b0a1373e996bf5"
+      },
+      {
+        "path": "linker.txt",
+        "bytes": 18,
+        "sha256": "e68aa1687a5a786623ad952515b64f3487a205ed7b12fb427f7e577f6b601d0e"
+      },
+      {
+        "path": "lint.log",
+        "bytes": 694,
+        "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+      },
+      {
+        "path": "native-baseline.log",
+        "bytes": 500,
+        "sha256": "a6b6cf1c3278e4d6074cc813af34bd985ec7e9fb1675c9e8ecd80ec8948cc079"
+      },
+      {
+        "path": "native-candidate.log",
+        "bytes": 500,
+        "sha256": "1622cd8e4d73e8d4b6d4b80635059fb6fcb32f0c3f44bfbb92f5e3f1546bfa97"
+      },
+      {
+        "path": "options.log",
+        "bytes": 590,
+        "sha256": "55986748dcd43858fe991f04ca7b8d09e2e3a7964a884ba08aadc746ab7bdc9b"
+      },
+      {
+        "path": "source-binding.json",
+        "bytes": 900,
+        "sha256": "0c8a02a8876f941074058a17bbda798e448c08ce3bbb8cf12692d0624b287904"
+      },
+      {
+        "path": "source-identity.txt",
+        "bytes": 82,
+        "sha256": "4f2086c3b1b3c1319cfbe3e7753f62f0c1867bd896d86a4bf70b8d1bd70878b1"
+      },
+      {
+        "path": "types-main.log",
+        "bytes": 74,
+        "sha256": "ee5d9c3afb0d87970e3a548313f44c02f5faeb3afa4a36a3d835c0a9b5e2c51d"
+      },
+      {
+        "path": "types-test.log",
+        "bytes": 89,
+        "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c"
+      },
+      {
+        "path": "unit.log",
+        "bytes": 592482,
+        "sha256": "d62818ebb7b1a5c49ea2c2c14f046684ec58a09dff16afa1304a33ded10ebe5d"
+      }
+    ]
+  },
+  "primaryLogChars": 819738,
+  "primaryLogSourceBindingAndSummaryAgreeWithArtifact": true,
+  "plannedComparisonJobs": [
+    {
+      "id": 140903281788,
+      "name": "jmdict (AB)",
+      "status": "queued"
+    },
+    {
+      "id": 140903281805,
+      "name": "jmdict (BA)",
+      "status": "queued"
+    },
+    {
+      "id": 140903281809,
+      "name": "vndb (AB)",
+      "status": "queued"
+    },
+    {
+      "id": 140903281821,
+      "name": "jitendex (AB)",
+      "status": "queued"
+    },
+    {
+      "id": 140903281848,
+      "name": "vndb (BA)",
+      "status": "queued"
+    },
+    {
+      "id": 140903281858,
+      "name": "jitendex (BA)",
+      "status": "queued"
+    }
+  ],
+  "fullObservationsAtAudit": 0,
+  "decision": "Correctness prerequisite passed. Await all six fixed comparison cells and independent raw-timing audits; no speed or memory qualification follows from this gate."
+}

@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-11-28T07:39:23.079829+00:00",
+  "scope": "Independent bounded source review only; no compilation, native execution, corpus work or timing",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "baselineCSourceSha256": "5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a",
+  "candidateCSourceSha256": "f622f057b7de9db9082d79c6d67eb7d93b86d74cb5ec9b1674d8e9a67f6456fb",
+  "patchSha256": "5b0deab5604fadcfc55b46e25a5b2cb1d2e76f4de52acac229e4f51425a95ad1",
+  "sourceSemanticBlockerFound": false,
+  "baselineIdentityChecks": {
+    "lateInternerAndNumericTailByteIdentical": true,
+    "lateInternerAndNumericTailBytes": 7330,
+    "lateInternerAndNumericTailSha256": "e28e80fbb45dacb89dc7a304fee38a4fea61bf7cac28fe0c50a7b9424bf4593e",
+    "twoEscapeMaskAssignmentsByteIdentical": true,
+    "keyIdentityHighBitPlumbingAbsent": true,
+    "originalStreakUpdateBlockByteIdentical": true,
+    "originalStreakUpdateBlockSha256": "a05593af90db05790db830674747a0767a01de063d82f8499b800779b9e21430",
+    "constantsUnchanged": {
+      "RECENT_CONTENT_DEDUP_WINDOW": 4,
+      "VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES": 512,
+      "VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES": 4,
+      "VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET": 4
+    }
+  },
+  "admission": {
+    "priorOriginalStreakRequired": true,
+    "usesStateBeforeCurrentRowParsingAndDedup": true,
+    "callerConditions": [
+      "validated glossary reuse enabled",
+      "strict glossary-type validation enabled",
+      "at least one prior row",
+      "original recent-content match streak nonzero"
+    ],
+    "parserConditions": [
+      "original lookback zero",
+      "non-null witness and key-escape-output pointers",
+      "at least one prior row",
+      "read-only adjacent expression or independent-reading raw body match"
+    ],
+    "helperExpressionFirst": true,
+    "emptyOrExpressionAliasedReadingCannotIndependentlyAdmit": true,
+    "maximumBytesPerAddedEqualityComparison": 32,
+    "maximumAddedEqualityComparisonsPerEligibleHelperCall": 3,
+    "maximumAggregateBytesOfferedAcrossThoseCalls": 96,
+    "helperMutatesNoFlagsIdsMetasTablesBudgetsOrStreak": true
+  },
+  "proofAndFallback": {
+    "prefixWindow": 4,
+    "necessaryPrefixConditions": "Equal definition-tag and rule raw token lengths plus their first up-to-four-byte signatures",
+    "selection": "Newest first prefix match only; local prior_count becomes k+1 and local lookback becomes1",
+    "failedSelectedCandidate": "Existing proof checks fail into ordinary strict glossary parsing; no retry of an older prefix candidate",
+    "proof": "Existing bounds/opener/tail/middle/full-byte equality function unchanged; only a fully successful earlier row can donate hint/normalization metadata",
+    "rawMetadataAndRemainingFieldValidation": "Late interner, numeric conversions, sequence/term-tags/row-close checks and key fallback paths remain unchanged",
+    "dedupNewestMatchArgument": "Any newer skipped row fails a necessary header-content condition; if the selected witness also matches remaining content fields, it remains the newest full-content match."
+  },
+  "statePolicy": {
+    "existingLookbackSelectionByteUnchanged": true,
+    "newOriginWitnessCannotRefreshOldProbeBudget": true,
+    "reason": "The caller refresh requires a witness AND its original lookback>0. The selector changes only callee-local bounds. Original four-match admission, four-miss budget and recent-content streak updates remain unchanged.",
+    "requiredDynamicCheck": "Verify original match indexes/counters and old budget transitions under active repeated negative fixtures and experimental fallback modes."
+  },
+  "limits": [
+    "Source review does not establish speed, memory behavior or complete-import correctness.",
+    "The added helper may offer up to96 raw body bytes across3 bounded comparisons;32 is a per-comparison limit.",
+    "Prior original-streak admission requires active repeating negative controls; all-unique streams alone do not exercise it.",
+    "Compilation, focused/full semantic oracles, malformed/fallback/metadata cases, source-bound mechanics and independent timing remain outstanding."
+  ]
+}
