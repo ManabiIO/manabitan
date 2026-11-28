@@ -1,0 +1,729 @@
+{
+  "dictionary": "jmdict",
+  "sourceRoot": "/workspace/scratch/21ba6d4042b8/live",
+  "node": "v22.22.0",
+  "hardwareConcurrency": 8,
+  "deviceMemory": 8,
+  "boundary": "Production compressed source planning and parser workers through owned lookup construction; excludes global canonical dedup, Zstd, storage, media reads and UI. Instrumented correctness/resource accounting only; no timing claim.",
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0
+  },
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "wasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+    "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+    "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "99afad5ad98cb1264d1acc8f15ab8f5c51246bbca25722eed6b89f8677301884",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d"
+  },
+  "options": {
+    "copyContentBytes": false,
+    "includeContentMetadata": true,
+    "initialContentBytesPerRow": 48,
+    "minimalDecode": true,
+    "reuseExpressionForReadingDecode": true,
+    "preallocateChunkRows": true,
+    "skipTagRuleDecode": false,
+    "lazyGlossaryDecode": true,
+    "mediaHintFastScan": false,
+    "projectImagePaths": false,
+    "validateGlossaryTypes": true,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "emitTermByteLists": false,
+    "prepareLookupIndexes": true,
+    "prepareLookupRoute": true,
+    "maxPendingChunks": 2
+  },
+  "totalSourceBytes": 171617523,
+  "totalRows": 528299,
+  "totalIndexBytes": 19515720,
+  "totalCanonicalBytes": 101218370,
+  "digest": "2e01b0de50158311b3705987975bc4aaba5a8c4cd0c5bf629b43a3863a7e91ae",
+  "summary": {
+    "nativeCalls": 20,
+    "nativeLookupRows": 528299,
+    "separateSequenceScratchReservationBytes": 1310720,
+    "avoidedSequenceScratchReservationBytes": 0,
+    "separateSequenceScratchAllocationBytes": 1048576,
+    "requestedWasmAllocationBytes": 411271336,
+    "nativeScratchReusedBytes": 29644424,
+    "nativeScratchReuseMisses": 0
+  },
+  "groups": [
+    {
+      "group": 1,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 4908393,
+      "digest": "144abbf724f45cf30ee8984b71c2d6c31dcbf5b32940a55b817e02948c73b0b3"
+    },
+    {
+      "group": 2,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5964396,
+      "digest": "5ee91a30037bb6d6392a7d0416f72d193288ff1ddecc37ea416da0c635339f18"
+    },
+    {
+      "group": 3,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 7044750,
+      "digest": "a825051b0cb03fdaca696297417842faf4eb4faeb0fd61ae0bb1ff8705df7c37"
+    },
+    {
+      "group": 4,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 6957965,
+      "digest": "a345e33a5cba770be946f38a4f42d45343ee07cfae08ff2cfefd0e2244c790a6"
+    },
+    {
+      "group": 5,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 4703882,
+      "digest": "c89ac24af5b9eb709c13faa090a14fa6f9b0f87a9caa2cd669b0969afeec335a"
+    },
+    {
+      "group": 6,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 4215527,
+      "digest": "fd51feecd564617481d6908c7909402b21901d073ea369231f5cd119ea5d3dad"
+    },
+    {
+      "group": 7,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5680332,
+      "digest": "31808752b715e6a2f8e98bd64c494f2f93bcc654a6f8a1e471465aadaeb2e4c5"
+    },
+    {
+      "group": 8,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5131856,
+      "digest": "0420d81f3155b76d59aa3c2946ebca02e9afc592cb2ad0e563ab83b8f6ae7ea8"
+    },
+    {
+      "group": 9,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5364671,
+      "digest": "37680765f3d14dae9c053dcc4b2f4e3a2b28d47f5be3ec1ac34de0506b2f7050"
+    },
+    {
+      "group": 10,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 3654374,
+      "digest": "60f15a95702aa9074790b1ff87e752eec880946008d4511c76ed74eda950320a"
+    },
+    {
+      "group": 11,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 3557699,
+      "digest": "8d947a57eea8485bc0e92cdb9e113881e85866eb50c922e102c3def9aacd734a"
+    },
+    {
+      "group": 12,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 4639699,
+      "digest": "a945a805f6f657707f8d3492d812a68d656f88c65c4947caa1c48045922d3a27"
+    },
+    {
+      "group": 13,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 4712086,
+      "digest": "c082970b77a404d56de4f141fb7853fbeb9f8ce921bb7500c43772c5771258b9"
+    },
+    {
+      "group": 14,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 3832049,
+      "digest": "27352d5492a17681e03cffe88894c03ac37c32e9db6a84f99cdd426352cd6d91"
+    },
+    {
+      "group": 15,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5729626,
+      "digest": "0549b6bc7dfe7f12fa0ebf910e1e867501ce4f721a7606b5134640ba27f51d72"
+    },
+    {
+      "group": 16,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5673942,
+      "digest": "d791e7b0fb543123db45f6655701a0ce8c4e5f6dfd2f9f5892b2358ddc1d5733"
+    },
+    {
+      "group": 17,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 3832500,
+      "digest": "c49cad1068b0922da381f6f64ff7154e9099add6e24e590c9f8d33a6295ddddf"
+    },
+    {
+      "group": 18,
+      "rows": 20000,
+      "indexCount": 1,
+      "canonicalBytes": 4058819,
+      "digest": "e0fcee9881f560e77ab130b61b527177e08642dd86b4ed691d0e70f13c799b87"
+    },
+    {
+      "group": 19,
+      "rows": 30000,
+      "indexCount": 1,
+      "canonicalBytes": 5781462,
+      "digest": "849b8f1096c1ef79fbfb4d07ec23cbbf0e4b9dc76f14248e2c2552dff546f8a7"
+    },
+    {
+      "group": 20,
+      "rows": 28299,
+      "indexCount": 1,
+      "canonicalBytes": 5774342,
+      "digest": "d5200c8965d2dd939005db5fe4cf8f71d246338ac800b554994a4aa520041cf7"
+    }
+  ],
+  "workerReports": [
+    {
+      "id": 1,
+      "rows": 30000,
+      "firstSource": "term_bank_1.json",
+      "lastSource": "term_bank_3.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1471328,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 22020096,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 16659,
+          "output": 9409376,
+          "outputCapacity": 1075788,
+          "slots": 15551536,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 844820
+        }
+      ],
+      "requestedWasmAllocationBytes": 21881579
+    },
+    {
+      "id": 2,
+      "rows": 30000,
+      "firstSource": "term_bank_4.json",
+      "lastSource": "term_bank_6.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1504472,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 25559040,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 22406,
+          "output": 10056016,
+          "outputCapacity": 1108932,
+          "slots": 16198176,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 920240
+        }
+      ],
+      "requestedWasmAllocationBytes": 22528223
+    },
+    {
+      "id": 3,
+      "rows": 30000,
+      "firstSource": "term_bank_7.json",
+      "lastSource": "term_bank_9.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1552928,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26345472,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 27497,
+          "output": 10886520,
+          "outputCapacity": 1157388,
+          "slots": 17028680,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1001360
+        }
+      ],
+      "requestedWasmAllocationBytes": 23358728
+    },
+    {
+      "id": 4,
+      "rows": 30000,
+      "firstSource": "term_bank_10.json",
+      "lastSource": "term_bank_12.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1542744,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 26808,
+          "output": 10988112,
+          "outputCapacity": 1147204,
+          "slots": 17130272,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 986964
+        }
+      ],
+      "requestedWasmAllocationBytes": 23460323
+    },
+    {
+      "id": 5,
+      "rows": 20000,
+      "firstSource": "term_bank_13.json",
+      "lastSource": "term_bank_14.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1074232,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 17825792,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 19018,
+          "output": 7245032,
+          "outputCapacity": 788696,
+          "slots": 11347192,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": 524288,
+          "shared": true,
+          "status": 683024
+        }
+      ],
+      "requestedWasmAllocationBytes": 15787255
+    },
+    {
+      "id": 6,
+      "rows": 20000,
+      "firstSource": "term_bank_15.json",
+      "lastSource": "term_bank_16.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 918480,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 18743296,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 11716,
+          "output": 8143608,
+          "outputCapacity": 632940,
+          "slots": 12245768,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": 524288,
+          "shared": true,
+          "status": 479504
+        }
+      ],
+      "requestedWasmAllocationBytes": 16685832
+    },
+    {
+      "id": 7,
+      "rows": 30000,
+      "firstSource": "term_bank_17.json",
+      "lastSource": "term_bank_19.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1551728,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 23068672,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 26980,
+          "output": 10485384,
+          "outputCapacity": 1156188,
+          "slots": 16627544,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 984668
+        }
+      ],
+      "requestedWasmAllocationBytes": 22957591
+    },
+    {
+      "id": 8,
+      "rows": 30000,
+      "firstSource": "term_bank_20.json",
+      "lastSource": "term_bank_22.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1670200,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 22347776,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 31792,
+          "output": 9714016,
+          "outputCapacity": 1274664,
+          "slots": 15856176,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1125316
+        }
+      ],
+      "requestedWasmAllocationBytes": 22186218
+    },
+    {
+      "id": 9,
+      "rows": 30000,
+      "firstSource": "term_bank_23.json",
+      "lastSource": "term_bank_25.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1824144,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 32993,
+          "output": 10231336,
+          "outputCapacity": 1428608,
+          "slots": 16373496,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1282132
+        }
+      ],
+      "requestedWasmAllocationBytes": 22703543
+    },
+    {
+      "id": 10,
+      "rows": 20000,
+      "firstSource": "term_bank_26.json",
+      "lastSource": "term_bank_27.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1167408,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 25559040,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 19244,
+          "output": 7517144,
+          "outputCapacity": 881872,
+          "slots": 8399016,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 766144
+        }
+      ],
+      "requestedWasmAllocationBytes": 16059372
+    },
+    {
+      "id": 11,
+      "rows": 20000,
+      "firstSource": "term_bank_28.json",
+      "lastSource": "term_bank_29.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1165000,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26345472,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 18556,
+          "output": 7455952,
+          "outputCapacity": 879464,
+          "slots": 8335416,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 756832
+        }
+      ],
+      "requestedWasmAllocationBytes": 15998176
+    },
+    {
+      "id": 12,
+      "rows": 30000,
+      "firstSource": "term_bank_30.json",
+      "lastSource": "term_bank_32.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1740056,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 25857,
+          "output": 10367608,
+          "outputCapacity": 1344516,
+          "slots": 16509768,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1157772
+        }
+      ],
+      "requestedWasmAllocationBytes": 22839812
+    },
+    {
+      "id": 13,
+      "rows": 30000,
+      "firstSource": "term_bank_33.json",
+      "lastSource": "term_bank_35.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1821512,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 23068672,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 29266,
+          "output": 9521264,
+          "outputCapacity": 1425972,
+          "slots": 15663424,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1261268
+        }
+      ],
+      "requestedWasmAllocationBytes": 21993471
+    },
+    {
+      "id": 14,
+      "rows": 20000,
+      "firstSource": "term_bank_36.json",
+      "lastSource": "term_bank_37.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1157848,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 22347776,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 18651,
+          "output": 7856712,
+          "outputCapacity": 872308,
+          "slots": 8729024,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 758520
+        }
+      ],
+      "requestedWasmAllocationBytes": 16398938
+    },
+    {
+      "id": 15,
+      "rows": 30000,
+      "firstSource": "term_bank_38.json",
+      "lastSource": "term_bank_40.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1745856,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 25559040,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 30624,
+          "output": 11274560,
+          "outputCapacity": 1350316,
+          "slots": 17416720,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1193916
+        }
+      ],
+      "requestedWasmAllocationBytes": 23746763
+    },
+    {
+      "id": 16,
+      "rows": 30000,
+      "firstSource": "term_bank_41.json",
+      "lastSource": "term_bank_43.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1700536,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26345472,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 28828,
+          "output": 11451280,
+          "outputCapacity": 1304996,
+          "slots": 17593440,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1137284
+        }
+      ],
+      "requestedWasmAllocationBytes": 23923484
+    },
+    {
+      "id": 17,
+      "rows": 20000,
+      "firstSource": "term_bank_44.json",
+      "lastSource": "term_bank_45.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1202456,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 19551,
+          "output": 7689912,
+          "outputCapacity": 916916,
+          "slots": 8606832,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 803384
+        }
+      ],
+      "requestedWasmAllocationBytes": 16232142
+    },
+    {
+      "id": 18,
+      "rows": 20000,
+      "firstSource": "term_bank_46.json",
+      "lastSource": "term_bank_47.json",
+      "sourceCount": 2,
+      "nativeScratchReusedBytes": 1175096,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 23068672,
+      "calls": [
+        {
+          "rows": 20000,
+          "keys": 19422,
+          "output": 7938928,
+          "outputCapacity": 889556,
+          "slots": 8828488,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 778564
+        }
+      ],
+      "requestedWasmAllocationBytes": 16481150
+    },
+    {
+      "id": 19,
+      "rows": 30000,
+      "firstSource": "term_bank_48.json",
+      "lastSource": "term_bank_50.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1757328,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 30000,
+          "keys": 30502,
+          "output": 10976168,
+          "outputCapacity": 1361788,
+          "slots": 17118328,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1199160
+        }
+      ],
+      "requestedWasmAllocationBytes": 23448375
+    },
+    {
+      "id": 20,
+      "rows": 28299,
+      "firstSource": "term_bank_51.json",
+      "lastSource": "term_bank_53.json",
+      "sourceCount": 3,
+      "nativeScratchReusedBytes": 1901072,
+      "nativeScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "maxWasmHeapBytes": 26476544,
+      "calls": [
+        {
+          "rows": 28299,
+          "keys": 33026,
+          "output": 10128160,
+          "outputCapacity": 1524232,
+          "slots": 11708992,
+          "slotBytes": 65536,
+          "aliased": false,
+          "slotAllocationBytes": null,
+          "shared": true,
+          "status": 1394848
+        }
+      ],
+      "requestedWasmAllocationBytes": 22600361
+    }
+  ]
+}

@@ -30,9 +30,10 @@ beforeAll(async () => {
 
 /**
  * @param {number[]|Int32Array} values
+ * @param {boolean} reuseOutput
  * @returns {{args: number[], plan: import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan, equals: Uint8Array, values: Int32Array, encode: () => {status: number, bytes: Uint8Array}, slots: () => Uint16Array}}
  */
-function fixture(values) {
+function fixture(values, reuseOutput) {
     wasm.wasm_reset_heap()
     const count = values.length
     const keyCount = Math.min(count, 2)
@@ -76,7 +77,7 @@ function fixture(values) {
         outputCapacity,
         put(new Int32Array(count).fill(-123)),
         put(new Uint16Array(count).fill(0xabcd)),
-        put(new Uint16Array(slotCount).fill(0xcafe)),
+        reuseOutput ? output + outputCapacity - ((slotCount * 2 + 3) & ~3) : put(new Uint16Array(slotCount).fill(0xcafe)),
         slotCount,
     ]
     return {
@@ -120,7 +121,7 @@ function sequenceHash(value) {
     return hash >>> 0
 }
 
-describe('native lookup sequence interning', () => {
+describe.each([false, true])('native lookup sequence interning with output tail scratch: %s', (reuseOutput) => {
     test.each([
         ['zero', [0]],
         ['maximum int32', [0x7fffffff]],
@@ -129,7 +130,7 @@ describe('native lookup sequence interning', () => {
         ['repeated', [0, 0, 1, 1, 1, 0x7fffffff, 0x7fffffff]],
         ['missing between repeats', [-1, 0, -2, 0, 10, -0x80000000, 10, 20, -1]],
     ])('preserves %s sequences with dirty hash scratch', (_name, values) => {
-        const input = fixture(/** @type {number[]} */ (values))
+        const input = fixture(/** @type {number[]} */ (values), reuseOutput)
         check(input)
     })
 
@@ -141,7 +142,7 @@ describe('native lookup sequence interning', () => {
         ['descending', [0x7fffffff, 10000, 10, 9, 8, 1, 0]],
         ['repeated decreases', [3, 4, 5, 2, 3, 1, 0, 5, 4, 3, 2, 1, 0]],
     ])('backfills first-seen keys on %s', (_name, values) => {
-        const input = fixture(/** @type {number[]} */ (values))
+        const input = fixture(/** @type {number[]} */ (values), reuseOutput)
         const index = check(input)
         for (const value of new Set(input.values)) {
             const rows = [...input.values.keys()].filter((row) => input.values[row] === value && value >= 0).reverse()
@@ -155,18 +156,18 @@ describe('native lookup sequence interning', () => {
             if ((sequenceHash(value) & 15) === 3) { collisions.push(value) }
         }
         const [a, b, c, d, e, f] = collisions
-        const input = fixture([a, b, c, d, b, e, a, f, d])
+        const input = fixture([a, b, c, d, b, e, a, f, d], reuseOutput)
         expect(input.args[16]).toBe(16)
         check(input)
     })
 
     test.each([2, 64, 1024, 32768])('fills a %i-slot table after a final new decreasing key', (count) => {
-        const input = fixture(Int32Array.from({length: count}, (_, i) => (i === count - 1 ? 0 : i + 1)))
+        const input = fixture(Int32Array.from({length: count}, (_, i) => (i === count - 1 ? 0 : i + 1)), reuseOutput)
         check(input)
     })
 
     test('retains the maximum supported row and sequence-key cardinality', () => {
-        const input = fixture(Int32Array.from({length: 0xfffe}, (_, i) => i))
+        const input = fixture(Int32Array.from({length: 0xfffe}, (_, i) => i), reuseOutput)
         check(input)
         input.args[10] = 0xffff
         expect(input.encode().status).toBe(-1)
@@ -175,11 +176,11 @@ describe('native lookup sequence interning', () => {
     test('backfills a nearly full prefix after absent rows and retains the final maximum int32 key', () => {
         const values = Int32Array.from({length: 0xfffe}, (_, i) => i)
         values.set([-1, -0x80000000, 0, 0x7fffffff], values.length - 4)
-        check(fixture(values))
+        check(fixture(values, reuseOutput))
     })
 
     test('retains exact indexes across repeated calls using populated and dirty scratch', () => {
-        const input = fixture([0, 3, 7, 9, 0x7fffffff, 0x7fffffff])
+        const input = fixture([0, 3, 7, 9, 0x7fffffff, 0x7fffffff], reuseOutput)
         check(input)
         input.values.set([0, 0x7fffffff, -1, 0x7fffffff, 0, 0x7fffffff])
         new Int32Array(wasm.memory.buffer, input.args[9], input.values.length).set(input.values)
@@ -194,7 +195,7 @@ describe('native lookup sequence interning', () => {
     })
 
     test.each([false, true])('preserves validation and recovery with a decreasing prefix: %s', (decreasing) => {
-        const input = fixture(decreasing ? [0, 3, 7, 3, 9, 10] : [0, 3, 7, 7, 9, 10])
+        const input = fixture(decreasing ? [0, 3, 7, 3, 9, 10] : [0, 3, 7, 7, 9, 10], reuseOutput)
         const expressions = new Uint32Array(wasm.memory.buffer, input.args[6], input.values.length)
         const readings = new Uint32Array(wasm.memory.buffer, input.args[7], input.values.length)
         const equals = new Uint8Array(wasm.memory.buffer, input.args[8], input.values.length)
@@ -217,4 +218,35 @@ describe('native lookup sequence interning', () => {
         lengths[1] = 1
         check(input)
     })
+})
+
+test('output tail scratch preserves live prefix keys through a decrease, failure and retry', () => {
+    const input = fixture([0, 3, 7, 3, 9, 10], true)
+    const output = input.args[11]
+    const separateStrings = input.args[0]
+    const keyBytesOffset = 16 + 32
+    const keyBytes = new Uint8Array(wasm.memory.buffer, output + keyBytesOffset, input.plan.stringsBuffer.byteLength)
+    keyBytes.set(input.plan.stringsBuffer)
+    input.args[0] = keyBytes.byteOffset
+    const prefix = new Uint8Array(wasm.memory.buffer, output, keyBytesOffset + keyBytes.byteLength)
+    const expectedPrefix = new Uint8Array(prefix)
+    expect(input.args[15] % 4).toBe(0)
+    expect(input.args[15]).toBeGreaterThanOrEqual(prefix.byteOffset + prefix.byteLength)
+    expect(input.args[15] + input.args[16] * 2).toBeLessThanOrEqual(output + input.args[12])
+
+    // A late invalid row fails after the first decrease initialized the slots,
+    // but before output initialization. Live key input must still be intact.
+    const expressions = new Uint32Array(wasm.memory.buffer, input.args[6], input.values.length)
+    expressions[5] = input.args[5]
+    expect(input.encode().status).toBe(-2)
+    expect(prefix).toEqual(expectedPrefix)
+    expressions[5] = input.plan.expressionIndexes[5]
+
+    const capacity = input.args[12]
+    input.args[12] = 16
+    expect(input.encode().status).toBe(-4)
+    expect(prefix).toEqual(expectedPrefix)
+    input.args[12] = capacity
+    input.args[0] = separateStrings
+    check(input)
 })

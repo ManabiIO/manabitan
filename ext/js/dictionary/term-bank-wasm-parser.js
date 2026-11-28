@@ -1560,6 +1560,7 @@ function getNativeSegmentKeyBytesCapacity(plan, rowCount) {
     return maximum;
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
  * @param {number} rowCapacity
@@ -1569,20 +1570,31 @@ function getNativeSegmentKeyBytesCapacity(plan, rowCount) {
  * @returns {{outputPtr: number, outputCapacity: number, readingEqualsPtr: number, sequenceValuesPtr: number, sequenceKeysPtr: number, sequenceKeyByRowPtr: number, sequenceSlotsPtr: number, sequenceSlotsCount: number}}
  */
 function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytesCapacity, allocator = null) {
-    const alloc = allocator ?? ((/** @type {number} */ size, /** @type {string} */ label) => allocateWasmBuffer(wasm, size, label));
-    const sequenceSlotsCount = getSequenceInternSlotCount(rowCapacity);
-    const outputCapacity = getNativeLookupIndexCapacity(rowCapacity, keyCapacity, keyBytesCapacity);
+    const alloc = allocator ?? ((/** @type {number} */ size, /** @type {string} */ label) => allocateWasmBuffer(wasm, size, label))
+    const sequenceSlotsCount = getSequenceInternSlotCount(rowCapacity)
+    const sequenceSlotsCapacity = align4(sequenceSlotsCount * 2)
+    const keyBytesEnd = 16 + 32 + align4(keyBytesCapacity)
+    const outputCapacity = Math.max(
+        getNativeLookupIndexCapacity(rowCapacity, keyCapacity, keyBytesCapacity),
+        keyBytesEnd + sequenceSlotsCapacity,
+    )
+    const outputPtr = alloc(outputCapacity, 'term lookup index output')
     return {
-        outputPtr: alloc(outputCapacity, 'term lookup index output'),
+        outputPtr,
         outputCapacity,
         readingEqualsPtr: alloc(rowCapacity, 'term lookup reading equality'),
         sequenceValuesPtr: alloc(rowCapacity * 4, 'term lookup sequence values'),
         sequenceKeysPtr: alloc(rowCapacity * 4, 'term lookup sequence keys'),
         sequenceKeyByRowPtr: alloc(rowCapacity * 2, 'term lookup sequence row keys'),
-        sequenceSlotsPtr: alloc(sequenceSlotsCount * 2, 'term lookup sequence slots'),
+        // The aligned tail cannot overlap live key bytes in the output prefix.
+        // Native sequence interning finishes before output initialization; its
+        // slots are dead then, while sequence keys and row IDs remain separate.
+        // encodeNativeTermLookupIndex owns a copy before any arena reuse.
+        sequenceSlotsPtr: outputPtr + outputCapacity - sequenceSlotsCapacity,
         sequenceSlotsCount,
-    };
+    }
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm

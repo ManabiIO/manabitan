@@ -1,0 +1,211 @@
+{
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "status": "draft; no whole-import latency or peak-memory claim",
+  "nativeChange": "Sequence-interning slots borrow an aligned output tail only before native output initialization. Output capacity explicitly covers the 48-byte header, aligned live key prefix and aligned slots without overlap. Live sequence keys and row IDs remain separate; returned output is copied before reuse.",
+  "javascriptChange": "Ordered and repeated IDs avoid hash interning; a decreasing ID creates and backfills the unchanged general table once. This is a fallback path; every row in the default captured workloads used native lookup encoding.",
+  "boundary": "Production compressed source-run planner and actual parser workers, with hardwareConcurrency=8 and deviceMemory=8. Node 22 bridge and instrumentation; excludes global canonical deduplication, compression, OPFS, media reads and UI.",
+  "results": [
+    {
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 20,
+      "outputDigest": "2e01b0de50158311b3705987975bc4aaba5a8c4cd0c5bf629b43a3863a7e91ae",
+      "fullChunkAndMediaDigest": "28baa9c73d83b3f1636a3615b63ac3c9593fab5a24f289d3d67db748ec7615fc",
+      "mediaDigest": "9919321fc91acbc3ad305c320342e8bd865c2719c1581cdc8b5de7dc274c0cff",
+      "canonicalBytes": 101218370,
+      "indexBytes": 19515720,
+      "mediaRows": 0,
+      "avoidedCumulativeRetiredScratchBytes": 1310720,
+      "freshWasmAllocationRequestDeltaBytes": 0,
+      "baselineReport": "tail-alias/jmdict-baseline.json",
+      "candidateReport": "tail-alias/jmdict-candidate.json"
+    },
+    {
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "outputDigest": "06c0a6c7c56e3f9c77e2be050552a384943e35f1db86fe08a902d2bf52b59d2d",
+      "fullChunkAndMediaDigest": "c8312479cce315d63bc1021fcc559fbe14ae06d1d00becfce897fb0fc92802a5",
+      "mediaDigest": "7debc2e534be0d9b254c648ed0fed90c227652446dacdaf43e4bbe6a7428465f",
+      "canonicalBytes": 389707807,
+      "indexBytes": 20092136,
+      "mediaRows": 339,
+      "avoidedCumulativeRetiredScratchBytes": 1245184,
+      "freshWasmAllocationRequestDeltaBytes": 0,
+      "baselineReport": "tail-alias/jitendex-baseline.json",
+      "candidateReport": "tail-alias/jitendex-candidate.json"
+    },
+    {
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "outputDigest": "06a588711bbef254bab8d4d03cb853a5b6d040ce524309668c1e92c43e803b1b",
+      "fullChunkAndMediaDigest": "09a614d8ee9921acf8bc8532623912d7482b095016f7992005b6f0ee9bd78e7a",
+      "mediaDigest": "b294421f1fc2098d32fabe9fb6fd0a0cb8e0f93e981e2ac354da7e3fa235bd8d",
+      "canonicalBytes": 91670244,
+      "indexBytes": 348270472,
+      "mediaRows": 146725,
+      "avoidedCumulativeRetiredScratchBytes": 21299200,
+      "freshWasmAllocationRequestDeltaBytes": 0,
+      "baselineReport": "tail-alias/vndb-baseline.json",
+      "candidateReport": "tail-alias/vndb-candidate.json"
+    }
+  ],
+  "validation": {
+    "focusedSuites": [
+      "test/term-lookup-javascript-sequences.test.js",
+      "test/term-lookup-monotonic-sequences.test.js",
+      "test/term-lookup-index.test.js",
+      "test/term-lookup-index-preparation.test.js",
+      "test/lookup-construction-experiments.test.js"
+    ],
+    "focusedFilesPassed": 5,
+    "focusedTestsPassed": 182,
+    "scopedEslint": "passed after tail placement on changed source/test files; other source/test files passed on their unchanged exact bytes",
+    "mainTypeScript": "passed",
+    "testTypeScript": "passed",
+    "allTargetDryBuild": "initial implementation passed; final combined dry build is owned by root",
+    "fullUnitSuite": "final combined run and PR CI owned by root; not run in this standalone checkout",
+    "candidateRuntimeCommit": "6c4e5d2a7ed52219c368f384ab629b260a92af1a",
+    "logsDirectory": "tail-alias/",
+    "concurrentPr894Compatibility": {
+      "baseHead": "8a191ce3f6a0b843ff195c086e7b8ff6e59245fd",
+      "sequenceDeltaHead": "6c4e5d2a7ed52219c368f384ab629b260a92af1a",
+      "testFilesPassed": 4,
+      "testsPassed": 126,
+      "receipt": "pr-894-compatibility/receipt.json",
+      "scope": "Separate combined compatibility checkout only; no performance claim and no combined branch published."
+    }
+  },
+  "notes": [
+    "Retired scratch reservations are cumulative capacity accounting, not fresh allocation or peak memory. Default fresh WASM allocation requests are unchanged.",
+    "Final paired reports use the exact bounded file-backed runner in tail-alias/replay.mjs. Every final candidate native call records a contained aligned output-tail alias beyond the encoded key prefix. Full recursive chunk/media and original byte digests match baseline for all three archives.",
+    "The superseded initial JMdict baseline report incorrectly counted some retired-region addresses as fresh allocations. Subsequent reports classify fresh allocation using nativeScratchReusedBytes and retain the raw initial report separately.",
+    "VNDB initial harness setup was killed before worker observations. Subsequent bounded file-backed replays completed both source versions with exact full chunk and media parity; the setup failure receipt is retained.",
+    "maxRssBytes is diagnostic single-run process RSS under Node instrumentation and is not used to claim a peak-memory improvement. All resource reductions reported here are cumulative retired scratch capacity.",
+    "Tail placement reserves the complete output key prefix for compatibility with concurrent PR #894. A native regression forces a decrease then late row/capacity errors, verifies the prefix and external canary remain intact, and retries successfully.",
+    "Concurrent PR #894 compatibility was separately verified with its source-bound WASM: 126 tests passed, including full successful live-prefix key encoding with tail backfill, dirty reuse, short and 90KB keys, exact persisted bytes and external red zones. The exact applied delta, added regression and test log are retained under pr-894-compatibility/.",
+    "Compatibility patch files are gzip-compressed without modifying their bytes; receipt patch SHA256 values refer to decompressed content."
+  ],
+  "files": {
+    "build-dry-run.log.gz": {
+      "sha256": "782bc57c9bc9d3ecf8abc747480dfbf145fcd6ca8ea056d6e95edb073f2aea21",
+      "sizeBytes": 240
+    },
+    "eslint.log.gz": {
+      "sha256": "08304d87e8b0ecc605ce950cc13f15bd27af2c05abba5e0c7f5f802f040467ca",
+      "sizeBytes": 522
+    },
+    "jitendex-production-baseline.json": {
+      "sha256": "876f40e05f4ebf066cc685b0c9696eb0cc95d928ae44481995fc71bfb5f84f4d",
+      "sizeBytes": 23489
+    },
+    "jitendex-production-candidate.json": {
+      "sha256": "e60e4beab18452169561ddf95c273e56dfba8f26f6caf5bd617affb7146c3ce5",
+      "sizeBytes": 23511
+    },
+    "jmdict-production-baseline.initial.json": {
+      "sha256": "c14a680b467d09681ba92f2c2635df1726b3bc1e10f8522c23ca0f5eb1a92030",
+      "sizeBytes": 20753
+    },
+    "jmdict-production-baseline.json": {
+      "sha256": "532242e5443ee54adb24285f2866ab8ebd805a35584e6b857387d34b3d0ef178",
+      "sizeBytes": 21033
+    },
+    "jmdict-production-candidate.json": {
+      "sha256": "7a32773febbd47cb7084fbe91d0fd225f8b64c67c2bb68232854096013750b3d",
+      "sizeBytes": 21066
+    },
+    "pr-894-compatibility/native-alias-regression.patch.gz": {
+      "sha256": "a082e02ba041b765f8061a076a7c9f187b176af2766b4383f3f95cf6a14baf08",
+      "sizeBytes": 890
+    },
+    "pr-894-compatibility/receipt.json": {
+      "sha256": "c7d16fb0aa23ee914492fa9a042315d055a7e355d77804b1ff86deb94f59b2b2",
+      "sizeBytes": 2991
+    },
+    "pr-894-compatibility/sequence-delta.patch.gz": {
+      "sha256": "defa8687fa2a8d0de358090e35f79fa4fec76db359a94087b7b3934b5af4a2ba",
+      "sizeBytes": 6733
+    },
+    "pr-894-compatibility/tests.log.gz": {
+      "sha256": "ab6980163b0ed299d60c59a70ab66a209b553b70c7a218b0e27f6d87b668c25b",
+      "sizeBytes": 344
+    },
+    "replay-media.mjs": {
+      "sha256": "21f522f507496da43067a8cbf56e6bd24bc5ffd1b9feee8f77eb9ef6e3edc5ad",
+      "sizeBytes": 16239
+    },
+    "replay-streamed.mjs": {
+      "sha256": "99905d6db9636241ec720a5a5af02e71edeea1d8ff9a51af25e52b03d49f4ff0",
+      "sizeBytes": 12482
+    },
+    "replay.mjs": {
+      "sha256": "dd361a7e807fb4aa17a1d543ffce90dbc34f30efcfa5b3743d247d6213757513",
+      "sizeBytes": 12270
+    },
+    "tail-alias/focused-tests.log.gz": {
+      "sha256": "37cc081d97a364592fb4d2199181ea60031340d0df752ee49106c820ad920613",
+      "sizeBytes": 341
+    },
+    "tail-alias/jitendex-baseline.json": {
+      "sha256": "ce9b249a4fb2e0eca7ea442d7696c49ce3bba052bcc9bd28686c192ce533443c",
+      "sizeBytes": 33518
+    },
+    "tail-alias/jitendex-candidate.json": {
+      "sha256": "59183adeb42d68c04c2bcae0edae4a958b60502568272f77329730274ec2bce6",
+      "sizeBytes": 33474
+    },
+    "tail-alias/jmdict-baseline.json": {
+      "sha256": "b96b5e2d6163c638d977bf1fe2c17a6099a00eaa3355d41c8721bd0a6abd1fa0",
+      "sizeBytes": 30143
+    },
+    "tail-alias/jmdict-candidate.json": {
+      "sha256": "215a30a8a0bad650300a2b1cbb9295fa8bf1c88199a11ac998423d14bd58ea37",
+      "sizeBytes": 30119
+    },
+    "tail-alias/replay.mjs": {
+      "sha256": "0badf90fd4611034f0cdd2d710d98a00c8f9dc7eb50deaf1bbaba11ad2f837e5",
+      "sizeBytes": 16478
+    },
+    "tail-alias/types-main.log.gz": {
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sizeBytes": 20
+    },
+    "tail-alias/types-test.log.gz": {
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sizeBytes": 20
+    },
+    "tail-alias/vndb-baseline.json": {
+      "sha256": "3c7fd1cee72dd91ce29807d5fc85a7c585248860785bce8aab761077ad7898da",
+      "sizeBytes": 232128
+    },
+    "tail-alias/vndb-candidate.json": {
+      "sha256": "d4e6f1c73062f79afbd74bf0021487166f9da08c5eaf7997081c2368a9730727",
+      "sizeBytes": 231951
+    },
+    "types-main.log.gz": {
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sizeBytes": 20
+    },
+    "types-test.log.gz": {
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "sizeBytes": 20
+    },
+    "vndb-production-baseline.json": {
+      "sha256": "d1c9ca10412658ba175ac617bf4571a441a909a96fe27ac1ad354715deccc7d8",
+      "sizeBytes": 219378
+    },
+    "vndb-production-candidate.json": {
+      "sha256": "d98d8cb96494ba302472194c36759fc779814043a4d78f3e20550c4577551084",
+      "sizeBytes": 219711
+    },
+    "vndb-production-setup-failed.json": {
+      "sha256": "3dadc0447bb99b98099db886c6087e734d80ee8bc13d4317d83a6c4406b6e6f6",
+      "sizeBytes": 456
+    }
+  },
+  "candidateRuntimeCommit": "6c4e5d2a7ed52219c368f384ab629b260a92af1a",
+  "finalRunner": "tail-alias/replay.mjs",
+  "supersededEvidence": "Reports and runners directly in this directory describe the initial output-prefix alias and are retained as raw history. Final runtime conclusions use only the paired tail-alias reports whose source hashes match candidateRuntimeCommit."
+}
