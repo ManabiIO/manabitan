@@ -133,7 +133,7 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Compact cacheable slabs and small projected slabs transfer
+                // Compact cacheable slabs and eligible projected slabs transfer
                 // ownership so the next parse can overlap the ordered sink.
                 const ownCacheableContent = options.ownContentBytes !== true && typeof SharedArrayBuffer === 'function' && shouldOwnTermContentBytes(
                     chunk.contentBytesLength,
@@ -142,10 +142,10 @@ async function parse(data) {
                     chunk.rowCount,
                 );
                 /* eslint-disable @stylistic/semi */
-                // Reuse the existing borrowed-result lease for byte-heavy
-                // projected groups. Never create a shared buffer for this path;
-                // nonshared sources retain the original private transfer.
-                const borrowProjectedContent = (
+                // Byte-heavy projected groups already qualify for independent
+                // shared ownership. The coordinator's byte admission accounts
+                // for these compact copies while they wait for the ordered sink.
+                const eligibleProjectedContent = (
                     options.ownContentBytes === true &&
                     options.projectImagePaths === true &&
                     typeof SharedArrayBuffer === 'function' &&
@@ -157,21 +157,21 @@ async function parse(data) {
                         chunk.rowCount,
                     )
                 )
-                const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
+                const ownProjectedContent = eligibleProjectedContent
+                const shareContentBytes = options.ownContentBytes !== true || eligibleProjectedContent
                 /* eslint-enable @stylistic/semi */
                 resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
                 if (
-                    ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
+                    (ownCacheableContent || ownProjectedContent) && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
                 ) {
-                    // Compression workers retain the shared-span path. This slab
-                    // is independent of the reusable parser heap and is never
-                    // written again after the result is posted.
+                    // This compact slab is independent of reusable parser
+                    // memory and is immutable after the result is posted.
                     const owned = new Uint8Array(new SharedArrayBuffer(resultChunk.contentBytesBuffer.byteLength));
                     owned.set(resultChunk.contentBytesBuffer);
                     resultChunk.contentBytesBuffer = owned;
                 }
-                ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
+                ownsContentBytes = ownCacheableContent || ownProjectedContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
