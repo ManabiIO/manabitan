@@ -1,0 +1,71 @@
+{
+  "createdAtUtc": "2026-11-28T06:51:44.761819+00:00",
+  "runId": 46111017640,
+  "files": {
+    "path-copy-hosted/PLAN.md": {
+      "bytes": 5926,
+      "sha256": "c4936b0d8aa5506579e586ef99af23c90b79bac7894b45b827d6e824e19dac8e"
+    },
+    "path-copy-hosted/download-fixture.py": {
+      "bytes": 1345,
+      "sha256": "a2353d406dd19ada7109a43221d8691a7b91197bdd116bcbe791cedf95dd4263"
+    },
+    "path-copy-hosted/oracle.mjs": {
+      "bytes": 16730,
+      "sha256": "578a6ab02734d031a806c38d8f5148dfb6cd9ed9f98719be94ae79f8dc84b660"
+    },
+    "path-copy-hosted/package-manifest.json": {
+      "bytes": 1974,
+      "sha256": "5ce3106ea36c0d42ce7c68ada002dc9ff8e39ce7026a6d84dfb9640f09459956"
+    },
+    "path-copy-hosted/public-false-branch-proof.json": {
+      "bytes": 991,
+      "sha256": "3375a6468cc7c8c3eed94295b05730cd3e2160e9999ae00a969302adb7fbac9c"
+    },
+    "path-copy-hosted/publication.json": {
+      "bytes": 464,
+      "sha256": "cb342da6b67efb776f776274a76ec60401e17d9cb9839b1c0896595c68068461"
+    },
+    "path-copy-hosted/reference-manifest.json": {
+      "bytes": 258368,
+      "sha256": "810c067eabf70271a5440775751420ce065e3bfc1ce2a47bfd2cb61c4876a8a2"
+    },
+    "path-copy-hosted/worker.mjs": {
+      "bytes": 7668,
+      "sha256": "88153533e411e480e566b241797f4ec7f456756422769731c46468ffbb451401"
+    },
+    "path-copy-hosted/workflow.yml": {
+      "bytes": 2672,
+      "sha256": "7d3ad0743e9659b92ab19cf7549e50bc36bf0b70f28ff21f1ba9826134879956"
+    },
+    "path-copy-hosted/zero-alias-diagnostic.json": {
+      "bytes": 1749,
+      "sha256": "c0c16cde36c96eaac38a1659c6ec61a38ef1906e3fa948951df60b1469082c40"
+    },
+    "path-copy-hosted-20261128/artifact.zip": {
+      "bytes": 177505,
+      "sha256": "9d075f92fd94b7b5fc7af462bcef783aba342c85380afde349f32f493cba119f"
+    },
+    "path-copy-hosted-20261128/audit-receipts.py": {
+      "bytes": 8809,
+      "sha256": "8e7f0f97af3428c40e26da5573321648ea41ae4042eb398ec676a023a0284b00"
+    },
+    "path-copy-hosted-20261128/github-metadata.json": {
+      "bytes": 4331,
+      "sha256": "988055ed6b71e9a05f9d75a9853a2c047204c76207df316e90554cfa268487da"
+    },
+    "path-copy-hosted-20261128/independent-audit.json": {
+      "bytes": 3709,
+      "sha256": "2b4a43c5cca524f6a52b8c918a5244791282a51b82d14840de87c206e02ac78c"
+    },
+    "path-copy-hosted-20261128/job.log.gz": {
+      "bytes": 40509,
+      "sha256": "77d3cd613db59e6de7f62c1e202031b6b2e9857620cf7d108e0a1ea0db128aa5"
+    },
+    "path-copy-hosted-20261128/workflow.yml": {
+      "bytes": 2672,
+      "sha256": "7d3ad0743e9659b92ab19cf7549e50bc36bf0b70f28ff21f1ba9826134879956"
+    }
+  },
+  "excluded": "Extracted artifact contents are not duplicated; their exact original ZIP is retained. Python cache files excluded."
+}

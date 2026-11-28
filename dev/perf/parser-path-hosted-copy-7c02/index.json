@@ -1,0 +1,9 @@
+{
+  "bytes": 249429,
+  "sha256": "00f089c752b132362f1debd0f4dfd0ee6f04f49f7f2e2fbfca8eee57f0a34ea2",
+  "gitBlobSha1": "1f5b8b9b9aa2940c028f2cc205d51f4668d3fa58",
+  "manifestSha256": "5cb4516ced684da75ff85dd2ebe03f6ca1e03d35e378c4dda8973f8cbf7eb589",
+  "artifactZipSha256": "9d075f92fd94b7b5fc7af462bcef783aba342c85380afde349f32f493cba119f",
+  "oracleManifestSha256": "b6c209428c2e706cb5da75e9d14ae702b7ac8023c5d1fc1d58b642136c4ae6fd",
+  "independentAuditSha256": "2b4a43c5cca524f6a52b8c918a5244791282a51b82d14840de87c206e02ac78c"
+}
