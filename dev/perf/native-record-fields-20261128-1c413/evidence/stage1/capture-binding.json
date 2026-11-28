@@ -1,0 +1,25 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "stockSource": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+  "stockSourceSha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+  "stockWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "retainedBaselineOracleSha256": "d2896fe91cb3361d19f179efbc17e33fe51aeb3f68e4c552ee0af89e06d19104",
+  "runtimeDigest": "73c774fb00b81979769ffbd0b244a78a10b07afb4fd159c44404344d1d5144a2",
+  "runtimeFiles": 323,
+  "recordEncoderSource": "ext/js/dictionary/term-record-opfs-store.js",
+  "recordEncoderSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+  "files": {
+    "README.md": "8199a67b485625f589dde51f2d0503cb6bd745be8228618b178e78defcacb235",
+    "stage-capture.py": "98dee4f87df61597fea299297c75c2285e3c26d00bf0947c1ec43460828c4a9c",
+    "export-hook.mjs": "27cc73c4f4b4af90b7b2b2d61919615b204816338d9b10caf9ba6d9c1ac0454d",
+    "capture-observer.mjs": "0b5ef398342790835092c48c73c29e30caeb804add945977a0eb4b24d5ce904f",
+    "capture.mjs": "e452914b05b7fa27958e1903fb60751d310fa5a9581488c953921d135183294d",
+    "capture-harness-delta.patch": "bcefff59301002c7b295c15cf4628d0bcbfbac9ac4ddb5f6ff175e60db72d682",
+    "retained-baseline-oracle.json": "d2896fe91cb3361d19f179efbc17e33fe51aeb3f68e4c552ee0af89e06d19104",
+    "node-import-worker-bridge.mjs": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+    "compression-observer.mjs": "121916dfc48cfa2c52c609d95066e3a2b2257258e923c7d072770f67f473c6e7",
+    "runtime-identity.json": "8fbff644391bb75748eef019bc1078fbc708478db687092680829d03203619c0"
+  },
+  "timingAcquisition": false,
+  "productChanges": false
+}

@@ -1,0 +1,2 @@
+Ignoring inability to install OPFS sqlite3_vfs: The OPFS sqlite3_vfs cannot run in the main thread because it requires Atomics.wait().
+{"complete":true,"rows":528299,"groups":12,"captureTotals":{"calls":12,"rows":528299,"sourceBytes":12858712,"compressedCaptureBytes":4111914},"finalizedOutputParity":true}

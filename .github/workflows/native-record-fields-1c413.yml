@@ -1,0 +1,60 @@
+name: Native record fields component screen 20261128
+
+on:
+  push:
+    branches: [perf/native-record-fields-screen-20261128-1c413]
+    paths:
+      - 'dev/perf/native-record-fields-20261128-1c413/**'
+      - '.github/workflows/native-record-fields-1c413.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-record-fields-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  screen:
+    name: Frozen complete-call native record-field screen
+    if: github.run_attempt == 1
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install checked pinned native compiler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Verify exact sources, native reproduction and focused behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf
+          node dev/perf/native-record-fields-20261128-1c413/prepare.mjs \
+            builds/perf/native-record-fields-1c413 \
+            2>&1 | tee builds/perf/native-record-fields-preparation.log
+      - name: Run the frozen fresh-process complete-call schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          python dev/perf/native-record-fields-20261128-1c413/pin-cpu.py \
+            builds/perf/native-record-fields-1c413/affinity.json \
+            node dev/perf/native-record-fields-20261128-1c413/run.mjs \
+            builds/perf/native-record-fields-1c413 \
+            2>&1 | tee builds/perf/native-record-fields-1c413/screen.log
+      - name: Preserve complete source, captures, every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-fields-1c413-${{ github.sha }}
+          path: |
+            builds/perf/native-record-fields-1c413
+            builds/perf/native-record-fields-preparation.log
+          if-no-files-found: error
+          retention-days: 14

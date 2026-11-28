@@ -1,0 +1,4118 @@
+{
+  "complete": true,
+  "timingAcquisition": false,
+  "sourceBinding": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "stockSource": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+    "stockSourceSha256": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+    "stockWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "retainedBaselineOracleSha256": "d2896fe91cb3361d19f179efbc17e33fe51aeb3f68e4c552ee0af89e06d19104",
+    "runtimeDigest": "73c774fb00b81979769ffbd0b244a78a10b07afb4fd159c44404344d1d5144a2",
+    "runtimeFiles": 323,
+    "recordEncoderSource": "ext/js/dictionary/term-record-opfs-store.js",
+    "recordEncoderSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+    "files": {
+      "README.md": "8199a67b485625f589dde51f2d0503cb6bd745be8228618b178e78defcacb235",
+      "stage-capture.py": "98dee4f87df61597fea299297c75c2285e3c26d00bf0947c1ec43460828c4a9c",
+      "export-hook.mjs": "27cc73c4f4b4af90b7b2b2d61919615b204816338d9b10caf9ba6d9c1ac0454d",
+      "capture-observer.mjs": "0b5ef398342790835092c48c73c29e30caeb804add945977a0eb4b24d5ce904f",
+      "capture.mjs": "e452914b05b7fa27958e1903fb60751d310fa5a9581488c953921d135183294d",
+      "capture-harness-delta.patch": "bcefff59301002c7b295c15cf4628d0bcbfbac9ac4ddb5f6ff175e60db72d682",
+      "retained-baseline-oracle.json": "d2896fe91cb3361d19f179efbc17e33fe51aeb3f68e4c552ee0af89e06d19104",
+      "node-import-worker-bridge.mjs": "1408d83e393d9e004afe77e58e772392bd96bd72ce76328a5d57ab24c727afcb",
+      "compression-observer.mjs": "121916dfc48cfa2c52c609d95066e3a2b2257258e923c7d072770f67f473c6e7",
+      "runtime-identity.json": "8fbff644391bb75748eef019bc1078fbc708478db687092680829d03203619c0"
+    },
+    "timingAcquisition": false,
+    "productChanges": false
+  },
+  "fixture": {
+    "label": "JMdict",
+    "cacheFile": "JMdict.zip",
+    "release": "2026-11-22",
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "expectedTitle": "JMdict [2026-11-22]",
+    "revision": "JMdict.2026-11-22",
+    "termRows": 528299,
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "node": "v24.22.3",
+  "scope": "One stock JMdict import capturing every actual field encoder call, exact compressed frames and references, and complete finalized payload hashes. Node workers, in-memory SQLite, test file OPFS adapter; no browser qualification.",
+  "substitutions": {
+    "sqlite": ":memory:",
+    "opfs": "test/fixtures/fused-score/node-opfs-adapter.mjs; atomic real files, in-memory copy per asynchronous write and file snapshot; Node fd sync handles for production index writes/reads",
+    "worker": "node:worker_threads with true transferable buffers; file fetch and sync access handle bridge",
+    "zipUseWebWorkers": false,
+    "skipImageMetadata": true
+  },
+  "sameStockProductionOutput": true,
+  "lookupReadSkipped": true,
+  "retainedBaselineHashParity": true,
+  "chunkCount": 12,
+  "rows": 528299,
+  "chunks": [
+    {
+      "index": 0,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34951,
+        "dedupNativeBulkPendingRows": 34951,
+        "dedupNativeExactCandidates": 0,
+        "dedupNativeCopiedInputBytes": 1594167,
+        "dedupNativeCopiedOutputBytes": 0,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 1,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 15049,
+        "dedupPersistedHitCount": 0,
+        "dedupUniqueCount": 34951,
+        "dedupExactFallbackCount": 0,
+        "dedupRecentSourceHitCount": 0,
+        "dedupRecentSourceCacheBytes": 8486982,
+        "dedupRecentSourceAdoptedBytes": 8486982
+      }
+    },
+    {
+      "index": 1,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 32856,
+        "dedupNativeBulkPendingRows": 32739,
+        "dedupNativeExactCandidates": 117,
+        "dedupNativeCopiedInputBytes": 1358552,
+        "dedupNativeCopiedOutputBytes": 936,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 7144,
+        "dedupPersistedHitCount": 117,
+        "dedupUniqueCount": 32739,
+        "dedupExactFallbackCount": 117,
+        "dedupRecentSourceHitCount": 117,
+        "dedupRecentSourceCacheBytes": 9427894,
+        "dedupRecentSourceAdoptedBytes": 9427894
+      }
+    },
+    {
+      "index": 2,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 32421,
+        "dedupNativeBulkPendingRows": 32256,
+        "dedupNativeExactCandidates": 165,
+        "dedupNativeCopiedInputBytes": 1351157,
+        "dedupNativeCopiedOutputBytes": 1320,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 7579,
+        "dedupPersistedHitCount": 165,
+        "dedupUniqueCount": 32256,
+        "dedupExactFallbackCount": 165,
+        "dedupRecentSourceHitCount": 165,
+        "dedupRecentSourceCacheBytes": 9272749,
+        "dedupRecentSourceAdoptedBytes": 9272749
+      }
+    },
+    {
+      "index": 3,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 28895,
+        "dedupNativeBulkPendingRows": 28758,
+        "dedupNativeExactCandidates": 137,
+        "dedupNativeCopiedInputBytes": 1291215,
+        "dedupNativeCopiedOutputBytes": 1096,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 11105,
+        "dedupPersistedHitCount": 137,
+        "dedupUniqueCount": 28758,
+        "dedupExactFallbackCount": 137,
+        "dedupRecentSourceHitCount": 137,
+        "dedupRecentSourceCacheBytes": 8619220,
+        "dedupRecentSourceAdoptedBytes": 8619220
+      }
+    },
+    {
+      "index": 4,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34677,
+        "dedupNativeBulkPendingRows": 34159,
+        "dedupNativeExactCandidates": 518,
+        "dedupNativeCopiedInputBytes": 1589509,
+        "dedupNativeCopiedOutputBytes": 4144,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 15323,
+        "dedupPersistedHitCount": 518,
+        "dedupUniqueCount": 34159,
+        "dedupExactFallbackCount": 518,
+        "dedupRecentSourceHitCount": 518,
+        "dedupRecentSourceCacheBytes": 8782091,
+        "dedupRecentSourceAdoptedBytes": 8782091
+      }
+    },
+    {
+      "index": 5,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 34006,
+        "dedupNativeBulkPendingRows": 33543,
+        "dedupNativeExactCandidates": 463,
+        "dedupNativeCopiedInputBytes": 1578102,
+        "dedupNativeCopiedOutputBytes": 3704,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 15994,
+        "dedupPersistedHitCount": 463,
+        "dedupUniqueCount": 33543,
+        "dedupExactFallbackCount": 463,
+        "dedupRecentSourceHitCount": 463,
+        "dedupRecentSourceCacheBytes": 9009676,
+        "dedupRecentSourceAdoptedBytes": 9009676
+      }
+    },
+    {
+      "index": 6,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 24271,
+        "dedupNativeBulkPendingRows": 24030,
+        "dedupNativeExactCandidates": 241,
+        "dedupNativeCopiedInputBytes": 1212607,
+        "dedupNativeCopiedOutputBytes": 1928,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 15729,
+        "dedupPersistedHitCount": 241,
+        "dedupUniqueCount": 24030,
+        "dedupExactFallbackCount": 241,
+        "dedupRecentSourceHitCount": 241,
+        "dedupRecentSourceCacheBytes": 7077918,
+        "dedupRecentSourceAdoptedBytes": 7077918
+      }
+    },
+    {
+      "index": 7,
+      "rowCount": 50000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 31906,
+        "dedupNativeBulkPendingRows": 31330,
+        "dedupNativeExactCandidates": 576,
+        "dedupNativeCopiedInputBytes": 1542402,
+        "dedupNativeCopiedOutputBytes": 4608,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 18094,
+        "dedupPersistedHitCount": 576,
+        "dedupUniqueCount": 31330,
+        "dedupExactFallbackCount": 576,
+        "dedupRecentSourceHitCount": 576,
+        "dedupRecentSourceCacheBytes": 7502706,
+        "dedupRecentSourceAdoptedBytes": 7502706
+      }
+    },
+    {
+      "index": 8,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 25774,
+        "dedupNativeBulkPendingRows": 25442,
+        "dedupNativeExactCandidates": 332,
+        "dedupNativeCopiedInputBytes": 1238158,
+        "dedupNativeCopiedOutputBytes": 2656,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 14226,
+        "dedupPersistedHitCount": 332,
+        "dedupUniqueCount": 25442,
+        "dedupExactFallbackCount": 332,
+        "dedupRecentSourceHitCount": 332,
+        "dedupRecentSourceCacheBytes": 7850259,
+        "dedupRecentSourceAdoptedBytes": 7850259
+      }
+    },
+    {
+      "index": 9,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 25109,
+        "dedupNativeBulkPendingRows": 24806,
+        "dedupNativeExactCandidates": 303,
+        "dedupNativeCopiedInputBytes": 1226853,
+        "dedupNativeCopiedOutputBytes": 2424,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 14891,
+        "dedupPersistedHitCount": 303,
+        "dedupUniqueCount": 24806,
+        "dedupExactFallbackCount": 303,
+        "dedupRecentSourceHitCount": 303,
+        "dedupRecentSourceCacheBytes": 7597844,
+        "dedupRecentSourceAdoptedBytes": 7597844
+      }
+    },
+    {
+      "index": 10,
+      "rowCount": 40000,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 26102,
+        "dedupNativeBulkPendingRows": 25651,
+        "dedupNativeExactCandidates": 451,
+        "dedupNativeCopiedInputBytes": 1243734,
+        "dedupNativeCopiedOutputBytes": 3608,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 13898,
+        "dedupPersistedHitCount": 451,
+        "dedupUniqueCount": 25651,
+        "dedupExactFallbackCount": 451,
+        "dedupRecentSourceHitCount": 451,
+        "dedupRecentSourceCacheBytes": 7884881,
+        "dedupRecentSourceAdoptedBytes": 7884881
+      }
+    },
+    {
+      "index": 11,
+      "rowCount": 48299,
+      "metrics": {
+        "dedupNativeCallCount": 1,
+        "dedupNativeScannedRows": 35062,
+        "dedupNativeBulkPendingRows": 34367,
+        "dedupNativeExactCandidates": 695,
+        "dedupNativeCopiedInputBytes": 1562034,
+        "dedupNativeCopiedOutputBytes": 5560,
+        "dedupNativeSnapshotBytes": 0,
+        "dedupNativeFallbackCount": 0,
+        "dedupNativeFallbackEligibilityCount": 0,
+        "dedupNativeFallbackAssetCount": 0,
+        "dedupNativeFallbackUnsupportedCount": 0,
+        "contentInitialReservationCount": 0,
+        "contentInitialReservationSavingsMissCount": 0,
+        "dedupPendingHitCount": 13237,
+        "dedupPersistedHitCount": 695,
+        "dedupUniqueCount": 34367,
+        "dedupExactFallbackCount": 695,
+        "dedupRecentSourceHitCount": 695,
+        "dedupRecentSourceCacheBytes": 9631061,
+        "dedupRecentSourceAdoptedBytes": 9631061
+      }
+    }
+  ],
+  "metricTotals": {
+    "dedupNativeCallCount": 12,
+    "dedupNativeScannedRows": 366030,
+    "dedupNativeBulkPendingRows": 362032,
+    "dedupNativeExactCandidates": 3998,
+    "dedupNativeCopiedInputBytes": 16788490,
+    "dedupNativeCopiedOutputBytes": 31984,
+    "dedupNativeSnapshotBytes": 0,
+    "dedupNativeFallbackCount": 0,
+    "dedupNativeFallbackEligibilityCount": 0,
+    "dedupNativeFallbackAssetCount": 0,
+    "dedupNativeFallbackUnsupportedCount": 0,
+    "contentInitialReservationCount": 1,
+    "contentInitialReservationSavingsMissCount": 0,
+    "dedupPendingHitCount": 162269,
+    "dedupPersistedHitCount": 3998,
+    "dedupUniqueCount": 362032,
+    "dedupExactFallbackCount": 3998,
+    "dedupRecentSourceHitCount": 3998,
+    "dedupRecentSourceCacheBytes": 101143281,
+    "dedupRecentSourceAdoptedBytes": 101143281
+  },
+  "parserProfile": {
+    "experiments": {
+      "experimentalGenericSpanCompression": true,
+      "experimentalParserWorkers3": true,
+      "experimentalSkipFusedParse": false,
+      "experimentalLookupScratchReuse": true,
+      "experimentalNativeSegmentedLookup": true,
+      "experimentalDirectLookupArena": false,
+      "experimentalSinglePassLookupCompaction": false,
+      "experimentalTermBankSpans": false,
+      "experimentalNativeEscapedKeys": false,
+      "experimentalValidatedGlossaryReuse": true,
+      "experimentalFusedSingleBank": false,
+      "experimentalGlobalExactContentReuse": false,
+      "experimentalFastGlossaryNormalization": false
+    },
+    "fusedParseAttempts": 12,
+    "fusedParseFallbacks": 0,
+    "discardedFusedRows": 0,
+    "bankSpanCount": 53,
+    "escapedKeyDecodeCount": 0,
+    "validatedGlossaryReuseCount": 54641,
+    "globalExactContentReuseCount": 0,
+    "fastGlossaryNormalizationCount": 0,
+    "fastGlossaryNormalizationFallbackCount": 0,
+    "fusedSingleBankGroups": 0,
+    "maxWasmHeapBytes": 43384832,
+    "recentContentDedupHitCount": 154416,
+    "mediaHintRowsSkipped": 0,
+    "nativeStringPlanChunkCount": 12,
+    "nativeStringPlanFallbackChunkCount": 0,
+    "sourceTransferredBytes": 15632849,
+    "sourceCrcScannedBytes": 0,
+    "sourceCrcReusedBytes": 0,
+    "sourceCrcReusedGlossaryCount": 0,
+    "sourceCompressedBytes": 15632849,
+    "sourceUncompressedBytes": 171617523,
+    "borrowedContentResultCount": 0,
+    "nativeLookupScratchReusedBytes": 29954640,
+    "compactContentMetadataGroups": 0,
+    "compactContentMetadataBytesAvoided": 0,
+    "nativeLookupScratchReuseGroups": 12,
+    "nativeLookupScratchReuseMisses": 0,
+    "nativeSegmentedLookupSegments": 0,
+    "nativeSegmentedLookupFallbacks": 0,
+    "directLookupArenaSegments": 0,
+    "directLookupArenaCopiedBytesAvoided": 0,
+    "lookupCompactionSourceValidationPasses": 0,
+    "rowCount": 528299,
+    "metaCapacity": 530000,
+    "metaAllocatedBytes": 36040000,
+    "encodedContentBytes": 101143985,
+    "contentCapacity": 125760000,
+    "initialContentBytesPerRow": 48,
+    "chunkCount": 12,
+    "chunkSize": 0,
+    "maxPendingChunks": 1,
+    "minimalDecode": true,
+    "includeContentMetadata": true,
+    "copyContentBytes": false,
+    "reuseExpressionForReadingDecode": true,
+    "skipTagRuleDecode": true,
+    "lazyGlossaryDecode": true,
+    "mediaHintFastScan": false,
+    "parallelWorkerCount": 3,
+    "parallelPipelineGroupsPerWorker": 4,
+    "parallelGroupCount": 12,
+    "parallelOwnedContentBytes": 101143985,
+    "parallelPeakQueuedOwnedContentBytes": 83229109
+  },
+  "compressionCensus": {
+    "measurement": "Untimed correctness census; callback hashing perturbs import latency",
+    "groups": [
+      {
+        "index": 0,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8486982,
+        "originalDescriptorCount": 34951,
+        "originalColumnBytes": 279608,
+        "originalOffsetsSha256": "ef07ff5194e4a8db1613c16d4d2ff1e2c38324adc563083ec3d891734151841d",
+        "originalLengthsSha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 34951,
+          "columnBytes": 279608,
+          "offsetsSha256": "ef07ff5194e4a8db1613c16d4d2ff1e2c38324adc563083ec3d891734151841d",
+          "lengthsSha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            3430,
+            7825,
+            12615,
+            17294,
+            22083,
+            26803,
+            30834,
+            34594,
+            34951
+          ],
+          "blockLengths": [
+            1048470,
+            1048562,
+            1048567,
+            1048508,
+            1048558,
+            1048458,
+            1048352,
+            1048351,
+            99156
+          ],
+          "metadataSnapshotBytes": 279608
+        },
+        "references": {
+          "count": 34951,
+          "offsetsSha256": "78ccd2bd3bd99601fc5f4948ad3f81d4dfe4da3402ba44ac7b470128aa1c1441",
+          "lengthsSha256": "10defa50f2d8824390dd61f26d2b51f2e85e670dfe44060c7f7240360597e455",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 110332,
+            "sha256": "eba2f093843f477a9b45a143ba6af8fcf778866d46cc203adecbae2a7ac6db43"
+          },
+          {
+            "byteLength": 109825,
+            "sha256": "bda1dab5fbdee066dc2d2074198b1fb760ed1af57f69653736c78dcf1435947f"
+          },
+          {
+            "byteLength": 110091,
+            "sha256": "9b5a0f769ee99f1bd8774bbc83347c0113a1756c1aa929c5299a4b44d7cecd31"
+          },
+          {
+            "byteLength": 106987,
+            "sha256": "81c4a54df1aafc9e5ffd7bcdfd1e9be1f1ae6e66381726be3dc85a12abff3d6c"
+          },
+          {
+            "byteLength": 109735,
+            "sha256": "af2cf4a52101fd56d444f94d9f1ebe5e80bb4c811084b79387c0c3e451509c8a"
+          },
+          {
+            "byteLength": 109212,
+            "sha256": "19d9614fb8291d1c9507ad8abfb0c40c7c1e0b2897f0034e0dde2290d2d3aeef"
+          },
+          {
+            "byteLength": 111306,
+            "sha256": "226e1da66fe33b6f811cd0d1cf243eb6b89a5d2adb1718681ee6c5e2c55f74f6"
+          },
+          {
+            "byteLength": 113685,
+            "sha256": "e04caf4d7524257ea34d5c5887b8d06e0f6741cea823df1b2be2ce70fb632a76"
+          },
+          {
+            "byteLength": 12293,
+            "sha256": "77532b1d9fd99395a8f75c547594c04e839abdd2fbec1bb41a0a8c99602c2631"
+          }
+        ],
+        "compressedFramesSha256": "aa62cad9769eafbc7f01412cfb0500b2471a465d6619ab475da069a2ba74d9d6",
+        "compressedFrameBytes": 893466,
+        "wrapped": true,
+        "finalCompressedBytes": 893466,
+        "finalUncompressedBytes": 8486982
+      },
+      {
+        "index": 1,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9427894,
+        "originalDescriptorCount": 32739,
+        "originalColumnBytes": 261912,
+        "originalOffsetsSha256": "71f117e7ca2628c2814f9a3cf7810b0130f6278a1d13df4834e5ff23a235715a",
+        "originalLengthsSha256": "3419759a9f67135c0334ea0e7d4a135e465260bc12c6d7021327355090600ac5",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 32739,
+          "columnBytes": 261912,
+          "offsetsSha256": "71f117e7ca2628c2814f9a3cf7810b0130f6278a1d13df4834e5ff23a235715a",
+          "lengthsSha256": "3419759a9f67135c0334ea0e7d4a135e465260bc12c6d7021327355090600ac5",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            3646,
+            7211,
+            10855,
+            14536,
+            18199,
+            21947,
+            25592,
+            29345,
+            32739
+          ],
+          "blockLengths": [
+            1048340,
+            1048391,
+            1048467,
+            1048535,
+            1048527,
+            1048555,
+            1048530,
+            1048536,
+            1016594
+          ],
+          "metadataSnapshotBytes": 261912
+        },
+        "references": {
+          "count": 32739,
+          "offsetsSha256": "cf63619232463db1b731a26e0ea4abf83654c5e9f57e73c994486c88e47854aa",
+          "lengthsSha256": "3419759a9f67135c0334ea0e7d4a135e465260bc12c6d7021327355090600ac5",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 114372,
+            "sha256": "5627cf90c1125de785a6eaa41f018635611cbf61da77c7dc665c0d10b4e8733b"
+          },
+          {
+            "byteLength": 110222,
+            "sha256": "ac845f5965303bd388f2d48a940f7abebe833d4fce15ce9a661d3e43409f905e"
+          },
+          {
+            "byteLength": 115814,
+            "sha256": "ac7ec3b2c902c998abc83eb82cc047d710311af76a20098e6f10b30c43d17735"
+          },
+          {
+            "byteLength": 115543,
+            "sha256": "a7fdd09986ded09ce79830dcd5c95f5cda5744409960e7c3a187bd444e3d074b"
+          },
+          {
+            "byteLength": 115897,
+            "sha256": "a8dd6bf1e68e23fb45710d32299d96289ba4cf5aa0b794e8f35fe57093691884"
+          },
+          {
+            "byteLength": 115738,
+            "sha256": "4b16415fbda95909bee0c2d428c996587e748f36fff95f1ddd29c86d4c15adfb"
+          },
+          {
+            "byteLength": 113850,
+            "sha256": "23eb8f3e42118f7b9c4a6ed18dd9d1cb021e802416db9e5ec71dea0a1adea683"
+          },
+          {
+            "byteLength": 115626,
+            "sha256": "2fe156f5a6ccf192e7a8a2a808fa5da7d7294fcbb8cb568ab284abcf7bc1993e"
+          },
+          {
+            "byteLength": 109783,
+            "sha256": "c6b5cd8a8da152a200da72eef8a531987dd2200723192a21bb14c1ca6cb99854"
+          }
+        ],
+        "compressedFramesSha256": "448f6c05cb8c455d5bf7d45c0d82ec5c2f2363c7966060c84ca670eac9c783f0",
+        "compressedFrameBytes": 1026845,
+        "wrapped": true,
+        "finalCompressedBytes": 1026845,
+        "finalUncompressedBytes": 9404475
+      },
+      {
+        "index": 2,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9272798,
+        "originalDescriptorCount": 32256,
+        "originalColumnBytes": 258048,
+        "originalOffsetsSha256": "dc075ea3f0bd7fe5a8ec802793f2a5febbd50aed75538cfa88783af62581c6fe",
+        "originalLengthsSha256": "b1e67c18e5ddf82d66e5c13956c2ed1524571d3448f7594e95070d63a6fa781b",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 32256,
+          "columnBytes": 258048,
+          "offsetsSha256": "dc075ea3f0bd7fe5a8ec802793f2a5febbd50aed75538cfa88783af62581c6fe",
+          "lengthsSha256": "b1e67c18e5ddf82d66e5c13956c2ed1524571d3448f7594e95070d63a6fa781b",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            3671,
+            7357,
+            11000,
+            14592,
+            18190,
+            21886,
+            25540,
+            29208,
+            32256
+          ],
+          "blockLengths": [
+            1048412,
+            1048443,
+            1048564,
+            1048405,
+            1048428,
+            1048008,
+            1048334,
+            1048469,
+            853386
+          ],
+          "metadataSnapshotBytes": 258048
+        },
+        "references": {
+          "count": 32256,
+          "offsetsSha256": "ceca00c7a2ff811bf104c40458cd4ef9e55ef8ea06c464ae87ec518b2044e324",
+          "lengthsSha256": "b1e67c18e5ddf82d66e5c13956c2ed1524571d3448f7594e95070d63a6fa781b",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 115586,
+            "sha256": "d1b7c11cc1e9d945bcdda90b7a753eccd85d7044ddefaef098d2ad5a8583fea7"
+          },
+          {
+            "byteLength": 116843,
+            "sha256": "750da548d77c52166268e045c4dc26e151652420e33a1cbc9918d2b9b379086a"
+          },
+          {
+            "byteLength": 114990,
+            "sha256": "1d834ec320733ce07cca607f985af8cbbc8e1c44d79a5e7cc56af39d887596ec"
+          },
+          {
+            "byteLength": 116882,
+            "sha256": "ba54c95a90bec39a80dbe129ed32c38def544722ee889ea6f3fdd520dbcf473f"
+          },
+          {
+            "byteLength": 116084,
+            "sha256": "dfd57cf858ae8de4625c884487f490aa30c22b52a20f9c44084df29dcd8ff7ca"
+          },
+          {
+            "byteLength": 116163,
+            "sha256": "fc290970a5585d97b9a18ab2d6b5cefaf84701e2b754cc4624f435e35481cc02"
+          },
+          {
+            "byteLength": 119714,
+            "sha256": "2bf1c557c129fbbb68d2b1a05ddac1c8330c208f00338be5a139811625dba7b4"
+          },
+          {
+            "byteLength": 118631,
+            "sha256": "9f078271fc4322b57bd0a605fd82b614e8021c9ca5aa6856524548c465e15de6"
+          },
+          {
+            "byteLength": 94618,
+            "sha256": "3389650b2e5d4d6cb8b228a7b32560794f3ec951e72ce146ead75e607a9b6e4d"
+          }
+        ],
+        "compressedFramesSha256": "75415546f8e82caacb9db49d18757a52abd987ffe1b3c18e53ba92183e32be26",
+        "compressedFrameBytes": 1029511,
+        "wrapped": true,
+        "finalCompressedBytes": 1029511,
+        "finalUncompressedBytes": 9240449
+      },
+      {
+        "index": 3,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8619220,
+        "originalDescriptorCount": 28758,
+        "originalColumnBytes": 230064,
+        "originalOffsetsSha256": "68c8f50de20e6c70f7735e90477ec7ef1720d975160a34fb5271c3a176898e2c",
+        "originalLengthsSha256": "2aa05498a74298f3725f38d4e06bd9615da3f6ace7af0d6cd4e31e021834b794",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 28758,
+          "columnBytes": 230064,
+          "offsetsSha256": "68c8f50de20e6c70f7735e90477ec7ef1720d975160a34fb5271c3a176898e2c",
+          "lengthsSha256": "2aa05498a74298f3725f38d4e06bd9615da3f6ace7af0d6cd4e31e021834b794",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            3616,
+            7240,
+            10891,
+            13326,
+            16336,
+            20321,
+            24327,
+            28000,
+            28758
+          ],
+          "blockLengths": [
+            1048364,
+            1048375,
+            1048431,
+            1047797,
+            1048454,
+            1048308,
+            1048394,
+            1048232,
+            202873
+          ],
+          "metadataSnapshotBytes": 230064
+        },
+        "references": {
+          "count": 28758,
+          "offsetsSha256": "5a5804d7058edd5a7b6b99e7fcd6b2ad32ff61f0ab38c582b11c65b275a3e7df",
+          "lengthsSha256": "2aa05498a74298f3725f38d4e06bd9615da3f6ace7af0d6cd4e31e021834b794",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 117756,
+            "sha256": "3144e90d3101f3ee3009b9394842e0381e9d3acf70a532ef7312832d57f47f0f"
+          },
+          {
+            "byteLength": 118068,
+            "sha256": "61c036e830c694579df5dadecbbfd9b48bf87f44b6af8ec6e624b86a2300f868"
+          },
+          {
+            "byteLength": 115155,
+            "sha256": "4f2d34884b23286e8aee057639ea156148ed010f9d2d85e0d0b0e592762bc2b1"
+          },
+          {
+            "byteLength": 79070,
+            "sha256": "8f7ab03975d350c583eb60f1cbda74a693531d68e40494d0b2745edb7e33d8db"
+          },
+          {
+            "byteLength": 89298,
+            "sha256": "79b068a6b2032747c8d8c293c9d6293f3d7fed057ea22ea3ca7ee2de7ada407c"
+          },
+          {
+            "byteLength": 104385,
+            "sha256": "8dbab5730d23db370045faee9a0ffa032976102246f1648481883b51d4969202"
+          },
+          {
+            "byteLength": 103916,
+            "sha256": "4bc3152749a724c2c85327895a39f0c13a06cd8924312d143a1fdf777dc03086"
+          },
+          {
+            "byteLength": 117211,
+            "sha256": "0681fe1c49b7f4cacfc501cb6f702fba32a5e014bbc01f004077004b2ef306ae"
+          },
+          {
+            "byteLength": 26331,
+            "sha256": "845535b2aeb11eb213f76042dafe6158a3e081b44843a781d7711b0a36e3d58b"
+          }
+        ],
+        "compressedFramesSha256": "0c4c808d5a917eabaa873c3eff5dad764dc0bd7a555edca87282fc78d8e6606f",
+        "compressedFrameBytes": 871190,
+        "wrapped": true,
+        "finalCompressedBytes": 871190,
+        "finalUncompressedBytes": 8589228
+      },
+      {
+        "index": 4,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 8782091,
+        "originalDescriptorCount": 34159,
+        "originalColumnBytes": 273272,
+        "originalOffsetsSha256": "7e6761123c3811da417fe02408b48e1bc40a5d356ba257fee6771682a6b76ddd",
+        "originalLengthsSha256": "6d2a47865efbd12a679ce73410ae7d4c18115571644a2d6568dde13a92b9d646",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 34159,
+          "columnBytes": 273272,
+          "offsetsSha256": "7e6761123c3811da417fe02408b48e1bc40a5d356ba257fee6771682a6b76ddd",
+          "lengthsSha256": "6d2a47865efbd12a679ce73410ae7d4c18115571644a2d6568dde13a92b9d646",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            3880,
+            7496,
+            11666,
+            15931,
+            20103,
+            24329,
+            28543,
+            33026,
+            34159
+          ],
+          "blockLengths": [
+            1048259,
+            1048452,
+            1048533,
+            1048133,
+            1048489,
+            1048493,
+            1048398,
+            1048434,
+            292257
+          ],
+          "metadataSnapshotBytes": 273272
+        },
+        "references": {
+          "count": 34159,
+          "offsetsSha256": "a76f3923193a1fa6e1643c01ea47b63a3afbb89fe10ef54707a63b96431e28e7",
+          "lengthsSha256": "6d2a47865efbd12a679ce73410ae7d4c18115571644a2d6568dde13a92b9d646",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 134847,
+            "sha256": "b243ba98c124e995b042371c6a8b08cd509a6bf128be4010f49a41109e0e7fec"
+          },
+          {
+            "byteLength": 117063,
+            "sha256": "489fb26b999660228167cbe22371ba655e16d2f1953da6cb2554b2cb047b2211"
+          },
+          {
+            "byteLength": 128068,
+            "sha256": "8fedbee4cd051597491f9ff8ee71be80b9bcf752340fa9e1ac31c8f5eb6f1a91"
+          },
+          {
+            "byteLength": 132124,
+            "sha256": "e57ca48195d9bbf9f10e369a26f29ca0667ef3be0e9ba439f200fe9f06aa5a6e"
+          },
+          {
+            "byteLength": 128694,
+            "sha256": "e7f546e29ce4859adffa0ec95affcde76fd1a9a314365084576bb8bfdb6cae2a"
+          },
+          {
+            "byteLength": 132583,
+            "sha256": "0e1c85e66a2d1eb32deb6e028d6bab4ee88d15fab66c5873bfccc52dbb774a2c"
+          },
+          {
+            "byteLength": 127866,
+            "sha256": "54e3d8e8a8bbb0d05c23da482747e9e5e0f19fdb398f0d244c71a0a96c0b5ddf"
+          },
+          {
+            "byteLength": 130798,
+            "sha256": "bf461ed3d3253bbfc5786909231418d9d10e663ec16114ee78e40d36f3563666"
+          },
+          {
+            "byteLength": 39793,
+            "sha256": "57b891941b456bc63811d31aee1a57352ff6f1bf72881ca5220f6b42c0da7cd3"
+          }
+        ],
+        "compressedFramesSha256": "08ac4b48aef9c8d8e1a7a02602cddf4c374a7b90372ddf4449d52ce47d263bf4",
+        "compressedFrameBytes": 1071836,
+        "wrapped": true,
+        "finalCompressedBytes": 1071836,
+        "finalUncompressedBytes": 8679448
+      },
+      {
+        "index": 5,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9009676,
+        "originalDescriptorCount": 33543,
+        "originalColumnBytes": 268344,
+        "originalOffsetsSha256": "d105d2e7d336b5066b9dbb81fe55c666dd571e632fc4a4616b5b53a21e8122d0",
+        "originalLengthsSha256": "6c580ef73f78c3261f3458d4551396598001fed63802014152af1edc3ffcf3f5",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 33543,
+          "columnBytes": 268344,
+          "offsetsSha256": "d105d2e7d336b5066b9dbb81fe55c666dd571e632fc4a4616b5b53a21e8122d0",
+          "lengthsSha256": "6c580ef73f78c3261f3458d4551396598001fed63802014152af1edc3ffcf3f5",
+          "blockCount": 9,
+          "blockStartIndexes": [
+            0,
+            4177,
+            8338,
+            12600,
+            16887,
+            20653,
+            24416,
+            28077,
+            31693,
+            33543
+          ],
+          "blockLengths": [
+            1048248,
+            1048323,
+            1047969,
+            1048398,
+            1048350,
+            1048097,
+            1048474,
+            1048118,
+            529209
+          ],
+          "metadataSnapshotBytes": 268344
+        },
+        "references": {
+          "count": 33543,
+          "offsetsSha256": "a8dc86b6020fc2c5d2b6b5f969a211c1462024fc1554a02f32a3c52a5db69ad3",
+          "lengthsSha256": "6c580ef73f78c3261f3458d4551396598001fed63802014152af1edc3ffcf3f5",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 134893,
+            "sha256": "4cdacdd2b8ca4d8c5b4c791131af38d9414aad6f895cb1e0c00452d4f3e720d1"
+          },
+          {
+            "byteLength": 131627,
+            "sha256": "3d35a3949dfccda1370bfd28086df28c635af3c7550581dc7eddcbcea6285f25"
+          },
+          {
+            "byteLength": 123783,
+            "sha256": "5a730b15753f900217fb6187ff53fc183088eec0fb2c6b1aa8d94cc86c94682e"
+          },
+          {
+            "byteLength": 126986,
+            "sha256": "68977bcbf8e6cac820042a04cea05f0d6eba41991027648d5b1a62bc6197f5fd"
+          },
+          {
+            "byteLength": 151615,
+            "sha256": "b5ce5e59d445b46e7e59d73bb62aef263a96073a0f04367b1f54c1a6975a8cf9"
+          },
+          {
+            "byteLength": 158469,
+            "sha256": "b4384c8af458cead9fd3e5fb33ec359c24183bf7d42fb1f23355306f67fcb6d9"
+          },
+          {
+            "byteLength": 145604,
+            "sha256": "3c2cedd656d2625abaac2523e293c01fdee29c0bbab2d47132ffb9551f7d717f"
+          },
+          {
+            "byteLength": 147816,
+            "sha256": "94d681a2ebca00f37f905aecf263eeb14daf52080bf8fadb45010cb93e723f60"
+          },
+          {
+            "byteLength": 76782,
+            "sha256": "780839b4bc44c807c67b87c2e0aa0a0ce812c0278ca0f224cd2bc5de13d2946c"
+          }
+        ],
+        "compressedFramesSha256": "55cd775676a4f31e3c4b08910c951411ab321e5fb79ba79b0ee91d22e94292cb",
+        "compressedFrameBytes": 1197575,
+        "wrapped": true,
+        "finalCompressedBytes": 1197575,
+        "finalUncompressedBytes": 8915186
+      },
+      {
+        "index": 6,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7077918,
+        "originalDescriptorCount": 24030,
+        "originalColumnBytes": 192240,
+        "originalOffsetsSha256": "374de31efcc48f49f0fb464a7df1a88c5b74cb0ec92be68213a9abdf80aa8859",
+        "originalLengthsSha256": "2d67a6c660548abb4d2d64bcd0347c95f1d66b531b1ff4014b080af898b139e4",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 24030,
+          "columnBytes": 192240,
+          "offsetsSha256": "374de31efcc48f49f0fb464a7df1a88c5b74cb0ec92be68213a9abdf80aa8859",
+          "lengthsSha256": "2d67a6c660548abb4d2d64bcd0347c95f1d66b531b1ff4014b080af898b139e4",
+          "blockCount": 7,
+          "blockStartIndexes": [
+            0,
+            3684,
+            7284,
+            10946,
+            14423,
+            17556,
+            20818,
+            24030
+          ],
+          "blockLengths": [
+            1048478,
+            1048569,
+            1048568,
+            1048341,
+            1048154,
+            1048519,
+            734395
+          ],
+          "metadataSnapshotBytes": 192240
+        },
+        "references": {
+          "count": 24030,
+          "offsetsSha256": "96847d02f61732d4b38c1f4650bcdb42943872810bc4785fe3c8c32983f35ac3",
+          "lengthsSha256": "2d67a6c660548abb4d2d64bcd0347c95f1d66b531b1ff4014b080af898b139e4",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 147089,
+            "sha256": "6db7b889d8bc7ac4b9da80021f1d48173f578ef321e2e319de41ff737701804e"
+          },
+          {
+            "byteLength": 135985,
+            "sha256": "3b5683ee87f58923f4456f9f79e4824e6b6cda74d4766885535adf808c2a639e"
+          },
+          {
+            "byteLength": 135956,
+            "sha256": "8a34fe779ed597b29cb99323bdcbcd1c2ce7417bbd49c7b2ffe4dbf4e9bdf25b"
+          },
+          {
+            "byteLength": 134204,
+            "sha256": "054e4490f23320361ea27dc951b6abb79ea2b329b0b1ed59fe46812976d664a7"
+          },
+          {
+            "byteLength": 127342,
+            "sha256": "2d3c1c4202d365ab1be26bb3c0d67f80e7d11ccbfe6b18b623a3ca137a6e39ad"
+          },
+          {
+            "byteLength": 135723,
+            "sha256": "d4e9c9b37cfa712acacdfcc26a5aeafbdeb22c7b4ea567b28bfcbcdfb2236af8"
+          },
+          {
+            "byteLength": 83647,
+            "sha256": "15308845234584d61c40cbad52bb89711805148f9e4c1cf63089390ed97c514b"
+          }
+        ],
+        "compressedFramesSha256": "9514a8f9a759d06d463c07f1b632a1832bf97c16e3b15ff71c86bec5426f53bf",
+        "compressedFrameBytes": 899946,
+        "wrapped": true,
+        "finalCompressedBytes": 899946,
+        "finalUncompressedBytes": 7025024
+      },
+      {
+        "index": 7,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7502995,
+        "originalDescriptorCount": 31330,
+        "originalColumnBytes": 250640,
+        "originalOffsetsSha256": "8323b875abc349c547e993d9e5b96b2f4d34cc2ea3899c3bca584b60e3875940",
+        "originalLengthsSha256": "b9e2b6e494d49d8f64f8648fb52c7ad6464b37e710c8f122776b1b984d1cd82d",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 31330,
+          "columnBytes": 250640,
+          "offsetsSha256": "8323b875abc349c547e993d9e5b96b2f4d34cc2ea3899c3bca584b60e3875940",
+          "lengthsSha256": "b9e2b6e494d49d8f64f8648fb52c7ad6464b37e710c8f122776b1b984d1cd82d",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            5572,
+            10099,
+            13682,
+            17654,
+            22606,
+            27321,
+            31141,
+            31330
+          ],
+          "blockLengths": [
+            1048464,
+            1048430,
+            1048216,
+            1048545,
+            1048491,
+            1048022,
+            1048490,
+            46105
+          ],
+          "metadataSnapshotBytes": 250640
+        },
+        "references": {
+          "count": 31330,
+          "offsetsSha256": "25a96c2c499838b722f1acd894e279185ec8b35e8a43b5acf5adf19d593db27a",
+          "lengthsSha256": "b9e2b6e494d49d8f64f8648fb52c7ad6464b37e710c8f122776b1b984d1cd82d",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 96221,
+            "sha256": "43da94a5669618501be31006cf338d25e81032583fe03d5979e2268ef3481b6a"
+          },
+          {
+            "byteLength": 85817,
+            "sha256": "6f38db9b488ad33b9f0bd7eb1f175e32ee3e7b3a985118aa5d2cea3391b62408"
+          },
+          {
+            "byteLength": 149943,
+            "sha256": "66737719b5b2371371c8b6bf016677bee77fe25899711fe87df4bdeeab60b5a4"
+          },
+          {
+            "byteLength": 136711,
+            "sha256": "3706d0905ae087eeb59585732b7124da159f290a55339672c13479e9e13fc56f"
+          },
+          {
+            "byteLength": 129438,
+            "sha256": "210a7eb0961edfeec8351dd9ce19554fa4dde5bbe5537647f3a0fa0d6f8effb7"
+          },
+          {
+            "byteLength": 125537,
+            "sha256": "8bd652802e48f9f116f1dc1fd0e0852610812ab0f0e8e2988ef71c10067d12a4"
+          },
+          {
+            "byteLength": 146460,
+            "sha256": "d1502f3986b31433ce68d575eba2d25f1ebe76bcb22900fe87c4f754c3fe3b94"
+          },
+          {
+            "byteLength": 6505,
+            "sha256": "6756c4d25c6cc5fc410d5f9fcff6e23d2718133f30ebc400ad0c574b8e2666c1"
+          }
+        ],
+        "compressedFramesSha256": "252425d7a1451498ba625acd692f4f9d2cef36e1e942301ee77cde743fc8be9b",
+        "compressedFrameBytes": 876632,
+        "wrapped": true,
+        "finalCompressedBytes": 876632,
+        "finalUncompressedBytes": 7384763
+      },
+      {
+        "index": 8,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7850259,
+        "originalDescriptorCount": 25442,
+        "originalColumnBytes": 203536,
+        "originalOffsetsSha256": "85c41a810754a7f2513a5f419800d3f31d5bafa40bcb3493bce08b70e211ab9f",
+        "originalLengthsSha256": "67c4f2907f17922d3cd8bdf7e72d0f07d408bf89a943097860a3af9991d3f7ee",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 25442,
+          "columnBytes": 203536,
+          "offsetsSha256": "85c41a810754a7f2513a5f419800d3f31d5bafa40bcb3493bce08b70e211ab9f",
+          "lengthsSha256": "67c4f2907f17922d3cd8bdf7e72d0f07d408bf89a943097860a3af9991d3f7ee",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            3085,
+            6086,
+            9563,
+            13364,
+            17096,
+            20633,
+            24003,
+            25442
+          ],
+          "blockLengths": [
+            1048508,
+            1048156,
+            1048074,
+            1048427,
+            1047997,
+            1048518,
+            1048038,
+            435095
+          ],
+          "metadataSnapshotBytes": 203536
+        },
+        "references": {
+          "count": 25442,
+          "offsetsSha256": "d9a0941fea76b51f0e5e3bed934b1a645fd087d54e276b4fbce9c0716673a256",
+          "lengthsSha256": "67c4f2907f17922d3cd8bdf7e72d0f07d408bf89a943097860a3af9991d3f7ee",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 137155,
+            "sha256": "7b537cda2f88533e884802bb52d9b011c9bbbcf09ffdd96df093ae89927203a5"
+          },
+          {
+            "byteLength": 135121,
+            "sha256": "9845f62f58c30c9cabe4de5d7608eeaa14fb50c78c72ec8ad9722b8eda6271d1"
+          },
+          {
+            "byteLength": 136329,
+            "sha256": "ccf6374bf44e47951f8832bf1bad7854050b89bbe8d6df8f22bfc342395c6b42"
+          },
+          {
+            "byteLength": 145156,
+            "sha256": "cd76bb36d2003a8e22915a55a6dc57d29d3521850ab49fa14e39687c61784e51"
+          },
+          {
+            "byteLength": 144764,
+            "sha256": "280d481a0d13beeb2fc4b91f8a1dd2910a2212b09406f07802911296c474c272"
+          },
+          {
+            "byteLength": 144859,
+            "sha256": "e9da02af71f7b00f6912383194ad7b99f679d39c7d3e35e4c9db7d6d457b1b29"
+          },
+          {
+            "byteLength": 142497,
+            "sha256": "631759bf9dadd4c1550fcb23b44dda1deb6aebbed6544a1d090e6dcae6f9f0ee"
+          },
+          {
+            "byteLength": 59264,
+            "sha256": "c710ead984834255098cd1c636f5624227785bca664b6e19cd9c4784e4989c56"
+          }
+        ],
+        "compressedFramesSha256": "15c36e4f606b2a0b84b4c4d05dee845a05f34919b46c9800a0e897638f8e8aad",
+        "compressedFrameBytes": 1045145,
+        "wrapped": true,
+        "finalCompressedBytes": 1045145,
+        "finalUncompressedBytes": 7772813
+      },
+      {
+        "index": 9,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7597844,
+        "originalDescriptorCount": 24806,
+        "originalColumnBytes": 198448,
+        "originalOffsetsSha256": "116c37901c98f657e1f0bb1e48a748b8fac853ca05fec968b0d1abf47b1617a7",
+        "originalLengthsSha256": "c47d28b8bad4fd43450fa3b01b7e1c40ca3ef0b9673efb6cb7ec284e04799ef4",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 24806,
+          "columnBytes": 198448,
+          "offsetsSha256": "116c37901c98f657e1f0bb1e48a748b8fac853ca05fec968b0d1abf47b1617a7",
+          "lengthsSha256": "c47d28b8bad4fd43450fa3b01b7e1c40ca3ef0b9673efb6cb7ec284e04799ef4",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            3426,
+            6862,
+            10399,
+            13719,
+            17278,
+            20767,
+            24226,
+            24806
+          ],
+          "blockLengths": [
+            1048537,
+            1048509,
+            1048456,
+            1048526,
+            1048429,
+            1048474,
+            1048253,
+            181707
+          ],
+          "metadataSnapshotBytes": 198448
+        },
+        "references": {
+          "count": 24806,
+          "offsetsSha256": "a4bc244e9454480dd335095d151ca04d003b09995762aef3acb021abc9548f3f",
+          "lengthsSha256": "c47d28b8bad4fd43450fa3b01b7e1c40ca3ef0b9673efb6cb7ec284e04799ef4",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 144147,
+            "sha256": "45af97a04decc4b720e4df79f668bda4f618dff317d5e3349b75a9bce5f59c56"
+          },
+          {
+            "byteLength": 147211,
+            "sha256": "f48bef032151c5d4054fbfc7746c77e98cd5b54b485b5115f689cd712bc2641e"
+          },
+          {
+            "byteLength": 153706,
+            "sha256": "dd59ece05a3906a8c0eb8c9b57fae063a05dce62a3486e622be48b9c3797a58d"
+          },
+          {
+            "byteLength": 144353,
+            "sha256": "55461149eb23b6dedc91d1bd34ae19f91a496333c067f0a16d9041c4f8a028d3"
+          },
+          {
+            "byteLength": 152008,
+            "sha256": "9ccb0815a7c50e299f063ab5acfdc69f43abc12764b72b53c7f5d9cdf60d298f"
+          },
+          {
+            "byteLength": 145072,
+            "sha256": "21050f2dc05952f3d9728869b580ddf8c5021fddc4ab19e15bb43384fa4414d5"
+          },
+          {
+            "byteLength": 149282,
+            "sha256": "5f995a77e042ea527c07f8f4dcf2699e2a5906e56fceb57c48b029c14bfbdd68"
+          },
+          {
+            "byteLength": 25458,
+            "sha256": "543de5218e87d40903800be433f92005b8697631e6b90326d6b7890d66003c5d"
+          }
+        ],
+        "compressedFramesSha256": "bca5a6164ab4fd87a428338aeb238b5f35de664f0e2ae7e2cb6bed78fa18be28",
+        "compressedFrameBytes": 1061237,
+        "wrapped": true,
+        "finalCompressedBytes": 1061237,
+        "finalUncompressedBytes": 7520891
+      },
+      {
+        "index": 10,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 7885247,
+        "originalDescriptorCount": 25651,
+        "originalColumnBytes": 205208,
+        "originalOffsetsSha256": "60e77f3bf9663aaa18289c53dc2a36594d363d70ca76a38f16af88e178ceff96",
+        "originalLengthsSha256": "214e2833bed85a785a9af2ccc400067ac387784005677f007195603b22f5b600",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 25651,
+          "columnBytes": 205208,
+          "offsetsSha256": "60e77f3bf9663aaa18289c53dc2a36594d363d70ca76a38f16af88e178ceff96",
+          "lengthsSha256": "214e2833bed85a785a9af2ccc400067ac387784005677f007195603b22f5b600",
+          "blockCount": 8,
+          "blockStartIndexes": [
+            0,
+            3438,
+            6981,
+            10328,
+            13497,
+            16876,
+            20333,
+            24073,
+            25651
+          ],
+          "blockLengths": [
+            1048210,
+            1048311,
+            1047729,
+            1048393,
+            1048105,
+            1048035,
+            1048548,
+            437564
+          ],
+          "metadataSnapshotBytes": 205208
+        },
+        "references": {
+          "count": 25651,
+          "offsetsSha256": "15260572773b548900858c3c5fae2cd8c79cb8febce58f15d75f3b379892fb1b",
+          "lengthsSha256": "214e2833bed85a785a9af2ccc400067ac387784005677f007195603b22f5b600",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 151287,
+            "sha256": "7379b6c1496e1238872e29ab5da1e7f33c3ab9e04c7b5b1bf59ed16cafc67e7b"
+          },
+          {
+            "byteLength": 144368,
+            "sha256": "19b4af40f265ca76dd5b4d10bcca7d58f3cefb2422824a858f4651b3cc4b6720"
+          },
+          {
+            "byteLength": 151756,
+            "sha256": "61024edba24f8d3b45efe8bc4b0c76d6669de853cf810ba00c4f000136beff9c"
+          },
+          {
+            "byteLength": 142844,
+            "sha256": "6a09b78a0902f2683c31a2d8eae8ad65e61cb2dc6748028a47615614a2264f49"
+          },
+          {
+            "byteLength": 145470,
+            "sha256": "72637ca882c227f88511fdbe7dcbf0e25e2482b3f9a266ca358ee9fc66e526b1"
+          },
+          {
+            "byteLength": 148920,
+            "sha256": "6fb2343c25046749f718a7417c0002be09790f49ff61ae31061dc2ce31f359cd"
+          },
+          {
+            "byteLength": 143493,
+            "sha256": "366b00714d0b0cfe0aea961deb801ec4d20a2a71a3764f96b4433a50f5038102"
+          },
+          {
+            "byteLength": 63752,
+            "sha256": "589852fb63c89bc65724003375c4a1620d8252d4c3423b5b53d4fe25d2cae137"
+          }
+        ],
+        "compressedFramesSha256": "6b2a743ab4824d90f1653683b7f192487c1a04452768b1346b5bb63922a7941a",
+        "compressedFrameBytes": 1091890,
+        "wrapped": true,
+        "finalCompressedBytes": 1091890,
+        "finalUncompressedBytes": 7774895
+      },
+      {
+        "index": 11,
+        "method": "_beginAppendSharedSpans",
+        "sourceBytes": 9631061,
+        "originalDescriptorCount": 34367,
+        "originalColumnBytes": 274936,
+        "originalOffsetsSha256": "42f13f00c56383299289e57a44e11d6dd77f39736af19d34f315601c5758f6c7",
+        "originalLengthsSha256": "1171525348a6a2d5e40d6a8d284ce63faf174a040c26eb5f9c8e3729e76f2d10",
+        "originalOffsetsPrivate": true,
+        "originalLengthsPrivate": true,
+        "transport": {
+          "descriptorCount": 34367,
+          "columnBytes": 274936,
+          "offsetsSha256": "42f13f00c56383299289e57a44e11d6dd77f39736af19d34f315601c5758f6c7",
+          "lengthsSha256": "1171525348a6a2d5e40d6a8d284ce63faf174a040c26eb5f9c8e3729e76f2d10",
+          "blockCount": 10,
+          "blockStartIndexes": [
+            0,
+            3741,
+            7343,
+            10967,
+            14676,
+            18536,
+            21900,
+            25162,
+            29355,
+            34041,
+            34367
+          ],
+          "blockLengths": [
+            1048374,
+            1048554,
+            1048415,
+            1048365,
+            1048385,
+            1048426,
+            1048516,
+            1048355,
+            1048571,
+            70511
+          ],
+          "metadataSnapshotBytes": 274936
+        },
+        "references": {
+          "count": 34367,
+          "offsetsSha256": "8c0a510cd940c379fc56919a8add9b9c2b40a60c9c331cba977c84a7dd8f7676",
+          "lengthsSha256": "1171525348a6a2d5e40d6a8d284ce63faf174a040c26eb5f9c8e3729e76f2d10",
+          "contentDictName": "raw-block-v2:jmdict"
+        },
+        "compressedFrames": [
+          {
+            "byteLength": 153097,
+            "sha256": "48b5bcf7b695a1f206845c2f0e9803f9d38de75f512ba2788806c2cec28c6f92"
+          },
+          {
+            "byteLength": 146653,
+            "sha256": "c528b9ad7713d6b247e78cf548ba495c07e0660475675b7be08ef97d6c983949"
+          },
+          {
+            "byteLength": 142638,
+            "sha256": "aedcb2fad311d152aca8299c184e494ff39b875034acea1b81fd2dca6714010c"
+          },
+          {
+            "byteLength": 142401,
+            "sha256": "dc81305daa226b1d07f9c49d050c7dd40f3a8338ff969194676b671feec086a4"
+          },
+          {
+            "byteLength": 144727,
+            "sha256": "b5203edf4856a0ad098eaade732c57d85b92fee535acacca1c105392e7635890"
+          },
+          {
+            "byteLength": 136981,
+            "sha256": "569ce451d0f8338e60a51ae2534f0e8d51c495267cf8c6d9c8291f384632cf8b"
+          },
+          {
+            "byteLength": 154659,
+            "sha256": "277e7445f101db9f749e3f56c8a2cb6cc0ea88519c1a715b4432ba29f40110f6"
+          },
+          {
+            "byteLength": 121367,
+            "sha256": "f383d397cac01ac4ed06475f23b80e6488c6baff96a9e13ade489c87889ebb8f"
+          },
+          {
+            "byteLength": 107213,
+            "sha256": "bee96f768da0c74bda4454799ffd241d7121984e14945ce154bc6a7966804ba6"
+          },
+          {
+            "byteLength": 11031,
+            "sha256": "665edf1fe39ee3aac3ff3382facde4d75224e0441e26880977906434143c8d34"
+          }
+        ],
+        "compressedFramesSha256": "5cf927d7141df2febe28c9f7c4b42fcb3cc1e3a36166325eb298b2e1938cd810",
+        "compressedFrameBytes": 1260767,
+        "wrapped": true,
+        "finalCompressedBytes": 1260767,
+        "finalUncompressedBytes": 9506472
+      }
+    ],
+    "totals": {
+      "groups": 12,
+      "originalDescriptorCount": 362032,
+      "transportDescriptorCount": 362032,
+      "originalColumnBytes": 2896256,
+      "transportColumnBytes": 2896256,
+      "compressedBlocks": 103,
+      "compressedBytes": 12326040,
+      "uncompressedBytes": 100300626,
+      "references": 362032
+    }
+  },
+  "fileReceipts": [
+    {
+      "path": "manabitan-term-content.bin",
+      "sizeBytes": 19566680,
+      "sha256": "f436eb66405233aa7e6b2f9baaf45b444c4f9e976449fb189e7b7846814d6963"
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr",
+      "sizeBytes": 45,
+      "sha256": "95927d2eefc36517d36bad826429a721be5011a5c38a3c46f8d30c2b19f6aec1",
+      "generationId": "c01f1c676c488cd05dbad03b46539ba2",
+      "generationNormalizedSha256": "3da3e40645ac7525cdc30dbc11ff66e9e9ca4ed169fe9550aaf3336dca2cae26"
+    },
+    {
+      "path": "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+      "sizeBytes": 23748952,
+      "sha256": "b1c968de04488f300217045637516964c53280af83adc774fb4e7fc213ada1ec",
+      "generationId": "c01f1c676c488cd05dbad03b46539ba2",
+      "generationNormalizedSha256": "397dae5e5f86853b47a90384739e42754e7ed84869a2d2142d05220f3600114f"
+    }
+  ],
+  "captureTotals": {
+    "calls": 12,
+    "rows": 528299,
+    "sourceBytes": 12858712,
+    "compressedCaptureBytes": 4111914
+  },
+  "diagnosticExport": {
+    "path": "/workspace/scratch/1c4137568bc6/manabitan/ext/js/dictionary/term-record-opfs-store.js",
+    "originalSha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594",
+    "appendedExport": "\nexport {getSynchronousRecordFieldReferences as diagnosticRecordFieldReferences}\n",
+    "instrumentedSha256": "71da8ae72d85ff7a40db6500e9eff6b270b395f29f9b60aec802b7881f2ce939",
+    "productFunctionBodiesUnchanged": true
+  },
+  "workers": [
+    {
+      "id": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 31,
+        "result": 31
+      },
+      "sent": {
+        "job": 31
+      }
+    },
+    {
+      "id": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 25,
+        "result": 25
+      },
+      "sent": {
+        "job": 25
+      }
+    },
+    {
+      "id": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 24,
+        "result": 24
+      },
+      "sent": {
+        "job": 24
+      }
+    },
+    {
+      "id": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "source-consumed": 23,
+        "result": 23
+      },
+      "sent": {
+        "job": 23
+      }
+    },
+    {
+      "id": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    },
+    {
+      "id": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    },
+    {
+      "id": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "ready": true,
+      "received": {
+        "ready": 1,
+        "result": 4
+      },
+      "sent": {
+        "initialize": 1,
+        "parse": 4
+      }
+    }
+  ],
+  "workerEvents": [
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize"
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize"
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "initialize"
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "ready"
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 1
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 2
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 3
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 2
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 4
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 3
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 5
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 1
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 6
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 1
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 2
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 3
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 4
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 5
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 6
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 7
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 8
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 9
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 4
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 7
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 5
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 8
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 1
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 1
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 5
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 5
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 9
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 9
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 2
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 2
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 6
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 6
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 3
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 3
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 7
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 7
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 4
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 4
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 8
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 8
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 6
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 9
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 8
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 10
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 10
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 11
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 12
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 13
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 14
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 15
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 16
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 17
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 18
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 10
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 10
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 14
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 14
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 18
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 18
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 11
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 11
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 15
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 15
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 12
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 12
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 16
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 16
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 13
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 13
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 17
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 17
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 9
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 11
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 7
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "sent",
+      "type": "parse",
+      "jobId": 12
+    },
+    {
+      "worker": 6,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 10
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 19
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 20
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 21
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 22
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 23
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 24
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 25
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 26
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 27
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 19
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 19
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 23
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 23
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 27
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 27
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 20
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 20
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 24
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 24
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 21
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 21
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 25
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 25
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 22
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 22
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 26
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 26
+    },
+    {
+      "worker": 4,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 11
+    },
+    {
+      "worker": 5,
+      "role": "term-bank-wasm-parser-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 12
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 28
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 29
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 30
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 31
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 32
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 33
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 34
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 35
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 36
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 28
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 28
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 32
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 32
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 36
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 36
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 29
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 29
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 33
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 33
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 30
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 30
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 34
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 34
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 31
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 31
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 35
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 35
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 37
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 38
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 39
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 40
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 41
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 42
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 43
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 44
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 45
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 37
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 37
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 41
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 41
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 45
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 45
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 38
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 38
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 42
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 42
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 39
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 39
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 43
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 43
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 40
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 40
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 44
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 44
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 46
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 47
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 48
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 49
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 50
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 51
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 52
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 53
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 54
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 46
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 46
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 50
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 50
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 54
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 54
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 47
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 47
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 51
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 51
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 48
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 48
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 52
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 52
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 49
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 49
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 53
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 53
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 55
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 56
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 57
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 58
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 59
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 60
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 61
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 55
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 55
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 59
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 59
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 56
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 56
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 60
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 60
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 57
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 57
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 61
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 61
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 58
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 58
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 62
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 63
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 64
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 65
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 66
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 67
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 68
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 69
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 62
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 62
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 66
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 66
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 63
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 63
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 67
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 67
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 64
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 64
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 68
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 68
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 65
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 65
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 69
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 69
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 70
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 71
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 72
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 73
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 74
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 75
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 76
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 77
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 70
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 70
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 74
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 74
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 71
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 71
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 75
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 75
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 72
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 72
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 76
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 76
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 73
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 73
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 77
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 77
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 78
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 79
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 80
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 81
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 82
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 83
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 84
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 85
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 78
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 78
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 82
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 82
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 79
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 79
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 83
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 83
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 80
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 80
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 84
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 84
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 81
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 81
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 85
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 85
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 86
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 87
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 88
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 89
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 90
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 91
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 92
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 93
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 86
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 86
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 90
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 90
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 87
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 87
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 91
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 91
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 88
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 88
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 92
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 92
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 89
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 89
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 93
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 93
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 94
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 95
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 96
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 97
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 98
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 99
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 100
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 101
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 102
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "sent",
+      "type": "job",
+      "jobId": 103
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 94
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 94
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 98
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 98
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 102
+    },
+    {
+      "worker": 0,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 102
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 95
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 95
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 99
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 99
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 103
+    },
+    {
+      "worker": 1,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 103
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 96
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 96
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 100
+    },
+    {
+      "worker": 2,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 100
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 97
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 97
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "source-consumed",
+      "jobId": 101
+    },
+    {
+      "worker": 3,
+      "role": "zstd-term-content-compression-worker.js",
+      "direction": "received",
+      "type": "result",
+      "jobId": 101
+    }
+  ],
+  "progress": [
+    {
+      "index": 0,
+      "count": 0,
+      "nextStep": true
+    },
+    {
+      "index": 0,
+      "count": 108000,
+      "nextStep": true
+    },
+    {
+      "index": 8982,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 16168,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 23355,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 39524,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 48506,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 64675,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 79048,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 106000,
+      "count": 108000,
+      "nextStep": false
+    },
+    {
+      "index": 0,
+      "count": 0,
+      "nextStep": true
+    }
+  ]
+}
