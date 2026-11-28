@@ -130,4 +130,33 @@ describe('in-flight term source validation', () => {
         )).toThrow('Invalid in-flight term content source at index 2');
         expect(database._findInFlightTermContentSource(100, 2, 'raw')).toBeUndefined();
     });
+
+    test.each(['persisted-offset-buffer', 'persisted-length-buffer', 'source-offset-buffer', 'source-length-buffer', 'source-offset-length', 'source-length-length'])('does not add getter reads for %s', (kind) => {
+        const database = new DictionaryDatabase();
+        const source = sourceSpans();
+        const persistedOffsets = new Float64Array([100, 200, 300]);
+        const persistedLengths = new Uint32Array([2, 2, 2]);
+        const view = kind.startsWith('persisted-offset') ? persistedOffsets :
+            kind.startsWith('persisted-length') ? persistedLengths :
+            kind.startsWith('source-offset') ? source.offsets : source.lengths;
+        const property = kind.endsWith('-buffer') ? 'buffer' : 'length';
+        Object.defineProperty(view, property, {get: () => { throw new Error('Unexpected metadata getter'); }});
+        const release = database._registerInFlightTermContentSources(persistedOffsets, persistedLengths, 'raw', [], source);
+        expect(database._findInFlightTermContentSource(200, 2, 'raw')).toEqual({buffer: source.buffer, offset: 2, length: 2});
+        release();
+    });
+
+    test('does not read a new buffer getter on typed-array subclasses', () => {
+        class Offsets extends Float64Array {
+            /** @returns {ArrayBuffer} */
+            get buffer() { throw new Error('Unexpected inherited metadata getter'); }
+        }
+        const database = new DictionaryDatabase();
+        const source = sourceSpans();
+        const release = database._registerInFlightTermContentSources(
+            new Offsets([100, 200, 300]), source.lengths, 'raw', [], source,
+        );
+        expect(database._findInFlightTermContentSource(200, 2, 'raw')).toEqual({buffer: source.buffer, offset: 2, length: 2});
+        release();
+    });
 });

@@ -531,6 +531,20 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
     return {packedChunks, packedRowStarts, packedRowCounts};
 }
 
+/**
+ * Check before reading properties that the general registration path need not
+ * access. Shadowed or subclass getters stay on that established path.
+ * @template {Uint8Array|Uint32Array|Float64Array} T
+ * @param {unknown} value
+ * @param {T} prototype
+ * @returns {value is T}
+ */
+function hasPlainTypedArrayProperties(value, prototype) {
+    return ArrayBuffer.isView(value) && Object.getPrototypeOf(value) === prototype &&
+        !Object.hasOwn(value, 'buffer') && !Object.hasOwn(value, 'length') &&
+        !Object.hasOwn(value, 'byteLength');
+}
+
 export class DictionaryDatabase {
     constructor() {
         /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static|null} */
@@ -6993,17 +7007,17 @@ void 0 :
         // Unordered or overlapping reservations retain the general path below.
         if (
             count > 0 && pendingContentSpans !== null &&
-            pendingOffsets instanceof Float64Array && pendingOffsets.buffer instanceof ArrayBuffer &&
-            pendingLengths instanceof Uint32Array && pendingLengths.buffer instanceof ArrayBuffer &&
+            hasPlainTypedArrayProperties(pendingOffsets, Float64Array.prototype) && pendingOffsets.buffer instanceof ArrayBuffer &&
+            hasPlainTypedArrayProperties(pendingLengths, Uint32Array.prototype) && pendingLengths.buffer instanceof ArrayBuffer &&
             typeof pendingResolvedDictNames === 'string'
         ) {
             const buffer = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'buffer')?.value);
             const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'offsets')?.value);
             const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(pendingContentSpans, 'lengths')?.value);
             if (
-                buffer instanceof Uint8Array &&
-                offsets instanceof Uint32Array && offsets.buffer instanceof ArrayBuffer && offsets.length >= count &&
-                lengths instanceof Uint32Array && lengths.buffer instanceof ArrayBuffer && lengths.length >= count
+                hasPlainTypedArrayProperties(buffer, Uint8Array.prototype) &&
+                hasPlainTypedArrayProperties(offsets, Uint32Array.prototype) && offsets.buffer instanceof ArrayBuffer && offsets.length >= count &&
+                hasPlainTypedArrayProperties(lengths, Uint32Array.prototype) && lengths.buffer instanceof ArrayBuffer && lengths.length >= count
             ) {
                 let valid = true;
                 let previous = -1;
