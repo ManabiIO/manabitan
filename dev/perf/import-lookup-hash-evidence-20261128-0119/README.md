@@ -1,5 +1,7 @@
 # Import lookup checksum experiment
 
+See the [follow-up evidence and current decision](FOLLOWUP.md) for the guard correction, rejected combined screen, contended pacing diagnostic, and subsequent gate attempts. This original report records the first experiment stage; it is not the final performance assessment.
+
 This bundle preserves the component experiments behind the native lookup checksum candidate. The enclosing writer result merits a complete browser import comparison. No complete-import speedup is established by these local measurements.
 
 The frozen baseline is `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`. The measured runtime change was checkpointed at `8c561628`; later changes through `4df50f0a4de2706e5f04782706d6d4ac7c1b021b` added the full license header, qualification observer/workflow, and another tail-coverage test. The published experiment, `f3fd2373de6e74f6243008ff3f1f68703d688973`, has the same complete tree as that local checkpoint. Its [hosted qualification run](https://github.com/ManabiIO/manabitan/actions/runs/46104742882) was queued when this evidence was prepared.

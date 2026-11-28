@@ -1,0 +1,174 @@
+{
+  "archive": {
+    "name": "followup-evidence.tar.gz",
+    "bytes": 440361,
+    "sha256": "0c7e036931e613541b06b36298b78861d771e2217ded9b362c59f5247b65b4b7"
+  },
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "publishedFixedNativeRuntime": "6eac74530a62269c171c874917a20ec341c9e662",
+  "localTestFormattingOnly": "4da360ce59471b9563acf8189deeb75a11659ce9",
+  "members": {
+    "followup/capture-combined-columns.mjs": {
+      "bytes": 8692,
+      "sha256": "bf5ab6bf8508df3d696370e2d3adb0cf5a7d144a21f0a8d3e14762d1867767f8"
+    },
+    "followup/combined-cohort.log": {
+      "bytes": 4405,
+      "sha256": "38ae8f7d0acbaf453099910ce2fdb4800c3b2ec3f52903bd42a779ad38611d42"
+    },
+    "followup/combined-columns-capture.log": {
+      "bytes": 935,
+      "sha256": "794dfdacdc8c65cb3a27c2f063bb6cb324b1917971895c497eb79acb6b35f969"
+    },
+    "followup/combined-one.mjs": {
+      "bytes": 7394,
+      "sha256": "4455b7873d2f7fe1becb07d4169592b574fa70baaeff5a51c7c09ecedca4d65f"
+    },
+    "followup/combined-phase-breakdown.json": {
+      "bytes": 2490,
+      "sha256": "c76ebb577cd0a6005776858e082c67b93409ae3c160e173793a65a4522c930cf"
+    },
+    "followup/combined-preflight-route.json": {
+      "bytes": 6721,
+      "sha256": "2a8b1dcb7a480208a07f1042d660e838e686b8f36ec1156077d2a321d4041d45"
+    },
+    "followup/combined-run.py": {
+      "bytes": 4667,
+      "sha256": "3d9f5e944788478624306d0951ae46d1c613aeca4bd48219a90c240860bd079c"
+    },
+    "followup/combined-score-delta.patch": {
+      "bytes": 8927,
+      "sha256": "8bf14a90b47ce23db100ff7046211059aba4131b41239a48fe122df989dc74a0"
+    },
+    "followup/combined-source-review.json": {
+      "bytes": 573,
+      "sha256": "d3ad2e01934ef8582be3b3dd7c8ca96b36b24404b9949f11e8b2513573d2b910"
+    },
+    "followup/dry-build-node22.log": {
+      "bytes": 385,
+      "sha256": "e2b2deaa27b66f7cb3f5e1c4bf9e2eaa79be42813f34b8a5783a750d4ea7f88f"
+    },
+    "followup/dry-build-node22.metrics.json": {
+      "bytes": 440,
+      "sha256": "cb8c69452d495203e1004adfd3d8d9940173acb4f93c8cfce3ddefdf3b41acf9"
+    },
+    "followup/envelope-paced-cohort.log": {
+      "bytes": 5719,
+      "sha256": "a82bb3bb2dd99b409966e537098a8019eda0b1cd58cec3a30296e90dca2746af"
+    },
+    "followup/envelope-paced-one.mjs": {
+      "bytes": 3514,
+      "sha256": "80db9aa8eb3837e43a261358803de27607b631d636bac77c815402a969b6690d"
+    },
+    "followup/envelope-paced-run.py": {
+      "bytes": 4014,
+      "sha256": "461609116f0076fcab8c2743c534f6816ca7bcdfd63ed5a5835db8fd893b52f8"
+    },
+    "followup/followup-summary.json": {
+      "bytes": 10082,
+      "sha256": "ccbff71774cb57ac8fb86aa0a4dbef8dc64432bd966b0d908125448c23095bfb"
+    },
+    "followup/history-fetch-failure.txt": {
+      "bytes": 409,
+      "sha256": "512abe5d76ce45eb0aae848db31063ef51e1efbc1781c3b374602dad1c9745e0"
+    },
+    "followup/jmdict-combined-integrated.json": {
+      "bytes": 3680038,
+      "sha256": "453bf6aba31bedb52bb3f0e5a9d465b2ec462573213c53b5a88d422b9225c40a"
+    },
+    "followup/jmdict-envelope-paced.json": {
+      "bytes": 502785,
+      "sha256": "9d80e83548dd20c29c5a7becbcc47f6e297be25acca05ea19d2b32da6eb7e751"
+    },
+    "followup/lookup-envelope-opportunity-review.md": {
+      "bytes": 4416,
+      "sha256": "d44d3d31dd8958ef64c2ce009f1c77d3b8bb2d9ca1e406bf863c3403260b6364"
+    },
+    "followup/main-types-node22.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "followup/main-types-node22.metrics.json": {
+      "bytes": 473,
+      "sha256": "f07dcf9bcf2ebce7f0413057c95b01eb850c9aeed28d3289827a327582844dc5"
+    },
+    "followup/parser-replay.mjs": {
+      "bytes": 14088,
+      "sha256": "34a1a1894c10442c40e62a9c4d89bb30132d43d884428e496c5de7ffe1854ef6"
+    },
+    "followup/run-gate.py": {
+      "bytes": 954,
+      "sha256": "3c5aaea05f9270809757e9383fb83ebc340cbf7a5d4f26b523b397d9352b6c70"
+    },
+    "followup/runtime-lint-node22.log": {
+      "bytes": 1042,
+      "sha256": "a42e19eed25ee58cf0e3fc62ef9548842a4c3da71b0faa78c8a73e076b052801"
+    },
+    "followup/runtime-lint-node22.metrics.json": {
+      "bytes": 534,
+      "sha256": "6dfc314b4d387447bbe4450183928fff7b6fadde716ca8080a8c08a5d7787017"
+    },
+    "followup/runtime-lint.log": {
+      "bytes": 60,
+      "sha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548"
+    },
+    "followup/test-lint-fixed-node22.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "followup/test-lint-fixed-node22.metrics.json": {
+      "bytes": 477,
+      "sha256": "34f378643bb3c66c5edac5bcc529ddb80f54b7f87325b20784b1cb1f913cbcc0"
+    },
+    "followup/test-lint-node22.log": {
+      "bytes": 1558,
+      "sha256": "48095e7d962acd7db39bc6beb0ab08d907ae81bf7f2083e3b29f137b28b73f13"
+    },
+    "followup/test-lint-node22.metrics.json": {
+      "bytes": 465,
+      "sha256": "84a10bb699d603f63f1d4b1a023432f95977cb03cdaf26f4388edc72ca71a4bb"
+    },
+    "followup/typed-kind-after.json": {
+      "bytes": 579,
+      "sha256": "0c5940c4c4451839157417ee83d461d5c8710c735db9f17dc978a6b1d225b6b8"
+    },
+    "followup/typed-kind-before.json": {
+      "bytes": 581,
+      "sha256": "48b3f38a5a60268749a05f563dcb1227a19b671d95905b7c37f3ffef25a3d942"
+    },
+    "followup/typed-kind-focused-tests.log": {
+      "bytes": 568,
+      "sha256": "4f2315fda5af9085ea51ae68e9b0bfd4b40638b559002678fe51bae91db49c3b"
+    },
+    "followup/typed-kind-witness.mjs": {
+      "bytes": 1330,
+      "sha256": "056cee28cc6f9c34460cc7e37ac9c314f4b8d45467c43657a49fc68d0b8e67fd"
+    },
+    "input-manifests/manabitan-combined-columns-0119.v8.json": {
+      "bytes": 69043,
+      "sha256": "c9c61add47281acf55e2d867e81ea8a26b9aa431809244532a6f5934d93c14a3"
+    },
+    "regeneration/capture-combined-columns.mjs": {
+      "bytes": 9369,
+      "sha256": "7f9cd6d0af0dd40bbe9d6a255c548729b4f70edd390b1dd386508fc5b47bf765"
+    },
+    "regeneration/parser-replay.mjs": {
+      "bytes": 14088,
+      "sha256": "34a1a1894c10442c40e62a9c4d89bb30132d43d884428e496c5de7ffe1854ef6"
+    },
+    "regeneration/verify-combined-columns.mjs": {
+      "bytes": 1797,
+      "sha256": "15fd62c1f96fce34662de34536800965ebd5404489742acea1ecb47d07ee9028"
+    }
+  },
+  "omittedAcquiredColumns": {
+    "name": "manabitan-combined-columns-0119.v8",
+    "bytes": 8657847,
+    "sha256": "a622d2ccbc506fc12b7cf72435bdda7e1c9455a4260ea67d4f56897f39ce262f"
+  },
+  "originalPayloadContainer": {
+    "sha256": "2fde77cf160f1d2d45edcc55dc4b728ff92d6df1622e3081df5cbc94f1515712",
+    "manifest": "Original evidence archive input-manifests/jmdict-lookup-payloads-baseline-raw-v6.v8.json"
+  },
+  "omittedDuplicates": "Completed timing reports contain every observation from their intermediate partial JSON checkpoints; duplicate checkpoint copies are not repeated."
+}
