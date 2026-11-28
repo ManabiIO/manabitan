@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "kind": "new-unmeasured-native-whole-fusion",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "productCommit": "01eb863506012136e417167f445b2708d9136293",
+  "productTree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+  "preservedProduct": "663df294f40e1832ad3e3349d0e061681fed77cb",
+  "productFiles": [
+    {
+      "path": "dev/bin/audit-release-packages.js",
+      "mode": "100644",
+      "blob": "76117e8c738eb56eb4c10ca708ee1ad166163394",
+      "bytes": 4520,
+      "sha256": "16bf135e8d6555f52e2ece51d2807daa9e69b4d8ccc8ebfae04ac70a67c4fa31"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "blob": "7d620f3f4b0b9e68d453afcc154769bd78b5fab3",
+      "bytes": 3159,
+      "sha256": "604d2a05972b2f267fc4bf7bb5f3eadceaedacf9b356c1336021e136ae53e7da"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-record-fields.wasm",
+      "mode": "100644",
+      "blob": "65df6fb046036fc710a621665d72084809055c07",
+      "bytes": 1860,
+      "sha256": "1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9"
+    },
+    {
+      "path": "dev/dictionary-wasm.js",
+      "mode": "100644",
+      "blob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "bytes": 7244,
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d"
+    },
+    {
+      "path": "eslint.config.js",
+      "mode": "100644",
+      "blob": "d0ced0b6cb1ced0ffef0e2f924a327724c76b719",
+      "bytes": 41188,
+      "sha256": "9142cb7986949a7257979d81448f7755fca0c1ab828322f9f74931646cfc852e"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "blob": "09bd411663a0183230e1436b99cac043f1db307a",
+      "bytes": 796663,
+      "sha256": "3df99986f532b999e2c86a9d492ffc99268cc5a1440ee4339c4456e60cff3306"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "mode": "100644",
+      "blob": "f77d7e39ec534b612921933480bbc63b78358e9f",
+      "bytes": 216058,
+      "sha256": "5bf828411612b3e81284de88332868b2ffa367be045baa41ee6df6fec1ddb315"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-fields.js",
+      "mode": "100644",
+      "blob": "1dc674f2a1c2d08353a43a74ff83a06a25228a49",
+      "bytes": 22694,
+      "sha256": "f2db0af75f57e5a3cbd763c26901229cd8312f84c305efdab33a90362ee595cc"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "mode": "100644",
+      "blob": "c4df83f6c6a9d305a3bf5ba74c9bb12b8712f471",
+      "bytes": 399335,
+      "sha256": "363abaafc0bc0428479c65367bd01d8aceb1db4217c8b04d467123f03d7f2417"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-prepared-fields.js",
+      "mode": "100644",
+      "blob": "8ab3c644d918d9dd2a659f81f422cbff5b44560c",
+      "bytes": 9782,
+      "sha256": "63363069a4d2575600cd40de77f4ab955c465a5a76aae644e40902a8c4fff2b9"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-record-fields.c",
+      "mode": "100644",
+      "blob": "db1f2c716e25a404dc2474daa1adddd81a75e0e8",
+      "bytes": 8765,
+      "sha256": "4cfe27aa54d537d8173d142a7b7c62964d020ec323861c270e80e1e486ffe591"
+    },
+    {
+      "path": "test/dictionary-wasm-build.test.js",
+      "mode": "100644",
+      "blob": "c40698117a9573fab8c85d80aaf0be0cc5e0c072",
+      "bytes": 7552,
+      "sha256": "668aee97603538f62f2dded03d875d031c487bbdf86ff15c39c18c5ab1deef67"
+    },
+    {
+      "path": "test/release-package-native-assets.test.js",
+      "mode": "100644",
+      "blob": "c8ba87ac12b028edb75df954ec8eade190272eb1",
+      "bytes": 6904,
+      "sha256": "b778ba93aa4eba6c148f89b124acde64fcab7e6292b8275bdf17dcf1f06cd151"
+    },
+    {
+      "path": "test/term-record-fields-fusion.test.js",
+      "mode": "100644",
+      "blob": "4cffcc890bd923445b74cd32329117bdb96720c1",
+      "bytes": 32209,
+      "sha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb"
+    },
+    {
+      "path": "test/term-record-fields-native.test.js",
+      "mode": "100644",
+      "blob": "7e58d6af3aa0011be8e0704ad79a8a9ce320a2bc",
+      "bytes": 40453,
+      "sha256": "23ea7f5f5fdb60a1bf07d8430fc09d43cd7618464eae578a3cfdebc651e8a3e6"
+    },
+    {
+      "path": "test/term-record-import-fields.test.js",
+      "mode": "100644",
+      "blob": "fbebbbccb8864d815535a74d4df9020bcafd8024",
+      "bytes": 20572,
+      "sha256": "faff7319ea2939b0df7a15d391c788939c2f5e59e16a7333f5e8adc71f2aa323"
+    }
+  ],
+  "control": {
+    "sha": "0ac6b01e6055fd1f3494252dea482910da3e6c77",
+    "tree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+    "parents": [
+      "a300da36d00df8e353c5679b1528b50a1299b75f"
+    ]
+  },
+  "controlTree": "3b49a0bc7c526504e5c61347cea892259a11acc0",
+  "sourceProofBlob": "8e06962be86c6aa82d93c055a1f726d16cb1e650",
+  "nativeHandoffBlob": "fac27898dd4ec5e0182ee0fdb95acda20adfd508",
+  "independentSourceReviewBlob": "5a3f064b4b226e7362599a3802aea3f710decc0a",
+  "reusedMachinery": {
+    "commit": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "workflowBlob": "67ca8a3945bf506b53bcc61bd420b0f8992b402a",
+    "driverBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+    "runAllBlob": "ebbfddf86e8b2f6ce1f008a3ac88ffe8bf0cca4b",
+    "archiveBlob": "82913f3e5a0091affdfa870c630c748dd20b150a"
+  },
+  "priorPerformance": {
+    "runId": 46138650386,
+    "resultBlob": "acbc0b3a88da99a21306615de88e5369f73d559b",
+    "disposition": "rejected; immutable historical source and observations; no result transfer"
+  },
+  "scope": {
+    "performanceMeasurements": false,
+    "optionalReadinessWait": false,
+    "wholeFusionActivationRequiredPerCorpus": true,
+    "fullRuntimeDeltaEntries": 7,
+    "newImportsAuthorizedOnlyAfterRootSourceReview": true
+  },
+  "changes": [
+    "owner-level native accounting includes earlier whole planning/encoding and the 8-byte output base",
+    "complete field buffers/scalars and all normalized final term files remain exact A/B byte oracles",
+    "strict source/fixture/parser/group/CRC/media-route boundaries and link-safe retention reused"
+  ],
+  "limitations": [
+    "Focused local165-case/native/lint evidence is not complete correctness",
+    "Node adapter uses real nonpersistent SQLite with disk OPFS-shaped files; no browser/restart/full-media qualification",
+    "No timing or CPU-screen entry point exists in this kit"
+  ],
+  "annotationOnlyProduct": {
+    "parent": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "changedPath": "test/term-record-fields-fusion.test.js",
+    "gitBlob": "4cffcc890bd923445b74cd32329117bdb96720c1",
+    "sha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb",
+    "executableAstSha256": "be6cf5f1e0899470a3337898a95a75249e627d8fe71aabbe3e753f4516ce66d1",
+    "runtimeChanged": false,
+    "priorFailuresRetained": true
+  }
+}

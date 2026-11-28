@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "identity": "NEW a300 whole-fusion untimed full-corpus correctness kit",
+  "baseline": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "productCommit": "01eb863506012136e417167f445b2708d9136293",
+  "productOnlyTree": "7606f691caf5f0c0d80e9bea9a4f98e868491e0a",
+  "productSource": {
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "gitBlob": "65df6fb046036fc710a621665d72084809055c07",
+      "sha256": "1ffc9e804789f09681041a7f701d18fcf32268d3bcf697c6b2d7d7493abe0aa9",
+      "bytes": 1860
+    },
+    "ext/js/dictionary/dictionary-database.js": {
+      "gitBlob": "09bd411663a0183230e1436b99cac043f1db307a",
+      "sha256": "3df99986f532b999e2c86a9d492ffc99268cc5a1440ee4339c4456e60cff3306",
+      "bytes": 796663
+    },
+    "ext/js/dictionary/term-bank-wasm-parser.js": {
+      "gitBlob": "f77d7e39ec534b612921933480bbc63b78358e9f",
+      "sha256": "5bf828411612b3e81284de88332868b2ffa367be045baa41ee6df6fec1ddb315",
+      "bytes": 216058
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "gitBlob": "1dc674f2a1c2d08353a43a74ff83a06a25228a49",
+      "sha256": "f2db0af75f57e5a3cbd763c26901229cd8312f84c305efdab33a90362ee595cc",
+      "bytes": 22694
+    },
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "gitBlob": "c4df83f6c6a9d305a3bf5ba74c9bb12b8712f471",
+      "sha256": "363abaafc0bc0428479c65367bd01d8aceb1db4217c8b04d467123f03d7f2417",
+      "bytes": 399335
+    },
+    "ext/js/dictionary/term-record-prepared-fields.js": {
+      "gitBlob": "8ab3c644d918d9dd2a659f81f422cbff5b44560c",
+      "sha256": "63363069a4d2575600cd40de77f4ab955c465a5a76aae644e40902a8c4fff2b9",
+      "bytes": 9782
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "gitBlob": "db1f2c716e25a404dc2474daa1adddd81a75e0e8",
+      "sha256": "4cfe27aa54d537d8173d142a7b7c62964d020ec323861c270e80e1e486ffe591",
+      "bytes": 8765
+    }
+  },
+  "execution": {
+    "authoringState": "source-only; no current-corpus import or timing acquired",
+    "node": "v22.22.0",
+    "pythonMinimum": "3.11",
+    "pureComparatorCases": 27,
+    "pureOwnerCases": 14,
+    "actualIoSmokeCases": 11,
+    "readinessWait": false,
+    "performanceMeasurements": false,
+    "replacementImports": false
+  },
+  "control": {
+    "armOrder": [
+      "A",
+      "B"
+    ],
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "groups": [
+      12,
+      22,
+      170
+    ],
+    "parserWorkers": 3
+  },
+  "boundaries": {
+    "sqlite": "real engine, nonpersistent :memory:; current admission helper external dependencies only; original outer body unchanged",
+    "contentRoot": "observed fresh epoch0/high-water0; epoch0 after import; unknown arena/online files fail closed",
+    "routeOverride": "usesFallbackStorage=false",
+    "setupTrackedException": "ext/legal-npm.html only, committed/generated hashes recorded, exact generated A/B equality",
+    "normalization": "only MBTRD16X@8 and MBTIDX11@24,16bytes; scalar base Float64 bits retained separately",
+    "runtimeDelta": "exact seven entries, same comparison before acquisition and after each pair",
+    "retirement": "successful matching A/B raw sinks after complete independent rehash; failed sinks retained",
+    "evidenceUpload": "verified link-safe PAX tar, all actual files and inert symlink targets, no extraction"
+  },
+  "files": {
+    "README.md": {
+      "bytes": 6397,
+      "gitBlob": "4560a8b150dd99c862d932921feb6b5248e35713",
+      "sha256": "0fd320445683985603fe726f8a02ec5caa577cacbaebefe08c58cf00ef319048"
+    },
+    "baseline-open-connection.txt": {
+      "bytes": 1436,
+      "gitBlob": "749bfafb6cfa7334f6a32f27c69fd850814e3aab",
+      "sha256": "bac2a4328d28b69e3e9e3c5ed222d77c62d81881172c9fff26274017b44527e0"
+    },
+    "baseline-open-supported-connection.txt": {
+      "bytes": 1538,
+      "gitBlob": "a903b017d14c4ea01e2694a5d0cdcbe14b0ef52e",
+      "sha256": "76547a8828fde1ce0ed18b4d8c573eb2973a0f3a5d648be995e03dd65a01397c"
+    },
+    "baseline-storage-schema-version.txt": {
+      "bytes": 53,
+      "gitBlob": "4543a635210630a27b8b5a8f1e6250267dd216c1",
+      "sha256": "f3a517fd1b071dadb0a48904133d5e1284101ac9c9e8cbdd06037475b17d68c4"
+    },
+    "node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+    },
+    "node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+    },
+    "node-runtime.mjs": {
+      "bytes": 8164,
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339"
+    },
+    "owner-observer.mjs": {
+      "bytes": 14670,
+      "gitBlob": "54658a14c6b8f2b8297b3368cab5e7edb6a7600c",
+      "sha256": "6900c1b4579eff730ea4f18684eba4b75aeb35fe873252da0fee911f6287bd03"
+    },
+    "run-all.py": {
+      "bytes": 33763,
+      "gitBlob": "d28be08b7a6df6cfbdb2ea0a2e64ae426faa1ea2",
+      "sha256": "67af532e1a311289b9d516e59255304b5f64efd12ccd4638d38401e809cdc70d"
+    },
+    "run.mjs": {
+      "bytes": 24435,
+      "gitBlob": "244b73751c7ba68c3f1b60d805db4cf8310ea97b",
+      "sha256": "19519a424db42b78868efc75da2525b57910e2162580331db112529b92071f4b"
+    },
+    "test-opfs.mjs": {
+      "bytes": 11798,
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979"
+    },
+    "test-owner-observer.mjs": {
+      "bytes": 8539,
+      "gitBlob": "35ab57c27a8c69729ca54e45d420a43edd8002ab",
+      "sha256": "51039591f9debcdc97e80f1f956bc0d132fd86948b123cf0b7a73dc4a36042a2"
+    },
+    "test-run-all.py": {
+      "bytes": 18038,
+      "gitBlob": "adc550353424bff3b3ba9bb4b8f0cb41cb05ff1b",
+      "sha256": "27cb07091ed1df435b1e4d6ae88b7f6e1bb982b1e1a4cb053d8fb4c522032587"
+    }
+  },
+  "bindingNote": "Self excluded; enclosing source.json and exact source guard bind this file before acquisition",
+  "priorMachinery": {
+    "sourceCommit": "5cfbd2ebd21e6a814be976aa496afcde70d35e47",
+    "driverBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+    "runAllBlob": "ebbfddf86e8b2f6ce1f008a3ac88ffe8bf0cca4b",
+    "resultTransfer": false
+  },
+  "sourceReview": "5a3f064b4b226e7362599a3802aea3f710decc0a",
+  "annotationOnlyProduct": {
+    "parent": "d6fc24acaa19cfbb907cbc42d8ef72235588d5b3",
+    "changedPath": "test/term-record-fields-fusion.test.js",
+    "gitBlob": "4cffcc890bd923445b74cd32329117bdb96720c1",
+    "sha256": "9179617e57d30853719c9302bd4870da181975a2ef811c65239d8f2185fa30fb",
+    "executableAstSha256": "be6cf5f1e0899470a3337898a95a75249e627d8fe71aabbe3e753f4516ce66d1",
+    "runtimeChanged": false,
+    "priorFailuresRetained": true
+  }
+}

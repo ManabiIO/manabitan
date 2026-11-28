@@ -1,0 +1,291 @@
+name: Native whole record fusion a300 correctness 20261128
+
+on:
+  push:
+    branches: [test/native-record-fields-fusion-20261128-1c413]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-record-fields-fusion-correctness-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FIELD_BASELINE: a300da36d00df8e353c5679b1528b50a1299b75f
+  FIELD_CANDIDATE: ${{ github.sha }}
+  PYTHONDONTWRITEBYTECODE: '1'
+
+# Fresh, untimed a300-to-fusion correctness. Every original f28 import/reader
+# outcome remains separate, including the rejected complete-import study.
+# No browser, CPU screen, optional readiness wait or comparative timings.
+# The exact unique branch is intentionally unfiltered so source registration
+# cannot depend on an already-reachable commit's push path calculation.
+jobs:
+  correctness:
+    name: Rebuild, complete units, types, lint and all-target builds
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind the original attempt and exact reconstructed source
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          [[ "$GITHUB_RUN_ATTEMPT" == 1 ]]
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py --candidate "$FIELD_CANDIDATE" --output builds/perf/native-record-fields-fusion-correctness/source-before-setup.json
+      - name: Prepare the pinned Node runtime and dependencies
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Bind generated assets and the setup-produced license document
+        id: generated
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py --candidate "$FIELD_CANDIDATE" --generated --output builds/perf/native-record-fields-fusion-correctness/source-after-setup.json
+      - name: Install the pinned native toolchain
+        id: toolchain
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/apt-update.log
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/apt-install.log
+      - name: Reproduce every checked-in native target
+        id: native
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          field_compiler_path="$(command -v clang-21)"
+          field_linker_path="$(command -v wasm-ld-21)"
+          [[ "$field_compiler_path" == /* && -x "$field_compiler_path" ]]
+          [[ "$field_linker_path" == /* && -x "$field_linker_path" ]]
+          MANABITAN_CLANG="$field_compiler_path" MANABITAN_WASM_LD="$field_linker_path" npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/native-build.log
+      - name: Changed-source lint
+        id: lint
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npx eslint dev/bin/audit-release-packages.js dev/dictionary-wasm.js eslint.config.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-record-fields.js ext/js/dictionary/term-record-opfs-store.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-record-prepared-fields.js test/dictionary-wasm-build.test.js test/release-package-native-assets.test.js test/term-record-fields-native.test.js test/term-record-import-fields.test.js test/term-record-fields-fusion.test.js 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/lint.log
+      - name: Complete ordinary unit suite
+        id: unit
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:unit 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/unit.log
+      - name: Complete options unit suite
+        id: options
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:unit:options 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/unit-options.log
+      - name: Complete main-source types
+        id: main_types
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:ts:main 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/types-main.log
+      - name: Complete development-source types
+        id: dev_types
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:ts:dev 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/types-dev.log
+      - name: Complete test-source types
+        id: test_types
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:ts:test 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/types-test.log
+      - name: All-target dry builds
+        id: builds
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.setup.outcome == 'success' && steps.generated.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          npm run test:build 2>&1 | tee builds/perf/native-record-fields-fusion-correctness/dry-build.log
+      - name: Retain every outcome and require all independent correctness gates
+        if: always()
+        shell: bash
+        env:
+          FIELD_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p builds/perf/native-record-fields-fusion-correctness
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(os.environ['FIELD_STEP_RESULTS'])
+          result = {key: {field: value.get(field) for field in ('outcome', 'conclusion')} for key, value in data.items()}
+          required = ('source', 'setup', 'generated', 'toolchain', 'native', 'lint', 'unit', 'options', 'main_types', 'dev_types', 'test_types', 'builds')
+          failed = [key for key in required if result.get(key, {}).get('outcome') != 'success']
+          receipt = {'passed': not failed, 'required': required, 'failed': failed, 'steps': result, 'performanceMeasurements': False}
+          Path('builds/perf/native-record-fields-fusion-correctness/step-outcomes.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          if failed:
+              raise SystemExit('Correctness gates did not all pass: ' + ', '.join(failed))
+          PY
+      - name: Preserve exact source, every log and every failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-fields-fusion-correctness-${{ github.sha }}
+          path: |
+            builds/perf/native-record-fields-fusion-correctness
+            dev/perf/whole-record-fusion-correctness-20261128-1c413
+            .github/workflows/native-record-fields-fusion-correctness-1c413.yml
+            dev/bin/audit-release-packages.js
+            dev/data/dictionary-wasm/manifest.json
+            dev/data/dictionary-wasm/term-record-fields.wasm
+            dev/dictionary-wasm.js
+            eslint.config.js
+            ext/js/dictionary/dictionary-database.js
+            ext/js/dictionary/term-record-fields.js
+            ext/js/dictionary/term-bank-wasm-parser.js
+            ext/js/dictionary/term-record-prepared-fields.js
+            ext/js/dictionary/term-record-opfs-store.js
+            ext/js/dictionary/wasm/term-record-fields.c
+            test/dictionary-wasm-build.test.js
+            test/release-package-native-assets.test.js
+            test/term-record-fields-native.test.js
+            test/term-record-fields-fusion.test.js
+            test/term-record-import-fields.test.js
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  corpus:
+    name: Untimed original baseline and candidate importer parity
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind the original attempt and exact reconstructed source
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/native-record-fields-fusion-correctness-corpus
+          [[ "$GITHUB_RUN_ATTEMPT" == 1 ]]
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py --candidate "$FIELD_CANDIDATE" --output builds/perf/native-record-fields-fusion-correctness-corpus/source-before-setup.json
+      - name: Prepare the candidate with pinned Node
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Bind the candidate generated assets
+        id: generated
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/verify-source.py --candidate "$FIELD_CANDIDATE" --generated --output builds/perf/native-record-fields-fusion-correctness-corpus/source-after-setup.json
+      - name: Check out the exact unmodified baseline
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: a300da36d00df8e353c5679b1528b50a1299b75f
+          path: baseline-source
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Build baseline assets from its independent locked dependency installation
+        shell: bash
+        working-directory: baseline-source
+        run: |
+          set -euo pipefail
+          [[ ! -e node_modules && ! -L node_modules ]]
+          npm ci 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-npm-ci.log"
+          [[ -d node_modules && ! -L node_modules ]]
+          npm run build:libs 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-libs.log"
+          npm run license-report:html 2>&1 | tee "$GITHUB_WORKSPACE/builds/perf/native-record-fields-fusion-correctness-corpus/baseline-license.log"
+      - name: Verify the pure correctness comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-run-all.py 2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/comparator-tests.log
+      - name: Verify pure enclosing-owner accounting before any import
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/test-owner-observer.mjs \
+            2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/owner-observer-tests.log
+      - name: Verify portable evidence retention before any corpus import
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/test-archive-evidence.py \
+            2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/archive-tests.log
+      - name: Verify the exact prepared runtime delta before any corpus work
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py \
+            --preflight-only \
+            --baseline-root "$GITHUB_WORKSPACE/baseline-source" \
+            --candidate-root "$GITHUB_WORKSPACE" --candidate "$FIELD_CANDIDATE" \
+            --output "$GITHUB_WORKSPACE/builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight" \
+            2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/runtime-preflight.log
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch and verify all pinned corpus archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js jmdict jitendex vndb 2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/fixtures.log
+      - name: Run the original untimed importer parity sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/corpus/run-all.py \
+            --baseline-root "$GITHUB_WORKSPACE/baseline-source" \
+            --candidate-root "$GITHUB_WORKSPACE" --candidate "$FIELD_CANDIDATE" \
+            --fixtures "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" \
+            --output "$GITHUB_WORKSPACE/builds/perf/native-record-fields-fusion-correctness-corpus/acquisition" \
+            2>&1 | tee builds/perf/native-record-fields-fusion-correctness-corpus/acquisition.log
+      - name: Preserve raw bytes and inert smoke-link metadata in a verified archive
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/whole-record-fusion-correctness-20261128-1c413/archive-evidence.py \
+            --repository "$GITHUB_WORKSPACE" \
+            --root builds/perf/native-record-fields-fusion-correctness-corpus \
+            --root dev/perf/whole-record-fusion-correctness-20261128-1c413 \
+            --root .github/workflows/native-record-fields-fusion-correctness-1c413.yml \
+            --archive builds/perf/native-record-fields-fusion-corpus-evidence.tar.gz \
+            --receipt builds/perf/native-record-fields-fusion-corpus-evidence.json
+      - name: Preserve the complete verified corpus archive and member receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-record-fields-fusion-corpus-${{ github.sha }}
+          path: |
+            builds/perf/native-record-fields-fusion-corpus-evidence.tar.gz
+            builds/perf/native-record-fields-fusion-corpus-evidence.json
+          if-no-files-found: error
+          retention-days: 14

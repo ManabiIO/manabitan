@@ -1,0 +1,25 @@
+async _openSupportedDictionaryConnection() {
+        try {
+            this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
+        } catch (error) {
+            const diagnostics = getLastOpenStorageDiagnostics();
+            const message = (error instanceof Error) ? error.message : String(error);
+            throw new Error(`Dictionary database open failed: ${message}. diagnostics=${JSON.stringify(diagnostics)}`);
+        }
+        this._usesFallbackStorage = didLastOpenUseFallbackStorage();
+        this._openStorageDiagnostics = getLastOpenStorageDiagnostics();
+        const installedSchemaVersion = this._getSupportedInstalledSchemaVersion();
+        const db = this._requireDb();
+        const hasContentState = db.selectValue(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'termContentStorageState'",
+        ) === 1;
+        const committedContent = hasContentState ?
+            db.selectObject('SELECT activeEpoch, logicalHighWater FROM termContentStorageState WHERE singleton = 1') :
+            void 0;
+        const storageEpoch = this._asNumber(committedContent?.activeEpoch, 0);
+        if (!Number.isSafeInteger(storageEpoch) || storageEpoch < 0 ||
+        (storageEpoch > 0) !== (installedSchemaVersion === ONLINE_CONTENT_DICTIONARY_SCHEMA_VERSION)) {
+            throw new Error('Dictionary schema version and immutable content root disagree');
+        }
+        return {storageEpoch, logicalHighWater: this._asNumber(committedContent?.logicalHighWater, -1)};
+    }
