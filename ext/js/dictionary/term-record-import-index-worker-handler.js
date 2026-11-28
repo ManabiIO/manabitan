@@ -65,7 +65,7 @@ export class ImportIndexWorkerHandler {
                 if (this._storageFailed) {
                     throw new Error('Import index worker session cannot detach after storage failure');
                 }
-                if (this._writers.size !== 0 || this._opening.size !== 0 || this._activeRequests !== 1) {
+                if (this._writers.size > 0 || this._opening.size > 0 || this._activeRequests !== 1) {
                     throw new Error('Import index worker session still owns pending storage');
                 }
                 this._disposed = true;

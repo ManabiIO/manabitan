@@ -59,11 +59,17 @@ beforeEach(async () => {
     responses = [];
     vi.stubGlobal('__manabitanTermContentCompressionWorker', false);
     vi.stubGlobal('self', {
-        /** @param {string} type @param {(event: MessageEvent<unknown>) => void} callback */
+        /**
+         * @param {string} type
+         * @param {(event: MessageEvent<unknown>) => void} callback
+         */
         addEventListener(type, callback) {
             if (type === 'message') { listener = callback; }
         },
-        /** @param {unknown} value @param {Transferable[]} [transfer] */
+        /**
+         * @param {unknown} value
+         * @param {Transferable[]} [transfer]
+         */
         postMessage(value, transfer = []) { responses.push(structuredClone(value, {transfer})); },
     });
     await import('../ext/js/dictionary/zstd-term-content-compression-worker.js');

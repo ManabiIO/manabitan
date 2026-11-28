@@ -130,7 +130,11 @@ export class TermContentCompressionPool {
     createImportIndexTransport(Transport) {
         if (this._failed || this._workers.length < 2 || this._importIndexTransport !== null || typeof MessageChannel !== 'function') { return null; }
         let channel;
-        try { channel = new MessageChannel(); } catch { return null; }
+        try {
+            channel = new MessageChannel();
+        } catch {
+            return null;
+        }
         /** @type {import('./compression-index-worker-transport.js').CompressionIndexWorkerTransport} */
         let transport;
         try {

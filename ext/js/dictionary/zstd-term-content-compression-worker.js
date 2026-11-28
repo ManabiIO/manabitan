@@ -31,7 +31,8 @@ void initialization.then(
 let importIndexPort = null;
 
 self.addEventListener('message', (event) => {
-    const data = /** @type {{type?: unknown, port?: unknown}|null} */ (event.data);
+    const rawData = /** @type {unknown} */ (event.data);
+    const data = /** @type {{type?: unknown, port?: unknown}|null} */ (rawData);
     if (data?.type === 'bind-import-index') {
         void bindImportIndex(data.port);
         return;
@@ -114,3 +115,5 @@ async function compressContent(event) {
         self.postMessage({id, error: `${error}`});
     }
 }
+
+export {};

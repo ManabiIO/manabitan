@@ -80,7 +80,9 @@ describe('borrowed import index session ownership', () => {
         const access = accessHandle();
         const {handler, responses, dispose} = server();
         const opening = handler.handleRequest({
-            id: 1, writerId: 1, action: 'open',
+            id: 1,
+            writerId: 1,
+            action: 'open',
             fileHandle: {async createSyncAccessHandle() { await gate.promise; return access; }},
         });
         await handler.handleRequest({id: 2, writerId: 0, action: 'dispose-session'});

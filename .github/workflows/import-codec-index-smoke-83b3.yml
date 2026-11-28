@@ -1,0 +1,120 @@
+name: Codec index browser correctness smoke
+
+on:
+  push:
+    branches: [research/import-codec-index-owner-20261128-83b3]
+    paths:
+      - "ext/**"
+      - "package.json"
+      - "package-lock.json"
+      - "dev/perf/codec-index-smoke-83b3.py"
+      - ".github/workflows/import-codec-index-smoke-83b3.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codec-index-smoke-83b3-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Correctness only (${{ matrix.arm }}, ${{ matrix.dictionary }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arm: A
+            dictionary: jmdict
+          - arm: B
+            dictionary: jmdict
+          - arm: B
+            dictionary: jitendex
+          - arm: B
+            dictionary: vndb
+    env:
+      SMOKE_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      SMOKE_SOURCE: ${{ matrix.arm == 'A' && '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2' || github.sha }}
+      SMOKE_TOOLING_SOURCE: ${{ github.sha }}
+      SMOKE_ARM: ${{ matrix.arm }}
+      SMOKE_DICTIONARY: ${{ matrix.dictionary }}
+      SMOKE_OUTPUT: builds/perf/codec-index-smoke-83b3
+      MANABITAN_E2E_STRICT_RUNTIME: "1"
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: "0"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SMOKE_SOURCE }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind source and unchanged native benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$SMOKE_OUTPUT"
+          {
+            test "$(git rev-parse HEAD)" = "$SMOKE_SOURCE"
+            test -z "$(git status --porcelain)"
+            git diff --exit-code "$SMOKE_BASELINE" "$SMOKE_TOOLING_SOURCE" -- \
+              package.json package-lock.json .github/actions/setup/action.yml \
+              test/perf/dictionaries.lock.json test/e2e test/chromium \
+              dev/perf/import-benchmark.js dev/perf/benchmark-support.js \
+              dev/perf/dictionary-fixtures.js dev/perf/prepare-dictionaries.js \
+              dev/perf/import-media-validation.js \
+              dev/perf/import-memory-20261125-a7f7
+            git show "$SMOKE_TOOLING_SOURCE:dev/perf/codec-index-smoke-83b3.py" \
+              > "$RUNNER_TEMP/codec-index-smoke-83b3.py"
+          } 2>&1 | tee "$SMOKE_OUTPUT/source-guard.log"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: "22.22.0"
+      - name: Install pinned full Chromium
+        run: npx playwright install --with-deps chromium --no-shell
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare exact fixture and release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$SMOKE_DICTIONARY" \
+            2>&1 | tee "$SMOKE_OUTPUT/fixture-prepare.log"
+          npm run build -- --target chrome \
+            2>&1 | tee "$SMOKE_OUTPUT/build.log"
+          python3 "$RUNNER_TEMP/codec-index-smoke-83b3.py" prepare \
+            --repo "$GITHUB_WORKSPACE" --output "$SMOKE_OUTPUT" \
+            --source "$SMOKE_SOURCE" --tooling-source "$SMOKE_TOOLING_SOURCE" \
+            --arm "$SMOKE_ARM" --dictionary "$SMOKE_DICTIONARY" \
+            2>&1 | tee "$SMOKE_OUTPUT/identity.log"
+      - name: Validate one complete import and all media (not a timing cohort)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$SMOKE_DICTIONARY" \
+            --runs 1 --no-build --build-target chrome --media-check all \
+            --output "$SMOKE_OUTPUT" \
+            2>&1 | tee "$SMOKE_OUTPUT/import.log"
+      - name: Verify corpus, persistence, storage and JMdict admission
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/codec-index-smoke-83b3.py" verify \
+            --repo "$GITHUB_WORKSPACE" --output "$SMOKE_OUTPUT" \
+            --source "$SMOKE_SOURCE" --tooling-source "$SMOKE_TOOLING_SOURCE" \
+            --arm "$SMOKE_ARM" --dictionary "$SMOKE_DICTIONARY" \
+            2>&1 | tee "$SMOKE_OUTPUT/verification.log"
+      - name: Preserve every smoke result, failure and exact package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: codec-index-smoke-83b3-${{ matrix.arm }}-${{ matrix.dictionary }}-${{ github.sha }}
+          path: |
+            builds/perf/codec-index-smoke-83b3
+            builds/manabitan-chrome.zip
+          if-no-files-found: error
+          retention-days: 14
