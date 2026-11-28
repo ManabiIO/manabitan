@@ -22,6 +22,7 @@ const SCRATCH_OFFSET = 131072;
 const SCRATCH_BYTES = 65536;
 const MEMORY_PAGES = 3;
 const MIN_NATIVE_BYTES = 1024;
+const getTypedArrayKind = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)?.get;
 const getBufferByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get;
 const getBufferResizable = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable')?.get;
 
@@ -71,9 +72,10 @@ export async function createImportLookupIndexHasher(loadModule = compileCanonica
                 let eligible = false;
                 try {
                     ({buffer, byteOffset, byteLength} = bytes);
-                    // Intrinsic getters reject forged ArrayBuffer prototypes and
-                    // ignore shadowed properties on the backing allocation.
+                    // Intrinsic getters reject forged typed-array and backing
+                    // prototypes without reading shadowed caller properties.
                     eligible = (
+                        getTypedArrayKind?.call(bytes) === 'Uint8Array' &&
                         typeof getBufferByteLength?.call(buffer) === 'number' &&
                         getBufferResizable?.call(buffer) !== true &&
                         byteLength >= MIN_NATIVE_BYTES && byteLength <= 0xffffffff

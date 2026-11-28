@@ -113,6 +113,30 @@ describe('native lookup-sidecar checksum', () => {
         expect(getter).not.toHaveBeenCalled();
     });
 
+    test('retains JS element semantics for forged typed-array prototypes and ignores shadowed tags', async () => {
+        const hasher = await createHasher();
+        const forgedViews = [
+            Uint16Array.from({length: 513}, (_, i) => (i * 29 + 173) & 255),
+            Int8Array.from({length: 1025}, (_, i) => (i * 29 + 173) & 255),
+        ];
+        const spoofedTag = vi.fn(() => 'Uint8Array');
+        const copy = vi.spyOn(Uint8Array.prototype, 'set');
+        for (const view of forgedViews) {
+            Object.setPrototypeOf(view, Uint8Array.prototype);
+            Object.defineProperty(view, Symbol.toStringTag, {get: spoofedTag});
+            const bytes = /** @type {Uint8Array} */ (/** @type {unknown} */ (view));
+            expect(hasher.hash(bytes)).toBe(hashTermKeyBytes(bytes));
+        }
+        expect(copy).not.toHaveBeenCalled();
+        expect(spoofedTag).not.toHaveBeenCalled();
+        const bytes = patternedBytes(1025);
+        const shadowedTag = vi.fn(() => { throw new Error('Shadowed typed-array tag witness'); });
+        Object.defineProperty(bytes, Symbol.toStringTag, {get: shadowedTag});
+        expect(hasher.hash(bytes)).toBe(hashTermKeyBytes(bytes));
+        expect(copy).toHaveBeenCalledTimes(1);
+        expect(shadowedTag).not.toHaveBeenCalled();
+    });
+
     test('a native trap recomputes with JS and retires that instance', async () => {
         const Instance = WebAssembly.Instance;
         const trap = vi.fn(() => { throw new WebAssembly.RuntimeError('Native trap witness'); });
