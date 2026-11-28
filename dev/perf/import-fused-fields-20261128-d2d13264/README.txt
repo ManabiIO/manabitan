@@ -91,3 +91,11 @@ full typed lint was killed by resource pressure. All failed setup, heap-limit,
 worker-exit and killed-process attempts remain in local-validation-logs.json.
 No full lint/type or end-to-end claim follows from this local diagnostic.
 See local-validation-manifest.json for exact source bindings and commands.
+
+Final pre-acquisition source and oracle binding
+============================================
+The current candidate is 91dfdea8f6d2f801b97c1f05a25102f3308371b0, tree cc5ebc68ac9c185cb5ea0c7313f37bd22be47c00. This tree is identical to local f04bc9af7e4b0dbbf61e69f95bb3a06861d0caa5. Before any qualifying acquisition, independent review identified typed metadata prototype hooks, forged native array kinds, and constructor instance hooks that could change the original first-error or getter-observation behavior. The final admission checks decline those callers before the unchanged original path. The compact encoding algorithm and ordinary-input bytes are unchanged. Prior source observations, if any, are superseded rather than pooled.
+
+The helper and candidate integration harnesses were regenerated from these exact sources. source-bindings.json records five source-file hashes and61 executable fragment bindings; verify-source-bindings.py checks the pinned commit/tree, whole files, and every extracted function/constant/method before replay. The baseline integration harness remains byte-for-byte identical to workflow2182621584aae812e0db8379727bb2e4c781dd25. The2019 helper cases,41 integration cases, constructor/lookup/persistence stubs and numeric test thresholds are unchanged. The portable extraction reproducer accepts --repo, --output, --candidate, and optional --local-tested-commit arguments. These extracted-source checks retain their stated component scope; the full original lint/types/unit/build and actual-worker corpus gates remain mandatory.
+
+The workflow delta changes only the candidate pin and adds the source-binding check before the existing deterministic replays. The six-pair acquisition schedules, warmups, A/C controls, exhaustive verifier, separate memory passes, fixed package additions, prospective criteria, failure retention, and compact observation logging remain unchanged. No timing claim is made by this update.

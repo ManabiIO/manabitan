@@ -1,0 +1,147 @@
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--repo', type=Path, default=Path.cwd())
+parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parent)
+parser.add_argument('--candidate', required=True)
+parser.add_argument('--local-tested-commit')
+args = parser.parse_args()
+REPO = args.repo
+OUT = args.output
+OUT.mkdir(parents=True, exist_ok=True)
+BASE = '9e10d3b3fcf66d344ab31bc42c9b522fa5215da2'
+CANDIDATE = args.candidate
+PREVIOUS = '2182621584aae812e0db8379727bb2e4c781dd25'
+PREFIX = 'dev/perf/import-fused-fields-20261128-d2d13264/'
+STORE = 'ext/js/dictionary/term-record-opfs-store.js'
+PREPARATION = 'ext/js/dictionary/term-record-field-preparation.js'
+LOOKUP = 'ext/js/dictionary/term-lookup-index-preparation.js'
+PLAN = 'ext/js/dictionary/term-record-preinterned-plan.js'
+
+def read(ref, path):
+    return subprocess.check_output(['git', 'show', f'{ref}:{path}'], cwd=REPO).decode()
+
+def sha(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+def fragment(source, name, kind):
+    if kind == 'function':
+        matches = list(re.finditer(r'(?m)(?:async )?function ' + re.escape(name) + r'\(', source))
+        assert len(matches) == 1, (name, kind, len(matches))
+        start = matches[0].start()
+        end = source.index('\n}', start) + 2
+    elif kind == 'method':
+        matches = list(re.finditer(r'    (?:async )?' + re.escape(name) + r'\(', source))
+        assert len(matches) == 1, (name, kind, len(matches))
+        start = matches[0].start()
+        end = source.index('\n    }', start) + 6
+    elif kind == 'constant':
+        matches = list(re.finditer(r'(?m)^const ' + re.escape(name) + r' = [^\n]+;', source))
+        assert len(matches) == 1, (name, kind, len(matches))
+        start, end = matches[0].span()
+    else:
+        raise ValueError(kind)
+    return source[start:end]
+
+sources = {(ref, path): read(ref, path) for ref, path in [
+    (BASE, STORE), (CANDIDATE, STORE), (CANDIDATE, PREPARATION),
+    (CANDIDATE, LOOKUP), (CANDIDATE, PLAN),
+]}
+harnesses = {name: read(PREVIOUS, PREFIX + name) for name in [
+    'helper-harness.js.txt', 'integration-baseline-harness.js.txt', 'integration-candidate-harness.js.txt',
+]}
+previous_hashes = {name: sha(text) for name, text in harnesses.items()}
+bindings = []
+
+def replace_binding(harness, ref, path, name, kind, insert_before=None):
+    value = fragment(sources[(ref, path)], name, kind)
+    text = harnesses[harness]
+    if insert_before is not None:
+        marker = fragment(text, insert_before, 'function' if kind == 'function' else 'constant')
+        assert text.count(marker) == 1
+        text = text.replace(marker, value + '\n\n' + marker)
+    else:
+        old = fragment(text, name, kind)
+        assert text.count(old) == 1
+        text = text.replace(old, value)
+    harnesses[harness] = text
+    bindings.append({'harness': harness, 'sourceRef': ref, 'sourcePath': path, 'name': name, 'kind': kind, 'sha256': sha(value)})
+
+common_functions = [
+    'hasFixedContentSpan', 'getArtifactContentOffset', 'getArtifactContentLength',
+    'isLosslessInt32Score', 'validateContentOffset', 'validateContentLength',
+    'getSynchronousResolvedContentReferences', 'getSynchronousRecordFieldReferences',
+    'createArtifactTermRecordChunkWithResolvedContent', 'isPlainPrivateRecordFieldColumn',
+    'tryEncodeCompactRecordFieldsWithContentBounds',
+]
+new_constants = [
+    'RECORD_FIELD_TYPED_ARRAY_PROTOTYPE', 'RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS',
+    'RECORD_FIELD_TYPED_ARRAY_PROPERTIES', 'RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR',
+    'RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR', 'RECORD_FIELD_CONSTRUCTORS',
+]
+for harness in ['helper-harness.js.txt', 'integration-candidate-harness.js.txt']:
+    for name in common_functions:
+        replace_binding(harness, CANDIDATE, STORE, name, 'function')
+    replace_binding(harness, CANDIDATE, STORE, 'hasOriginalRecordFieldInstanceChecks', 'function', 'tryEncodeCompactRecordFieldsWithContentBounds')
+    for name in new_constants:
+        # These declarations are source-exact; their placement precedes every
+        # helper use, and their order preserves captured prototype dependencies.
+        value = fragment(sources[(CANDIDATE, STORE)], name, 'constant')
+        anchor = fragment(harnesses[harness], 'ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR', 'constant')
+        if name != new_constants[0]:
+            anchor = fragment(harnesses[harness], new_constants[new_constants.index(name) - 1], 'constant')
+        harnesses[harness] = harnesses[harness].replace(anchor, anchor + '\n' + value)
+        bindings.append({'harness': harness, 'sourceRef': CANDIDATE, 'sourcePath': STORE, 'name': name, 'kind': 'constant', 'sha256': sha(value)})
+
+for name in ['hasResolvedContentReferences', 'getContentOffsetDelta', 'sliceResolvedContentReferences', 'inheritSlicedContentReferenceOrigin', 'hasOriginalArtifactRecordEncoders', 'settleEncodedArtifactRecordFields']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, STORE, name, 'function')
+for name in ['createPreparedTermLookupIndexForRecordFields', 'getSynchronousWholePreparedTermLookupIndex']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, PREPARATION, name, 'function')
+for name in ['preparedOrigins', 'mapGet']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, PREPARATION, name, 'constant')
+for name in ['originalArtifactRecordStores', 'originalArtifactChunkEncoder', 'originalArtifactFieldEncoder']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, STORE, name, 'constant')
+for name in ['hasTermRecordPreinternedPlanShape', 'hasCompleteTermRecordPreinternedPlan', 'hasCompletePreparedTermRecordPreinternedPlan']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, PLAN, name, 'function')
+for name in ['isCompletePreparedTermLookupIndex', 'hasCompletePreparedTermLookupIndexes']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, LOOKUP, name, 'function')
+for name in ['_encodeAndAppendArtifactChunkForState', '_encodeArtifactChunkRecords', '_encodeArtifactRecordFields']:
+    replace_binding('integration-candidate-harness.js.txt', CANDIDATE, STORE, name, 'method')
+replace_binding('helper-harness.js.txt', BASE, STORE, '_encodeArtifactRecordFields', 'method')
+
+# The baseline harness remains byte-for-byte the previous control. Bind the
+# three executed production methods to the frozen baseline; its unused helper
+# copies and its explicit constructor/lookup/persistence stubs are unchanged.
+for name in ['_encodeAndAppendArtifactChunkForState', '_encodeArtifactChunkRecords', '_encodeArtifactRecordFields']:
+    before = harnesses['integration-baseline-harness.js.txt']
+    replace_binding('integration-baseline-harness.js.txt', BASE, STORE, name, 'method')
+    assert harnesses['integration-baseline-harness.js.txt'] == before
+
+for name, value in harnesses.items():
+    (OUT / name).write_text(value)
+for row in bindings:
+    actual = fragment(harnesses[row['harness']], row['name'], row['kind'])
+    expected = fragment(sources[(row['sourceRef'], row['sourcePath'])], row['name'], row['kind'])
+    assert actual == expected
+    assert sha(actual) == row['sha256']
+
+manifest = {
+    'format': 'manabitan-fusion-source-bindings-v1',
+    'baseCommit': BASE,
+    'candidateCommit': CANDIDATE,
+    'candidateTree': subprocess.check_output(['git', 'rev-parse', CANDIDATE + '^{tree}'], cwd=REPO, text=True).strip(),
+    'localTestedCommit': args.local_tested_commit,
+    'previousWorkflowCommit': PREVIOUS,
+    'sources': [{'ref': ref, 'path': path, 'sha256': sha(text)} for (ref, path), text in sources.items()],
+    'harnesses': {name: {'sha256': sha(text), 'previousSha256': previous_hashes[name]} for name, text in harnesses.items()},
+    'fragments': bindings,
+    'scope': 'Source-exact executable production functions and new admission captures. Baseline control, 2019 helper cases, 41 integration cases, minimal constructor, fallback lookup/persistence stubs and thresholds stay unchanged. Full-source unit and real-worker corpus gates remain mandatory.',
+    'stubs': ['minimal TermRecordOpfsStore constructor', 'safePerformance.now', 'compactTermRecordPreinternedPlan', 'buildTermLookupFilter', 'encodePersistedTermLookupIndex', 'encodePersistedTermLookupIndexFromPreinternedPlan', 'integration-only numeric lookup thresholds', 'append capture'],
+}
+(OUT / 'source-bindings.json').write_text(json.dumps(manifest, indent=2) + '\n')
+print(json.dumps({'candidate': CANDIDATE, 'bindings': len(bindings), 'baselineUnchanged': sha(harnesses['integration-baseline-harness.js.txt']) == previous_hashes['integration-baseline-harness.js.txt'], 'harnesses': manifest['harnesses']}))

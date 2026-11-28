@@ -1,0 +1,550 @@
+{
+  "format": "manabitan-fusion-source-bindings-v1",
+  "baseCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidateCommit": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+  "candidateTree": "cc5ebc68ac9c185cb5ea0c7313f37bd22be47c00",
+  "localTestedCommit": "f04bc9af7e4b0dbbf61e69f95bb3a06861d0caa5",
+  "previousWorkflowCommit": "2182621584aae812e0db8379727bb2e4c781dd25",
+  "sources": [
+    {
+      "ref": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha256": "7325a63fa3d054a3c8b426c87880671ca57f5956dce842d9daef4acd4d617594"
+    },
+    {
+      "ref": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "sha256": "c66505c996359255e8fee5ebad98e51ddf840bd95bce12ba40cb1dd12a6579a7"
+    },
+    {
+      "ref": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "path": "ext/js/dictionary/term-record-field-preparation.js",
+      "sha256": "565982f5b783fd8ba6db16bd4e3d1fce30a338458a9361d3022cd532c4949e32"
+    },
+    {
+      "ref": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "path": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "sha256": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969"
+    },
+    {
+      "ref": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "path": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "sha256": "19a13fedbbe925a5a04d65ec7ba13a94aaec7f36eaaa554ab53fad840bc74f4a"
+    }
+  ],
+  "harnesses": {
+    "helper-harness.js.txt": {
+      "sha256": "f6d5560cc608e0121cacb1429cc5b22076dc505d27619f6289c72d93898dccc5",
+      "previousSha256": "bbf3378dfd96590db8976bedd9adddf369d51f6cf27c6b249a4e45a78a5e6beb"
+    },
+    "integration-baseline-harness.js.txt": {
+      "sha256": "eb5f53f1da46d21951ab2cd5aa617b6777e19a7a95aea4178ca9ee26d88008b4",
+      "previousSha256": "eb5f53f1da46d21951ab2cd5aa617b6777e19a7a95aea4178ca9ee26d88008b4"
+    },
+    "integration-candidate-harness.js.txt": {
+      "sha256": "69ceeac0b4f4908ae44ad8915f753abbdcfa30e89ba1275f7c0f4a9d09d3e400",
+      "previousSha256": "1352838486b50f15116a57e6f1d29a5d4fcc5999ebc11aa590d63a499dbe4992"
+    }
+  },
+  "fragments": [
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasFixedContentSpan",
+      "kind": "function",
+      "sha256": "8733f1028eb5a7bac92118c71e1551d425550ff85a1107b6187b988e897d5acf"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getArtifactContentOffset",
+      "kind": "function",
+      "sha256": "a219797232025bffc7191ca91331a964e5b8e70316c36fa9e41dc469900ef5f5"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getArtifactContentLength",
+      "kind": "function",
+      "sha256": "61253638e7d6cbf9a514972b42b7bd2f30381aacc4c9fb6fccbfb04bb92917bc"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "isLosslessInt32Score",
+      "kind": "function",
+      "sha256": "7d49fdb36705588c111f18f935e8e17a69b865da9c13ac8292312f0943ced67a"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "validateContentOffset",
+      "kind": "function",
+      "sha256": "74e8a1b77307e6c3effe8c08c2797bcada304980e006d2e1fa15c5d50924a525"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "validateContentLength",
+      "kind": "function",
+      "sha256": "6ce6910c3e944b994044c14e2ad470c9da280aee1428890ca5c15ea604415ab7"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getSynchronousResolvedContentReferences",
+      "kind": "function",
+      "sha256": "2bacf0b5a612ccb7f33439558901ace4584453d3d940d2b869c6fb9b76b9a42c"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getSynchronousRecordFieldReferences",
+      "kind": "function",
+      "sha256": "7f7461185d28ad5c100e635cc5d1d9ef6a5eafac4750f854855147ca922c781c"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "createArtifactTermRecordChunkWithResolvedContent",
+      "kind": "function",
+      "sha256": "4812dcf22a548898c13c47263fd3810d3f35367523f1337b67e765ab7258d150"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "isPlainPrivateRecordFieldColumn",
+      "kind": "function",
+      "sha256": "36184cee54a5a310274ba1ccc64cba12b8ec86a9045ae37d93d03477911fa0a1"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "tryEncodeCompactRecordFieldsWithContentBounds",
+      "kind": "function",
+      "sha256": "a70bb0ed3d4bc612dc1e484fd9ff346215428a6e6b074410a33b5904d27ecc4e"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasOriginalRecordFieldInstanceChecks",
+      "kind": "function",
+      "sha256": "976587f3a6d9ca1f0c3f4d89035d2804bb13007a0cc2696fdd41a516bf5f6822"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_PROTOTYPE",
+      "kind": "constant",
+      "sha256": "06ae3b450005f75dc3fe63074eaf42393d2083b2e78b831c4a892a26eca81b8a"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS",
+      "kind": "constant",
+      "sha256": "789618cf7f29ab4b06b4c418c66f01ac9efce9594f33a2350ca088e951b878b9"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_PROPERTIES",
+      "kind": "constant",
+      "sha256": "54c1d41358daf5cdec4d87e964a3135e07c45f138535c38db38cb88229cdad65"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR",
+      "kind": "constant",
+      "sha256": "dca5071f9924b67aadcfe074d5628cd05ed7f644c1ac8cb54ee04909c5251829"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR",
+      "kind": "constant",
+      "sha256": "30f3d5d423e776015fad9b69dbb7499d7c974de047e91e08ae58273fad8acfd8"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_CONSTRUCTORS",
+      "kind": "constant",
+      "sha256": "2a39f84ab714527724130c2a34d7b3f943c9e76e8396459f44df3d9e58ea8525"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasFixedContentSpan",
+      "kind": "function",
+      "sha256": "8733f1028eb5a7bac92118c71e1551d425550ff85a1107b6187b988e897d5acf"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getArtifactContentOffset",
+      "kind": "function",
+      "sha256": "a219797232025bffc7191ca91331a964e5b8e70316c36fa9e41dc469900ef5f5"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getArtifactContentLength",
+      "kind": "function",
+      "sha256": "61253638e7d6cbf9a514972b42b7bd2f30381aacc4c9fb6fccbfb04bb92917bc"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "isLosslessInt32Score",
+      "kind": "function",
+      "sha256": "7d49fdb36705588c111f18f935e8e17a69b865da9c13ac8292312f0943ced67a"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "validateContentOffset",
+      "kind": "function",
+      "sha256": "74e8a1b77307e6c3effe8c08c2797bcada304980e006d2e1fa15c5d50924a525"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "validateContentLength",
+      "kind": "function",
+      "sha256": "6ce6910c3e944b994044c14e2ad470c9da280aee1428890ca5c15ea604415ab7"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getSynchronousResolvedContentReferences",
+      "kind": "function",
+      "sha256": "2bacf0b5a612ccb7f33439558901ace4584453d3d940d2b869c6fb9b76b9a42c"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getSynchronousRecordFieldReferences",
+      "kind": "function",
+      "sha256": "7f7461185d28ad5c100e635cc5d1d9ef6a5eafac4750f854855147ca922c781c"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "createArtifactTermRecordChunkWithResolvedContent",
+      "kind": "function",
+      "sha256": "4812dcf22a548898c13c47263fd3810d3f35367523f1337b67e765ab7258d150"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "isPlainPrivateRecordFieldColumn",
+      "kind": "function",
+      "sha256": "36184cee54a5a310274ba1ccc64cba12b8ec86a9045ae37d93d03477911fa0a1"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "tryEncodeCompactRecordFieldsWithContentBounds",
+      "kind": "function",
+      "sha256": "a70bb0ed3d4bc612dc1e484fd9ff346215428a6e6b074410a33b5904d27ecc4e"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasOriginalRecordFieldInstanceChecks",
+      "kind": "function",
+      "sha256": "976587f3a6d9ca1f0c3f4d89035d2804bb13007a0cc2696fdd41a516bf5f6822"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_PROTOTYPE",
+      "kind": "constant",
+      "sha256": "06ae3b450005f75dc3fe63074eaf42393d2083b2e78b831c4a892a26eca81b8a"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_DESCRIPTORS",
+      "kind": "constant",
+      "sha256": "789618cf7f29ab4b06b4c418c66f01ac9efce9594f33a2350ca088e951b878b9"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_PROPERTIES",
+      "kind": "constant",
+      "sha256": "54c1d41358daf5cdec4d87e964a3135e07c45f138535c38db38cb88229cdad65"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_TAG_DESCRIPTOR",
+      "kind": "constant",
+      "sha256": "dca5071f9924b67aadcfe074d5628cd05ed7f644c1ac8cb54ee04909c5251829"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_TYPED_ARRAY_CONSTRUCTOR",
+      "kind": "constant",
+      "sha256": "30f3d5d423e776015fad9b69dbb7499d7c974de047e91e08ae58273fad8acfd8"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "RECORD_FIELD_CONSTRUCTORS",
+      "kind": "constant",
+      "sha256": "2a39f84ab714527724130c2a34d7b3f943c9e76e8396459f44df3d9e58ea8525"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasResolvedContentReferences",
+      "kind": "function",
+      "sha256": "789a7c27a72cd8af82c785f18f4641ba19ef39220e56c283a5f6e6b74ffbbd0f"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "getContentOffsetDelta",
+      "kind": "function",
+      "sha256": "1c741d723b780b8e7efafc4544f4481019a76a912235d15ebdcb39993307a005"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "sliceResolvedContentReferences",
+      "kind": "function",
+      "sha256": "34698c9f09d996d5a4d693f458246e7e3f356bc73597630eeb933bd6391e7a56"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "inheritSlicedContentReferenceOrigin",
+      "kind": "function",
+      "sha256": "4a058f8513010abfd7aa2a8d981a84e0617dc1bfda42179690a48071db2a3f46"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "hasOriginalArtifactRecordEncoders",
+      "kind": "function",
+      "sha256": "9ef922d3141d3b2fc75510af453e9b976026fd3ca37cdee8f0624c5b2c0a785b"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "settleEncodedArtifactRecordFields",
+      "kind": "function",
+      "sha256": "c949327988f922d9735e953ffcfd151ca06170a8b9fb5fe9bb8a4fa47dd44294"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-field-preparation.js",
+      "name": "createPreparedTermLookupIndexForRecordFields",
+      "kind": "function",
+      "sha256": "71421346884d9bbe6e04d2912d03760bd6437b715dcae4253c9adc9b2bf27f13"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-field-preparation.js",
+      "name": "getSynchronousWholePreparedTermLookupIndex",
+      "kind": "function",
+      "sha256": "3168b192cd681cfac3f7b686e771200f22cd4921609d8e12786a4d880d724d6a"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-field-preparation.js",
+      "name": "preparedOrigins",
+      "kind": "constant",
+      "sha256": "3f87829d2d2a67ea8f1faed17e97541213aa960e094408543fb9f0f959406c64"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-field-preparation.js",
+      "name": "mapGet",
+      "kind": "constant",
+      "sha256": "bd15fd60c645bbf24794a2cc8a9b8456c487d01ddbfab889200162d40207672b"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "originalArtifactRecordStores",
+      "kind": "constant",
+      "sha256": "4c95ea811cfac4af1843f2f30af4e2ab2c9d18b84a1119f4d1d87088cd68fb4c"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "originalArtifactChunkEncoder",
+      "kind": "constant",
+      "sha256": "fc8bede4b33a194b1a48ce9fddd487263e94499044c4b59d6a2a6034184d9fcd"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "originalArtifactFieldEncoder",
+      "kind": "constant",
+      "sha256": "a37b660384b4dd760ee8bed8dc70574e11ce8ef050bf844218cc92530053e72b"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "name": "hasTermRecordPreinternedPlanShape",
+      "kind": "function",
+      "sha256": "9021326c89cfefe1e4449a4c4c60dc9cd7ce333b9000b2200082b95918569738"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "name": "hasCompleteTermRecordPreinternedPlan",
+      "kind": "function",
+      "sha256": "fe0e423cdbfac2aa39984635b9b2f24550b9f2876c335f01ea015824dab32712"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-preinterned-plan.js",
+      "name": "hasCompletePreparedTermRecordPreinternedPlan",
+      "kind": "function",
+      "sha256": "b6aa65736d58d41b12f62523fa1150cad97e43f55efb1275b66767e7e407c6c3"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "name": "isCompletePreparedTermLookupIndex",
+      "kind": "function",
+      "sha256": "788662bf2cb84f2db8444c6a361b2ede0db796842643edca47e5312293c891ce"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-lookup-index-preparation.js",
+      "name": "hasCompletePreparedTermLookupIndexes",
+      "kind": "function",
+      "sha256": "f6e520f23f28840fb964807e845d04323d5e1cac7e634a2df65ed058cbcc5c28"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeAndAppendArtifactChunkForState",
+      "kind": "method",
+      "sha256": "efacf398a5d562332d0d372490e8482a933ce6da33c04592a02579ba0a641feb"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeArtifactChunkRecords",
+      "kind": "method",
+      "sha256": "4c52b64ff6a4b0dd59dccb528c6d551578944d472800f8ee0953da6466c13520"
+    },
+    {
+      "harness": "integration-candidate-harness.js.txt",
+      "sourceRef": "91dfdea8f6d2f801b97c1f05a25102f3308371b0",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeArtifactRecordFields",
+      "kind": "method",
+      "sha256": "cb6fa52c54e60047db48234bb5b062d588d0ba6a728d46fee04f049f925c502b"
+    },
+    {
+      "harness": "helper-harness.js.txt",
+      "sourceRef": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeArtifactRecordFields",
+      "kind": "method",
+      "sha256": "cb6fa52c54e60047db48234bb5b062d588d0ba6a728d46fee04f049f925c502b"
+    },
+    {
+      "harness": "integration-baseline-harness.js.txt",
+      "sourceRef": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeAndAppendArtifactChunkForState",
+      "kind": "method",
+      "sha256": "1de2ee0359776d81f5f1636a2d058cc5dc55ee30de6ffabdab2d459cb0a9bee0"
+    },
+    {
+      "harness": "integration-baseline-harness.js.txt",
+      "sourceRef": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeArtifactChunkRecords",
+      "kind": "method",
+      "sha256": "4c52b64ff6a4b0dd59dccb528c6d551578944d472800f8ee0953da6466c13520"
+    },
+    {
+      "harness": "integration-baseline-harness.js.txt",
+      "sourceRef": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "name": "_encodeArtifactRecordFields",
+      "kind": "method",
+      "sha256": "cb6fa52c54e60047db48234bb5b062d588d0ba6a728d46fee04f049f925c502b"
+    }
+  ],
+  "scope": "Source-exact executable production functions and new admission captures. Baseline control, 2019 helper cases, 41 integration cases, minimal constructor, fallback lookup/persistence stubs and thresholds stay unchanged. Full-source unit and real-worker corpus gates remain mandatory.",
+  "stubs": [
+    "minimal TermRecordOpfsStore constructor",
+    "safePerformance.now",
+    "compactTermRecordPreinternedPlan",
+    "buildTermLookupFilter",
+    "encodePersistedTermLookupIndex",
+    "encodePersistedTermLookupIndexFromPreinternedPlan",
+    "integration-only numeric lookup thresholds",
+    "append capture"
+  ]
+}

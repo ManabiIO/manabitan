@@ -23,6 +23,19 @@ import {createPreparedTermLookupIndexForRecordFields, getSynchronousWholePrepare
 /** @typedef {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[1]} ArtifactChunk */
 /** @typedef {NonNullable<ArtifactChunk['resolvedContentReferences']>} References */
 /** @typedef {ReturnType<typeof fixture>} Fixture */
+/** @typedef {['indexes'|'offsets'|'lengths'|'scores', 'buffer'|'length'|'byteOffset'|'byteLength', 'own'|'concrete'|'typed', 'throw'|'native'|'change-offset']} ColumnHookCase */
+
+/** @type {ColumnHookCase[]} */
+const columnHookCases = [];
+for (const column of /** @type {const} */ (['indexes', 'offsets', 'lengths', 'scores'])) {
+    for (const property of /** @type {const} */ (['buffer', 'length', 'byteOffset', 'byteLength'])) {
+        for (const location of /** @type {const} */ (['own', 'concrete', 'typed'])) {
+            for (const behavior of /** @type {const} */ (['throw', 'native', 'change-offset'])) {
+                columnHookCases.push([column, property, location, behavior]);
+            }
+        }
+    }
+}
 
 /**
  * @param {boolean} branded
@@ -54,7 +67,7 @@ function fixture(branded, count = 128) {
     const prepared = new Map();
     for (const [key, entry] of generated.indexes) {
         prepared.set(key, branded ?
-            createPreparedTermLookupIndexForRecordFields(entry.bytes, entry.preinternedPlan, entry.routeFilter) :
+            createPreparedTermLookupIndexForRecordFields(entry.bytes, entry.preinternedPlan) :
             {...entry});
     }
     const uniqueCount = Math.ceil(count / 2);
@@ -151,6 +164,40 @@ function changeValues(value, kind) {
         case 'bad-after-legacy':
             references.lengths[0] = 65535;
             references.offsets[references.offsets.length - 1] = Number.NaN;
+            break;
+    }
+}
+
+/**
+ * Preserve the visible prototype while changing the native indexed kind.
+ * @param {Fixture} value
+ * @param {'indexes'|'offsets'|'lengths'|'scores'} columnName
+ * @param {'numeric'|'bigint'} kind
+ */
+function forgeColumnKind(value, columnName, kind) {
+    const columns = {
+        indexes: value.references.uniqueIndexList,
+        offsets: value.references.offsets,
+        lengths: value.references.lengths,
+        scores: value.chunk.scoreList,
+    };
+    const original = columns[columnName];
+    const replacement = kind === 'bigint' ?
+        BigInt64Array.from(original, (number) => BigInt(number)) :
+        Float32Array.from(original);
+    Object.setPrototypeOf(replacement, Object.getPrototypeOf(original));
+    switch (columnName) {
+        case 'scores':
+            value.chunk.scoreList = /** @type {Int32Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        case 'offsets':
+            value.references.offsets = /** @type {Float64Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        case 'indexes':
+            value.references.uniqueIndexList = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
+            break;
+        default:
+            value.references.lengths = /** @type {Uint32Array} */ (/** @type {unknown} */ (replacement));
             break;
     }
 }
@@ -330,6 +377,151 @@ describe('fused whole-run content bounds and compact record fields', () => {
         assert.deepEqual(actual.appends, expected.appends);
         expect(actual.fusedRows).toBe(0);
         expect(reads[1]).toBe(reads[0]);
+    });
+
+    test.each(columnHookCases)('preserves the %s %s hook on %s with %s behavior', async (columnName, property, location, behavior) => {
+        const baseline = fixture(false);
+        const candidate = fixture(true);
+        const reads = [0, 0];
+        const typedPrototype = Object.getPrototypeOf(Uint8Array.prototype);
+        const nativeDescriptor = Object.getOwnPropertyDescriptor(typedPrototype, property);
+        /**
+         * @param {Fixture} value
+         * @param {number} position
+         * @returns {ReturnType<typeof capture>}
+         */
+        async function observe(value, position) {
+            const columns = {
+                indexes: value.references.uniqueIndexList,
+                offsets: value.references.offsets,
+                lengths: value.references.lengths,
+                scores: value.chunk.scoreList,
+            };
+            const column = columns[columnName];
+            const target = location === 'own' ? column : (location === 'concrete' ? Object.getPrototypeOf(column) : typedPrototype);
+            const original = Object.getOwnPropertyDescriptor(target, property);
+            Object.defineProperty(target, property, {
+                configurable: true,
+                get() {
+                    if (this === column) {
+                        ++reads[position];
+                        if (behavior === 'throw') { throw new Error('Typed-array metadata getter'); }
+                        if (behavior === 'change-offset' && reads[position] === 2) { value.references.offsets[0] = Number.NaN; }
+                    }
+                    if (typeof nativeDescriptor?.get !== 'function') { throw new Error('Missing native typed-array getter'); }
+                    return nativeDescriptor.get.call(this);
+                },
+            });
+            try {
+                return await capture(value);
+            } finally {
+                if (typeof original === 'undefined') {
+                    Reflect.deleteProperty(target, property);
+                } else {
+                    Object.defineProperty(target, property, original);
+                }
+            }
+        }
+        const expected = await observe(baseline, 0);
+        const actual = await observe(candidate, 1);
+        expect(actual.error).toEqual(expected.error);
+        assert.deepEqual(actual.appends, expected.appends);
+        expect(actual.fusedRows).toBe(0);
+        expect(reads[1]).toBe(reads[0]);
+    });
+
+    test.each(/** @type {const} */ (['ArrayBuffer', 'Uint32Array', 'Float64Array', 'Int32Array', 'TypedArray']))('retains the %s constructor instance checks', async (kind) => {
+        for (const behavior of /** @type {const} */ (['native', 'throw', 'change-offset'])) {
+            const baseline = fixture(false);
+            const candidate = fixture(true);
+            const reads = [0, 0];
+            const constructors = {ArrayBuffer, Uint32Array, Float64Array, Int32Array, TypedArray: Object.getPrototypeOf(Uint8Array)};
+            const constructor = constructors[kind];
+            const original = Object.getOwnPropertyDescriptor(constructor, Symbol.hasInstance);
+            const native = Object.getOwnPropertyDescriptor(Function.prototype, Symbol.hasInstance);
+            /**
+             * @param {Fixture} value
+             * @param {number} position
+             * @returns {ReturnType<typeof capture>}
+             */
+            async function observe(value, position) {
+                Object.defineProperty(constructor, Symbol.hasInstance, {
+                    configurable: true,
+                    /**
+                     * @param {unknown} instance
+                     * @returns {boolean}
+                     */
+                    value(instance) {
+                        ++reads[position];
+                        if (behavior === 'throw' && reads[position] === 4) { throw new Error('Constructor instance hook'); }
+                        if (behavior === 'change-offset' && reads[position] === 4) { value.references.offsets[0] = Number.NaN; }
+                        return native?.value.call(this, instance);
+                    },
+                });
+                try {
+                    return await capture(value);
+                } finally {
+                    if (typeof original === 'undefined') {
+                        Reflect.deleteProperty(constructor, Symbol.hasInstance);
+                    } else {
+                        Object.defineProperty(constructor, Symbol.hasInstance, original);
+                    }
+                }
+            }
+            const expected = await observe(baseline, 0);
+            const actual = await observe(candidate, 1);
+            expect(actual.error).toEqual(expected.error);
+            assert.deepEqual(actual.appends, expected.appends);
+            expect(actual.fusedRows).toBe(0);
+            expect(reads[1]).toBe(reads[0]);
+        }
+    });
+
+    test.each(/** @type {const} */ (['indexes', 'offsets', 'lengths', 'scores']))('preserves the original path for a forged native %s kind', async (columnName) => {
+        for (const kind of /** @type {const} */ (['numeric', 'bigint'])) {
+            const baseline = fixture(false);
+            const candidate = fixture(true);
+            forgeColumnKind(baseline, columnName, kind);
+            forgeColumnKind(candidate, columnName, kind);
+            const expected = await capture(baseline);
+            const actual = await capture(candidate);
+            expect(actual.error).toEqual(expected.error);
+            assert.deepEqual(actual.appends, expected.appends);
+            expect(actual.fusedRows).toBe(0);
+        }
+    });
+
+    test.each(/** @type {const} */ (['numeric', 'bigint']))('validates late offsets before a forged %s score kind', async (kind) => {
+        const baseline = fixture(false);
+        const candidate = fixture(true);
+        for (const value of [baseline, candidate]) {
+            forgeColumnKind(value, 'scores', kind);
+            value.references.offsets[value.references.offsets.length - 1] = Number.NaN;
+        }
+        const expected = await capture(baseline);
+        const actual = await capture(candidate);
+        expect(expected.error).toEqual({name: 'RangeError', message: 'Invalid term content offset: NaN'});
+        expect(actual.error).toEqual(expected.error);
+        assert.deepEqual(actual.appends, expected.appends);
+        expect(actual.fusedRows).toBe(0);
+    });
+
+    test('checks the native kind without reading a caller Symbol.toStringTag', async () => {
+        const baseline = fixture(false);
+        const candidate = fixture(true);
+        let reads = 0;
+        for (const value of [baseline, candidate]) {
+            Object.defineProperty(value.chunk.scoreList, Symbol.toStringTag, {get() {
+                ++reads;
+                throw new Error('Caller type tag');
+            }});
+        }
+        const expected = await capture(baseline);
+        const actual = await capture(candidate);
+        expect(actual.error).toBeNull();
+        assert.deepEqual(actual.appends, expected.appends);
+        expect(actual.fusedRows).toBe(128);
+        expect(reads).toBe(0);
     });
 
     test('requires original entry identity and data bindings without invoking proxy traps', () => {

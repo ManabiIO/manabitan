@@ -19,7 +19,7 @@ concurrency:
 
 env:
   BASE_SHA: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-  CANDIDATE_SHA: aa2473f42957648d71912af0547a99039f795840
+  CANDIDATE_SHA: 91dfdea8f6d2f801b97c1f05a25102f3308371b0
 
 jobs:
   validate:
@@ -119,6 +119,11 @@ jobs:
           assert original.split("schedule = []", 1)[1] == current.split("schedule = []", 1)[1].replace(metadata, "")
           print("FUSION_EVIDENCE measurement suffix is byte-identical to frozen baseline except prospective added-package metadata")
           PY
+      - name: Verify executable source bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-fused-fields-20261128-d2d13264/verify-source-bindings.py | tee builds/perf/fused-fields-tooling/source-bindings.json
       - name: Replay deterministic helper and integration checks
         shell: bash
         run: |
