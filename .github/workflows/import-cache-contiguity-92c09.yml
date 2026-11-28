@@ -1,110 +1,33 @@
-name: Import cache contiguity qualification 92c09
+name: Stop rejected cache contiguity study 92c09
 
 on:
   push:
     branches: ['perf/jmdict-cache-contiguity-20261128-92c09']
-    paths:
-      - 'ext/js/dictionary/dictionary-database.js'
-      - 'test/dictionary-recent-source-contiguity.test.js'
-      - '.github/workflows/import-cache-contiguity-92c09.yml'
+    paths: ['.github/workflows/import-cache-contiguity-92c09.yml']
 
 permissions:
   contents: read
 
 concurrency:
   group: import-cache-contiguity-92c09-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  verify:
-    env:
-      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-    name: Verify candidate source
+  record-rejection:
+    name: Record correctness rejection
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 1
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - name: Unit, type, lint, and build verification
+      - name: Retain cancellation reason in the job log
         shell: bash
         run: |
-          set -euo pipefail
-          mkdir -p builds/perf/cache-contiguity-verification
-          npm run test:unit 2>&1 | tee builds/perf/cache-contiguity-verification/unit.log
-          npm run test:build 2>&1 | tee builds/perf/cache-contiguity-verification/build.log
-          npm run test:ts:main 2>&1 | tee builds/perf/cache-contiguity-verification/types-main.log
-          npm run test:ts:test 2>&1 | tee builds/perf/cache-contiguity-verification/types-test.log
-          mapfile -t changed_js < <(git diff --name-only --diff-filter=AM "$PERF_BASELINE" "$GITHUB_SHA" -- "*.js")
-          test "${#changed_js[@]}" -gt 0
-          npx eslint "${changed_js[@]}" 2>&1 | tee builds/perf/cache-contiguity-verification/lint.log
-          git diff --exit-code
-      - name: Preserve source verification
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: cache-contiguity-verification-92c09
-          path: builds/perf/cache-contiguity-verification
-          if-no-files-found: error
-          retention-days: 14
-
-  qualify:
-    needs: verify
-    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.order }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        dictionary: [jmdict, jitendex, vndb]
-        order: [AB, BA]
-    env:
-      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
-      PERF_CANDIDATE: ${{ github.sha }}
-      PERF_DICTIONARY: ${{ matrix.dictionary }}
-      PERF_ORDER: ${{ matrix.order }}
-      MANABITAN_E2E_STRICT_RUNTIME: '1'
-      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - name: Verify qualification observers
-        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
-      - name: Install matching Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Restore pinned dictionary archives
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: builds/e2e-dictionary-cache
-          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
-      - name: Run exact-source balanced timing and separate memory cohorts
-        shell: bash
-        run: |
-          set -euo pipefail
-          storage_args=()
-          if [[ "$PERF_DICTIONARY" == vndb ]]; then
-            storage_args+=(--vndb-sah-allocation-units 37 37)
-          fi
-          python dev/perf/import-qualification-20261125-a7f7.py \
-            --baseline "$PERF_BASELINE" \
-            --candidate "$PERF_CANDIDATE" \
-            --dictionary "$PERF_DICTIONARY" \
-            --initial-order "$PERF_ORDER" \
-            --pairs 12 \
-            --expected-package-entry js/dictionary/dictionary-database.js \
-            "${storage_args[@]}" \
-            --evidence builds/perf/cache-contiguity-qualification
-      - name: Preserve every observation, source identity, and failure
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: cache-contiguity-92c09-${{ matrix.dictionary }}-${{ matrix.order }}
-          path: builds/perf/cache-contiguity-qualification
-          if-no-files-found: error
-          retention-days: 14
-
+          python3 - <<'PYTHON'
+          import json
+          print(json.dumps({
+              "decision": "Stop queued browser qualification; do not promote this candidate",
+              "reason": "The cached contiguity proof can become invalid across caller callbacks",
+              "rejected_source": "88f7d75422bfd9b3979c7b69eb0f5a16f69d0904",
+              "superseded_run": 46105217926,
+              "scope": "This study branch only; no benchmark or product execution"
+          }, sort_keys=True))
+          PYTHON
