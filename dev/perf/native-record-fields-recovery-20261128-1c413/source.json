@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "kind": "reconstructed-production-correctness-only",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productCommit": "5545e5c26daaaa13af18a4f6f94e762b3856446c",
+  "productTree": "9bb3a0dcbf22e9b2d55c15f21bb5444fc64e00a9",
+  "nodeVersion": "22.22.0",
+  "digest": "64a530a4e3e5825a7640eb5a02cc8c936c7357bdaf20d58ec617cf3262394e92",
+  "files": {
+    ".github/workflows/native-record-fields-correctness-1c413.yml": {
+      "sha256": "43f23d097511eb39ebf7521db29a92889162dbb02f4aa6fa41f9c07a9ae5c3d4",
+      "bytes": 14306,
+      "gitBlob": "030042538bad01a66ce993e39cce69c975b1a0da",
+      "mode": "100644"
+    },
+    "dev/bin/audit-release-packages.js": {
+      "sha256": "0ddda735182b505a79536771eac40e9b8317269f2bf63151b2ca2ee4565b9a4d",
+      "bytes": 4062,
+      "gitBlob": "ceca0d1478afddb5480a5661bcf4c533805ad669",
+      "mode": "100644"
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "sha256": "10a186288df1f8641433b706a321554949bdb55481c67c493338665cb763082c",
+      "bytes": 3159,
+      "gitBlob": "0921b1806a239e1b753f199af642849afdad4077",
+      "mode": "100644"
+    },
+    "dev/data/dictionary-wasm/term-record-fields.wasm": {
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753,
+      "gitBlob": "5a419e0017ac6ac5b153b85575805b5ab56c54ad",
+      "mode": "100644"
+    },
+    "dev/dictionary-wasm.js": {
+      "sha256": "0c69082f7a1ade5f12e564599f229d049fd8f7a7cab976d27d61321514ea815d",
+      "bytes": 7244,
+      "gitBlob": "7f339b89e3f71058d16f808dab28485ffa47cff5",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/README.md": {
+      "sha256": "b5c034d19bc560b59ecb5ef8c3b3431d1745de2c33a86c901301206b8853a366",
+      "bytes": 7538,
+      "gitBlob": "b4fd8021ad3464851d5b785c3cd0f383e5761d81",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/README.md": {
+      "sha256": "8f34735871fedbab6238090e6b5c00317555fc910d7cd6855cbd7d2891c5e204",
+      "bytes": 11309,
+      "gitBlob": "c1a0edbfa313d7806d98370ad8186b9cd4f6cf5a",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/baseline-open-connection.txt": {
+      "sha256": "ab9f6d1be6bbbcaf07ff3cf9658c12a95799d8099e6a4e55d07a976207dfcd0b",
+      "bytes": 1953,
+      "gitBlob": "4a563609c474e77158f5bf1d403c938f359ba8c3",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-import-worker-bridge.mjs": {
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56",
+      "bytes": 2148,
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-opfs-disk.mjs": {
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621",
+      "bytes": 15180,
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/node-runtime.mjs": {
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339",
+      "bytes": 8164,
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run-all.py": {
+      "sha256": "77fbfdfc216700dbdf55ffbb5978580a802fb30311c4905b7c0ab73e8e60767b",
+      "bytes": 14510,
+      "gitBlob": "2d8be59caddbe900eafc6d5fa9cf1d78eb3d4fe6",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/run.mjs": {
+      "sha256": "eb9f1b64b4baee2976c74f8263d5f52c9002676c6ef5844b412560e04a1f8086",
+      "bytes": 24273,
+      "gitBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/source-binding.json": {
+      "sha256": "5814e8a8a5df2f913799e443196ab8d310a78e682604b3da811cca2cb001ec8b",
+      "bytes": 4452,
+      "gitBlob": "b094f1cbb84bd73ac58c6c785b7282acb1233710",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/test-opfs.mjs": {
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979",
+      "bytes": 11798,
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/corpus/test-run-all.py": {
+      "sha256": "ef424625e5662fd5824eaab0ee2efa490eedeb6db8a34f86fee930a906ec61e6",
+      "bytes": 7624,
+      "gitBlob": "55b73d02b16024a00286f25234755ece03f3ac75",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/recovery.json": {
+      "sha256": "a6cf7db10355cc1a29761c3c53b4e69fbc752042e05d8656383bab91791cbe7a",
+      "bytes": 22565,
+      "gitBlob": "4482ddf7014ef0d3cf61b08a3c980b0f447be1c6",
+      "mode": "100644"
+    },
+    "dev/perf/native-record-fields-recovery-20261128-1c413/verify-source.py": {
+      "sha256": "b6e952b7d698d571fbf937f1348aaafce93fde3411f905f15986af52296c0702",
+      "bytes": 10665,
+      "gitBlob": "065cbaad6c5b908bb7ce5c20e7e5f66b2b31075e",
+      "mode": "100644"
+    },
+    "eslint.config.js": {
+      "sha256": "52132b40b84b149a267c823e12bca1b24b3b6ef8fcd7ae97d3896cd7248b007b",
+      "bytes": 39532,
+      "gitBlob": "7713f8acde7f3d140888d8d324e3cb4135829c36",
+      "mode": "100644"
+    },
+    "ext/js/dictionary/dictionary-database.js": {
+      "sha256": "65f8d900ed478050925320002c333ddda77f01271ee8840ba28f7333b43700a8",
+      "bytes": 613623,
+      "gitBlob": "c7426300d25a4933eed2f2565ce8628684f52ab3",
+      "mode": "100644"
+    },
+    "ext/js/dictionary/term-record-fields.js": {
+      "sha256": "09951502c445b7e9f5f310be4e9d467bf150f6cba958eb9badae0784e6c57015",
+      "bytes": 15901,
+      "gitBlob": "6a157304832371e48ba39cd5229c832f3d5517c6",
+      "mode": "100644"
+    },
+    "ext/js/dictionary/term-record-opfs-store.js": {
+      "sha256": "c8abf6787445f4872792379cb04b23efd301e5763f406c2f41eeb770794a65f8",
+      "bytes": 368673,
+      "gitBlob": "138d4dcc2a17a17a6239717376d3563150a1b6f0",
+      "mode": "100644"
+    },
+    "ext/js/dictionary/wasm/term-record-fields.c": {
+      "sha256": "7fa9ce1bdc4f0103479efd41f211bc0507360809e212f95003a71caa3d0830af",
+      "bytes": 6660,
+      "gitBlob": "b90068f8dc8b5b4740c27235f445a69a8a6177b7",
+      "mode": "100644"
+    },
+    "test/dictionary-wasm-build.test.js": {
+      "sha256": "68913067ae4f25f1c57c33a192d1f850ec499bfaace6ce11fcd5f1346b61e46c",
+      "bytes": 7594,
+      "gitBlob": "1afaa61e9d961ba0e8f751d7ae3dafb5346f67aa",
+      "mode": "100644"
+    },
+    "test/release-package-native-assets.test.js": {
+      "sha256": "a079be5e7bd5cd981a00fed268bf8d3ae0eff140b26414a5774f1e5d154bd174",
+      "bytes": 5421,
+      "gitBlob": "76ce6d10ba7a1f208e1e5df99498ae510b22135a",
+      "mode": "100644"
+    },
+    "test/term-record-fields-native.test.js": {
+      "sha256": "94fd200b8532880447d30e60c16ab53c17f1596e0c5334ca7406fded72407f43",
+      "bytes": 39163,
+      "gitBlob": "9a3844b8137bf27adec8f1d54b77b0f0f66e76fb",
+      "mode": "100644"
+    },
+    "test/term-record-import-fields.test.js": {
+      "sha256": "e231fff79e47801ab668b00c7036dcaf7a3a129ddc1529e17bd85a154a0295c3",
+      "bytes": 20254,
+      "gitBlob": "2daaba6096b3f4c5fc4b9c7e9ec157760deac320",
+      "mode": "100644"
+    }
+  },
+  "sourceManifestExcludedFromOwnDigest": true
+}

@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "identity": "NEW reconstructed untimed corpus correctness kit; not recovered original source",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productOnlyTree": "9bb3a0dcbf22e9b2d55c15f21bb5444fc64e00a9",
+  "productSource": {
+    "helper": {
+      "gitBlob": "6a157304832371e48ba39cd5229c832f3d5517c6",
+      "sha256": "09951502c445b7e9f5f310be4e9d467bf150f6cba958eb9badae0784e6c57015"
+    },
+    "store": {
+      "gitBlob": "138d4dcc2a17a17a6239717376d3563150a1b6f0",
+      "sha256": "c8abf6787445f4872792379cb04b23efd301e5763f406c2f41eeb770794a65f8"
+    },
+    "database": {
+      "gitBlob": "c7426300d25a4933eed2f2565ce8628684f52ab3",
+      "sha256": "65f8d900ed478050925320002c333ddda77f01271ee8840ba28f7333b43700a8"
+    },
+    "wasm": {
+      "sha256": "8556f66c8af26ac3c0386f7ca068ffb10a5bd8949e34facde7e8451d46bf4e7a",
+      "bytes": 1753
+    }
+  },
+  "execution": {
+    "authoringState": "Static source and review only; not executed",
+    "node": "v22.22.0",
+    "pythonMinimum": "3.11",
+    "pureComparatorCases": 12,
+    "actualIoSmokeCases": 11,
+    "readinessWait": false,
+    "performanceMeasurements": false,
+    "replacementImports": false
+  },
+  "control": {
+    "armOrder": [
+      "A",
+      "B"
+    ],
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "groups": [
+      12,
+      22,
+      170
+    ],
+    "parserWorkers": 3
+  },
+  "boundaries": {
+    "sqlite": "real engine, nonpersistent :memory:",
+    "opfs": "new disk-backed host adapter",
+    "routeOverride": "usesFallbackStorage=false",
+    "setupTrackedException": "ext/legal-npm.html only; committed/generated digests recorded; generated A/B bytes must still match",
+    "normalization": "only MBTRD16X@8 and MBTIDX11@24, each 16 bytes in matching record/lookup file",
+    "retirement": "successful A/B matching raw sinks only after independent full raw-byte rehash; no full raw archive claim"
+  },
+  "files": {
+    "node-opfs-disk.mjs": {
+      "bytes": 15180,
+      "gitBlob": "09b8eda066484d748408868937494d79d3d33e83",
+      "sha256": "6bb9d0912c5a7af714bc1456688c7f58a7ed2f4a7c98ac4fea18eafe96491621"
+    },
+    "node-runtime.mjs": {
+      "bytes": 8164,
+      "gitBlob": "fe800d59128034a957d4ce920270cb0e59439972",
+      "sha256": "009743d3dc630f282895769f47c2389670fe3e548320fd0279a08072c2d12339"
+    },
+    "node-import-worker-bridge.mjs": {
+      "bytes": 2148,
+      "gitBlob": "e607c751e7b6b33912af78d3397b471afaa785b9",
+      "sha256": "b73b3700816ee75cce05cc606bda173b76b6f58e8e7044a738409193364aee56"
+    },
+    "test-opfs.mjs": {
+      "bytes": 11798,
+      "gitBlob": "af7266a9c587c8d2cb078207b0ac7e38228a3ecd",
+      "sha256": "31b6ed6c08b49fbf6add27b61c6f32294ec5d3557456bc924676eb0980318979"
+    },
+    "run.mjs": {
+      "bytes": 24273,
+      "gitBlob": "97963dba2500c4ba557ec2c2b2367b74199e6ced",
+      "sha256": "eb9f1b64b4baee2976c74f8263d5f52c9002676c6ef5844b412560e04a1f8086"
+    },
+    "run-all.py": {
+      "bytes": 14510,
+      "gitBlob": "2d8be59caddbe900eafc6d5fa9cf1d78eb3d4fe6",
+      "sha256": "77fbfdfc216700dbdf55ffbb5978580a802fb30311c4905b7c0ab73e8e60767b"
+    },
+    "test-run-all.py": {
+      "bytes": 7624,
+      "gitBlob": "55b73d02b16024a00286f25234755ece03f3ac75",
+      "sha256": "ef424625e5662fd5824eaab0ee2efa490eedeb6db8a34f86fee930a906ec61e6"
+    },
+    "baseline-open-connection.txt": {
+      "bytes": 1953,
+      "gitBlob": "4a563609c474e77158f5bf1d403c938f359ba8c3",
+      "sha256": "ab9f6d1be6bbbcaf07ff3cf9658c12a95799d8099e6a4e55d07a976207dfcd0b"
+    },
+    "README.md": {
+      "bytes": 11309,
+      "gitBlob": "c1a0edbfa313d7806d98370ad8186b9cd4f6cf5a",
+      "sha256": "8f34735871fedbab6238090e6b5c00317555fc910d7cd6855cbd7d2891c5e204"
+    }
+  },
+  "bindingNote": "This JSON deliberately excludes its own digest. The enclosing source guard/workflow binds it and the final combined candidate tree before any acquisition.",
+  "currentParserWasmSha256": "5d216041823936521f8a70b721472fb8c42052d165d771a92b59ed967d8d2695",
+  "priorUnexecutedCorpus": {
+    "commit": "8847aa8c11fc53a6de0439f09758d3cc01c21dbd",
+    "tree": "01cf8f3ab434c6e8e483ad93d7848f2c755ad9ae",
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "reason": "Baseline advanced after #972 before any correctness execution; original performance studies remain unchanged",
+    "changedCorpusFiles": [
+      "README.md",
+      "run-all.py",
+      "source-binding.json"
+    ]
+  }
+}
