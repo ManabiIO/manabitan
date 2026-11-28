@@ -71,6 +71,7 @@ function createSparseDatabase() {
     expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(4)
     expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(2)
     expect(Reflect.get(database, '_termEntryContentMetaFreeIndexes')).toEqual([2])
+    Reflect.get(database, '_materializeRecentTermContentSourceColumns').call(database)
     Reflect.get(database, '_termEntryContentMetaRecentSourceBatchIdTable')[4] = 99
     Reflect.get(database, '_termEntryContentMetaRecentSourceOffsetTable')[4] = 123
     return database

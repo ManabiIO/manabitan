@@ -410,6 +410,9 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             const database = new DictionaryDatabase();
             const source = new Uint8Array([1, 2, 3, 4]);
             const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+            // Exercise all legacy dense columns after sparse-cache fallback.
+            // eslint-disable-next-line @stylistic/semi
+            Reflect.get(database, '_materializeRecentTermContentSourceColumns').call(database)
             const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
             const pending = stage([30], [40], [source], null);
             const tableNames = [

@@ -623,6 +623,9 @@ export class DictionaryDatabase {
         this._inFlightTermContentSourceBatches = new Set();
         /** @type {Map<number, Uint8Array>} */
         this._recentTermContentSourceBatches = new Map();
+        /** @type {Array<{batchId: number, firstIndex: number, offsets: Uint32Array, baseOffset: number}>} */
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentSourceRanges = []
         /** @type {number} */
         this._recentTermContentSourceBatchBytes = 0;
         /** @type {number} */
@@ -6341,6 +6344,8 @@ void 0 :
         this._termEntryContentMetaCollisionsByHashPair.clear();
         this._inFlightTermContentSourceBatches.clear();
         this._recentTermContentSourceBatches.clear();
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentSourceRanges.length = 0
         this._recentTermContentSourceBatchBytes = 0;
         // eslint-disable-next-line @stylistic/semi
         this._recentTermContentBoundaryBatchId = 0
@@ -6763,24 +6768,77 @@ void 0 :
         return void 0;
     }
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Contiguous publication IDs share one cache descriptor. Eviction removes
+     * the descriptor as well as its bytes, so retained offsets remain bounded.
+     * @param {number} index
+     * @returns {{batchId: number, firstIndex: number, offsets: Uint32Array, baseOffset: number}|undefined}
+     */
+    _findRecentTermContentSourceRange(index) {
+        const ranges = this._recentTermContentSourceRanges
+        let low = 0
+        let high = ranges.length
+        while (low < high) {
+            const mid = (low + high) >>> 1
+            if (ranges[mid].firstIndex <= index) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        const range = ranges[low - 1]
+        return typeof range !== 'undefined' && index - range.firstIndex < range.offsets.length ? range : void 0
+    }
+
+    /**
+     * Unusual sparse publication or reused IDs retain the original dense path.
+     * Build both columns before replacing any range descriptors.
+     */
+    _materializeRecentTermContentSourceColumns() {
+        if (this._termEntryContentMetaRecentSourceBatchIdTable.length > 0) { return }
+        const capacity = this._termEntryContentMetaStateTable.length
+        const batchIds = new Uint32Array(capacity)
+        const offsets = new Uint32Array(capacity)
+        for (const range of this._recentTermContentSourceRanges) {
+            if (!this._recentTermContentSourceBatches.has(range.batchId)) { continue }
+            const end = range.firstIndex + range.offsets.length
+            batchIds.fill(range.batchId, range.firstIndex, end)
+            for (let i = 0; i < range.offsets.length; ++i) {
+                offsets[range.firstIndex + i] = range.offsets[i] - range.baseOffset
+            }
+        }
+        this._termEntryContentMetaRecentSourceBatchIdTable = batchIds
+        this._termEntryContentMetaRecentSourceOffsetTable = offsets
+        this._recentTermContentSourceRanges.length = 0
+    }
+
     /**
      * @param {TermContentMeta} meta
      * @returns {{buffer: Uint8Array, offset: number, length: number}|undefined}
      */
     _findRecentTermContentSource(meta) {
-        const index = meta.tableIndex;
-        if (typeof index !== 'number' || index < 0 || index >= this._termEntryContentMetaRecentSourceBatchIdTable.length) {
-            return void 0;
+        const index = meta.tableIndex
+        if (typeof index !== 'number' || !Number.isSafeInteger(index) || index < 0 || index >= this._termEntryContentMetaStateTable.length) {
+            return void 0
         }
-        const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index];
-        if (batchId === 0) { return void 0; }
-        const buffer = this._recentTermContentSourceBatches.get(batchId);
-        if (typeof buffer === 'undefined') { return void 0; }
-        const offset = this._termEntryContentMetaRecentSourceOffsetTable[index];
-        const length = meta.length;
-        if (length < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return void 0; }
-        return {buffer, offset, length};
+        const range = this._termEntryContentMetaRecentSourceBatchIdTable.length === 0 ?
+            this._findRecentTermContentSourceRange(index) :
+            void 0
+        const batchId = typeof range === 'undefined' ?
+            this._termEntryContentMetaRecentSourceBatchIdTable[index] :
+            range.batchId
+        if (!batchId) { return void 0 }
+        const buffer = this._recentTermContentSourceBatches.get(batchId)
+        if (typeof buffer === 'undefined') { return void 0 }
+        const offset = typeof range === 'undefined' ?
+            this._termEntryContentMetaRecentSourceOffsetTable[index] :
+            range.offsets[index - range.firstIndex] - range.baseOffset
+        const length = meta.length
+        if (!Number.isSafeInteger(offset) || offset < 0 || length < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return void 0 }
+        return {buffer, offset, length}
     }
+    /* eslint-enable @stylistic/semi */
 
     /* eslint-disable @stylistic/semi */
     /**
@@ -6809,6 +6867,12 @@ void 0 :
             this._recentTermContentSourceBatchBytes -= previousBoundary.buffer.byteLength
         }
         this._recentTermContentBoundaryBatchId = 0
+        const ranges = this._recentTermContentSourceRanges
+        if (Array.isArray(ranges)) {
+            for (let i = ranges.length - 1; i >= 0; --i) {
+                if (!this._recentTermContentSourceBatches.has(ranges[i].batchId)) { ranges.splice(i, 1) }
+            }
+        }
         const averageSampleCount = Math.min(
             staged.indexes.length,
             TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
@@ -6889,12 +6953,17 @@ void 0 :
             if (first.done) { break; }
             this._recentTermContentSourceBatches.delete(first.value[0]);
             this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength;
+            if (Array.isArray(ranges)) {
+                const index = ranges.findIndex((range) => range.batchId === first.value[0])
+                if (index >= 0) { ranges.splice(index, 1) }
+            }
         }
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
             this._recentTermContentSourceBatchBytes = 0;
             this._recentTermContentBoundaryBatchId = 0
             this._termEntryContentMetaRecentSourceBatchIdTable.fill(0);
+            if (Array.isArray(ranges)) { ranges.length = 0 }
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
@@ -6910,11 +6979,35 @@ void 0 :
         if (copySource && !adoptTransferredSource) {
             owned.set(source.subarray(minimumOffset, maximumEnd));
         }
+        const rangeFirstIndex = staged.indexes[sourceStart]
+        const rangeCount = sourceEnd - sourceStart
+        const previousRange = ranges?.at(-1)
+        let useRange = (
+            this._termEntryContentMetaRecentSourceBatchIdTable.length === 0 &&
+            Array.isArray(ranges) &&
+            publishedCount === rangeCount && rangeFirstIndex >= 0 &&
+            spans.offsets instanceof Uint32Array &&
+            rangeFirstIndex + rangeCount <= this._termEntryContentMetaStateTable.length &&
+            (typeof previousRange === 'undefined' ||
+            rangeFirstIndex >= previousRange.firstIndex + previousRange.offsets.length)
+        )
+        for (let i = 1; useRange && i < rangeCount; ++i) {
+            if (staged.indexes[sourceStart + i] !== rangeFirstIndex + i) { useRange = false }
+        }
+        // The resolver's offset scratch is reused; retain only this live range.
+        const rangeOffsets = useRange ? spans.offsets.slice(sourceStart, sourceEnd) : null
+        if (!useRange && this._termEntryContentMetaRecentSourceBatchIdTable.length === 0) {
+            this._materializeRecentTermContentSourceColumns()
+        }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
         if (retainBoundaryOnly) { this._recentTermContentBoundaryBatchId = batchId }
         if (adoptTransferredSource && importMetrics !== null) {
             importMetrics.dedupRecentSourceAdoptedBytes = (importMetrics.dedupRecentSourceAdoptedBytes ?? 0) + owned.byteLength;
+        }
+        if (rangeOffsets !== null) {
+            ranges.push({batchId, firstIndex: rangeFirstIndex, offsets: rangeOffsets, baseOffset: minimumOffset})
+            return owned.byteLength
         }
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
@@ -7278,9 +7371,10 @@ void 0 :
         const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
-        const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
-        const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
         /* eslint-disable @stylistic/semi */
+        const growRecentSources = growDense && this._termEntryContentMetaRecentSourceBatchIdTable.length > 0
+        const recentSourceBatchIdTable = growRecentSources ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable
+        const recentSourceOffsetTable = growRecentSources ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable
         if (growDense) {
             idTable.set(this._termEntryContentMetaIdTable.subarray(0, denseCount))
             offsetTable.set(this._termEntryContentMetaOffsetTable.subarray(0, denseCount))
@@ -7326,6 +7420,12 @@ void 0 :
      * @returns {number}
      */
     _allocateTermEntryContentMetaIndex() {
+        // Materialization can fail; leave reusable IDs available for retry.
+        /* eslint-disable @stylistic/semi */
+        if (this._termEntryContentMetaFreeIndexes.length > 0) {
+            this._materializeRecentTermContentSourceColumns()
+        }
+        /* eslint-enable @stylistic/semi */
         const reused = this._termEntryContentMetaFreeIndexes.pop();
         if (typeof reused === 'number') {
             this._termEntryContentMetaRecentSourceBatchIdTable[reused] = 0;
@@ -7666,8 +7766,12 @@ this._readTermContentSignature(
             if (index < 0) { continue; }
             if (this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_EMPTY) {
                 indexesToClear.push(index);
-                const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index];
-                if (batchId !== 0) { recentSourceBatchIds.add(batchId); }
+                /* eslint-disable @stylistic/semi */
+                const batchId = this._termEntryContentMetaRecentSourceBatchIdTable.length === 0 ?
+                    this._findRecentTermContentSourceRange(index)?.batchId :
+                    this._termEntryContentMetaRecentSourceBatchIdTable[index]
+                if (typeof batchId === 'number' && batchId !== 0) { recentSourceBatchIds.add(batchId) }
+                /* eslint-enable @stylistic/semi */
             }
         }
         for (const index of indexesToClear) {
@@ -7690,6 +7794,10 @@ this._readTermContentSignature(
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
+            /* eslint-disable @stylistic/semi */
+            const rangeIndex = this._recentTermContentSourceRanges.findIndex((range) => range.batchId === batchId)
+            if (rangeIndex >= 0) { this._recentTermContentSourceRanges.splice(rangeIndex, 1) }
+            /* eslint-enable @stylistic/semi */
             this._recentTermContentSourceBatchBytes -= source.buffer.byteLength;
         }
         if (indexesToClear.length > 0) {
