@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "kind": "Completed suffix study: preservation only, no review-worthy import gain",
+  "repository": "ManabiIO/manabitan",
+  "branch": "perf/format3-suffix-reuse-20261128",
+  "measuredCommit": "38031a752b26c9b630e5f2f1d45e780786656c74",
+  "measuredTree": "a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5",
+  "evidenceParent": "a8c890c81b755e56d66468fc809e6c90f6f660f1",
+  "evidenceParentTree": "92f202d920f9d63b439291abbe0545b43a8d5c7f",
+  "runId": 46104813593,
+  "originalImports": 252,
+  "rawMemoryScans": 2153,
+  "originalJobs": [
+    {
+      "id": 140855069080,
+      "name": "Validate exact native candidate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 140866515654,
+      "name": "vndb complete import (BA)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140866515656,
+      "name": "jitendex complete import (AB)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 140866515657,
+      "name": "vndb complete import (AB)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140866515664,
+      "name": "jitendex complete import (BA)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 140866515678,
+      "name": "jmdict complete import (BA)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 140866515699,
+      "name": "jmdict complete import (AB)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "files": [
+    {
+      "path": "dev/perf/import-experiments-20260914.md",
+      "bytes": 106102,
+      "sha256": "7a6c70bc452c17c12d03844d5d50ec133cf2a03e42efc5154fe85f04b47e3acf",
+      "gitBlob": "221ac1be83c8758086d2d0ff7013629aad21f728"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/independent-final-review.json.txt",
+      "bytes": 6926,
+      "sha256": "09b300be84faaddc0b4e6b21ad597e13350dce0916d3fd34251d1619bf887485",
+      "gitBlob": "4254a5f2c189f9ab11232a6440ff027f1ccb6aa7"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/jitendex-AB.json.txt",
+      "bytes": 952067,
+      "sha256": "d8b3f59f955a70699b468ef3265a15fad587b6fd1e15ed8ce257f9755e568134",
+      "gitBlob": "8a65f0a4943e7a48df182e614517da4434dc7ece"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/jitendex-BA.json.txt",
+      "bytes": 954014,
+      "sha256": "dba3ac1efa16bba7b7415ee3015562b7b8ce2c4ed172952b2456a862aee7ad85",
+      "gitBlob": "987989beb688251176a2331a201f39e22b05974e"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/jmdict-AB.json.txt",
+      "bytes": 933240,
+      "sha256": "d3dee4bc2d97c9fc8453812d116386209b800dfa1e0f74134539ed8ca72f5a19",
+      "gitBlob": "19dd81328703c401f43570c3877d8b8135486921"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/jmdict-BA.json.txt",
+      "bytes": 936692,
+      "sha256": "a193d8dd99702337c071fa098c9791209a3a27603f621da15d07b9764635f62d",
+      "gitBlob": "4f9483fa4cf3aa50cf4f0c3cec99d9c50583ceee"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/results.json.txt",
+      "bytes": 99033,
+      "sha256": "f04c20823e23e0cc857187002355de7589e7baa6f024225b9b17a4f03bbe3097",
+      "gitBlob": "73776d29c16bb8f3c6ee4bdf42e73e6d8932fa6e"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/source-proof.json.txt",
+      "bytes": 508362,
+      "sha256": "c94196506f56273c8da6b2155ea42fd01964bf18400ad950d110cc59c4b025e2",
+      "gitBlob": "ed860bd450984d7996d0d2165df92f8358829f34"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-final-preparation-manifest.json",
+      "bytes": 1186,
+      "sha256": "750c602fc6030ec2cba69469c1bed8de081c8482b1f58799430842fe96a89318",
+      "gitBlob": "71a41491057a68975818159bcadb6c61f905bb92"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-final-preparation.tar.xz",
+      "bytes": 8276,
+      "sha256": "1c5d67c704b2062138623b12553f4f1c655b51aa317549811889b796e003a8ae",
+      "gitBlob": "d444aa58d6ab22090311e237a8eb939e47ab051e"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-final-review-evidence-manifest.json",
+      "bytes": 1151,
+      "sha256": "c461a05ffab84612217195eb67467317c3b0ee0b949f1d4d6c44984ad6a68b1e",
+      "gitBlob": "851b4192886782e7f96d1408c0bfdb73a186440c"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-final-review-evidence.tar.xz",
+      "bytes": 7072,
+      "sha256": "8f99be1ebcdc9eb475019791005cc5fe1f08370053800203e43a384567bd6bef",
+      "gitBlob": "ebc7cad42b11abf9400a8c497a08ab1704cbe4fc"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-portable-import-isolation-review-manifest.json",
+      "bytes": 4110,
+      "sha256": "de45933388a3a05e0c13757130bac4de7126670454828abda0867b47adb6c52e",
+      "gitBlob": "c7327d6bd7a5165fdfc19f1bd05d5d142842c7f6"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-portable-import-isolation-review.tar.xz",
+      "bytes": 1394100,
+      "sha256": "4d17852252d259803a5db163f6f2824e70d63541b7833195f837ad2df4ef9248",
+      "gitBlob": "07bd509383a4bf5781b40a7b293725140b436029"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-portable-review-history-manifest.json",
+      "bytes": 85048,
+      "sha256": "75fe873a27624ad6848b18e23e7de46bd2686c37656d6c57eb801dccb6731655",
+      "gitBlob": "101903aa5248fa20320ce70067abd30348366f15"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/suffix-portable-review-history.tar.xz",
+      "bytes": 1629788,
+      "sha256": "c975792df869647019e64f5f7a84ac779db4b9960cf86646d62571edad38c397",
+      "gitBlob": "aeb0fbda46d52a92cb5c2218057d45752911745c"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/vndb-AB.json.txt",
+      "bytes": 997371,
+      "sha256": "6f733907bd1968c48b34cc1ccfe9a8d2f1715a473f8295ff76157b779a6b80da",
+      "gitBlob": "432207ebed887dc001f02160d35cf5e6a4963698"
+    },
+    {
+      "path": "dev/perf/suffix-window-5a86/hosted/vndb-BA.json.txt",
+      "bytes": 982532,
+      "sha256": "db6562a58a4e6ce5ea567ffb52141ec1b57b3118ac722b35d9bcc6f8a6bc32bc",
+      "gitBlob": "87b601b63b3f0a270e6ce5f284aa2c91801c6c68"
+    },
+    {
+      "path": "dev/perf/verify-suffix-window-hosted-5a86.py",
+      "bytes": 16830,
+      "sha256": "6cbf0035c62485ea4e5074a1d00d7665292f3a8003e414e552181f23e7c65bab",
+      "gitBlob": "78e2b350ace77c7ef5b1bdfc2038d422c6f4c30e"
+    }
+  ],
+  "excludesSelfFromFileTable": true,
+  "noNewAcquisition": true,
+  "noPullRequest": true,
+  "productTestsWorkflowAndProtocolUnchanged": true,
+  "formattingAttempt": "The offline no-install Prettier check could not complete because the package is absent; exact receipt retained in suffix-final-preparation.tar.xz.",
+  "scope": "Every original full-artifact audit and compact replay is retained. Four memory cohorts pass; both VNDB cohorts retain failed baseline A1 coverage and null aggregate effects. Partial exact Git closure, explicit original-product-ZIP omissions, historical verifier corrections, and independent final review remain separately bound."
+}

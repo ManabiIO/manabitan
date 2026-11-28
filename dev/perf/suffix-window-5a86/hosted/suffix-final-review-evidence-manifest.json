@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "noNewAcquisition": true,
+  "archive": {
+    "file": "suffix-final-review-evidence.tar.xz",
+    "bytes": 7072,
+    "sha256": "8f99be1ebcdc9eb475019791005cc5fe1f08370053800203e43a384567bd6bef",
+    "members": 5,
+    "uncompressedBytes": 23175
+  },
+  "members": {
+    "command-receipt.json": {
+      "bytes": 622,
+      "sha256": "0733e1887e46d5fa20c1bb53a0a15fc96658b66d3412e619889fd5c8acdfa6ff"
+    },
+    "review.json": {
+      "bytes": 6926,
+      "sha256": "09b300be84faaddc0b4e6b21ad597e13350dce0916d3fd34251d1619bf887485"
+    },
+    "review.py": {
+      "bytes": 15406,
+      "sha256": "0c2f0a949cedb2efe53c14563574f20d858ca880c78560d88ee0ceaca30a1477"
+    },
+    "review.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "review.stdout": {
+      "bytes": 221,
+      "sha256": "e03abbc1cd7e372796a657a5fa1573a1440f389a7620212340de76a1c9f0ab98"
+    }
+  },
+  "scope": "Exact independent final consolidation review, source and execution receipts. All six original cohorts are retained separately. No import or product test was run by this review."
+}

@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "kind": "Independent bounded suffix consolidation review",
+  "inputs": {
+    "results.json.txt": {
+      "bytes": 99033,
+      "sha256": "f04c20823e23e0cc857187002355de7589e7baa6f024225b9b17a4f03bbe3097"
+    },
+    "handoff-proposed.md": {
+      "bytes": 106102,
+      "sha256": "7a6c70bc452c17c12d03844d5d50ec133cf2a03e42efc5154fe85f04b47e3acf"
+    }
+  },
+  "source": {
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "38031a752b26c9b630e5f2f1d45e780786656c74",
+    "candidateTree": "a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5",
+    "runId": 46104813593
+  },
+  "checks": {
+    "allSixAuditAndArchiveBindings": true,
+    "allCandidateAndControlStatisticsRecomputedFromRetainedObservations": true,
+    "allTailsRetained": true,
+    "fourPassingAndTwoCoverageFailedMemoryCellsPreserved": true,
+    "failedWholeCohortAggregateMetricsRemainNull": true,
+    "originalHandoffMatchesEvidenceParentGitBlob": true,
+    "originalHandoffPreservedWithTwoInsertionsOnly": true,
+    "tableMatchesExactCohortStatistics": true,
+    "proposedRelativePathsConsistent": true,
+    "originalPackageOmissionsExplicitAndExact": true,
+    "sourceProofAndUnchangedVerifierIdentitiesMatch": true,
+    "noGainNoPullRequestDecisionSupported": true,
+    "formattingFailureAccuratelyDisclosed": true
+  },
+  "totals": {
+    "imports": 252,
+    "rawMemoryScans": 2153,
+    "retainedNonPackageOriginalMembers": 1878,
+    "omittedOriginalProductZipPayloads": 12,
+    "memoryPassingCells": 4,
+    "memoryCoverageFailedCells": 2
+  },
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "order": "AB",
+      "artifactId": 15251413550,
+      "auditSha256": "b4fa6fd31c9b64229ca7b24e28164118524e767db4fb8a80d641ec8a4b1d2373",
+      "wrapperSha256": "d3dee4bc2d97c9fc8453812d116386209b800dfa1e0f74134539ed8ca72f5a19",
+      "imports": 42,
+      "rawMemoryScans": 278,
+      "medianPairedChangePercent": 0.896388497693823,
+      "equalWorkChangePercent": 9.484354245149774,
+      "fasterPairs": 6,
+      "interval": [
+        -2.069820649280929,
+        3.047664792564242
+      ],
+      "controlMedianPercent": 1.037241981030812,
+      "memoryPassed": true,
+      "failedMemoryObservation": null
+    },
+    {
+      "dictionary": "jmdict",
+      "order": "BA",
+      "artifactId": 15252566013,
+      "auditSha256": "cbad9a61697f4d09b7a24534dd32f14ee06d17d0e61a72f425dd6b109d3ed702",
+      "wrapperSha256": "a193d8dd99702337c071fa098c9791209a3a27603f621da15d07b9764635f62d",
+      "imports": 42,
+      "rawMemoryScans": 257,
+      "medianPairedChangePercent": -1.926064336540556,
+      "equalWorkChangePercent": -1.8565440257822807,
+      "fasterPairs": 8,
+      "interval": [
+        -4.916260876020528,
+        0.8692863609066404
+      ],
+      "controlMedianPercent": 2.72127773476436,
+      "memoryPassed": true,
+      "failedMemoryObservation": null
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "AB",
+      "artifactId": 15251225761,
+      "auditSha256": "dd28ee1667a603f456195f4539058d8fee64441186675b318d12b4ec8904fe1f",
+      "wrapperSha256": "d8b3f59f955a70699b468ef3265a15fad587b6fd1e15ed8ce257f9755e568134",
+      "imports": 42,
+      "rawMemoryScans": 274,
+      "medianPairedChangePercent": 1.6346545675880453,
+      "equalWorkChangePercent": 1.60239146827581,
+      "fasterPairs": 3,
+      "interval": [
+        -0.01060337333553818,
+        3.362658339623459
+      ],
+      "controlMedianPercent": -0.7441181412074949,
+      "memoryPassed": true,
+      "failedMemoryObservation": null
+    },
+    {
+      "dictionary": "jitendex",
+      "order": "BA",
+      "artifactId": 15251643376,
+      "auditSha256": "31aeae1e3e473d6d637268e06a5b6e8a489a28d90bd9f64d6819235fd28d5972",
+      "wrapperSha256": "dba3ac1efa16bba7b7415ee3015562b7b8ce2c4ed172952b2456a862aee7ad85",
+      "imports": 42,
+      "rawMemoryScans": 403,
+      "medianPairedChangePercent": -0.19721933799590197,
+      "equalWorkChangePercent": 1.8870604107861233,
+      "fasterPairs": 6,
+      "interval": [
+        -1.0187564015755268,
+        0.9033786362225626
+      ],
+      "controlMedianPercent": -1.5091029781829746,
+      "memoryPassed": true,
+      "failedMemoryObservation": null
+    },
+    {
+      "dictionary": "vndb",
+      "order": "AB",
+      "artifactId": 15253370270,
+      "auditSha256": "13a5f1059581e817e96511b06873cafb8d34034b207d321ebedf62f36eef3b6e",
+      "wrapperSha256": "6f733907bd1968c48b34cc1ccfe9a8d2f1715a473f8295ff76157b779a6b80da",
+      "imports": 42,
+      "rawMemoryScans": 490,
+      "medianPairedChangePercent": -0.27037563056222513,
+      "equalWorkChangePercent": -0.7872218895262573,
+      "fasterPairs": 7,
+      "interval": [
+        -1.9883432858506689,
+        1.13153458193902
+      ],
+      "controlMedianPercent": 0.05869840619108224,
+      "memoryPassed": false,
+      "failedMemoryObservation": {
+        "name": "A1",
+        "maximumCoveredSampleGapMs": 254.012525
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "order": "BA",
+      "artifactId": 15252436461,
+      "auditSha256": "23a5c761fa3f446567d9b1f2073042557d05b114b4a0701db52913a18a2b2635",
+      "wrapperSha256": "db6562a58a4e6ce5ea567ffb52141ec1b57b3118ac722b35d9bcc6f8a6bc32bc",
+      "imports": 42,
+      "rawMemoryScans": 451,
+      "medianPairedChangePercent": 1.9318301867053744,
+      "equalWorkChangePercent": 2.8831258247749014,
+      "fasterPairs": 4,
+      "interval": [
+        -1.644559059705586,
+        5.897841338630205
+      ],
+      "controlMedianPercent": -0.20486211610042382,
+      "memoryPassed": false,
+      "failedMemoryObservation": {
+        "name": "A1",
+        "maximumCoveredSampleGapMs": 356.501319
+      }
+    }
+  ],
+  "limitations": [
+    "This review recomputes consolidation statistics from retained observations and compares existing original-artifact audits. It does not rerun imports, corpus proof, memory acquisition, adversarial verifier probes or product tests.",
+    "Every timing interval spans zero; opposite-order hosts remain separate. No pooling, trimming or control subtraction is introduced.",
+    "Memory coverage failures are unqualified memory evidence, not measured memory regressions. Sampled PSS/private maxima are not exact peaks.",
+    "Complete-corpus scope was already independently reviewed: live output digests, not direct retained-after-reuse arrays. Browser content checks remain sampled and exhaustive-media diagnostics are separate imports.",
+    "Compact wrappers omit original ZIP containers and twelve product ZIP payloads. Original full-package audits remain bound; repeating omitted-byte verification requires the matching originals.",
+    "The original documentation-only formatter attempt failed because Prettier was unavailable. This review does not claim a formatting pass or change frozen product validation."
+  ],
+  "newImportAcquisition": false,
+  "productMutations": false,
+  "publicationOwner": "/root"
+}

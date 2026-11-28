@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "scope": "Lossless independent suffix verifier import-isolation addendum and its two harmless preparation probes; no new acquisition. Earlier baeb review is separately archived.",
+  "archive": {
+    "path": "suffix-portable-import-isolation-review.tar.xz",
+    "bytes": 1394100,
+    "sha256": "4d17852252d259803a5db163f6f2824e70d63541b7833195f837ad2df4ef9248",
+    "gitBlobSha": "07bd509383a4bf5781b40a7b293725140b436029",
+    "members": 24,
+    "uncompressedBytes": 2001883
+  },
+  "members": {
+    "adjacent-pathlib-marker.txt": {
+      "bytes": 33,
+      "sha256": "7bc33d6060a0a991d04817328d86ec5e22e5163f41dc790aa054b4883ce00052"
+    },
+    "adjacent-pathlib.json.txt": {
+      "bytes": 965362,
+      "sha256": "3f2580389166191709112764215db9e633f5274048b98427ddcb154ee025e43e"
+    },
+    "helper-copy-marker.txt": {
+      "bytes": 33,
+      "sha256": "7bc33d6060a0a991d04817328d86ec5e22e5163f41dc790aa054b4883ce00052"
+    },
+    "helper-copy.json.txt": {
+      "bytes": 965410,
+      "sha256": "6082abb753c6897794d0ce07bfc6c1281d62047f0ac0d1edbd8d0f2a274df152"
+    },
+    "historical-adjacent-pathlib.stderr": {
+      "bytes": 436,
+      "sha256": "f5c4ee7723432ac0c07d1b4acbc0aa541f66c5af10a6313fae1d0e267b190bdb"
+    },
+    "historical-adjacent-pathlib.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "historical-helper-copy.stderr": {
+      "bytes": 735,
+      "sha256": "55f9304551d5906f276b44cc649625a26d4a75a39411bb87f930224863a0bb90"
+    },
+    "historical-helper-copy.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "historical-verifier-baeb.py": {
+      "bytes": 16321,
+      "sha256": "baeb8b8cb2f5dd8a2016f898e74e1d7836e015ffb8838cbe2fabfdbcc08ff399"
+    },
+    "new-adjacent-pathlib.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-adjacent-pathlib.stdout": {
+      "bytes": 3415,
+      "sha256": "7b0ab468f91816a3f94d2f3f2418a865d18e831ee6f7d45e3893e743bd91d93c"
+    },
+    "new-compact.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-compact.stdout": {
+      "bytes": 3415,
+      "sha256": "9d7e3918b25fb088b54266b585446f9c4747853570d4a3828c651ec141d4c2f3"
+    },
+    "new-full.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-full.stdout": {
+      "bytes": 3414,
+      "sha256": "66be2ec2e37bdf83b19766eb3f4a3ebd6b7b67ca8401a0b82768d3a50ad3ce70"
+    },
+    "new-helper-copy.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "new-helper-copy.stdout": {
+      "bytes": 3415,
+      "sha256": "5140f0a236343d3322bf5de8dc2bd9eaf603c122e572101efb12656a973607f8"
+    },
+    "new-optimized-python.stderr": {
+      "bytes": 39,
+      "sha256": "8cd0dad9450dd11a82e9b34ead68c09a7fcc0fc980ffcc6abf4f00880201dadd"
+    },
+    "new-optimized-python.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "receipts.json": {
+      "bytes": 4951,
+      "sha256": "76a40a45284b9e2fcb8ed969ac70760d919b58b37bb7e8941e2c5f24da7b35b4"
+    },
+    "review-addendum.json": {
+      "bytes": 11449,
+      "sha256": "7f5529ce60fe7039555c1217b70fa6663fc4fb33240e2e033182c4bf1195c1b9"
+    },
+    "review-isolation.py": {
+      "bytes": 4768,
+      "sha256": "fb36273a1b5e4cbf8d2c883fdec74690c486408d3575cb72fa77e71090b54bab"
+    },
+    "reviewed-verifier-6cbf.py": {
+      "bytes": 16830,
+      "sha256": "6cbf0035c62485ea4e5074a1d00d7665292f3a8003e414e552181f23e7c65bab"
+    },
+    "verifier-import-isolation.diff": {
+      "bytes": 1857,
+      "sha256": "85c3ab862d615f011946cdd266351d7a7df0f67d9808e146980d2a35f0daa3f8"
+    }
+  },
+  "excluded": [],
+  "verification": "Every regular-file member was freshly decoded and compared to its retained original bytes."
+}

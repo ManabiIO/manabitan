@@ -2,6 +2,10 @@
 
 ## November 27, 2026: complete format-3 suffix reuse study
 
+**Final hosted decision: stop without a performance PR.** All six original
+cohorts are complete; no consistent import gain was found. The complete
+results and preserved evidence are in the hosted supplement below.
+
 This is an unqualified source candidate against frozen `develop`
 `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2`, tree
 `d99ea4d04658f7ec1c76acdc5f3684594212a471`. No import speedup is claimed.
@@ -140,6 +144,91 @@ and `--extract /new/directory` to write verified original files. It uses only
 the Python standard library and acquires no imports. The original six-cell
 browser qualification remains bound to the frozen source; this supplement
 makes no timing or memory improvement claim.
+
+
+### Completed hosted suffix qualification
+
+**Decision: stop without a performance PR.** The original proposal and
+prospective plan above remain as the historical record. All six registered
+cohorts are now complete: 252 imports and 2,153 raw sampled-memory scans were
+independently audited against the original artifacts. The frozen acquisition
+remains `38031a752b26c9b630e5f2f1d45e780786656c74`; this follow-up changes only
+evidence and this handoff, and does not acquire any new observations.
+
+Negative changes mean faster. Each row is its own twelve-pair host; the
+descriptive bootstrap interval is for its paired median. Total time compares
+the sums for equal work. Identical-code control results remain separate.
+
+| Cohort | Median change | Total-time change | Faster pairs | Descriptive 95% interval | Control median | Memory screen |
+| --- | ---: | ---: | ---: | --- | ---: | --- |
+| JMdict AB | +0.8964% | +9.4844% | 6/12 | [-2.0698%, +3.0477%] | +1.0372% | pass |
+| JMdict BA | -1.9261% | -1.8565% | 8/12 | [-4.9163%, +0.8693%] | +2.7213% | pass |
+| Jitendex AB | +1.6347% | +1.6024% | 3/12 | [-0.0106%, +3.3627%] | -0.7441% | pass |
+| Jitendex BA | -0.1972% | +1.8871% | 6/12 | [-1.0188%, +0.9034%] | -1.5091% | pass |
+| VNDB AB | -0.2704% | -0.7872% | 7/12 | [-1.9883%, +1.1315%] | +0.0587% | coverage failure |
+| VNDB BA | +1.9318% | +2.8831% | 4/12 | [-1.6446%, +5.8978%] | -0.2049% | coverage failure |
+
+JMdict's opposite-order results do not establish a repeatable gain. Its AB
+cohort retains the +116.9095% slow pair; that observation is part of the
++9.4844% total-time result. Jitendex retains its +27.8094% BA pair, and both
+Jitendex total-time comparisons are slower. VNDB's mildly favorable AB result
+does not replicate in BA. No host pooling, tail removal, control subtraction,
+selected rerun or revised acceptance criterion is used.
+
+Both VNDB memory screens fail the original 250 ms coverage bound. The baseline
+A1 gaps are 254.012525 ms on AB and 356.501319 ms on BA. The other three
+observations on each host qualify, but the whole-cohort aggregate PSS/private
+effects remain null. Memory effects are unqualified for these two cohorts;
+the failed observations and exact raw scans are retained. All six original
+artifact audits verify source and package identities, canonical receipts,
+storage byte totals, lookups after restart, and every media file. The two
+failed acquisition jobs remain unqualified.
+
+The separate [complete-corpus proof](https://github.com/ManabiIO/manabitan/commit/05a829b3fa88bac31cb4956104356fd393e0facc)
+covers 7,613,164 rows in 937 banks and 204 production parser groups per arm.
+Production JMdict reuse increases from 54,641 to 161,292 rows; this is a work
+counter, not a latency estimate. The source model above and these execution
+counters have different grouping/admission boundaries. JMdict and Jitendex
+continue to perform immediate CRC, so suffix reuse saves no CRC work for
+either fixture. The proof compares complete live output ranges through
+digests and has the limitations recorded in its own report; browser content
+probes remain sampled.
+
+The [hosted result index](suffix-window-5a86/hosted/results.json.txt) preserves
+each cohort's full paired statistics, memory result, artifact identity and
+audit binding. Its six compact archives retain all 1,878 non-package original
+members. The original ZIP containers and their twelve product ZIP payloads
+are omitted from these compact files. Every original product ZIP was checked
+in full first; all 554 member identities per arm, exact changed native bytes,
+raw observations and original audits remain retained. Full omitted package
+bytes can be checked again when the matching original artifact is supplied.
+
+The portable checker uses an exact partial closure of 52 Git objects for 36
+source paths. It validates frozen source and observer identities before
+running the original observation logic, copies only the nine verified files
+into a fresh helper tree, and launches the derived auditor with isolated
+Python imports. Its output must reproduce the original full-artifact audit
+byte for byte. Review history retains the initial provenance-text and Git
+argument corrections, historical checker versions, harmless import-shadowing
+reproducers, and the separate final isolation review. These are verifier
+preparation corrections; product source, protocol and observations are
+unchanged.
+
+For example, with Python and Git installed:
+
+```sh
+python3 -I -B dev/perf/verify-suffix-window-hosted-5a86.py \
+  --evidence dev/perf/suffix-window-5a86/hosted/jmdict-AB.json.txt \
+  --source-proof dev/perf/suffix-window-5a86/hosted/source-proof.json.txt
+```
+
+Add `--original-artifact /path/to/the-matching-artifact.zip` to repeat the
+omitted full-package checks. Both modes state explicitly whether those ZIP
+bytes were rechecked. They run no imports. The minimum documentation-only
+Prettier check could not complete because the package is absent following the
+executor reset; the exact failed attempt is retained with these preparation
+receipts. The completed frozen product-source gate above is unchanged.
+
 
 ## November 26, 2026: index setup coverage and frozen screen
 
