@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "kind": "Evidence-only current JMdict diagnostic follow-up; no new performance observation",
+  "baselineCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "suffixCandidateCommit": "38031a752b26c9b630e5f2f1d45e780786656c74",
+  "originalArtifact": {
+    "runId": 46101023614,
+    "artifactId": 15245426709,
+    "sha256": "4000809bac65e05a2ac9ede1087b8bb88b13148aa84d5ca5a56a2b4aeb7f4468",
+    "members": {
+      "fixtures.log": {
+        "bytes": 157,
+        "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349",
+        "crc32": 2887658671
+      },
+      "host.json": {
+        "bytes": 504,
+        "sha256": "6f6899713c9aaa63c574f15ae1eb809dd04d6b09982b6f418190101ed39d6b89",
+        "crc32": 2688035857
+      },
+      "ordinary/run-1.html": {
+        "bytes": 84071,
+        "sha256": "c3d99b46591b35adb30f78cc38f1fe94cdb4034670a5a7570af0b280ff25b98c",
+        "crc32": 1228880540
+      },
+      "ordinary/run-1.json": {
+        "bytes": 151174,
+        "sha256": "41888910dd05e0a22415e46d2be7ba6dc0d9ccb4674c111ad8c89bbef9074856",
+        "crc32": 3092390045
+      },
+      "ordinary/summary.json": {
+        "bytes": 58781,
+        "sha256": "f8d4ac76e340e4160cb960a0515e3758aa589c4fd4e8d0edc0ef3fc60d8bea2a",
+        "crc32": 1599448914
+      },
+      "ordinary.log": {
+        "bytes": 1838,
+        "sha256": "e9169d00245841c95e68382757e963ae0f2c63913d4eeea60cce65bfd5759e52",
+        "crc32": 2008439215
+      },
+      "source.txt": {
+        "bytes": 82,
+        "sha256": "3a304c16a0b426bd58356009805a56a5bf9346d1e58fe217c99d3c4314f8bb26",
+        "crc32": 577575461
+      },
+      "trace/run-1.html": {
+        "bytes": 85163,
+        "sha256": "65ce470dbc803d672e0c29047d7610bd3e9a0cfe026e25145ccebc3e3733ead1",
+        "crc32": 1512770509
+      },
+      "trace/run-1.json": {
+        "bytes": 152358,
+        "sha256": "16c0d0f8eb4a23484d8c99b660657c1c9f336d8b8fb5d97549fca53fe81ba92a",
+        "crc32": 2575039381
+      },
+      "trace/run-1.trace.json": {
+        "bytes": 5464244,
+        "sha256": "3f2c3f7c560219286840f777bbedf4988411e9c162f39eb177e0d156dbd02bcb",
+        "crc32": 2032721119
+      },
+      "trace/summary.json": {
+        "bytes": 59263,
+        "sha256": "bbcfe2fe7d196f4c6bbd76d8d9d671c5ea2cbd0c6b841d77b95335d3ae94d9e8",
+        "crc32": 969961724
+      },
+      "trace.log": {
+        "bytes": 2101,
+        "sha256": "0db63814cdbbe2e40a99a1d3ceea87ae72d13659691363bcbebfabf4250be895",
+        "crc32": 3292326524
+      }
+    }
+  },
+  "files": {
+    "census/analysis.json": {
+      "bytes": 5914,
+      "sha256": "e656669c59207ca8254eb3aa3258bce6bc5022ae55c6f7e9d66b3e8273833994"
+    },
+    "census/corpus-replay.mjs": {
+      "bytes": 24498,
+      "sha256": "fd7a947fcd095a66691713bc9d4e9b83f2da889ff2fb8473925c34bfd5f81190"
+    },
+    "census/jmdict-suffix-production-groups.json": {
+      "bytes": 36355,
+      "sha256": "5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904"
+    },
+    "census/suffix-production-groups-20261128-receipt.json": {
+      "bytes": 420,
+      "sha256": "fb57a086397bd4dc6568c397840bc331f07c4d09ddee8b3b0868ad8f15569579"
+    },
+    "census/suffix-production-groups-20261128.log": {
+      "bytes": 15028,
+      "sha256": "008196ab57b1d70ba72adb283108a94b04c68fe4ff5b9b53436f50b2024985bd"
+    },
+    "census/suffix-production-groups.mjs": {
+      "bytes": 19720,
+      "sha256": "b4a17143f5f20325cbb85ec4ec8a3b01c8fb85033739e17c5245ca5e9000f3a0"
+    },
+    "census/suffix-window4.mjs": {
+      "bytes": 8763,
+      "sha256": "9290e79ef6d347eb4e7ddd5f8671ceaf79654b2e586dc26523caf843f7564300"
+    },
+    "original-jmdict-artifact.zip": {
+      "bytes": 606882,
+      "sha256": "4000809bac65e05a2ac9ede1087b8bb88b13148aa84d5ca5a56a2b4aeb7f4468"
+    },
+    "trace/coordinator-message-gap-points.json": {
+      "bytes": 23467,
+      "sha256": "9ba68f8e5c1632157ac6858fa35beb9aa27ad35ad2d73c3419338d6ff2f4d39c"
+    },
+    "trace/coordinator-required-group-gap.json": {
+      "bytes": 2042,
+      "sha256": "fdd27419f58d137585c348f307009e40f9239b7f081415d6ebca108d6fd16f48"
+    },
+    "trace/jmdict-compression-batch-timeline.json": {
+      "bytes": 97160,
+      "sha256": "5a8d5a747446b6d8729a62f4284688fa62952ddced6038fcefac03416eceb9b5"
+    },
+    "trace/jmdict-critical-path-audit.json": {
+      "bytes": 12683,
+      "sha256": "d5d13e618bbfca2968ae14bd233d76766bcdf4ad68a7550381605b493be05be4"
+    },
+    "trace/jmdict-trace-message-events.json": {
+      "bytes": 93431,
+      "sha256": "3d2888ec1f38527baf469c32fe24e8bf884fe22bca00e3d1e67426a8a1973e1c"
+    },
+    "trace/parser-message-intervals.json": {
+      "bytes": 5240,
+      "sha256": "e4ad5cf962b75a4a85dc67e687448343de97e717345ae439bfef847342434943"
+    },
+    "verify.py": {
+      "bytes": 16845,
+      "sha256": "450b21345e696d6452fdefc285600863dd60f2dd54ea2583dab9122884808df6"
+    }
+  }
+}

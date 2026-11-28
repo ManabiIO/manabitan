@@ -1,5 +1,78 @@
 # Codex instructions: import optimization experiments
 
+## November 28, 2026: current JMdict dependency trace and exact suffix opportunity
+
+This follow-up preserves diagnostics for frozen baseline `9e10d3b3fcf66d344ab31bc42c9b522fa5215da2` (tree `d99ea4d04658f7ec1c76acdc5f3684594212a471`) and the unchanged format-3 suffix candidate `38031a752b26c9b630e5f2f1d45e780786656c74` (tree `a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5`). It changes only evidence and this handoff. No runtime, acquisition workflow, parser setting or source threshold changes here, and no performance PR or new timing acquisition follows from these diagnostics.
+
+The fixed JMdict fixture has 53 term banks, 528,299 rows, 171,617,523 decoded source bytes and archive SHA-256 `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f`. Node is 22.22.0. The corpus model uses the existing three-worker, four-groups-per-worker policy and 24 MiB byte-balancing target, producing twelve complete source groups. It executes the census serially and changes no production budget.
+
+### Why faster parser components can be hidden
+
+[Baseline run 46101023614](https://github.com/ManabiIO/manabitan/actions/runs/46101023614) acquired separate ordinary and import-only trace observations. The original [JMdict artifact 15245426709](https://github.com/ManabiIO/manabitan/actions/runs/46101023614/artifacts/15245426709) is retained verbatim: 606,882 bytes, SHA-256 `4000809bac65e05a2ac9ede1087b8bb88b13148aa84d5ca5a56a2b4aeb7f4468`. Its trace SHA-256 is `3f2c3f7c560219286840f777bbedf4988411e9c162f39eb177e0d156dbd02bcb`. These are baseline diagnostics, not candidate comparisons.
+
+The ordinary fast-term phase is 843 ms, including 581 ms summed serial sink callbacks. The 262 ms remainder includes startup, source acquisition, parser waits, scheduling and outer bookkeeping; it is not a measured native-parser-only portion. The worker-wall counter is 752 ms, source-read wall 85.5 ms, aggregate parse time 1,049 ms and aggregate ordered-sink wait 1,544.9 ms. The latter counters overlap across workers. Compression's 357.7 ms and metadata/index publication counters include overlapping asynchronous work and cannot be added to obtain a critical path.
+
+The trace is substantially perturbed: its fast-term phase is 1,324 ms and aggregate parsing 1,871 ms. Message trace IDs pair all twelve parser jobs and replies, and 103 compression jobs form twelve synchronous sink batches. Worker initialization order plus the current run-loop source supports the source-group assignment. Message payload IDs are not recorded, so those group IDs remain source-inferred. All twelve groups fit the unchanged lead window, and borrowed-result count is zero.
+
+Most parser results are already queued when the serial sink can use them: groups 1–3 and 5–11 were handled before the preceding group's last compression completion was handled. Two concrete intervals show the remaining limits, with times relative to the first parser dispatch rather than import start:
+
+- **Synchronous sink work delays worker delivery.** Source group 3's reply is posted at 415.033 ms and handled at 490.949 ms. A coordinator microtask block spans 422.181–490.928 ms. In the 75.916 ms delivery interval, 175 of 339 point samples are under lookup-chunk publication, including 144 full-index hash samples; 119 are under record encoding/appending and four are idle. Ancestor counts can overlap. This locates real coordinator work without treating sampled weights as exact CPU duration.
+- **A parser straggler leaves the coordinator waiting.** Source group 4 is handled at 720.678 ms. After the preceding group's compression and coordinator work, the 660.016–720.678 ms interval contains only 0.731 ms of coordinator `RunTask` events, including every event below 0.3 ms. The remaining 59.931 ms has no coordinator task event. The required parser invocation spans 465.933 ms of wall time but only 150.170 ms of thread CPU, showing why contention and instrumentation must be considered.
+
+Initial group 0 is also exposed: between its first result and its first compression dispatch, 133 of 283 coordinator point samples are under canonical scanning. Parser acceleration may improve initial readiness or a straggler and may reduce shared CPU contention, but this trace does not supply a whole-import speedup estimate or a strict improvement ceiling.
+
+Some `SchedulePostMessage` stamps occur after the paired receiver begins by a few milliseconds. They are call stamps, not exact queue-enqueue endpoints. The coordinator profile also contains 131 negative sample deltas totaling -34.595 ms. The narrowed code-location analysis therefore uses point counts; naive delta sums are not disjoint CPU or wall intervals. The ordinary report has no retained per-group sink timestamps, so the diagnostic timeline cannot be transplanted onto its 843 ms phase.
+
+### Exact final suffix model on those twelve groups
+
+The preserved census is a raw-token model, separate from native runtime instrumentation. It binds the exact baseline C SHA-256 `5a8257cb77d061694b6b2d247057aebb53ea2f49521d8d9893b3af175f145d8a` and candidate C SHA-256 `5fb1656504b65502f396d23d1222342f9c9b6485f90b949207758cb8058fa3ca`. It resets prior rows, probe budget and duplicate streak at each production group boundary while retaining them across banks within a group. JSON parsing and ZIP CRC validation check every bank independently.
+
+The original admitted glossary probe runs first. Only after it fails does the candidate inspect older unchecked rows in the existing four-row window. The model follows the final helper's glossary tail, glossary middle and complete-suffix tail rejection filters, then requires full byte equality from glossary start through sequence, term tags and the row's closing bracket. Samples never authorize reuse. Candidate and baseline admission state are asserted equal after every row.
+
+The model reproduces **exactly 54,641 baseline validated-glossary reuses and 154,416 recent-content matches**, agreeing with the existing default browser counters. Candidate reuse is 161,292 rows: **106,651 additional rows**, with **25,012,079 additional glossary bytes** skipped by grammar validation and 1,296,867 subsequent suffix grammar bytes. The glossary figure is 20.98% of bytes the baseline still validates, or 18.42% of all raw glossary bytes; it is not a whole-parser or whole-import speedup.
+
+| Source group, zero-based | Banks |   Rows | Baseline reuse | Additional suffix reuse | Additional glossary bytes skipped |
+| ------------------------ | ----- | -----: | -------------: | ----------------------: | --------------------------------: |
+| 0                        | 1–5   | 50,000 |          4,685 |                  10,514 |                         1,991,022 |
+| 1                        | 6–9   | 40,000 |          1,935 |                   4,667 |                         1,236,932 |
+| 2                        | 10–13 | 40,000 |          2,417 |                   4,797 |                         1,289,240 |
+| 3                        | 14–17 | 40,000 |          7,450 |                   5,235 |                         1,489,666 |
+| 4                        | 18–22 | 50,000 |          6,156 |                   9,250 |                         2,108,833 |
+| 5                        | 23–27 | 50,000 |          5,378 |                  10,413 |                         2,467,414 |
+| 6                        | 28–31 | 40,000 |          6,250 |                   9,313 |                         2,269,046 |
+| 7                        | 32–36 | 50,000 |          5,056 |                  12,407 |                         2,294,467 |
+| 8                        | 37–40 | 40,000 |          4,646 |                   9,351 |                         2,472,697 |
+| 9                        | 41–44 | 40,000 |          4,575 |                  10,118 |                         2,487,773 |
+| 10                       | 45–48 | 40,000 |          3,785 |                  10,018 |                         2,532,340 |
+| 11                       | 49–53 | 48,299 |          2,308 |                  10,568 |                         2,372,649 |
+
+The opportunity reaches both exposed groups: group 0 removes 1.991 MB of additional glossary validation, 20.35% of its previously validated glossary bytes; group 4 removes 2.109 MB, 20.61%. Other groups range from 12.27% to 25.70% of their previously validated glossary bytes.
+
+The extra proof work is retained rather than treated as free: **1,391,532 additional candidate probes**. Glossary-tail samples reject 1,239,590, glossary-middle samples 1,593, suffix-tail samples 42,937 and bounds 51. There are 107,361 full equality calls, of which 710 reject. The C comparator's logical 32/8/1-byte block model accounts for 13,548,645 sampled byte pairs and 26,361,458 full-comparison byte pairs. Each byte pair reads both source spans; these figures are neither native instruction counts nor measured cache traffic. The census supports the distinct optimization hypothesis, while fixed browser and memory studies determine whether its comparison costs yield a review-worthy gain.
+
+### Durable evidence and reproduction
+
+All machine-readable inputs, the verbatim baseline artifact, exact executed census and upstream census, raw log/exit receipt, per-bank and per-group reports, both independent trace reconstructions and their audit are under `builds/perf/import-analysis-20261128-5a86/`. `manifest.json.txt` binds every file and every original ZIP member. The census report SHA-256 is `5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904`; its executed runner is `b4a17143f5f20325cbb85ec4ec8a3b01c8fb85033739e17c5245ca5e9000f3a0`. The original window-four census is retained unchanged at `9290e79ef6d347eb4e7ddd5f8671ceaf79654b2e586dc26523caf843f7564300`.
+
+From this checkout, Python 3 can verify the retained evidence without rerunning an import or census:
+
+```sh
+python3 builds/perf/import-analysis-20261128-5a86/verify.py
+```
+
+The audit verifies all retained bytes and the original artifact's ZIP CRCs, reconstructs all parser message pairs and source-inferred groups, recomputes all compression batches and the coordinator task gap, and reconciles every census group and probe count. It rejects disabled Python assertions. The exact frozen census can be reproduced separately from the repository root with Node 22.22.0, the unchanged dependency lock and the locked JMdict archive:
+
+```sh
+npm ci
+node dev/perf/prepare-dictionaries.js jmdict
+git fetch --no-tags origin 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2 38031a752b26c9b630e5f2f1d45e780786656c74
+mkdir -p /tmp/manabitan-session-5a86/corpus-proof-5a86
+cp builds/perf/import-analysis-20261128-5a86/census/corpus-replay.mjs /tmp/manabitan-session-5a86/corpus-proof-5a86/replay.mjs
+node builds/perf/import-analysis-20261128-5a86/census/suffix-production-groups.mjs builds/perf/jmdict-suffix-census-reproduction
+```
+
+Use a fresh output directory. The fixed temporary replay path is a preserved input of the original executed census; that replay is only hashed here, not executed. Its SHA-256 remains `fd7a947fcd095a66691713bc9d4e9b83f2da889ff2fb8473925c34bfd5f81190`. The separate complete-corpus proof is frozen at `7657938904308d6b08d5ffda78124ee7695f3e14` in [run 46105432915](https://github.com/ManabiIO/manabitan/actions/runs/46105432915); it compares baseline, composite-window and suffix output. Its results and the candidates' fixed browser qualifications remain separate from this diagnostic evidence. The original analysis workflow path filters exclude this follow-up, so publication does not reacquire observations or modify the frozen suffix measurement source.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.

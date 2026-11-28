@@ -1,0 +1,90 @@
+{
+  "traceSha256": "3f2c3f7c560219286840f777bbedf4988411e9c162f39eb177e0d156dbd02bcb",
+  "originTs": 74762565,
+  "coordinatorTid": 3714,
+  "startMs": 660.016,
+  "endMs": 720.678,
+  "allRunTaskOverlapMs": 0.731,
+  "sourceInferredRequiredGroupIndex": 4,
+  "parserWorkerTid": 3767,
+  "requiredGroupInvocationWallMs": 465.933,
+  "requiredGroupInvocationThreadCpuMs": 150.17,
+  "tasks": [
+    {
+      "startMs": 660.019,
+      "endMs": 660.022,
+      "overlapMs": 0.003
+    },
+    {
+      "startMs": 660.025,
+      "endMs": 660.033,
+      "overlapMs": 0.008
+    },
+    {
+      "startMs": 660.035,
+      "endMs": 660.247,
+      "overlapMs": 0.212
+    },
+    {
+      "startMs": 660.249,
+      "endMs": 660.256,
+      "overlapMs": 0.007
+    },
+    {
+      "startMs": 663.168,
+      "endMs": 663.175,
+      "overlapMs": 0.007
+    },
+    {
+      "startMs": 666.289,
+      "endMs": 666.344,
+      "overlapMs": 0.055
+    },
+    {
+      "startMs": 666.603,
+      "endMs": 666.625,
+      "overlapMs": 0.022
+    },
+    {
+      "startMs": 670.221,
+      "endMs": 670.282,
+      "overlapMs": 0.061
+    },
+    {
+      "startMs": 679.263,
+      "endMs": 679.301,
+      "overlapMs": 0.038
+    },
+    {
+      "startMs": 691.318,
+      "endMs": 691.497,
+      "overlapMs": 0.179
+    },
+    {
+      "startMs": 691.636,
+      "endMs": 691.662,
+      "overlapMs": 0.026
+    },
+    {
+      "startMs": 704.223,
+      "endMs": 704.263,
+      "overlapMs": 0.04
+    },
+    {
+      "startMs": 716.285,
+      "endMs": 716.322,
+      "overlapMs": 0.037
+    },
+    {
+      "startMs": 716.607,
+      "endMs": 716.63,
+      "overlapMs": 0.023
+    },
+    {
+      "startMs": 720.665,
+      "endMs": 776.509,
+      "overlapMs": 0.013
+    }
+  ],
+  "caveat": "Source group IDs inferred from initialization ordering and ordered run-loop scheduling, not explicit trace payload. All RunTask durations included without threshold. No-RunTask time describes only coordinator inactivity in this perturbed diagnostic trace, not overall process idle or an ordinary-import speedup ceiling."
+}

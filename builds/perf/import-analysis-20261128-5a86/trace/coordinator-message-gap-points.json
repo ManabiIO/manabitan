@@ -1,0 +1,1007 @@
+{
+  "tracePath": "/tmp/manabitan-session-5a86/current-baseline-jmdict/trace/run-1.trace.json",
+  "profileId": "0x4",
+  "profileThreadTid": 3714,
+  "profileProcessorTid": 3765,
+  "originTs": 74762565,
+  "caveat": "Point-sample counts only. Negative timeDeltas exist (131 totalling -34.595ms) and invalidate naive summed delta durations as disjoint wall time. Ancestor counts overlap; sample clusters are not exact function entry/exit. Trace perturbed, no ordinary critical-path or speed estimate.",
+  "windows": [
+    {
+      "label": "first_result_to_compress_1",
+      "startMs": 243.392,
+      "endMs": 324.927,
+      "sampleCount": 283,
+      "negativeDeltaSamples": 4,
+      "self": [
+        {
+          "name": "wasm-function[4]",
+          "url": "34e657a2",
+          "line": 1,
+          "samples": 103
+        },
+        {
+          "name": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "samples": 14
+        },
+        {
+          "name": "_bulkAddArtifactTermsChunkWithContentDedup",
+          "url": "dictionary-database.js",
+          "line": 8401,
+          "samples": 12
+        },
+        {
+          "name": "planContentSpansIntoSlabs",
+          "url": "term-content-block-store.js",
+          "line": 1460,
+          "samples": 10
+        },
+        {
+          "name": "fetch",
+          "url": "",
+          "line": 34,
+          "samples": 8
+        },
+        {
+          "name": "hasCompletePreparedTermRecordPreinternedPlan",
+          "url": "term-record-preinterned-plan.js",
+          "line": 576,
+          "samples": 7
+        },
+        {
+          "name": "validateTermContentSpans",
+          "url": "term-content-block-store.js",
+          "line": 1281,
+          "samples": 6
+        },
+        {
+          "name": "scan",
+          "url": "term-content-canonical-scan.js",
+          "line": 144,
+          "samples": 5
+        },
+        {
+          "name": "_scan",
+          "url": "term-content-canonical-scan.js",
+          "line": 289,
+          "samples": 5
+        },
+        {
+          "name": "hasCompletePreparedTermRecordPreinternedPlan",
+          "url": "term-record-preinterned-plan.js",
+          "line": 587,
+          "samples": 5
+        },
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": 0,
+          "samples": 4
+        },
+        {
+          "name": "bulkAddArtifactTermsChunk",
+          "url": "dictionary-database.js",
+          "line": 5095,
+          "samples": 4
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 3797,
+          "samples": 4
+        },
+        {
+          "name": "js-to-wasm:id:",
+          "url": "zstd.wasm",
+          "line": 1,
+          "samples": 4
+        },
+        {
+          "name": "_scan",
+          "url": "term-content-canonical-scan.js",
+          "line": 293,
+          "samples": 4
+        }
+      ],
+      "ancestors": [
+        {
+          "name": "(root)",
+          "samples": 283
+        },
+        {
+          "name": "_scan",
+          "samples": 133
+        },
+        {
+          "name": "js-to-wasm:id:",
+          "samples": 110
+        },
+        {
+          "name": "_bulkAddArtifactTermsChunkWithContentDedup",
+          "samples": 104
+        },
+        {
+          "name": "wasm-function[4]",
+          "samples": 103
+        },
+        {
+          "name": "",
+          "samples": 70
+        },
+        {
+          "name": "handleParsedChunk",
+          "samples": 49
+        },
+        {
+          "name": "bulkAddArtifactTermsChunk",
+          "samples": 49
+        },
+        {
+          "name": "_runPipeline",
+          "samples": 49
+        },
+        {
+          "name": "processTermChunk",
+          "samples": 49
+        },
+        {
+          "name": "_tryBeginPersistArtifactTermContent",
+          "samples": 46
+        },
+        {
+          "name": "tryBeginAppendSpans",
+          "samples": 46
+        },
+        {
+          "name": "_resolveArtifactTermContentDedup",
+          "samples": 29
+        },
+        {
+          "name": "_beginAppendSharedSpans",
+          "samples": 22
+        },
+        {
+          "name": "planContentSpansIntoSlabs",
+          "samples": 18
+        },
+        {
+          "name": "hasCompletePreparedTermLookupIndexes",
+          "samples": 16
+        },
+        {
+          "name": "isCompletePreparedTermLookupIndex",
+          "samples": 16
+        },
+        {
+          "name": "hasCompletePreparedTermRecordPreinternedPlan",
+          "samples": 15
+        },
+        {
+          "name": "scan",
+          "samples": 14
+        },
+        {
+          "name": "(garbage collector)",
+          "samples": 14
+        },
+        {
+          "name": "_runWorkerLoop",
+          "samples": 11
+        },
+        {
+          "name": "runParallelParserJob",
+          "samples": 9
+        }
+      ]
+    },
+    {
+      "label": "dispatch4_result_delay",
+      "startMs": 415.033,
+      "endMs": 490.949,
+      "sampleCount": 339,
+      "negativeDeltaSamples": 0,
+      "self": [
+        {
+          "name": "round",
+          "url": "term-key-hash.js",
+          "line": 41,
+          "samples": 63
+        },
+        {
+          "name": "rotateLeft",
+          "url": "term-key-hash.js",
+          "line": 32,
+          "samples": 22
+        },
+        {
+          "name": "_encodeArtifactChunkRecords",
+          "url": "term-record-opfs-store.js",
+          "line": 6004,
+          "samples": 17
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 138,
+          "samples": 17
+        },
+        {
+          "name": "parseCompactRecordFields",
+          "url": "term-record-opfs-store.js",
+          "line": 207,
+          "samples": 13
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2510,
+          "samples": 9
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "url": "term-record-opfs-store.js",
+          "line": 5948,
+          "samples": 8
+        },
+        {
+          "name": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "samples": 8
+        },
+        {
+          "name": "hashTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 66,
+          "samples": 8
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 135,
+          "samples": 7
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 134,
+          "samples": 7
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 140,
+          "samples": 7
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "url": "term-record-opfs-store.js",
+          "line": 6277,
+          "samples": 7
+        },
+        {
+          "name": "appendBatchFromArtifactChunkResolvedContent",
+          "url": "term-record-opfs-store.js",
+          "line": 2293,
+          "samples": 6
+        },
+        {
+          "name": "getArtifactContentLength",
+          "url": "term-record-opfs-store.js",
+          "line": 315,
+          "samples": 6
+        }
+      ],
+      "ancestors": [
+        {
+          "name": "(root)",
+          "samples": 339
+        },
+        {
+          "name": "_appendEncodedChunk",
+          "samples": 178
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "samples": 175
+        },
+        {
+          "name": "hashLookupIndexBytes",
+          "samples": 144
+        },
+        {
+          "name": "hashTermKeyBytes",
+          "samples": 144
+        },
+        {
+          "name": "hashTermKeyByteRange",
+          "samples": 144
+        },
+        {
+          "name": "hashBytes",
+          "samples": 144
+        },
+        {
+          "name": "hashTermLookupKeyBytes",
+          "samples": 144
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "samples": 136
+        },
+        {
+          "name": "appendBatchFromArtifactChunkResolvedContent",
+          "samples": 123
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "samples": 119
+        },
+        {
+          "name": "round",
+          "samples": 85
+        },
+        {
+          "name": "_encodeArtifactChunkRecords",
+          "samples": 80
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "samples": 62
+        },
+        {
+          "name": "",
+          "samples": 23
+        },
+        {
+          "name": "validateRecordFields",
+          "samples": 22
+        },
+        {
+          "name": "rotateLeft",
+          "samples": 22
+        },
+        {
+          "name": "createTermContentReferenceSlabs",
+          "samples": 18
+        },
+        {
+          "name": "getArtifactContentLength",
+          "samples": 18
+        },
+        {
+          "name": "parseCompactRecordFields",
+          "samples": 18
+        },
+        {
+          "name": "(garbage collector)",
+          "samples": 8
+        },
+        {
+          "name": "(idle)",
+          "samples": 4
+        }
+      ]
+    },
+    {
+      "label": "dispatch8_result_delay",
+      "startMs": 726.701,
+      "endMs": 776.542,
+      "sampleCount": 129,
+      "negativeDeltaSamples": 2,
+      "self": [
+        {
+          "name": "wasm-function[4]",
+          "url": "34e657a2",
+          "line": 1,
+          "samples": 17
+        },
+        {
+          "name": "setTimeout",
+          "url": "",
+          "line": 381,
+          "samples": 9
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 386,
+          "samples": 9
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2510,
+          "samples": 5
+        },
+        {
+          "name": "round",
+          "url": "term-key-hash.js",
+          "line": 41,
+          "samples": 5
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "url": "term-record-opfs-store.js",
+          "line": 6277,
+          "samples": 5
+        },
+        {
+          "name": "write",
+          "url": "",
+          "line": 271,
+          "samples": 5
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "url": "term-record-opfs-store.js",
+          "line": 5950,
+          "samples": 4
+        },
+        {
+          "name": "",
+          "url": "term-content-canonical-scan.js",
+          "line": 359,
+          "samples": 3
+        },
+        {
+          "name": "(program)",
+          "url": "",
+          "line": 0,
+          "samples": 3
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2496,
+          "samples": 3
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 140,
+          "samples": 3
+        },
+        {
+          "name": "adoptPendingColumns",
+          "url": "dictionary-database.js",
+          "line": 9119,
+          "samples": 2
+        },
+        {
+          "name": "resolveExactCandidates",
+          "url": "dictionary-database.js",
+          "line": 9139,
+          "samples": 2
+        },
+        {
+          "name": "resolveExactCandidates",
+          "url": "dictionary-database.js",
+          "line": 9164,
+          "samples": 2
+        }
+      ],
+      "ancestors": [
+        {
+          "name": "(root)",
+          "samples": 129
+        },
+        {
+          "name": "_scan",
+          "samples": 35
+        },
+        {
+          "name": "",
+          "samples": 32
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "samples": 27
+        },
+        {
+          "name": "appendBatchFromArtifactChunkResolvedContent",
+          "samples": 27
+        },
+        {
+          "name": "_dispatchWithSourceConsumed",
+          "samples": 18
+        },
+        {
+          "name": "_startDispatch",
+          "samples": 18
+        },
+        {
+          "name": "beginCompressWrappedSpans",
+          "samples": 18
+        },
+        {
+          "name": "wasm-function[4]",
+          "samples": 17
+        },
+        {
+          "name": "js-to-wasm:id:",
+          "samples": 17
+        },
+        {
+          "name": "_appendEncodedChunk",
+          "samples": 16
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "samples": 16
+        },
+        {
+          "name": "_bulkAddArtifactTermsChunkWithContentDedup",
+          "samples": 15
+        },
+        {
+          "name": "_encodeArtifactChunkRecords",
+          "samples": 13
+        },
+        {
+          "name": "resolveExactCandidates",
+          "samples": 12
+        },
+        {
+          "name": "_publishArtifactTermContentMetadata",
+          "samples": 11
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "samples": 11
+        },
+        {
+          "name": "setTimeout",
+          "samples": 10
+        },
+        {
+          "name": "postMessage",
+          "samples": 10
+        },
+        {
+          "name": "adoptPendingColumns",
+          "samples": 9
+        },
+        {
+          "name": "hashLookupIndexBytes",
+          "samples": 9
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "samples": 9
+        }
+      ]
+    },
+    {
+      "label": "dispatch7_result_delay",
+      "startMs": 738.646,
+      "endMs": 779.198,
+      "sampleCount": 104,
+      "negativeDeltaSamples": 4,
+      "self": [
+        {
+          "name": "setTimeout",
+          "url": "",
+          "line": 381,
+          "samples": 9
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 386,
+          "samples": 9
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2510,
+          "samples": 5
+        },
+        {
+          "name": "round",
+          "url": "term-key-hash.js",
+          "line": 41,
+          "samples": 5
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "url": "term-record-opfs-store.js",
+          "line": 6277,
+          "samples": 5
+        },
+        {
+          "name": "write",
+          "url": "",
+          "line": 271,
+          "samples": 5
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "url": "term-record-opfs-store.js",
+          "line": 5950,
+          "samples": 4
+        },
+        {
+          "name": "setInterval",
+          "url": "",
+          "line": 3700,
+          "samples": 3
+        },
+        {
+          "name": "postMessage",
+          "url": "",
+          "line": 3797,
+          "samples": 3
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2496,
+          "samples": 3
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 140,
+          "samples": 3
+        },
+        {
+          "name": "resolveExactCandidates",
+          "url": "dictionary-database.js",
+          "line": 9164,
+          "samples": 2
+        },
+        {
+          "name": "setResolvedTermContentPlanDictName",
+          "url": "dictionary-database.js",
+          "line": 307,
+          "samples": 2
+        },
+        {
+          "name": "clearInterval",
+          "url": "",
+          "line": 3827,
+          "samples": 2
+        },
+        {
+          "name": "(program)",
+          "url": "",
+          "line": 0,
+          "samples": 2
+        }
+      ],
+      "ancestors": [
+        {
+          "name": "(root)",
+          "samples": 104
+        },
+        {
+          "name": "",
+          "samples": 33
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "samples": 27
+        },
+        {
+          "name": "appendBatchFromArtifactChunkResolvedContent",
+          "samples": 27
+        },
+        {
+          "name": "_dispatchWithSourceConsumed",
+          "samples": 18
+        },
+        {
+          "name": "_startDispatch",
+          "samples": 18
+        },
+        {
+          "name": "beginCompressWrappedSpans",
+          "samples": 18
+        },
+        {
+          "name": "_appendEncodedChunk",
+          "samples": 16
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "samples": 16
+        },
+        {
+          "name": "_bulkAddArtifactTermsChunkWithContentDedup",
+          "samples": 15
+        },
+        {
+          "name": "_encodeArtifactChunkRecords",
+          "samples": 13
+        },
+        {
+          "name": "postMessage",
+          "samples": 12
+        },
+        {
+          "name": "setTimeout",
+          "samples": 11
+        },
+        {
+          "name": "_publishArtifactTermContentMetadata",
+          "samples": 11
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "samples": 11
+        },
+        {
+          "name": "_runWorkerLoop",
+          "samples": 9
+        },
+        {
+          "name": "hashLookupIndexBytes",
+          "samples": 9
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "samples": 9
+        },
+        {
+          "name": "hashTermKeyBytes",
+          "samples": 9
+        },
+        {
+          "name": "hashTermKeyByteRange",
+          "samples": 9
+        },
+        {
+          "name": "hashBytes",
+          "samples": 9
+        },
+        {
+          "name": "hashTermLookupKeyBytes",
+          "samples": 9
+        }
+      ]
+    },
+    {
+      "label": "dispatch9_result_delay",
+      "startMs": 962.842,
+      "endMs": 997.136,
+      "sampleCount": 106,
+      "negativeDeltaSamples": 1,
+      "self": [
+        {
+          "name": "round",
+          "url": "term-key-hash.js",
+          "line": 41,
+          "samples": 26
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 134,
+          "samples": 17
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "url": "term-key-hash.js",
+          "line": 140,
+          "samples": 10
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "url": "term-record-opfs-store.js",
+          "line": 6277,
+          "samples": 9
+        },
+        {
+          "name": "_cacheRecentPublishedTermContentSources",
+          "url": "dictionary-database.js",
+          "line": 6943,
+          "samples": 5
+        },
+        {
+          "name": "(idle)",
+          "url": "",
+          "line": 0,
+          "samples": 4
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2510,
+          "samples": 3
+        },
+        {
+          "name": "_tryPublishContiguousArtifactTermContentMetadata",
+          "url": "dictionary-database.js",
+          "line": 9885,
+          "samples": 2
+        },
+        {
+          "name": "_cacheRecentPublishedTermContentSources",
+          "url": "dictionary-database.js",
+          "line": 6853,
+          "samples": 2
+        },
+        {
+          "name": "hasCompletePreparedTermRecordPreinternedPlan",
+          "url": "term-record-preinterned-plan.js",
+          "line": 576,
+          "samples": 2
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "url": "term-record-opfs-store.js",
+          "line": 2493,
+          "samples": 2
+        },
+        {
+          "name": "getArtifactContentLength",
+          "url": "term-record-opfs-store.js",
+          "line": 314,
+          "samples": 2
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "url": "term-record-opfs-store.js",
+          "line": 5890,
+          "samples": 2
+        },
+        {
+          "name": "_tryPublishContiguousArtifactTermContentMetadata",
+          "url": "dictionary-database.js",
+          "line": 9872,
+          "samples": 1
+        },
+        {
+          "name": "_tryPublishContiguousArtifactTermContentMetadata",
+          "url": "dictionary-database.js",
+          "line": 9886,
+          "samples": 1
+        }
+      ],
+      "ancestors": [
+        {
+          "name": "(root)",
+          "samples": 106
+        },
+        {
+          "name": "_appendEncodedChunk",
+          "samples": 66
+        },
+        {
+          "name": "_createLookupIndexChunk",
+          "samples": 65
+        },
+        {
+          "name": "hashLookupIndexBytes",
+          "samples": 54
+        },
+        {
+          "name": "hashLargeTermKeyByteRange",
+          "samples": 54
+        },
+        {
+          "name": "hashTermKeyBytes",
+          "samples": 54
+        },
+        {
+          "name": "hashTermKeyByteRange",
+          "samples": 54
+        },
+        {
+          "name": "hashBytes",
+          "samples": 54
+        },
+        {
+          "name": "hashTermLookupKeyBytes",
+          "samples": 54
+        },
+        {
+          "name": "round",
+          "samples": 27
+        },
+        {
+          "name": "_encodeAndAppendArtifactChunkForState",
+          "samples": 22
+        },
+        {
+          "name": "appendBatchFromArtifactChunkResolvedContent",
+          "samples": 22
+        },
+        {
+          "name": "_publishArtifactTermContentMetadata",
+          "samples": 14
+        },
+        {
+          "name": "_bulkAddArtifactTermsChunkWithContentDedup",
+          "samples": 14
+        },
+        {
+          "name": "_encodeArtifactChunkRecords",
+          "samples": 10
+        },
+        {
+          "name": "_encodeArtifactRecordFields",
+          "samples": 10
+        },
+        {
+          "name": "_cacheRecentPublishedTermContentSources",
+          "samples": 9
+        },
+        {
+          "name": "_tryPublishContiguousArtifactTermContentMetadata",
+          "samples": 5
+        },
+        {
+          "name": "(idle)",
+          "samples": 4
+        },
+        {
+          "name": "hasCompletePreparedTermLookupIndexes",
+          "samples": 2
+        },
+        {
+          "name": "isCompletePreparedTermLookupIndex",
+          "samples": 2
+        },
+        {
+          "name": "hasCompletePreparedTermRecordPreinternedPlan",
+          "samples": 2
+        }
+      ]
+    }
+  ],
+  "dedupSampleClusters": [
+    {
+      "firstMs": 249.367,
+      "lastMs": 254.101,
+      "samples": 28
+    },
+    {
+      "firstMs": 304.762,
+      "lastMs": 304.762,
+      "samples": 1
+    },
+    {
+      "firstMs": 492.238,
+      "lastMs": 492.238,
+      "samples": 1
+    },
+    {
+      "firstMs": 612.409,
+      "lastMs": 621.357,
+      "samples": 2
+    },
+    {
+      "firstMs": 795.015,
+      "lastMs": 795.015,
+      "samples": 1
+    },
+    {
+      "firstMs": 865.666,
+      "lastMs": 865.784,
+      "samples": 2
+    },
+    {
+      "firstMs": 942.466,
+      "lastMs": 942.52,
+      "samples": 2
+    },
+    {
+      "firstMs": 999.924,
+      "lastMs": 999.924,
+      "samples": 1
+    },
+    {
+      "firstMs": 1087.942,
+      "lastMs": 1088.547,
+      "samples": 4
+    },
+    {
+      "firstMs": 1128.595,
+      "lastMs": 1128.595,
+      "samples": 1
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/home/agent/manabitan-toolchains-5a86d1e7822a/node-v22.22.0-linux-x64/bin/node",
+    "/tmp/manabitan-session-5a86/profile/suffix-production-groups.mjs",
+    "/tmp/manabitan-session-5a86/profile/suffix-production-groups-20261128"
+  ],
+  "cwd": "/workspace/scratch/5a86d1e7822a/manabitan",
+  "exitCode": 0,
+  "signal": null,
+  "elapsedDiagnosticSeconds": 7.040784120559692,
+  "noTimingClaim": true
+}

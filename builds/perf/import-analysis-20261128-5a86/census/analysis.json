@@ -1,0 +1,172 @@
+{
+  "sourceReportSha256": "5d809c6ac68e083f48003e711b576d080d82d0a067c32dc606180b907e0c4904",
+  "ordinaryBaselineReportSha256": "41888910dd05e0a22415e46d2be7ba6dc0d9ccb4674c111ad8c89bbef9074856",
+  "zeroBasedSourceGroups": [
+    {
+      "groupIndex": 0,
+      "banks": "term_bank_1.json..term_bank_5.json",
+      "rows": 50000,
+      "baselineReuseRows": 4685,
+      "suffixAdditionalReuseRows": 10514,
+      "candidateReuseRows": 15199,
+      "additionalSkippedGlossaryBytes": 1991022,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.20346111013122944
+    },
+    {
+      "groupIndex": 1,
+      "banks": "term_bank_6.json..term_bank_9.json",
+      "rows": 40000,
+      "baselineReuseRows": 1935,
+      "suffixAdditionalReuseRows": 4667,
+      "candidateReuseRows": 6602,
+      "additionalSkippedGlossaryBytes": 1236932,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.12268338082409876
+    },
+    {
+      "groupIndex": 2,
+      "banks": "term_bank_10.json..term_bank_13.json",
+      "rows": 40000,
+      "baselineReuseRows": 2417,
+      "suffixAdditionalReuseRows": 4797,
+      "candidateReuseRows": 7214,
+      "additionalSkippedGlossaryBytes": 1289240,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.1300304682635954
+    },
+    {
+      "groupIndex": 3,
+      "banks": "term_bank_14.json..term_bank_17.json",
+      "rows": 40000,
+      "baselineReuseRows": 7450,
+      "suffixAdditionalReuseRows": 5235,
+      "candidateReuseRows": 12685,
+      "additionalSkippedGlossaryBytes": 1489666,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.16541256202557453
+    },
+    {
+      "groupIndex": 4,
+      "banks": "term_bank_18.json..term_bank_22.json",
+      "rows": 50000,
+      "baselineReuseRows": 6156,
+      "suffixAdditionalReuseRows": 9250,
+      "candidateReuseRows": 15406,
+      "additionalSkippedGlossaryBytes": 2108833,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.20611612264577492
+    },
+    {
+      "groupIndex": 5,
+      "banks": "term_bank_23.json..term_bank_27.json",
+      "rows": 50000,
+      "baselineReuseRows": 5378,
+      "suffixAdditionalReuseRows": 10413,
+      "candidateReuseRows": 15791,
+      "additionalSkippedGlossaryBytes": 2467414,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.22630069885558934
+    },
+    {
+      "groupIndex": 6,
+      "banks": "term_bank_28.json..term_bank_31.json",
+      "rows": 40000,
+      "baselineReuseRows": 6250,
+      "suffixAdditionalReuseRows": 9313,
+      "candidateReuseRows": 15563,
+      "additionalSkippedGlossaryBytes": 2269046,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2533878915874692
+    },
+    {
+      "groupIndex": 7,
+      "banks": "term_bank_32.json..term_bank_36.json",
+      "rows": 50000,
+      "baselineReuseRows": 5056,
+      "suffixAdditionalReuseRows": 12407,
+      "candidateReuseRows": 17463,
+      "additionalSkippedGlossaryBytes": 2294467,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.24503543800567654
+    },
+    {
+      "groupIndex": 8,
+      "banks": "term_bank_37.json..term_bank_40.json",
+      "rows": 40000,
+      "baselineReuseRows": 4646,
+      "suffixAdditionalReuseRows": 9351,
+      "candidateReuseRows": 13997,
+      "additionalSkippedGlossaryBytes": 2472697,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2484900345597228
+    },
+    {
+      "groupIndex": 9,
+      "banks": "term_bank_41.json..term_bank_44.json",
+      "rows": 40000,
+      "baselineReuseRows": 4575,
+      "suffixAdditionalReuseRows": 10118,
+      "candidateReuseRows": 14693,
+      "additionalSkippedGlossaryBytes": 2487773,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2570423688491603
+    },
+    {
+      "groupIndex": 10,
+      "banks": "term_bank_45.json..term_bank_48.json",
+      "rows": 40000,
+      "baselineReuseRows": 3785,
+      "suffixAdditionalReuseRows": 10018,
+      "candidateReuseRows": 13803,
+      "additionalSkippedGlossaryBytes": 2532340,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2544102658642232
+    },
+    {
+      "groupIndex": 11,
+      "banks": "term_bank_49.json..term_bank_53.json",
+      "rows": 48299,
+      "baselineReuseRows": 2308,
+      "suffixAdditionalReuseRows": 10568,
+      "candidateReuseRows": 12876,
+      "additionalSkippedGlossaryBytes": 2372649,
+      "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2080143213578673
+    }
+  ],
+  "probeTotals": {
+    "baselineProbes": {
+      "candidates": 425984,
+      "boundsRejects": 10,
+      "firstByteRejects": 0,
+      "glossaryTailRejects": 368718,
+      "glossaryMiddleRejects": 825,
+      "suffixTailRejects": 0,
+      "fullEqualityRejects": 1790,
+      "fullEqualityCalls": 56431,
+      "sampleBytePairs": 3865817,
+      "fullBytePairs": 16659492
+    },
+    "suffixProbes": {
+      "candidates": 1391532,
+      "boundsRejects": 51,
+      "firstByteRejects": 0,
+      "glossaryTailRejects": 1239590,
+      "glossaryMiddleRejects": 1593,
+      "suffixTailRejects": 42937,
+      "fullEqualityRejects": 710,
+      "fullEqualityCalls": 107361,
+      "sampleBytePairs": 13548645,
+      "fullBytePairs": 26361458
+    }
+  },
+  "noTimingClaim": true,
+  "totals": {
+    "banks": 53,
+    "rows": 528299,
+    "sourceBytes": 171617523,
+    "glossaryBytes": 135760945,
+    "baselineReuseRows": 54641,
+    "baselineSkippedGlossaryBytes": 16529724,
+    "suffixReuseRows": 106651,
+    "suffixSkippedGlossaryBytes": 25012079,
+    "suffixSkippedGrammarTailBytes": 1296867,
+    "candidateReuseRows": 161292,
+    "candidateSkippedGlossaryBytes": 41541803,
+    "rawContentMatches": 154416,
+    "crossBankBaselineReuseRows": 10,
+    "crossBankSuffixReuseRows": 25,
+    "additionalFractionOfAllRows": 0.20187621025214889,
+    "additionalFractionOfAllGlossaryBytes": 0.1842361881025504,
+    "additionalFractionOfPreviouslyValidatedGlossaryBytes": 0.2097779322414219
+  }
+}

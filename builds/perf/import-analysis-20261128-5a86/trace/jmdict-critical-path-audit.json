@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "kind": "Existing trace/source audit; no new benchmark",
+  "sourceCommit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "rawTrace": "/tmp/manabitan-session-5a86/current-baseline-jmdict/trace/run-1.trace.json",
+  "rawTraceSha256": "3f2c3f7c560219286840f777bbedf4988411e9c162f39eb177e0d156dbd02bcb",
+  "origin": "First parser parse-job SchedulePostMessage trace stamp,74762565microseconds",
+  "ordinary": {
+    "fastTermMs": 843,
+    "serialSinkCallbackMs": 581,
+    "outsideSerialSinkCallbackMs": 262,
+    "parallelWorkerWallMs": 752,
+    "aggregateParseBankMs": 1049,
+    "aggregateOrderedSinkWaitMs": 1544.9,
+    "aggregateResultDeliveryMs": 160,
+    "sourceReadWallMs": 85.5,
+    "contentCompressMs": 357.7,
+    "contentMetadataPublishMs": 149.9,
+    "metadataIndexPublishMs": 88.6,
+    "recentCacheMs": 43.1,
+    "recordFieldEncodeMs": 50.4
+  },
+  "trace": {
+    "fastTermMs": 1324,
+    "serialSinkCallbackMs": 855,
+    "parallelWorkerWallMs": 1246,
+    "aggregateParseBankMs": 1871,
+    "aggregateOrderedSinkWaitMs": 1491.8,
+    "aggregateResultDeliveryMs": 236,
+    "sourceReadWallMs": 157.9,
+    "compressionDispatchToLastReceiptSumMs": 466.31900000000013,
+    "lastCompressionPostToLastReceiptSumMs": 82.40500000000026
+  },
+  "sourceInferredGroups": [
+    {
+      "workerTid": 3767,
+      "dispatchTraceId": "6645949254931603526",
+      "replyTraceId": "6645949254931604414",
+      "dispatchMs": 0.0,
+      "replyPostedMs": 247.007,
+      "replyHandledMs": 243.392,
+      "sourceGroupIndex": 0,
+      "compressionBatch": {
+        "batch": 1,
+        "jobs": 9,
+        "dispatchFirstMs": 324.927,
+        "dispatchLastMs": 325.681,
+        "lastResultPostedMs": 406.257,
+        "lastResultReceivedMs": 414.183,
+        "lastSourceConsumedReceivedMs": 414.046,
+        "dispatchToLastReceiveMs": 89.25599999999997,
+        "lastPostedToLastReceivedMs": 7.925999999999988
+      },
+      "receivedBeforePreviousCompressionLastHandled": null
+    },
+    {
+      "workerTid": 3768,
+      "dispatchTraceId": "6645949254931603523",
+      "replyTraceId": "6645949254931604399",
+      "dispatchMs": 3.084,
+      "replyPostedMs": 224.825,
+      "replyHandledMs": 224.859,
+      "sourceGroupIndex": 1,
+      "compressionBatch": {
+        "batch": 2,
+        "jobs": 9,
+        "dispatchFirstMs": 503.719,
+        "dispatchLastMs": 503.953,
+        "lastResultPostedMs": 542.174,
+        "lastResultReceivedMs": 543.072,
+        "lastSourceConsumedReceivedMs": 536.813,
+        "dispatchToLastReceiveMs": 39.35300000000001,
+        "lastPostedToLastReceivedMs": 0.8980000000000246
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3766,
+      "dispatchTraceId": "6645949254931603532",
+      "replyTraceId": "6645949254931604408",
+      "dispatchMs": 3.847,
+      "replyPostedMs": 251.129,
+      "replyHandledMs": 258.971,
+      "sourceGroupIndex": 2,
+      "compressionBatch": {
+        "batch": 3,
+        "jobs": 9,
+        "dispatchFirstMs": 555.481,
+        "dispatchLastMs": 555.744,
+        "lastResultPostedMs": 590.884,
+        "lastResultReceivedMs": 591.264,
+        "lastSourceConsumedReceivedMs": 591.072,
+        "dispatchToLastReceiveMs": 35.783000000000015,
+        "lastPostedToLastReceivedMs": 0.37999999999999545
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3768,
+      "dispatchTraceId": "6645949254931604404",
+      "replyTraceId": "6645949254931604241",
+      "dispatchMs": 225.726,
+      "replyPostedMs": 415.033,
+      "replyHandledMs": 490.949,
+      "sourceGroupIndex": 3,
+      "compressionBatch": {
+        "batch": 4,
+        "jobs": 9,
+        "dispatchFirstMs": 622.676,
+        "dispatchLastMs": 623.025,
+        "lastResultPostedMs": 651.901,
+        "lastResultReceivedMs": 656.282,
+        "lastSourceConsumedReceivedMs": 656.253,
+        "dispatchToLastReceiveMs": 33.605999999999995,
+        "lastPostedToLastReceivedMs": 4.3810000000000855
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3767,
+      "dispatchTraceId": "6645949254931604353",
+      "replyTraceId": "6645949254931606837",
+      "dispatchMs": 257.45,
+      "replyPostedMs": 720.625,
+      "replyHandledMs": 720.678,
+      "sourceGroupIndex": 4,
+      "compressionBatch": {
+        "batch": 5,
+        "jobs": 9,
+        "dispatchFirstMs": 741.477,
+        "dispatchLastMs": 744.704,
+        "lastResultPostedMs": 767.569,
+        "lastResultReceivedMs": 783.483,
+        "lastSourceConsumedReceivedMs": 783.075,
+        "dispatchToLastReceiveMs": 42.00599999999997,
+        "lastPostedToLastReceivedMs": 15.913999999999987
+      },
+      "receivedBeforePreviousCompressionLastHandled": false
+    },
+    {
+      "workerTid": 3766,
+      "dispatchTraceId": "6645949254931604370",
+      "replyTraceId": "6645949254931604198",
+      "dispatchMs": 260.542,
+      "replyPostedMs": 482.685,
+      "replyHandledMs": 491.319,
+      "sourceGroupIndex": 5,
+      "compressionBatch": {
+        "batch": 6,
+        "jobs": 9,
+        "dispatchFirstMs": 816.461,
+        "dispatchLastMs": 820.421,
+        "lastResultPostedMs": 847.81,
+        "lastResultReceivedMs": 860.773,
+        "lastSourceConsumedReceivedMs": 860.61,
+        "dispatchToLastReceiveMs": 44.31200000000001,
+        "lastPostedToLastReceivedMs": 12.96300000000008
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3768,
+      "dispatchTraceId": "6645949254931604203",
+      "replyTraceId": "6645949254931606843",
+      "dispatchMs": 491.278,
+      "replyPostedMs": 738.646,
+      "replyHandledMs": 779.198,
+      "sourceGroupIndex": 6,
+      "compressionBatch": {
+        "batch": 7,
+        "jobs": 7,
+        "dispatchFirstMs": 887.649,
+        "dispatchLastMs": 887.924,
+        "lastResultPostedMs": 910.563,
+        "lastResultReceivedMs": 929.242,
+        "lastSourceConsumedReceivedMs": 914.147,
+        "dispatchToLastReceiveMs": 41.59299999999996,
+        "lastPostedToLastReceivedMs": 18.678999999999974
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3766,
+      "dispatchTraceId": "6645949254931604223",
+      "replyTraceId": "6645949254931606847",
+      "dispatchMs": 491.595,
+      "replyPostedMs": 726.701,
+      "replyHandledMs": 776.542,
+      "sourceGroupIndex": 7,
+      "compressionBatch": {
+        "batch": 8,
+        "jobs": 8,
+        "dispatchFirstMs": 956.93,
+        "dispatchLastMs": 957.196,
+        "lastResultPostedMs": 980.588,
+        "lastResultReceivedMs": 998.162,
+        "lastSourceConsumedReceivedMs": 997.922,
+        "dispatchToLastReceiveMs": 41.232000000000085,
+        "lastPostedToLastReceivedMs": 17.57400000000007
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3767,
+      "dispatchTraceId": "6645949254931606788",
+      "replyTraceId": "6645949254931607369",
+      "dispatchMs": 740.1,
+      "replyPostedMs": 962.842,
+      "replyHandledMs": 997.136,
+      "sourceGroupIndex": 8,
+      "compressionBatch": {
+        "batch": 9,
+        "jobs": 8,
+        "dispatchFirstMs": 1005.5,
+        "dispatchLastMs": 1005.782,
+        "lastResultPostedMs": 1027.224,
+        "lastResultReceivedMs": 1030.769,
+        "lastSourceConsumedReceivedMs": 1030.502,
+        "dispatchToLastReceiveMs": 25.269000000000005,
+        "lastPostedToLastReceivedMs": 3.5450000000000728
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3766,
+      "dispatchTraceId": "6645949254931606749",
+      "replyTraceId": "6645949254931607503",
+      "dispatchMs": 779.159,
+      "replyPostedMs": 896.85,
+      "replyHandledMs": 907.867,
+      "sourceGroupIndex": 9,
+      "compressionBatch": {
+        "batch": 10,
+        "jobs": 8,
+        "dispatchFirstMs": 1060.012,
+        "dispatchLastMs": 1063.917,
+        "lastResultPostedMs": 1086.681,
+        "lastResultReceivedMs": 1086.703,
+        "lastSourceConsumedReceivedMs": 1083.14,
+        "dispatchToLastReceiveMs": 26.69100000000003,
+        "lastPostedToLastReceivedMs": 0.021999999999934516
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3768,
+      "dispatchTraceId": "6645949254931606688",
+      "replyTraceId": "6645949254931607302",
+      "dispatchMs": 782.477,
+      "replyPostedMs": 995.873,
+      "replyHandledMs": 999.017,
+      "sourceGroupIndex": 10,
+      "compressionBatch": {
+        "batch": 11,
+        "jobs": 8,
+        "dispatchFirstMs": 1100.937,
+        "dispatchLastMs": 1104.654,
+        "lastResultPostedMs": 1126.042,
+        "lastResultReceivedMs": 1126.151,
+        "lastSourceConsumedReceivedMs": 1125.495,
+        "dispatchToLastReceiveMs": 25.21400000000017,
+        "lastPostedToLastReceivedMs": 0.10900000000015098
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    },
+    {
+      "workerTid": 3766,
+      "dispatchTraceId": "6645949254931607474",
+      "replyTraceId": "6645949254931607059",
+      "dispatchMs": 913.764,
+      "replyPostedMs": 1086.285,
+      "replyHandledMs": 1086.304,
+      "sourceGroupIndex": 11,
+      "compressionBatch": {
+        "batch": 12,
+        "jobs": 10,
+        "dispatchFirstMs": 1138.247,
+        "dispatchLastMs": 1138.656,
+        "lastResultPostedMs": 1160.237,
+        "lastResultReceivedMs": 1160.251,
+        "lastSourceConsumedReceivedMs": 1157.981,
+        "dispatchToLastReceiveMs": 22.003999999999905,
+        "lastPostedToLastReceivedMs": 0.013999999999896318
+      },
+      "receivedBeforePreviousCompressionLastHandled": true
+    }
+  ],
+  "visibleMidstreamWait": {
+    "requiredSourceGroupIndex": 4,
+    "workerTid": 3767,
+    "coordinatorPreviousTaskEndMs": 660.016,
+    "requiredResultHandlerStartMs": 720.678,
+    "spanMs": 60.662,
+    "allCoordinatorRunTaskOverlapMs": 0.731,
+    "noCoordinatorRunTaskMs": 59.931,
+    "parserJobWallMs": 465.933,
+    "parserJobThreadCpuMs": 150.17
+  },
+  "interpretation": [
+    "The actual default12 groups fit the3workers\u00d74lead cap. All source groups are activated up front and borrowed-result count is zero: no lead-cap or borrowed-content-consumer backpressure is exercised.",
+    "The ordered sink starts on source group0; it is serial. For source groups1\u20133 and5\u201311, their result is handled before the previous group has handled its last compression completion, so those next groups cannot be waiting on parser readiness at that checkpoint.",
+    "Group4 is the visible midstream straggler; its predecessor has finished compression and the coordinator has almost no task activity for~60ms until the required parser result arrives.",
+    "Source group0 initial readiness and a straggler can expose parser savings. Most later results are queued behind the serial sink. This does not imply that all parser savings would translate to wall time, or that only first-group work matters.",
+    "Synchronous lookup hashing/record publication delays result handling and therefore subsequent work dispatch. The75.9ms result-delivery gap contains a68.747ms coordinator microtask block with175/339 samples under lookup chunk creation,144of those hash samples,119under record encoding/append.",
+    "Compression and metadata+record work run concurrently after reservation and are joined. Their counters cannot be summed. ContentCompressMs includes await/delivery time; it is not native compression CPU.",
+    "A faster parser may also reduce shared CPU contention. The dependency timeline cannot place a strict wall-gain ceiling on that secondary effect."
+  ],
+  "limitations": [
+    "This is one heavily instrumented trace; fast-term elapsed1324ms vs843ms in the separate ordinary diagnostic. No trace interval is a production latency estimate.",
+    "Ordinary reports retain aggregate group counters, not exact per-group result/sink timestamps. Source-group IDs are inferred from synchronous initialization order and subsequent worker-loop dispatch/receipt order because message payload IDs are not recorded.",
+    "Some SchedulePostMessage stamps occur after the paired HandlePostMessage starts by a few milliseconds. Treat these as trace call stamps, not strict enqueue latency endpoints.",
+    "ProfileChunk has negative time deltas in this acquisition. Point samples support code-location attribution; naive sums of sample deltas do not establish exact wall or CPU phase time.",
+    "The262ms ordinary fast-wall minus serial-sink remainder includes startup, parser waits, scheduling and outer bookkeeping; it is not a measured native-parser-only portion."
+  ]
+}
