@@ -104,7 +104,6 @@ const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
-const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const STORAGE_READ_RETRY_COUNT = 2;
@@ -6430,13 +6429,10 @@ view.chunks :
         const fileHandle = state.lookupIndexFileHandle;
         if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
         if (this._importSessionActive && state.initialFileLength === 0) {
-            // Keep the worker and periodic flushes for imports with enough
-            // source work to cover their setup and scheduling costs. Tiny
+            // Use queued index bytes to cover worker setup and scheduling. Tiny
             // sidecars first written at finalization still use the local path
             // unless a worker already belongs to this eligible session.
             if (
-                this._rawTermBankSourceBytes !== null &&
-                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES &&
                 (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
             ) {
                 this._importIndexWorkerPromise ??= createImportIndexWorkerClient();

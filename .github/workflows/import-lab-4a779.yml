@@ -12,10 +12,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  profile:
-    name: Current baseline (${{ matrix.dictionary }})
+  qualify:
+    name: Index worker experiment (${{ matrix.dictionary }})
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -24,11 +24,13 @@ jobs:
       MANABITAN_E2E_STRICT_RUNTIME: '1'
       MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
       PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
       - name: Install pinned Chromium
@@ -38,21 +40,18 @@ jobs:
         with:
           path: builds/e2e-dictionary-cache
           key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
-      - name: Measure complete baseline imports
+      - name: Compare complete imports with identical-code controls
         run: |
-          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
-            --build-target chrome --runs 4 --media-check sample \
-            --output "builds/perf/lab-baseline/$PERF_DICTIONARY/timing"
-      - name: Capture independent diagnostic trace
-        run: |
-          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
-            --build-target chrome --no-build --trace --runs 1 --media-check sample \
-            --output "builds/perf/lab-baseline/$PERF_DICTIONARY/trace"
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order AB --pairs 6 \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --evidence "builds/perf/lab-index-worker/$PERF_DICTIONARY"
       - name: Preserve all observations and failures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-lab-baseline-${{ matrix.dictionary }}
-          path: builds/perf/lab-baseline
+          name: import-lab-index-worker-${{ matrix.dictionary }}
+          path: builds/perf/lab-index-worker/${{ matrix.dictionary }}
           if-no-files-found: error
           retention-days: 14
