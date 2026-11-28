@@ -16,7 +16,9 @@
  */
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
-import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {createImportIndexWorkerClient, MIN_INDEX_WORKER_SOURCE_BYTES, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {prepareImportIndexChunkParts} from './term-record-import-index-chunk.js';
+import {canTakeOwnedTermLookupIndex, getTermLookupIndexConsumer, registerOwnedTermRecordFields, registerTermLookupIndexConsumer, takeOwnedTermLookupIndex} from './term-lookup-index-ownership.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -104,16 +106,20 @@ const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
-const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+/** @typedef {import('./term-record-import-index-chunk.js').ImportIndexChunk} PendingLookupIndexChunk */
+/** @type {WeakMap<object, Uint8Array>} */
+const deferredLookupIndexRouteHeaders = new WeakMap();
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
+/** @type {WeakSet<object>} */
+const termRecordStoreOrigins = new WeakSet();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
@@ -354,6 +360,7 @@ export function createArtifactTermRecordChunkWithResolvedContent(chunk, uniqueIn
     const references = {uniqueIndexList, offsets, lengths};
     const result = {...chunk, ...(preparedLookupIndexes === null ? {} : {preparedLookupIndexes}), resolvedContentReferences: references};
     resolvedContentReferenceOrigins.set(result, references);
+    registerTermLookupIndexConsumer(result, references);
     return result;
 }
 
@@ -787,7 +794,7 @@ class DenseIdRecordStore {
  * @property {number} segmentIndex
  * @property {string} logicalKey
  * @property {number} initialFileLength
- * @property {Uint8Array[]} pendingLookupIndexChunks
+ * @property {PendingLookupIndexChunk[]} pendingLookupIndexChunks
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
@@ -824,6 +831,8 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexWriteBytes
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
+ * @property {number} lookupIndexWorkerOwnedEnvelopeCount
+ * @property {number} lookupIndexWorkerOwnedEnvelopeBytes
  * @property {number} lookupIndexWorkerFileCount
  */
 
@@ -861,6 +870,7 @@ class DenseIdRecordStore {
 
 export class TermRecordOpfsStore {
     constructor() {
+        termRecordStoreOrigins.add(this);
         /** @type {FileSystemDirectoryHandle|null} */
         this._rootDirectoryHandle = null;
         /** @type {FileSystemDirectoryHandle|null} */
@@ -956,7 +966,7 @@ export class TermRecordOpfsStore {
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
+        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, workerOwnedEnvelopeCount: number, workerOwnedEnvelopeBytes: number}} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
@@ -1529,6 +1539,8 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            lookupIndexWorkerOwnedEnvelopeCount: this._lookupIndexWriteMetrics.workerOwnedEnvelopeCount,
+            lookupIndexWorkerOwnedEnvelopeBytes: this._lookupIndexWriteMetrics.workerOwnedEnvelopeBytes,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -2208,6 +2220,11 @@ export class TermRecordOpfsStore {
             this._importSessionActive &&
             (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
         );
+        // Materialized records can retain earlier key slices across awaits.
+        // Only the existing persisted-only path can relinquish lookup buffers.
+        const lookupIndexConsumer = skipRecordMaterialization && (this._rawTermBankSourceBytes ?? 0) >= MIN_INDEX_WORKER_SOURCE_BYTES ?
+            getTermLookupIndexConsumer(chunk, contentOffsets, contentLengths) :
+            null;
         const stableStringOffsets = skipRecordMaterialization ?
             null :
             (
@@ -2291,6 +2308,7 @@ export class TermRecordOpfsStore {
                 chunk.termRecordPreinternedPlan ?? null,
                 uniformContentDictName,
                 chunk.preparedLookupIndexes ?? null,
+                lookupIndexConsumer,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -2320,6 +2338,7 @@ export class TermRecordOpfsStore {
                 chunk.termRecordPreinternedPlan ?? null,
                 firstContentDictName,
                 chunk.preparedLookupIndexes ?? null,
+                lookupIndexConsumer,
             );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
@@ -2451,9 +2470,10 @@ export class TermRecordOpfsStore {
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
      * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} [preparedLookupIndexes=null]
+     * @param {object|null} [lookupIndexConsumer=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
-    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
+    async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null, lookupIndexConsumer = null) {
         let encodeMs = 0;
         let appendWriteMs = 0;
         let validationMs = 0;
@@ -2548,20 +2568,31 @@ export class TermRecordOpfsStore {
                 chunk.readingEqualsExpressionList,
             );
             const tEncodeStart = safePerformance.now();
-            const encodedChunk = await this._encodeArtifactChunkRecords(
+            // Capture exact method identity; Reflect.apply below supplies the store receiver.
+            // eslint-disable-next-line @typescript-eslint/unbound-method
+            const encodeChunk = this._encodeArtifactChunkRecords;
+            const canOwnEncodedChunk = (
+                lookupIndexConsumer !== null &&
+                encodeChunk === originalTermRecordChunkEncoder && hasOriginalTermRecordAppendMethods(this)
+            );
+            const encodedChunk = await /** @type {ReturnType<TermRecordOpfsStore['_encodeArtifactChunkRecords']>} */ (Reflect.apply(encodeChunk, this, [
                 runChunk,
                 runOffsets,
                 runLengths,
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
                 runContentOffsetBase,
-            );
+            ]));
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += runValidationMs + encodedChunk.validationMs;
             recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
             lookupIndexEncodeMs += encodedChunk.lookupIndexEncodeMs;
             const tAppendStart = safePerformance.now();
-            await this._appendEncodedChunk(
+            // Capture exact method identity; Reflect.apply below supplies the store receiver.
+            // eslint-disable-next-line @typescript-eslint/unbound-method
+            const appendChunk = this._appendEncodedChunk;
+            const canOwnAppend = canOwnEncodedChunk && appendChunk === originalTermRecordAppend;
+            await Reflect.apply(appendChunk, this, [
                 state,
                 firstId + runStart,
                 runCount,
@@ -2573,7 +2604,9 @@ export class TermRecordOpfsStore {
                 (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES ?
                     preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
                     null,
-            );
+                preparedLookupIndex,
+                canOwnAppend ? lookupIndexConsumer : null,
+            ]);
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
         }
@@ -6001,12 +6034,20 @@ view.chunks :
         }
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
-        const recordFields = this._encodeArtifactRecordFields(
+        // Capture exact method identity; Reflect.apply below supplies the store receiver.
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        const encodeFields = this._encodeArtifactRecordFields;
+        const canOwnRecordFields = (
+            this._importSessionActive && (this._rawTermBankSourceBytes ?? 0) >= MIN_INDEX_WORKER_SOURCE_BYTES &&
+            encodeFields === originalTermRecordFieldEncoder && hasOriginalTermRecordAppendMethods(this)
+        );
+        const recordFields = /** @type {Uint8Array} */ (Reflect.apply(encodeFields, this, [
             chunk,
             contentOffsets,
             contentLengths,
             contentOffsetBase,
-        );
+        ]));
+        if (canOwnRecordFields) { registerOwnedTermRecordFields(recordFields); }
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
         // so the encoder remains the only owner of score representation.
@@ -6057,6 +6098,8 @@ view.chunks :
      * @param {Uint8Array|null} [recordFields=null]
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
      * @param {Uint32Array|null} [routeFilter=null]
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} [preparedLookupIndex=null]
+     * @param {object|null} [lookupIndexConsumer=null]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -6069,6 +6112,8 @@ view.chunks :
         recordFields = null,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
         routeFilter = null,
+        preparedLookupIndex = null,
+        lookupIndexConsumer = null,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -6099,19 +6144,28 @@ view.chunks :
             lookupIndexBytes instanceof Uint8Array &&
             lookupIndexBytes.byteLength > 0
         ) {
-            const lookupIndexChunk = this._createLookupIndexChunk(
+            const lookupIndexChunk = this._createPendingLookupIndexChunk(
                 firstId,
                 count,
                 contentOffsetBase,
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                preparedLookupIndex,
+                lookupIndexConsumer,
             );
             if (
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
                 (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES
             ) {
-                this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);
+                this._recordExactLookupRouteChunk(
+                    state,
+                    firstId,
+                    count,
+                    lookupIndexChunk,
+                    lookupIndexChunk instanceof Uint8Array ? lookupIndexBytes : lookupIndexChunk.payload,
+                    routeFilter,
+                );
             }
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -6145,7 +6199,7 @@ view.chunks :
      * @param {TermRecordShardState} state
      * @param {number} firstId
      * @param {number} count
-     * @param {Uint8Array} chunk
+     * @param {PendingLookupIndexChunk} chunk
      * @param {Uint8Array} payload
      * @param {Uint32Array|null} preparedFilter
      */
@@ -6175,7 +6229,9 @@ view.chunks :
         const start = shard.end;
         shard.end += chunk.byteLength;
         shard.recordCount += count;
-        shard.chunks.push({firstId, count, start, end: shard.end, header: chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES), filter});
+        const header = chunk instanceof Uint8Array ? chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES) : new Uint8Array(chunk.header);
+        if (!(chunk instanceof Uint8Array)) { deferredLookupIndexRouteHeaders.set(chunk, header); }
+        shard.chunks.push({firstId, count, start, end: shard.end, header, filter});
         route.bytes += filter.byteLength;
         ++route.chunkCount;
         this._exactLookupRoute = route;
@@ -6229,6 +6285,55 @@ view.chunks :
             generationId[i] = Math.floor(Math.random() * 256);
         }
         return generationId;
+    }
+
+    /**
+     * Snapshot private parser/store buffers for the existing heavy I/O worker.
+     * Authoritative validation precedes the atomic move; the ordered writer
+     * hashes and writes that same immutable snapshot. Other sources retain the
+     * established eager envelope contract.
+     * @param {number} firstId
+     * @param {number} count
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {Uint8Array|null} recordFields
+     * @param {number} recordFieldsFormat
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} prepared
+     * @param {object|null} [consumer=null]
+     * @returns {PendingLookupIndexChunk}
+     * @throws {Error} If the authoritative fields or lookup framing are invalid.
+     */
+    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat, prepared, consumer = null) {
+        if (
+            !this._importSessionActive || this._rawTermBankSourceBytes === null ||
+            this._rawTermBankSourceBytes < MIN_INDEX_WORKER_SOURCE_BYTES ||
+            !hasOriginalTermRecordAppendMethods(this) ||
+            !canTakeOwnedTermLookupIndex(prepared, payload, recordFields, consumer)
+        ) {
+            return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
+        }
+        if (!(recordFields instanceof Uint8Array) ||
+        getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength) {
+            throw new Error('Invalid authoritative term-record fields');
+        }
+        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
+        const {base} = splitPersistedTermLookupIndex(payload);
+        const byteLength = LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength + recordFields.byteLength;
+        const header = new Uint8Array(LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, firstId, true);
+        view.setUint32(4, count, true);
+        writeSafeU64Le(view, 8, contentOffsetBase);
+        view.setUint32(16, payload.byteLength, true);
+        view.setUint32(20, base.byteLength, true);
+        view.setUint32(36, recordFieldsFormat, true);
+        const owned = takeOwnedTermLookupIndex(
+            /** @type {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex} */ (prepared),
+            payload,
+            recordFields,
+            consumer,
+        );
+        return {header, ...owned, byteLength};
     }
 
     /**
@@ -6392,14 +6497,28 @@ view.chunks :
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
-                    // _createLookupIndexChunk owns each complete buffer. The
-                    // existing queue budget remains charged until this worker
-                    // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
-                } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
-                    await state.lookupIndexWritable.writeChunks(chunks);
+                    // The complete logical byte charge remains until the worker
+                    // acknowledges its writes/flushes and validates every header.
+                    const headers = await state.lookupIndexWritable.writeOwnedIndexChunks(chunks);
+                    for (let i = 0; i < chunks.length; ++i) {
+                        const chunk = chunks[i];
+                        if (chunk instanceof Uint8Array) { continue; }
+                        const header = headers[i];
+                        if (!(header instanceof Uint8Array)) { throw new Error('Missing completed import index header'); }
+                        deferredLookupIndexRouteHeaders.get(chunk)?.set(header);
+                        ++this._lookupIndexWriteMetrics.workerOwnedEnvelopeCount;
+                        this._lookupIndexWriteMetrics.workerOwnedEnvelopeBytes += chunk.byteLength;
+                    }
                 } else {
-                    await state.lookupIndexWritable.write(new Blob(chunks));
+                    // Unsupported startup retains the existing local writer;
+                    // it hashes the same moved bytes before any local write.
+                    const parts = prepareImportIndexChunkParts(chunks);
+                    await (state.lookupIndexWritable instanceof SyncImportIndexWriter ?
+                        state.lookupIndexWritable.writeChunks(parts) :
+                        state.lookupIndexWritable.write(new Blob(parts)));
+                    for (const chunk of chunks) {
+                        if (!(chunk instanceof Uint8Array)) { deferredLookupIndexRouteHeaders.get(chunk)?.set(chunk.header); }
+                    }
                 }
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
@@ -7551,7 +7670,7 @@ view.chunks :
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number, workerOwnedEnvelopeCount: number, workerOwnedEnvelopeBytes: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7560,6 +7679,8 @@ view.chunks :
             awaitMs: 0,
             maxQueuedBytes: 0,
             workerFileCount: 0,
+            workerOwnedEnvelopeCount: 0,
+            workerOwnedEnvelopeBytes: 0,
         };
     }
 
@@ -7890,4 +8011,35 @@ view.chunks :
             }
         }
     }
+}
+
+const originalTermRecordFieldEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactRecordFields']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactRecordFields'));
+const originalTermRecordChunkEncoder = /** @type {TermRecordOpfsStore['_encodeArtifactChunkRecords']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_encodeArtifactChunkRecords'));
+const originalTermRecordAppend = /** @type {TermRecordOpfsStore['_appendEncodedChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_appendEncodedChunk'));
+const originalTermRecordEnvelope = /** @type {TermRecordOpfsStore['_createLookupIndexChunk']} */ (Reflect.get(TermRecordOpfsStore.prototype, '_createLookupIndexChunk'));
+/** @type {Array<[string, unknown]>} */
+const originalTermRecordAppendMethods = [
+    ['_encodeArtifactRecordFields', originalTermRecordFieldEncoder],
+    ['_encodeArtifactChunkRecords', originalTermRecordChunkEncoder],
+    ['_appendEncodedChunk', originalTermRecordAppend],
+    ['_createLookupIndexChunk', originalTermRecordEnvelope],
+];
+
+/**
+ * Existing encoder/append wrappers can retain buffers, and envelope overrides
+ * must still run. Inspect known store objects without invoking method accessors.
+ * @param {TermRecordOpfsStore} store
+ * @returns {boolean}
+ */
+function hasOriginalTermRecordAppendMethods(store) {
+    if (!termRecordStoreOrigins.has(store) || Object.getPrototypeOf(store) !== TermRecordOpfsStore.prototype) { return false; }
+    for (const [name, method] of originalTermRecordAppendMethods) {
+        const own = Object.getOwnPropertyDescriptor(store, name);
+        const prototype = Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, name);
+        if (
+            (typeof own !== 'undefined' && (!('value' in own) || own.value !== method)) ||
+            prototype?.value !== method
+        ) { return false; }
+    }
+    return true;
 }

@@ -17,6 +17,8 @@
 
 import {toError} from '../core/to-error.js';
 
+export const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
+
 const READY_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 60_000;
 
@@ -246,7 +248,7 @@ export class ImportIndexWorkerClient {
     }
 }
 
-/** Ordered proxy; only writeOwnedChunks consumes its input buffers. */
+/** Ordered proxy; only private writeOwned methods consume their input buffers. */
 export class WorkerImportIndexWriter {
     /**
      * @param {ImportIndexWorkerClient} client
@@ -324,6 +326,76 @@ export class WorkerImportIndexWriter {
         await this._enqueue('writeChunks', {chunks: owned}, [...buffers]);
     }
 
+    /**
+     * Move private envelope parts without flattening them on the storage owner.
+     * The worker hashes and writes the same snapshot in its existing queue.
+     * @param {import('./term-record-import-index-chunk.js').ImportIndexChunk[]} chunks
+     * @returns {Promise<(Uint8Array|null)[]>} Completed headers in logical chunk order.
+     */
+    async writeOwnedIndexChunks(chunks) {
+        if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
+        const owned = [...chunks];
+        if (owned.every((chunk) => chunk instanceof Uint8Array)) {
+            await this.writeOwnedChunks(/** @type {Uint8Array[]} */ (owned));
+            return owned.map(() => null);
+        }
+        /** @type {Set<ArrayBuffer>} */
+        const buffers = new Set();
+        /** @type {(Uint8Array|null)[]} */
+        const expectedHeaders = [];
+        let length = 0;
+        for (const chunk of owned) {
+            const parts = chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields];
+            let chunkLength = 0;
+            for (const part of parts) {
+                if (
+                    !(part instanceof Uint8Array) || !(part.buffer instanceof ArrayBuffer) ||
+                    part.byteOffset !== 0 || part.byteLength !== part.buffer.byteLength ||
+                    buffers.has(part.buffer)
+                ) { throw new TypeError('Import index transfer requires independently owned complete buffers'); }
+                buffers.add(part.buffer);
+                chunkLength += part.byteLength;
+            }
+            if (chunkLength !== chunk.byteLength) { throw new TypeError('Invalid import index chunk length'); }
+            if (chunk instanceof Uint8Array) {
+                expectedHeaders.push(null);
+            } else {
+                if (chunk.header.byteLength !== 40) { throw new TypeError('Invalid import index chunk header'); }
+                // This bounded frame survives the ownership move. Only the
+                // three checksum fields may change in the worker's receipt.
+                expectedHeaders.push(Uint8Array.from(chunk.header));
+            }
+            length += chunkLength;
+            if (!Number.isSafeInteger(length)) { throw new RangeError('Import index chunk length overflow'); }
+        }
+        /** @type {(Uint8Array|null)[]} */
+        const headers = [];
+        await this._enqueue('writeIndexChunks', {chunks: owned}, [...buffers], (value) => {
+            if (!Array.isArray(value) || value.length !== expectedHeaders.length) {
+                throw new TypeError('Invalid import index worker header receipt');
+            }
+            for (let i = 0; i < expectedHeaders.length; ++i) {
+                const expected = expectedHeaders[i];
+                const header = /** @type {unknown} */ (value[i]);
+                if (expected === null) {
+                    if (header !== null) { throw new TypeError('Invalid import index worker header receipt'); }
+                } else {
+                    if (
+                        !(header instanceof Uint8Array) || !(header.buffer instanceof ArrayBuffer) ||
+                        header.byteOffset !== 0 || header.byteLength !== 40 || header.buffer.byteLength !== 40
+                    ) { throw new TypeError('Invalid import index worker header receipt'); }
+                    for (let j = 0; j < 40; ++j) {
+                        if ((j < 24 || j >= 36) && header[j] !== expected[j]) {
+                            throw new TypeError('Invalid import index worker header receipt');
+                        }
+                    }
+                }
+                headers.push(header);
+            }
+        });
+        return headers;
+    }
+
     /** @returns {Promise<void>} */
     async close() {
         await this._finish(false);
@@ -382,17 +454,19 @@ export class WorkerImportIndexWriter {
      * @param {string} action
      * @param {Record<string, unknown>} params
      * @param {Transferable[]} [transfer]
+     * @param {(value: unknown) => void} [validateResult]
      * @returns {Promise<void>}
      */
-    _enqueue(action, params, transfer = []) {
+    _enqueue(action, params, transfer = [], validateResult) {
         if (this._failure !== null) { return Promise.reject(this._failure); }
         if (this._closing) { return Promise.reject(new Error('Import index writer is closed')); }
         const promise = this._client.request(this._writerId, action, params, transfer)
-            .then(() => {}, (error) => {
-                this._failure = toError(error);
+            .then((value) => { validateResult?.(value); })
+            .catch((error) => {
+                this._failure ??= toError(error);
                 throw this._failure;
             });
-        // The remote writer orders execution. Track every acknowledgement for
+        // The remote writer orders execution. Track every validated receipt for
         // local close/abort without retaining transferred bytes until a later
         // local turn, or delaying abort behind the operation it must join.
         void promise.catch(() => {});

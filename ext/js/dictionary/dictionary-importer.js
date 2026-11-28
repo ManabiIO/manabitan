@@ -17,6 +17,7 @@
  */
 
 import {MIN_EXACT_LOOKUP_SOURCE_BYTES} from './term-lookup-route.js';
+import {MIN_INDEX_WORKER_SOURCE_BYTES} from './term-record-import-index-worker-client.js';
 import {
     BlobReader as BlobReader0,
     BlobWriter as BlobWriter0,
@@ -855,6 +856,8 @@ export class DictionaryImporter {
         this._fastPrefixReverse = true;
         /** @type {boolean} */
         this._prepareExactLookupRoute = false;
+        /** @type {boolean} */
+        this._registerLookupIndexOwnership = false;
         /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
         this._termBankExperiments = snapshotTermBankExperiments();
     }
@@ -1437,6 +1440,7 @@ export class DictionaryImporter {
         const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
         const allowNativeImageProjection = isNativeImageProjectionSourceSizeEligible(rawTermBankSourceBytes);
         this._prepareExactLookupRoute = (rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES;
+        this._registerLookupIndexOwnership = (rawTermBankSourceBytes ?? 0) >= MIN_INDEX_WORKER_SOURCE_BYTES;
         /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
@@ -5445,6 +5449,7 @@ export class DictionaryImporter {
                 emitTermByteLists: !useDirectArtifactChunkImport,
                 prepareLookupIndexes: useDirectArtifactChunkImport,
                 prepareLookupRoute: useDirectArtifactChunkImport && this._prepareExactLookupRoute,
+                registerLookupIndexOwnership: useDirectArtifactChunkImport && this._registerLookupIndexOwnership,
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;

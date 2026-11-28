@@ -1520,6 +1520,8 @@ export class DictionaryDatabase {
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
             let termRecordLookupIndexWorkerFileCount = 0;
+            let termRecordLookupIndexWorkerOwnedEnvelopeCount = 0;
+            let termRecordLookupIndexWorkerOwnedEnvelopeBytes = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1591,6 +1593,8 @@ export class DictionaryDatabase {
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
                             termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
+                            termRecordLookupIndexWorkerOwnedEnvelopeCount = metrics.lookupIndexWorkerOwnedEnvelopeCount ?? 0;
+                            termRecordLookupIndexWorkerOwnedEnvelopeBytes = metrics.lookupIndexWorkerOwnedEnvelopeBytes ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1768,6 +1772,8 @@ export class DictionaryDatabase {
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
                     termRecordLookupIndexWorkerFileCount,
+                    termRecordLookupIndexWorkerOwnedEnvelopeCount,
+                    termRecordLookupIndexWorkerOwnedEnvelopeBytes,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
