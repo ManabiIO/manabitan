@@ -1612,6 +1612,9 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
         let cancelled = false;
+        /** @type {() => TermBankColumnChunk|null} */
+        // eslint-disable-next-line @stylistic/semi
+        let peekNextChunk = () => null
         const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
         /** @implements {WorkerMock} */
         class BorrowingWorker {
@@ -1671,6 +1674,8 @@ describe('term-bank WASM parser', () => {
                 3,
                 async (_chunk, progress) => {
                     if (progress.chunkIndex !== 1) { return; }
+                    // eslint-disable-next-line @stylistic/semi
+                    peekNextChunk = Reflect.get(_chunk, 'peekNextChunk')
                     firstSinkStarted();
                     await firstSinkGate;
                 },
@@ -1680,7 +1685,15 @@ describe('term-bank WASM parser', () => {
             await firstSinkStart;
             const leadGroups = workerCount * (media ? 3 : 4);
             await vi.waitFor(() => { expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount); });
+            /* eslint-disable @stylistic/semi */
+            const next = peekNextChunk()
+            expect(next?.rowCount).toBe(1)
+            for (let i = 0; i < 10; ++i) { expect(peekNextChunk()).toBe(next) }
+            expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount)
+            /* eslint-enable @stylistic/semi */
             cancelled = cancel;
+            // eslint-disable-next-line @stylistic/semi
+            if (cancel) { expect(peekNextChunk).toThrow(/cancel/i) }
             releaseFirstSink();
             if (cancel) {
                 await expect(parsing).rejects.toThrow(/cancel/i);

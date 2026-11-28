@@ -167,6 +167,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint8Array} [contentBytesBuffer]
  * @property {number} [contentBytesBaseOffset]
  * @property {() => void} [releaseBorrowedContent]
+ * @property {() => ArtifactTermRecordChunk|null} [peekNextContentChunk]
  * @property {Uint32Array} [contentMetaList]
  * @property {boolean} [contentMetaByUniqueIndex]
  * @property {Uint32Array|null} [contentUniqueIndexList]
@@ -180,6 +181,8 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
 
 /**
  * @typedef {ArtifactTermContentChunk & Parameters<TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']>[0]} ArtifactTermRecordChunk
+ * @typedef {Awaited<ReturnType<DictionaryDatabase['_resolveArtifactTermContentDedup']>>} ArtifactTermContentResolution
+ * @typedef {{chunk: ArtifactTermRecordChunk, result: ArtifactTermContentResolution|null, elapsedMs: number}} PreparedArtifactTermContent
  */
 
 /**
@@ -575,6 +578,9 @@ export class DictionaryDatabase {
         this._termContentMetadataArena = null;
         /** @type {NativeCanonicalScanner} */
         this._nativeCanonicalScanner = new NativeCanonicalScanner();
+        /** @type {PreparedArtifactTermContent|null} One next group, joined before the current storage callback settles. */
+        // eslint-disable-next-line @stylistic/semi
+        this._preparedArtifactTermContent = null
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         /** @type {Uint32Array} */
@@ -6314,6 +6320,10 @@ void 0 :
 
     /** */
     _clearTermEntryContentMetaCaches() {
+        // Every started preparation is joined by its current storage owner.
+        // Cancellation between ordered groups retires the unused reservation.
+        // eslint-disable-next-line @stylistic/semi
+        this._discardPreparedArtifactTermContent()
         this._termContentMetadataArena = null;
         this._termEntryContentMetaByHash.clear();
         this._termContentBlockStore.clearCache();
@@ -8398,7 +8408,14 @@ this._readTermContentSignature(
         }
         try {
             const tContentAppendStart = safePerformance.now();
-            const dedup = await this._resolveArtifactTermContentDedup(chunk, true);
+            /* eslint-disable @stylistic/semi */
+            const prepared = this._takePreparedArtifactTermContent(chunk)
+            const dedup = prepared?.result ?? await this._resolveArtifactTermContentDedup(chunk, true)
+            if (prepared !== null) {
+                importMetrics.dedupLookaheadConsumedCount += 1
+                importMetrics.dedupLookaheadScanMs += prepared.elapsedMs
+            }
+            /* eslint-enable @stylistic/semi */
             const {
                 contentOffsets,
                 contentLengths,
@@ -8438,7 +8455,8 @@ this._readTermContentSignature(
             importMetrics.dedupCapacityMs += dedupCapacityMs;
             importMetrics.dedupCanonicalScanMs += dedupCanonicalScanMs;
             importMetrics.dedupExactCompareMs += dedupExactCompareMs;
-            importMetrics.dedupScanMs += safePerformance.now() - tContentAppendStart;
+            // eslint-disable-next-line @stylistic/semi
+            importMetrics.dedupScanMs += prepared?.elapsedMs ?? safePerformance.now() - tContentAppendStart
             if (contentDedupPlan !== null && pendingContentCount > 0) {
                 dedupPlanRollbackState = {
                     plan: contentDedupPlan,
@@ -8475,6 +8493,9 @@ this._readTermContentSignature(
                     null;
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
+                /** @type {Promise<void>|null} */
+                // eslint-disable-next-line @stylistic/semi
+                let pendingLookahead = null
                 /** @type {(() => void)|null} */
                 let unregisterInFlightContentSources = null;
                 let borrowedContentReleased = false;
@@ -8592,6 +8613,13 @@ this._readTermContentSignature(
                             resolvedContentDictNames,
                             importMetrics,
                         );
+                        /* eslint-disable @stylistic/semi */
+                        // Metadata is now visible and exact source bytes remain
+                        // leased. Prepare at most the already-ready next group
+                        // while the current compression/record tail completes.
+                        pendingLookahead = this._tryPrepareArtifactTermContent(chunk)
+                        if (pendingLookahead !== null) { importMetrics.dedupLookaheadPreparedCount += 1 }
+                        /* eslint-enable @stylistic/semi */
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
                         const measuredContentCompletion = earlyContentPersistence.completion
@@ -8603,6 +8631,7 @@ this._readTermContentSignature(
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
+                            pendingLookahead,
                         ]);
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
@@ -8613,7 +8642,9 @@ this._readTermContentSignature(
                         if (concurrentErrors.length > 1) {
                             throw new AggregateError(
                                 concurrentErrors,
-                                'Term content and record persistence both failed',
+                                pendingLookahead === null ?
+                                    'Term content and record persistence both failed' :
+                                    'Concurrent term content persistence, record append, or preparation failed',
                             );
                         }
                         this._addTermContentBlockProfile(
@@ -8636,6 +8667,8 @@ this._readTermContentSignature(
                     if (pendingRecordAppend !== null) {
                         pendingOperations.push(pendingRecordAppend);
                     }
+                    // eslint-disable-next-line @stylistic/semi
+                    if (pendingLookahead !== null) { pendingOperations.push(pendingLookahead) }
                     await Promise.allSettled(pendingOperations);
                     throw error;
                 } finally {
@@ -8670,6 +8703,10 @@ this._readTermContentSignature(
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
+            // Roll back the next reservation before the current publication.
+            // Its resolver has settled above, so no borrowed source is in use.
+            // eslint-disable-next-line @stylistic/semi
+            this._discardPreparedArtifactTermContent()
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {
@@ -8678,6 +8715,98 @@ this._readTermContentSignature(
             throw e;
         }
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Starts read/scan work only; storage and source admission remain ordered.
+     * The caller must join this promise before releasing its callback or rolling
+     * back metadata. The next group retains its existing parser result lease.
+     * @param {ArtifactTermRecordChunk} chunk
+     * @returns {Promise<void>|null}
+     */
+    _tryPrepareArtifactTermContent(chunk) {
+        if (!this._bulkImportTransactionOpen || this._preparedArtifactTermContent !== null) { return null }
+        const next = chunk.peekNextContentChunk?.()
+        if (!next) { return null }
+        const plan = next.contentDedupPlan
+        if (
+            next.dictionary !== chunk.dictionary ||
+            next.useResolvedContentReferences !== true ||
+            next.contentRowStart !== 0 || next.rowCount !== plan?.sourceRowCount ||
+            plan === chunk.contentDedupPlan || plan?.resolutionDeferred !== true ||
+            !(plan.uniqueRowIndexes instanceof Uint32Array) ||
+            !(plan.uniqueSignatures instanceof Uint32Array) ||
+            next.contentDictNameList !== null || next.uniformContentDictName !== chunk.uniformContentDictName ||
+            !(next.contentMetaList instanceof Uint32Array) ||
+            !(next.contentUniqueIndexList instanceof Uint32Array) ||
+            !(next.contentBytesBuffer instanceof Uint8Array) ||
+            typeof SharedArrayBuffer !== 'function' || !(next.contentBytesBuffer.buffer instanceof SharedArrayBuffer)
+        ) { return null }
+        /** @type {PreparedArtifactTermContent} */
+        const prepared = {chunk: next, result: null, elapsedMs: 0}
+        this._preparedArtifactTermContent = prepared
+        const startedAt = safePerformance.now()
+        const pending = this._resolveArtifactTermContentDedup(next, true).then((result) => {
+            prepared.result = result
+            prepared.elapsedMs = safePerformance.now() - startedAt
+        })
+        void pending.catch(() => {})
+        return pending
+    }
+
+    /**
+     * Only the same parser-owned content may consume a prepared result. Other
+     * callers discard it and use the ordinary validated resolver.
+     * @param {ArtifactTermRecordChunk} chunk
+     * @returns {PreparedArtifactTermContent|null}
+     */
+    _takePreparedArtifactTermContent(chunk) {
+        const prepared = this._preparedArtifactTermContent
+        if (prepared === null) { return null }
+        const source = prepared.chunk
+        if (
+            prepared.result !== null &&
+            source.dictionary === chunk.dictionary && source.rowCount === chunk.rowCount &&
+            source.contentRowStart === chunk.contentRowStart &&
+            source.contentDedupPlan === chunk.contentDedupPlan &&
+            source.contentBytesBuffer === chunk.contentBytesBuffer &&
+            source.contentBytesBaseOffset === chunk.contentBytesBaseOffset &&
+            source.contentMetaList === chunk.contentMetaList &&
+            source.contentUniqueIndexList === chunk.contentUniqueIndexList &&
+            source.contentMetaByUniqueIndex === chunk.contentMetaByUniqueIndex &&
+            source.useResolvedContentReferences === chunk.useResolvedContentReferences &&
+            source.contentDictNameList === chunk.contentDictNameList &&
+            source.uniformContentDictName === chunk.uniformContentDictName
+        ) {
+            this._preparedArtifactTermContent = null
+            return prepared
+        }
+        this._discardPreparedArtifactTermContent()
+        return null
+    }
+
+    /** Retires a completed but unused next-group resolution. */
+    _discardPreparedArtifactTermContent() {
+        const prepared = this._preparedArtifactTermContent
+        if (prepared === null) { return }
+        this._preparedArtifactTermContent = null
+        if (prepared.result !== null) {
+            this._rollbackStagedArtifactTermContentMetadata(prepared.result.stagedContentMetadata ?? null)
+        }
+        const plan = prepared.chunk.contentDedupPlan
+        if (!plan) { return }
+        plan.resolvedFlags.fill(0)
+        plan.resolvedOffsets.fill(0)
+        plan.resolvedLengths.fill(0)
+        plan.resolvedDictNames = null
+        plan.resolvedUniformDictName = void 0
+        plan.pendingEpochs = null
+        plan.pendingIndexes = null
+        plan.nextEpoch = 1
+        plan.nextUnresolvedUniqueIndex = 0
+        plan.persistedLookupRequired = null
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {number} tableSize
