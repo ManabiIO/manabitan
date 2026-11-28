@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent fresh extraction, exact original-payload comparison, semantic negative controls, relocation and artifact tamper checks; no parser or import acquisition.",
+  "independentReview": {
+    "status": "PASS",
+    "scope": "Independent read-only archive and observer review; no parser, benchmark, browser, or memory acquisition",
+    "verifierSha256": "791645d290eda36199b7c68949f60598e96fcc6ebb6af30f3e1c8c352b67928f",
+    "manifestSha256": "07889d1ad1d48f1288063435d4e92ad43eb5cb2ffb4a94a1ccdb010e4605b7d9",
+    "archiveSha256": "00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7",
+    "originalPayloadsCompared": 17,
+    "originalBytesCompared": 3528127,
+    "portableAudit": {
+      "status": "PASS",
+      "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+      "candidate": "38031a752b26c9b630e5f2f1d45e780786656c74",
+      "archiveSha256": "00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7",
+      "members": 17,
+      "uncompressedBytes": 3528127,
+      "adversarial": {
+        "records": 6720,
+        "totals": {
+          "observations": 6240,
+          "valid": 480,
+          "emittedRows": 1920,
+          "additionalReuse": 353,
+          "casesWithAdditionalReuse": 353,
+          "negativeZeroSequenceCases": 120,
+          "fallbackValidCases": 44,
+          "fallbackAdditionalReuse": 34,
+          "malformed": 5760,
+          "fusedSuccessValidCases": 436,
+          "fusedSuccessAdditionalReuse": 319
+        },
+        "distanceCounts": {
+          "1": {
+            "cases": 96,
+            "additionalReuse": 80
+          },
+          "2": {
+            "cases": 96,
+            "additionalReuse": 91
+          },
+          "3": {
+            "cases": 96,
+            "additionalReuse": 91
+          },
+          "4": {
+            "cases": 96,
+            "additionalReuse": 91
+          },
+          "5": {
+            "cases": 96,
+            "additionalReuse": 0
+          }
+        },
+        "malformedErrorCounts": {
+          "term-bank parser failed with code -1": 88,
+          "fused term-bank parser failed with code -1": 5672
+        },
+        "scopeNotes": [
+          "There are6240 A/B comparison observations plus480 no-reuse-oracle receipts,6720 JSONL records. Count them separately.",
+          "44 cases intentionally include a negative-zero score and fall back in both arms.319 extra reuse observations occur in successful fused cases;34 occur before eventual fallback.353 is not an all-fused success count.",
+          "120 cases spell sequence as raw -0, distinct from negative-zero score fallback.",
+          "The low-level parser builds prepared index bytes but does not build the optional routeFilter; that occurs in copyWasmBackedColumnChunk. This diagnostic is not a route-filter oracle.",
+          "The observer compares complete materialized row/index bytes in memory and retains their SHA256 values, not full output-byte payloads. Its independently reusable evidence is source-bound digests plus the frozen generator, not exhaustive persisted-database bytes.",
+          "Preflight binds the main parser JS, C, experiments JS and WASM, and asserts Node version. This review additionally observes tracked runtime cleanliness; it cannot retroactively strengthen the preflight to a Node executable hash or a complete imported-module hash manifest.",
+          "This replay uses explicit native escaped-key admission and generated raw banks; it is a diagnostic grammar/offset/hint replay, not default-policy production grouping, ZIP CRC, compression, storage, browser, memory or performance qualification."
+        ]
+      },
+      "hostedValidation": {
+        "runId": 46104813593,
+        "jobId": 140855069080,
+        "artifactId": 15248253449,
+        "source": "38031a752b26c9b630e5f2f1d45e780786656c74",
+        "testsPassed": 15153,
+        "testFilesPassed": 669,
+        "testsSkipped": 47,
+        "compilerVersion": "21.1.8",
+        "linkerVersion": "21.1.8",
+        "buildTargets": [
+          "chrome",
+          "chrome-dev",
+          "chrome-playwright",
+          "firefox",
+          "firefox-dev",
+          "firefox-android",
+          "edge"
+        ],
+        "testTypes": "passed",
+        "jsonFormat": "passed",
+        "scopedTestLint": "passed"
+      },
+      "repackChecked": true,
+      "sourceObjectsChecked": true,
+      "noAcquisition": true
+    },
+    "negativeChecks": [
+      {
+        "case": "missing-last-observation",
+        "rejected": true,
+        "message": "Missing or extra observation lines"
+      },
+      {
+        "case": "changed-source-identity",
+        "rejected": true,
+        "message": "Generated source hash mismatch"
+      },
+      {
+        "case": "valid-output-mismatch",
+        "rejected": true,
+        "message": "Output digest mismatch"
+      },
+      {
+        "case": "assertion-is-not-parser-rejection",
+        "rejected": true,
+        "message": "Malformed case is not a parser rejection"
+      },
+      {
+        "case": "reuse-disabled-oracle-mismatch",
+        "rejected": true,
+        "message": "Reuse-disabled oracle mismatch"
+      },
+      {
+        "case": "reuse-outside-four-row-window",
+        "rejected": true,
+        "message": "Reuse escaped the four-row window"
+      },
+      {
+        "case": "failed-hosted-gate",
+        "rejected": true,
+        "message": "Hosted validation job did not succeed"
+      }
+    ],
+    "reviewNotes": [
+      "Every archived payload exactly matches its original file and verified extracted bytes.",
+      "Malformed results must be parser Error/code -1; a caught assertion cannot satisfy rejection evidence.",
+      "Original observer compares full normalized row/index outputs and a disabled-reuse baseline oracle before recording success.",
+      "Portable observer reconstructs every generated input and validates the complete retained schedule; it never executes the parser.",
+      "The retained scope notes accurately separate fused success from discarded fallback attempts and exclude persistence, low-level route-filter and speed claims."
+    ]
+  },
+  "publicationChecks": {
+    "positivePortable": {
+      "command": "python3 relocated/verify.py --evidence relocated/evidence --check-repack",
+      "exitCode": 0,
+      "result": {
+        "status": "PASS",
+        "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+        "candidate": "38031a752b26c9b630e5f2f1d45e780786656c74",
+        "archiveSha256": "00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7",
+        "members": 17,
+        "uncompressedBytes": 3528127,
+        "adversarial": {
+          "records": 6720,
+          "totals": {
+            "observations": 6240,
+            "valid": 480,
+            "emittedRows": 1920,
+            "additionalReuse": 353,
+            "casesWithAdditionalReuse": 353,
+            "negativeZeroSequenceCases": 120,
+            "fallbackValidCases": 44,
+            "fallbackAdditionalReuse": 34,
+            "malformed": 5760,
+            "fusedSuccessValidCases": 436,
+            "fusedSuccessAdditionalReuse": 319
+          },
+          "distanceCounts": {
+            "1": {
+              "cases": 96,
+              "additionalReuse": 80
+            },
+            "2": {
+              "cases": 96,
+              "additionalReuse": 91
+            },
+            "3": {
+              "cases": 96,
+              "additionalReuse": 91
+            },
+            "4": {
+              "cases": 96,
+              "additionalReuse": 91
+            },
+            "5": {
+              "cases": 96,
+              "additionalReuse": 0
+            }
+          },
+          "malformedErrorCounts": {
+            "term-bank parser failed with code -1": 88,
+            "fused term-bank parser failed with code -1": 5672
+          },
+          "scopeNotes": [
+            "There are6240 A/B comparison observations plus480 no-reuse-oracle receipts,6720 JSONL records. Count them separately.",
+            "44 cases intentionally include a negative-zero score and fall back in both arms.319 extra reuse observations occur in successful fused cases;34 occur before eventual fallback.353 is not an all-fused success count.",
+            "120 cases spell sequence as raw -0, distinct from negative-zero score fallback.",
+            "The low-level parser builds prepared index bytes but does not build the optional routeFilter; that occurs in copyWasmBackedColumnChunk. This diagnostic is not a route-filter oracle.",
+            "The observer compares complete materialized row/index bytes in memory and retains their SHA256 values, not full output-byte payloads. Its independently reusable evidence is source-bound digests plus the frozen generator, not exhaustive persisted-database bytes.",
+            "Preflight binds the main parser JS, C, experiments JS and WASM, and asserts Node version. This review additionally observes tracked runtime cleanliness; it cannot retroactively strengthen the preflight to a Node executable hash or a complete imported-module hash manifest.",
+            "This replay uses explicit native escaped-key admission and generated raw banks; it is a diagnostic grammar/offset/hint replay, not default-policy production grouping, ZIP CRC, compression, storage, browser, memory or performance qualification."
+          ]
+        },
+        "hostedValidation": {
+          "runId": 46104813593,
+          "jobId": 140855069080,
+          "artifactId": 15248253449,
+          "source": "38031a752b26c9b630e5f2f1d45e780786656c74",
+          "testsPassed": 15153,
+          "testFilesPassed": 669,
+          "testsSkipped": 47,
+          "compilerVersion": "21.1.8",
+          "linkerVersion": "21.1.8",
+          "buildTargets": [
+            "chrome",
+            "chrome-dev",
+            "chrome-playwright",
+            "firefox",
+            "firefox-dev",
+            "firefox-android",
+            "edge"
+          ],
+          "testTypes": "passed",
+          "jsonFormat": "passed",
+          "scopedTestLint": "passed"
+        },
+        "repackChecked": true,
+        "sourceObjectsChecked": false,
+        "noAcquisition": true
+      },
+      "stderr": ""
+    },
+    "negativeChecks": [
+      {
+        "case": "optimized-python",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "FAIL: Do not run this auditor with optimized Python (-O)\n"
+      },
+      {
+        "case": "altered-archive-byte",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "FAIL: Archive hash mismatch\n"
+      },
+      {
+        "case": "altered-observation-with-rehashed-archive-and-manifest",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "FAIL: Original payload identity mismatch: adversarial/observations.jsonl\n"
+      }
+    ],
+    "pushFiltersForBranch": [
+      {
+        "workflow": "suffix-window-screen-5a86.yml",
+        "branches": [
+          "perf/format3-suffix-reuse-20261128"
+        ],
+        "paths": [
+          ".github/workflows/suffix-window-screen-5a86.yml",
+          "dev/perf/suffix-window-screen-5a86.py",
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "dev/data/dictionary-wasm/manifest.json",
+          "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "test/term-bank-format3-row.test.js"
+        ],
+        "matchedChangedPaths": []
+      }
+    ]
+  },
+  "originalFiles": {
+    "review.json": {
+      "bytes": 5623,
+      "sha256": "da2254b3ba8e58079a1415b9f2a72f71c68b6d7eb72d75f54f71ef9c04b64238",
+      "encoding": "utf-8",
+      "text": "{\n  \"status\": \"PASS\",\n  \"scope\": \"Independent read-only archive and observer review; no parser, benchmark, browser, or memory acquisition\",\n  \"verifierSha256\": \"791645d290eda36199b7c68949f60598e96fcc6ebb6af30f3e1c8c352b67928f\",\n  \"manifestSha256\": \"07889d1ad1d48f1288063435d4e92ad43eb5cb2ffb4a94a1ccdb010e4605b7d9\",\n  \"archiveSha256\": \"00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7\",\n  \"originalPayloadsCompared\": 17,\n  \"originalBytesCompared\": 3528127,\n  \"portableAudit\": {\n    \"status\": \"PASS\",\n    \"baseline\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\",\n    \"candidate\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n    \"archiveSha256\": \"00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7\",\n    \"members\": 17,\n    \"uncompressedBytes\": 3528127,\n    \"adversarial\": {\n      \"records\": 6720,\n      \"totals\": {\n        \"observations\": 6240,\n        \"valid\": 480,\n        \"emittedRows\": 1920,\n        \"additionalReuse\": 353,\n        \"casesWithAdditionalReuse\": 353,\n        \"negativeZeroSequenceCases\": 120,\n        \"fallbackValidCases\": 44,\n        \"fallbackAdditionalReuse\": 34,\n        \"malformed\": 5760,\n        \"fusedSuccessValidCases\": 436,\n        \"fusedSuccessAdditionalReuse\": 319\n      },\n      \"distanceCounts\": {\n        \"1\": {\n          \"cases\": 96,\n          \"additionalReuse\": 80\n        },\n        \"2\": {\n          \"cases\": 96,\n          \"additionalReuse\": 91\n        },\n        \"3\": {\n          \"cases\": 96,\n          \"additionalReuse\": 91\n        },\n        \"4\": {\n          \"cases\": 96,\n          \"additionalReuse\": 91\n        },\n        \"5\": {\n          \"cases\": 96,\n          \"additionalReuse\": 0\n        }\n      },\n      \"malformedErrorCounts\": {\n        \"term-bank parser failed with code -1\": 88,\n        \"fused term-bank parser failed with code -1\": 5672\n      },\n      \"scopeNotes\": [\n        \"There are6240 A/B comparison observations plus480 no-reuse-oracle receipts,6720 JSONL records. Count them separately.\",\n        \"44 cases intentionally include a negative-zero score and fall back in both arms.319 extra reuse observations occur in successful fused cases;34 occur before eventual fallback.353 is not an all-fused success count.\",\n        \"120 cases spell sequence as raw -0, distinct from negative-zero score fallback.\",\n        \"The low-level parser builds prepared index bytes but does not build the optional routeFilter; that occurs in copyWasmBackedColumnChunk. This diagnostic is not a route-filter oracle.\",\n        \"The observer compares complete materialized row/index bytes in memory and retains their SHA256 values, not full output-byte payloads. Its independently reusable evidence is source-bound digests plus the frozen generator, not exhaustive persisted-database bytes.\",\n        \"Preflight binds the main parser JS, C, experiments JS and WASM, and asserts Node version. This review additionally observes tracked runtime cleanliness; it cannot retroactively strengthen the preflight to a Node executable hash or a complete imported-module hash manifest.\",\n        \"This replay uses explicit native escaped-key admission and generated raw banks; it is a diagnostic grammar/offset/hint replay, not default-policy production grouping, ZIP CRC, compression, storage, browser, memory or performance qualification.\"\n      ]\n    },\n    \"hostedValidation\": {\n      \"runId\": 46104813593,\n      \"jobId\": 140855069080,\n      \"artifactId\": 15248253449,\n      \"source\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n      \"testsPassed\": 15153,\n      \"testFilesPassed\": 669,\n      \"testsSkipped\": 47,\n      \"compilerVersion\": \"21.1.8\",\n      \"linkerVersion\": \"21.1.8\",\n      \"buildTargets\": [\n        \"chrome\",\n        \"chrome-dev\",\n        \"chrome-playwright\",\n        \"firefox\",\n        \"firefox-dev\",\n        \"firefox-android\",\n        \"edge\"\n      ],\n      \"testTypes\": \"passed\",\n      \"jsonFormat\": \"passed\",\n      \"scopedTestLint\": \"passed\"\n    },\n    \"repackChecked\": true,\n    \"sourceObjectsChecked\": true,\n    \"noAcquisition\": true\n  },\n  \"negativeChecks\": [\n    {\n      \"case\": \"missing-last-observation\",\n      \"rejected\": true,\n      \"message\": \"Missing or extra observation lines\"\n    },\n    {\n      \"case\": \"changed-source-identity\",\n      \"rejected\": true,\n      \"message\": \"Generated source hash mismatch\"\n    },\n    {\n      \"case\": \"valid-output-mismatch\",\n      \"rejected\": true,\n      \"message\": \"Output digest mismatch\"\n    },\n    {\n      \"case\": \"assertion-is-not-parser-rejection\",\n      \"rejected\": true,\n      \"message\": \"Malformed case is not a parser rejection\"\n    },\n    {\n      \"case\": \"reuse-disabled-oracle-mismatch\",\n      \"rejected\": true,\n      \"message\": \"Reuse-disabled oracle mismatch\"\n    },\n    {\n      \"case\": \"reuse-outside-four-row-window\",\n      \"rejected\": true,\n      \"message\": \"Reuse escaped the four-row window\"\n    },\n    {\n      \"case\": \"failed-hosted-gate\",\n      \"rejected\": true,\n      \"message\": \"Hosted validation job did not succeed\"\n    }\n  ],\n  \"reviewNotes\": [\n    \"Every archived payload exactly matches its original file and verified extracted bytes.\",\n    \"Malformed results must be parser Error/code -1; a caught assertion cannot satisfy rejection evidence.\",\n    \"Original observer compares full normalized row/index outputs and a disabled-reuse baseline oracle before recording success.\",\n    \"Portable observer reconstructs every generated input and validates the complete retained schedule; it never executes the parser.\",\n    \"The retained scope notes accurately separate fused success from discarded fallback attempts and exclude persistence, low-level route-filter and speed claims.\"\n  ]\n}\n"
+    },
+    "portable.stdout.log": {
+      "bytes": 3348,
+      "sha256": "993b2f800c5f62f5b2c5909e5e968389811915a111ae486900f39b3e518958d9",
+      "encoding": "utf-8",
+      "text": "{\n  \"status\": \"PASS\",\n  \"baseline\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\",\n  \"candidate\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n  \"archiveSha256\": \"00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7\",\n  \"members\": 17,\n  \"uncompressedBytes\": 3528127,\n  \"adversarial\": {\n    \"records\": 6720,\n    \"totals\": {\n      \"observations\": 6240,\n      \"valid\": 480,\n      \"emittedRows\": 1920,\n      \"additionalReuse\": 353,\n      \"casesWithAdditionalReuse\": 353,\n      \"negativeZeroSequenceCases\": 120,\n      \"fallbackValidCases\": 44,\n      \"fallbackAdditionalReuse\": 34,\n      \"malformed\": 5760,\n      \"fusedSuccessValidCases\": 436,\n      \"fusedSuccessAdditionalReuse\": 319\n    },\n    \"distanceCounts\": {\n      \"1\": {\n        \"cases\": 96,\n        \"additionalReuse\": 80\n      },\n      \"2\": {\n        \"cases\": 96,\n        \"additionalReuse\": 91\n      },\n      \"3\": {\n        \"cases\": 96,\n        \"additionalReuse\": 91\n      },\n      \"4\": {\n        \"cases\": 96,\n        \"additionalReuse\": 91\n      },\n      \"5\": {\n        \"cases\": 96,\n        \"additionalReuse\": 0\n      }\n    },\n    \"malformedErrorCounts\": {\n      \"term-bank parser failed with code -1\": 88,\n      \"fused term-bank parser failed with code -1\": 5672\n    },\n    \"scopeNotes\": [\n      \"There are6240 A/B comparison observations plus480 no-reuse-oracle receipts,6720 JSONL records. Count them separately.\",\n      \"44 cases intentionally include a negative-zero score and fall back in both arms.319 extra reuse observations occur in successful fused cases;34 occur before eventual fallback.353 is not an all-fused success count.\",\n      \"120 cases spell sequence as raw -0, distinct from negative-zero score fallback.\",\n      \"The low-level parser builds prepared index bytes but does not build the optional routeFilter; that occurs in copyWasmBackedColumnChunk. This diagnostic is not a route-filter oracle.\",\n      \"The observer compares complete materialized row/index bytes in memory and retains their SHA256 values, not full output-byte payloads. Its independently reusable evidence is source-bound digests plus the frozen generator, not exhaustive persisted-database bytes.\",\n      \"Preflight binds the main parser JS, C, experiments JS and WASM, and asserts Node version. This review additionally observes tracked runtime cleanliness; it cannot retroactively strengthen the preflight to a Node executable hash or a complete imported-module hash manifest.\",\n      \"This replay uses explicit native escaped-key admission and generated raw banks; it is a diagnostic grammar/offset/hint replay, not default-policy production grouping, ZIP CRC, compression, storage, browser, memory or performance qualification.\"\n    ]\n  },\n  \"hostedValidation\": {\n    \"runId\": 46104813593,\n    \"jobId\": 140855069080,\n    \"artifactId\": 15248253449,\n    \"source\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n    \"testsPassed\": 15153,\n    \"testFilesPassed\": 669,\n    \"testsSkipped\": 47,\n    \"compilerVersion\": \"21.1.8\",\n    \"linkerVersion\": \"21.1.8\",\n    \"buildTargets\": [\n      \"chrome\",\n      \"chrome-dev\",\n      \"chrome-playwright\",\n      \"firefox\",\n      \"firefox-dev\",\n      \"firefox-android\",\n      \"edge\"\n    ],\n    \"testTypes\": \"passed\",\n    \"jsonFormat\": \"passed\",\n    \"scopedTestLint\": \"passed\"\n  },\n  \"repackChecked\": true,\n  \"sourceObjectsChecked\": true,\n  \"noAcquisition\": true\n}\n"
+    },
+    "portable.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "utf-8",
+      "text": ""
+    },
+    "review-script-preflight-failure.txt": {
+      "bytes": 267,
+      "sha256": "a13ca3284447fdc11cd9f6f5dd73618d1c3af0bcc67f1cbfe343e31243c8493f",
+      "encoding": "utf-8",
+      "text": "First independent-review command was rejected at Python parsing: SyntaxError: unmatched closing parenthesis at the assertion-is-not-parser-rejection call. No auditor, parser, extraction, source mutation, or acquisition ran. Corrected only this review-command syntax.\n"
+    },
+    "publication-checks.py": {
+      "bytes": 5465,
+      "sha256": "14f8a73460239d4a1e8260d74426daba75bc4c03e894593ec2e0c9f06b39ff4f",
+      "encoding": "utf-8",
+      "text": "from pathlib import Path\nimport copy,fnmatch,hashlib,importlib.util,json,shutil,subprocess,tarfile,tempfile,yaml\n\ncheckout=Path('/home/agent/manabitan-suffix-supplement-5a86');evidence=checkout/'builds/perf/suffix-supplement-20261128-5a86'\nauditor=checkout/'dev/perf/verify-suffix-supplement-20261128-5a86.py'\nreviewroot=Path('/home/agent/manabitan-suffix-review-5a86')\nspec=importlib.util.spec_from_file_location('auditor',auditor);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nmanifest=json.loads((evidence/'manifest.json').read_text());original=(evidence/'evidence.tar.xz').read_bytes()\nnegative=[]\nwith tempfile.TemporaryDirectory(prefix='publication-',dir=reviewroot) as temp:\n temp=Path(temp);portable=temp/'portable';portable.mkdir();shutil.copy2(auditor,portable/'verify.py');shutil.copytree(evidence,portable/'evidence')\n result=subprocess.run(['python3',str(portable/'verify.py'),'--evidence',str(portable/'evidence'),'--check-repack'],text=True,capture_output=True)\n assert result.returncode==0,result.stderr\n positive={'command':'python3 relocated/verify.py --evidence relocated/evidence --check-repack','exitCode':0,'result':json.loads(result.stdout),'stderr':result.stderr}\n r=subprocess.run(['python3','-O',str(portable/'verify.py'),'--evidence',str(portable/'evidence')],text=True,capture_output=True)\n assert r.returncode!=0 and 'Do not run this auditor with optimized Python' in r.stderr\n negative.append({'case':'optimized-python','exitCode':r.returncode,'stdout':r.stdout,'stderr':r.stderr})\n damaged=bytearray(original);damaged[len(damaged)//2]^=1;(portable/'evidence/evidence.tar.xz').write_bytes(damaged)\n r=subprocess.run(['python3',str(portable/'verify.py'),'--evidence',str(portable/'evidence')],text=True,capture_output=True)\n assert r.returncode!=0 and 'Archive hash mismatch' in r.stderr\n negative.append({'case':'altered-archive-byte','exitCode':r.returncode,'stdout':r.stdout,'stderr':r.stderr})\n _,payloads=m.load_archive(evidence,manifest)\n altered=copy.copy(payloads);lines=altered['adversarial/observations.jsonl'].decode().splitlines();first=json.loads(lines[0]);first['B']['reuse']+=1;lines[0]=json.dumps(first,separators=(',',':'));altered['adversarial/observations.jsonl']=('\\n'.join(lines)+'\\n').encode()\n changed=m.deterministic_archive(altered);damaged_manifest=copy.deepcopy(manifest);damaged_manifest['archive']['bytes']=len(changed);damaged_manifest['archive']['sha256']=m.sha(changed);damaged_manifest['archive']['uncompressedBytes']=sum(map(len,altered.values()));entry=damaged_manifest['members']['adversarial/observations.jsonl'];entry['bytes']=len(altered['adversarial/observations.jsonl']);entry['sha256']=m.sha(altered['adversarial/observations.jsonl'])\n (portable/'evidence/evidence.tar.xz').write_bytes(changed);(portable/'evidence/manifest.json').write_text(json.dumps(damaged_manifest))\n r=subprocess.run(['python3',str(portable/'verify.py'),'--evidence',str(portable/'evidence')],text=True,capture_output=True)\n assert r.returncode!=0 and 'Original payload identity mismatch: adversarial/observations.jsonl' in r.stderr\n negative.append({'case':'altered-observation-with-rehashed-archive-and-manifest','exitCode':r.returncode,'stdout':r.stdout,'stderr':r.stderr})\nchanged_paths=['dev/perf/import-experiments-20260914.md','dev/perf/verify-suffix-supplement-20261128-5a86.py','builds/perf/suffix-supplement-20261128-5a86/evidence.tar.xz','builds/perf/suffix-supplement-20261128-5a86/manifest.json','builds/perf/suffix-supplement-20261128-5a86/packing-review.json']\nbranch='perf/format3-suffix-reuse-20261128';workflowroot=Path('/workspace/scratch/5a86d1e7822a/manabitan/.github/workflows')\n# Include the frozen candidate's branch-specific workflow, which is absent on baseline.\nworkflowfiles={p.name:p for p in workflowroot.iterdir() if p.suffix in ['.yml','.yaml']};workflowfiles['suffix-window-screen-5a86.yml']=checkout/'.github/workflows/suffix-window-screen-5a86.yml'\nmatching=[]\nfor name,p in sorted(workflowfiles.items()):\n doc=yaml.load(p.read_text(),Loader=yaml.BaseLoader);on=doc.get('on',{})\n if not isinstance(on,dict) or 'push' not in on:continue\n push=on['push'] or {}\n if isinstance(push,dict) and ('tags' in push or 'tags-ignore' in push) and not ('branches' in push or 'branches-ignore' in push):continue\n branches=push.get('branches',[]) if isinstance(push,dict) else []\n if isinstance(push,dict) and any(fnmatch.fnmatchcase(branch,pattern) for pattern in push.get('branches-ignore',[])):continue\n if branches and not any(fnmatch.fnmatchcase(branch,pattern) for pattern in branches if not pattern.startswith('!')):continue\n if any(fnmatch.fnmatchcase(branch,pattern[1:]) for pattern in branches if pattern.startswith('!')):continue\n paths=push.get('paths',[]) if isinstance(push,dict) else []\n matched=changed_paths if not paths else [f for f in changed_paths if any(fnmatch.fnmatchcase(f,pattern) for pattern in paths if not pattern.startswith('!'))]\n matching.append({'workflow':name,'branches':branches,'paths':paths,'matchedChangedPaths':matched})\nqualification=next(v for v in matching if v['workflow']=='suffix-window-screen-5a86.yml');assert not qualification['matchedChangedPaths']\nprint(json.dumps({'positivePortable':positive,'negativeChecks':negative,'pushFiltersForBranch':matching},indent=2))\n(reviewroot/'publication-checks.json').write_text(json.dumps({'positivePortable':positive,'negativeChecks':negative,'pushFiltersForBranch':matching},indent=2)+'\\n')\n"
+    },
+    "publication-checks.json": {
+      "bytes": 4951,
+      "sha256": "41244b06ba1a26455fce53dfbedd30f8a6c20ceeb8ca0084f996c372446aaa70",
+      "encoding": "utf-8",
+      "text": "{\n  \"positivePortable\": {\n    \"command\": \"python3 relocated/verify.py --evidence relocated/evidence --check-repack\",\n    \"exitCode\": 0,\n    \"result\": {\n      \"status\": \"PASS\",\n      \"baseline\": \"9e10d3b3fcf66d344ab31bc42c9b522fa5215da2\",\n      \"candidate\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n      \"archiveSha256\": \"00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7\",\n      \"members\": 17,\n      \"uncompressedBytes\": 3528127,\n      \"adversarial\": {\n        \"records\": 6720,\n        \"totals\": {\n          \"observations\": 6240,\n          \"valid\": 480,\n          \"emittedRows\": 1920,\n          \"additionalReuse\": 353,\n          \"casesWithAdditionalReuse\": 353,\n          \"negativeZeroSequenceCases\": 120,\n          \"fallbackValidCases\": 44,\n          \"fallbackAdditionalReuse\": 34,\n          \"malformed\": 5760,\n          \"fusedSuccessValidCases\": 436,\n          \"fusedSuccessAdditionalReuse\": 319\n        },\n        \"distanceCounts\": {\n          \"1\": {\n            \"cases\": 96,\n            \"additionalReuse\": 80\n          },\n          \"2\": {\n            \"cases\": 96,\n            \"additionalReuse\": 91\n          },\n          \"3\": {\n            \"cases\": 96,\n            \"additionalReuse\": 91\n          },\n          \"4\": {\n            \"cases\": 96,\n            \"additionalReuse\": 91\n          },\n          \"5\": {\n            \"cases\": 96,\n            \"additionalReuse\": 0\n          }\n        },\n        \"malformedErrorCounts\": {\n          \"term-bank parser failed with code -1\": 88,\n          \"fused term-bank parser failed with code -1\": 5672\n        },\n        \"scopeNotes\": [\n          \"There are6240 A/B comparison observations plus480 no-reuse-oracle receipts,6720 JSONL records. Count them separately.\",\n          \"44 cases intentionally include a negative-zero score and fall back in both arms.319 extra reuse observations occur in successful fused cases;34 occur before eventual fallback.353 is not an all-fused success count.\",\n          \"120 cases spell sequence as raw -0, distinct from negative-zero score fallback.\",\n          \"The low-level parser builds prepared index bytes but does not build the optional routeFilter; that occurs in copyWasmBackedColumnChunk. This diagnostic is not a route-filter oracle.\",\n          \"The observer compares complete materialized row/index bytes in memory and retains their SHA256 values, not full output-byte payloads. Its independently reusable evidence is source-bound digests plus the frozen generator, not exhaustive persisted-database bytes.\",\n          \"Preflight binds the main parser JS, C, experiments JS and WASM, and asserts Node version. This review additionally observes tracked runtime cleanliness; it cannot retroactively strengthen the preflight to a Node executable hash or a complete imported-module hash manifest.\",\n          \"This replay uses explicit native escaped-key admission and generated raw banks; it is a diagnostic grammar/offset/hint replay, not default-policy production grouping, ZIP CRC, compression, storage, browser, memory or performance qualification.\"\n        ]\n      },\n      \"hostedValidation\": {\n        \"runId\": 46104813593,\n        \"jobId\": 140855069080,\n        \"artifactId\": 15248253449,\n        \"source\": \"38031a752b26c9b630e5f2f1d45e780786656c74\",\n        \"testsPassed\": 15153,\n        \"testFilesPassed\": 669,\n        \"testsSkipped\": 47,\n        \"compilerVersion\": \"21.1.8\",\n        \"linkerVersion\": \"21.1.8\",\n        \"buildTargets\": [\n          \"chrome\",\n          \"chrome-dev\",\n          \"chrome-playwright\",\n          \"firefox\",\n          \"firefox-dev\",\n          \"firefox-android\",\n          \"edge\"\n        ],\n        \"testTypes\": \"passed\",\n        \"jsonFormat\": \"passed\",\n        \"scopedTestLint\": \"passed\"\n      },\n      \"repackChecked\": true,\n      \"sourceObjectsChecked\": false,\n      \"noAcquisition\": true\n    },\n    \"stderr\": \"\"\n  },\n  \"negativeChecks\": [\n    {\n      \"case\": \"optimized-python\",\n      \"exitCode\": 1,\n      \"stdout\": \"\",\n      \"stderr\": \"FAIL: Do not run this auditor with optimized Python (-O)\\n\"\n    },\n    {\n      \"case\": \"altered-archive-byte\",\n      \"exitCode\": 1,\n      \"stdout\": \"\",\n      \"stderr\": \"FAIL: Archive hash mismatch\\n\"\n    },\n    {\n      \"case\": \"altered-observation-with-rehashed-archive-and-manifest\",\n      \"exitCode\": 1,\n      \"stdout\": \"\",\n      \"stderr\": \"FAIL: Original payload identity mismatch: adversarial/observations.jsonl\\n\"\n    }\n  ],\n  \"pushFiltersForBranch\": [\n    {\n      \"workflow\": \"suffix-window-screen-5a86.yml\",\n      \"branches\": [\n        \"perf/format3-suffix-reuse-20261128\"\n      ],\n      \"paths\": [\n        \".github/workflows/suffix-window-screen-5a86.yml\",\n        \"dev/perf/suffix-window-screen-5a86.py\",\n        \"ext/js/dictionary/wasm/term-bank-parser.c\",\n        \"dev/data/dictionary-wasm/manifest.json\",\n        \"dev/data/dictionary-wasm/term-bank-parser.wasm\",\n        \"test/term-bank-format3-row.test.js\"\n      ],\n      \"matchedChangedPaths\": []\n    }\n  ]\n}\n"
+    }
+  }
+}

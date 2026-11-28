@@ -79,6 +79,68 @@ A separate bounded complete-corpus replay is being prepared for all three
 fixtures because sampled browser content probes are not a full output oracle.
 Do not open a performance PR until the collected gain is worth reviewing.
 
+### November 28 supplement: adversarial replay and hosted source gate
+
+The acquisition source remains `38031a752b26c9b630e5f2f1d45e780786656c74`,
+tree `a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5`. This follow-up retains additional
+correctness evidence and the completed source gate. Runtime, tests, workflow,
+qualification protocol and measured inputs are unchanged; no new acquisition
+or performance PR is started.
+
+A bounded public-parser replay generated 480 valid cases containing 1,920 rows
+and 5,760 malformed variants. Valid cases compare complete materialized row
+content and prepared-index bytes against both the frozen baseline and its
+reuse-disabled parser. Every malformed variant rejects in both arms. The
+retained JSONL contains all 6,240 A/B comparison observations plus 480 separate
+reuse-disabled oracle receipts, for 6,720 lines.
+
+Of the valid cases, 436 complete the fused path; 44 deliberately include a
+negative-zero score and fall back in both arms. Additional reuse occurs in 319
+successful fused cases and in 34 attempts that are subsequently discarded by
+fallback. Those counts remain separate. All 96 distance-five cases have no
+additional reuse. The matrix also includes 120 raw negative-zero sequence
+cases, whitespace, escapes, media and normalization shapes, sample collisions,
+and nonempty banks separated by empty banks.
+
+The observer copies and normalizes native views before another parse can reuse
+the heap. It compares full bytes in memory and retains their digests. The
+low-level API does not produce optional route filters. Explicit escaped-key
+admission and generated raw banks make this a diagnostic grammar/offset/hint
+check; it does not establish production grouping, ZIP CRC, persistence, browser
+timing or peak-memory results. The original Node observer and independent
+review retain their exact bytes and local paths, including the original
+invocation and warning log.
+
+The [frozen hosted validation job](https://github.com/ManabiIO/manabitan/actions/runs/46104813593/job/140855069080)
+passed 15,153 tests in 669 files, with 47 existing skips. Test-project TypeScript,
+scoped changed-test lint, generated JSON formatting, all seven dry-run build
+targets, and the unchanged native artifact check also passed. Clang/LLD 21.1.8
+reproduced the candidate parser and unchanged canonical scanner. The earlier
+failed local component and type attempts remain retained; this completed hosted
+gate does not relabel them.
+
+The [supplement manifest](../../builds/perf/suffix-supplement-20261128-5a86/manifest.json)
+binds 17 original payloads in a deterministic 346,916-byte archive, SHA-256
+`00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7`.
+It includes the original 48,630-byte validation ZIP, SHA-256
+`19adec2fae01b3b0358686e0fcf790c27fb67baa717ec76fcba4b20e92c0ea1d`,
+its manifest and all five logs, plus a separate job/step connector receipt.
+Every payload is retained without alteration or exclusion.
+
+Verify the archive, regenerate every prescribed source hash, reconcile all
+receipts and validation results, and optionally check the frozen Git objects:
+
+```sh
+python3 dev/perf/verify-suffix-supplement-20261128-5a86.py \
+  --check-repack --verify-sources .
+```
+
+The auditor accepts `--evidence /path/to/evidence` for relocated verification
+and `--extract /new/directory` to write verified original files. It uses only
+the Python standard library and acquires no imports. The original six-cell
+browser qualification remains bound to the frozen source; this supplement
+makes no timing or memory improvement claim.
+
 ## November 26, 2026: index setup coverage and frozen screen
 
 [PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.

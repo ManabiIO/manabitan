@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "kind": "Evidence-only suffix correctness and completed hosted source validation supplement",
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "38031a752b26c9b630e5f2f1d45e780786656c74",
+  "sourceTrees": {
+    "A": "d99ea4d04658f7ec1c76acdc5f3684594212a471",
+    "B": "a05ece005d9fb4931cb1fc24f0cb67ceb109a7f5"
+  },
+  "measuredHeadUnchanged": true,
+  "scope": "No runtime, tests, workflow, acquisition protocol or measured inputs changed; no new timing or memory observation; no PR.",
+  "archive": {
+    "file": "evidence.tar.xz",
+    "format": "XZ(preset6)/USTAR; sorted regular files; uid/gid/mtime0; mode0644; empty owner names",
+    "bytes": 346916,
+    "sha256": "00b4e6f5717197e3cb091b4e0c7b5e97a59b9a545ed4a1dcbbf91f8f65f415b7",
+    "memberCount": 17,
+    "uncompressedBytes": 3528127
+  },
+  "verifier": {
+    "path": "dev/perf/verify-suffix-supplement-20261128-5a86.py",
+    "bytes": 22841,
+    "sha256": "791645d290eda36199b7c68949f60598e96fcc6ebb6af30f3e1c8c352b67928f"
+  },
+  "members": {
+    "adversarial/invocation.json": {
+      "bytes": 419,
+      "sha256": "06362f4804fcb391d1b2ebf55b92e96adb03786adbf25156314b76acfad963fa",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-first-invocation.json"
+    },
+    "adversarial/observations.jsonl": {
+      "bytes": 2841564,
+      "sha256": "699d3544f8415a933eb1ae25ba2022cce3c0499cb73755288df318f24ed34573",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-results/observations.jsonl"
+    },
+    "adversarial/preflight.json": {
+      "bytes": 1985,
+      "sha256": "77731eb743b0456631c1f193c4435f3aff62577dfbe3e5b09fcc3523c90e42c4",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-results/preflight.json"
+    },
+    "adversarial/runner.mjs": {
+      "bytes": 13167,
+      "sha256": "6f97176e8500c35911022c5382fdfd771f9aa273d099aae566c1a59163c880f9",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-replay.mjs"
+    },
+    "adversarial/stderr.log": {
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-first.stderr.log"
+    },
+    "adversarial/stdout.log": {
+      "bytes": 2552,
+      "sha256": "9018c60fd1f6c126ebc02590e16ea054c3540873783d2cbd4d4108c4f209d0fb",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-first.stdout.log"
+    },
+    "adversarial/summary.json": {
+      "bytes": 2162,
+      "sha256": "e7cf657b9539159e9a52346f2a399a3d18854791bf4fcf463a89a50da2568dac",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-results/summary.json"
+    },
+    "hosted/job-receipt.json": {
+      "bytes": 6843,
+      "sha256": "e3c7b3a23dd435994e6c45877a873f17337a0fa2b28a1c6e3f83a80a866409fe",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation-job-receipt.json"
+    },
+    "hosted/logs/build.log": {
+      "bytes": 280,
+      "sha256": "f1b5a4a0b295eb91df1df0b377d6a3e0fe96bceb13199abbbd6c5c1bbc1b2cda",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation/build.log"
+    },
+    "hosted/logs/json-format.log": {
+      "bytes": 759,
+      "sha256": "e739f86f192724afd466e6fd712b8f12d80c11f56c471bab2c5c06d120e33d6a",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation/json-format.log"
+    },
+    "hosted/logs/native-rebuild.log": {
+      "bytes": 500,
+      "sha256": "6124d90f35a9775574295dbf01e78c7fbd0dcf111aacf0df6210c8d1491d15b6",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation/native-rebuild.log"
+    },
+    "hosted/logs/test-types.log": {
+      "bytes": 89,
+      "sha256": "483be17dfd1c7a790c03be201b26aeac3b7a3dfd7f5d6b5c996f0bf33df1b92c",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation/test-types.log"
+    },
+    "hosted/logs/unit.log": {
+      "bytes": 591995,
+      "sha256": "4c2327850800a9e3b739562a02e1cdda84cb61385e15d3941f0793816be2ba30",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation/unit.log"
+    },
+    "hosted/original-manifest.json": {
+      "bytes": 1000,
+      "sha256": "64e53612567a3f7c85c6c8e0d9b539e30f61867ef2ede65b45cd3269963e7fe2",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation-manifest.json"
+    },
+    "hosted/validation.zip": {
+      "bytes": 48630,
+      "sha256": "19adec2fae01b3b0358686e0fcf790c27fb67baa717ec76fcba4b20e92c0ea1d",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/hosted-validation.zip"
+    },
+    "review/independent-audit.json": {
+      "bytes": 4627,
+      "sha256": "7ab5b699ae1bb1277f1e42bfe5b02a464213eda0715cb7466c8585dde165f79b",
+      "originalPath": "/home/agent/manabitan-suffix-evidence-5a86/adversarial-independent-audit.json"
+    },
+    "review/original-auditor.mjs": {
+      "bytes": 11381,
+      "sha256": "209fa004fb9d60ef25820bfefd6e7da4d1b46510232bc368c775a02a20885769",
+      "originalPath": "/home/agent/manabitan-suffix-review-5a86/review-adversarial.mjs"
+    }
+  },
+  "originalHostedArtifact": {
+    "runId": 46104813593,
+    "jobId": 140855069080,
+    "artifactId": 15248253449,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104813593",
+    "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104813593/job/140855069080",
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46104813593/artifacts/15248253449",
+    "bytes": 48630,
+    "sha256": "19adec2fae01b3b0358686e0fcf790c27fb67baa717ec76fcba4b20e92c0ea1d"
+  },
+  "adversarialCounts": {
+    "observations": 6240,
+    "valid": 480,
+    "malformed": 5760,
+    "emittedRows": 1920,
+    "additionalReuse": 353,
+    "casesWithAdditionalReuse": 353,
+    "negativeZeroSequenceCases": 120,
+    "fusedSuccessValidCases": 436,
+    "fallbackValidCases": 44,
+    "fusedSuccessAdditionalReuse": 319,
+    "fallbackAdditionalReuse": 34
+  },
+  "limits": [
+    "The 480 valid cases compare complete semantic row/index bytes in memory and retain hashes; all 5,760 malformed cases reject in both arms. The 6,720 JSONL lines include 480 reuse-disabled oracle receipts in addition to 6,240 A/B observations.",
+    "436 valid cases finish fused; 44 negative-zero-score cases fall back in both arms. 319 extra reuse observations occur in successful fused cases and 34 before discarded fused attempts. All 96 distance-five cases have no extra reuse.",
+    "No low-level route-filter, full production-policy, ZIP CRC, persisted database, browser timing or peak-memory claim follows from the generated replay.",
+    "Original observer and original review auditor preserve absolute local paths. The new Python auditor is relocatable and needs no parser execution; optional --verify-sources checks Git objects.",
+    "Only test-project TypeScript is represented by this hosted validation artifact; the artifact does not imply all type projects or all browser integration suites ran.",
+    "The hosted job receipt is a separate read-only connector snapshot; the original ZIP, manifest and five logs are retained byte-for-byte."
+  ]
+}
