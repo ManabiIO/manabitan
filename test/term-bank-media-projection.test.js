@@ -148,6 +148,7 @@ describe('native single-image semantic projection', () => {
 /**
  * @param {string} glossary
  * @param {(chunk: Parameters<typeof copyWasmBackedColumnChunk>[0], source: Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>) => void} inspect
+ * @returns {Promise<void>}
  */
 async function parseCompressedGlossary(glossary, inspect) {
     return parseCompressedGlossaries([glossary], inspect);
@@ -158,9 +159,7 @@ async function parseCompressedGlossary(glossary, inspect) {
  * @param {Parameters<typeof parseCompressedGlossary>[1]} inspect
  */
 async function parseCompressedGlossaries(glossaries, inspect) {
-    const bytes = encoder.encode('[' + glossaries.map((glossary, index) =>
-        `["画像${index}","がぞう${index}","","",${index % 3},${glossary},${index + 1},""]`,
-    ).join(',') + ']');
+    const bytes = encoder.encode('[' + glossaries.map((glossary, index) => `["画像${index}","がぞう${index}","","",${index % 3},${glossary},${index + 1},""]`).join(',') + ']');
     const source = await inflateCompressedTermBankSourcesWasm([{bytes, compressionMethod: 0, compressedSize: bytes.length, uncompressedSize: bytes.length, signature: crc32(bytes)}]);
     await parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => inspect(chunk, source), 2048, {
         singleChunk: true,
@@ -237,7 +236,10 @@ describe('compressed worker-source media projection', () => {
     });
 });
 
-/** @param {string} path @returns {string} */
+/**
+ * @param {string} path
+ * @returns {string}
+ */
 function imageGlossary(path) {
     return JSON.stringify([{type: 'image', path}]);
 }
@@ -273,8 +275,11 @@ describe('worker image-path decode windows', () => {
         '[{"type":"structured-content","content":[{"tag":"img","path":"one.png"},{"tag":"img","path":"two.webp"}]}]',
     ])('preserves ASCII runs around a fallback or semantic special case: %s', async (middle) => {
         await parseCompressedGlossaries([
-            imageGlossary('before-a.png'), imageGlossary('before-b.png'), middle,
-            imageGlossary('after-a.png'), imageGlossary('after-b.png'),
+            imageGlossary('before-a.png'),
+            imageGlossary('before-b.png'),
+            middle,
+            imageGlossary('after-a.png'),
+            imageGlossary('after-b.png'),
         ], (chunk, source) => {
             const expected = copyWasmBackedColumnChunk(chunk, false, true, false, source);
             expect(copyParserWorkerColumnChunk(chunk, false, true, false, source)).toEqual(expected);
