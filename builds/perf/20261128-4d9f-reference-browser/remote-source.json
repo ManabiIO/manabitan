@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "source": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "tree": "c9bd2df5331c144d4988be32f29a64045a407786",
+  "extTree": "69840d6c3eaa0adf61df967cfc18c0e934d40c1d",
+  "formatFlagDefault": false,
+  "requiredReaderFloorWhenFormat4": 13,
+  "scope": "Distinct latest integration and corrected supplemental observer; exact release package is unchanged between off/on. No timing or process-memory claims.",
+  "priorObservationRunId": 46136881596
+}

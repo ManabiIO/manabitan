@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "candidate": "16c1b9fb1e850fec5d1c3e1dba792b9c8a293e97",
+  "localEquivalent": null,
+  "parent": "a300da36d00df8e353c5679b1528b50a1299b75f",
+  "timingEligible": false,
+  "basis": "Prospective exact term-file expectations inherited from completed original full-corpus off/on acquisitions. This distinct a300/floor13 integration must reproduce them in fresh complete browser imports; no earlier result is relabeled. Storage/correctness only; no timing or memory claim.",
+  "dictionaries": {
+    "jmdict": {
+      "totalRows": 528299,
+      "modes": {
+        "off": {
+          "termFiles": {
+            "manabitan-term-content.bin": 19566680,
+            "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr": 45,
+            "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti": 23748952
+          },
+          "activation": {
+            "floor": 10,
+            "formatCounts": {
+              "2": 12
+            },
+            "format4Rows": 0,
+            "totalRows": 528299,
+            "chunks": 12,
+            "requestedFlag": false
+          }
+        },
+        "on": {
+          "termFiles": {
+            "manabitan-term-content.bin": 19566680,
+            "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr": 45,
+            "manabitan-term-records/dict-25|JMdict%20%5B2026-11-22%5Draw-block-v2%3Ajmdict.mbtr.mbti": 23707948
+          },
+          "activation": {
+            "floor": 13,
+            "formatCounts": {
+              "2": 7,
+              "4": 5
+            },
+            "format4Rows": 210000,
+            "totalRows": 528299,
+            "chunks": 12,
+            "requestedFlag": true
+          }
+        }
+      },
+      "expectedTermFileBytesSaved": 41004,
+      "corpusReceiptHashes": {
+        "original": "22d1208594226113cd0bfc2ed6e8b3e48f8ae549af3e295ee8a6b2dae349adb4",
+        "compact": "7338d67a60b4444b3af2905ca3073456cfdb3ed62a601764af9c23d92386839d"
+      }
+    },
+    "jitendex": {
+      "totalRows": 436555,
+      "modes": {
+        "off": {
+          "termFiles": {
+            "manabitan-term-content.bin": 38386795,
+            "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr": 45,
+            "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti": 23590852
+          },
+          "activation": {
+            "floor": 10,
+            "formatCounts": {
+              "2": 22
+            },
+            "format4Rows": 0,
+            "totalRows": 436555,
+            "chunks": 22,
+            "requestedFlag": false
+          }
+        },
+        "on": {
+          "termFiles": {
+            "manabitan-term-content.bin": 38386795,
+            "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr": 45,
+            "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti": 23590852
+          },
+          "activation": {
+            "floor": 10,
+            "formatCounts": {
+              "2": 22
+            },
+            "format4Rows": 0,
+            "totalRows": 436555,
+            "chunks": 22,
+            "requestedFlag": true
+          }
+        }
+      },
+      "expectedTermFileBytesSaved": 0,
+      "corpusReceiptHashes": {
+        "original": "c6f4d0ff38c68730159c852298a28204b63ed3b655cb57fa655c4ce798404fbb",
+        "compact": "bf440effbda050ea1814a2515ece38484a6e14042ca2958baba663a70732001e"
+      }
+    },
+    "vndb": {
+      "totalRows": 6648310,
+      "modes": {
+        "off": {
+          "termFiles": {
+            "manabitan-term-content.bin": 7533449,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+          },
+          "activation": {
+            "floor": 11,
+            "formatCounts": {
+              "2": 192
+            },
+            "format4Rows": 0,
+            "totalRows": 6648310,
+            "chunks": 192,
+            "requestedFlag": false
+          }
+        },
+        "on": {
+          "termFiles": {
+            "manabitan-term-content.bin": 7533449,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 375257528,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+            "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2231060
+          },
+          "activation": {
+            "floor": 13,
+            "formatCounts": {
+              "2": 30,
+              "4": 162
+            },
+            "format4Rows": 6328310,
+            "totalRows": 6648310,
+            "chunks": 192,
+            "requestedFlag": true
+          }
+        }
+      },
+      "expectedTermFileBytesSaved": 24411244,
+      "corpusReceiptHashes": {
+        "original": "c051c24b4967fdcf1fa2477637443e1fb3f5bef49c0443d152d18a0c434aafb0",
+        "compact": "37d09c1721059fd26b0d7b09d3b4adcc374ad0894cd7338c48b375a18ecaca77"
+      }
+    }
+  },
+  "previousFailedAcquisition": {
+    "runId": 46136881596,
+    "source": "a72385b08a1004bec627172b0ca07f49b50c2f19",
+    "reason": "The E2E serializer omitted the supplemental activation receipt. All six first-import reports and failures are retained. Observer v2 adds the actual JSON projection and an executed serializer regression contract."
+  },
+  "observerSources": [
+    {
+      "path": "test/perf/record-reference-table-verification/activation_overlay.py",
+      "sha": "3d3c7039f9b9a0fba4e3880e325350866ed4352c",
+      "sha256": "64ff2f94312edbdbeecac0473d1aac5680bf8d7eee35a07238b21fcb0ca83e27"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.mjs",
+      "sha": "b20a22dd097a8f551e890120851e2a7e0cdc0852",
+      "sha256": "6b336c9d9c54274209c1d3c8d94c5baf446ec0a63c5f553bf64ee1de5fcddd2d"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/test_activation_overlay.py",
+      "sha": "eabdcd09be181acdd09b845669e98c6dbc5823e1",
+      "sha256": "ae52d3a38984bf0ffdaf98c064732e65e3f3694fb90b551e153bb3cbb1b03db4"
+    },
+    {
+      "path": "test/perf/record-reference-table-verification/storage-activation.contract.mjs",
+      "sha": "b528451127b29c28370460b6eced025d7d673c9a",
+      "sha256": "feea0cd1b2b52594570c4615c47768bf273c205ac1821cfe8f78735eee06f54e"
+    }
+  ]
+}
