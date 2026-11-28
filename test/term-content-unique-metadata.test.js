@@ -23,7 +23,7 @@ import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonica
 /** @typedef {import('../ext/js/dictionary/dictionary-database.js').ArtifactTermContentChunk} ContentChunk */
 /** @typedef {import('../ext/js/dictionary/dictionary-database.js').ArtifactTermContentDedupPlan} DedupPlan */
 
-const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)));
+const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)));
 
 /**
  * @param {{compact?: boolean, native?: boolean, uniqueCount?: number, repeats?: number, existing?: boolean, generic?: boolean, references?: boolean}} [options]

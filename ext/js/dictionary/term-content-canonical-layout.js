@@ -16,8 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Private ABI v1: the kernel owns only the reserved prefix, never table copies.
-export const CANONICAL_SCAN_ABI_VERSION = 1;
+// Private ABI v2 packs a hash fingerprint beside each dense slot identity.
+// The kernel owns only the reserved prefix, never table copies.
+export const CANONICAL_SCAN_ABI_VERSION = 2;
+
+// The fixed WASM32 arena uses at least 26 bytes per dense entry. Therefore a
+// valid capacity is below 2^28, and index + 1 fits in the low 28 bits. The high
+// nibble filters probe collisions; both complete hashes still decide matches.
+export const TERM_CONTENT_METADATA_SLOT_INDEX_MASK = 0x0fffffff;
+export const TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK = 0xf0000000;
 
 export const CANONICAL_SCAN_MAX_ROWS = 100000;
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {TERM_CONTENT_METADATA_PREFIX_BYTES} from './term-content-canonical-layout.js';
+import {TERM_CONTENT_METADATA_PREFIX_BYTES, TERM_CONTENT_METADATA_SLOT_INDEX_MASK} from './term-content-canonical-layout.js';
 
 const WASM_PAGE_BYTES = 65536;
 // Fixed scratch reservation shared with the native canonical scanner.
@@ -36,7 +36,7 @@ export class TermContentMetadataArena {
      */
     constructor(denseCapacity, slotCapacity) {
         if (
-            !Number.isSafeInteger(denseCapacity) || denseCapacity < 0 ||
+            !Number.isSafeInteger(denseCapacity) || denseCapacity < 0 || denseCapacity > TERM_CONTENT_METADATA_SLOT_INDEX_MASK ||
             !Number.isSafeInteger(slotCapacity) || slotCapacity < 0
         ) {
             throw new RangeError('Invalid term content metadata arena capacity');

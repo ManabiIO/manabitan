@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-// Private ABI v1; mirror term-content-canonical-layout.js. All scratch columns
+// Private ABI v2; mirror term-content-canonical-layout.js. All scratch columns
 // fit below the authoritative arena, which begins at the fixed 8 MiB prefix.
 #define MAX_ROWS 100000u
 #define EXACT_BATCH_SIZE 4096u
@@ -34,17 +34,23 @@
 #define EPOCHS (EXACT + EXACT_BATCH_SIZE * 8u)
 #define INDEXES (EPOCHS + MAX_ROWS * 4u)
 #define LAYOUT_END (INDEXES + MAX_ROWS * 4u)
+#define SLOT_INDEX_MASK 0x0fffffffu
+#define SLOT_FINGERPRINT_MASK 0xf0000000u
 #define U32(p) ((uint32_t *)(uintptr_t)(p))
 #define U8(p) ((uint8_t *)(uintptr_t)(p))
 
-_Static_assert(LAYOUT_END == 8263840u, "canonical layout v1 endpoint");
+_Static_assert(LAYOUT_END == 8263840u, "canonical scratch layout endpoint");
 _Static_assert(LAYOUT_END <= PREFIX, "canonical scratch exceeds reserved prefix");
 _Static_assert(META >= 131072u, "canonical scratch overlaps stack");
 _Static_assert(FLAGS % 4u == 0 && OUT % 4u == 0 && INDEXES % 4u == 0,
                "canonical columns must remain aligned");
+// A valid WASM32 metadata arena spends at least 26 bytes per dense entry.
+// Thus index + 1 never needs the high nibble reserved for the hash filter.
+_Static_assert(((uint64_t)SLOT_INDEX_MASK + 1u) * 26u > UINT32_MAX,
+               "dense identities fit below the slot fingerprint");
 
 __attribute__((export_name("canonical_abi_version")))
-uint32_t canonical_abi_version(void) { return 1u; }
+uint32_t canonical_abi_version(void) { return 2u; }
 __attribute__((export_name("canonical_layout_end")))
 uint32_t canonical_layout_end(void) { return LAYOUT_END; }
 __attribute__((export_name("canonical_max_rows")))
@@ -67,7 +73,8 @@ int32_t scan_canonical(void) {
     h[1] = c[15];
     h[5] = c[11];
     if (c[12] > MAX_ROWS || c[14] < c[13] || c[14] - c[13] > MAX_ROWS ||
-        c[15] > c[14] - c[13] || c[1] == 0 || (c[1] & (c[1] - 1)) || bytes < PREFIX) {
+        c[15] > c[14] - c[13] || c[1] == 0 || (c[1] & (c[1] - 1)) || bytes < PREFIX ||
+        c[10] > SLOT_INDEX_MASK) {
         return -1;
     }
     uint32_t widths[8] = {4, 4, 1, 4, 1, 4, 4, 4};
@@ -104,9 +111,11 @@ int32_t scan_canonical(void) {
         hash ^= hash >> 16;
         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
         while (slots[slot]) {
-            uint32_t index = slots[slot] - 1;
+            const uint32_t encoded = slots[slot];
+            uint32_t index = (encoded & SLOT_INDEX_MASK) - 1;
             if (index >= c[10] || ++probes >= c[1]) { return -4; }
-            if (hash1[index] == m[2] && hash2[index] == m[3]) {
+            if (((encoded ^ m[2]) & SLOT_FINGERPRINT_MASK) == 0 &&
+                hash1[index] == m[2] && hash2[index] == m[3]) {
                 pair = 1;
                 if (c[19] && state[index] == 1) {
                     existing = index;
@@ -142,7 +151,7 @@ int32_t scan_canonical(void) {
             s3[index] = sigs[i * 3 + 2];
             present[index] = 1;
             state[index] = 2;
-            slots[slot] = index + 1;
+            slots[slot] = (index + 1) | (m[2] & SLOT_FINGERPRINT_MASK);
             staged = index;
             h[5] = index + 1;
             if (c[21] && h[0] == c[21]) { __builtin_trap(); }

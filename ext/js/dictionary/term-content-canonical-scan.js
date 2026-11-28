@@ -31,7 +31,7 @@ const instances = new WeakMap();
 export function compileCanonicalScanModule() {
     if (modulePromise === null) {
         modulePromise = (async () => {
-            const response = await fetch(new URL('../../lib/term-content-canonical-scan-v1.wasm', import.meta.url));
+            const response = await fetch(new URL('../../lib/term-content-canonical-scan-v2.wasm', import.meta.url));
             if (!response.ok) {
                 throw new Error(`Failed to load canonical scan WASM: ${response.status}`);
             }

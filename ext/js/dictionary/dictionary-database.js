@@ -21,6 +21,7 @@
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
 import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
+import {TERM_CONTENT_METADATA_SLOT_INDEX_MASK, TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK} from './term-content-canonical-layout.js';
 import {TermContentMetadataArena} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
@@ -7295,13 +7296,13 @@ void 0 :
             const useDense = denseCount <= oldSlotTable.length;
             const scanLength = useDense ? denseCount : oldSlotTable.length;
             for (let i = 0; i < scanLength; ++i) {
-                const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
+                const encodedIndex = useDense ? i + 1 : oldSlotTable[i] & TERM_CONTENT_METADATA_SLOT_INDEX_MASK;
                 if (encodedIndex === 0) { continue; }
                 const index = encodedIndex - 1;
                 if (arena.state[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
                 let slot = this._getTermEntryContentMetaHashPairSlot(arena.hash1[index], arena.hash2[index], mask);
                 while (arena.slots[slot] !== 0) { slot = (slot + 1) & mask; }
-                arena.slots[slot] = encodedIndex;
+                arena.slots[slot] = encodedIndex | (arena.hash1[index] & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK);
             }
         }
         this._termContentMetadataArena = arena;
@@ -7460,8 +7461,12 @@ void 0 :
                 }
                 let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
                 while (slotTable[slot] !== 0) {
-                    const existingIndex = slotTable[slot] - 1;
-                    if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
+                    const encodedIndex = slotTable[slot];
+                    const existingIndex = (encodedIndex & TERM_CONTENT_METADATA_SLOT_INDEX_MASK) - 1;
+                    if (
+                        ((encodedIndex ^ hash1) & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK) === 0 &&
+                        hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2
+                    ) {
                         slot = -1;
                         break;
                     }
@@ -7488,7 +7493,7 @@ void 0 :
                 );
                 signature3Table[index] = this._readTermContentSignature(contentBytes, contentByteOffset + lastOffset);
                 stateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
-                slotTable[slot] = index + 1;
+                slotTable[slot] = (index + 1) | (hash1 & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK);
                 indexes[i] = index;
                 ++stagedCount;
             }
@@ -7600,8 +7605,12 @@ this._readTermContentSignature(
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
         let probeCount = 0;
         while (slotTable[slot] !== 0) {
-            const existingIndex = slotTable[slot] - 1;
-            if (hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2) {
+            const encodedIndex = slotTable[slot];
+            const existingIndex = (encodedIndex & TERM_CONTENT_METADATA_SLOT_INDEX_MASK) - 1;
+            if (
+                ((encodedIndex ^ hash1) & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK) === 0 &&
+                hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2
+            ) {
                 return -1;
             }
             if (++probeCount >= slotTable.length) {
@@ -7618,7 +7627,7 @@ this._readTermContentSignature(
         this._termEntryContentMetaSignature2Table[index] = signature2;
         this._termEntryContentMetaSignature3Table[index] = signature3;
         this._termEntryContentMetaStateTable[index] = TERM_CONTENT_META_SLOT_PENDING;
-        slotTable[slot] = index + 1;
+        slotTable[slot] = (index + 1) | (hash1 & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK);
         ++this._termEntryContentMetaHashPairPendingCount;
         return index;
     }
@@ -7764,8 +7773,9 @@ this._readTermContentSignature(
         while (true) {
             const encodedIndex = slotTable[slot];
             if (encodedIndex === 0) { return -1; }
-            const index = encodedIndex - 1;
+            const index = (encodedIndex & TERM_CONTENT_METADATA_SLOT_INDEX_MASK) - 1;
             if (
+                ((encodedIndex ^ hash1) & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK) === 0 &&
                 stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
@@ -7806,12 +7816,13 @@ this._readTermContentSignature(
                 hash1Table[index] = hash1;
                 hash2Table[index] = hash2;
                 stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
-                slotTable[slot] = index + 1;
+                slotTable[slot] = (index + 1) | (hash1 & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK);
                 ++this._termEntryContentMetaHashPairCount;
                 return;
             }
-            const index = encodedIndex - 1;
+            const index = (encodedIndex & TERM_CONTENT_METADATA_SLOT_INDEX_MASK) - 1;
             if (
+                ((encodedIndex ^ hash1) & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK) === 0 &&
                 stateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[index] === hash1 && hash2Table[index] === hash2
             ) {
@@ -7846,8 +7857,10 @@ this._readTermContentSignature(
         let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
         let probeCount = 0;
         while (slotTable[slot] !== 0) {
-            const existingIndex = slotTable[slot] - 1;
+            const encodedIndex = slotTable[slot];
+            const existingIndex = (encodedIndex & TERM_CONTENT_METADATA_SLOT_INDEX_MASK) - 1;
             if (
+                ((encodedIndex ^ hash1) & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK) === 0 &&
                 stateTable[existingIndex] === TERM_CONTENT_META_SLOT_PUBLISHED &&
                 hash1Table[existingIndex] === hash1 && hash2Table[existingIndex] === hash2
             ) {
@@ -7891,7 +7904,7 @@ this._readTermContentSignature(
         hash1Table[index] = hash1;
         hash2Table[index] = hash2;
         stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
-        slotTable[slot] = index + 1;
+        slotTable[slot] = (index + 1) | (hash1 & TERM_CONTENT_METADATA_SLOT_FINGERPRINT_MASK);
         this._termEntryContentMetaIdTable[index] = 0;
         this._termEntryContentMetaOffsetTable[index] = offset;
         this._termEntryContentMetaLengthTable[index] = length;

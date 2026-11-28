@@ -31,7 +31,7 @@ import {NativeCanonicalScanner, compileCanonicalScanModule} from '../ext/js/dict
 import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js';
 
 const wasm = new Uint8Array(
-    await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)),
+    await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)),
 );
 const module = await WebAssembly.compile(wasm);
 function jsDatabase() {
@@ -1219,7 +1219,7 @@ test('default loader: missing asset retry, single-flight, healthy native metrics
     let fetches = 0;
     try {
         globalThis.fetch = vi.fn(async (url) => {
-            assert.ok(String(url).endsWith('/lib/term-content-canonical-scan-v1.wasm'));
+            assert.ok(String(url).endsWith('/lib/term-content-canonical-scan-v2.wasm'));
             ++fetches;
             if (fetches === 1) {
                 return new Response('', {status: 404});

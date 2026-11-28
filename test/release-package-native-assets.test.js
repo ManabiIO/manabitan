@@ -31,7 +31,7 @@ async function packageFixture(scanner, variant = 'chrome', mutate = () => {}) {
     zip.file('manifest.json', JSON.stringify(manifest));
     zip.file('lib/term-bank-parser.wasm', wasm);
     zip.file('lib/zstd.wasm', wasm);
-    if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v1.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }
+    if (scanner !== 'missing') { zip.file('lib/term-content-canonical-scan-v2.wasm', scanner === 'corrupt' ? Uint8Array.of(1, 2, 3) : wasm); }
     const path = join(directory, `manabitan-${variant}.zip`);
     await writeFile(path, await zip.generateAsync({type: 'nodebuffer'}));
     return path;
@@ -46,7 +46,7 @@ test('release package audit validates and records the canonical scanner alongsid
     const path = await packageFixture('valid');
     const {stdout} = await run(process.execPath, ['dev/bin/audit-release-packages.js', version, path]);
     const report = JSON.parse(stdout);
-    expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v1.wasm']).toMatch(/^[0-9a-f]{64}$/u);
+    expect(report.packages[0].nativeAssets['lib/term-content-canonical-scan-v2.wasm']).toMatch(/^[0-9a-f]{64}$/u);
     expect(Object.keys(report.packages[0].nativeAssets)).toHaveLength(3);
 });
 
