@@ -16,6 +16,7 @@ import {
     encodeRawTermContentBlockReference,
     encodeRawTermContentCompactBlockReference,
     getRawTermContentBlockCompressionDictName,
+    getRawTermContentBlockReferenceBytes,
     RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES,
     RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
     writeRawTermContentBlockReference,
@@ -90,6 +91,19 @@ describe('raw term content block references', () => {
         expect(getRawTermContentBlockCompressionDictName('raw-block-v2')).toBeNull();
         expect(getRawTermContentBlockCompressionDictName('raw-block-v2:jmdict')).toBe('jmdict');
         expect(getRawTermContentBlockCompressionDictName('raw-v2')).toBeUndefined();
+    });
+
+    test('selects reference width from the block version regardless of codec suffix', () => {
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1:jmdict')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v1:unknown-codec')).toBe(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:jmdict')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:unknown-codec')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v2:')).toBe(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+        expect(getRawTermContentBlockReferenceBytes('raw-block-v3:jmdict')).toBeUndefined();
+        expect(getRawTermContentBlockReferenceBytes('raw-v2')).toBeUndefined();
+        expect(getRawTermContentBlockReferenceBytes('')).toBeUndefined();
     });
 
     test('round trips compact references with uint64 offsets', () => {

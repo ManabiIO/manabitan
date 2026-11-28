@@ -44,6 +44,7 @@ import {
     decodeRawTermContentHeader,
     decodeRawTermContentTokenHeader,
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+    getRawTermContentBlockReferenceBytes,
     decodeRawTermContentSharedGlossaryHeader,
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
@@ -52,7 +53,6 @@ import {
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
-    getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
@@ -6515,7 +6515,7 @@ void 0 :
             dictName === RAW_TERM_CONTENT_DICT_NAME ||
             dictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
             dictName === RAW_TERM_CONTENT_TOKEN_DICT_NAME ||
-            typeof getRawTermContentBlockCompressionDictName(dictName) !== 'undefined'
+            typeof getRawTermContentBlockReferenceBytes(dictName) !== 'undefined'
         );
     }
 
@@ -11511,13 +11511,21 @@ null :
     }
 
     /**
-     * @param {Iterable<import('./term-record-opfs-store.js').TermRecord>} records
+     * @param {Iterable<Pick<import('./term-record-opfs-store.js').TermRecord, 'entryContentOffset'|'entryContentLength'|'entryContentDictName'>>} records
      * @yields {{offset: number, length: number}}
      * @returns {IterableIterator<{offset: number, length: number}>}
      */
     *_iterateTermRecordContentSpans(records) {
-        for (const {entryContentOffset: offset, entryContentLength: length} of records) {
-            yield {offset, length};
+        for (const {entryContentOffset: offset, entryContentLength: length, entryContentDictName} of records) {
+            let prefetchLength = length;
+            if (offset >= 0 && length > 0) {
+                const dictName = typeof entryContentDictName === 'string' ? entryContentDictName : '';
+                const referenceBytes = getRawTermContentBlockReferenceBytes(dictName);
+                if (typeof referenceBytes !== 'undefined') {
+                    prefetchLength = referenceBytes;
+                }
+            }
+            yield {offset, length: prefetchLength};
         }
     }
 
@@ -11698,7 +11706,7 @@ null :
                                 // Block references describe their container compression; the
                                 // extracted entry is the original raw payload and must not be
                                 // decompressed a second time.
-                                const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
+                                const isBlockContent = typeof getRawTermContentBlockReferenceBytes(contentDictName) !== 'undefined';
                                 let decodedContentBytes = contentBytes;
                                 if (contentDictName !== 'raw' && !isBlockContent) {
                                     try {

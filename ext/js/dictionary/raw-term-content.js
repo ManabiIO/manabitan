@@ -81,6 +81,29 @@ export function getRawTermContentBlockCompressionDictName(contentDictName) {
 }
 
 /**
+ * Gets the physical reference width for a recognized block content format.
+ * Codec suffixes do not affect the reference layout.
+ * @param {string} contentDictName
+ * @returns {number|undefined} Undefined when the name is not a recognized block format.
+ */
+export function getRawTermContentBlockReferenceBytes(contentDictName) {
+    if (typeof getRawTermContentBlockCompressionDictName(contentDictName) === 'undefined') { return void 0; }
+    if (
+        contentDictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX ||
+        contentDictName.startsWith(`${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`)
+    ) {
+        return RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES;
+    }
+    if (
+        contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX ||
+        contentDictName.startsWith(`${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`)
+    ) {
+        return RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+    }
+    return void 0;
+}
+
+/**
  * @param {string|null} compressionDictName
  * @returns {string}
  */
