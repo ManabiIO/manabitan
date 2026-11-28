@@ -116,6 +116,8 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
+/** @type {WeakSet<object>} */
+const termRecordStoreOrigins = new WeakSet();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
@@ -864,6 +866,7 @@ class DenseIdRecordStore {
 
 export class TermRecordOpfsStore {
     constructor() {
+        termRecordStoreOrigins.add(this);
         /** @type {FileSystemDirectoryHandle|null} */
         this._rootDirectoryHandle = null;
         /** @type {FileSystemDirectoryHandle|null} */
@@ -2559,14 +2562,17 @@ export class TermRecordOpfsStore {
                 chunk.readingEqualsExpressionList,
             );
             const tEncodeStart = safePerformance.now();
-            const encodedChunk = await this._encodeArtifactChunkRecords(
+            const encodeChunk = this._encodeArtifactChunkRecords;
+            const canOwnEncodedChunk = lookupIndexConsumer !== null &&
+            encodeChunk === originalTermRecordChunkEncoder && hasOriginalTermRecordEncoders(this);
+            const encodedChunk = await /** @type {ReturnType<TermRecordOpfsStore['_encodeArtifactChunkRecords']>} */ (Reflect.apply(encodeChunk, this, [
                 runChunk,
                 runOffsets,
                 runLengths,
                 runPlan,
                 preparedLookupIndex?.bytes ?? null,
                 runContentOffsetBase,
-            );
+            ]));
             encodeMs += safePerformance.now() - tEncodeStart;
             validationMs += runValidationMs + encodedChunk.validationMs;
             recordFieldEncodeMs += encodedChunk.recordFieldEncodeMs;
@@ -2585,7 +2591,7 @@ export class TermRecordOpfsStore {
                     preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
                     null,
                 preparedLookupIndex,
-                lookupIndexConsumer,
+                canOwnEncodedChunk ? lookupIndexConsumer : null,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -5865,7 +5871,6 @@ view.chunks :
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
                 view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
             }
-            registerOwnedTermRecordFields(output);
             return output;
         }
         /* eslint-disable @stylistic/semi */
@@ -5938,7 +5943,6 @@ view.chunks :
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
                 legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
             }
-            registerOwnedTermRecordFields(legacy);
             return legacy;
         }
         const output = new Uint8Array(compactByteLength);
@@ -5972,7 +5976,6 @@ view.chunks :
         /* eslint-enable @stylistic/semi */
         cursor += count * 2;
         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
-        registerOwnedTermRecordFields(output);
         return output;
     }
 
@@ -6017,12 +6020,15 @@ view.chunks :
         }
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
-        const recordFields = this._encodeArtifactRecordFields(
+        const encodeFields = this._encodeArtifactRecordFields;
+        const canOwnRecordFields = encodeFields === originalTermRecordFieldEncoder && hasOriginalTermRecordEncoders(this);
+        const recordFields = /** @type {Uint8Array} */ (Reflect.apply(encodeFields, this, [
             chunk,
             contentOffsets,
             contentLengths,
             contentOffsetBase,
-        );
+        ]));
+        if (canOwnRecordFields) { registerOwnedTermRecordFields(recordFields); }
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
         // so the encoder remains the only owner of score representation.
@@ -6281,6 +6287,7 @@ view.chunks :
         if (
             !this._importSessionActive || this._rawTermBankSourceBytes === null ||
             this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES ||
+            !hasOriginalTermRecordEncoders(this) ||
             !canTakeOwnedTermLookupIndex(prepared, payload, recordFields, consumer)
         ) {
             return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
@@ -7972,4 +7979,31 @@ view.chunks :
             }
         }
     }
+}
+
+const originalTermRecordFieldEncoder = TermRecordOpfsStore.prototype._encodeArtifactRecordFields;
+const originalTermRecordChunkEncoder = TermRecordOpfsStore.prototype._encodeArtifactChunkRecords;
+/** @type {Array<[string, unknown]>} */
+const originalTermRecordEncoders = [
+    ['_encodeArtifactRecordFields', originalTermRecordFieldEncoder],
+    ['_encodeArtifactChunkRecords', originalTermRecordChunkEncoder],
+];
+
+/**
+ * Encoder wrappers can retain returned buffers. Preserve their eager snapshots,
+ * and inspect only known store objects without invoking method accessors.
+ * @param {TermRecordOpfsStore} store
+ * @returns {boolean}
+ */
+function hasOriginalTermRecordEncoders(store) {
+    if (!termRecordStoreOrigins.has(store) || Object.getPrototypeOf(store) !== TermRecordOpfsStore.prototype) { return false; }
+    for (const [name, method] of originalTermRecordEncoders) {
+        const own = Object.getOwnPropertyDescriptor(store, name);
+        const prototype = Object.getOwnPropertyDescriptor(TermRecordOpfsStore.prototype, name);
+        if (
+            (typeof own !== 'undefined' && (!('value' in own) || own.value !== method)) ||
+            prototype?.value !== method
+        ) { return false; }
+    }
+    return true;
 }

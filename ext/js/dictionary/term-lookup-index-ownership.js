@@ -29,10 +29,13 @@ const ownedRecordFields = new WeakSet()
 const invalidDataProperty = Symbol('Invalid ownership data property')
 const arrayBufferByteLengthDescriptor = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')
 const arrayBufferResizableDescriptor = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable')
+const sharedArrayBufferByteLengthDescriptor = typeof SharedArrayBuffer === 'function' ?
+    Object.getOwnPropertyDescriptor(SharedArrayBuffer.prototype, 'byteLength') :
+    void 0
 const rowBindingNames = [
     'rowCount', 'expressionBytesList', 'readingBytesList', 'contentBytesList', 'readingEqualsExpressionList',
     'scoreList', 'sequenceList', 'termRecordPreinternedPlan', 'preparedLookupIndexes',
-    'contentDedupPlan', 'contentUniqueIndexList',
+    'contentDedupPlan', 'contentUniqueIndexList', 'contentBytesBuffer',
 ]
 const viewShadowNames = ['buffer', 'byteOffset', 'byteLength', 'length', 'constructor', 'subarray', 'slice', 'set', Symbol.iterator]
 const bufferShadowNames = ['byteLength', 'resizable', 'maxByteLength', 'constructor', 'transfer', 'transferToFixedLength']
@@ -44,27 +47,36 @@ const viewPrototypes = new Set([Uint8Array.prototype, Uint16Array.prototype, Uin
  * per-object shadows before reading geometry; global intrinsic replacement is
  * outside the parser/store ownership contract.
  * @param {unknown} value
- * @returns {ArrayBuffer|null}
+ * @param {boolean} [allowShared=false]
+ * @returns {ArrayBufferLike|null}
  */
-function getPlainViewBuffer(value) {
+function getPlainViewBuffer(value, allowShared = false) {
     if (!ArrayBuffer.isView(value) || !viewPrototypes.has(/** @type {object} */ (Object.getPrototypeOf(value)))) { return null }
     for (const name of viewShadowNames) {
         if (Object.hasOwn(value, name)) { return null }
     }
     const buffer = value.buffer
-    if (Object.getPrototypeOf(buffer) !== ArrayBuffer.prototype) { return null }
+    const shared = allowShared && typeof SharedArrayBuffer === 'function' && Object.getPrototypeOf(buffer) === SharedArrayBuffer.prototype
+    if (!shared && Object.getPrototypeOf(buffer) !== ArrayBuffer.prototype) { return null }
     for (const name of bufferShadowNames) {
         if (Object.hasOwn(buffer, name)) { return null }
     }
-    if (
-        typeof arrayBufferByteLengthDescriptor?.get !== 'function' ||
-        Reflect.apply(arrayBufferByteLengthDescriptor.get, buffer, []) !== buffer.byteLength ||
-        (
-            typeof arrayBufferResizableDescriptor?.get === 'function' &&
-            Reflect.apply(arrayBufferResizableDescriptor.get, buffer, []) === true
-        )
-    ) { return null }
-    return /** @type {ArrayBuffer} */ (buffer)
+    const byteLengthGetter = shared ? sharedArrayBufferByteLengthDescriptor?.get : arrayBufferByteLengthDescriptor?.get
+    if (typeof byteLengthGetter !== 'function') { return null }
+    try {
+        if (
+            Reflect.apply(byteLengthGetter, buffer, []) !== buffer.byteLength ||
+            (
+                !shared && typeof arrayBufferResizableDescriptor?.get === 'function' &&
+                Reflect.apply(arrayBufferResizableDescriptor.get, buffer, []) === true
+            )
+        ) { return null }
+    } catch {
+        // A forged prototype does not establish either internal backing-buffer
+        // brand. Preserve the ordinary eager path on that input.
+        return null
+    }
+    return buffer
 }
 
 /**
@@ -131,12 +143,14 @@ function matchesBindings(value, bindings) {
  */
 function hasDisjointDataViews(value, payloadBuffer, onlyColumns = false, fieldsBuffer = null) {
     if (Object.getPrototypeOf(value) !== Object.prototype) { return false }
-    for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(value))) {
+    for (const [name, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
         if (!('value' in descriptor)) { return false }
         const member = /** @type {unknown} */ (descriptor.value)
         if (member === payloadBuffer || (fieldsBuffer !== null && member === fieldsBuffer)) { return false }
         if (ArrayBuffer.isView(member)) {
-            const buffer = getPlainViewBuffer(member)
+            // The worker's shared content slab is retained, never transferred.
+            // Genuine shared backing cannot alias either private output buffer.
+            const buffer = getPlainViewBuffer(member, !onlyColumns && name === 'contentBytesBuffer')
             if (buffer === null || buffer === payloadBuffer || buffer === fieldsBuffer) { return false }
         } else if (onlyColumns && typeof member === 'object' && member !== null) {
             return false
@@ -265,7 +279,7 @@ export function getTermLookupIndexConsumer(chunk, contentOffsets, contentLengths
 }
 
 /**
- * Call inside the concrete encoder only, at its fresh-buffer return sites.
+ * The caller has captured and invoked the original allocation-owning encoder.
  * An overridable encoder's return value never grants ownership by itself.
  * @param {Uint8Array} fields
  */

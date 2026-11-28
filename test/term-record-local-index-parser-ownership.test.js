@@ -105,6 +105,7 @@ describe('production parser-worker local lookup ownership', () => {
         })
         let rows = 0
         const used = await parser.parseTermBankWithWasmColumnChunksParallel(sources(), 3, async (chunk) => {
+            expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(SharedArrayBuffer)
             const keys = Uint8Array.from(chunk.termRecordPreinternedPlan.stringsBuffer)
             const consumer = createArtifactTermRecordChunkWithResolvedContent(
                 {dictionary: 'Worker ownership', dictionaryTotalRows, ...chunk},

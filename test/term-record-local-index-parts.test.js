@@ -419,4 +419,138 @@ describe('local owned import index envelopes', () => {
         }
     })
 
+    test.each([false, true])('declines shared reference backing without throwing when its prototype is forged: %s', async (forged) => {
+        const fixture = await createImportIndexChunkFixture()
+        const buffer = new SharedArrayBuffer(fixture.chunk.rowCount * Float64Array.BYTES_PER_ELEMENT)
+        const offsets = new Float64Array(buffer)
+        if (forged) { Object.setPrototypeOf(buffer, ArrayBuffer.prototype) }
+        fixture.consumer.resolvedContentReferences.offsets = offsets
+        expect(canTakeOwnedTermLookupIndex(
+            fixture.prepared,
+            fixture.prepared.bytes,
+            fixture.encoded.recordFields,
+            fixture.consumer,
+        )).toBe(false)
+        expect(fixture.adopt()).toEqual(fixture.expected)
+        expect(fixture.prepared.bytes.byteLength).toBeGreaterThan(0)
+    })
+
+    test.each([false, true])('keeps the original shared source slab alive and handles a forged source prototype: %s', async (forged) => {
+        const fixture = await createImportIndexChunkFixture(128, 0, false)
+        const buffer = new SharedArrayBuffer(32)
+        const content = new Uint8Array(buffer).fill(0x5a)
+        if (forged) { Object.setPrototypeOf(buffer, ArrayBuffer.prototype) }
+        fixture.chunk.contentBytesBuffer = content
+        fixture.consumer.contentBytesBuffer = content
+        registerOwnedTermLookupIndexes(fixture.chunk)
+        const pending = fixture.adopt()
+        if (forged) {
+            expect(pending).toBeInstanceOf(Uint8Array)
+            expect(fixture.prepared.bytes.byteLength).toBeGreaterThan(0)
+        } else {
+            expect(pending).not.toBeInstanceOf(Uint8Array)
+            expect(fixture.prepared.bytes.byteLength).toBe(0)
+        }
+        expect(content.byteLength).toBe(32)
+        expect(content[0]).toBe(0x5a)
+        expect(concatenate(getImportIndexChunkParts([pending]))).toEqual(fixture.expected)
+    })
+
+    test.each(['fields', 'chunk'])('preserves fresh buffers retained by a %s encoder wrapper', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        let retained
+        let override
+        if (kind === 'fields') {
+            const original = fixture.store._encodeArtifactRecordFields.bind(fixture.store)
+            override = vi.spyOn(fixture.store, '_encodeArtifactRecordFields').mockImplementation((...args) => {
+                retained = original(...args)
+                return retained
+            })
+        } else {
+            const original = fixture.store._encodeArtifactChunkRecords.bind(fixture.store)
+            override = vi.spyOn(fixture.store, '_encodeArtifactChunkRecords').mockImplementation(async (...args) => {
+                const result = await original(...args)
+                retained = result.recordFields
+                return result
+            })
+        }
+        try {
+            const encoded = await fixture.store._encodeArtifactChunkRecords(
+                fixture.consumer,
+                new Float64Array(0),
+                new Uint32Array(0),
+                fixture.prepared.preinternedPlan,
+                fixture.prepared.bytes,
+            )
+            const pending = fixture.store._createPendingLookupIndexChunk(
+                1,
+                fixture.chunk.rowCount,
+                encoded.contentOffsetBase,
+                encoded.lookupIndexBytes,
+                encoded.recordFields,
+                encoded.recordFieldsFormat,
+                fixture.prepared,
+                fixture.consumer,
+            )
+            expect(pending).toEqual(fixture.expected)
+            expect(retained).toBe(encoded.recordFields)
+            expect(encoded.recordFields.byteLength).toBeGreaterThan(0)
+            expect(fixture.prepared.bytes.byteLength).toBeGreaterThan(0)
+        } finally {
+            override.mockRestore()
+        }
+    })
+
+    test('does not invoke a late encoder accessor while checking ownership', async () => {
+        const fixture = await createImportIndexChunkFixture()
+        let reads = 0
+        Object.defineProperty(fixture.store, '_encodeArtifactRecordFields', {
+            get() { ++reads; throw new Error('Encoder accessor must keep eager snapshot') },
+        })
+        expect(fixture.adopt()).toEqual(fixture.expected)
+        expect(reads).toBe(0)
+    })
+
+    test.each(['fields', 'chunk'])('keeps the invocation witness revoked after a %s wrapper restores itself', async (kind) => {
+        const fixture = await createImportIndexChunkFixture()
+        const {store, consumer, prepared} = fixture
+        let retained
+        if (kind === 'fields') {
+            const original = store._encodeArtifactRecordFields.bind(store)
+            store._encodeArtifactRecordFields = (...args) => {
+                Reflect.deleteProperty(store, '_encodeArtifactRecordFields')
+                retained = original(...args)
+                return retained
+            }
+        } else {
+            const original = store._encodeArtifactChunkRecords.bind(store)
+            store._encodeArtifactChunkRecords = async (...args) => {
+                Reflect.deleteProperty(store, '_encodeArtifactChunkRecords')
+                const encoded = await original(...args)
+                retained = encoded.recordFields
+                return encoded
+            }
+        }
+        Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return {} }})
+        Reflect.set(store, '_importSessionActive', false)
+        await store.beginImportSession()
+        const createPending = store._createPendingLookupIndexChunk.bind(store)
+        const pending = []
+        const override = vi.spyOn(store, '_createPendingLookupIndexChunk').mockImplementation((...args) => {
+            const value = createPending(...args)
+            pending.push(value)
+            return value
+        })
+        try {
+            await store.appendBatchFromArtifactChunkResolvedContent(consumer, new Float64Array(0), new Uint32Array(0), 'raw')
+            expect(pending).toHaveLength(1)
+            expect(pending[0]).toBeInstanceOf(Uint8Array)
+            expect(pending[0]).toEqual(fixture.expected)
+            expect(retained?.byteLength).toBeGreaterThan(0)
+            expect(prepared.bytes.byteLength).toBeGreaterThan(0)
+        } finally {
+            override.mockRestore()
+        }
+    })
+
 })
