@@ -1,0 +1,95 @@
+{
+  "schema": "manabitan-owned-overlap-current-baseline-qualification-v1",
+  "baseline": "dcfc02a0a5534929b1e9fa1f2801ec7a0784ea16",
+  "productCommit": "ae19a4c3f471cf5b5b0d2b6215f283c41a1ea9ed",
+  "productTree": "11db07622fe196dd1a6fd587aec247553e8de193",
+  "supersedes": {
+    "qualificationCommit": "c4330b235eaa31a62c48837578f230038dc48226",
+    "run": 46121740432,
+    "statusAtSupersession": "source verification queued; no timing acquired",
+    "reason": "Develop merged #972's parser and WASM fastpath; current-source results are required."
+  },
+  "unchangedProductPatch": [
+    {
+      "path": "eslint.config.js",
+      "blob": "ecacd4bd0572e1df051d2f0167d11d09d3026cf8"
+    },
+    {
+      "path": "ext/js/dictionary/artifact-term-chunk-pipeline.js",
+      "blob": "8119bdd41ffb50c2cb91970df5c9f6afa20b3076"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "blob": "102e26c04ab5474f02ccaecc4cd9283648c3df98"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-import-session.js",
+      "blob": "32574553d57b302880f1235a59000a3bb9dbef4c"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "blob": "037c976fce4d78752f7c4aa003161f5ebbc85bc4"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "blob": "c0d0bc701a06b11760b20dea481dff1321d4db35"
+    },
+    {
+      "path": "ext/js/dictionary/term-content-ownership.js",
+      "blob": "594dcac28affa8d982d7705556db78d3ecd26f35"
+    },
+    {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "blob": "1310d598e4e230eed12c415eb4fbf9be60c8c5a4"
+    },
+    {
+      "path": "test/artifact-term-chunk-pipeline.test.js",
+      "blob": "4022099cca30d71acaa7f1040dffeb900c8032a3"
+    },
+    {
+      "path": "test/dictionary-database-chunk-pipeline.test.js",
+      "blob": "c3800ccc9d91f03143447e430203f3165d726a3c"
+    },
+    {
+      "path": "test/dictionary-database-content-dedup.test.js",
+      "blob": "ecb4aa20575794d7a791fbc6779b5949513441ab"
+    },
+    {
+      "path": "test/dictionary-import-ownership.test.js",
+      "blob": "fe94582d3b6714afeee4d85f42b6ce78ce2cb0bc"
+    },
+    {
+      "path": "test/dictionary-importer-chunk-completion.test.js",
+      "blob": "bd9c874f8510c91bb1cb9ab4a038e64b8a34941d"
+    },
+    {
+      "path": "test/term-bank-pipeline-completion.test.js",
+      "blob": "c7f0e70eef4f2b016e2bd45a8fe0f48067747b8e"
+    },
+    {
+      "path": "test/zstd-term-content-overlap.test.js",
+      "blob": "b152488474601d4a1ee2156803635cfbe3e22a6c"
+    }
+  ],
+  "protocol": "Same frozen6 dictionary/order cells,12candidate pairs+4same-code controls+4warmups per cell, independent release packages/host identities,3parser workers, VNDB37SAHunits, strict exact semantics, separate unchanged memory protocol/audit, no product flags or headed fallback.",
+  "timingReadiness": {
+    "jmdictEachHost": {
+      "pairedMedianSavingMsAtLeast": 10,
+      "pairedMedianSavingPercentAtLeast": 1,
+      "fasterPairsAtLeast": 9,
+      "equalWorkChangePercentStrictlyBelow": 0,
+      "upper95PairedBootstrapMsStrictlyBelow": 0,
+      "upper95PairedBootstrapPercentStrictlyBelow": 0,
+      "controls": "Absolute median and equal-work C/A changes below half the smaller candidate median/equal-work percentage saving"
+    },
+    "otherEachHost": {
+      "medianRegressionPercentAtMost": 1,
+      "equalWorkRegressionPercentAtMost": 1,
+      "upper95BootstrapPercentAtMost": 3,
+      "absoluteMedianAndEqualWorkControlPercentAtMost": 1
+    },
+    "statistics": "10000 shared complete-pair resamples using Python random.Random(897), sorted percentile indices249 and9749. No pooling across hosts, sources or traced runs."
+  },
+  "disposition": "Draft #977 remains on hold until complete current source, semantic, memory and replicated timing gates pass. Prior9e component evidence remains historical and is not a complete-import gain.",
+  "createdAtUtc": "2026-11-28T08:26:39Z"
+}
