@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "prior_work_audit",
+  "recordedAt": "2026-11-28T05:40:24.847496+00:00",
+  "status": "Static analyzer and independent raw-profile reconstruction passed",
+  "newAcquisition": false,
+  "analyzerSha256": "6dbda22c5a8b7690a6faaf3f774fd1d1091e9822d1ab395f5596ea74ee55c5bc",
+  "outputHashes": {
+    "analysis.json": "714c9aa2b46b4be653683b725d54062511a02180d199aece96f3e0bf47e58190",
+    "bindings.json": "4b5e1c80843f5325e6541f66c0cb4a997bf08e7160dda821b9c304c4edba9544",
+    "summary.json": "81031d01b34c6fb468f118ab00d4395794a918b4246a1a726d8609fa1e156e26",
+    "native-symbol-proof.json": "263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69"
+  },
+  "rawTraceSha256": "3beac18db05dad6198e2b40695b8e9c3eb0bf94622b57b413be41a5056a5351e",
+  "packageValidationScope": "Reviewed frozen-artifact/package binding code and successful results; independently matched all 554 package inventory hashes and sizes to current pinned baseline ext files. This pass did not reopen the outer ZIP.",
+  "rawSamples": 37824,
+  "rawNegativeDeltas": 417,
+  "profileChunks": 447,
+  "ownerProfiles": 11,
+  "chunkEmitterThreads": 14,
+  "allPerProfileAndAggregateSampleCountsAndForwardIntervalsMatch": true,
+  "profiles": [
+    {
+      "pid": 3304,
+      "profileId": "0x1",
+      "ownerTid": 3328,
+      "chunks": 59,
+      "chunkTimestampInversions": 0,
+      "samples": 5900,
+      "negativeDeltas": 0,
+      "initialGapUs": 2391,
+      "forwardIntervalSumUs": 1138045,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x2",
+      "ownerTid": 3304,
+      "chunks": 66,
+      "chunkTimestampInversions": 0,
+      "samples": 5388,
+      "negativeDeltas": 115,
+      "initialGapUs": 140542,
+      "forwardIntervalSumUs": 1009381,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x3",
+      "ownerTid": 3314,
+      "chunks": 46,
+      "chunkTimestampInversions": 0,
+      "samples": 4413,
+      "negativeDeltas": 16,
+      "initialGapUs": 75108,
+      "forwardIntervalSumUs": 911335,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x4",
+      "ownerTid": 3327,
+      "chunks": 80,
+      "chunkTimestampInversions": 0,
+      "samples": 4219,
+      "negativeDeltas": 103,
+      "initialGapUs": 87750,
+      "forwardIntervalSumUs": 830929,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x5",
+      "ownerTid": 3378,
+      "chunks": 32,
+      "chunkTimestampInversions": 0,
+      "samples": 2957,
+      "negativeDeltas": 5,
+      "initialGapUs": 7606,
+      "forwardIntervalSumUs": 714420,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x6",
+      "ownerTid": 3377,
+      "chunks": 35,
+      "chunkTimestampInversions": 0,
+      "samples": 3094,
+      "negativeDeltas": 3,
+      "initialGapUs": 8245,
+      "forwardIntervalSumUs": 711422,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x7",
+      "ownerTid": 3379,
+      "chunks": 35,
+      "chunkTimestampInversions": 0,
+      "samples": 3141,
+      "negativeDeltas": 11,
+      "initialGapUs": 6741,
+      "forwardIntervalSumUs": 710786,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x8",
+      "ownerTid": 3329,
+      "chunks": 23,
+      "chunkTimestampInversions": 0,
+      "samples": 2090,
+      "negativeDeltas": 45,
+      "initialGapUs": 14823,
+      "forwardIntervalSumUs": 529292,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0x9",
+      "ownerTid": 3332,
+      "chunks": 23,
+      "chunkTimestampInversions": 0,
+      "samples": 2186,
+      "negativeDeltas": 35,
+      "initialGapUs": 11231,
+      "forwardIntervalSumUs": 529604,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0xa",
+      "ownerTid": 3331,
+      "chunks": 24,
+      "chunkTimestampInversions": 0,
+      "samples": 2209,
+      "negativeDeltas": 40,
+      "initialGapUs": 8587,
+      "forwardIntervalSumUs": 544228,
+      "allFrameCountsAndWeightsMatch": true
+    },
+    {
+      "pid": 3304,
+      "profileId": "0xb",
+      "ownerTid": 3330,
+      "chunks": 24,
+      "chunkTimestampInversions": 0,
+      "samples": 2227,
+      "negativeDeltas": 44,
+      "initialGapUs": 10080,
+      "forwardIntervalSumUs": 532924,
+      "allFrameCountsAndWeightsMatch": true
+    }
+  ],
+  "nativeMapping": [
+    {
+      "url": "wasm://wasm/34e657a2",
+      "module": "lib/term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "numericFrameLocations": 1,
+      "everyMappedIndexAndColumnMatchesExactBody": true,
+      "namingEvidence": "Code-body signature inference against exact packaged bytes and the separately proven names build; not browser debugger byte retrieval"
+    },
+    {
+      "url": "wasm://wasm/0004212e",
+      "module": "lib/term-bank-parser.wasm",
+      "sha256": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+      "numericFrameLocations": 23,
+      "everyMappedIndexAndColumnMatchesExactBody": true,
+      "namingEvidence": "Code-body signature inference against exact packaged bytes and the separately proven names build; not browser debugger byte retrieval"
+    }
+  ],
+  "canonicalObservedParentStacks": [
+    [
+      {
+        "node": 355,
+        "function": "wasm-function[4]",
+        "url": "wasm://wasm/34e657a2",
+        "line": 0
+      },
+      {
+        "node": 354,
+        "function": "js-to-wasm:iiii:i",
+        "url": "wasm://wasm/362472d2",
+        "line": 0
+      },
+      {
+        "node": 353,
+        "function": "_scan",
+        "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/js/dictionary/term-content-canonical-scan.js",
+        "line": 158
+      },
+      {
+        "node": 1,
+        "function": "(root)",
+        "url": null,
+        "line": null
+      }
+    ]
+  ],
+  "waitCapableProxyIntervalsUs": 1138045,
+  "limitations": [
+    "One previously acquired baseline diagnostic only, no candidate comparison or new browser run.",
+    "Forward sampled-stack intervals can include scheduling/native waits and cannot establish exact CPU work or wall-time savings.",
+    "Initial gaps and terminal sample durations are unassigned; signed negative deltas are preserved and stably sorted.",
+    "Browser Zstd frames remain unnamed and must not reuse the different Node zstd-simd.wasm index map."
+  ]
+}

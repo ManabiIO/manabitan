@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "kind": "retrospective-profile-boundary-readback",
+  "acquisitionPerformed": false,
+  "sourceProtocol": "https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/json/js_protocol.json",
+  "recordedUtc": "2026-11-28T05:22:27.227546+00:00",
+  "interpretation": "The first timeDelta is from profile startTime to the first sample. Every profile first observes inspector/post. This is an unassigned initial sampling gap; the first stack does not establish how much of that gap was on-CPU startup, product work or waiting. It must not be described as measured profile-stop cost or assigned to product CPU. Original preceding-delta weighted tables remain unchanged; these are descriptive sampled-stack weights, not measured CPU. Terminal intervals remain separately unassigned.",
+  "profiles": [
+    {
+      "path": "20261128-canonical-sink-profile/run-1/codec-worker-0.cpuprofile",
+      "sha256": "423e9e52f406cd14852157028f31732ee835d1d0c673721752dd7b4738e3a296",
+      "sampleCount": 6312,
+      "firstGapUs": 58118,
+      "sampleToSampleSpanUs": 2597854,
+      "terminalGapUs": 86,
+      "startToEndUs": 2656058,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        58118
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/codec-worker-1.cpuprofile",
+      "sha256": "e5fe5079e6f933d58bb8b4d7ec699f160339ffe84de542fc08e33641007f191d",
+      "sampleCount": 6461,
+      "firstGapUs": 46865,
+      "sampleToSampleSpanUs": 2608859,
+      "terminalGapUs": 306,
+      "startToEndUs": 2656030,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        46865
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/codec-worker-2.cpuprofile",
+      "sha256": "0521f7cd2840618b0607ec336f9fea75c59c19ab6d147ab691989d711435e8c4",
+      "sampleCount": 6321,
+      "firstGapUs": 56208,
+      "sampleToSampleSpanUs": 2599734,
+      "terminalGapUs": 185,
+      "startToEndUs": 2656127,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        56208
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/codec-worker-3.cpuprofile",
+      "sha256": "36b2a8ea2c66ce71898c1151c3c4d7234e627fa63fda6768b1434e27eab7478a",
+      "sampleCount": 6525,
+      "firstGapUs": 50890,
+      "sampleToSampleSpanUs": 2605176,
+      "terminalGapUs": 124,
+      "startToEndUs": 2656190,
+      "inspectorPostSampleIndices": [
+        0,
+        6524
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        50890,
+        400
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-0.cpuprofile",
+      "sha256": "0bcdd3211c7d56b904da916ec2b2b6f0802344951fc5f973a9fb45ce55b6b436",
+      "sampleCount": 311,
+      "firstGapUs": 36729,
+      "sampleToSampleSpanUs": 122131,
+      "terminalGapUs": 229,
+      "startToEndUs": 159089,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        36729
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-1.cpuprofile",
+      "sha256": "328c4b52993086111b1991ff40557eccf5e31d80f9daaae56f786c0e24c76d8a",
+      "sampleCount": 134,
+      "firstGapUs": 32794,
+      "sampleToSampleSpanUs": 42267,
+      "terminalGapUs": 281,
+      "startToEndUs": 75342,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        32794
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-10.cpuprofile",
+      "sha256": "e93c27cb9450484581aeee7aaed52ff407ddeb739d5b168c80df5e04b682bf5b",
+      "sampleCount": 93,
+      "firstGapUs": 32609,
+      "sampleToSampleSpanUs": 30698,
+      "terminalGapUs": 86,
+      "startToEndUs": 63393,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        32609
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-11.cpuprofile",
+      "sha256": "0eba4f3d0d1c907d1a953ab6b0330ba403a01d699b8c4b48db89197a208601de",
+      "sampleCount": 355,
+      "firstGapUs": 24900,
+      "sampleToSampleSpanUs": 128680,
+      "terminalGapUs": 266,
+      "startToEndUs": 153846,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        24900
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-2.cpuprofile",
+      "sha256": "8755a0683f5297d1dc52023b75e4b549cbe16af1feb4e4d1e73f67fb77becf7c",
+      "sampleCount": 105,
+      "firstGapUs": 27131,
+      "sampleToSampleSpanUs": 64703,
+      "terminalGapUs": 487,
+      "startToEndUs": 92321,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        27131
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-3.cpuprofile",
+      "sha256": "291ca07d1c15f21a792b93f25cc3a016724b0a4b913883224801d3f1e7eca504",
+      "sampleCount": 56,
+      "firstGapUs": 30020,
+      "sampleToSampleSpanUs": 27296,
+      "terminalGapUs": 211,
+      "startToEndUs": 57527,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        30020
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-4.cpuprofile",
+      "sha256": "f96e80bb5f12f8bc7c46c5d12f9ae9ba582a26c98f42ca63040ebec73c099269",
+      "sampleCount": 105,
+      "firstGapUs": 21987,
+      "sampleToSampleSpanUs": 36705,
+      "terminalGapUs": 334,
+      "startToEndUs": 59026,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        21987
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-5.cpuprofile",
+      "sha256": "8aa15f8110a51e67f46f09e35f248275c396505f643184f18e4fe53b992eacbf",
+      "sampleCount": 68,
+      "firstGapUs": 29371,
+      "sampleToSampleSpanUs": 24806,
+      "terminalGapUs": 391,
+      "startToEndUs": 54568,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        29371
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-6.cpuprofile",
+      "sha256": "497839dfd1cb85bf08c7558d10651331bb14391f709ab623b1c98c609db9afef",
+      "sampleCount": 69,
+      "firstGapUs": 20548,
+      "sampleToSampleSpanUs": 28812,
+      "terminalGapUs": 337,
+      "startToEndUs": 49697,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        20548
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-7.cpuprofile",
+      "sha256": "35e32ffc6447487289c436ac79708bef7f33c694c2ef4fe9ef62c4d2e6634d85",
+      "sampleCount": 77,
+      "firstGapUs": 24769,
+      "sampleToSampleSpanUs": 29150,
+      "terminalGapUs": 244,
+      "startToEndUs": 54163,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        24769
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-8.cpuprofile",
+      "sha256": "8540dbb608a9d8e88ce5f0711edaac518d008a493a8f585e2c597207f9c5337d",
+      "sampleCount": 255,
+      "firstGapUs": 30389,
+      "sampleToSampleSpanUs": 85398,
+      "terminalGapUs": 449,
+      "startToEndUs": 116236,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        30389
+      ]
+    },
+    {
+      "path": "20261128-canonical-sink-profile/run-1/sink-group-9.cpuprofile",
+      "sha256": "bc05adf53658d619908f6ef9e50ada31053f42672fbf0764f082010c4bdacf15",
+      "sampleCount": 67,
+      "firstGapUs": 21531,
+      "sampleToSampleSpanUs": 24825,
+      "terminalGapUs": 205,
+      "startToEndUs": 46561,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "inspectorPostPrecedingDeltasUs": [
+        21531
+      ]
+    }
+  ],
+  "groups": {
+    "sink": {
+      "profiles": 12,
+      "firstGapUs": 332778,
+      "sampleToSampleSpanUs": 645471,
+      "terminalGapUs": 3520,
+      "startToEndUs": 981769,
+      "nonInitialInspectorPostPrecedingDeltaUs": 0
+    },
+    "codec": {
+      "profiles": 4,
+      "firstGapUs": 212081,
+      "sampleToSampleSpanUs": 10411623,
+      "terminalGapUs": 701,
+      "startToEndUs": 10624405,
+      "nonInitialInspectorPostPrecedingDeltaUs": 400
+    }
+  },
+  "revisionNote": "Wording clarification only; all raw profile hashes, counts and interval arithmetic unchanged."
+}

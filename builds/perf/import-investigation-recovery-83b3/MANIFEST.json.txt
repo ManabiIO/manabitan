@@ -1,13 +1,13 @@
 {
-  "schemaVersion": 2,
-  "kind": "recovered-complete-import-evidence",
+  "schemaVersion": 3,
+  "kind": "complete-import-evidence-and-browser-profile-readback",
   "repository": "ManabiIO/manabitan",
   "runtimeCandidate": "f65f4ef97ebf2f37a5b1b79ca7733d7b362ec963",
   "runtimeUnchanged": true,
-  "previousSnapshotCommit": "70a8ad262561ad9ffe05e3a3185726927464fddd",
+  "previousSnapshotCommit": "bc26b191ba38d3b5cfd90d4c88584883720d267c",
   "selfExcluded": true,
-  "payloadFiles": 46,
-  "payloadBytes": 12002724,
+  "payloadFiles": 57,
+  "payloadBytes": 12754875,
   "entries": [
     {
       "path": "builds/perf/20261128-compressed-worker-profile-83b3/attribution.json.txt",
@@ -333,9 +333,9 @@
       "path": "builds/perf/import-investigation-recovery-83b3/README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "998ec3d9b4a678579d0647b6e5cf9f906511cedb",
-      "size": 5671,
-      "sha256": "be1e5860e5220a2657ca6b8c423a843fa4331b0d1ddbe624e905721643f7b2f4"
+      "sha": "90a1281cf3cf12f3d4cbad564c72727141e1b0a4",
+      "size": 6798,
+      "sha256": "67984bdec6181395e3fbd4bd5f7f137df51258c55766eb81c2e3cea34cd50caf"
     },
     {
       "path": "builds/perf/import-investigation-recovery-83b3/recovery-status.json.txt",
@@ -376,6 +376,94 @@
       "sha": "60f818efafabc59c44c5f8fcf0308d3aa4c7e0cb",
       "size": 11294013,
       "sha256": "78af8326b7fdf03799c22f914bfee2d861e9ae4ad2a4566a63fd57f793e31a46"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/evidence.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d80c1b42c882ceec745c32056bd456412dec44f",
+      "size": 653144,
+      "sha256": "00ce3eee90f4e2e7d0967e2822e325bae847a6b5e3b3701882d010b0e5a86d33"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/ARCHIVE-MANIFEST.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "273c637383216389ddbc94c3688ff8203c536ded",
+      "size": 8626,
+      "sha256": "fc1d7aa4d16588e90e8114750b5a134426ddb29759622d15aa0e52aba0815ad1"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b60aaa7206c68e1c26520bddd837af0efeb6afb2",
+      "size": 15093,
+      "sha256": "09be8070a7725463404e97294499caf566f1c794c8e9cd16d83a85bd3fd8bf80"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/verify-archive.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76360d2a159d6c1a72a1342f9783d910a2d81a38",
+      "size": 2412,
+      "sha256": "ae10ebfb4d5a4e44936a698fab51911451bc6d5a6e5a32bd35b6e6901667f632"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/SAMPLING-NOTE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e23f849dc43874447ad56cf22b5d1c6b131bd0c9",
+      "size": 4095,
+      "sha256": "078b10e18c0beead8e01a0305b4c69a41eb53a1a9e70be67a85e640d472542f2"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/compressed-profile-gap-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d4b83a375be9f516d5195ce8a27dbd605755c5f",
+      "size": 9382,
+      "sha256": "a1f9cbd7fb3cc4fb99f4983a12a9ad77b79b7c60270aedf93b0a9bdbd62d7141"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/canonical-profile-gap-audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c9fb7edd461f45cb4f8d722314fed10de96cfc4",
+      "size": 8571,
+      "sha256": "834a6b3ad4539128504f08d611fc309eec043888444992511ade3c5182c7518e"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/independent-readback-v2.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e297d3ba451abfdbb10474afeefef01ded7c2c53",
+      "size": 6618,
+      "sha256": "4c2f1a1eab221f3cf23b8ee2edff1aa3126cf1058b0ba4db5f9d64b6831561e6"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/readback-v2/summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "40e3317c31210c7bc4f26f37c0cb7cff837c1991",
+      "size": 12336,
+      "sha256": "81031d01b34c6fb468f118ab00d4395794a918b4246a1a726d8609fa1e156e26"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/analyze.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd6e99328ad02197778781838976f2c100397585",
+      "size": 26276,
+      "sha256": "6dbda22c5a8b7690a6faaf3f774fd1d1091e9822d1ab395f5596ea74ee55c5bc"
+    },
+    {
+      "path": "builds/perf/20261128-browser-jmdict-profile-83b3/audit-sampling-gaps.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a2aae7fd61a2dee03892e7075b2a2911588303d",
+      "size": 4471,
+      "sha256": "a7ef020157b9a3e4ab190f8942a08ed91577437f59e0adb8ebf4743fb9c02294"
     }
   ]
 }

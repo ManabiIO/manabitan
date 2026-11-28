@@ -1,0 +1,226 @@
+{
+  "archive": {
+    "bytes": 653144,
+    "gitBlobSha": "1d80c1b42c882ceec745c32056bd456412dec44f",
+    "path": "evidence.tar.gz",
+    "sha256": "00ce3eee90f4e2e7d0967e2822e325bae847a6b5e3b3701882d010b0e5a86d33"
+  },
+  "complete": true,
+  "contentsSha256": "ec04e60bfe1c6ed0f7ebf7cd459f223ce15acf95a12b90665da04b9ddae24b7d",
+  "exclusions": [
+    "Original two product ZIPs (complete hashes and inventories retained)",
+    "Original outer ZIP (fixed source artifact identity retained)",
+    "Duplicate raw members from the failed first offline mapper invocation"
+  ],
+  "fileCount": 34,
+  "files": [
+    {
+      "bytes": 15093,
+      "gitBlobSha": "b60aaa7206c68e1c26520bddd837af0efeb6afb2",
+      "path": "README.md",
+      "sha256": "09be8070a7725463404e97294499caf566f1c794c8e9cd16d83a85bd3fd8bf80"
+    },
+    {
+      "bytes": 4095,
+      "gitBlobSha": "e23f849dc43874447ad56cf22b5d1c6b131bd0c9",
+      "path": "SAMPLING-NOTE.md",
+      "sha256": "078b10e18c0beead8e01a0305b4c69a41eb53a1a9e70be67a85e640d472542f2"
+    },
+    {
+      "bytes": 25857,
+      "gitBlobSha": "78796039a35f4e5386e35c45347c8dfd627198b2",
+      "path": "analyze-v1-failed-mapper.py",
+      "sha256": "6192ab5ab0bf6049b59abf033fa014974da9417485747c605829e681c99d607f"
+    },
+    {
+      "bytes": 26276,
+      "gitBlobSha": "fd6e99328ad02197778781838976f2c100397585",
+      "path": "analyze.py",
+      "sha256": "6dbda22c5a8b7690a6faaf3f774fd1d1091e9822d1ab395f5596ea74ee55c5bc"
+    },
+    {
+      "bytes": 4471,
+      "gitBlobSha": "6a2aae7fd61a2dee03892e7075b2a2911588303d",
+      "path": "audit-sampling-gaps.py",
+      "sha256": "a7ef020157b9a3e4ab190f8942a08ed91577437f59e0adb8ebf4743fb9c02294"
+    },
+    {
+      "bytes": 3124,
+      "gitBlobSha": "3a575b248f3418c7c741b3acb68cfa57f3d11f83",
+      "path": "build-archive.py",
+      "sha256": "1d0ae1641d6bbe84200cb89978f69a56bebbacffa4e0689ac453ece2dee56702"
+    },
+    {
+      "bytes": 8571,
+      "gitBlobSha": "7c9fb7edd461f45cb4f8d722314fed10de96cfc4",
+      "path": "canonical-profile-gap-audit.json",
+      "sha256": "834a6b3ad4539128504f08d611fc309eec043888444992511ade3c5182c7518e"
+    },
+    {
+      "bytes": 9382,
+      "gitBlobSha": "0d4b83a375be9f516d5195ce8a27dbd605755c5f",
+      "path": "compressed-profile-gap-audit.json",
+      "sha256": "a1f9cbd7fb3cc4fb99f4983a12a9ad77b79b7c60270aedf93b0a9bdbd62d7141"
+    },
+    {
+      "bytes": 6618,
+      "gitBlobSha": "e297d3ba451abfdbb10474afeefef01ded7c2c53",
+      "path": "independent-readback-v2.json",
+      "sha256": "4c2f1a1eab221f3cf23b8ee2edff1aa3126cf1058b0ba4db5f9d64b6831561e6"
+    },
+    {
+      "bytes": 1026,
+      "gitBlobSha": "c2670d66c3f884dc05ccfe75888bf1c4d8b6fef4",
+      "path": "readback-v1.log",
+      "sha256": "155ec271b0f0cc0d40350173e51c08bdfb1106632457a758f1806e93657b0ada"
+    },
+    {
+      "bytes": 152,
+      "gitBlobSha": "23005e0edf0a688e67562ecd72dbabf701f66920",
+      "path": "readback-v1/analysis-failure.json",
+      "sha256": "fba1e8b268a5e9f10ee27a7df0661b4f8623836bce59584daa82dd7b45bc687d"
+    },
+    {
+      "bytes": 9672,
+      "gitBlobSha": "9d51a5409cc6f50ceac95253f377dd8681fc5978",
+      "path": "readback-v2.log",
+      "sha256": "fd9d4a77a1e372aa30689be363d1ab6a51ba33222639b4fcb2aae99c9fe953b3"
+    },
+    {
+      "bytes": 473733,
+      "gitBlobSha": "240cb71de87dfa1345578359a8c7cacad527b5c8",
+      "path": "readback-v2/analysis.json",
+      "sha256": "714c9aa2b46b4be653683b725d54062511a02180d199aece96f3e0bf47e58190"
+    },
+    {
+      "bytes": 117605,
+      "gitBlobSha": "bed35cee740109f567f61dc12f89da35406484e4",
+      "path": "readback-v2/bindings.json",
+      "sha256": "4b5e1c80843f5325e6541f66c0cb4a997bf08e7160dda821b9c304c4edba9544"
+    },
+    {
+      "bytes": 27215,
+      "gitBlobSha": "853e40032f0dd1c0ee463b419607ccf90fbe6c02",
+      "path": "readback-v2/native-symbol-proof.json",
+      "sha256": "263ca8e77c4932c41db6a3f2c96f89697e32c91b19041a3d99c2e37e01438a69"
+    },
+    {
+      "bytes": 84601,
+      "gitBlobSha": "ee0dae1b0294178a39ebe353e57b1cc2b74cec32",
+      "path": "readback-v2/raw/baseline-profile/run-1.html",
+      "sha256": "3cb6f25b896fb65a326f7da9a74b7d046e2384f5d4992095de34c7490e0737af"
+    },
+    {
+      "bytes": 151849,
+      "gitBlobSha": "5f703e2d2232897acbf3914a378a90f9480392b0",
+      "path": "readback-v2/raw/baseline-profile/run-1.json",
+      "sha256": "3ca2baa6a7eaa47f736ce633ac09b4e7872ab6bf747a6fe8f6045181a4a9a48b"
+    },
+    {
+      "bytes": 5080630,
+      "gitBlobSha": "e6ea9112d3bac46ba00c55924cb9301fa4e2d722",
+      "path": "readback-v2/raw/baseline-profile/run-1.trace.json",
+      "sha256": "3beac18db05dad6198e2b40695b8e9c3eb0bf94622b57b413be41a5056a5351e"
+    },
+    {
+      "bytes": 59131,
+      "gitBlobSha": "b2a04238dd5af48a9d2704dfb51a6010cf46634a",
+      "path": "readback-v2/raw/baseline-profile/summary.json",
+      "sha256": "7668e38f70b6ef44fa63ec75a34341eb4dd912b33056ef1548d008cc176fce5d"
+    },
+    {
+      "bytes": 8199,
+      "gitBlobSha": "ffcc0ad2d48b7b2bc84e6b6f8d16278cb9c00a94",
+      "path": "readback-v2/raw/cpu-profile-instrumentation.json",
+      "sha256": "0b93db2bacc45bbf88543ba22610a1966857f6872f0b38df277316cb9920f39f"
+    },
+    {
+      "bytes": 2061,
+      "gitBlobSha": "27ae3f7b70b2f0bcd90127405751e4fe9b29c42a",
+      "path": "readback-v2/raw/cpu-profile.log",
+      "sha256": "8829b949ecb54419c4055c0280b6e45cca2b9110ed9dc7071784a7d684ae20de"
+    },
+    {
+      "bytes": 157,
+      "gitBlobSha": "f4504e8db6f2d2623c02b690e960fd153370fc2f",
+      "path": "readback-v2/raw/fixtures.log",
+      "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+    },
+    {
+      "bytes": 264,
+      "gitBlobSha": "be78fdaff93192dd2d9cb0eec58ed31210840735",
+      "path": "readback-v2/raw/frozen-browser-identity.json",
+      "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+    },
+    {
+      "bytes": 5015,
+      "gitBlobSha": "f1ee36b3246681bc829bcda62af08cebcdc94eae",
+      "path": "readback-v2/raw/frozen-registered-plan.json",
+      "sha256": "4e0f3ee096229af6916e110f9b9c64811ff7c438fe799433267f5845d7713afe"
+    },
+    {
+      "bytes": 129043,
+      "gitBlobSha": "436d1454d493a466acc0afecaa00787af3e1f547",
+      "path": "readback-v2/raw/frozen-source-identities.json",
+      "sha256": "6ec8b37f1cd11cad993c4b18ca4a7895a81f3d3b349065f2a41635619a2bdbc5"
+    },
+    {
+      "bytes": 577,
+      "gitBlobSha": "f3feecfce7926280e4d96f1c566b18f443ec557c",
+      "path": "readback-v2/raw/observer-source.json",
+      "sha256": "363c03548e751056392d7c225e9eb8f047991c1a3951b500b5d0b3c0c898a170"
+    },
+    {
+      "bytes": 12336,
+      "gitBlobSha": "40e3317c31210c7bc4f26f37c0cb7cff837c1991",
+      "path": "readback-v2/summary.json",
+      "sha256": "81031d01b34c6fb468f118ab00d4395794a918b4246a1a726d8609fa1e156e26"
+    },
+    {
+      "bytes": 21788,
+      "gitBlobSha": "f60a53842bb19813849fbde0e702be0c53574b9d",
+      "path": "references/CPUProfileDataModel.ts",
+      "sha256": "741a14e5ea226eb34f98fbde8c47c4b575a77ca6a16ad18a7ac63c0e0d27c863"
+    },
+    {
+      "bytes": 14681,
+      "gitBlobSha": "597a53e0118f67d0b8f460d3f1e72472d10284d7",
+      "path": "references/SamplesHandler.ts",
+      "sha256": "a79014c1cddeceb57b06cf637c9797e4bc7c93d1fd858ddfba7eb3346f68a37b"
+    },
+    {
+      "bytes": 1537,
+      "gitBlobSha": "513e8a6a0a1d9a42818b02fd46b31fe88c653400",
+      "path": "references/devtools-frontend-LICENSE",
+      "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e"
+    },
+    {
+      "bytes": 1559,
+      "gitBlobSha": "972bb2edb099e58b6a1939fa57f8e74391159c0c",
+      "path": "references/devtools-protocol-LICENSE",
+      "sha256": "7a209dd1b94cabdb5ea9c6f9164b9546ffa5daaa671e7767d49510db055f5c51"
+    },
+    {
+      "bytes": 184514,
+      "gitBlobSha": "2c9dc9bdf3a8345b3143c0574ef958113d1fd547",
+      "path": "references/js_protocol.json",
+      "sha256": "24e92bccdff62d8d5ffda822ecda119f54155729636510be5bcd4d40cc2f7d14"
+    },
+    {
+      "bytes": 1737,
+      "gitBlobSha": "f161579af1d54193bc35407b691eb5f49b1e9f89",
+      "path": "references/sources.json",
+      "sha256": "49a155fae1aa33357e58ad805ce31d06477c732aab9a635bb94fe8b8c49e194b"
+    },
+    {
+      "bytes": 2412,
+      "gitBlobSha": "76360d2a159d6c1a72a1342f9783d910a2d81a38",
+      "path": "verify-archive.py",
+      "sha256": "ae10ebfb4d5a4e44936a698fab51911451bc6d5a6e5a32bd35b6e6901667f632"
+    }
+  ],
+  "newAcquisition": false,
+  "payloadBytes": 6494981,
+  "schemaVersion": 1,
+  "scope": "Existing browser baseline trace, exact readback, independent audit, primary references, and additive Node endpoint correction"
+}

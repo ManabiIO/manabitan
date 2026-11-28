@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "acquisitionPerformed": false,
+  "sourceManifestSha256": "b2a440fd3e265f16f0a508cc072a569fcc5da55ad6f0ddacee6f78d157133e48",
+  "auditScriptSha256": "a7ef020157b9a3e4ab190f8942a08ed91577437f59e0adb8ebf4743fb9c02294",
+  "protocol": "https://github.com/ChromeDevTools/devtools-protocol/blob/master/json/js_protocol.json",
+  "interpretation": "The first timeDelta spans startTime to the first sample, whose observed stack is inspector/post. Keep it as an unassigned initial sampling gap; do not label it measured startup CPU, stop cost, or product CPU from this sample. Keep the terminal gap unassigned. Existing preceding-delta tables are unchanged descriptive sampled-stack weights, not measured CPU time.",
+  "profiles": [
+    {
+      "path": "raw/group-00.cpuprofile",
+      "sha256": "cb35a4127dc9efed0f90a5aa59a43bc005ba21b6e1db8f9f09148639e7f5d0f2",
+      "bytes": 14321,
+      "sampleCount": 454,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 16615,
+      "observedSampleSpanUs": 149796,
+      "terminalUnassignedGapUs": 273,
+      "startToEndUs": 166684,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 16615
+    },
+    {
+      "path": "raw/group-01.cpuprofile",
+      "sha256": "b22ff2b0e74aa06d8c3a967c3bcc2dbee22eca93de0d8e9ae02524c6e5cf5158",
+      "bytes": 11298,
+      "sampleCount": 283,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 21041,
+      "observedSampleSpanUs": 92946,
+      "terminalUnassignedGapUs": 171,
+      "startToEndUs": 114158,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 21041
+    },
+    {
+      "path": "raw/group-02.cpuprofile",
+      "sha256": "16e7aaff1c4fc7a9665ab7f83497b38316359a37b0de1889aa5a2a140f83566e",
+      "bytes": 9978,
+      "sampleCount": 187,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 20793,
+      "observedSampleSpanUs": 61303,
+      "terminalUnassignedGapUs": 248,
+      "startToEndUs": 82344,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 20793
+    },
+    {
+      "path": "raw/group-03.cpuprofile",
+      "sha256": "994b4ce66c054d4449ada31505553999f522d13fe786795f402bf5ef4a75888c",
+      "bytes": 10277,
+      "sampleCount": 165,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 17671,
+      "observedSampleSpanUs": 54259,
+      "terminalUnassignedGapUs": 292,
+      "startToEndUs": 72222,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 17671
+    },
+    {
+      "path": "raw/group-04.cpuprofile",
+      "sha256": "925b2145f9db2af502f6d3e10c7b89025778e4216eca36d9924a221ed6c0c489",
+      "bytes": 9916,
+      "sampleCount": 221,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 17533,
+      "observedSampleSpanUs": 71777,
+      "terminalUnassignedGapUs": 170,
+      "startToEndUs": 89480,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 17533
+    },
+    {
+      "path": "raw/group-05.cpuprofile",
+      "sha256": "9f8764780e5572d6ca0670cffd19e6a22a763ad234eb6d02e32a094c48541ed2",
+      "bytes": 9915,
+      "sampleCount": 244,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 18268,
+      "observedSampleSpanUs": 80142,
+      "terminalUnassignedGapUs": 207,
+      "startToEndUs": 98617,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 18268
+    },
+    {
+      "path": "raw/group-06.cpuprofile",
+      "sha256": "e7f4e1b22dc50d3e853ce3eb8ac3ead203e893b015fc75b77961a889f8440559",
+      "bytes": 9854,
+      "sampleCount": 161,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 10642,
+      "observedSampleSpanUs": 56950,
+      "terminalUnassignedGapUs": 365,
+      "startToEndUs": 67957,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 10642
+    },
+    {
+      "path": "raw/group-07.cpuprofile",
+      "sha256": "fab7d696bdafa1eabae297e09abff87b523763e12c02906938bbd0c55a96fc15",
+      "bytes": 11972,
+      "sampleCount": 187,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 12986,
+      "observedSampleSpanUs": 61207,
+      "terminalUnassignedGapUs": 42,
+      "startToEndUs": 74235,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 12986
+    },
+    {
+      "path": "raw/group-08.cpuprofile",
+      "sha256": "1c0532d1a430a0777b93301f65f4026eb9606c2861b5b0fecc23ee7a67d27b85",
+      "bytes": 10008,
+      "sampleCount": 172,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 10331,
+      "observedSampleSpanUs": 59212,
+      "terminalUnassignedGapUs": 367,
+      "startToEndUs": 69910,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 10331
+    },
+    {
+      "path": "raw/group-09.cpuprofile",
+      "sha256": "8ce741ef1fc4806496229884e61f9a7bfc079ba7d69dcbeea3ee7472f3021a81",
+      "bytes": 9795,
+      "sampleCount": 187,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 13178,
+      "observedSampleSpanUs": 65027,
+      "terminalUnassignedGapUs": 505,
+      "startToEndUs": 78710,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 13178
+    },
+    {
+      "path": "raw/group-10.cpuprofile",
+      "sha256": "7ea3f61d48f10a67747d8b6f356f3100b53fe3e068df3ccc15e9fa7ccffbafc2",
+      "bytes": 9770,
+      "sampleCount": 158,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 12119,
+      "observedSampleSpanUs": 52340,
+      "terminalUnassignedGapUs": 110,
+      "startToEndUs": 64569,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 12119
+    },
+    {
+      "path": "raw/group-11.cpuprofile",
+      "sha256": "3289abefee58e9e20dac926f3a820d48ebd3b712a1862c422013f1a4f1bbdf50",
+      "bytes": 10994,
+      "sampleCount": 274,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 13649,
+      "observedSampleSpanUs": 96121,
+      "terminalUnassignedGapUs": 193,
+      "startToEndUs": 109963,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 13649
+    },
+    {
+      "path": "raw/initialization.cpuprofile",
+      "sha256": "f6b9a9a2691b41848be0f743f693e4d8ec9f691e795ba224e7052aa1afdaf9fa",
+      "bytes": 12238,
+      "sampleCount": 47,
+      "firstSampleFrame": {
+        "functionName": "post",
+        "scriptId": "195",
+        "url": "node:inspector",
+        "lineNumber": 117,
+        "columnNumber": 6
+      },
+      "initialUnassignedGapUs": 31921,
+      "observedSampleSpanUs": 16252,
+      "terminalUnassignedGapUs": 282,
+      "startToEndUs": 48455,
+      "inspectorPostSampleIndices": [
+        0
+      ],
+      "oldPrecedingDeltaInspectorPostWeightUs": 31921
+    }
+  ],
+  "groups": {
+    "initialization": {
+      "profiles": 1,
+      "initialUnassignedGapUs": 31921,
+      "observedSampleSpanUs": 16252,
+      "terminalUnassignedGapUs": 282,
+      "startToEndUs": 48455,
+      "oldPrecedingDeltaInspectorPostWeightUs": 31921
+    },
+    "workerGroups": {
+      "profiles": 12,
+      "initialUnassignedGapUs": 184826,
+      "observedSampleSpanUs": 901080,
+      "terminalUnassignedGapUs": 2943,
+      "startToEndUs": 1088849,
+      "oldPrecedingDeltaInspectorPostWeightUs": 184826
+    }
+  }
+}

@@ -1,0 +1,427 @@
+{
+  "complete": true,
+  "sourceSha": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "packageSha256": "8f21192b9e4a15261fd188604c1f0d3245b095e35f529948926c0a5366b0dd22",
+  "traceSha256": "3beac18db05dad6198e2b40695b8e9c3eb0bf94622b57b413be41a5056a5351e",
+  "newAcquisition": false,
+  "authoritativeTiming": false,
+  "coverage": {
+    "traceEvents": 23210,
+    "profileHeads": 11,
+    "profileChunks": 447,
+    "chunksWithCpuProfile": 444,
+    "rawSamples": 37824,
+    "ownerThreads": 11,
+    "emitterThreads": 14,
+    "roles": {
+      "sqlite-async-proxy": 1,
+      "renderer-settings": 1,
+      "background-service-worker": 1,
+      "dictionary-import-worker": 1,
+      "parser-worker": 3,
+      "codec-worker": 4
+    },
+    "orphanProfiles": 0,
+    "negativeDeltasPreservedAndSorted": 417
+  },
+  "profiles": [
+    {
+      "profileId": "0x1",
+      "ownerTid": 3328,
+      "role": "sqlite-async-proxy",
+      "sampleCount": 5900,
+      "observedSampleSpanUs": 1138045,
+      "unassignedInitialGapUs": 2391,
+      "negativeRawDeltaCount": 0,
+      "categoryIntervalsUs": {
+        "wait-capable-proxy-occupancy-not-cpu": 1138045
+      }
+    },
+    {
+      "profileId": "0x2",
+      "ownerTid": 3304,
+      "role": "renderer-settings",
+      "sampleCount": 5388,
+      "observedSampleSpanUs": 1009381,
+      "unassignedInitialGapUs": 140542,
+      "negativeRawDeltaCount": 115,
+      "categoryIntervalsUs": {
+        "packaged-javascript-sampled-stack": 14753,
+        "runtime-unattributed": 72204,
+        "runtime-or-unmapped": 29428,
+        "garbage-collector": 1936,
+        "idle": 891060
+      }
+    },
+    {
+      "profileId": "0x3",
+      "ownerTid": 3314,
+      "role": "background-service-worker",
+      "sampleCount": 4413,
+      "observedSampleSpanUs": 911335,
+      "unassignedInitialGapUs": 75108,
+      "negativeRawDeltaCount": 16,
+      "categoryIntervalsUs": {
+        "packaged-javascript-sampled-stack": 2540,
+        "idle": 906425,
+        "runtime-or-unmapped": 2109,
+        "runtime-unattributed": 261
+      }
+    },
+    {
+      "profileId": "0x4",
+      "ownerTid": 3327,
+      "role": "dictionary-import-worker",
+      "sampleCount": 4219,
+      "observedSampleSpanUs": 830929,
+      "unassignedInitialGapUs": 87750,
+      "negativeRawDeltaCount": 103,
+      "categoryIntervalsUs": {
+        "packaged-javascript-sampled-stack": 406415,
+        "runtime-or-unmapped": 106139,
+        "idle": 223034,
+        "runtime-unattributed": 5411,
+        "garbage-collector": 37697,
+        "wasm-sampled-stack": 50757,
+        "v8-bridge-unmapped": 1476
+      }
+    },
+    {
+      "profileId": "0x5",
+      "ownerTid": 3378,
+      "role": "parser-worker",
+      "sampleCount": 2957,
+      "observedSampleSpanUs": 714420,
+      "unassignedInitialGapUs": 7606,
+      "negativeRawDeltaCount": 5,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 2556,
+        "idle": 270980,
+        "packaged-javascript-sampled-stack": 70924,
+        "runtime-or-unmapped": 1318,
+        "wasm-sampled-stack": 368642
+      }
+    },
+    {
+      "profileId": "0x6",
+      "ownerTid": 3377,
+      "role": "parser-worker",
+      "sampleCount": 3094,
+      "observedSampleSpanUs": 711422,
+      "unassignedInitialGapUs": 8245,
+      "negativeRawDeltaCount": 3,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 1077,
+        "packaged-javascript-sampled-stack": 64389,
+        "idle": 298945,
+        "runtime-or-unmapped": 6154,
+        "wasm-sampled-stack": 340857
+      }
+    },
+    {
+      "profileId": "0x7",
+      "ownerTid": 3379,
+      "role": "parser-worker",
+      "sampleCount": 3141,
+      "observedSampleSpanUs": 710786,
+      "unassignedInitialGapUs": 6741,
+      "negativeRawDeltaCount": 11,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 1302,
+        "packaged-javascript-sampled-stack": 72137,
+        "idle": 204720,
+        "runtime-or-unmapped": 2430,
+        "wasm-sampled-stack": 430083,
+        "garbage-collector": 114
+      }
+    },
+    {
+      "profileId": "0x8",
+      "ownerTid": 3329,
+      "role": "codec-worker",
+      "sampleCount": 2090,
+      "observedSampleSpanUs": 529292,
+      "unassignedInitialGapUs": 14823,
+      "negativeRawDeltaCount": 45,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 3264,
+        "packaged-javascript-sampled-stack": 32391,
+        "runtime-or-unmapped": 38981,
+        "wasm-sampled-stack": 142934,
+        "idle": 311576,
+        "v8-bridge-unmapped": 146
+      }
+    },
+    {
+      "profileId": "0x9",
+      "ownerTid": 3332,
+      "role": "codec-worker",
+      "sampleCount": 2186,
+      "observedSampleSpanUs": 529604,
+      "unassignedInitialGapUs": 11231,
+      "negativeRawDeltaCount": 35,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 2080,
+        "packaged-javascript-sampled-stack": 37636,
+        "runtime-or-unmapped": 28862,
+        "wasm-sampled-stack": 108875,
+        "idle": 351988,
+        "garbage-collector": 163
+      }
+    },
+    {
+      "profileId": "0xa",
+      "ownerTid": 3331,
+      "role": "codec-worker",
+      "sampleCount": 2209,
+      "observedSampleSpanUs": 544228,
+      "unassignedInitialGapUs": 8587,
+      "negativeRawDeltaCount": 40,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 2732,
+        "packaged-javascript-sampled-stack": 21308,
+        "idle": 367332,
+        "wasm-sampled-stack": 126875,
+        "runtime-or-unmapped": 25530,
+        "v8-bridge-unmapped": 311,
+        "garbage-collector": 140
+      }
+    },
+    {
+      "profileId": "0xb",
+      "ownerTid": 3330,
+      "role": "codec-worker",
+      "sampleCount": 2227,
+      "observedSampleSpanUs": 532924,
+      "unassignedInitialGapUs": 10080,
+      "negativeRawDeltaCount": 44,
+      "categoryIntervalsUs": {
+        "runtime-unattributed": 1417,
+        "packaged-javascript-sampled-stack": 22212,
+        "wasm-sampled-stack": 100614,
+        "runtime-or-unmapped": 48964,
+        "v8-bridge-unmapped": 8389,
+        "idle": 351182,
+        "garbage-collector": 146
+      }
+    }
+  ],
+  "largestSampledFramesExcludingWaitIdleAndInstrumentation": [
+    {
+      "function": "wasm-function[13]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 1261,
+      "observedForwardIntervalUs": 275258,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "parse_composite_span_impl"
+    },
+    {
+      "function": "wasm-function[36]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 1003,
+      "observedForwardIntervalUs": 221122,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "parse_and_encode_term_bank_token_binary_dedup"
+    },
+    {
+      "function": "wasm-function[48]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 728,
+      "observedForwardIntervalUs": 195417,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "libdeflate_deflate_decompress_ex"
+    },
+    {
+      "function": "postMessage",
+      "url": "",
+      "category": "runtime-or-unmapped",
+      "samples": 468,
+      "observedForwardIntervalUs": 172870,
+      "roles": [
+        "codec-worker",
+        "dictionary-import-worker",
+        "parser-worker",
+        "renderer-settings"
+      ]
+    },
+    {
+      "function": "wasm-function[101]",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/lib/zstd.wasm",
+      "category": "wasm-sampled-stack",
+      "samples": 406,
+      "observedForwardIntervalUs": 149184,
+      "roles": [
+        "codec-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[2]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 568,
+      "observedForwardIntervalUs": 123550,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "crc32_bytes"
+    },
+    {
+      "function": "wasm-function[149]",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/lib/zstd.wasm",
+      "category": "wasm-sampled-stack",
+      "samples": 345,
+      "observedForwardIntervalUs": 115209,
+      "roles": [
+        "codec-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[106]",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/lib/zstd.wasm",
+      "category": "wasm-sampled-stack",
+      "samples": 234,
+      "observedForwardIntervalUs": 86853,
+      "roles": [
+        "codec-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[18]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 400,
+      "observedForwardIntervalUs": 85901,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "parse_row_single_pass"
+    },
+    {
+      "function": "parseTermBankWithWasmColumnChunks",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/js/dictionary/term-bank-wasm-parser-worker.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 318,
+      "observedForwardIntervalUs": 82717,
+      "roles": [
+        "parser-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[24]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 250,
+      "observedForwardIntervalUs": 57820,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "hash_content_xxh32_pair"
+    },
+    {
+      "function": "prepareSpanCompression",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/lib/zstd-wasm.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 168,
+      "observedForwardIntervalUs": 54922,
+      "roles": [
+        "codec-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[27]",
+      "url": "wasm://wasm/0004212e",
+      "category": "wasm-sampled-stack",
+      "samples": 260,
+      "observedForwardIntervalUs": 51340,
+      "roles": [
+        "parser-worker"
+      ],
+      "nativeFunctionName": "encode_term_content_token_binary_row"
+    },
+    {
+      "function": "_encodeArtifactRecordFields",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/js/dictionary/term-record-opfs-store.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 145,
+      "observedForwardIntervalUs": 51302,
+      "roles": [
+        "dictionary-import-worker"
+      ]
+    },
+    {
+      "function": "wasm-function[4]",
+      "url": "wasm://wasm/34e657a2",
+      "category": "wasm-sampled-stack",
+      "samples": 255,
+      "observedForwardIntervalUs": 44070,
+      "roles": [
+        "dictionary-import-worker"
+      ],
+      "nativeFunctionName": "scan_canonical"
+    },
+    {
+      "function": "(garbage collector)",
+      "url": "",
+      "category": "garbage-collector",
+      "samples": 145,
+      "observedForwardIntervalUs": 40196,
+      "roles": [
+        "codec-worker",
+        "dictionary-import-worker",
+        "parser-worker",
+        "renderer-settings"
+      ]
+    },
+    {
+      "function": "setTimeout",
+      "url": "",
+      "category": "runtime-or-unmapped",
+      "samples": 164,
+      "observedForwardIntervalUs": 33970,
+      "roles": [
+        "background-service-worker",
+        "dictionary-import-worker",
+        "renderer-settings"
+      ]
+    },
+    {
+      "function": "_cacheRecentPublishedTermContentSources",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/js/dictionary/dictionary-database.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 84,
+      "observedForwardIntervalUs": 29937,
+      "roles": [
+        "dictionary-import-worker"
+      ]
+    },
+    {
+      "function": "_registerInFlightTermContentSources",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/js/dictionary/dictionary-database.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 66,
+      "observedForwardIntervalUs": 27847,
+      "roles": [
+        "dictionary-import-worker"
+      ]
+    },
+    {
+      "function": "finishPreparedSpanCompression",
+      "url": "chrome-extension://jmgnodcdmnchnldnpmippgcdeceldlfc/lib/zstd-wasm.js",
+      "category": "packaged-javascript-sampled-stack",
+      "samples": 62,
+      "observedForwardIntervalUs": 25951,
+      "roles": [
+        "codec-worker"
+      ]
+    }
+  ]
+}
