@@ -27,7 +27,8 @@ function fixture(count = 128) {
     const keys = new Uint32Array(count)
     return createArtifactTermRecordChunkWithResolvedContent(
         {
-            dictionary: 'Native record fields', rowCount: count,
+            dictionary: 'Native record fields',
+            rowCount: count,
             expressionBytesList: new Array(count).fill(expression),
             readingBytesList: new Array(count).fill(expression),
             readingEqualsExpressionList: new Uint8Array(count).fill(1),
@@ -79,7 +80,13 @@ async function compare(chunk, base = 2 ** 40) {
 async function append(store, chunk, prepared = null) {
     await store._encodeAndAppendArtifactChunkForState(
         /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
-        chunk, 1, [], [], chunk.termRecordPreinternedPlan, 'raw', prepared,
+        chunk,
+        1,
+        [],
+        [],
+        chunk.termRecordPreinternedPlan,
+        'raw',
+        prepared,
     )
 }
 
@@ -139,13 +146,21 @@ describe('native compact record fields', () => {
             const chunk = fixture(count)
             chunk.scoreList.fill(-200)
             const result = native.encode(count, chunk.scoreList, chunk.resolvedContentReferences, 2 ** 40)
-            if (count === 5) { expect(result).toBeNull() } else { assert.deepEqual(result, baseline(chunk)) }
+            if (count === 5) {
+                expect(result).toBeNull()
+            } else {
+                assert.deepEqual(result, baseline(chunk))
+            }
         }
         for (const uniqueScores of [1024, 1025]) {
             const chunk = fixture(uniqueScores * 2)
             chunk.scoreList = Int32Array.from({length: chunk.rowCount}, (_, index) => index % uniqueScores)
             const result = native.encode(chunk.rowCount, chunk.scoreList, chunk.resolvedContentReferences, 2 ** 40)
-            if (uniqueScores === 1025) { expect(result).toBeNull() } else { assert.deepEqual(result, baseline(chunk)) }
+            if (uniqueScores === 1025) {
+                expect(result).toBeNull()
+            } else {
+                assert.deepEqual(result, baseline(chunk))
+            }
         }
     })
 
@@ -224,16 +239,22 @@ describe('native compact record fields', () => {
             }
             let prepared = null
             if (mode === 'split-slice') {
-                chunk.resolvedContentReferences.uniqueIndexList = Uint32Array.from({length: chunk.rowCount}, (_, index) => index < 64 ? 0 : 1)
+                chunk.resolvedContentReferences.uniqueIndexList = Uint32Array.from({length: chunk.rowCount}, (_, index) => (index < 64 ? 0 : 1))
                 chunk.resolvedContentReferences.offsets = Float64Array.of(16, 16 + 0xffffffff)
                 chunk.resolvedContentReferences.lengths = Uint32Array.of(7, 9)
                 const original = chunk.expressionBytesList.slice
-                chunk.expressionBytesList.slice = function (...args) { mutate(); return original.apply(this, args) }
+                chunk.expressionBytesList.slice = function mutatedSlice(...args) {
+                    mutate()
+                    return original.apply(this, args)
+                }
             } else {
                 prepared = store.prepareArtifactChunkLookupIndexes(chunk)?.indexes ?? null
                 assert(prepared)
                 const original = prepared.get
-                prepared.get = function (...args) { mutate(); return original.apply(this, args) }
+                prepared.get = function mutatedGet(...args) {
+                    mutate()
+                    return original.apply(this, args)
+                }
             }
             await append(store, chunk, prepared)
             outputs.push(writes.mock.calls)
@@ -243,7 +264,7 @@ describe('native compact record fields', () => {
 
     test('revalidates changed columns after awaiting the first split append', async () => {
         const chunk = fixture()
-        chunk.resolvedContentReferences.uniqueIndexList = Uint32Array.from({length: chunk.rowCount}, (_, index) => index < 64 ? 0 : 1)
+        chunk.resolvedContentReferences.uniqueIndexList = Uint32Array.from({length: chunk.rowCount}, (_, index) => (index < 64 ? 0 : 1))
         chunk.resolvedContentReferences.offsets = Float64Array.of(16, 16 + 0xffffffff)
         chunk.resolvedContentReferences.lengths = Uint32Array.of(7, 9)
         const store = new TermRecordOpfsStore()

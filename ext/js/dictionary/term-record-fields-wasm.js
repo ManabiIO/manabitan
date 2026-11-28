@@ -20,12 +20,15 @@ const MAX_ROWS = 262_144
 const MAX_UNIQUE = 262_144
 const MAX_BYTES = 8 * 1024 * 1024
 const PAGE_BYTES = 65_536
-const typedArrayPrototype = Object.getPrototypeOf(Uint8Array.prototype)
-const getBuffer = Object.getOwnPropertyDescriptor(typedArrayPrototype, 'buffer')?.get
-const getByteOffset = Object.getOwnPropertyDescriptor(typedArrayPrototype, 'byteOffset')?.get
-const getLength = Object.getOwnPropertyDescriptor(typedArrayPrototype, 'length')?.get
-const getArrayBufferByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get
+const typedArrayPrototype = /** @type {unknown} */ (Object.getPrototypeOf(Uint8Array.prototype))
+// Capture the intrinsics unbound; every invocation supplies its current receiver with .call.
+/* eslint-disable @typescript-eslint/unbound-method */
+const getBuffer = /** @type {((this: unknown) => ArrayBuffer)|undefined} */ (Object.getOwnPropertyDescriptor(typedArrayPrototype, 'buffer')?.get)
+const getByteOffset = /** @type {((this: unknown) => number)|undefined} */ (Object.getOwnPropertyDescriptor(typedArrayPrototype, 'byteOffset')?.get)
+const getLength = /** @type {((this: unknown) => number)|undefined} */ (Object.getOwnPropertyDescriptor(typedArrayPrototype, 'length')?.get)
+const getArrayBufferByteLength = /** @type {((this: unknown) => number)|undefined} */ (Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength')?.get)
 const setTypedArray = Uint8Array.prototype.set
+/* eslint-enable @typescript-eslint/unbound-method */
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null
 
@@ -55,8 +58,8 @@ function compileRecordFieldsModule() {
  */
 function getPrivateColumn(value, prototype) {
     if (!ArrayBuffer.isView(value) || Object.getPrototypeOf(value) !== prototype ||
-        typeof getBuffer !== 'function' || typeof getByteOffset !== 'function' ||
-        typeof getLength !== 'function' || typeof getArrayBufferByteLength !== 'function') { return null }
+    typeof getBuffer !== 'function' || typeof getByteOffset !== 'function' ||
+    typeof getLength !== 'function' || typeof getArrayBufferByteLength !== 'function') { return null }
     try {
         const buffer = /** @type {ArrayBuffer} */ (getBuffer.call(value))
         getArrayBufferByteLength.call(buffer)
@@ -96,7 +99,7 @@ export class NativeRecordFieldEncoder {
             const instance = new WebAssembly.Instance(module, {env: {memory}})
             const exports = /** @type {{record_fields_abi_version: () => number, record_fields_scratch_start: () => number, encode_record_fields: (count: number, uniqueCount: number, base: number) => number}} */ (instance.exports)
             if (typeof exports.record_fields_abi_version !== 'function' || exports.record_fields_abi_version() !== 1 ||
-                typeof exports.record_fields_scratch_start !== 'function' || typeof exports.encode_record_fields !== 'function') { return false }
+            typeof exports.record_fields_scratch_start !== 'function' || typeof exports.encode_record_fields !== 'function') { return false }
             const start = exports.record_fields_scratch_start()
             if (!Number.isSafeInteger(start) || start <= 0 || start % 8 !== 0 || start >= memory.buffer.byteLength) { return false }
             this._memory = memory
@@ -125,19 +128,19 @@ export class NativeRecordFieldEncoder {
      */
     encode(count, scores, references, base) {
         if (this._memory === null || this._encode === null ||
-            !Number.isSafeInteger(count) || count <= 0 || count > MAX_ROWS ||
-            !Number.isSafeInteger(base) || base < 0) { return null }
+        !Number.isSafeInteger(count) || count <= 0 || count > MAX_ROWS ||
+        !Number.isSafeInteger(base) || base < 0) { return null }
         const indexes = getPrivateColumn(references.uniqueIndexList, Uint32Array.prototype)
         const scoreColumn = getPrivateColumn(scores, Int32Array.prototype)
         const offsets = getPrivateColumn(references.offsets, Float64Array.prototype)
         const lengths = getPrivateColumn(references.lengths, Uint32Array.prototype)
         if (indexes === null || scoreColumn === null || offsets === null || lengths === null ||
-            indexes.length < count || scoreColumn.length < count || offsets.length !== lengths.length ||
-            offsets.length <= 0 || offsets.length > MAX_UNIQUE) { return null }
+        indexes.length < count || scoreColumn.length < count || offsets.length !== lengths.length ||
+        offsets.length <= 0 || offsets.length > MAX_UNIQUE) { return null }
         const memory = this._memory
         const currentBuffer = memory.buffer
         if (indexes.buffer === currentBuffer || scoreColumn.buffer === currentBuffer ||
-            offsets.buffer === currentBuffer || lengths.buffer === currentBuffer) { return null }
+        offsets.buffer === currentBuffer || lengths.buffer === currentBuffer) { return null }
         const uniqueCount = offsets.length
         const scoresPointer = this._start + count * 4
         const offsetsPointer = scoresPointer + count * 4
