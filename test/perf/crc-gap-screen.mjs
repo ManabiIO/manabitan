@@ -19,7 +19,6 @@ import {getHostEnvironment} from '../../dev/perf/host-environment.js'
 const harnessPath = fileURLToPath(import.meta.url)
 const orders = ['ABC', 'BCA', 'CAB', 'ACB', 'BAC', 'CBA']
 const parserOptions = {
-    experimentalNativeEscapedKeys: true,
     singleChunk: true,
     maxPendingChunks: 1,
     emitTermByteLists: false,
@@ -330,6 +329,7 @@ async function runScreen() {
         startedAtIso: new Date().toISOString(),
         protocol,
         scope: 'Node production parser stage with owned output, sampled production groups; excludes browser worker scheduling, ZIP reads, compression, storage, media unpacking and UI. Native source CRC is reported separately. This is not a complete-import speed claim.',
+        parserOptions,
         excludedDiagnosticFields: ['preparedLookupIndexEncodeMs'],
         fixture: {...fixture, lockSha256: sha256(lockBytes)},
         identities,
