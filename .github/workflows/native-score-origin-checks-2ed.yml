@@ -1,0 +1,63 @@
+name: Native score origin source checks 2ed
+
+on:
+  push:
+    branches: ['test/native-score-origin-checks-20261128-2ed']
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Corrected source unit, lint, types and builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXPECTED_PRODUCT_SHA: '13e7a7e6c1568de0af563d0577385e9ba16892c1'
+      EXPECTED_PRODUCT_TREE: 'cb45e5071784ec13fabe8d64494399c65480878c'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: '13e7a7e6c1568de0af563d0577385e9ba16892c1'
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify frozen product identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PRODUCT_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_PRODUCT_TREE"
+          test -z "$(git status --porcelain)"
+      - uses: ./.github/actions/setup
+      - name: Complete unit suite
+        run: npm run test:unit -- --maxWorkers=2 --no-file-parallelism
+      - name: Lint all changed JavaScript
+        if: always()
+        run: >-
+          npx eslint
+          eslint.config.js
+          ext/js/dictionary/dictionary-database.js
+          ext/js/dictionary/dictionary-importer.js
+          ext/js/dictionary/term-bank-wasm-parser-worker.js
+          ext/js/dictionary/term-bank-wasm-parser.js
+          ext/js/dictionary/term-record-opfs-store.js
+          ext/js/dictionary/term-score-plan.js
+          test/dictionary-importer-score-plan.test.js
+          test/term-bank-native-score-plan.test.js
+          test/term-record-score-plan-origin.test.js
+          test/term-record-score-plan.test.js
+          test/term-record-split-reference-origin.test.js
+          test/term-score-plan.test.js
+      - name: Check extension TypeScript project
+        if: always()
+        run: npm run test:ts:main
+      - name: Check development TypeScript project
+        if: always()
+        run: npm run test:ts:dev
+      - name: Check test TypeScript project
+        if: always()
+        run: npm run test:ts:test
+      - name: Check benchmark TypeScript project
+        if: always()
+        run: npm run test:ts:bench
+      - name: Dry build all seven targets
+        if: always()
+        run: npm run test:build
