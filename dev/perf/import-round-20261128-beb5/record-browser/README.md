@@ -71,9 +71,11 @@ The repair passed scoped lint, 32 native-encoder tests, the complete main TypeSc
 
 ## Representation correction in component replays
 
-An earlier component capture converted every score column to Int32. That was faithful for JMdict and Jitendex but overstated VNDB native admission. The corrected replay preserves actual source types: 144 VNDB groups, containing 5,648,310 rows, admit native encoding; 26 groups, containing 1,000,000 rows, carry Float64 score columns and correctly fall back. All captured values happen to be lossless Int32 values, so the previous byte oracle remains valid, but its activation/timing scope does not.
+An earlier component capture converted every score column to Int32. That was faithful to the synchronous harness output for JMdict and Jitendex but overstated VNDB native admission in that harness. A type-preserving synchronous replay has 144 native-eligible VNDB groups (5,648,310 rows) and 26 Float64 fallback groups (1,000,000 rows). All captured score values happen to be lossless Int32 values, so the previous byte oracle remains valid, but its activation/timing scope does not.
 
-The browser campaign uses the actual product path and actual types; it is not based on those coerced inputs. A separate Float64-admission experiment has only local component evidence and is not included in this candidate or any result above.
+**Those counts are not production-worker admission counts.** A later actual-worker transport diagnostic established that VNDB group 23, banks 93–96, has an Int32 score column under the real projected-import options. The synchronous capture omitted `projectImagePaths` and `experimentalNativeEscapedKeys`; an escaped key can therefore select the general parser and Float64 column there while the real worker keeps its fused native path. All original captures and their corrections are retained separately. Private checksum payloads are not made shared merely because content storage uses a SharedArrayBuffer.
+
+The browser campaign uses the actual product path and actual types; it is not based on either coerced or synchronous surrogate inputs. A separate Float64-admission experiment has only local component evidence, lacks a demonstrated production need, and is not included in this candidate or any result above. It is not being promoted.
 
 ## Retained evidence and reproduction
 
