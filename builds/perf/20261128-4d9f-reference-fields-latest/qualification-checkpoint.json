@@ -326,7 +326,12 @@
       "lintExit": 0,
       "skipped": 0
     },
-    "finalEvidenceManifest": "2cf6de8b8450ffd3f01acdbfe515d89948f03933"
+    "finalEvidenceManifest": "2cf6de8b8450ffd3f01acdbfe515d89948f03933",
+    "workflowProvenance": {
+      "portableWorkflowBlob": "5f63c448949ced2f9a7c275ea5f1b3065da02b40",
+      "executedWorkflowBlob": "4939c30661206c6202fd654019b9f0b7f43ce4d1",
+      "difference": "The executed26c5 workflow replaces manual dispatch with a unique initial-push trigger, explicit Bash, and first-attempt guards. All runtime, helper code, original oracles and acquisition commands are unchanged."
+    }
   },
   "limitations": [
     "Experimental flag remains off; enabling actual format4 raises the schema floor and prevents opening with older builds.",

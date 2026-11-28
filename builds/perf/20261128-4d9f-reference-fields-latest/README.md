@@ -1,8 +1,8 @@
 # Completed current-source result
 
-The frozen workflow in [run46145076480](https://github.com/ManabiIO/manabitan/actions/runs/46145076480) completed all six exact85 off/on corpus observations. Independent audits reproduce the original complete output oracles and saved term bytes:41,004 for JMdict,0 for Jitendex and24,411,244 for VNDB. All35 Node/five Python contracts,22 syntax checks, scoped lint and actual previous-reader nonmutation checks pass. See [the complete artifact/member index](reports/final-current-corpus/artifact-index.json), [the corpus audit](reports/final-current-corpus/independent-audit.json) and [the current checkpoint](qualification-checkpoint.json). Actual committed floors/media/restart remain separately covered by the browser audits. No timing or process-memory gain is claimed.
+The frozen workflow in [run 46145076480](https://github.com/ManabiIO/manabitan/actions/runs/46145076480) completed all six exact 85 off/on corpus observations. Independent audits reproduce the original complete output oracles and saved term bytes: 41,004 for JMdict, 0 for Jitendex and 24,411,244 for VNDB. All 35 Node/five Python contracts, 22 syntax checks, scoped lint and actual previous-reader nonmutation checks pass. See [the complete artifact/member index](reports/final-current-corpus/artifact-index.json), [the corpus audit](reports/final-current-corpus/independent-audit.json) and [the current checkpoint](qualification-checkpoint.json). Actual committed floors/media/restart remain separately covered by the browser audits. No timing or process-memory gain is claimed.
 
-This outcome annotation is later than the frozen35-file source manifest. The executed helper code and original oracles are unchanged; the original source manifest remains attached for reproducibility.
+This outcome annotation is later than the frozen 35-file source manifest. The executed helper code and original oracles are unchanged; the original source manifest remains attached for reproducibility.
 
 # Reference-table record fields: latest-source qualification
 
