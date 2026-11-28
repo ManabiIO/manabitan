@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: import-columnar-media-63aba8-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   compare:
@@ -71,6 +71,7 @@ jobs:
             --expected-package-entry js/dictionary/dictionary-media-diagnostics.js \
             --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
             --expected-package-entry js/dictionary/term-bank-wasm-parser-worker.js \
+            --expected-added-package-entry js/dictionary/dictionary-media-diagnostics.js \
             "${storage_policy[@]}" \
             --evidence builds/perf/import-columnar-media-63aba8
       - name: Retain every observation, exact packages, and failures

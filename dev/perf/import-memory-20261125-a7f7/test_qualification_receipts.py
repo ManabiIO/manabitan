@@ -9,12 +9,15 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import warnings
+import zipfile
 
 from qualification_receipts import (
     EMPTY_SHA256, EXPECTED_PRODUCT_PATHS, LOOKUP_BOUNDARY,
     SOURCE_HASH_FIELDS, STORAGE_KIND, TIMING_BOUNDARY, canonicalize_storage,
     require_matching_receipts, validate_import_summary, validate_vndb_sah_allocation_units,
 )
+from qualification_packages import read_package_manifest, write_package_identity_receipt
 
 
 SOURCE = 'a' * 40
@@ -355,6 +358,138 @@ class QualificationReceiptWitness(unittest.TestCase):
         change_validation(summary, report, lambda value: value['media'].__setitem__('bytes', value['media']['bytes'] - 1))
         with self.assertRaises(ValueError):
             validate(summary, report, media_check='all')
+
+
+class PackageIdentityWitness(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.directory = Path(temporary.name)
+        self.receipt_path = self.directory / 'source-identities.json'
+
+    def identities(self, baseline, candidate):
+        identities = {}
+        for arm, members in [('A', baseline), ('B', candidate)]:
+            path = self.directory / f'{arm}.zip'
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', UserWarning)
+                with zipfile.ZipFile(path, 'w') as package:
+                    for name, content in members:
+                        package.writestr(name, content)
+            identities[arm] = {'sha': arm * 40, **read_package_manifest(path)}
+        return identities
+
+    def reject(self, identities, expected, added=(), message=None):
+        original = deepcopy(identities)
+        with self.assertRaisesRegex(RuntimeError, message or '.'):
+            write_package_identity_receipt(self.receipt_path, identities, expected, added)
+        receipt = json.loads(self.receipt_path.read_text())
+        self.assertEqual(receipt['arms'], original)
+        self.assertEqual(identities, original)
+        self.assertEqual(receipt['expectedPackageEntries'], list(expected))
+        self.assertEqual(receipt['expectedAddedPackageEntries'], list(added))
+        self.assertIn('addedPackageEntries', receipt)
+        self.assertIn('removedPackageEntries', receipt)
+        return receipt
+
+    def test_strict_default_accepts_only_declared_existing_member_changes(self):
+        identities = self.identities([('runtime.js', b'old'), ('stable.js', b'same')],
+                                     [('stable.js', b'same'), ('runtime.js', b'new')])
+        original = deepcopy(identities)
+        receipt = write_package_identity_receipt(self.receipt_path, identities, ['runtime.js'])
+        self.assertEqual(receipt['changedPackageEntries'], ['runtime.js'])
+        self.assertEqual(receipt['addedPackageEntries'], [])
+        self.assertEqual(receipt['removedPackageEntries'], [])
+        self.assertEqual(receipt['expectedAddedPackageEntries'], [])
+        self.assertEqual(identities, original)
+        self.assertEqual(json.loads(self.receipt_path.read_text()), receipt)
+
+    def test_explicit_new_member_is_part_of_the_exact_changed_union(self):
+        identities = self.identities([('runtime.js', b'old'), ('stable.js', b'same')],
+                                     [('runtime.js', b'new'), ('stable.js', b'same'), ('helper.js', b'helper')])
+        receipt = write_package_identity_receipt(self.receipt_path, identities,
+                                                ['runtime.js', 'helper.js'], ['helper.js'])
+        self.assertEqual(receipt['changedPackageEntries'], ['helper.js', 'runtime.js'])
+        self.assertEqual(receipt['addedPackageEntries'], ['helper.js'])
+        self.assertEqual(receipt['removedPackageEntries'], [])
+        self.assertEqual(receipt['arms'], identities)
+
+    def test_added_only_candidate_can_be_declared_exactly(self):
+        identities = self.identities([('stable.js', b'same')],
+                                     [('stable.js', b'same'), ('helper.js', b'helper')])
+        receipt = write_package_identity_receipt(self.receipt_path, identities, ['helper.js'], ['helper.js'])
+        self.assertEqual(receipt['changedPackageEntries'], ['helper.js'])
+
+    def test_strict_default_rejects_additions_even_when_listed_as_changes(self):
+        identities = self.identities([('runtime.js', b'old')],
+                                     [('runtime.js', b'new'), ('helper.js', b'helper')])
+        receipt = self.reject(identities, ['runtime.js', 'helper.js'], message='Unexpected added')
+        self.assertEqual(receipt['addedPackageEntries'], ['helper.js'])
+        self.assertEqual(receipt['changedPackageEntries'], ['helper.js', 'runtime.js'])
+
+    def test_missing_and_extra_added_members_fail(self):
+        cases = [
+            [('runtime.js', b'new')],
+            [('runtime.js', b'new'), ('helper.js', b'helper'), ('extra.js', b'extra')],
+            [('runtime.js', b'new'), ('different.js', b'helper')],
+        ]
+        for candidate in cases:
+            with self.subTest(candidate=candidate):
+                identities = self.identities([('runtime.js', b'old')], candidate)
+                self.reject(identities, ['runtime.js', 'helper.js'], ['helper.js'], 'Unexpected added')
+
+    def test_expected_addition_must_also_be_an_expected_change(self):
+        identities = self.identities([('runtime.js', b'old')],
+                                     [('runtime.js', b'new'), ('helper.js', b'helper')])
+        self.reject(identities, ['runtime.js'], ['helper.js'], 'subset')
+
+    def test_missing_or_unexpected_existing_changes_still_fail(self):
+        for candidate in [
+            [('runtime.js', b'old'), ('stable.js', b'same'), ('helper.js', b'helper')],
+            [('runtime.js', b'new'), ('stable.js', b'changed'), ('helper.js', b'helper')],
+        ]:
+            with self.subTest(candidate=candidate):
+                identities = self.identities([('runtime.js', b'old'), ('stable.js', b'same')], candidate)
+                self.reject(identities, ['runtime.js', 'helper.js'], ['helper.js'], 'Unexpected packaged changes')
+
+    def test_existing_changed_member_cannot_be_declared_as_added(self):
+        identities = self.identities([('runtime.js', b'old')], [('runtime.js', b'new')])
+        self.reject(identities, ['runtime.js'], ['runtime.js'], 'Unexpected added')
+
+    def test_removals_are_always_rejected_and_recorded(self):
+        identities = self.identities([('runtime.js', b'old'), ('removed.js', b'keep')],
+                                     [('runtime.js', b'new'), ('helper.js', b'helper')])
+        for expected in [['runtime.js', 'helper.js'], ['runtime.js', 'helper.js', 'removed.js']]:
+            with self.subTest(expected=expected):
+                receipt = self.reject(identities, expected, ['helper.js'], 'removes packaged files')
+                self.assertEqual(receipt['removedPackageEntries'], ['removed.js'])
+                self.assertEqual(receipt['addedPackageEntries'], ['helper.js'])
+
+    def test_duplicate_file_members_in_either_arm_retain_both_hashes_and_fail(self):
+        for arm in ('A', 'B'):
+            baseline = [('runtime.js', b'old')]
+            candidate = [('runtime.js', b'new')]
+            (baseline if arm == 'A' else candidate).append(('runtime.js', b'duplicate'))
+            with self.subTest(arm=arm):
+                identities = self.identities(baseline, candidate)
+                receipt = self.reject(identities, ['runtime.js'], message='Duplicate package member')
+                manifest = receipt['arms'][arm]
+                self.assertEqual(manifest['duplicatePackageEntries'], ['runtime.js'])
+                self.assertEqual(len(manifest['packageMembers']), 2)
+                contents = baseline if arm == 'A' else candidate
+                self.assertEqual([member['sha256'] for member in manifest['packageMembers']],
+                                 [hashlib.sha256(content).hexdigest() for _, content in contents])
+
+    def test_duplicate_directory_members_remain_rejected(self):
+        identities = self.identities([('runtime.js', b'old')],
+                                     [('runtime.js', b'new'), ('assets/', b''), ('assets/', b'')])
+        receipt = self.reject(identities, ['runtime.js'], message='Duplicate package member')
+        self.assertEqual(receipt['arms']['B']['duplicatePackageEntries'], ['assets/'])
+        self.assertEqual(receipt['addedPackageEntries'], [])
+
+    def test_unchanged_candidate_is_not_a_qualification(self):
+        identities = self.identities([('runtime.js', b'same')], [('runtime.js', b'same')])
+        self.reject(identities, [], message='no changed runtime package bytes')
 
 
 if __name__ == '__main__':
