@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "repository": "ManabiIO/manabitan",
+  "task": "Optimize JMdict, Jitendex and VNDB imports, prioritize JMdict, open PRs only for gains worth review, do not use Work mode",
+  "recordedAtUtc": "2026-11-28 07:05:40 UTC",
+  "status": "In progress. Four approaches closed without PR; native score transport qualification pending. Local execution unavailable since 2026-11-28 06:58:35 UTC; remote GitHub monitoring remains available.",
+  "baseline": {
+    "commit": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "tree": "d99ea4d04658f7ec1c76acdc5f3684594212a471"
+  },
+  "decisions": {
+    "performancePRsCreated": 0,
+    "negativePercentMeansFaster": true,
+    "statisticsPolicy": "Keep every cohort separate. Do not pool hosts, subtract identical-code controls, discard outliers, or equate a coverage failure with a measured memory regression.",
+    "completedExperimentsDecision": "No repeatable complete-import gain established; no PR."
+  },
+  "completedCohorts": [
+    {
+      "name": "Plain glossary arrays",
+      "run": 46101522659,
+      "product": "0e99965c57f669b17f7fe72c75685e97bf1082c0",
+      "study": "8ce5cdea4c1ed0c2e760f2195ac283eddd1973c5",
+      "pairsPerDictionary": 6,
+      "results": {
+        "jmdict": {
+          "medianPercent": 0.8801,
+          "fasterPairs": 3,
+          "memory": "passed"
+        },
+        "jitendex": {
+          "medianPercent": 0.1889,
+          "fasterPairs": 3,
+          "memory": "incomplete coverage"
+        },
+        "vndb": {
+          "medianPercent": 0.7866,
+          "fasterPairs": 2,
+          "memory": "incomplete coverage"
+        }
+      }
+    },
+    {
+      "name": "Adjacent expression validation witness",
+      "run": 46102205395,
+      "product": "e677343763d9a65e287ab2009a1939b8f84127e3",
+      "study": "4853517efb946f03748103a8864a1863c031cfb2",
+      "pairsPerDictionary": 6,
+      "results": {
+        "jmdict": {
+          "medianPercent": -0.4745,
+          "fasterPairs": 4,
+          "memory": "incomplete coverage"
+        },
+        "jitendex": {
+          "medianPercent": -0.6032,
+          "fasterPairs": 3,
+          "memory": "incomplete coverage"
+        },
+        "vndb": {
+          "medianPercent": -0.1673,
+          "fasterPairs": 3,
+          "memory": "passed"
+        }
+      }
+    },
+    {
+      "name": "Exact score index cache, first screen",
+      "run": 46102904843,
+      "product": "a6405695423f7c985d1bf14e0cfec85638dc9576",
+      "study": "84d6dda6479e46b666dde4230a8cf0c9d875ee09",
+      "pairsPerDictionary": 6,
+      "results": {
+        "jmdict": {
+          "medianPercent": 0.3936,
+          "fasterPairs": 2,
+          "memory": "passed"
+        },
+        "jitendex": {
+          "medianPercent": 0.4621,
+          "fasterPairs": 2,
+          "memory": "passed"
+        },
+        "vndb": {
+          "medianPercent": -1.3937,
+          "fasterPairs": 5,
+          "memory": "passed"
+        }
+      }
+    },
+    {
+      "name": "Exact score index cache, independent confirmation",
+      "run": 46106625456,
+      "product": "3e1e602d0cac73055dfd85bf6ec2674b10ca0a59",
+      "study": "1ca09d5f955c0c4c5b7232c4267034e54f52e8ab",
+      "pairsPerDictionary": 12,
+      "runtimeSameAsFirstScreen": true,
+      "results": {
+        "jmdict": {
+          "medianPercent": -2.9442,
+          "equalWorkPercent": 3.604,
+          "fasterPairs": 7,
+          "bootstrap95Percent": [
+            -7.1319,
+            12.7489
+          ],
+          "worstPairPercent": 70.215,
+          "memory": "passed"
+        },
+        "jitendex": {
+          "medianPercent": 0.6704,
+          "equalWorkPercent": -1.4238,
+          "fasterPairs": 5,
+          "bootstrap95Percent": [
+            -2.3571,
+            1.1105
+          ],
+          "memory": "passed"
+        },
+        "vndb": {
+          "medianPercent": 2.1816,
+          "equalWorkPercent": 1.9476,
+          "fasterPairs": 5,
+          "bootstrap95Percent": [
+            -1.2807,
+            3.6764
+          ],
+          "memory": "incomplete coverage; no comparison claim"
+        }
+      }
+    },
+    {
+      "name": "Indexed compact score validation, original",
+      "run": 46104264150,
+      "product": "7e488d809ba18ce120f5766651bdfdf622561fab",
+      "pairsPerDictionary": 6,
+      "results": {
+        "jmdict": {
+          "medianPercent": -0.8246,
+          "fasterPairs": 4,
+          "memory": "passed"
+        },
+        "jitendex": {
+          "medianPercent": -2.4427,
+          "fasterPairs": 5,
+          "memory": "passed"
+        },
+        "vndb": {
+          "medianPercent": -0.9785,
+          "fasterPairs": 4,
+          "memory": "incomplete coverage"
+        }
+      },
+      "study": "9aa3bbd66b34fc31d90a35c79401f65d9161f8bb",
+      "branch": "perf/indexed-validation-screen-20261127-2ed"
+    },
+    {
+      "name": "Indexed compact score validation, duplicate registration",
+      "run": 46105386929,
+      "product": "7e488d809ba18ce120f5766651bdfdf622561fab",
+      "pairsPerDictionary": 6,
+      "results": {
+        "jmdict": {
+          "medianPercent": -2.031,
+          "fasterPairs": 4,
+          "memory": "passed"
+        },
+        "jitendex": {
+          "medianPercent": -0.5861,
+          "fasterPairs": 4,
+          "memory": "passed"
+        },
+        "vndb": {
+          "medianPercent": 2.3831,
+          "fasterPairs": 0,
+          "memory": "incomplete coverage"
+        }
+      },
+      "study": "31c3da6295118c955afcc46f81de5175cecabb3f",
+      "branch": "perf/indexed-validation-screen-20261127-2ed",
+      "provenanceNote": "Retain the duplicate-registration cohort separately; do not select or pool favorable samples. Full study identity was read back directly from its run."
+    }
+  ],
+  "completedEvidenceTotals": {
+    "independentlyAuditedSemanticObservations": 516,
+    "dictionaryCells": 18,
+    "ordinaryObservations": 408,
+    "warmupObservations": 72,
+    "candidateObservations": 252,
+    "candidatePairs": 126,
+    "identicalControlObservations": 84,
+    "identicalControlPairs": 42,
+    "separateAllMediaObservations": 36,
+    "separateMemoryObservations": 72,
+    "rawMemoryScans": 6226,
+    "semanticFailures": 0,
+    "memoryQualifiedCells": 11,
+    "memoryIncompleteCells": 7,
+    "scanGapFailures": 12,
+    "coverageLimitMs": 250,
+    "measuredMemoryBoundFailures": 0,
+    "qualificationBoundary": "Incomplete coverage does not support a full memory conclusion. Zero measured bound failures is not a blanket memory-nonregression claim.",
+    "originalDecisionMatrixSha256": "13f9673be9d1b3035c46efedd7cd93c1fa2f2269f4ff2e0eea0a823d7da1318c"
+  },
+  "cacheStageCalibration": {
+    "dictionary": "jmdict",
+    "run": 46106625456,
+    "candidateFieldEncoderMedianMs": -4.95,
+    "candidateFieldEncoderLowerPairs": 10,
+    "candidatePairs": 12,
+    "identicalCodeControlFieldEncoderMedianMs": 5.45,
+    "identicalCodeControlFieldEncoderMedianPercent": 15.2821,
+    "identicalCodeControlLowerPairs": 0,
+    "controlPairs": 4,
+    "interpretation": "Descriptive stage counters only. Comparable same-source counter drift prevents a reliable causal gain claim. Large total-time extremes coincide with finalization/UI-window variation. No counter or control subtraction.",
+    "evidenceSha256": "32ef5faf2a14d7fe458f3088f4fd6ae0358fe62499e6dc85b780c14baf35217d"
+  },
+  "nativeCandidate": {
+    "mechanism": "Prepare an exact first-use Int32 score dictionary and Uint16 row keys in retired native lookup scratch, copy into one owned compact transport buffer when smaller, and consume validated plans in the authoritative record encoder. Preserve raw fallbacks and buffer lifetimes.",
+    "originalProduct": "cc369aec9d0233b8491bcef4d82d185eb5c5086d",
+    "originalTree": "36bb2d4855b04ea6ee1d2209db1ee94238221c7c",
+    "originalStudy": "1540e0e3451956cd9757780879a02ef41ec9505a",
+    "originalRun": 46109112015,
+    "finalProduct": "13e7a7e6c1568de0af563d0577385e9ba16892c1",
+    "finalTree": "cb45e5071784ec13fabe8d64494399c65480878c",
+    "finalLocalEquivalent": "2c744b53f51abc5c53d855d60597b9e619725d45",
+    "finalRecordStoreSha256": "8e188c82f9bb418cd3411868d255fc98eae0b48b9ba4d22132a5f7d749d91f7c",
+    "nativeWasmSha256": "a97f9f39eca091a39f746a3e1bd42be6d55e69d048802cee78bbb543c060228c",
+    "correctedStudy": "bee2c67d4b6d4ef70915b30931289c5cbd438b44",
+    "correctedStudyTree": "a09f9cf09602eb48f252d2401fc28a177e7ad157",
+    "correctedBranch": "perf/native-score-corrected-screen-20261128-2ed",
+    "correctedRun": 46116689172,
+    "correctedActionlintRun": 46116689156,
+    "finalSourceValidationRun": 46115635267,
+    "finalSourceValidationActionlintRun": 46115635212,
+    "finalSourceValidationStudy": "a009b2397502df2ebda56541abad3ab324115b4f",
+    "finalSourceValidationBranch": "test/native-score-origin-checks-20261128-2ed",
+    "protocol": "Corrected source: 12 alternating pairs starting BA, 2 warmup pairs, 4 identical controls, separate all-media B/A, memory BAAB, all three dictionaries, unchanged defaults and VNDB37/37. Exactly42 observations per dictionary. No extra traces.",
+    "interpretation": "First full-browser qualification of corrected runtime. Do not pool with v1 or describe it as exact-binary replication of v1.",
+    "driverSha256": "e40161963984bcf0e28c28d2930cc989345f9c239a74ed7306331c7a98a762c7",
+    "correctedWorkflowSha256": "df873250c13e9ccbe67dbb687f1495e1ddca92ad3bc91e8ed7986b06f11ee6a6",
+    "correctedAuditorSha256": "11605eca8ab07ef7131f5e56a55218bf63a23afdd335bb712b9e8f5cacd72076",
+    "correctedAuditContractSha256": "714846807a50457e2472bb41858a357366b26a3ac1e22f2eecdf05fd9fcd76b5",
+    "originalAuditorSha256": "664eadfa4445560a2b2756a4e25ef8c4f8e1e0fe7cabb833d3aff0845dd5a134",
+    "originalAuditContractSha256": "b9911771809c190c9e05473d161bedc20b6cd22db47aa3db08ebf8cf7c329919",
+    "codeValidation": {
+      "originalV1": "673 unit files /15198 tests passed,47 skipped. Lint45 errors and one test type error were identified and corrected in final source; original bench TS did not run.",
+      "finalFocused": "73 tests in4 files and full type closure of all6 changed test files passed. Main/dev full TS passed locally; remaining full checks queued remotely.",
+      "corpusParity": {
+        "replayCommit": "49b426371ace2542710ab2b7a3e0e0915b6c4e35",
+        "groups": 204,
+        "rows": 7613164,
+        "bytesAvoided": {
+          "jmdict": 1043222,
+          "jitendex": 868106,
+          "vndb": 13294580,
+          "total": 15205908
+        },
+        "aggregateSha256": "fa0051c6105febda894aacc1b3a014fbc97425d0408bc5d86a147264dd7a8124",
+        "independentBindingSha256": "858aab1f093ac2a9a7a41fe556dfd161ee1517ff466f076c556335dac3d54035",
+        "secondBindingSha256": "14fbaeb2a1bd02b186027bae69523eda285dc0c8e8fcc56d4fc4396dbdaa6afc",
+        "normalizedRuntimeAstSha256": "d967024db5e3af4e2f7ab72093fb93f527ea9bc928f5608c71a01d177dc7d825",
+        "runtimeBridgeSha256": "1cc775d5d0841104a40e647b2b8d18779b1fe4d4939b89bea8af1b89cad595bb",
+        "boundary": "All groups/rows exact record and lookup-byte parity through production parser route options, synthetic private content offsets and captured append IO. Not browser persistence, all-media import, elapsed-time or peak-memory proof. Final runtime differs only by independently checked comments/layout and unshadowed undefined-to-void0 spelling; later changes are tests only.",
+        "tailInvocation": "Initial last-part selection count10 was rejected by the unchanged combiner. Historical receipt and rejection retained; accepted aggregate uses rerun requested count32 clipped to10 remaining groups. No rule, runner, manifest or source change."
+      }
+    },
+    "originalPrintedResultsProvisional": {
+      "source": "Completed GitHub job logs; independent new-artifact audit blocked by unavailable execution environment.",
+      "jmdict": {
+        "medianPercent": -1.7266,
+        "equalWorkPercent": -0.5376,
+        "fasterPairs": 3,
+        "pairs": 6,
+        "identicalControlMedianPercent": -3.2283,
+        "conclusion": "No worthwhile gain established from printed summary"
+      },
+      "vndb": {
+        "medianPercent": -0.088,
+        "equalWorkPercent": 0.2489,
+        "fasterPairs": 3,
+        "pairs": 6,
+        "identicalControlMedianPercent": 2.5946,
+        "conclusion": "Essentially flat; combined memory/semantic gate failed, exact reason not yet established"
+      },
+      "artifacts": [
+        {
+          "dictionary": "jmdict",
+          "id": 15253170104,
+          "bytes": 36081099,
+          "sha256": "e5fa6d613523850affc71a902751beeb05b7934537201be3815b3256acef6ca7",
+          "independentAudit": "pending"
+        },
+        {
+          "dictionary": "vndb",
+          "id": 15253075614,
+          "bytes": 35153034,
+          "sha256": "92dcd111f4a250742fbfbb857bfd10fc72ab29f10e3372494f1801680a480020",
+          "independentAudit": "pending"
+        }
+      ]
+    },
+    "componentDiagnostic": {
+      "evidenceSha256": "f9e506ac9eedac6f5a98714d75619e1cff50437568081c0f1110e346655cf27f",
+      "scope": "Twelve actual JMdict groups, warmed Node field encoder only; synthetic private offsets; not cold browser or complete-import evidence.",
+      "baselineSumOfGroupMedianMs": 13.4557185,
+      "candidateSumOfGroupMedianMs": 9.2678485,
+      "changePercent": -31.123,
+      "groupsWithLowerMedian": 12,
+      "pairsPerGroup": 24,
+      "interpretation": "Only about4.19ms of warmed component work in this diagnostic; no whole-import prediction."
+    }
+  },
+  "lockedFixtures": [
+    {
+      "id": "jmdict",
+      "rows": 528299,
+      "bytes": 15645766,
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+    },
+    {
+      "id": "jitendex",
+      "rows": 436555,
+      "bytes": 38831822,
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356"
+    },
+    {
+      "id": "vndb",
+      "rows": 6648310,
+      "bytes": 291705969,
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+    }
+  ],
+  "pending": [
+    "Wait for original native Jitendex browser cohort.",
+    "Wait for corrected-source full units, scoped lint, four full TS projects, seven dry builds and actionlint.",
+    "Wait for all three corrected-native 12-pair browser cohorts.",
+    "Resume frozen independent native artifact audits only when execution is available; do not treat printed summaries as independent audits.",
+    "Open a PR only if the exact final source establishes a gain worth review with applicable correctness and memory evidence."
+  ],
+  "recoveryLimits": "This checkpoint reconstructs compact facts from completed independent reports and preserved conversation/tool state. It is not a replacement for raw artifacts or full local audit files. GitHub source/study objects are published and verified; raw workflow artifacts have14-day retention. Rounded displayed statistics retain the underlying original report/run references.",
+  "rejectedOrOwnedLeads": [
+    "Current JMdict resolved-plan publication already admits all12 groups and bulk-copies99.9669% of newly published rows; scalar source-line profiler attribution was misleading. Do not widen admission.",
+    "Jitendex final-close duration varies greatly by host/storage; a fifth cohort was about7ms after four near110ms. Existing flush durability must remain.",
+    "Canonical slot tags (#975), current in-flight registration (#830), and owned content overlap (#977) are existing owners' separate work. Read-only overlap review found no qualified full-browser JMdict gain at06:07UTC; do not duplicate those scopes.",
+    "Do not repeat blocked local Chromium/socket attempts or switch to Work mode.",
+    "Do not change worker count, batching, cache capacities, compression settings, dictionary thresholds, or fixtures to manufacture a result."
+  ]
+}
