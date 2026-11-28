@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+    "candidate": "9917c9d424914d7ed5824e1ad8c009bb6d6fe850",
+    "candidateTree": "81d0bb972a57f7622ed3f6f446be1fc507ccedd4",
+    "localCandidateEquivalent": "7b872550546d4fba9da55d95b504e7acfc7d1517",
+    "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "browserVersion": "153.0.8010.12",
+    "nodeVersion": "v22.22.0",
+    "parserWasmSha256": {
+        "A": "8ae00698649c5a3e41039b13c5ffe1dff2d4e69948cba2e3c063f381250031ee",
+        "B": "382a90b60b180bf756d17b2f01266ddc07ab44137055d7003bf18032aa7c598c"
+    },
+    "expectedPackageChanges": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+    ],
+    "vndbSahAllocationUnits": [
+        37,
+        37
+    ],
+    "vndbSahAllocationPolicy": "Current baseline-bound 4096-byte allocation units; exact complete file-size equality remains required across every observation.",
+    "control": "A and C use the same immutable baseline package in independent fresh browser profiles.",
+    "timingPlan": "Three warmups followed by twelve balanced ABC blocks. The second independent hosted job reverses each block. No retries or appended observations.",
+    "timingBoundary": "Unchanged file-input change through post-UI import completion. No product or timing-harness overlay. First-use work is not deferred by this native parser change.",
+    "diagnostics": "Complete per-corpus native output parity precedes timing. Exhaustive media and four separately instrumented process-memory observations follow timing. Separate baseline and candidate browser traces follow all timing and memory observations.",
+    "memoryPolicy": "Existing complete-process-tree observer and fixed coverage rules, median PSS/private growth at most 5%, each individual pair at most 10%. Both independent host results remain separate.",
+    "statistics": "Twelve within-block B/A, B/C and unchanged C/A comparisons per host. Descriptive paired percentile bootstrap, 10000 resamples, seed 20261127. No control subtraction or pooling across hosts/corpora.",
+    "promotion": "No automatic promotion. Review requires a repeatable complete-import benefit compared with both unchanged controls on both hosts, assessed against control variation, plus all correctness and memory gates. An inconclusive result is not a speed claim; all raw observations and failures remain available.",
+    "hypothesis": "Avoiding redundant JSON object-value opener and container closer/comma dispatch reduces import work without altering any grammar, required-field, media, normalization or source-boundary check.",
+    "selection": "Combined delimiter fusion was selected before any runtime performance comparison. Close-only correctness results are retained separately; no favorable timing was used to select this combined candidate."
+}
